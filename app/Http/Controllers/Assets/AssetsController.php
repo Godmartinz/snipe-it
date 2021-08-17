@@ -12,7 +12,7 @@ use App\Models\Company;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
-1use Auth;
+use Auth;
 use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
 use DB;
