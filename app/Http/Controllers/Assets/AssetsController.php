@@ -12,6 +12,7 @@ use App\Models\Company;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Depreciable;
 use Auth;
 use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
