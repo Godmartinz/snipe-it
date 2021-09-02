@@ -10,6 +10,7 @@ use App\Models\Asset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 
 class AssetCheckinController extends Controller
 {
@@ -72,6 +73,7 @@ class AssetCheckinController extends Controller
         $asset->accepted = null;
         $asset->name = $request->get('name');
 
+
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->get('status_id'));
         }
@@ -121,5 +123,16 @@ class AssetCheckinController extends Controller
         }
         // Redirect to the asset management page with error
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.error').$asset->getErrors());
+    }
+    //Almost there
+    static function assetRedirect($assetId){
+
+
+        if(request()->input('asset_redirect')=='1') {
+            $asset_url= env(APP_URL).'/hardware/'.$assetId;
+            $redirect= $asset_url;
+            return $redirect;
+        }
+        return URL::previous();
     }
 }

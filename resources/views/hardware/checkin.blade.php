@@ -108,7 +108,7 @@
                       </div>
                     </div>
                     <div class="box-footer">
-                      <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
+                      <a class="btn btn-link" href="{{ App\Http\Controllers\Assets\AssetCheckinController::assetRedirect('assetId') }}"> {{ trans('button.cancel') }}</a>
                       <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkin') }}</button>
                     </div>
                   </form>
