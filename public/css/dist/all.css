@@ -19995,10 +19995,14 @@ a.accordion-header {
   z-index: 100;
   width: 50px;
   padding-top: 10px;
+  font-family: 'Font Awesome\ 5 Free';
+  content: "\f0c9";
+  font-weight: 900;
 }
 .main-header .sidebar-toggle:before {
   font-family: 'Font Awesome\ 5 Free';
   content: "\f0c9";
+  font-weight: 900;
 }
 .direct-chat-contacts {
   padding: 10px;
@@ -21037,10 +21041,14 @@ a.accordion-header {
   z-index: 100;
   width: 50px;
   padding-top: 10px;
+  font-family: 'Font Awesome\ 5 Free';
+  content: "\f0c9";
+  font-weight: 900;
 }
 .main-header .sidebar-toggle:before {
   font-family: 'Font Awesome\ 5 Free';
   content: "\f0c9";
+  font-weight: 900;
 }
 .direct-chat-contacts {
   padding: 10px;

@@ -131,6 +131,11 @@
           <!-- Navbar Right Menu -->
             <div class="navbar-custom-menu">
               <ul class="nav navbar-nav">
+                 <li> <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu" role="button">
+                      <span class="sr-only">Toggle navigation</span>
+                      <i class="fas fa-bars"></i>
+                  </a>
+                 </li>
                   @can('index', \App\Models\Asset::class)
                   <li aria-hidden="true"{!! (Request::is('hardware*') ? ' class="active"' : '') !!} tabindex="-1">
                       <a href="{{ url('hardware') }}" tabindex="-1">
@@ -376,10 +381,6 @@
             </ul>
           </div>
       </nav>
-       <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu" role="button">
-        <span class="sr-only">Toggle navigation</span>
-        <i class="far fa-bars"></i>
-      </a>
        <!-- Sidebar toggle button-->
       </header>
 
