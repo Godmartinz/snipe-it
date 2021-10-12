@@ -102,7 +102,7 @@
         <nav class="navbar navbar-static-top" role="navigation">
           <!-- Sidebar toggle button above the compact sidenav -->
           <a href="#" style="color: white" class="sidebar-toggle btn btn-white" data-toggle="push-menu" role="button">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only"> Toggle navigation</span>
           </a>
           <div class="nav navbar-nav navbar-left">
               <div class="left-navblock">
@@ -378,7 +378,7 @@
       </nav>
        <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu" role="button">
         <span class="sr-only">Toggle navigation</span>
-        <i class="fas fa-bars"></i>
+        <i class="far fa-bars"></i>
       </a>
        <!-- Sidebar toggle button-->
       </header>

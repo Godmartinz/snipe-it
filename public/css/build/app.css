@@ -457,6 +457,7 @@ a.accordion-header {
   padding-top: 10px;
 }
 .main-header .sidebar-toggle:before {
+  font-family: 'Font Awesome\ 5 Free';
   content: "\f0c9";
 }
 .direct-chat-contacts {
