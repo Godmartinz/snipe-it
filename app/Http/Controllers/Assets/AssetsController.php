@@ -287,6 +287,7 @@ class AssetsController extends Controller
      */
     public function update(ImageUploadRequest $request, $assetId = null)
     {
+        dd($assetId);
         // Check if the asset exists
         if (! $asset = Asset::find($assetId)) {
             // Redirect to the asset management page with error
