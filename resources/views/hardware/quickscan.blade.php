@@ -108,6 +108,8 @@
                         <tr>
                             <th>{{ trans('general.asset_tag') }}</th>
                             <th>{{ trans('general.bulkaudit_status') }}</th>
+                            <th>{{ trans('general.location') }}</th>
+                            <th>{{ trans('general.default_location') }}</th>
                             <th></th>
                         </tr>
                         <tr id="audit-loader" style="display: none;">
@@ -152,7 +154,7 @@
                 data : formData,
                 success : function (data) {
                     if (data.status == 'success') {
-                        $('#audited tbody').prepend("<tr class='success'><td>" + data.payload.asset_tag + "</td><td>" + data.messages + "</td><td><i class='fas fa-check text-success'></i></td></tr>");
+                        $('#audited tbody').prepend("<tr class='success'><td>" + data.payload.asset_tag + "</td><td>" + data.messages + "</td><td>" + data.payload.current_location + "</td><td>" + data.payload.default_location + "</td><td><i class='fas fa-check text-success'></i></td></tr>");
                         incrementOnSuccess();
                     } else {
                         handleAuditFail(data);
