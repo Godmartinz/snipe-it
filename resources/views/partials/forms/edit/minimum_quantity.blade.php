@@ -4,10 +4,11 @@
     <div class="col-md-9{{  (Helper::checkIfRequired($item, 'min_amt')) ? ' required' : '' }}">
        <div class="col-md-2" style="padding-left:0px">
             <input class="form-control col-md-3" type="text" name="min_amt" id="min_amt" aria-label="min_amt" value="{{ old('min_amt', $item->min_amt) }}" />
+           <label>{{trans('general.min_amt_null_msg')}}</label>
         </div>
             <div class="col-md-7" style="margin-left: -15px;">
                 <a href="#" data-toggle="tooltip" title="{{ trans('general.min_amt_help') }}"><i class="fas fa-info-circle" aria-hidden="true"></i>
-                <span class="sr-only">{{ trans('general.min_amt_help') }}</span>
+                <span class="sr-only">{!! trans('general.min_amt_help') !!}</span>
             </a>
 
         </div>
