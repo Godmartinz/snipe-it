@@ -170,11 +170,11 @@ a:visited {
   --text-main: #BBB;
   --text-alt: #222;
   --text-sub: #9b9b9b;
-  --link: #e00000;
+  --link: #dd4b39;
   /* Use same as Header picker, lighten by 70% */
-  --visited-link: #D24D57;
+  --visited-link: #e8867a;
   /* Use same as Header picker, lighten by 70% */
-  --hover-link: #D24D57;
+  --hover-link: #f3c2bc;
   /* Use same as Header picker, lighten by 70% */
   --nav-link: #FFF;
   /* Use same as Header picker */
@@ -186,6 +186,16 @@ a:link {
 }
 a:visited {
   color: var(--visited-link);
+}
+a.btn-info:link,
+a.btn-warning:link,
+a.btn-danger:link {
+  color: #FFF;
+}
+a.btn-info:visited,
+a.btn-warning:visited,
+a.btn-danger:visited {
+  color: #FFF;
 }
 .fixed-table-container tbody .selected td {
   background-color: #fff8af;

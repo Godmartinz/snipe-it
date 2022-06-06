@@ -3,8 +3,6 @@
  * ----------
  */
 :root {
-  --visited-link: #5D995D;
-  /* Use same as Header picker, lighten by 70% */
   --background: #222;
   --back-main: #333;
   --back-sub: #3d4144;
@@ -16,8 +14,11 @@
   /* Use same as Header picker */
   --text-main: #BBB;
   --text-sub: #9b9b9b;
-  --link: #28A228;
+  --link: #00a65a;
   /* Use same as Header picker, lighten by 70% */
+  --visited-link: #00f383;
+  /* Use same as Header picker, lighten by 70% */
+  --hover-link: #0dff90;
 }
 .skin-green .main-header .navbar {
   background-color: #00a65a;
@@ -165,6 +166,16 @@
 .btn:hover.btn-white:hover {
   background-color: #000d07;
   color: #fff;
+}
+a.btn-info:link,
+a.btn-warning:link,
+a.btn-danger:link {
+  color: #FFF;
+}
+a.btn-info:visited,
+a.btn-warning:visited,
+a.btn-danger:visited {
+  color: #FFF;
 }
 a:link {
   color: var(--link);

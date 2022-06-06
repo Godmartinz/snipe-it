@@ -133,7 +133,7 @@ btn-sm .btn-primary:link,
 .btn:hover .btn-primary:link {
   background-color: #307095;
   border-color: #23536f;
-  color: #fff;
+  color: #fff !important;
 }
 .btna.btn-primary:hover,
 btn-sma.btn-primary:hover,
@@ -172,15 +172,6 @@ a.btn-danger:hover,
 .btn-danger:visited {
   color: #fff;
 }
-a {
-  color: #3c8dbc;
-}
-a:hover {
-  color: #23536f;
-}
-a:visited {
-  color: #3c8dbc;
-}
 :root {
   --button-default: #00436b;
   --button-primary: #002338;
@@ -189,22 +180,35 @@ a:visited {
   /* Use same as Header picker */
   --text-main: #BBB;
   --text-sub: #9b9b9b;
-  --link: #1978D4;
+  --link: #0073b7;
   /* Use same as Header picker, lighten by 70% */
-  --visited-link: #3c8dbc;
+  --visited-link: #0093ea;
   /* Use same as Header picker, lighten by 70% */
-  --hover-link: #4B77BE;
+  --hover-link: #1eabff;
   /* Use same as Header picker, lighten by 70% */
   --nav-link: #FFF;
   /* Use same as Header picker */
   --light-link: #fff;
   /* Use same as Header picker */
 }
+a.btn-info:link,
+a.btn-warning:link,
+a.btn-danger:link {
+  color: #FFF;
+}
+a.btn-info:visited,
+a.btn-warning:visited,
+a.btn-danger:visited {
+  color: #FFF;
+}
 a:link {
   color: var(--link);
 }
 a:visited {
   color: var(--visited-link);
+}
+a:hover {
+  color: var(--hover-link);
 }
 .text-primary {
   color: #23536f;
