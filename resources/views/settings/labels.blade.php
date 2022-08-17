@@ -191,6 +191,10 @@
 
                                 </div> <!--/.CHECKBOX-->
                             </div> <!--/.col-md-9-->
+                            <br>
+                            @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+{{--                            @livewire('company-select')--}}
+
                         </div> <!--/.form-group-->
 
 
