@@ -57,6 +57,7 @@ class LdapSync extends Command
         $ldap_result_country = Setting::getSettings()->ldap_country;
         $ldap_result_dept = Setting::getSettings()->ldap_dept;
         $ldap_result_manager = Setting::getSettings()->ldap_manager;
+        $ldap_result_basedn = Setting::getSettings()->ldap_basedn;
 
         try {
             $ldapconn = Ldap::connectToLdap();
@@ -117,7 +118,6 @@ class LdapSync extends Command
             // Retrieve locations with a mapped OU, and sort them from the shallowest to deepest OU (see #3993)
             $ldap_ou_locations = Location::where('ldap_ou', '!=', '')->get()->toArray();
             $ldap_ou_lengths = [];
-
             foreach ($ldap_ou_locations as $ou_loc) {
                 $ldap_ou_lengths[] = strlen($ou_loc['ldap_ou']);
             }
