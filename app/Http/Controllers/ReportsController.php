@@ -14,6 +14,7 @@ use App\Models\License;
 use App\Models\Setting;
 use App\Notifications\CheckoutAssetNotification;
 use Carbon\Carbon;
+use http\Client;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -886,6 +887,18 @@ class ReportsController extends Controller
         ]);
 
         return $response;
+    }
+    public function DownloadEulas(){
+        try{
+            $client= new Client();
+            $response = $client->get('storage/private_uploads/eula-pdfs');
+
+
+        }
+        catch(\Exception $e){
+            echo $e;
+
+        }
     }
 
     /**
