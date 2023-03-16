@@ -145,9 +145,6 @@
                                         <div class="col-md-offset-2 col-md-8">
                                             <a href="#" wire:click.prevent="testWebhook"
                                                class="btn btn-default btn-sm pull-left"><span><i class="{{$webhook_icon}}"></i>  {!! trans('admin/settings/general.webhook_test',['app' => $webhook_selected ]) !!}</span></a>
-                                            <div wire:loading><span style="padding-left: 5px; font-size: 20px"><i
-                                                            class="fas fa-spinner fa-spin"></i></span></div>
-                                        </div>
                                     </div>
                                 @endif
                             @endif
@@ -158,7 +155,7 @@
                                        href="{{ route('settings.index') }}">{{ trans('button.cancel') }}</a>
                                     <button type="submit" {{$isDisabled}} class="btn btn-primary"><i
                                                 class="fas fa-check icon-white"
-                                                aria-hidden="true"></i> {{ trans('general.save') }}</button>
+                                                aria-hidden="true"></i> {{ $save_button }}</button>
                                 </div>
                             </div><!--box-footer-->
                         </form>
