@@ -29,7 +29,7 @@ class SlackSettingsForm extends Component
 
     public function mount(){
         $this->webhook_text= [
-            "Slack" => array(
+            "slack" => array(
                 "name" => "Slack",
                 "icon" => 'fab fa-slack',
                 "placeholder" => "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXX",
@@ -41,7 +41,7 @@ class SlackSettingsForm extends Component
 //            "placeholder" => "https://discord.com/api/webhooks/XXXXXXXXXXXXXXXXXXXXX",
 //            "link" => 'https://support.discord.com/hc/en-us/articles/360045093012-Server-Integrations-Page',
 //        ),
-            "General"=> array(
+            "general"=> array(
                 "name" => "General",
                 "icon" => "fab fa-hashtag",
                 "placeholder" => "",
@@ -50,7 +50,7 @@ class SlackSettingsForm extends Component
         ];
 
         $this->setting = Setting::getSettings();
-        $this->save_button = trans('admin/settings/general.webhook_presave');
+        $this->save_button = trans('general.save');
         $this->webhook_selected = $this->setting->webhook_selected;
         $this->webhook_placeholder = $this->webhook_text[$this->setting->webhook_selected]["placeholder"];
         $this->webhook_name = $this->webhook_text[$this->setting->webhook_selected]["name"];
@@ -67,7 +67,7 @@ class SlackSettingsForm extends Component
     }
     public function updated($field){
 
-        if($this->webhook_selected != 'General') {
+        if($this->webhook_selected != 'general') {
             $this->validateOnly($field, $this->rules);
         }
     }
@@ -79,11 +79,10 @@ class SlackSettingsForm extends Component
 
     }
 
-    public function render()
-    {
-        if(!empty($this->webhook_channel) && empty($this->webhook_endpoint)){
-            $this->isDisabled='';
-        }
+
+
+    private function isButtonDisabled(){
+
         if(empty($this->webhook_endpoint)){
             $this->isDisabled= 'disabled';
             $this->save_button = trans('admin/settings/general.webhook_presave');
@@ -92,10 +91,10 @@ class SlackSettingsForm extends Component
             $this->isDisabled= 'disabled';
             $this->save_button = trans('admin/settings/general.webhook_presave');
         }
-        if(empty($this->webhook_endpoint) && empty($this->webhook_endpoint)){
-            $this->save_button = trans('general.save');
-            $this->isDisabled='';
-        }
+    }
+    public function render()
+    {
+        $this->isButtonDisabled();
         return view('livewire.slack-settings-form');
     }
 
@@ -127,15 +126,26 @@ class SlackSettingsForm extends Component
             return session()->flash('error' , trans('admin/settings/message.webhook.error', ['error_message' => $e->getMessage(), 'app' => $this->webhook_name]));
         }
 
-        //}
         return session()->flash('message' , trans('admin/settings/message.webhook.error_misc'));
 
-
-
     }
+
+    public function clearSettings(){
+        $this->webhook_endpoint = '';
+        $this->webhook_channel = '';
+        $this->webhook_botname = '';
+        $this->setting->webhook_endpoint = '';
+        $this->setting->webhook_channel = '';
+        $this->setting->webhook_botname = '';
+
+        $this->setting->save();
+
+        session()->flash('save',trans('admin/settings/message.update.success'));
+    }
+
     public function submit()
     {
-        if($this->webhook_selected != 'General') {
+        if($this->webhook_selected != 'general') {
             $this->validate($this->rules);
         }
 
@@ -144,11 +154,9 @@ class SlackSettingsForm extends Component
         $this->setting->webhook_channel = $this->webhook_channel;
         $this->setting->webhook_botname = $this->webhook_botname;
 
-
         $this->setting->save();
 
         session()->flash('save',trans('admin/settings/message.update.success'));
-
 
     }
 }

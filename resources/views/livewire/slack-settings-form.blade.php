@@ -24,7 +24,7 @@
         </div>
         <div class="box-body">
             <div class="col-md-12">
-                @if($webhook_selected != 'General')
+                @if($webhook_selected != 'general')
                 <p>
                     {!! trans('admin/settings/general.webhook_integration_help',array('webhook_link' => $webhook_link, 'app' => $webhook_name)) !!}
                 </p>
@@ -78,7 +78,7 @@
                             <!--Webhook endpoint-->
                             <div class="form-group{{ $errors->has('webhook_endpoint') ? ' error' : '' }}">
                                 <div class="col-md-2">
-                                    {{ Form::label('webhook_endpoint', trans('admin/settings/general.webhook_endpoint',['app' => $webhook_selected ])) }}
+                                    {{ Form::label('webhook_endpoint', trans('admin/settings/general.webhook_endpoint',['app' => $webhook_name ])) }}
                                 </div>
                                 <div class="col-md-8 required">
                                     @if (config('app.lock_passwords')===true)
@@ -99,7 +99,7 @@
                             <!-- Webhook channel -->
                             <div class="form-group{{ $errors->has('webhook_channel') ? ' error' : '' }}">
                                 <div class="col-md-2">
-                                    {{ Form::label('webhook_channel', trans('admin/settings/general.webhook_channel',['app' => $webhook_selected ])) }}
+                                    {{ Form::label('webhook_channel', trans('admin/settings/general.webhook_channel',['app' => $webhook_name ])) }}
                                 </div>
                                 <div class="col-md-8 required">
                                     @if (config('app.lock_passwords')===true)
@@ -121,7 +121,7 @@
                             <!-- Webhook botname -->
                             <div class="form-group{{ $errors->has('webhook_botname') ? ' error' : '' }}">
                                 <div class="col-md-2">
-                                    {{ Form::label('webhook_botname', trans('admin/settings/general.webhook_botname',['app' => $webhook_selected ])) }}
+                                    {{ Form::label('webhook_botname', trans('admin/settings/general.webhook_botname',['app' => $webhook_name ])) }}
                                 </div>
                                 <div class="col-md-8">
                                     @if (config('app.lock_passwords')===true)
@@ -139,7 +139,7 @@
                             </div>
 
                             <!--Webhook Integration Test-->
-                            @if($webhook_selected == 'Slack' || $webhook_selected == 'Discord')
+                            @if($webhook_selected == 'slack')
                                 @if($webhook_endpoint != null && $webhook_channel != null)
                                     <div class="form-group">
                                         <div class="col-md-offset-2 col-md-8">
@@ -151,6 +151,8 @@
 
                             <div class="box-footer" style="margin-top: 45px;">
                                 <div class="text-right col-md-12">
+                                    <button type="reset" wire:click.prevent="clearSettings" class="col-md-2 text-left btn btn-danger">Clear & Save</button>
+
                                     <a class="btn btn-link text-left"
                                        href="{{ route('settings.index') }}">{{ trans('button.cancel') }}</a>
                                     <button type="submit" {{$isDisabled}} class="btn btn-primary"><i
