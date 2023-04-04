@@ -6833,9 +6833,9 @@ button.close {
 }
 /*# sourceMappingURL=bootstrap.css.map */
 /*!
- * Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com
+ * Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
- * Copyright 2023 Fonticons, Inc.
+ * Copyright 2022 Fonticons, Inc.
  */
 .fa {
   font-family: var(--fa-style-family, "Font Awesome 6 Free");
@@ -7092,10 +7092,8 @@ button.close {
             animation-duration: 1ms;
     -webkit-animation-iteration-count: 1;
             animation-iteration-count: 1;
-    -webkit-transition-delay: 0s;
-            transition-delay: 0s;
-    -webkit-transition-duration: 0s;
-            transition-duration: 0s; } }
+    transition-delay: 0s;
+    transition-duration: 0s; } }
 
 @-webkit-keyframes fa-beat {
   0%, 90% {
@@ -7327,7 +7325,6 @@ button.close {
 
 /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
 readers do not read off random characters that represent icons */
-
 .fa-0::before {
   content: "\30"; }
 
@@ -8329,9 +8326,6 @@ readers do not read off random characters that represent icons */
 
 .fa-v::before {
   content: "\56"; }
-
-.fa-bangladeshi-taka-sign::before {
-  content: "\e2e6"; }
 
 .fa-bicycle::before {
   content: "\f206"; }
@@ -10904,6 +10898,9 @@ readers do not read off random characters that represent icons */
 .fa-subtract::before {
   content: "\f068"; }
 
+.fa-child-rifle::before {
+  content: "\e4e0"; }
+
 .fa-chess::before {
   content: "\f439"; }
 
@@ -12011,12 +12008,6 @@ readers do not read off random characters that represent icons */
 .fa-share-square::before {
   content: "\f14d"; }
 
-.fa-child-combatant::before {
-  content: "\e4e0"; }
-
-.fa-child-rifle::before {
-  content: "\e4e0"; }
-
 .fa-gun::before {
   content: "\e19b"; }
 
@@ -12193,9 +12184,6 @@ readers do not read off random characters that represent icons */
 
 .fa-hand-lizard::before {
   content: "\f258"; }
-
-.fa-notdef::before {
-  content: "\e1fe"; }
 
 .fa-disease::before {
   content: "\f7fa"; }
@@ -14581,9 +14569,6 @@ readers do not read off random characters that represent icons */
 .fa-internet-explorer:before {
   content: "\f26b"; }
 
-.fa-stubber:before {
-  content: "\e5c7"; }
-
 .fa-telegram:before {
   content: "\f2c6"; }
 
@@ -14592,9 +14577,6 @@ readers do not read off random characters that represent icons */
 
 .fa-old-republic:before {
   content: "\f510"; }
-
-.fa-odysee:before {
-  content: "\e5c6"; }
 
 .fa-square-whatsapp:before {
   content: "\f40c"; }
@@ -23759,7 +23741,7 @@ input[type="checkbox"] {
   /* Not removed via appearance */
   margin: 0;
   font: inherit;
-  color: #959495;
+  color: blue;
   width: 1.8em;
   height: 1.8em;
   border: 0.05em solid;
@@ -23772,16 +23754,15 @@ input[type="checkbox"] {
 /** This sets the display of a checkbox, and what the "fill" checkmark should look like */
 input[type="checkbox"]::before {
   /** If you want to use the non-checkbox, filled square, use this instead **/
-  box-shadow: inset 1em 1em #d3d3d3;
   content: "";
   width: 1em;
   height: 1em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em #d3d3d3;
   -webkit-clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
           clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-  transform: scale(0);
   transform-origin: bottom left;
-  transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em #428bca;
   /* Windows High Contrast Mode */
   background-color: CanvasText;
 }
@@ -24979,7 +24960,7 @@ input[type="checkbox"] {
   /* Not removed via appearance */
   margin: 0;
   font: inherit;
-  color: #959495;
+  color: blue;
   width: 1.8em;
   height: 1.8em;
   border: 0.05em solid;
@@ -24992,16 +24973,15 @@ input[type="checkbox"] {
 /** This sets the display of a checkbox, and what the "fill" checkmark should look like */
 input[type="checkbox"]::before {
   /** If you want to use the non-checkbox, filled square, use this instead **/
-  box-shadow: inset 1em 1em #d3d3d3;
   content: "";
   width: 1em;
   height: 1em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em #d3d3d3;
   -webkit-clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
           clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-  transform: scale(0);
   transform-origin: bottom left;
-  transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em #428bca;
   /* Windows High Contrast Mode */
   background-color: CanvasText;
 }
