@@ -120,9 +120,9 @@ class LdapSync extends Command
         if (! isset($location)) {
             Log::debug('That location is invalid or a location was not provided, so no location will be assigned by default.');
         }
-
         /* Process locations with explicitly defined OUs, if doing a full import. */
         if ($this->option('base_dn') == '' && $this->option('filter') == '') {
+
             // Retrieve locations with a mapped OU, and sort them from the shallowest to deepest OU (see #3993)
             $ldap_ou_locations = Location::where('ldap_ou', '!=', '')->get()->toArray();
             $ldap_ou_lengths = [];
