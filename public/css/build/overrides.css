@@ -726,6 +726,9 @@ input[type="radio"]::before {
 input[type="radio"]:checked::before {
   transform: scale(1);
 }
+/** --------------------------------------- **/
+/** End checkbox styles to replace iCheck   **/
+/** --------------------------------------- **/
 /**
 * This addresses the column selector in bootstrap-table. Without these two lines, the
 * checkbox and the <span></span> with the label text that BS tables generates will
@@ -749,7 +752,4 @@ input[type="radio"]:checked::before {
 .select2-container .select2-search--inline .select2-search__field {
   padding-left: 15px;
 }
-/** --------------------------------------- **/
-/** End checkbox styles to replace iCheck   **/
-/** --------------------------------------- **/
 
