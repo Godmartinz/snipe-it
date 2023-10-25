@@ -103,5 +103,16 @@
 
 @section('moar_scripts')
 @include('partials/assets-assigned')
+<script>
+    function focusSelect2Search(select2Element) {
+        var select2Container = $(select2Element).data('select2').$container;
+        var searchInput = select2Container.find('.select2-search__field');
+        searchInput.focus();
+    }
 
+    $(document).ready(function () {
+        $('.assigned_assets_select').select2();
+        focusSelect2Search('.assigned_assets_select');
+    });
+</script>
 @stop
