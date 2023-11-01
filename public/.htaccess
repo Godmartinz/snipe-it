@@ -1,0 +1,58 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    # Needed for https://letsencrypt.org/ certificates.
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+    # Uncomment these two lines to force SSL redirect in Apache
+    # RewriteCond %{HTTPS} off
+    # RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Security Headers
+    # Header set Strict-Transport-Security "max-age=2592000" env=HTTPS
+    # Header set X-XSS-Protection "1; mode=block"
+    # Header set X-Content-Type-Options nosniff
+    # Header set X-Permitted-Cross-Domain-Policies "master-only"
+
+</IfModule>
+Options -Indexes
+
+# DENY ACCESS TO IIS CONFIG FILE
+
+# Apache 2.2+
+<IfModule !authz_core_module>
+	<Files "web.config">
+	    Order allow,deny
+    	Deny from all
+    </Files>
+</IfModule>
+
+# Apache 2.4+
+<IfModule authz_core_module>
+	<Files "web.config">
+      Require all denied
+    </Files>
+</IfModule>
+
+
+
