@@ -135,10 +135,7 @@
                                                     @if ($requestableModel->isRequestedBy(Auth::user()))
                                                         {{ Form::submit(trans('button.cancel'), ['class' => 'btn btn-danger btn-sm'])}}
                                                     @else
-{{--                                                        {{ Form::submit(trans('button.request'), ['class' => 'btn btn-primary btn-sm', 'data-target' => '#request_notes'])}}--}}
-                                                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#request_notes">
-                                                                {{trans('button.request')}}
-                                                            </button>
+                                                        {{ Form::submit(trans('button.request'), ['class' => 'btn btn-primary btn-sm', 'data-target' => '#request_notes'])}}
                                                     @endif
                                                     </form>
                                                 </td>
@@ -172,11 +169,11 @@
                 </button>
             </div>
             <div class="modal-body">
-                ...
+                <textarea id="notes" rows="5"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add to Request</button>
             </div>
         </div>
     </div>
@@ -202,6 +199,16 @@
         currentUrl = $(this).attr('href');
         // $(this).attr('href', currentUrl + '?quantity=' + quantity);
         // alert($(this).attr('href'));
+    });
+    $(document).on('click','#request', function (e) {
+        e.preventDefault();
+        var btn = $(this);
+        var target = $(btn.data('target'));
+        target.find('.modal-content').load(
+           function() {
+                target.modal('show');
+            }
+        );
     });
 </script>
 @stop
