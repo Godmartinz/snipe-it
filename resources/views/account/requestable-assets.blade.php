@@ -135,7 +135,10 @@
                                                     @if ($requestableModel->isRequestedBy(Auth::user()))
                                                         {{ Form::submit(trans('button.cancel'), ['class' => 'btn btn-danger btn-sm'])}}
                                                     @else
-                                                        {{ Form::submit(trans('button.request'), ['class' => 'btn btn-primary btn-sm'])}}
+{{--                                                        {{ Form::submit(trans('button.request'), ['class' => 'btn btn-primary btn-sm', 'data-target' => '#request_notes'])}}--}}
+                                                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#request_notes">
+                                                                {{trans('button.request')}}
+                                                            </button>
                                                     @endif
                                                     </form>
                                                 </td>
@@ -159,7 +162,28 @@
         </div> <!-- .nav-tabs-custom -->
     </div> <!-- .col-md-12> -->
 </div> <!-- .row -->
+<div class="modal fade" id="request_notes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @stop
+
 
 
 @section('moar_scripts')
