@@ -186,6 +186,11 @@ class UsersController extends Controller
         }
 
         if ($request->filled('search')) {
+            if ($request->filled('location_id')) {
+
+            $users = $users->where('users.location_id', '=', $request->filled('location_id'));
+        }
+        else {
             $users = $users->TextSearch($request->input('search'));
         }
 
