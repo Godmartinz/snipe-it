@@ -2,6 +2,48 @@
  * Skin: yellow dark
  * ----------
  */
+/*
+ * All Dark Themed Skins
+ * ----------
+ */
+.row-striped .row:nth-of-type(odd) div {
+  background-color: var(--back-sub);
+  color: var(--text-main);
+  border-top: 1px solid #dddddd;
+  display: table-cell;
+}
+.row-striped .row:nth-of-type(even) div {
+  background-color: var(--back-sub);
+  color: var(--text-main);
+  border-top: 1px solid #dddddd;
+  display: table-cell;
+}
+.row-new-striped > .row:nth-of-type(odd) {
+  background-color: var(--back-sub);
+  color: var(--text-main);
+}
+.row-new-striped > .row:nth-of-type(even) {
+  background-color: var(--back-sub-alt);
+  color: var(--text-main);
+}
+.search-highlight,
+.search-highlight:hover {
+  background-color: #e9d15b;
+}
+.table > thead > tr > td.danger,
+.table > tbody > tr > td.danger,
+.table > tfoot > tr > td.danger,
+.table > thead > tr > th.danger,
+.table > tbody > tr > th.danger,
+.table > tfoot > tr > th.danger,
+.table > thead > tr.danger > td,
+.table > tbody > tr.danger > td,
+.table > tfoot > tr.danger > td,
+.table > thead > tr.danger > th,
+.table > tbody > tr.danger > th,
+.table > tfoot > tr.danger > th {
+  background-color: var(--back-sub);
+}
 .skin-yellow-dark .main-header .navbar .sidebar-toggle {
   color: #000 !important;
 }
@@ -456,43 +498,5 @@ tr th div.th-inner {
   margin-left: 20px;
   box-sizing: border-box;
   display: table;
-}
-.row-striped .row:nth-of-type(odd) div {
-  background-color: var(--back-sub);
-  color: var(--text-main);
-  border-top: 1px solid #dddddd;
-  display: table-cell;
-}
-.row-striped .row:nth-of-type(even) div {
-  background-color: var(--back-sub);
-  color: var(--text-main);
-  border-top: 1px solid #dddddd;
-  display: table-cell;
-}
-.row-new-striped > .row:nth-of-type(odd) {
-  background-color: var(--back-sub);
-  color: var(--text-main);
-}
-.row-new-striped > .row:nth-of-type(even) {
-  background-color: var(--back-sub-alt);
-  color: var(--text-main);
-}
-.search-highlight,
-.search-highlight:hover {
-  background-color: #e9d15b;
-}
-.table > thead > tr > td.danger,
-.table > tbody > tr > td.danger,
-.table > tfoot > tr > td.danger,
-.table > thead > tr > th.danger,
-.table > tbody > tr > th.danger,
-.table > tfoot > tr > th.danger,
-.table > thead > tr.danger > td,
-.table > tbody > tr.danger > td,
-.table > tfoot > tr.danger > td,
-.table > thead > tr.danger > th,
-.table > tbody > tr.danger > th,
-.table > tfoot > tr.danger > th {
-  background-color: var(--back-sub);
 }
 
