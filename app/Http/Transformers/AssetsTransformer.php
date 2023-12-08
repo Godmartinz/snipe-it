@@ -218,6 +218,7 @@ class AssetsTransformer
 
     public function transformRequestedAsset(Asset $asset)
     {
+        $setting= Setting::getSettings();
         $array = [
             'id' => (int) $asset->id,
             'name' => e($asset->name),
@@ -230,6 +231,7 @@ class AssetsTransformer
             'location' => ($asset->location) ? e($asset->location->name) : null,
             'status'=> ($asset->assetstatus) ? $asset->present()->statusMeta : null,
             'assigned_to_self' => ($asset->assigned_to == \Auth::user()->id),
+            'add_notes'=> $setting->requestable_notes,
         ];
 
         if (($asset->model) && ($asset->model->fieldset) && ($asset->model->fieldset->fields->count() > 0)) {

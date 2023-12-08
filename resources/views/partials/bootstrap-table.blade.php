@@ -415,12 +415,18 @@
 
     // This is only used by the requestable assets section
     function assetRequestActionsFormatter (row, value) {
+        console.log(value);
         if (value.assigned_to_self == true){
             return '<button class="btn btn-danger btn-sm disabled" data-tooltip="true" title="Cancel this item request">{{ trans('button.cancel') }}</button>';
         } else if (value.available_actions.cancel == true)  {
             return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-danger btn-sm" data-tooltip="true" title="Cancel this item request">{{ trans('button.cancel') }}</button></form>';
         } else if (value.available_actions.request == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>';
+            if(value.add_notes == 0){
+                return console.log('hi');
+            }
+            else {
+                return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>';
+            }
         }
 
     }

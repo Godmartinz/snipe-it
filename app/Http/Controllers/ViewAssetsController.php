@@ -146,7 +146,7 @@ class ViewAssetsController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function getRequestAsset($assetId = null)
-    {
+    {  if(Auth::user()->can(''))
         $user = Auth::user();
 
         // Check if the asset exists and is requestable
