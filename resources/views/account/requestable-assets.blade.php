@@ -79,7 +79,7 @@
                     </div>
                 </div>
             </div>
-
+{{--            @livewire('requestable-button', ['$requested_asset'=>$id])--}}
                 <div class="tab-pane fade" id="models">
                     <div class="row">
                         <div class="col-md-12">

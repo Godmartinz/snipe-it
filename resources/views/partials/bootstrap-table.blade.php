@@ -422,7 +422,8 @@
             return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-danger btn-sm" data-tooltip="true" title="Cancel this item request">{{ trans('button.cancel') }}</button></form>';
         } else if (value.available_actions.request == true)  {
             if(value.add_notes == 0){
-                return console.log('hi');
+                console.log(value.id);
+               return '<form action="{{ config('app.url') }}/account/request-assets-notes/' + value.id + '" method="GET">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>'
             }
             else {
                 return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>';
