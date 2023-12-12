@@ -285,7 +285,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         'requestable-assets',
         [ViewAssetsController::class, 'getRequestableIndex']
     )->name('requestable-assets');
-    Route::get('request-assets-notes/{assetId}', RequestableButton::class);
+    Route::get('request-assets-notes/{assetId}',\App\Http\Livewire\RequestableButton::class);
     Route::post(
         'request-asset/{assetId}',
         [ViewAssetsController::class, 'getRequestAsset']
