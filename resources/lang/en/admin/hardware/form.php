@@ -38,6 +38,7 @@ return [
     'order'				=> 'Order Number',
     'qr'				=> 'QR Code',
     'requestable'		=> 'Users may request this asset',
+    'request_notes'     => 'Request Notes',
     'select_statustype'	=> 'Select Status Type',
     'serial'			=> 'Serial',
     'status'			=> 'Status',

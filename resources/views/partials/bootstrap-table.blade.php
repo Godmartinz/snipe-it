@@ -423,7 +423,7 @@
         } else if (value.available_actions.request == true)  {
             if(value.add_notes == 0){
                 console.log(value.id);
-               return '<form action="{{ config('app.url') }}/account/request-assets-notes/' + value.id + '" method="GET">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>'
+               return '<form action="{{ config('app.url') }}/account/request-assets-notes/' + value + '" method="GET">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>'
             }
             else {
                 return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>';
