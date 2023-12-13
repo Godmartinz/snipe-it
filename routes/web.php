@@ -285,9 +285,8 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         'requestable-assets',
         [ViewAssetsController::class, 'getRequestableIndex']
     )->name('requestable-assets');
-    Route::get('request-assets-notes/{assetId}',function($assetId) {
-        return View::make('account/requestable-notes')->with('assetId', $assetId);
-})->name('request-asset-notes');
+    Route::get('request-assets-notes/{assetId}',[ViewAssetsController::class, 'getRequestNotes']
+    )->name('request-assets-notes');
     Route::post(
         'request-asset/{assetId}',
         [ViewAssetsController::class, 'getRequestAsset']

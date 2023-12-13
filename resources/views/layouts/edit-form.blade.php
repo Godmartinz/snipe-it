@@ -6,8 +6,6 @@
         {{ $updateText }}
     @else
         {{ $createText }}
-        @else
-            {{$requestNotes}}
     @endif
 @parent
 @stop

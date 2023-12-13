@@ -139,6 +139,10 @@ class ViewAssetsController extends Controller
             return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.success'));
         }
     }
+    public function getRequestNotes($assetId){
+        $item = Asset::RequestableAssets()->find($assetId);
+        return view("account/requestable-notes")->with('item', $item);
+    }
 
     /**
      * Process a specific requested asset

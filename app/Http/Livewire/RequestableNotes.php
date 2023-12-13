@@ -8,15 +8,6 @@ use App\Models\Asset;
 
 class RequestableNotes extends Component
 {
-    public $requested_asset;
-    public $requested_licenses= [];
-    public $title;
-    public $requested_accessories;
-    public $request;
-
-    public function saveRequest(){
-
-    }
 
     public function render()
     {
