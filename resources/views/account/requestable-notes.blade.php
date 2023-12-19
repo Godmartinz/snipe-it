@@ -7,8 +7,7 @@
     'helpText' => trans('help.companies'),
     'formAction' => route('account/request-asset', $item->id)]),
 @section('inputFields')
-@include ('partials.forms.edit.license-select', ['translated_name' => trans('general.licenses_available'),'fieldname' => 'requested_licenses'] )
-@include ('partials.forms.edit.accessory-select', ['translated_name' => trans('general.accessories'), 'fieldname' => 'requested_accessories'] )
+
 @stop
 
 @section('livewire')
