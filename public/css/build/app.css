@@ -973,6 +973,10 @@ th.css-accessory > .th-inner::before {
   .sidebar-menu {
     margin-top: 50px;
   }
+  .ldap-test-table {
+    table-layout: fixed;
+    width: 100%;
+  }
 }
 .ellipsis {
   overflow: hidden;
