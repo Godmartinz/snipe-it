@@ -1,52 +1,45 @@
-
-
 <div>
-@section('inputFields')
-    <div wire:ignore>
-        @include ('partials.forms.edit.license-select', ['translated_name' => trans('general.licenses_available'),'fieldname' => 'requested_licenses', 'select_id' => 'requested_licenses'] )
-{{--        @include ('partials.forms.edit.accessory-select', ['translated_name' => trans('general.accessories'), 'fieldname' => 'requested_accessories','select_id' => 'requested_accessories'] )--}}
-    </div>
 
-        <!-- License -->
-        <div id="assigned_license" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}"{!!  (isset($style)) ? ' style="'.e($style).'"' : ''  !!}>
-            {{ Form::label($fieldname, $translated_name, array('class' => 'col-md-3 control-label')) }}
-            <div class="col-md-7{{  ((isset($required) && ($required =='true'))) ?  ' required' : '' }}">
-                <select class="js-data-ajax select2" data-endpoint="licenses" data-placeholder="{{ trans('general.select_license') }}" name="{{ $fieldname }}" style="width: 100%" id="{{ (isset($select_id)) ? $select_id : 'assigned_license_select' }}"{{ (isset($multiple)) ? ' multiple' : '' }}>
-
-                    @if ((!isset($unselect)) && ($license_id = Request::old($fieldname, (isset($license) ? $license->id  : (isset($item) ? $item->{$fieldname} : '')))))
-                        <option value="{{ $license_id }}" selected="selected">
-                            {{ (\App\Models\License::find($license_id)) ? \App\Models\License::find($license_id)->present()->fullName : '' }}
+    <!-- License -->
+        <div   class="form-group">
+            {{ Form::label('license_request', trans('license_request')) }}
+            <div class="col-md-7">
+                <select
+                        wire:model.lazy="license_request"
+                        aria-label="license_request"
+                        id="license_request"
+                        class="form-control"
+                >
+                    <option value="">{{ trans('general.select_license') }}</option>
+                    @foreach ($licenses as $id => $license)
+                        <option value="{{ $id }}">
+                            {{ $license->name }}
                         </option>
-                    @else
-                        @if(!isset($multiple))
-                            <option value="">{{ trans('general.select_license') }}</option>
-                        @endif
-                    @endif
+                    @endforeach
                 </select>
             </div>
-            {!! $errors->first($fieldname, '<div class="col-md-8 col-md-offset-3"><span class="alert-msg"><i class="fas fa-times"></i> :message</span></div>') !!}
-
+            {!! $errors->first('license_request', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg"><i class="fas fa-times"></i> :message</span></div>') !!}
         </div>
-        <!-- Accessory -->
-        <div id="assigned_accessory" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}"{!!  (isset($style)) ? ' style="'.e($style).'"' : ''  !!}>
-            {{ Form::label($fieldname, $translated_name, array('class' => 'col-md-3 control-label')) }}
-            <div class="col-md-7{{  ((isset($required) && ($required =='true'))) ?  ' required' : '' }}">
-                <select class="js-data-ajax select2" wire:model='{{$fieldname}}' data-endpoint="accessories" data-placeholder="{{ trans('general.select_accessory') }}" name="{{ $fieldname }}" style="width: 100%" id="{{ (isset($select_id)) ? $select_id : 'assigned_accessory_select' }}"{{ (isset($multiple)) ? ' multiple' : '' }}>
+{{--        <!-- Accessory -->--}}
+{{--        <div id="assigned_accessory" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}"{!!  (isset($style)) ? ' style="'.e($style).'"' : ''  !!}>--}}
+{{--            {{ Form::label($fieldname, $translated_name, array('class' => 'col-md-3 control-label')) }}--}}
+{{--            <div class="col-md-7{{  ((isset($required) && ($required =='true'))) ?  ' required' : '' }}">--}}
+{{--                <select class="js-data-ajax select2  livewire-select2" wire:model='{{$fieldname}}' data-endpoint="accessories" data-placeholder="{{ trans('general.select_accessory') }}" name="{{ $fieldname }}" style="width: 100%" id="{{ (isset($select_id)) ? $select_id : 'assigned_accessory_select' }}"{{ (isset($multiple)) ? ' multiple' : '' }}>--}}
 
-                    @if ((!isset($unselect)) && ($accessory_id = Request::old($fieldname, (isset($accessory) ? $accessory->id  : (isset($item) ? $item->{$fieldname} : '')))))
-                        <option value="{{ $accessory_id }}" selected="selected">
-                            {{ (\App\Models\Accessory::find($accessory_id)) ? \App\Models\Accessory::find($accessory_id)->present()->name : '' }}
-                        </option>
-                    @else
-                        @if(!isset($multiple))
-                            <option value="">{{ trans('general.select_accessory') }}</option>
-                        @endif
-                    @endif
-                </select>
-            </div>
-            {!! $errors->first($fieldname, '<div class="col-md-8 col-md-offset-3"><span class="alert-msg"><i class="fas fa-times"></i> :message</span></div>') !!}
+{{--                    @if ((!isset($unselect)) && ($accessory_id = Request::old($fieldname, (isset($accessory) ? $accessory->id  : (isset($item) ? $item->{$fieldname} : '')))))--}}
+{{--                        <option value="{{ $accessory_id }}" selected="selected">--}}
+{{--                            {{ (\App\Models\Accessory::find($accessory_id)) ? \App\Models\Accessory::find($accessory_id)->present()->name : '' }}--}}
+{{--                        </option>--}}
+{{--                    @else--}}
+{{--                        @if(!isset($multiple))--}}
+{{--                            <option value="">{{ trans('general.select_accessory') }}</option>--}}
+{{--                        @endif--}}
+{{--                    @endif--}}
+{{--                </select>--}}
+{{--            </div>--}}
+{{--            {!! $errors->first($fieldname, '<div class="col-md-8 col-md-offset-3"><span class="alert-msg"><i class="fas fa-times"></i> :message</span></div>') !!}--}}
 
-        </div>
+{{--        </div>--}}
 
         <!-- Notes -->
         <div class="form-group{{ $errors->has('notes') ? ' has-error' : '' }}">
@@ -57,17 +50,15 @@
             </div>
         </div>
 
-
     {{--@include ('partials.forms.edit.notes', ['item' => $request])--}}
-@stop
 </div>
-<script>
-    $(document).ready(function() {
-        $('#requested_licenses').select2();
+{{--<script>--}}
+{{--    $(document).ready(function() {--}}
+{{--        $('#requested_licenses').select2();--}}
 
-        $('#requested_licenses').on('change', function() {
-            let data = $(this).val();
-            $wire.set('licenses', data);
-        });
-    });
-</script>
+{{--        $('#requested_licenses').on('change', function() {--}}
+{{--            let data = $(this).val();--}}
+{{--            $wire.set('licenses', data);--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}

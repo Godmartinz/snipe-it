@@ -7,9 +7,6 @@
     'helpText' => trans('help.companies'),
     'formAction' => route('account/request-asset', $item->id)]),
 @section('inputFields')
-
+        @livewire('requestable-notes',[ 'item' => $item])
 @stop
 
-@section('livewire')
-@livewire('requestable-notes')
-@stop
