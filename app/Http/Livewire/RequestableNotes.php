@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Accessory;
 use App\Models\License;
 use Illuminate\Support\Facades\Request;
 use Livewire\Component;
@@ -11,9 +12,12 @@ class RequestableNotes extends Component
 {
     public $asset;
     public $licenses;
+    public $accessories;
     public $license_request;
+    public $accessory_request;
     public function mount($item){
-        $this->licenses = License::all();
+      $this->license_request = $license_request;
+      $this->accessory_request = $accessory_request;
         $this->asset = $item->id;
     }
 
