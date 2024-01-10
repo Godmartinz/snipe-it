@@ -13,11 +13,10 @@ class RequestableNotes extends Component
     public $asset;
     public $licenses;
     public $accessories;
-    public $license_request;
-    public $accessory_request;
+    public $license_request = [];
+    public $accessory_request = [];
     public function mount($item){
-      $this->license_request = $license_request;
-      $this->accessory_request = $accessory_request;
+
         $this->asset = $item->id;
     }
 
