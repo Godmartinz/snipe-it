@@ -39,10 +39,16 @@ class SlackSettingsForm extends Component
         $this->webhook_text= [
             "slack" => array(
                 "name" => trans('admin/settings/general.slack') ,
-            "icon" => 'fab fa-slack',
-            "placeholder" => "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXX",
-            "link" => 'https://api.slack.com/messaging/webhooks',
+                "icon" => 'fab fa-slack',
+                "placeholder" => "https://hooks.slack.com/services/XXXXXXXXXXXXXXXXXXXXX",
+                "link" => 'https://api.slack.com/messaging/webhooks',
         ),
+            "discord"=> array(
+                "name" => trans('admin/settings/general.discord'),
+                "icon" => "fa-brands fa-discord",
+                "placeholder" => 'https://discord.com/api/webhooks/XXXXXXXXX',
+                "link" => "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks",
+            ),
             "general"=> array(
                 "name" => trans('admin/settings/general.general_webhook'),
                 "icon" => "fab fa-hashtag",
