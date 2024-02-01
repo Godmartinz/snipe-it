@@ -72,7 +72,7 @@ class CheckoutAssetNotification extends Notification
             $notifyBy[] = MicrosoftTeamsChannel::class;
         }
 
-        if ((Setting::getSettings()->webhook_selected == 'slack') || (Setting::getSettings()->webhook_selected == '')) {
+        if ((Setting::getSettings()->webhook_selected == 'slack') || (Setting::getSettings()->webhook_selected == '' || Setting::getSettings()->webhook_selected == 'discord')) {
             \Log::debug('use webhook');
             $notifyBy[] = 'slack';
         }
