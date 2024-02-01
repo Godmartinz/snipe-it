@@ -11,6 +11,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Http;
 use NotificationChannels\GoogleChat\Card;
 use NotificationChannels\GoogleChat\Enums\Icon;
 use NotificationChannels\GoogleChat\Enums\ImageStyle;
@@ -62,6 +63,11 @@ class CheckoutAssetNotification extends Notification
     public function via()
     {
         $notifyBy = [];
+
+        if (Setting::getSettings()->webhook_selected == 'discord'){
+
+            $notifyBy[] = self::toDiscord();
+        }
         if (Setting::getSettings()->webhook_selected == 'google'){
 
             $notifyBy[] = GoogleChatChannel::class;
@@ -180,6 +186,48 @@ public function toGoogleChat()
                         )
                     )
             );
+
+    }
+    public function toDiscord()
+    {
+        $target = $this->target;
+        $admin = $this->admin;
+        $item = $this->item;
+        $note = $this->note;
+        $payload = [
+            "username" => "Webhook",
+            "avatar_url" => "https://i.imgur.com/4M34hi2.png",
+            "content" => "Text message. Up to 2000 characters.",
+            "embeds" => [
+                [
+                    "title" => "Title",
+                    "url" => "https://google.com/",
+                    "description" => "Text message. You can use Markdown here. *Italic* **bold** __underline__ ~~strikeout~~ [hyperlink](https://google.com) `code`",
+                    "color" => 15258703,
+                    "fields" => [
+                        [
+                            "name" => "Text",
+                            "value" => "More text",
+                            "inline" => true
+                        ],
+                        [
+                            "name" => "Even more text",
+                            "value" => "Yup",
+                            "inline" => true
+                        ],
+                        ],
+
+                        "footer" => [
+                        "text" => "Woah! So cool! :smirk:",
+                        "icon_url" => "https://i.imgur.com/fKL31aD.jpg"
+                    ]
+                ]
+            ]
+        ];
+        return Http::withHeaders([
+            'content-type' => 'application/json',
+        ])->post($this->settings->webhook_endpoint,
+            $payload)->throw();
 
     }
 
