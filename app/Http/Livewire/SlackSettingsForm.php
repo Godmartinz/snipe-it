@@ -88,6 +88,10 @@ class SlackSettingsForm extends Component
         $this->webhook_botname = $this->setting->webhook_botname;
         $this->webhook_options = $this->setting->webhook_selected;
 
+        if($this->webhook_selected == 'microsoft' || $this->webhook_selected == 'google' || $this->webhook_selected == 'discord' ){
+            $this->webhook_channel = '#NA';
+        }
+
 
         if($this->setting->webhook_endpoint != null && $this->setting->webhook_channel != null){
             $this->isDisabled= '';
@@ -108,6 +112,11 @@ class SlackSettingsForm extends Component
         $this->webhook_channel = null;
         $this->webhook_link = $this->webhook_text[$this->webhook_selected]["link"];
         $this->webhook_test = $this->webhook_text[$this->webhook_selected]["test"];
+
+        if($this->webhook_selected == 'microsoft' || $this->webhook_selected == 'google' || $this->webhook_selected == 'discord' ){
+            $this->webhook_channel = '#NA';
+        }
+
         if($this->webhook_selected != 'slack'){
             $this->isDisabled= '';
             $this->save_button = trans('general.save');
@@ -215,16 +224,15 @@ class SlackSettingsForm extends Component
                 [
                     "title" => 'Webhook Integrations Test',
                     "description" => trans('general.webhook_test_msg', ['app' => $this->webhook_name]),
-                    "color" => 15258703,
-                    "footer" => [
-                    ]
+                    //the footer is empty, but required. Without it the post will be rejected for bad format.
+                    "footer" => ["text" => '',]
                 ]
             ]
         ];
 
         try {
             $response = Http::withHeaders([
-                'content-type' => 'applications/json',
+                'content-type' => 'application/json',
             ])->post($this->webhook_endpoint,
                 $payload)->throw();
 
