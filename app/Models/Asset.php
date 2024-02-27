@@ -1786,6 +1786,10 @@ class Asset extends Depreciable
             ->join('depreciations', 'models.depreciation_id', '=', 'depreciations.id')->where('models.depreciation_id', '=', $search);
 
     }
+    public function routeNotificationForDiscord()
+    {
+        return $this->settings->webhook_channel;
+    }
 
 
 }

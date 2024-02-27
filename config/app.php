@@ -282,6 +282,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
+        NotificationChannels\Discord\DiscordServiceProvider::class,
 
         /*
          * Package Service Providers...
