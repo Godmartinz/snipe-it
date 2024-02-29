@@ -200,7 +200,7 @@ public function toGoogleChat()
         $note = $this->note;
 
 
-        return DiscordChannel::send([
+        return DiscordMessage::create([null,
 
             "embeds" => [
                 [
@@ -227,7 +227,8 @@ public function toGoogleChat()
                     ]
                 ]
             ]
-        ]);
+        ])
+            ->to($this->settings->webhook_endpoint);
 
     }
 
