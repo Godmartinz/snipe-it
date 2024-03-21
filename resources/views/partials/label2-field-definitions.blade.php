@@ -360,19 +360,19 @@
             </template>
         </div>
         <div class="l2fd-buttonbar" style="grid-area: options-buttons">
-            <button 
+            <button
                 x-on:click.prevent="if(!$event.target.classList.contains('disabled')) shiftSelectedOption(-1)"
                 x-bind:class="{ 'disabled': !selectedField || !selectedOption || selectedOptionIndex == 0 }"
                 ><i class="fa-solid fa-caret-up"></i></button>
-            <button 
+            <button
                 x-on:click.prevent="if(!$event.target.classList.contains('disabled')) shiftSelectedOption(+1)"
                 x-bind:class="{ 'disabled': !selectedField || !selectedOption || selectedOptionIndex == selectedField.options.length - 1 }"
                 ><i class="fa-solid fa-caret-down"></i></button>
-            <button 
+            <button
                 x-on:click.prevent="if(!$event.target.classList.contains('disabled')) addOption()"
                 x-bind:class="{ 'disabled': !selectedField }"
                 ><i class="fa-solid fa-plus"></i></button>
-            <button 
+            <button
                 x-on:click.prevent="if(!$event.target.classList.contains('disabled')) trashSelectedOption()"
                 x-bind:class="{ 'disabled': !selectedField || !selectedOption }"
                 ><i class="fa-solid fa-trash"></i></button>
