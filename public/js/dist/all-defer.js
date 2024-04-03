@@ -85,24 +85,6 @@
       cleanup2();
     }];
   }
-  function watch(getter, callback) {
-    let firstTime = true;
-    let oldValue;
-    let effectReference = effect(() => {
-      let value = getter();
-      JSON.stringify(value);
-      if (!firstTime) {
-        queueMicrotask(() => {
-          callback(value, oldValue);
-          oldValue = value;
-        });
-      } else {
-        oldValue = value;
-      }
-      firstTime = false;
-    });
-    return () => release(effectReference);
-  }
 
   // packages/alpinejs/src/utils/dispatch.js
   function dispatch(el, name, detail = {}) {
@@ -272,17 +254,21 @@
     observer.disconnect();
     currentlyObserving = false;
   }
-  var queuedMutations = [];
+  var recordQueue = [];
+  var willProcessRecordQueue = false;
   function flushObserver() {
-    let records = observer.takeRecords();
-    queuedMutations.push(() => records.length > 0 && onMutate(records));
-    let queueLengthWhenTriggered = queuedMutations.length;
-    queueMicrotask(() => {
-      if (queuedMutations.length === queueLengthWhenTriggered) {
-        while (queuedMutations.length > 0)
-          queuedMutations.shift()();
-      }
-    });
+    recordQueue = recordQueue.concat(observer.takeRecords());
+    if (recordQueue.length && !willProcessRecordQueue) {
+      willProcessRecordQueue = true;
+      queueMicrotask(() => {
+        processRecordQueue();
+        willProcessRecordQueue = false;
+      });
+    }
+  }
+  function processRecordQueue() {
+    onMutate(recordQueue);
+    recordQueue.length = 0;
   }
   function mutateDom(callback) {
     if (!currentlyObserving)
@@ -307,16 +293,16 @@
       deferredMutations = deferredMutations.concat(mutations);
       return;
     }
-    let addedNodes = /* @__PURE__ */ new Set();
-    let removedNodes = /* @__PURE__ */ new Set();
+    let addedNodes = [];
+    let removedNodes = [];
     let addedAttributes = /* @__PURE__ */ new Map();
     let removedAttributes = /* @__PURE__ */ new Map();
     for (let i = 0; i < mutations.length; i++) {
       if (mutations[i].target._x_ignoreMutationObserver)
         continue;
       if (mutations[i].type === "childList") {
-        mutations[i].addedNodes.forEach((node) => node.nodeType === 1 && addedNodes.add(node));
-        mutations[i].removedNodes.forEach((node) => node.nodeType === 1 && removedNodes.add(node));
+        mutations[i].addedNodes.forEach((node) => node.nodeType === 1 && addedNodes.push(node));
+        mutations[i].removedNodes.forEach((node) => node.nodeType === 1 && removedNodes.push(node));
       }
       if (mutations[i].type === "attributes") {
         let el = mutations[i].target;
@@ -349,7 +335,7 @@
       onAttributeAddeds.forEach((i) => i(el, attrs));
     });
     for (let node of removedNodes) {
-      if (addedNodes.has(node))
+      if (addedNodes.includes(node))
         continue;
       onElRemoveds.forEach((i) => i(node));
       destroyTree(node);
@@ -359,7 +345,7 @@
       node._x_ignore = true;
     });
     for (let node of addedNodes) {
-      if (removedNodes.has(node))
+      if (removedNodes.includes(node))
         continue;
       if (!node.isConnected)
         continue;
@@ -545,10 +531,7 @@
     }
   }
   function handleError(error2, el, expression = void 0) {
-    error2 = Object.assign(
-      error2 ?? { message: "No error message given." },
-      { el, expression }
-    );
+    Object.assign(error2, { el, expression });
     console.warn(`Alpine Expression Error: ${error2.message}
 
 ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
@@ -668,7 +651,9 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     return {
       before(directive2) {
         if (!directiveHandlers[directive2]) {
-          console.warn(String.raw`Cannot find directive \`${directive2}\`. \`${name}\` will use the default order of execution`);
+          console.warn(
+            "Cannot find directive `${directive}`. `${name}` will use the default order of execution"
+          );
           return;
         }
         const pos = directiveOrder.indexOf(directive2);
@@ -1482,25 +1467,25 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   function entangle({ get: outerGet, set: outerSet }, { get: innerGet, set: innerSet }) {
     let firstRun = true;
     let outerHash;
-    let innerHash;
     let reference = effect(() => {
-      let outer = outerGet();
-      let inner = innerGet();
+      const outer = outerGet();
+      const inner = innerGet();
       if (firstRun) {
         innerSet(cloneIfObject(outer));
         firstRun = false;
+        outerHash = JSON.stringify(outer);
       } else {
-        let outerHashLatest = JSON.stringify(outer);
-        let innerHashLatest = JSON.stringify(inner);
+        const outerHashLatest = JSON.stringify(outer);
         if (outerHashLatest !== outerHash) {
           innerSet(cloneIfObject(outer));
-        } else if (outerHashLatest !== innerHashLatest) {
-          outerSet(cloneIfObject(inner));
+          outerHash = outerHashLatest;
         } else {
+          outerSet(cloneIfObject(inner));
+          outerHash = JSON.stringify(inner);
         }
       }
-      outerHash = JSON.stringify(outerGet());
-      innerHash = JSON.stringify(innerGet());
+      JSON.stringify(innerGet());
+      JSON.stringify(outerGet());
     });
     return () => {
       release(reference);
@@ -1619,7 +1604,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     get raw() {
       return raw;
     },
-    version: "3.13.5",
+    version: "3.13.3",
     flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions,
     disableEffectScheduling,
@@ -1672,7 +1657,6 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     // INTERNAL
     bound: getBinding,
     $data: scope,
-    watch,
     walk,
     data,
     bind: bind2
@@ -2394,15 +2378,23 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   magic("dispatch", (el) => dispatch.bind(dispatch, el));
 
   // packages/alpinejs/src/magics/$watch.js
-  magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 }) => (key, callback) => {
+  magic("watch", (el, { evaluateLater: evaluateLater2, effect: effect3 }) => (key, callback) => {
     let evaluate2 = evaluateLater2(key);
-    let getter = () => {
-      let value;
-      evaluate2((i) => value = i);
-      return value;
-    };
-    let unwatch = watch(getter, callback);
-    cleanup2(unwatch);
+    let firstTime = true;
+    let oldValue;
+    let effectReference = effect3(() => evaluate2((value) => {
+      JSON.stringify(value);
+      if (!firstTime) {
+        queueMicrotask(() => {
+          callback(value, oldValue);
+          oldValue = value;
+        });
+      } else {
+        oldValue = value;
+      }
+      firstTime = false;
+    }));
+    el._x_effects.delete(effectReference);
   });
 
   // packages/alpinejs/src/magics/$store.js
@@ -2453,31 +2445,11 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   }
 
   // packages/alpinejs/src/magics/$id.js
-  magic("id", (el, { cleanup: cleanup2 }) => (name, key = null) => {
-    let cacheKey = `${name}${key ? `-${key}` : ""}`;
-    return cacheIdByNameOnElement(el, cacheKey, cleanup2, () => {
-      let root = closestIdRoot(el, name);
-      let id = root ? root._x_ids[name] : findAndIncrementId(name);
-      return key ? `${name}-${id}-${key}` : `${name}-${id}`;
-    });
+  magic("id", (el) => (name, key = null) => {
+    let root = closestIdRoot(el, name);
+    let id = root ? root._x_ids[name] : findAndIncrementId(name);
+    return key ? `${name}-${id}-${key}` : `${name}-${id}`;
   });
-  interceptClone((from, to) => {
-    if (from._x_id) {
-      to._x_id = from._x_id;
-    }
-  });
-  function cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
-    if (!el._x_id)
-      el._x_id = {};
-    if (el._x_id[cacheKey])
-      return el._x_id[cacheKey];
-    let output = callback();
-    el._x_id[cacheKey] = output;
-    cleanup2(() => {
-      delete el._x_id[cacheKey];
-    });
-    return output;
-  }
 
   // packages/alpinejs/src/magics/$el.js
   magic("el", (el) => el);
@@ -2797,7 +2769,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       setValue(getInputValue(el, modifiers, e, getValue()));
     });
     if (modifiers.includes("fill")) {
-      if ([void 0, null, ""].includes(getValue()) || el.type === "checkbox" && Array.isArray(getValue())) {
+      if ([null, ""].includes(getValue()) || el.type === "checkbox" && Array.isArray(getValue())) {
         el.dispatchEvent(new Event(event, {}));
       }
     }
@@ -3283,11 +3255,6 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   directive("id", (el, { expression }, { evaluate: evaluate2 }) => {
     let names = evaluate2(expression);
     names.forEach((name) => setIdRoot(el, name));
-  });
-  interceptClone((from, to) => {
-    if (from._x_ids) {
-      to._x_ids = from._x_ids;
-    }
   });
 
   // packages/alpinejs/src/directives/x-on.js
