@@ -277,9 +277,9 @@
                         <td>{{ $accessory->pivot->created_at }}</td>
 
                         <td>
-                            @if (($accessory->assetlog->first()) && ($accessory->assetlog->first()->accept_signature!=''))
-                            <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $accessory->assetlog->first()->accept_signature }}">
-                            @endif
+                                @if ($accessory->assetlog[$loop->index]->accept_signature !='')
+                                    <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $accessory->assetlog[$loop->index]->accept_signature}}">
+                                @endif
                         </td>
                     </tr>
                     @php
