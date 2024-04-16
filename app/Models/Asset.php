@@ -819,11 +819,14 @@ class Asset extends Depreciable
 
 
         if ($settings->auto_increment_assets == '1') {
-            if ($settings->zerofill_count > 0) {
-                return $settings->auto_increment_prefix.self::zerofill($settings->next_auto_tag_base + $additional_increment, $settings->zerofill_count);
-            }
+            if(($settings->next_auto_tag_base + $additional_increment) <= PHP_INT_MAX) {
+                if ($settings->zerofill_count > 0) {
+                    return $settings->auto_increment_prefix . self::zerofill($settings->next_auto_tag_base + $additional_increment, $settings->zerofill_count);
+                }
 
-            return $settings->auto_increment_prefix.($settings->next_auto_tag_base + $additional_increment);
+                return $settings->auto_increment_prefix . ($settings->next_auto_tag_base + $additional_increment);
+            }
+            return redirect()->back()->with('error', trans('general.asset_tag_range_error'));
         } else {
             return false;
         }
