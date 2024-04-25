@@ -86,22 +86,32 @@ class LdapSync extends Command
         $summary = [];
 
         try {
-
+            dd('hi');
             /**
              * if a location ID has been specified, use that OU
              */
-            if ( $this->option('location_id') != '') {
+            if ( $this->option('location_id') ) {
 
                 foreach($this->option('location_id') as $location_id){
                     $location_ou = Location::where('id', '=', $location_id)->value('ldap_ou');
                     $search_base = $location_ou;
                     Log::debug('Importing users from specified location OU: \"'.$search_base.'\".');
-                 }
+                }
+            }
+            /**
+             * if a sync type is company and a Company ID has been specified, use that OU
+             */
+            if ($this->option('company_id')) {
+                $ou_type = Company::where('id', '=', $this->option('company_id'))->value('ldap_ou');
+                $search_base = $ou_type;
+                Log::debug('Importing users from specified location OU: \"'.$search_base.'\".');
+            }
+
 
             /**
              * Otherwise if a manual base DN has been specified, use that
              */
-            } elseif ($this->option('base_dn') != '') {
+            if ($this->option('base_dn') != '' && $this->option('location_id') == null && $this->option('company_id' == null)) {
                 $search_base = $this->option('base_dn');
                 Log::debug('Importing users from specified base DN: \"'.$search_base.'\".');
             }
@@ -112,11 +122,13 @@ class LdapSync extends Command
             if ($this->option('filter') != '') {
                 $results = Ldap::findLdapUsers($search_base, -1, $this->option('filter'));
             } else {
+
                 $results = Ldap::findLdapUsers($search_base);
             }
             
         } catch (\Exception $e) {
             if ($this->option('json_summary')) {
+
                 $json_summary = ['error' => true, 'error_message' => $e->getMessage(), 'summary' => []];
                 $this->info(json_encode($json_summary));
             }
@@ -134,6 +146,7 @@ class LdapSync extends Command
                 }
 
             } elseif ($this->option('location_id') != '') {
+
                 foreach($this->option('location_id') as $location_id) {
                 if ($location = Location::where('id', '=', $location_id)->first()) {
                     Log::debug('Location ID ' . $location_id . ' passed');

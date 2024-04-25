@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan; // Note that this is awful close to 'Users' the namespace above; be careful
@@ -31,7 +32,8 @@ class LDAPImportController extends Controller
             return redirect()->route('users.index')->with('error', $e->getMessage());
         }
 
-        return view('users/ldap');
+        return view('users/ldap')
+             ->with('settings', Setting::getSettings());
     }
 
     /**
@@ -50,7 +52,12 @@ class LDAPImportController extends Controller
         $this->authorize('update', User::class);
         // Call Artisan LDAP import command.
 
-        Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('location_id'), '--json_summary' => true]);
+        if(Setting::getSettings()->ldap_ou_sync_type == 'location') {
+            Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('ou_type_id'), '--json_summary' => true]);
+        }
+        else {
+            Artisan::call('snipeit:ldap-sync', ['--company_id' => $request->input('ou_type_id'), '--json_summary' => true]);
+        }
 
         // Collect and parse JSON summary.
         $ldap_results_json = Artisan::output();
