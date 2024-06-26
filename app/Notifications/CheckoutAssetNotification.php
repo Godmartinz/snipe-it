@@ -35,7 +35,22 @@ class CheckoutAssetNotification extends Notification
         $this->item = $asset;
         $this->admin = $checkedOutBy;
         $this->note = $note;
-        $this->target = $checkedOutTo;
+
+        if($this->item->assigned_type === 'App\Models\Location'){
+            if($checkedOutTo->manager !== '') {
+                $this->target = $checkedOutTo->manager;
+            }
+        }
+        if($this->item->assigned_type === 'App\Models\Asset'){
+            if($checkedOutTo->assignedTo !== '') {
+                if($checkedOutTo->assignedTo === 'App\Models\Location') {
+                    $this->target = $checkedOutTo->assignedTo->manager;
+                }
+                else{
+                    $this->target = $checkedOutTo->assignedTo;
+                }
+            }
+        }
         $this->acceptance = $acceptance;
 
         $this->settings = Setting::getSettings();
