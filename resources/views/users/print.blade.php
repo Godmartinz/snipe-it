@@ -265,6 +265,7 @@
 
             @foreach ($accessories as $accessory)
                 @if ($accessory)
+
                     <tr>
                         <td>{{ $acounter }}</td>
                         <td>
@@ -277,8 +278,13 @@
                         <td>{{ $accessory->pivot->created_at }}</td>
 
                         <td>
-                            @if (($accessory->assetlog->first()) && ($accessory->assetlog->first()->accept_signature!=''))
-                            <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $accessory->assetlog->first()->accept_signature }}">
+                            @if ($accessory->assetlog->isNotEmpty())
+                                @foreach ($accessory->assetlog as $log)
+                                    @if ($log->accept_signature)
+                                        <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $log->accept_signature }}" alt="Signature for log ID {{ $log->id }}">
+                                        @break
+                                    @endif
+                                @endforeach
                             @endif
                         </td>
                     </tr>

@@ -475,7 +475,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function assetlog()
     {
-        return $this->hasMany(\App\Models\Asset::class, 'id')->withTrashed();
+        return $this->hasMany(\App\Models\Asset::class, 'item_id')->withTrashed();
     }
 
     /**

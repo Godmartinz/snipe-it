@@ -614,7 +614,8 @@ class UsersController extends Controller
         $assets = Asset::where('assigned_to', $id)->where('assigned_type', User::class)->with('model', 'model.category')->get();
         $accessories = $user->accessories()->get();
         $consumables = $user->consumables()->get();
-
+        foreach ($accessories as $accessory) {}
+//        dd($accessory->assetlog());
         return view('users/print')->with('assets', $assets)
             ->with('licenses', $user->licenses()->get())
             ->with('accessories', $accessories)
