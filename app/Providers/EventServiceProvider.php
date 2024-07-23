@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Listeners\CheckoutableListener;
-use App\Listeners\LogListener;
+use App\Http\Controllers\Listeners\CheckoutableListener;
+use App\Http\Controllers\Listeners\LogListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -15,11 +15,11 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         'Illuminate\Auth\Events\Login' => [
-            \App\Listeners\LogSuccessfulLogin::class,
+            \App\Http\Controllers\Listeners\LogSuccessfulLogin::class,
         ],
 
         'Illuminate\Auth\Events\Failed' => [
-            \App\Listeners\LogFailedLogin::class,
+            \App\Http\Controllers\Listeners\LogFailedLogin::class,
         ],
     ];
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Http\Controllers\Listeners;
 
 use App\Events\AccessoryCheckedIn;
 use App\Events\AccessoryCheckedOut;
@@ -17,10 +17,11 @@ use App\Events\ItemAccepted;
 use App\Events\ItemDeclined;
 use App\Events\LicenseCheckedIn;
 use App\Events\LicenseCheckedOut;
-use App\Models\Actionlog;
-use App\Models\User;
-use App\Models\LicenseSeat;
 use App\Events\UserMerged;
+use App\Listeners\Illuminate;
+use App\Models\Actionlog;
+use App\Models\LicenseSeat;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class LogListener

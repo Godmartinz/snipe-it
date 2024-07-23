@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Http\Controllers\Listeners;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Listeners\CheckoutableCheckedIn;
+use App\Listeners\Collection;
+use App\Listeners\Event;
+use App\Listeners\Illuminate;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
@@ -18,10 +22,10 @@ use App\Notifications\CheckoutAccessoryNotification;
 use App\Notifications\CheckoutAssetNotification;
 use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
-use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Notification;
 use Exception;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class CheckoutableListener
 {

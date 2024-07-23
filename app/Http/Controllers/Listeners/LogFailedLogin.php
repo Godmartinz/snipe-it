@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Listeners;
+namespace App\Http\Controllers\Listeners;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Events\Failed;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LogFailedLogin
