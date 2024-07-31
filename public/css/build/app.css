@@ -999,6 +999,19 @@ th.css-location > .th-inner::before {
     margin-top: 50px;
   }
 }
+@media screen and (max-width: 1318px) and (min-width: 1200px) {
+  .box {
+    height: 170px;
+  }
+}
+@media screen and (max-width: 1494px) and (min-width: 1200px) {
+  .dashboard .small-box {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
 .ellipsis {
   overflow: hidden;
   white-space: nowrap;

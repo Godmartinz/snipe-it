@@ -54842,11 +54842,11 @@ return SignaturePad;
 }));
 
 /*!
- * jQuery Validation Plugin v1.20.1
+ * jQuery Validation Plugin v1.20.0
  *
  * https://jqueryvalidation.org/
  *
- * Copyright (c) 2024 Jörn Zaefferer
+ * Copyright (c) 2023 Jörn Zaefferer
  * Released under the MIT license
  */
 (function( factory ) {
@@ -56455,12 +56455,11 @@ $.extend( $.validator, {
 
 			param = typeof param === "string" && { url: param } || param;
 			optionDataString = $.param( $.extend( { data: value }, param.data ) );
-			if ( previous.valid !== null && previous.old === optionDataString ) {
+			if ( previous.old === optionDataString ) {
 				return previous.valid;
 			}
 
 			previous.old = optionDataString;
-			previous.valid = null;
 			validator = this;
 			this.startRequest( element );
 			data = {};

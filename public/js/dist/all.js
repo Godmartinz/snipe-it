@@ -54842,11 +54842,11 @@ return SignaturePad;
 }));
 
 /*!
- * jQuery Validation Plugin v1.20.1
+ * jQuery Validation Plugin v1.20.0
  *
  * https://jqueryvalidation.org/
  *
- * Copyright (c) 2024 Jörn Zaefferer
+ * Copyright (c) 2023 Jörn Zaefferer
  * Released under the MIT license
  */
 (function( factory ) {
@@ -56455,12 +56455,11 @@ $.extend( $.validator, {
 
 			param = typeof param === "string" && { url: param } || param;
 			optionDataString = $.param( $.extend( { data: value }, param.data ) );
-			if ( previous.valid !== null && previous.old === optionDataString ) {
+			if ( previous.old === optionDataString ) {
 				return previous.valid;
 			}
 
 			previous.old = optionDataString;
-			previous.valid = null;
 			validator = this;
 			this.startRequest( element );
 			data = {};
@@ -91240,10 +91239,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 /***/ }),
 
-/***/ "./resources/assets/less/skins/skin-contrast.less":
-/*!********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-contrast.less ***!
-  \********************************************************/
+/***/ "./resources/assets/less/skins/skin-black.less":
+/*!*****************************************************!*\
+  !*** ./resources/assets/less/skins/skin-black.less ***!
+  \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -91253,10 +91252,36 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/assets/less/skins/skin-green.less":
-/*!*****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-green.less ***!
-  \*****************************************************/
+/***/ "./resources/assets/less/skins/skin-blue-dark.less":
+/*!*********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-blue-dark.less ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-blue.less":
+/*!****************************************************!*\
+  !*** ./resources/assets/less/skins/skin-blue.less ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-contrast.less":
+/*!********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-contrast.less ***!
+  \********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -91279,101 +91304,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/assets/less/skins/skin-black.less":
+/***/ "./resources/assets/less/skins/skin-green.less":
 /*!*****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-black.less ***!
+  !*** ./resources/assets/less/skins/skin-green.less ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-black-dark.less":
-/*!**********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-black-dark.less ***!
-  \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-red-dark.less":
-/*!********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-red-dark.less ***!
-  \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-purple.less":
-/*!******************************************************!*\
-  !*** ./resources/assets/less/skins/skin-purple.less ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-purple-dark.less":
-/*!***********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-purple-dark.less ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-yellow.less":
-/*!******************************************************!*\
-  !*** ./resources/assets/less/skins/skin-yellow.less ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-yellow-dark.less":
-/*!***********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-yellow-dark.less ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-blue-dark.less":
-/*!*********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-blue-dark.less ***!
-  \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -91399,6 +91333,84 @@ __webpack_require__.r(__webpack_exports__);
 /***/ "./resources/assets/less/skins/skin-orange.less":
 /*!******************************************************!*\
   !*** ./resources/assets/less/skins/skin-orange.less ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-purple-dark.less":
+/*!***********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-purple-dark.less ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-purple.less":
+/*!******************************************************!*\
+  !*** ./resources/assets/less/skins/skin-purple.less ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-red-dark.less":
+/*!********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-red-dark.less ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-red.less":
+/*!***************************************************!*\
+  !*** ./resources/assets/less/skins/skin-red.less ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-yellow-dark.less":
+/*!***********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-yellow-dark.less ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-yellow.less":
+/*!******************************************************!*\
+  !*** ./resources/assets/less/skins/skin-yellow.less ***!
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -91448,10 +91460,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/assets/less/skins/skin-blue.less":
-/*!****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-blue.less ***!
-  \****************************************************/
+/***/ "./resources/assets/less/skins/_all-skins.less":
+/*!*****************************************************!*\
+  !*** ./resources/assets/less/skins/_all-skins.less ***!
+  \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -91461,10 +91473,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/assets/less/skins/skin-red.less":
-/*!***************************************************!*\
-  !*** ./resources/assets/less/skins/skin-red.less ***!
-  \***************************************************/
+/***/ "./resources/assets/less/skins/skin-black-dark.less":
+/*!**********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-black-dark.less ***!
+  \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -91585,24 +91597,25 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
 /******/ 			"/js/build/app": 0,
-/******/ 			"css/dist/skins/skin-red": 0,
-/******/ 			"css/dist/skins/skin-blue": 0,
+/******/ 			"css/dist/skins/skin-black-dark": 0,
+/******/ 			"css/dist/skins/_all-skins": 0,
 /******/ 			"css/build/overrides": 0,
 /******/ 			"css/build/app": 0,
 /******/ 			"css/build/AdminLTE": 0,
+/******/ 			"css/dist/skins/skin-yellow": 0,
+/******/ 			"css/dist/skins/skin-yellow-dark": 0,
+/******/ 			"css/dist/skins/skin-red": 0,
+/******/ 			"css/dist/skins/skin-red-dark": 0,
+/******/ 			"css/dist/skins/skin-purple": 0,
+/******/ 			"css/dist/skins/skin-purple-dark": 0,
 /******/ 			"css/dist/skins/skin-orange": 0,
 /******/ 			"css/dist/skins/skin-orange-dark": 0,
-/******/ 			"css/dist/skins/skin-blue-dark": 0,
-/******/ 			"css/dist/skins/skin-yellow-dark": 0,
-/******/ 			"css/dist/skins/skin-yellow": 0,
-/******/ 			"css/dist/skins/skin-purple-dark": 0,
-/******/ 			"css/dist/skins/skin-purple": 0,
-/******/ 			"css/dist/skins/skin-red-dark": 0,
-/******/ 			"css/dist/skins/skin-black-dark": 0,
-/******/ 			"css/dist/skins/skin-black": 0,
-/******/ 			"css/dist/skins/skin-green-dark": 0,
 /******/ 			"css/dist/skins/skin-green": 0,
-/******/ 			"css/dist/skins/skin-contrast": 0
+/******/ 			"css/dist/skins/skin-green-dark": 0,
+/******/ 			"css/dist/skins/skin-contrast": 0,
+/******/ 			"css/dist/skins/skin-blue": 0,
+/******/ 			"css/dist/skins/skin-blue-dark": 0,
+/******/ 			"css/dist/skins/skin-black": 0
 /******/ 		};
 /******/ 		
 /******/ 		// no chunk on demand loading
@@ -91652,26 +91665,27 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/js/snipeit.js")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/js/snipeit_modals.js")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./node_modules/admin-lte/build/less/AdminLTE.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/app.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/overrides.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-blue.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-red.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-contrast.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-green.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-green-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-black.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-black-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-red-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-purple.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-purple-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-yellow.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-yellow-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-blue-dark.less")))
-/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-orange-dark.less")))
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/dist/skins/skin-red","css/dist/skins/skin-blue","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-blue-dark","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-yellow","css/dist/skins/skin-purple-dark","css/dist/skins/skin-purple","css/dist/skins/skin-red-dark","css/dist/skins/skin-black-dark","css/dist/skins/skin-black","css/dist/skins/skin-green-dark","css/dist/skins/skin-green","css/dist/skins/skin-contrast"], () => (__webpack_require__("./resources/assets/less/skins/skin-orange.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/js/snipeit.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/js/snipeit_modals.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./node_modules/admin-lte/build/less/AdminLTE.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/app.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/overrides.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/_all-skins.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-black-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-black.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-blue-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-blue.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-contrast.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-green-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-green.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-orange-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-orange.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-purple-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-purple.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-red-dark.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-red.less")))
+/******/ 	__webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-yellow-dark.less")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/dist/skins/skin-black-dark","css/dist/skins/_all-skins","css/build/overrides","css/build/app","css/build/AdminLTE","css/dist/skins/skin-yellow","css/dist/skins/skin-yellow-dark","css/dist/skins/skin-red","css/dist/skins/skin-red-dark","css/dist/skins/skin-purple","css/dist/skins/skin-purple-dark","css/dist/skins/skin-orange","css/dist/skins/skin-orange-dark","css/dist/skins/skin-green","css/dist/skins/skin-green-dark","css/dist/skins/skin-contrast","css/dist/skins/skin-blue","css/dist/skins/skin-blue-dark","css/dist/skins/skin-black"], () => (__webpack_require__("./resources/assets/less/skins/skin-yellow.less")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()
