@@ -5,6 +5,7 @@ return [
     'add'    	                => 'Add New',
     'cancel'                    => 'Cancel',
     'checkin_and_delete'  	    => 'Checkin All / Delete User',
+    'checkin_selected'          => 'Checkin Selected :type',
     'delete'  	                => 'Delete',
     'edit'    	                => 'Edit',
     'clone'    	                => 'Clone',
