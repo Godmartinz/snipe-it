@@ -26,14 +26,14 @@
   <div class="col-md-12">
     <div class="box">
       <div class="box-body">
-
-      <label for="bulk_actions">
-        <span class="sr-only">
-            {{ trans('button.bulk_actions') }}
-        </span>
-      </label>
-      <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkLicenseCheckinButton' }}" disabled>{{ trans('button.checkin_selected', ['type' => 'Licenses']) }}</button>
-
+          <div id="{{ (isset($id_divname)) ? $id_divname : 'checkinSelectedLicensesButton' }}" style="min-width:400px">
+              <label for="bulk_actions">
+                <span class="sr-only">
+                    {{ trans('button.bulk_actions') }}
+                </span>
+              </label>
+              <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkLicenseCheckinButton' }}" disabled>{{ trans('button.checkin_selected', ['type' => 'Licenses']) }}</button>
+          </div>
           <table
               data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
               data-cookie-id-table="licensesTable"
@@ -47,6 +47,7 @@
               data-show-refresh="true"
               data-sort-order="asc"
               data-sort-name="name"
+              data-toolbar="#checkinSelectedLicensesButton"
               data-bulk-button-id="#bulkLicenseCheckinButton"
               id="licensesTable"
               class="table table-striped snipe-table"
