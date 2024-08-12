@@ -27,12 +27,18 @@
     <div class="box">
       <div class="box-body">
           <div id="{{ (isset($id_divname)) ? $id_divname : 'checkinSelectedLicensesButton' }}" style="min-width:400px">
+          {{ Form::open([
+              'method' => 'POST',
+              'route' => ['license/bulkcheckin'],
+              'class' => 'form-inline',
+            ]) }}
               <label for="bulk_actions">
                 <span class="sr-only">
                     {{ trans('button.bulk_actions') }}
                 </span>
               </label>
               <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkLicenseCheckinButton' }}" disabled>{{ trans('button.checkin_selected', ['type' => 'Licenses']) }}</button>
+          {{ Form::close() }}
           </div>
           <table
               data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
