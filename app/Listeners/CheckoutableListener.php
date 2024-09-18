@@ -11,6 +11,7 @@ use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\Recipients\AdminRecipient;
 use App\Models\Setting;
+use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
@@ -35,7 +36,7 @@ class CheckoutableListener
      */
     public function onCheckedOut($event)
     {
-        if ($this->shouldNotSendAnyNotifications($event->checkoutable)){
+        if ($this->shouldNotSendAnyNotifications($event->checkoutable)) {
             return;
         }
 
@@ -43,30 +44,33 @@ class CheckoutableListener
          * Make a checkout acceptance and attach it in the notification
          */
         $acceptance = $this->getCheckoutAcceptance($event);
-
+        $notifiables = $this->getNotifiables($event);
+        static $webhookSent = false;
+        // Send email notifications
         try {
-            if (! $event->checkedOutTo->locale) {
-                Notification::locale(Setting::getSettings()->locale)->send(
-                    $this->getNotifiables($event),
-                    $this->getCheckoutNotification($event, $acceptance)
-                );
-            } else {
-                Notification::send(
-                    $this->getNotifiables($event),
-                    $this->getCheckoutNotification($event, $acceptance)
-                );
+            foreach ($notifiables as $notifiable) {
+                if ($notifiable instanceof User && $notifiable->email != '') {
+                    if (! $event->checkedOutTo->locale) {
+                        Notification::locale(Setting::getSettings()->locale)
+                            ->send($notifiable, $this->getCheckoutNotification($event, $acceptance));
+                    } else {
+                        Notification::send($notifiable, $this->getCheckoutNotification($event, $acceptance));
+                    }
+                }
+            }
+            // Slack doesn't include the URL in its messaging format, so this is needed to hit the endpoint
+            if (Setting::getSettings()->webhook_selected == 'slack' || Setting::getSettings()->webhook_selected == 'general') {
+                Notification::route('slack', Setting::getSettings()->webhook_endpoint)
+                    ->notify($this->getCheckoutNotification($event));
             }
 
-            if ($this->shouldSendWebhookNotification()) {
+            // Send Webhook notification
+            if (!$webhookSent && $this->shouldSendWebhookNotification()) {
 
-            //slack doesn't include the url in its messaging format so this is needed to hit the endpoint
+                Notification::route(Setting::getSettings()->webhook_selected, Setting::getSettings()->webhook_endpoint)
+                    ->notify($this->getCheckoutNotification($event, $acceptance));
 
-              if(Setting::getSettings()->webhook_selected =='slack' || Setting::getSettings()->webhook_selected =='general') {
-
-
-                  Notification::route('slack', Setting::getSettings()->webhook_endpoint)
-                      ->notify($this->getCheckoutNotification($event));
-              }
+                $webhookSent = true; // Mark the webhook as sent
             }
         } catch (ClientException $e) {
             Log::debug("Exception caught during checkout notification: " . $e->getMessage());
