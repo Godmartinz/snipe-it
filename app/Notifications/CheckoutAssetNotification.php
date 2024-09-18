@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\MicrosoftTeams\TeamsNotification;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -145,7 +146,7 @@ class CheckoutAssetNotification extends Notification
         $item = $this->item;
         $note = $this->note;
 
-        return MicrosoftTeamsMessage::create()
+        return TeamsNotification::create()
             ->to($this->settings->webhook_endpoint)
             ->type('success')
             ->title(trans('mail.Asset_Checkout_Notification'))
