@@ -3,6 +3,7 @@
 
 namespace App\Services\MicrosoftTeams;
 
+use App\Models\Setting;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
 class TeamsNotification extends MicrosoftTeamsMessage
@@ -119,7 +120,7 @@ class TeamsNotification extends MicrosoftTeamsMessage
     public function getWebhookUrl(): string
     {
         info("Sending to teams wb: $this->webhookUrl");
-        return $this->webhookUrl;
+        return Setting::getSettings()->webhook_endpoint;
     }
     public function toArray(): array
     {
