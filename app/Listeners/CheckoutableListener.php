@@ -10,6 +10,7 @@ use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\Recipients\AdminRecipient;
+use App\Models\Recipients\AlertRecipient;
 use App\Models\Setting;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
@@ -162,6 +163,7 @@ class CheckoutableListener
     private function getNotifiables($event)
     {
         $notifiables = collect();
+        $checkedOutToType = get_class($event->checkedOutTo);
 
         /**
          * Notify who checked out the item as long as the model can route notifications
@@ -169,14 +171,21 @@ class CheckoutableListener
         if (method_exists($event->checkedOutTo, 'routeNotificationFor')) {
             $notifiables->push($event->checkedOutTo);
         }
-
+        /**
+         * Notify manager in charge of location if checked out to location
+         */
+        if ($checkedOutToType === "App\Models\Location") {
+//            dd('email:'.$event->checkedOutTo->manager?->email);
+            if($event->checkedOutTo->manager?->email) {
+                $notifiables->push(new AlertRecipient($event->checkedOutTo->manager?->email));
+            }
+        }
         /**
          * Notify Admin users if the settings is activated
          */
         if ((Setting::getSettings()) && (Setting::getSettings()->admin_cc_email != '')) {
             $notifiables->push(new AdminRecipient());
         }
-
         return $notifiables;       
     }
 

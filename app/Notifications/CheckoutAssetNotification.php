@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Helpers\Helper;
 use App\Models\Asset;
+use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
@@ -82,7 +83,7 @@ class CheckoutAssetNotification extends Notification
         /**
          * Only send notifications to users that have email addresses
          */
-        if ($this->target instanceof User && $this->target->email != '') {
+        if (($this->target instanceof User && $this->target->email != '') || $this->target instanceof Location) {
 
             /**
              * Send an email if the asset requires acceptance,
