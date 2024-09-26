@@ -67,6 +67,7 @@ class Helper
         'pt' => 'pt-PT', // Portuguese
         'ro' => 'ro-RO', // Romanian
         'ru' => 'ru-RU', // Russian
+        'si' => 'si-EL', // Sindarin
         'sk' => 'sk-SK', // Slovak
         'sl' => 'sl-SI', // Slovenian
         'so' => 'so-SO', // Somali

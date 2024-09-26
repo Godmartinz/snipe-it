@@ -20,6 +20,7 @@
           <label for="first_name" class="col-md-3 control-label">{{ trans('general.first_name') }}
           </label>
           <div class="col-md-8 required">
+            {{$user->locale}}
             <input class="form-control" type="text" name="first_name" id="first_name" value="{{ old('first_name', $user->first_name) }}" required />
             {!! $errors->first('first_name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
