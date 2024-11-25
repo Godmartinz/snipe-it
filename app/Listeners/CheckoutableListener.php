@@ -349,6 +349,6 @@ class CheckoutableListener
 
     private function newMicrosoftTeamsWebhookEnabled(): bool
     {
-        return Setting::getSettings()->webhook_selected === 'microsoft' && Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows');
+        return Setting::getSettings()->webhook_selected === 'microsoft' && Str::contains(Setting::getSettings()->webhook_endpoint, 'logic.azure.com');
     }
 }

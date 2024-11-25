@@ -81,7 +81,7 @@ class SlackSettingsForm extends Component
         $this->webhook_channel = $this->setting->webhook_channel;
         $this->webhook_botname = $this->setting->webhook_botname;
         $this->webhook_options = $this->setting->webhook_selected;
-        $this->teams_webhook_deprecated = !Str::contains($this->webhook_endpoint, 'workflows');
+        $this->teams_webhook_deprecated = !Str::contains($this->webhook_endpoint, 'logic.azure.com');
         if($this->webhook_selected === 'microsoft' || $this->webhook_selected === 'google'){
             $this->webhook_channel = '#NA';
         }
@@ -117,7 +117,7 @@ class SlackSettingsForm extends Component
 
     public function updatedwebhookEndpoint()
     {
-        $this->teams_webhook_deprecated = !Str::contains($this->webhook_endpoint, 'workflows');
+        $this->teams_webhook_deprecated = !Str::contains($this->webhook_endpoint, 'logic.azure.com');
     }
 
     private function isButtonDisabled() {

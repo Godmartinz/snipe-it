@@ -119,7 +119,7 @@ class CheckoutAssetNotification extends Notification
         $item = $this->item;
         $note = $this->note;
 
-        if(!Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
+        if(!Str::contains(Setting::getSettings()->webhook_endpoint, 'logic.azure.com')) {
             return MicrosoftTeamsMessage::create()
                 ->to($this->settings->webhook_endpoint)
                 ->type('success')
