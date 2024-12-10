@@ -15,7 +15,7 @@ class CustomFieldSetDefaultValuesForModel extends Component
 
     public $fieldset_id;
     public $model_id;
-
+    protected $listeners = ['fieldsetChanged' => 'updateFieldset'];
     public array $selectedValues = [];
 
     public function mount($model_id = null)
@@ -53,7 +53,13 @@ class CustomFieldSetDefaultValuesForModel extends Component
 
         return collect();
     }
-
+    public function updateFieldset($value)
+    {
+        $this->fieldset_id = $value;
+        if($this->fieldset_id != null) {
+            $this->add_default_values = true;
+        }
+    }
     public function render()
     {
         return view('livewire.custom-field-set-default-values-for-model');

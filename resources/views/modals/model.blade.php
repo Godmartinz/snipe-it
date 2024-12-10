@@ -17,7 +17,9 @@
             @include ('modals.partials.depreciation')
             @include ('modals.partials.minimum_quantity')
             @include ('modals.partials.eol_months')
-            @include('modals.partials.fieldset-select')
+
+            <!-- If $item->id is null we are cloning the model and we need the $model_id variable -->
+            @livewire('custom-field-set-default-values-for-model', ["model_id" => $item->id ?? $model_id ?? null], key(['fieldset_id' =>$item->id]))
             @include ('modals.partials.notes')
             @include ('modals.partials.requestable', ['requestable_text' => trans('admin/models/general.requestable')])
 
@@ -28,3 +30,13 @@
     @include('modals.partials.footer')
 </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+@section('moar_scripts')
+    <script>
+        $(document).ready(function() {
+            // Emit Livewire event when modal is shown
+            $('#yourModalId').on('shown.bs.modal', function () {
+                Livewire.emit('modalOpened');
+            });
+        });
+    </script>
+@endsection
