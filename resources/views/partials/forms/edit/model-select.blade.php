@@ -28,14 +28,10 @@
 </div>
 @section('moar_scripts')
     <script>
+        console.log('out');
         $(document).ready(function() {
-            $('#createModal').on('shown.bs.modal', function () {
-                Livewire.emit('modalOpened');
-            });
-        });
-        $('.js-fieldset-field').on('change', function () {
-            var fieldsetId = $(this).val();
-            Livewire.emit('fieldsetChanged', fieldsetId);
+            console.log('in');
+            Livewire.start();
         });
     </script>
 @endsection

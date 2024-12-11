@@ -10,7 +10,7 @@
                     'style'=>'width:100%; min-width:350px',
                     'aria-label'=>'custom_fieldset',
                     'data-livewire-component' => $this->getId(),
-                    'wire:model.live' => 'fieldset_id'))
+                    ))
             }}
             {!! $errors->first('custom_fieldset', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
         </div>
@@ -152,3 +152,12 @@
 
     @endif
 </span>
+
+@section('moar_scripts')
+<script>
+    $('.js-fieldset-field').on('change', function () {
+        var fieldsetId = $(this).val();
+        Livewire.emit('fieldsetChanged', fieldsetId);
+    });
+</script>
+@endsection

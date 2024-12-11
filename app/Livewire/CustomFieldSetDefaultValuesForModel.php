@@ -21,7 +21,7 @@ class CustomFieldSetDefaultValuesForModel extends Component
     public function mount($model_id = null)
     {
         $this->model_id = $model_id;
-        $this->fieldset_id = $this->model?->fieldset_id;
+        $this->fieldset_id = 1;
         $this->add_default_values = ($this->model?->defaultValues->count() > 0);
 
 
@@ -53,12 +53,14 @@ class CustomFieldSetDefaultValuesForModel extends Component
 
         return collect();
     }
-    public function updateFieldset($value)
+    public function updateFieldsetId($value)
     {
+        dd('hi');
         $this->fieldset_id = $value;
         if($this->fieldset_id != null) {
             $this->add_default_values = true;
         }
+        return $this->add_default_values;
     }
     public function render()
     {
