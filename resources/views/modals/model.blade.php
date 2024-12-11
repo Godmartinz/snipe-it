@@ -1,5 +1,7 @@
 {{-- See snipeit_modals.js for what powers this --}}
-
+@if(isset($livewireStyles))
+    {!! $livewireStyles !!}
+@endif
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
@@ -10,7 +12,8 @@
         <div class="modal-body">
         <form action="{{ route('api.models.store') }}" onsubmit="return false">
             <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-            </div>
+            </div>{{isset($livewireScripts)}}
+            {{isset($livewireStyles)}}
             @include('modals.partials.name', ['required' => 'true'])
             @include('modals.partials.categories-select', ['required' => 'true'])
             @include('modals.partials.manufacturer-select')
@@ -31,11 +34,6 @@
     @include('modals.partials.footer')
 </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
-    <script>
-        console.log('out');
-        $(document).ready(function() {
-            console.log('in');
-            Livewire.start();
-        });
-    </script>
-
+@if(isset($livewireScripts))
+    {!! $livewireScripts !!}
+@endif

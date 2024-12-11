@@ -40,6 +40,13 @@ $(function () {
       select = link.data("select");
       refreshSelector = link.data("refresh");
 
+      Livewire.init();
+
+      // Reinitialize Livewire components (if necessary)
+      Livewire.hook('message.processed', (message, component) => {
+          // Re-enable any JS code or handlers
+          console.log('Livewire component reloaded');
+      });
 
       $('#createModal').load(link.attr('href'),function () {
 

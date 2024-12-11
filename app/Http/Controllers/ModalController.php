@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\AssetModel;
+use Livewire\Livewire;
 
 class ModalController extends Controller
 {
@@ -45,7 +46,9 @@ class ModalController extends Controller
             }
             if ($type == "model") {
                 $view->with('depreciation_list', Helper::depreciationList())
-                     ->with('item', new AssetModel);
+                     ->with('item', new AssetModel)
+                     ->with('livewireStyles', '@livewireStyles')
+                     ->with('livewireScripts', '@livewireScripts');
             }
         if (in_array($type, ['kit-model', 'kit-license', 'kit-consumable', 'kit-accessory'])) {
             $view->with('kitId', $itemId);
