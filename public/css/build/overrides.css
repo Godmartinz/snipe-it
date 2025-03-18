@@ -346,6 +346,9 @@ body {
     size: A4;
     margin: 0mm;
   }
+  .table-responsive {
+    overflow-x: hidden;
+  }
   .tab-content > .tab-pane {
     display: block !important;
     opacity: 1 !important;
