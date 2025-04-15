@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Console\Commands\SendExpirationAlerts;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
@@ -40,7 +41,7 @@ class BulkAssetsController extends Controller
      * @internal param int $assetId
      * @since [v2.0]
      */
-    public function edit(Request $request) : View | RedirectResponse
+    public function edit(Request $request) : SendExpirationAlerts
     {
         $this->authorize('view', Asset::class);
 
@@ -151,6 +152,10 @@ class BulkAssetsController extends Controller
                         ->with('statuslabel_list', Helper::statusLabelList())
                         ->with('models', $models->pluck(['model']))
                         ->with('modelNames', $modelNames);
+
+                case 'send_reminder':
+                    $this->authorize('update', Asset::class);
+                    return new SendExpirationAlerts();
             }
         }
 
