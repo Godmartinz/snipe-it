@@ -2373,11 +2373,6 @@ input[type=search] {
   background-color: var(--back-sub);
   color: var(--text-main);
 }
-.input-group,
-.input-group-addon {
-  background-color: var(--back-sub) !important;
-  color: var(--text-main);
-}
 #licensesTable > tbody > tr > td > nobr > a > i.fa {
   color: var(--text-main);
 }
@@ -2911,11 +2906,6 @@ p {
 input[type=text],
 input[type=search] {
   background-color: var(--back-sub);
-  color: var(--text-main);
-}
-.input-group,
-.input-group-addon {
-  background-color: var(--back-sub) !important;
   color: var(--text-main);
 }
 #licensesTable > tbody > tr > td > nobr > a > i.fa {
@@ -3647,11 +3637,6 @@ p {
 input[type=text],
 input[type=search] {
   background-color: var(--back-sub);
-  color: var(--text-main);
-}
-.input-group,
-.input-group-addon {
-  background-color: var(--back-sub) !important;
   color: var(--text-main);
 }
 #licensesTable > tbody > tr > td > nobr > a > i.fa {
@@ -4399,11 +4384,6 @@ p {
 input[type=text],
 input[type=search] {
   background-color: var(--back-sub);
-  color: var(--text-main);
-}
-.input-group,
-.input-group-addon {
-  background-color: var(--back-sub) !important;
   color: var(--text-main);
 }
 #licensesTable > tbody > tr > td > nobr > a > i.fa {
@@ -5350,11 +5330,6 @@ p {
 input[type=text],
 input[type=search] {
   background-color: var(--back-sub);
-  color: var(--text-main);
-}
-.input-group,
-.input-group-addon {
-  background-color: var(--back-sub) !important;
   color: var(--text-main);
 }
 #licensesTable > tbody > tr > td > nobr > a > i.fa {
