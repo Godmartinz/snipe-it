@@ -20,39 +20,76 @@
     @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 
 
-  <!-- Asset Tag -->
-  <div class="form-group {{ $errors->has('asset_tag') ? ' has-error' : '' }}">
-    <label for="asset_tag" class="col-md-3 control-label">{{ trans('admin/hardware/form.tag') }}</label>
+    <!-- Asset Tag + Serial Fields -->
+    @if ($item->id)
+        {{-- Editing an existing asset --}}
+        <div class="form-group {{ $errors->has('asset_tag') ? ' has-error' : '' }}">
+            <label for="asset_tag" class="col-md-3 control-label">{{ trans('admin/hardware/form.tag') }}</label>
 
+            <div class="col-md-7 col-sm-12">
+                <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag"
+                       value="{{ old('asset_tag', $item->asset_tag) }}" required>
 
+                {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+            </div>
+        </div>
 
-      @if  ($item->id)
-          <!-- we are editing an existing asset,  there will be only one asset tag -->
-          <div class="col-md-7 col-sm-12">
+        @include ('partials.forms.edit.serial', [
+            'fieldname'=> 'serials[1]',
+            'old_val_name' => 'serials.1',
+            'translated_serial' => trans('admin/hardware/form.serial')
+        ])
+    @else
+        {{-- Creating a new asset --}}
+        @php
+            $oldAssetTags = old('asset_tags', [1 => \App\Models\Asset::autoincrement_asset()]);
+        @endphp
 
-          <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tag', $item->asset_tag) }}" required>
-              {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-          </div>
-      @else
-          <!-- we are creating a new asset - let people use more than one asset tag -->
-          <div class="col-md-7 col-sm-12">
-              <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tags.1', \App\Models\Asset::autoincrement_asset()) }}" required>
-              {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-          </div>
-          <div class="col-md-2 col-sm-12">
-              <button class="add_field_button btn btn-default btn-sm" name="add_field_button">
-                  <x-icon type="plus" />
-                  <span class="sr-only">
-                      {{ trans('general.new') }}
-                  </span>
-              </button>
-          </div>
-      @endif
-  </div>
+        <div class="input_fields_wrap">
+            @foreach ($oldAssetTags as $index => $value)
+                <span class="fields_wrapper">
+                <div class="form-group">
+                    <label for="asset_tag_{{ $index }}" class="col-md-3 control-label">
+                        {{ trans('admin/hardware/form.tag') }} {{ $index }}
+                    </label>
 
-    @include ('partials.forms.edit.serial', ['fieldname'=> 'serials[1]', 'old_val_name' => 'serials.1', 'translated_serial' => trans('admin/hardware/form.serial')])
+                    <div class="col-md-7 col-sm-12 required">
+                        <input class="form-control" type="text"
+                               name="asset_tags[{{ $index }}]"
+                               id="asset_tag_{{ $index }}"
+                               value="{{ old("asset_tags.$index", $value) }}"
+                               required>
+                        {!! $errors->first("asset_tags.$index", '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                    </div>
+
+                    <div class="col-md-2 col-sm-12">
+                        @if ($loop->first)
+                            <button class="add_field_button btn btn-default btn-sm" name="add_field_button">
+                                <x-icon type="plus" />
+                                <span class="sr-only">{{ trans('general.new') }}</span>
+                            </button>
+                        @else
+                            <a href="#" class="remove_field btn btn-default btn-sm"><x-icon type="minus" /></a>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Serial Field --}}
+                    @include ('partials.forms.edit.serial', [
+                        'fieldname' => "serials[$index]",
+                        'old_val_name' => "serials.$index",
+                        'translated_serial' => trans('admin/hardware/form.serial')
+                    ])
+            </span>
+            @endforeach
+        </div>
+
+        {{-- Sync JS counter with the highest used index --}}
+        <script>
+            var x = {{ collect(old('asset_tags', []))->keys()->max() ?? 1 }};
+        </script>
+    @endif
 
     <div class="input_fields_wrap">
     </div>
@@ -311,7 +348,7 @@
         var max_fields      = 100; //maximum input boxes allowed
         var wrapper         = $(".input_fields_wrap"); //Fields wrapper
         var add_button      = $(".add_field_button"); //Add button ID
-        var x               = 1; //initial text box count
+        var x = {{ collect(old('asset_tags', []))->keys()->max() ?? 1 }};
 
 
 
@@ -319,11 +356,13 @@
         $(add_button).click(function(e){ //on add input button click
 
             e.preventDefault();
-
-            var auto_tag = $("#asset_tag").val().replace(/^{{ preg_quote(App\Models\Setting::getSettings()->auto_increment_prefix, '/') }}/g, '');
-            var box_html        = '';
+            var auto_tag = $("input[name^='asset_tags']:first").val() || '';
 			const zeroPad 		= (num, places) => String(num).padStart(places, '0');
 
+            if (auto_tag !== '') {
+                auto_tag = auto_tag.replace(/^{{ preg_quote(App\Models\Setting::getSettings()->auto_increment_prefix, '/') }}/g, '');
+            }
+            var box_html        = '';
             // Check that we haven't exceeded the max number of asset fields
             if (x < max_fields) {
 
@@ -360,14 +399,13 @@
             }
         });
 
-        $(wrapper).on("click",".remove_field", function(e){ //user clicks on remove text
-            $(".add_field_button").removeAttr('disabled');
-            $(".add_field_button").removeClass('disabled');
+        $(wrapper).on("click", ".remove_field", function(e) {
             e.preventDefault();
-            //console.log(x);
 
-            $(this).parent('div').parent('div').parent('span').remove();
+            $(this).closest('.fields_wrapper').remove();
             x--;
+
+            $(".add_field_button").removeAttr('disabled').removeClass('disabled');
         });
 
 
