@@ -7,6 +7,7 @@ use App\Events\CheckoutDeclined;
 use App\Events\ItemAccepted;
 use App\Events\ItemDeclined;
 use App\Http\Controllers\Controller;
+use App\Mail\CheckoutAcceptanceResponseMail;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
@@ -21,8 +22,10 @@ use App\Models\Component;
 use App\Models\Consumable;
 use App\Notifications\AcceptanceAssetAcceptedNotification;
 use App\Notifications\AcceptanceAssetDeclinedNotification;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Http\Controllers\SettingsController;
@@ -208,9 +211,12 @@ class AcceptanceController extends Controller
              */
             $branding_settings = SettingsController::getPDFBranding();
 
-            if (is_null($branding_settings->logo)){
-                $path_logo = "";
-            } else {
+            $path_logo = "";
+
+            // Check for the PDF logo path and use that, otherwise use the regular logo path
+            if (!is_null($branding_settings->acceptance_pdf_logo)) {
+                $path_logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+            } elseif (!is_null($branding_settings->logo)) {
                 $path_logo = public_path() . '/uploads/' . $branding_settings->logo;
             }
             
@@ -334,6 +340,21 @@ class AcceptanceController extends Controller
             $return_msg = trans('admin/users/message.declined');
         }
 
+        if ($acceptance->alert_on_response_id) {
+            try {
+                $recipient = User::find($acceptance->alert_on_response_id);
+
+                if ($recipient) {
+                    Mail::to($recipient)->send(new CheckoutAcceptanceResponseMail(
+                        $acceptance,
+                        $recipient,
+                        $request->input('asset_acceptance') === 'accepted',
+                    ));
+                }
+            } catch (Exception $e) {
+                Log::warning($e);
+            }
+        }
 
         return redirect()->to('account/accept')->with('success', $return_msg);
 

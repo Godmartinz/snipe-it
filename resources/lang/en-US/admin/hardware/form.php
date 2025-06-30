@@ -59,6 +59,7 @@ return [
     'bulk_asset_undeployable' => 'Asset in this bulk checkout request is undeployable.|[2,*]Assets in this bulk checkout request are undeployable.',
     'asset_deployable' => 'This asset can be checked out.',
     'processing_spinner' => 'Processing... (This might take a bit of time on large files)',
+    'processing' => 'Processing... ',
     'optional_infos'  => 'Optional Information',
     'order_details'   => 'Order Related Information',
     'calc_eol'    => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',

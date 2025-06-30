@@ -52,14 +52,30 @@ class BulkAssetsController extends Controller
         }
 
         $asset_ids = $request->input('ids');
+
         if ($request->input('bulk_actions') === 'checkout') {
             $undeployable_assets = Asset::findMany($asset_ids)->filter(fn(Asset $asset) => !$asset->availableForCheckout());
 
             if($undeployable_assets->count() > 0) {
                 return redirect()->back()->with('error', trans_choice('admin/hardware/form.bulk_asset_undeployable', $undeployable_assets->count()));
             }
+
+            $status_check =$this->hasUndeployableStatus($asset_ids);
+            if($status_check && $status_check['status'] === true){
+
+                $asset_tags = implode(', ', array_column($status_check['tags'], 'asset_tag'));
+                $asset_ids = $status_check['asset_ids'];
+
+                session()->flash('warning', trans('admin/hardware/message.undeployable', ['asset_tags' => $asset_tags]));
+            }
+
             $request->session()->flashInput(['selected_assets' => $asset_ids]);
             return redirect()->route('hardware.bulkcheckout.show');
+        }
+
+        if ($request->input('bulk_actions') === 'maintenance') {
+            $request->session()->flashInput(['selected_assets' => $asset_ids]);
+            return redirect()->route('maintenances.create');
         }
 
         // Figure out where we need to send the user after the update is complete, and store that in the session

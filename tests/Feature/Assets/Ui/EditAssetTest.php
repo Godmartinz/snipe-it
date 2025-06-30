@@ -98,8 +98,31 @@ class EditAssetTest extends TestCase
         $this->assertEquals($achived_status->id, $asset->status_id);
 
         Event::assertDispatched(function (CheckoutableCheckedIn $event) use ($currentTimestamp) {
-            return Carbon::parse($event->action_date)->diffInSeconds($currentTimestamp) < 2;
+            return (int) Carbon::parse($event->action_date)->diffInSeconds($currentTimestamp, true) < 2;
         }, 1);
+    }
+
+    public function testCurrentLocationIsNotUpdatedOnEdit()
+    {
+        $defaultLocation = Location::factory()->create();
+        $currentLocation = Location::factory()->create();
+        $asset = Asset::factory()->create([
+            'location_id' => $currentLocation->id,
+            'rtd_location_id' => $defaultLocation->id
+        ]);
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->put(route('hardware.update', $asset), [
+                'redirect_option' => 'item',
+                'name' => 'New name',
+                'asset_tags' => 'New Asset Tag',
+                'status_id' => $asset->status_id,
+                'model_id' => $asset->model_id,
+            ]);
+
+        $asset->refresh();
+        $this->assertEquals('New name', $asset->name);
+        $this->assertEquals($currentLocation->id, $asset->location_id);
     }
 
 }

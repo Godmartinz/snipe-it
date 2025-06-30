@@ -57,7 +57,9 @@ class Actionlog extends SnipeModel
         'user_agent',
         'item_type',
         'target_type',
-        'action_source'
+        'action_source',
+        'created_at',
+        'action_date',
     ];
 
     /**
@@ -67,9 +69,27 @@ class Actionlog extends SnipeModel
      */
     protected $searchableRelations = [
         'company'     => ['name'],
-        'adminuser'   => ['first_name','last_name','username', 'email'],
-        'user'        => ['first_name','last_name','username', 'email'],
-        'assets'      => ['asset_tag','name', 'serial'],
+        'adminuser'   => ['first_name','last_name','username', 'email', 'employee_num'],
+        'user'        => ['first_name','last_name','username', 'email', 'employee_num'],
+        'assets'      => ['asset_tag','name', 'serial', 'order_number', 'notes', 'purchase_date'],
+        'assets.model'              => ['name', 'model_number', 'eol', 'notes'],
+        'assets.model.category'     => ['name', 'notes'],
+        'assets.model.manufacturer' => ['name', 'notes'],
+        'licenses'    => ['name', 'serial', 'notes', 'order_number', 'license_email', 'license_name', 'purchase_order', 'purchase_date'],
+        'licenses.category'     => ['name', 'notes'],
+        'licenses.supplier'     => ['name'],
+        'consumables'    => ['name', 'notes', 'order_number', 'model_number', 'item_no', 'purchase_date'],
+        'consumables.category'     => ['name', 'notes'],
+        'consumables.location'     => ['name', 'notes'],
+        'consumables.supplier'     => ['name', 'notes'],
+        'components'     => ['name', 'notes', 'purchase_date'],
+        'components.category'     => ['name', 'notes'],
+        'components.location'     => ['name', 'notes'],
+        'components.supplier'     => ['name', 'notes'],
+        'accessories'     => ['name', 'purchase_date'],
+        'accessories.category'     => ['name'],
+        'accessories.location'     => ['name', 'notes'],
+        'accessories.supplier'     => ['name', 'notes'],
     ];
 
     /**
@@ -93,6 +113,11 @@ class Actionlog extends SnipeModel
             } elseif (auth()->user() && auth()->user()->company) {
                 $actionlog->company_id = auth()->user()->company_id;
             }
+
+            if ($actionlog->action_date == '') {
+                $actionlog->action_date = Carbon::now();
+            }
+
         });
     }
 
@@ -132,6 +157,54 @@ class Actionlog extends SnipeModel
     public function assets()
     {
         return $this->hasMany(\App\Models\Asset::class, 'id', 'item_id');
+    }
+
+    /**
+     * Establishes the actionlog -> license relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function licenses()
+    {
+        return $this->hasMany(\App\Models\License::class, 'id', 'item_id');
+    }
+
+    /**
+     * Establishes the actionlog -> consumable relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function consumables()
+    {
+        return $this->hasMany(\App\Models\Consumable::class, 'id', 'item_id');
+    }
+
+    /**
+     * Establishes the actionlog -> consumable relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function accessories()
+    {
+        return $this->hasMany(\App\Models\Accessory::class, 'id', 'item_id');
+    }
+
+    /**
+     * Establishes the actionlog -> components relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function components()
+    {
+        return $this->hasMany(\App\Models\Component::class, 'id', 'item_id');
     }
 
     /**
@@ -177,8 +250,8 @@ class Actionlog extends SnipeModel
     public function uploads()
     {
         return $this->morphTo('item')
-                    ->where('action_type', '=', 'uploaded')
-                    ->withTrashed();
+            ->where('action_type', '=', 'uploaded')
+            ->withTrashed();
     }
 
     /**
@@ -203,7 +276,7 @@ class Actionlog extends SnipeModel
     public function adminuser()
     {
         return $this->belongsTo(User::class, 'created_by')
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     /**
@@ -295,20 +368,20 @@ class Actionlog extends SnipeModel
         $now = Carbon::now();
         $last_audit_date = $this->created_at; // this is the action log's created at, not the asset itself
         $next_audit = $last_audit_date->addMonth($monthInterval); // this actually *modifies* the $last_audit_date
-        $next_audit_days = round($now->diffInDays($next_audit, true));
+        $next_audit_days = (int) round($now->diffInDays($next_audit, true));
         $override_default_next = $next_audit;
 
         // Override the default setting for interval if the asset has its own next audit date
         if (($asset) && ($asset->next_audit_date)) {
             $override_default_next = Carbon::parse($asset->next_audit_date);
-            $next_audit_days = round($override_default_next->diffInDays($now, true));
+            $next_audit_days = (int) round($override_default_next->diffInDays($now, true));
         }
 
         // Show as negative number if the next audit date is before the audit date we're looking at
         if ($this->created_at > $override_default_next) {
             $next_audit_days = '-'.$next_audit_days;
         }
-        
+
         return $next_audit_days;
     }
 
@@ -340,10 +413,10 @@ class Actionlog extends SnipeModel
     public function getListingOfActionLogsChronologicalOrder()
     {
         return $this->all()
-                 ->where('action_type', '!=', 'uploaded')
-                 ->orderBy('item_id', 'asc')
-                 ->orderBy('created_at', 'asc')
-                 ->get();
+            ->where('action_type', '!=', 'uploaded')
+            ->orderBy('item_id', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
     }
 
     /**
@@ -366,7 +439,7 @@ class Actionlog extends SnipeModel
             return 'api';
         }
 
-       // This is probably NOT an API call
+        // This is probably NOT an API call
         if (request()->filled('_token')) {
             return 'gui';
         }
@@ -375,6 +448,62 @@ class Actionlog extends SnipeModel
         return 'cli/unknown';
 
     }
+
+    public function uploads_file_url()
+    {
+
+        switch ($this->item_type) {
+            case Accessory::class:
+                return route('show.accessoryfile', [$this->item_id, $this->id]);
+            case Asset::class:
+                return route('show/assetfile', [$this->item_id, $this->id]);
+            case AssetModel::class:
+                return route('show/modelfile', [$this->item_id, $this->id]);
+            case Consumable::class:
+                return route('show/locationsfile', [$this->item_id, $this->id]);
+            case Component::class:
+                return route('show.componentfile', [$this->item_id, $this->id]);
+            case License::class:
+                return route('show.licensefile', [$this->item_id, $this->id]);
+            case Location::class:
+                return route('show/locationsfile', [$this->item_id, $this->id]);
+            case User::class:
+                return route('show/userfile', [$this->item_id, $this->id]);
+            default:
+                return null;
+        }
+    }
+
+    public function uploads_file_path()
+    {
+
+        switch ($this->item_type) {
+            case Accessory::class:
+                return 'private_uploads/accessories/'.$this->filename;
+            case Asset::class:
+                return 'private_uploads/assets/'.$this->filename;
+            case AssetModel::class:
+                return 'private_uploads/assetmodels/'.$this->filename;
+            case Consumable::class:
+                return 'private_uploads/consumables/'.$this->filename;
+            case Component::class:
+                return 'private_uploads/components/'.$this->filename;
+            case License::class:
+                return 'private_uploads/licenses/'.$this->filename;
+            case Location::class:
+                return 'private_uploads/locations/'.$this->filename;
+            case User::class:
+                return 'private_uploads/users/'.$this->filename;
+            default:
+                return null;
+        }
+    }
+
+
+
+
+
+
 
     // Manually sets $this->source for determineActionSource()
     public function setActionSource($source = null): void

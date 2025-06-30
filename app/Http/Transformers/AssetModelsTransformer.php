@@ -46,8 +46,9 @@ class AssetModelsTransformer
                 'name'=> e($assetmodel->manufacturer->name),
             ] : null,
             'image' => ($assetmodel->image != '') ? Storage::disk('public')->url('models/'.e($assetmodel->image)) : null,
-            'model_number' => e($assetmodel->model_number),
+            'model_number' => ($assetmodel->model_number ? e($assetmodel->model_number): null),
             'min_amt'   => ($assetmodel->min_amt) ? (int) $assetmodel->min_amt : null,
+            'remaining' => (int) ($assetmodel->assets_count - $assetmodel->min_amt),
             'depreciation' => ($assetmodel->depreciation) ? [
                 'id' => (int) $assetmodel->depreciation->id,
                 'name'=> e($assetmodel->depreciation->name),
@@ -104,6 +105,7 @@ class AssetModelsTransformer
         $array = [
             'id' => (int) $file->id,
             'filename' => e($file->filename),
+            'note' => $file->note,
             'url' => route('show/modelfile', [$assetmodel->id, $file->id]),
             'created_by' => ($file->adminuser) ? [
                 'id' => (int) $file->adminuser->id,

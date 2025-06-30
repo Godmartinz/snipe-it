@@ -88,6 +88,7 @@ abstract class Importer
         'department' => 'department',
         'manager_name' => 'manager full name',
         'manager_username' => 'manager username',
+        'manager_employee_num' => 'manager employee number',
         'min_amt' => 'minimum quantity',
         'remote' => 'remote',
         'vip' => 'vip',

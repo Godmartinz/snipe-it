@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\Helper;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,7 @@ class Accessory extends SnipeModel
 
     protected $presenter = \App\Presenters\AccessoryPresenter::class;
     use CompanyableTrait;
+    use HasUploads;
     use Loggable, Presentable;
     use SoftDeletes;
 
@@ -61,6 +63,7 @@ class Accessory extends SnipeModel
         'qty'               => 'required|integer|min:1',
         'category_id'       => 'required|integer|exists:categories,id',
         'company_id'        => 'integer|nullable',
+        'location_id'       => 'exists:locations,id|nullable|fmcs_location',
         'min_amt'           => 'integer|min:0|nullable',
         'purchase_cost'     => 'numeric|nullable|gte:0|max:9999999999999',
         'purchase_date'     => 'date_format:Y-m-d|nullable',
@@ -99,24 +102,6 @@ class Accessory extends SnipeModel
         'requestable',
         'notes',
     ];
-
-
-
-    /**
-     * Establishes the accessories -> action logs -> uploads relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v6.1.13]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
-            ->where('item_type', '=', self::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
 
 
     /**
@@ -307,7 +292,7 @@ class Accessory extends SnipeModel
      */
     public function checkin_email()
     {
-        return $this->category->checkin_email;
+        return $this->category?->checkin_email;
     }
 
     /**
