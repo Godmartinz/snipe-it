@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ class AssetModel extends SnipeModel
     use SoftDeletes;
     use Loggable, Requestable, Presentable;
     use TwoColumnUniqueUndeletedTrait;
+    use HasUploads;
 
     /**
      * Whether the model should inject its identifier to the unique
@@ -209,21 +211,6 @@ class AssetModel extends SnipeModel
             && ($this->deleted_at == '');
     }
 
-    /**
-     * Get uploads for this model
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany('\App\Models\Actionlog', 'item_id')
-            ->where('item_type', '=', AssetModel::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
 
     /**
      * Get user who created the item

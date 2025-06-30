@@ -9,18 +9,12 @@
 <!-- begin non-ajaxed file listing table -->
 <div class="table-responsive">
     <table
-            data-cookie-id-table="{{ str_slug($object->name) }}UploadsTable"
-            data-id-table="{{ str_slug($object->name) }}UploadsTable"
-            id="{{ str_slug($object->name) }}}UploadsTable"
-            data-search="true"
-            data-pagination="true"
+            data-cookie-id-table="{{ str_slug($object->name ?? $object->id) }}UploadsTable"
+            data-id-table="{{ str_slug($object->name ?? $object->id) }}UploadsTable"
+            id="{{ str_slug($object->name ?? $object->id) }}UploadsTable"
             data-side-pagination="client"
-            data-show-columns="true"
-            data-show-fullscreen="true"
-            data-show-export="true"
             data-show-footer="true"
             data-toolbar="#upload-toolbar"
-            data-show-refresh="true"
             data-sort-order="asc"
             data-sort-name="name"
             class="table table-striped snipe-table"
@@ -120,7 +114,7 @@
                     @endif
                 </td>
                 <td>
-                    {{ $file->created_at }}
+                    {{ $file->created_at ? Helper::getFormattedDateObject($file->created_at, 'datetime', false) : '' }}
                 </td>
                 <td>
                     {{ ($file->adminuser) ? $file->adminuser->present()->getFullNameAttribute() : '' }}

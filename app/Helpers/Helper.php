@@ -722,8 +722,8 @@ class Helper
         // The check and message that the user is still using the deprecated version
         $deprecations = [
             'ms_teams_deprecated' => array(
-            'check' => !Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows'),
-            'message' => 'The Microsoft Teams webhook URL being used will be deprecated Jan 31st, 2025. <a class="btn btn-primary" href="' . route('settings.slack.index') . '">Change webhook endpoint</a>'),
+            'check' => !Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows') && (Setting::getSettings()->webhook_selected === 'microsoft'),
+            'message' => 'The Microsoft Teams webhook URL being used will be deprecated Dec 31st, 2025. <a class="btn btn-primary" href="' . route('settings.slack.index') . '">Change webhook endpoint</a>'),
         ];
 
         // if item of concern is being used and its being used with the deprecated values return the notification array.
@@ -896,6 +896,12 @@ class Helper
     public static function selectedPermissionsArray($permissions, $selected_arr = [])
     {
         $permissions_arr = [];
+        if (is_array($permissions)) {
+            $permissions = json_encode($permissions);
+        }
+
+        // Set default to empty JSON if the value is null
+        $permissions = json_decode($permissions ?? '{}', JSON_OBJECT_AS_ARRAY);
 
         foreach ($permissions as $permission) {
             for ($x = 0; $x < count($permission); $x++) {
@@ -906,13 +912,13 @@ class Helper
                     if (is_array($selected_arr)) {
 
                         if (array_key_exists($permission_name, $selected_arr)) {
-                            $permissions_arr[$permission_name] = $selected_arr[$permission_name];
+                            $permissions_arr[$permission_name] = (int) $selected_arr[$permission_name];
                         } else {
-                            $permissions_arr[$permission_name] = '0';
+                            $permissions_arr[$permission_name] = 0;
                         }
 
                     } else {
-                        $permissions_arr[$permission_name] = '0';
+                        $permissions_arr[$permission_name] = 0;
                     }
                 }
             }
@@ -1307,25 +1313,24 @@ class Helper
         switch ($item) {
             case 'asset':
                 return 'fas fa-barcode';
-                break;
             case 'accessory':
                 return 'fas fa-keyboard';
-                break;
             case 'component':
                 return 'fas fa-hdd';
-                break;
             case 'consumable':
                 return 'fas fa-tint';
-                break;
             case 'license':
                 return 'far fa-save';
-                break;
             case 'location':
                 return 'fas fa-map-marker-alt';
-                break;
             case 'user':
                 return 'fas fa-user';
-                break;
+            case 'supplier':
+                return 'fa-solid fa-store';
+            case 'manufacturer':
+                return 'fa-solid fa-building';
+            case 'category':
+                return 'fa-solid fa-table-columns';
         }
 
     }
@@ -1480,6 +1485,8 @@ class Helper
 
         $redirect_option = Session::get('redirect_option');
         $checkout_to_type = Session::get('checkout_to_type');
+        $checkedInFrom = Session::get('checkedInFrom');
+        $other_redirect = Session::get('other_redirect');
 
         // return to index
         if ($redirect_option == 'index') {
@@ -1521,13 +1528,23 @@ class Helper
         if ($redirect_option == 'target') {
             switch ($checkout_to_type) {
                 case 'user':
-                    return route('users.show', $request->assigned_user);
+                    return route('users.show', $request->assigned_user ?? $checkedInFrom);
                 case 'location':
-                    return route('locations.show', $request->assigned_location);
+                    return route('locations.show', $request->assigned_location ?? $checkedInFrom);
                 case 'asset':
-                    return route('hardware.show', $request->assigned_asset);
+                    return route('hardware.show', $request->assigned_asset ?? $checkedInFrom);
             }
         }
+
+        // return to somewhere else
+        if ($redirect_option == 'other_redirect') {
+            switch ($other_redirect) {
+                case 'audit':
+                    return route('assets.audit.due');
+            }
+
+        }
+
         return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'));
     }
 
@@ -1553,6 +1570,11 @@ class Helper
             }
         } else {
             $locations = Location::all();
+        }
+
+        // Bail out early if there are no locations
+        if ($locations->count() == 0) {
+            return [];
         }
 
         foreach($locations as $location) {
@@ -1593,14 +1615,17 @@ class Helper
                         $items = collect([])->push($location->$keyword);
                     }
 
+                    $count = 0;
                     foreach ($items as $item) {
 
+
                         if ($item && $item->company_id != $location_company) {
+
                             $mismatched[] = [
                                     class_basename(get_class($item)),
                                     $item->id,
                                     $item->name ?? $item->asset_tag ?? $item->serial ?? $item->username,
-                                    str_replace('App\\Models\\', '', $item->assigned_type) ?? null,
+                                    $item->assigned_type ? str_replace('App\\Models\\', '', $item->assigned_type) : null,
                                     $item->company_id ?? null,
                                     $item->company->name ?? null,
 //                                    $item->defaultLoc->id ?? null,
@@ -1611,6 +1636,15 @@ class Helper
                                     $item->location->company->name ?? null,
                                     $location_company ?? null,
                                 ];
+
+                            $count++;
+
+                            // Bail early if this is not being run via artisan
+                            if ((!$artisan) && ($count > 0)) {
+                                return $mismatched;
+                            }
+
+
 
                         }
                     }

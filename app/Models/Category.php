@@ -32,6 +32,7 @@ class Category extends SnipeModel
     protected $hidden = ['created_by', 'deleted_at'];
 
     protected $casts = [
+        'alert_on_response' => 'boolean',
         'created_by'      => 'integer',
     ];
 
@@ -69,6 +70,7 @@ class Category extends SnipeModel
         'eula_text',
         'name',
         'require_acceptance',
+        'alert_on_response',
         'use_default_eula',
         'created_by',
         'notes',
@@ -99,6 +101,14 @@ class Category extends SnipeModel
      */
     public function isDeletable()
     {
+
+        // We have to check for models as well if the category type is asset
+        if ($this->category_type == 'asset') {
+            return Gate::allows('delete', $this)
+                && ($this->itemCount() == 0)
+                && ($this->models_count == 0)
+                && ($this->deleted_at == '');
+        }
 
         return Gate::allows('delete', $this)
                 && ($this->itemCount() == 0)

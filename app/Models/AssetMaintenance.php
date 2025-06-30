@@ -26,12 +26,12 @@ class AssetMaintenance extends Model implements ICompanyableChild
     protected $table = 'asset_maintenances';
     protected $rules = [
         'asset_id'               => 'required|integer',
-        'supplier_id'            => 'required|integer',
+        'supplier_id'            => 'nullable|integer',
         'asset_maintenance_type' => 'required',
         'title'                  => 'required|max:100',
         'is_warranty'            => 'boolean',
         'start_date'             => 'required|date_format:Y-m-d',
-        'completion_date'        => 'date_format:Y-m-d|nullable',
+        'completion_date'        => 'date_format:Y-m-d|nullable|after_or_equal:start_date',
         'notes'                  => 'string|nullable',
         'cost'                   => 'numeric|nullable',
     ];
@@ -166,6 +166,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         return $this->belongsTo(\App\Models\Asset::class, 'asset_id')
                     ->withTrashed();
     }
+    
 
     /**
      * Get the admin who created the maintenance
@@ -263,6 +264,21 @@ class AssetMaintenance extends Model implements ICompanyableChild
         return $query->join('assets as maintained_asset', 'asset_maintenances.asset_id', '=', 'maintained_asset.id')
             ->leftjoin('status_labels as maintained_asset_status', 'maintained_asset_status.id', '=', 'maintained_asset.status_id')
             ->orderBy('maintained_asset_status.name', $order);
+    }
+
+    /**
+     * Query builder scope to order on status label name
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  text                              $order         Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeOrderLocationName($query, $order)
+    {
+        return $query->join('assets as maintained_asset', 'asset_maintenances.asset_id', '=', 'maintained_asset.id')
+            ->leftjoin('locations as maintained_asset_location', 'maintained_asset_location.id', '=', 'maintained_asset.location_id')
+            ->orderBy('maintained_asset_location.name', $order);
     }
 
     /**

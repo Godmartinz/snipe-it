@@ -78,7 +78,7 @@
 @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
 @include ('partials.forms.edit.order_number')
 @include ('partials.forms.edit.purchase_cost')
-@include ('partials.forms.edit.purchase_date')
+@include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.purchase_date'),'fieldname' => 'purchase_date'])
 
 <!-- Expiration Date -->
 <div class="form-group {{ $errors->has('expiration_date') ? ' has-error' : '' }}">

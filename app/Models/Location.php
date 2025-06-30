@@ -6,6 +6,7 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\SnipeModel;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\User;
 use App\Presenters\Presentable;
@@ -20,10 +21,12 @@ class Location extends SnipeModel
 {
     use HasFactory;
     use CompanyableTrait;
+    use Loggable;
 
     protected $presenter = \App\Presenters\LocationPresenter::class;
     use Presentable;
     use SoftDeletes;
+    use HasUploads;
 
     protected $table = 'locations';
     protected $rules = [
@@ -132,6 +135,17 @@ class Location extends SnipeModel
     public function users()
     {
         return $this->hasMany(\App\Models\User::class, 'location_id');
+    }
+
+    /**
+     * Establishes the location -> admin user relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function adminuser()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     /**
@@ -288,6 +302,7 @@ class Location extends SnipeModel
         return $this->attributes['ldap_ou'] = empty($ldap_ou) ? null : $ldap_ou;
     }
 
+
     /**
      * Query builder scope to order on parent
      *
@@ -356,4 +371,13 @@ class Location extends SnipeModel
     {
         return $query->leftJoin('companies as company_sort', 'locations.company_id', '=', 'company_sort.id')->orderBy('company_sort.name', $order);
     }
+
+    /**
+     * Query builder scope to order on the user that created it
+     */
+    public function scopeOrderByCreatedByName($query, $order)
+    {
+        return $query->leftJoin('users as admin_sort', 'locations.created_by', '=', 'admin_sort.id')->select('locations.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
 }

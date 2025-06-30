@@ -97,9 +97,9 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12 table-responsive" style="padding-top: 30px;">
-                                <table data-pagination="true"
+                                <table
                                         data-id-table="upload-table"
-                                        data-search="true"
+
                                         data-side-pagination="client"
                                         id="upload-table"
                                         class="col-md-12 table table-striped snipe-table">
@@ -191,7 +191,7 @@
 
 
 
-                                                                @if (($typeOfImport != 'location' && $typeOfImport!= 'assetModel' && $typeOfImport!= 'component') && ($typeOfImport!=''))
+                                                                @if (($typeOfImport != 'location' && $typeOfImport!= 'assetModel' && $typeOfImport!= 'component' && $typeOfImport!= 'supplier') && $typeOfImport!= 'manufacturer' && $typeOfImport!= 'category' && ($typeOfImport!=''))
                                                                 <label class="form-control">
                                                                     <input type="checkbox" name="send_welcome" data-livewire-component="{{ $this->getId() }}" wire:model.live="send_welcome">
                                                                     {{ trans('general.send_welcome_email_to_users') }}

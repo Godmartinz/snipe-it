@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ class License extends Depreciable
 
     use SoftDeletes;
     use CompanyableTrait;
+    use HasUploads;
     use Loggable, Presentable;
     protected $injectUniqueIdentifier = true;
     use ValidatingTrait;
@@ -43,7 +45,7 @@ class License extends Depreciable
 
     protected $rules = [
         'name'   => 'required|string|min:3|max:255',
-        'seats'   => 'required|min:1|integer',
+        'seats' => 'required|min:1|integer|limit_change:10000', // limit_change is a "pseudo-rule" that translates into 'between', see prepareLimitChangeRule() below
         'license_email'   => 'email|nullable|max:120',
         'license_name'   => 'string|nullable|max:100',
         'notes'   => 'string|nullable',
@@ -113,6 +115,7 @@ class License extends Depreciable
         'company'      => ['name'],
         'category'     => ['name'],
         'depreciation' => ['name'],
+        'supplier'     => ['name'],
     ];
     protected $appends = ['free_seat_count'];
 
@@ -148,6 +151,14 @@ class License extends Depreciable
         });
     }
 
+    public function prepareLimitChangeRule($parameters, $field)
+    {
+        $actual_seat_count = $this->licenseseats()->count(); //we use the *actual* seat count here, in case your license has gone wonky
+        $lower_bound = $actual_seat_count - $parameters[0];
+        $upper_bound = $actual_seat_count + $parameters[0];
+        return ["between", ($lower_bound <= 0 ? 1 : $lower_bound), $upper_bound];
+    }
+
     /**
      * Balance seat counts
      *
@@ -164,21 +175,17 @@ class License extends Depreciable
         // On Create, we just make one for each of the seats.
         $change = abs($oldSeats - $newSeats);
         if ($oldSeats > $newSeats) {
-            $license->load('licenseseats.user');
 
             // Need to delete seats... lets see if if we have enough.
-            $seatsAvailableForDelete = $license->licenseseats->reject(function ($seat) {
-                return ((bool) $seat->assigned_to) || ((bool) $seat->asset_id);
-            });
+            $seatsAvailableForDelete = $license->licenseseats()->whereNull('assigned_to')->whereNull('asset_id')->limit($change);
 
             if ($change > $seatsAvailableForDelete->count()) {
                 Session::flash('error', trans('admin/licenses/message.assoc_users'));
 
                 return false;
             }
-            for ($i = 1; $i <= $change; $i++) {
-                $seatsAvailableForDelete->pop()->delete();
-            }
+            $seatsAvailableForDelete->delete();
+
             // Log Deletion of seats.
             $logAction = new Actionlog;
             $logAction->item_type = self::class;
@@ -407,21 +414,6 @@ class License extends Depreciable
             ->orderBy('created_at', 'desc');
     }
 
-    /**
-     * Establishes the license -> action logs -> uploads relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
-            ->where('item_type', '=', self::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
 
 
     /**

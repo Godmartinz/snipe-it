@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\Helper;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,7 @@ class Consumable extends SnipeModel
     use Loggable, Presentable;
     use SoftDeletes;
     use Acceptable;
+    use HasUploads;
 
     protected $table = 'consumables';
     protected $casts = [
@@ -111,21 +113,6 @@ class Consumable extends SnipeModel
     ];
 
 
-    /**
-     * Establishes the components -> action logs -> uploads relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v6.1.13]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany(Actionlog::class, 'item_id')
-            ->where('item_type', '=', self::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
 
 
     /**
@@ -284,7 +271,7 @@ class Consumable extends SnipeModel
      */
     public function checkin_email()
     {
-        return $this->category->checkin_email;
+        return $this->category?->checkin_email;
     }
 
     /**

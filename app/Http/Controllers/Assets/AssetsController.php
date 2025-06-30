@@ -149,7 +149,7 @@ class AssetsController extends Controller
             $asset->byod                    = request('byod', 0);
 
             if (! empty($settings->audit_interval)) {
-                $asset->next_audit_date = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
+                $asset->next_audit_date = Carbon::now()->addMonths((int) $settings->audit_interval)->toDateString();
             }
 
             // Set location_id to rtd_location_id ONLY if the asset isn't being checked out
@@ -188,14 +188,31 @@ class AssetsController extends Controller
 
             // Validate the asset before saving
             if ($asset->isValid() && $asset->save()) {
-                if (request('assigned_user')) {
-                    $target = User::find(request('assigned_user'));
+                $target = null;
+                $location = null;
+
+                if ($userId = request('assigned_user')) {
+                    $target = User::find($userId);
+
+                    if (!$target) {
+                        return redirect()->back()->withInput()->with('error', trans('admin/hardware/message.create.target_not_found.user'));
+                    }
                     $location = $target->location_id;
-                } elseif (request('assigned_asset')) {
-                    $target = Asset::find(request('assigned_asset'));
+
+                } elseif ($assetId = request('assigned_asset')) {
+                    $target = Asset::find($assetId);
+
+                    if (!$target) {
+                        return redirect()->back()->withInput()->with('error', trans('admin/hardware/message.create.target_not_found.asset'));
+                    }
                     $location = $target->location_id;
-                } elseif (request('assigned_location')) {
-                    $target = Location::find(request('assigned_location'));
+
+                } elseif ($locationId = request('assigned_location')) {
+                    $target = Location::find($locationId);
+
+                    if (!$target) {
+                        return redirect()->back()->withInput()->with('error', trans('admin/hardware/message.create.target_not_found.location'));
+                    }
                     $location = $target->id;
                 }
 
@@ -446,7 +463,7 @@ class AssetsController extends Controller
             event(new CheckoutableCheckedIn($asset, $target, auth()->user(), 'Checkin on delete', $checkin_at, $originalValues));
             DB::table('assets')
                 ->where('id', $asset->id)
-                ->update(['assigned_to' => null]);
+                ->update(['assigned_to' => null, 'assigned_type' => null]);
         }
 
 
@@ -457,6 +474,7 @@ class AssetsController extends Controller
                 Log::debug($e);
             }
         }
+
 
         $asset->delete();
 
@@ -519,7 +537,7 @@ class AssetsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        if (($settings->qr_code == '1') && ($settings->label2_2d_type !== 'none')) {
+        if ($settings->label2_2d_type !== 'none') {
 
             if ($asset) {
                 $size = Helper::barcodeDimensions($settings->label2_2d_type);
@@ -877,11 +895,20 @@ class AssetsController extends Controller
     }
 
 
-    public function audit(Asset $asset)
+    public function audit(Asset $asset): View | RedirectResponse
     {
-        $settings = Setting::getSettings();
         $this->authorize('audit', Asset::class);
-        $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
+        $settings = Setting::getSettings();
+
+
+        // Invoke the validation to see if the audit will complete successfully
+        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
+
+        if ($asset->isInvalid()) {
+            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
+        }
+
+        $dt = Carbon::now()->addMonths( (int) $settings->audit_interval)->toDateString();
         return view('hardware/audit')->with('asset', $asset)->with('item', $asset)->with('next_audit_date', $dt)->with('locations_list');
     }
 
@@ -889,6 +916,10 @@ class AssetsController extends Controller
     {
 
         $this->authorize('audit', Asset::class);
+
+        session()->put('redirect_option', $request->get('redirect_option'));
+        session()->put('other_redirect', 'audit');
+
 
         $originalValues = $asset->getRawOriginal();
 
@@ -924,8 +955,8 @@ class AssetsController extends Controller
             }
         }
 
-        // Validate custom fields
-        Validator::make($asset->toArray(), $asset->customFieldValidationRules())->validate();
+        // Invoke the validation to see if the audit will complete successfully
+        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
 
         // Validate the rest of the data before we turn off the event dispatcher
         if ($asset->isInvalid()) {
@@ -965,7 +996,7 @@ class AssetsController extends Controller
             }
 
             $asset->logAudit($request->input('note'), $request->input('location_id'), $file_name, $originalValues);
-            return redirect()->route('assets.audit.due')->with('success', trans('admin/hardware/message.audit.success'));
+            return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))->with('success', trans('admin/hardware/message.audit.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($asset->getErrors());

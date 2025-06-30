@@ -80,7 +80,16 @@ class AssetImporter extends ItemImporter
             $asset_tag = Asset::autoincrement_asset();
         }
 
-        $asset = Asset::where(['asset_tag'=> (string) $asset_tag])->first();
+
+
+        if ($this->findCsvMatch($row, 'id')!='') {
+            // Override asset if an ID was given
+            \Log::debug('Finding asset by ID: '.$this->findCsvMatch($row, 'id'));
+            $asset = Asset::find($this->findCsvMatch($row, 'id'));
+        } else {
+            $asset = Asset::where(['asset_tag'=> (string) $asset_tag])->first();
+        }
+        
         if ($asset) {
             if (! $this->updating) {
                 $exists_error = trans('general.import_asset_tag_exists', ['asset_tag' => $asset_tag]);

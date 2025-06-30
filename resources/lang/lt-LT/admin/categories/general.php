@@ -4,6 +4,7 @@ return array(
     'asset_categories' 					=> 'Turto kategorijos',
     'category_name'  					=> 'Kategorijos pavadinimas',
     'checkin_email'                     => 'Siųsti el. laišką naudotojui, paimant/išduodant turtą.',
+    'email_to_initiator'                => 'Send email to you when user accepts or declines checkout.',
     'checkin_email_notification'        => 'Šis naudotojas gaus el. laišką, paimant/išduodant turtą.',
     'clone'                             => 'Klonuoti kategoriją',
     'create'  							=> 'Sukurti kategoriją',
@@ -21,5 +22,9 @@ return array(
     'use_default_eula'					=> 'Naudoti <a href="#" data-toggle="modal" data-target="#eulaModal"> pirminį numatytąjį licencinį sutikimą (EULA)</a>.',
     'use_default_eula_disabled'			=> '<del>Naudoti pirminį numatytąjį licencinį sutikimą (EULA).</del> Nėra pirminio numatytojo EULA. Pridėkite jį nustatymuose.',
     'use_default_eula_column'			=> 'Naudoti numatytąjį licencinį sutikimą (EULA)',
+    'import_require_acceptance'         => 'Require Acceptance',
+    'import_checkin_email'              => 'Send Checkin Email',
+    'import_eula_text'                  => 'EULA text',
+    'import_category_type'              => 'Category Type',
 
 );
