@@ -436,15 +436,6 @@
                                   </div>
                               </div>
 
-                              <!-- Mobile -->
-                              <div class="form-group {{ $errors->has('mobile') ? 'has-error' : '' }}">
-                                  <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.mobile') }}</label>
-                                  <div class="col-md-6">
-                                      <input class="form-control" type="text" name="mobile" id="mobile" value="{{ old('mobile', $user->mobile) }}" maxlength="191" />
-                                      {!! $errors->first('mobile', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
-                                  </div>
-                              </div>
-
                               <!-- Website URL -->
                               <div class="form-group {{ $errors->has('website') ? ' has-error' : '' }}">
                                   <label for="website" class="col-md-3 control-label">{{ trans('general.website') }}</label>

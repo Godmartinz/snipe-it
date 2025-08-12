@@ -527,19 +527,6 @@
                       </div>
                     @endif
 
-                   @if ($user->mobile)
-                       <!-- phone -->
-                       <div class="row">
-                           <div class="col-md-3">
-                               {{ trans('admin/users/table.mobile') }}
-                           </div>
-                           <div class="col-md-9">
-                               <a href="tel:{{ $user->mobile }}" data-tooltip="true" title="{{ trans('general.call') }}">
-                                   <x-icon type="mobile" />
-                                   {{ $user->mobile }}</a>
-                           </div>
-                       </div>
-                   @endif
                     @if ($user->userloc)
                      <!-- location -->
                      <div class="row">

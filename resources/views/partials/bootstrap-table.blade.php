@@ -778,13 +778,6 @@
         }
     }
 
-    // Create a linked phone number in the table list
-    function mobileFormatter(value) {
-        if (value) {
-            return  '<span style="white-space: nowrap;"><a href="tel:' + value + '" data-tooltip="true" title="{{ trans('general.call') }}"><x-icon type="mobile" /> ' + value + '</a></span>';
-        }
-    }
-
 
     function deployedLocationFormatter(row, value) {
         if ((row) && (row!=undefined)) {

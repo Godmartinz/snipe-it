@@ -45,7 +45,6 @@ class UsersTransformer
                 'jobtitle' => ($user->jobtitle) ? e($user->jobtitle) : null,
                 'vip' => ($user->vip == '1') ? true : false,
                 'phone' => ($user->phone) ? e($user->phone) : null,
-                'mobile' => ($user->mobile) ? e($user->mobile) : null,
                 'website' => ($user->website) ? e($user->website) : null,
                 'address' => ($user->address) ? e($user->address) : null,
                 'city' => ($user->city) ? e($user->city) : null,

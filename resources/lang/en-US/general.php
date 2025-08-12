@@ -342,7 +342,6 @@ return [
     'no_files_uploaded'     => 'File upload success!',
     'token_expired'         => 'Your form session has expired. Please try again.',
     'login_enabled'         => 'Login Enabled',
-    'login_disabled'        => 'Login Disabled',
     'audit_due'             => 'Due for Audit',
     'audit_due_days'        => '{}Assets Due or Overdue for Audit|[1]Assets Due or Overdue for Audit Within a Day|[2,*]Assets Due or Overdue for Audit Within :days Days',
     'checkin_due'           => 'Due for Checkin',

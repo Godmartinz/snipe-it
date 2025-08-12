@@ -53,8 +53,7 @@
                             'company_id' => e(request('company_id')),
                             'manager_id' => e(request('manager_id')),
                             'admins' => e(request('admins')),
-                            'superadmins' => e(request('superadmins')),
-                            'activated' => e(request('activated')),
+                            'superadmins' => e(request('superadmins'))
                        ]) }}"
                     data-export-options='{
                 "fileName": "export-users-{{ date('Y-m-d') }}",

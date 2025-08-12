@@ -38,7 +38,6 @@ class UpdateUserTest extends TestCase
                 'permissions' => '{"a.new.permission":"1"}',
                 'activated' => true,
                 'phone' => '619-555-5555',
-                'mobile' => '619-666-6666',
                 'jobtitle' => 'Host',
                 'manager_id' => $manager->id,
                 'employee_num' => '1111',
@@ -66,7 +65,6 @@ class UpdateUserTest extends TestCase
         $this->assertArrayHasKey('a.new.permission', $user->decodePermissions(), 'Permissions were not updated');
         $this->assertTrue((bool) $user->activated, 'User not marked as activated');
         $this->assertEquals('619-555-5555', $user->phone, 'Phone was not updated');
-        $this->assertEquals('619-666-6666', $user->mobile, 'Mobile was not updated');
         $this->assertEquals('Host', $user->jobtitle, 'Job title was not updated');
         $this->assertTrue($user->manager->is($manager), 'Manager was not updated');
         $this->assertEquals('1111', $user->employee_num, 'Employee number was not updated');
@@ -114,7 +112,6 @@ class UpdateUserTest extends TestCase
                 'permissions' => '{"a.new.permission":"1"}',
                 'activated' => true,
                 'phone' => '619-555-5555',
-                'mobile' => '619-666-6666',
                 'jobtitle' => 'Host',
                 'manager_id' => $manager->id,
                 'employee_num' => '1111',
@@ -142,7 +139,6 @@ class UpdateUserTest extends TestCase
         $this->assertArrayHasKey('a.new.permission', $user->decodePermissions(), 'Permissions were not updated');
         $this->assertTrue((bool) $user->activated, 'User not marked as activated');
         $this->assertEquals('619-555-5555', $user->phone, 'Phone was not updated');
-        $this->assertEquals('619-666-6666', $user->mobile, 'Mobile was not updated');
         $this->assertEquals('Host', $user->jobtitle, 'Job title was not updated');
         $this->assertTrue($user->manager->is($manager), 'Manager was not updated');
         $this->assertEquals('1111', $user->employee_num, 'Employee number was not updated');

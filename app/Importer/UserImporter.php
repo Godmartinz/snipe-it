@@ -52,7 +52,6 @@ class UserImporter extends ItemImporter
         $this->item['email'] = trim($this->findCsvMatch($row, 'email'));
         $this->item['gravatar'] = trim($this->findCsvMatch($row, 'gravatar'));
         $this->item['phone'] = trim($this->findCsvMatch($row, 'phone_number'));
-        $this->item['mobile'] = trim($this->findCsvMatch($row, 'mobile_number'));
         $this->item['website'] = trim($this->findCsvMatch($row, 'website'));
         $this->item['jobtitle'] = trim($this->findCsvMatch($row, 'jobtitle'));
         $this->item['address'] = trim($this->findCsvMatch($row, 'address'));

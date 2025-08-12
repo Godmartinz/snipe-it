@@ -549,16 +549,6 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                 ->push(trans('general.users'), route('users.index'))
                 ->push(trans('general.show_superadmins'), route('users.index'))
             );
-        } elseif ((request()->is('users*')) && (request()->activated=='0')) {
-            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
-                ->push(trans('general.users'), route('users.index'))
-                ->push(trans('general.login_disabled'), route('users.index'))
-            );
-        } elseif ((request()->is('users*')) && (request()->activated=='1')) {
-            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
-                ->push(trans('general.users'), route('users.index'))
-                ->push(trans('general.login_enabled'), route('users.index'))
-            );
         } else {
             Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
                 ->push(trans('general.users'), route('users.index'))

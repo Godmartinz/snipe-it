@@ -70,7 +70,6 @@ class UsersController extends Controller
             'users.notes',
             'users.permissions',
             'users.phone',
-            'users.mobile',
             'users.state',
             'users.two_factor_enrolled',
             'users.two_factor_optin',
@@ -120,14 +119,6 @@ class UsersController extends Controller
 
         if ($request->filled('company_id')) {
             $users = $users->where('users.company_id', '=', $request->input('company_id'));
-        }
-
-        if ($request->filled('phone')) {
-            $users = $users->where('users.phone', '=', $request->input('phone'));
-        }
-
-        if ($request->filled('mobile')) {
-            $users = $users->where('users.mobile', '=', $request->input('mobile'));
         }
 
         if ($request->filled('location_id')) {
@@ -302,7 +293,6 @@ class UsersController extends Controller
                         'manages_users_count',
                         'manages_locations_count',
                         'phone',
-                        'mobile',
                         'address',
                         'city',
                         'state',

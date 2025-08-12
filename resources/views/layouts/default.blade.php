@@ -659,40 +659,28 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
 
                                     <ul class="treeview-menu">
-                                        <li {!! ((request()->is('users')  && (request()->input() == null)) ? ' class="active"' : '') !!} id="users-sidenav-list-all">
+                                        <li {!! ((request()->is('users')  && (request()->input() == null)) ? ' class="active"' : '') !!}>
                                             <a href="{{ route('users.index') }}">
-                                                <x-icon type="circle" class="text-grey fa-fw fa-fw"/>
+                                                <x-icon type="circle" class="text-grey fa-fw"/>
                                                 {{ trans('general.list_all') }}
                                             </a>
                                         </li>
-                                        <li class="{{ (request()->is('users') && request()->input('superadmins') == "true") ? 'active' : '' }}" id="users-sidenav-superadmins">
+                                        <li class="{{ (request()->is('users') && request()->input('superadmins') == "true") ? 'active' : '' }}">
                                             <a href="{{ route('users.index', ['superadmins' => 'true']) }}">
-                                                <x-icon type="superadmin" class="text-danger fa-fw"/>
+                                                <x-icon type="superadmin" class="text-danger"/>
                                                 {{ trans('general.show_superadmins') }}
                                             </a>
                                         </li>
-                                        <li class="{{ (request()->is('users') && request()->input('admins') == "true") ? 'active' : '' }}" id="users-sidenav-list-admins">
+                                        <li class="{{ (request()->is('users') && request()->input('admins') == "true") ? 'active' : '' }}">
                                             <a href="{{ route('users.index', ['admins' => 'true']) }}">
-                                                <x-icon type="admin" class="text-warning fa-fw"/>
+                                                <x-icon type="admin" class="text-warning"/>
                                                 {{ trans('general.show_admins') }}
                                             </a>
                                         </li>
-                                        <li class="{{ (request()->is('users') && request()->input('status') == "deleted") ? 'active' : '' }}" id="users-sidenav-deleted">
+                                        <li class="{{ (request()->is('users') && request()->input('status') == "deleted") ? 'active' : '' }}">
                                             <a href="{{ route('users.index', ['status' => 'deleted']) }}">
-                                                <x-icon type="x" class="text-danger fa-fw"/>
+                                                <x-icon type="x" class="text-danger"/>
                                                 {{ trans('general.deleted_users') }}
-                                            </a>
-                                        </li>
-                                        <li class="{{ (request()->is('users') && request()->input('activated') == "1") ? 'active' : '' }}" id="users-sidenav-activated">
-                                            <a href="{{ route('users.index', ['activated' => true]) }}">
-                                                <i class="fa-solid fa-person-circle-check text-success fa-fw"></i>
-                                                {{ trans('general.login_enabled') }}
-                                            </a>
-                                        </li>
-                                        <li class="{{ (request()->is('users') && request()->input('activated') == "0") ? 'active' : '' }}" id="users-sidenav-not-activated">
-                                            <a href="{{ route('users.index', ['activated' => false]) }}">
-                                                <i class="fa-solid fa-person-circle-xmark text-danger fa-fw"></i>
-                                                {{ trans('general.login_disabled') }}
                                             </a>
                                         </li>
                                     </ul>
