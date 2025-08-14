@@ -1101,6 +1101,13 @@ caption.tableCaption {
   margin-left: -47px;
   margin-top: 2px;
 }
+.popover.help-popover,
+.popover.help-popover .popover-content,
+.popover.help-popover .popover-body,
+.popover.help-popover .popover-title,
+.popover.help-popover .popover-header {
+  color: #000;
+}
 
 
 /*# sourceMappingURL=overrides.css.map*/
