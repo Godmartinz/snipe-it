@@ -514,11 +514,7 @@
                                                 <strong>{{ trans('admin/hardware/form.serial') }}</strong>
                                             </div>
                                             <div class="col-md-9">
-                                                <span class="js-copy-serial">{{ $asset->serial  }}</span>
-
-                                                <i class="fa-regular fa-clipboard js-copy-link hidden-print" data-clipboard-target=".js-copy-serial" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}">
-                                                    <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
-                                                </i>
+                                                <x-copyable id="serial-{{ $asset->id }}" :text="$asset->serial"/>
                                             </div>
                                         </div>
                                     @endif
@@ -732,17 +728,10 @@
                                                     @if (!empty($asset->{$field->db_column_name()}))
                                                         {{-- Hidden span used as copy target --}}
                                                         {{-- It's tempting to break out the HTML into separate lines for this, but it results in extra spaces being added onto the end of the coipied value --}}
-                                                        <span class="js-copy-{{ $field->id }} hidden-print" style="font-size: 0px;">{{ ($field->isFieldDecryptable($asset->{$field->db_column_name()}) ? Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) : $asset->{$field->db_column_name()}) }}</span>
-
-                                                        {{-- Clipboard icon --}}
-                                                        <i class="fa-regular fa-clipboard js-copy-link hidden-print"
-                                                           data-clipboard-target=".js-copy-{{ $field->id }}"
-                                                           aria-hidden="true"
-                                                           data-tooltip="true"
-                                                           data-placement="top"
-                                                           title="{{ trans('general.copy_to_clipboard') }}">
-                                                            <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
-                                                        </i>
+                                                        <x-copyable :id="$field->id"
+                                                                    :text="$field->isFieldDecryptable($asset->{$field->db_column_name()})
+                                                                    ? Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()})
+                                                                    : $asset->{$field->db_column_name()}"/>
                                                     @endif
                                                     @if (($field->field_encrypted=='1') && ($asset->{$field->db_column_name()}!=''))
 
