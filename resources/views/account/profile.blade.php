@@ -10,7 +10,7 @@
 
 <div class="row">
   <div class="col-md-9">
-  {{ Form::open(['method' => 'POST', 'files' => true, 'class' => 'form-horizontal', 'autocomplete' => 'off']) }}
+  <form method="POST" action="{{ route('profile.update') }}" accept-charset="UTF-8" class="form-horizontal" autocomplete="off" enctype="multipart/form-data">
   <!-- CSRF Token -->
     <input type="hidden" name="_token" value="{{ csrf_token() }}" />
     <div class="box box-default">
@@ -49,7 +49,7 @@
           <div class="col-md-7">
 
             @if (!config('app.lock_passwords'))
-              {!! Form::locales('locale', old('locale', $user->locale), 'select2') !!}
+              <x-input.locale-select name="locale" :selected="old('locale', $user->locale)"/>
               {!! $errors->first('locale', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
             @else
               <p class="help-block">{{ trans('general.feature_disabled') }}</p>
@@ -65,7 +65,7 @@
             {{ trans('general.skin') }}
           </label>
           <div class="col-md-8">
-            {!! Form::user_skin('skin', old('skin', $user->skin), 'select2') !!}
+            <x-input.skin name="skin" :selected="old('skin', $user->skin)" :include-blank-option="true"/>
             {!! $errors->first('skin', '<span class="alert-msg">:message</span>') !!}
           </div>
         </div>
@@ -107,39 +107,44 @@
           </div>
         </div>
 
-        <!-- Gravatar Email -->
-        <div class="form-group {{ $errors->has('gravatar') ? ' has-error' : '' }}">
-          <label for="gravatar" class="col-md-3 control-label">{{ trans('general.gravatar_email') }}
-            <small>(Private)</small>
-          </label>
-          <div class="col-md-8">
-            <input class="form-control" type="text" name="gravatar" id="gravatar" value="{{ old('gravatar', $user->gravatar) }}" />
-            {!! $errors->first('gravatar', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-            <p>
-              <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" alt="{{ $user->present()->fullName() }} avatar image">
-              {!! trans('general.gravatar_url') !!}
-            </p>
-          </div>
-        </div>
+
 
         <!-- Avatar -->
-
         @if (($user->avatar) && ($user->avatar!=''))
           <div class="form-group{{ $errors->has('image_delete') ? ' has-error' : '' }}">
             <div class="col-md-9 col-md-offset-3">
+              @if (!$user->isAvatarExternal())
               <label for="image_delete" class="form-control">
-                {{ Form::checkbox('image_delete', '1', old('image_delete'), ['id' => 'image_delete', 'aria-label'=>'image_delete']) }}
+                <input type="checkbox" name="image_delete" id="image_delete" value="1" @checked(old('image_delete')) aria-label="image_delete">
                 {{ trans('general.image_delete') }}
               </label>
               {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
+              @endif
             </div>
           </div>
           <div class="form-group">
             <div class="col-md-9 col-md-offset-3">
-              <img src="{{ Storage::disk('public')->url(app('users_upload_path').e($user->avatar)) }}" class="img-responsive">
+              <img src="{{ (($user->isAvatarExternal()) ? $user->avatar : Storage::disk('public')->url(app('users_upload_path').e($user->avatar))) }}" class="img-responsive">
               {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
             </div>
           </div>
+
+          @else
+          <!-- Gravatar Email -->
+          <div class="form-group {{ $errors->has('gravatar') ? ' has-error' : '' }}">
+            <label for="gravatar" class="col-md-3 control-label">{{ trans('general.gravatar_email') }}
+              <small>(Private)</small>
+            </label>
+            <div class="col-md-8">
+              <input class="form-control" type="text" name="gravatar" id="gravatar" value="{{ old('gravatar', $user->gravatar) }}" />
+              {!! $errors->first('gravatar', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <p style="padding-top: 3px;">
+                <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" alt="{{ $user->display_name }} avatar image">
+                {!! trans('general.gravatar_url') !!}
+              </p>
+            </div>
+          </div>
+
         @endif
 
 
@@ -150,13 +155,23 @@
         @if ($snipeSettings->two_factor_enabled=='1')
         <div class="form-group {{ $errors->has('two_factor_optin') ? 'has-error' : '' }}">
           <div class="col-md-7 col-md-offset-3">
-            @can('self.two_factor')
-              <label class="form-control">{{ Form::checkbox('two_factor_optin', '1', old('two_factor_optin', $user->two_factor_optin)) }}
-            @else
-                <label class="form-control form-control--disabled">{{ Form::checkbox('two_factor_optin', '1', old('two_factor_optin', $user->two_factor_optin),['disabled' => 'disabled']) }}
-            @endcan
-
-            {{ trans('admin/settings/general.two_factor_enabled_text') }}</label>
+              <label
+                  for="two_factor_optin"
+                  @class([
+                    'form-control',
+                    'form-control--disabled' => auth()->user()->cannot('self.two_factor'),
+                  ])
+              >
+                <input
+                    type="checkbox"
+                    name="two_factor_optin"
+                    id="two_factor_optin"
+                    value="1"
+                    @checked(old('two_factor_optin', $user->two_factor_optin))
+                    @disabled(auth()->user()->cannot('self.two_factor'))
+                >
+                {{ trans('admin/settings/general.two_factor_enabled_text') }}
+              </label>
             @can('self.two_factor')
               <p class="help-block">{{ trans('admin/settings/general.two_factor_enabled_warning') }}</p>
             @else
@@ -177,7 +192,7 @@
         <button type="submit" class="btn btn-primary"><x-icon type="checkmark" /> {{ trans('general.save') }}</button>
       </div>
     </div> <!-- .box-default -->
-    {{ Form::close() }}
+    </form>
   </div> <!-- .col-md-9 -->
 </div> <!-- .row-->
 

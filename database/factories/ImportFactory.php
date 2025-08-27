@@ -143,4 +143,94 @@ class ImportFactory extends Factory
             return $attributes;
         });
     }
+
+
+
+    /**
+     * Create an asset model import type.
+     *
+     * @return static
+     */
+    public function assetmodel()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\AssetModelsImportFileBuilder::new();
+
+            $attributes['name'] = "{$attributes['name']} Asset Model";
+            $attributes['import_type'] = 'assetModel';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+    /**
+     * Create a supplier import type.
+     *
+     * @return static
+     */
+    public function suppliers()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\SuppliersImportFileBuilder::new();
+            $attributes['name'] = "Supplier {$attributes['name']}";
+            $attributes['import_type'] = 'supplier';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+    /**
+     * Create an supplier import type.
+     *
+     * @return static
+     */
+    public function locations()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\SuppliersImportFileBuilder::new();
+            $attributes['name'] = "Location {$attributes['name']}";
+            $attributes['import_type'] = 'location';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+    /**
+     * Create a supplier import type.
+     *
+     * @return static
+     */
+    public function manufacturers()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\ManufacturersImportFileBuilder::new();
+            $attributes['name'] = "Manufacturer {$attributes['name']}";
+            $attributes['import_type'] = 'manufacturer';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+    public function categories()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\CategoriesImportFileBuilder::new();
+            $attributes['name'] = "Category {$attributes['name']}";
+            $attributes['import_type'] = 'category';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+
 }

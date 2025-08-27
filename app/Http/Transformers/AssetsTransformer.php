@@ -3,12 +3,14 @@
 namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
+use App\Models\Accessory;
+use App\Models\AccessoryCheckout;
 use App\Models\Asset;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AssetsTransformer
 {
@@ -40,7 +42,7 @@ class AssetsTransformer
             'requestable' => ($asset->requestable ? true : false),
 
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
-            'eol' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date).' months' : null,
+            'eol' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? (int) Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date, true) . ' months' : null,
             'asset_eol_date' => ($asset->asset_eol_date != '') ? Helper::getFormattedDateObject($asset->asset_eol_date, 'date') : null,
             'status_label' => ($asset->assetstatus) ? [
                 'id' => (int) $asset->assetstatus->id,
@@ -55,6 +57,13 @@ class AssetsTransformer
             'manufacturer' => (($asset->model) && ($asset->model->manufacturer)) ? [
                 'id' => (int) $asset->model->manufacturer->id,
                 'name'=> e($asset->model->manufacturer->name),
+            ] : null,
+            'depreciation' => (($asset->model) && ($asset->model->depreciation)) ? [
+                'id' => (int) $asset->model->depreciation->id,
+                'name'=> e($asset->model->depreciation->name),
+                'months'=> (int) $asset->model->depreciation->months,
+                'type'=>  e($asset->model->depreciation->depreciation_type),
+                'minimum'=> ($asset->model->depreciation->depreciation_min) ? (int) $asset->model->depreciation->depreciation_min : null,
             ] : null,
             'supplier' => ($asset->supplier) ? [
                 'id' => (int) $asset->supplier->id,
@@ -82,7 +91,7 @@ class AssetsTransformer
             'warranty_expires' => ($asset->warranty_months > 0) ? Helper::getFormattedDateObject($asset->warranty_expires, 'date') : null,
             'created_by' => ($asset->adminuser) ? [
                 'id' => (int) $asset->adminuser->id,
-                'name'=> e($asset->adminuser->present()->fullName()),
+                'name'=> e($asset->adminuser->display_name),
             ] : null,
             'created_at' => Helper::getFormattedDateObject($asset->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($asset->updated_at, 'datetime'),
@@ -99,7 +108,7 @@ class AssetsTransformer
             'checkout_counter' => (int) $asset->checkout_counter,
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
-            'book_value' => Helper::formatCurrencyOutput($asset->getLinearDepreciatedValue()),
+            'book_value' => Helper::formatCurrencyOutput($asset->getDepreciatedValue()),
         ];
 
 
@@ -153,6 +162,7 @@ class AssetsTransformer
             'clone'         => Gate::allows('create', Asset::class) ? true : false,
             'restore'       => ($asset->deleted_at!='' && Gate::allows('create', Asset::class)) ? true : false,
             'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'audit'        => Gate::allows('audit', Asset::class) ? true : false,
             'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class) && ($asset->deleted_at == '')) ? true : false,
         ];      
 
@@ -200,6 +210,7 @@ class AssetsTransformer
                     'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
                     'email'=> ($asset->assigned->email) ? e($asset->assigned->email) : null,
                     'employee_number' =>  ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
+                    'jobtitle' => $asset->assigned->jobtitle ? e($asset->assigned->jobtitle) : null,
                     'type' => 'user',
                 ] : null;
         }
@@ -225,7 +236,7 @@ class AssetsTransformer
     public function transformRequestedAsset(Asset $asset)
     {
         $array = [
-            'id' => (int) $asset->id,
+            'id' => (int)$asset->id,
             'name' => e($asset->name),
             'asset_tag' => e($asset->asset_tag),
             'serial' => e($asset->serial),
@@ -234,7 +245,7 @@ class AssetsTransformer
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
             'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
             'location' => ($asset->location) ? e($asset->location->name) : null,
-            'status'=> ($asset->assetstatus) ? $asset->present()->statusMeta : null,
+            'status' => ($asset->assetstatus) ? $asset->present()->statusMeta : null,
             'assigned_to_self' => ($asset->assigned_to == auth()->id()),
         ];
 
@@ -244,7 +255,7 @@ class AssetsTransformer
             foreach ($asset->model->fieldset->fields as $field) {
 
                 // Only display this if it's allowed via the custom field setting
-                if (($field->field_encrypted=='0') && ($field->show_in_requestable_list=='1')) {
+                if (($field->field_encrypted == '0') && ($field->show_in_requestable_list == '1')) {
 
                     $value = $asset->{$field->db_column};
                     if (($field->format == 'DATE') && (!is_null($value)) && ($value != '')) {
@@ -268,7 +279,64 @@ class AssetsTransformer
 
         $array += $permissions_array;
         return $array;
-
-
     }
+
+    public function transformAssetCompact(Asset $asset)
+    {
+        $array = [
+            'id' => (int) $asset->id,
+            'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
+            'type' => 'asset',
+            'name' => e($asset->display_name),
+            'model' => ($asset->model) ? e($asset->model->name) : null,
+            'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
+            'asset_tag' => e($asset->asset_tag),
+            'serial' => e($asset->serial),
+        ];
+
+        return $array;
+    }
+
+    public function transformCheckedoutAccessories($accessory_checkouts, $total)
+    {
+
+        $array = [];
+        foreach ($accessory_checkouts as $checkout) {
+            $array[] = self::transformCheckedoutAccessory($checkout);
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
+    }
+
+
+    public function transformCheckedoutAccessory(AccessoryCheckout $accessory_checkout)
+    {
+        if ($accessory_checkout->accessory) {
+            $array = [
+                'id' => $accessory_checkout->id,
+                'accessory' => [
+                    'id' => $accessory_checkout->accessory->id,
+                    'name' => $accessory_checkout->accessory->name,
+                ],
+                'assigned_to' => $accessory_checkout->assigned_to,
+                'image' => ($accessory_checkout->accessory->image) ? Storage::disk('public')->url('accessories/' . e($accessory_checkout->accessory->image)) : null,
+                'note' => $accessory_checkout->note ? e($accessory_checkout->note) : null,
+                'created_by' => $accessory_checkout->adminuser ? [
+                    'id' => (int)$accessory_checkout->adminuser->id,
+                    'name' => e($accessory_checkout->adminuser->present()->fullName),
+                ] : null,
+                'created_at' => Helper::getFormattedDateObject($accessory_checkout->created_at, 'datetime'),
+                'deleted_at' => Helper::getFormattedDateObject($accessory_checkout->deleted_at, 'datetime'),
+            ];
+
+            $permissions_array['available_actions'] = [
+                'checkout' => false,
+                'checkin' => Gate::allows('checkin', Accessory::class),
+            ];
+
+            $array += $permissions_array;
+            return $array;
+        }
+    }
+
 }

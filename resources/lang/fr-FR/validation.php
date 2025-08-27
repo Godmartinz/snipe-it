@@ -31,6 +31,7 @@ return [
         'numeric' => 'Le champ :attribute doit être compris entre :min et :max.',
         'string' => 'Le champ :attribute doit contenir entre :min et :max caractères.',
     ],
+    'valid_regex' => 'The regular expression is invalid.',
     'boolean' => 'Le champ :attribute doit être vrai ou faux.',
     'can' => 'Le champ :attribute contient une valeur non autorisée.',
     'confirmed' => 'La confirmation du champ :attribute ne correspond pas.',
@@ -172,6 +173,8 @@ return [
     'url' => 'Le champ :attribute doit être une URL valide.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
+    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'Une ou plusieurs adresses e-mail sont invalides.',
+    'checkboxes'           => ':attribute contient des options non valides.',
+    'radio_buttons'        => ':attribute est invalide.',
+    
     'custom' => [
         'alpha_space' => 'Le champ d\'attribut: contient un caractère qui n\'est pas autorisé.',
-        'email_array'      => 'Une ou plusieurs adresses électroniques sont invalides.',
+
         'hashed_pass'      => 'Votre mot de passe actuel est incorrect',
         'dumbpwd'          => 'Ce mot de passe est trop commun.',
         'statuslabel_type' => 'Vous devez sélectionner un type d\'étiquette de statut valide',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'This field seems to exist, but is not available on this Asset Model\'s fieldset.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => ':attribute doit être une date valide au format AAAA-MM-JJ',
         'last_audit_date.date_format'   =>  ':attribute doit être une date valide au format AAAA-MM-JJ hh:mm:ss',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  ':attribute doit être une date valide au format AAAA-MM-JJ',
         'start_date.date_format'        =>  ':attribute doit être une date valide au format AAAA-MM-JJ',
         'end_date.date_format'          =>  ':attribute doit être une date valide au format AAAA-MM-JJ',
-        'checkboxes'           => ':attribute contient des options non valides.',
-        'radio_buttons'        => ':attribute est invalide.',
         'invalid_value_in_field' => 'Valeur non valide incluse dans ce champ',
+
+        'ldap_username_field' => [
+            'not_in' =>         '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead.'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'This value should probably not be wrapped in parentheses.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

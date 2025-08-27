@@ -73,6 +73,8 @@ class ComponentsController extends Controller
         $component->name                   = $request->input('name');
         $component->category_id            = $request->input('category_id');
         $component->supplier_id            = $request->input('supplier_id');
+        $component->manufacturer_id        = $request->input('manufacturer_id');
+        $component->model_number           = $request->input('model_number');
         $component->location_id            = $request->input('location_id');
         $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
         $component->order_number           = $request->input('order_number', null);
@@ -86,10 +88,16 @@ class ComponentsController extends Controller
 
         $component = $request->handleImages($component);
 
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
+        if($request->get('redirect_option') === 'back'){
+            session()->put(['redirect_option' => 'index']);
+        } else {
+            session()->put(['redirect_option' => $request->get('redirect_option')]);
+        }
+
 
         if ($component->save()) {
-            return redirect()->to(Helper::getRedirectOption($request, $component->id, 'Components'))->with('success', trans('admin/components/message.create.success'));
+            return Helper::getRedirectOption($request, $component->id, 'Components')
+                ->with('success', trans('admin/components/message.create.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($component->getErrors());
@@ -105,15 +113,14 @@ class ComponentsController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function edit($componentId = null)
+    public function edit(Component $component)
     {
-        if ($item = Component::find($componentId)) {
-            $this->authorize('update', $item);
 
-            return view('components/edit', compact('item'))->with('category_type', 'component');
-        }
-
-        return redirect()->route('components.index')->with('error', trans('admin/components/message.does_not_exist'));
+            $this->authorize('update', $component);
+            session()->put('back_url', url()->previous());
+            return view('components/edit')
+                ->with('item', $component)
+                ->with('category_type', 'component');
     }
 
 
@@ -128,11 +135,8 @@ class ComponentsController extends Controller
      * @throws \Illuminate\Auth\Access\AuthorizationException
      * @since [v3.0]
      */
-    public function update(ImageUploadRequest $request, $componentId = null)
+    public function update(ImageUploadRequest $request, Component $component)
     {
-        if (is_null($component = Component::find($componentId))) {
-            return redirect()->route('components.index')->with('error', trans('admin/components/message.does_not_exist'));
-        }
         $min = $component->numCheckedOut();
         $validator = Validator::make($request->all(), [
             'qty' => "required|numeric|min:$min",
@@ -150,6 +154,8 @@ class ComponentsController extends Controller
         $component->name                   = $request->input('name');
         $component->category_id            = $request->input('category_id');
         $component->supplier_id            = $request->input('supplier_id');
+        $component->manufacturer_id        = $request->input('manufacturer_id');
+        $component->model_number           = $request->input('model_number');
         $component->location_id            = $request->input('location_id');
         $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
         $component->order_number           = $request->input('order_number');
@@ -165,7 +171,8 @@ class ComponentsController extends Controller
         session()->put(['redirect_option' => $request->get('redirect_option')]);
 
         if ($component->save()) {
-            return redirect()->to(Helper::getRedirectOption($request, $component->id, 'Components'))->with('success', trans('admin/components/message.update.success'));
+            return Helper::getRedirectOption($request, $component->id, 'Components')
+                ->with('success', trans('admin/components/message.update.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($component->getErrors());
@@ -189,12 +196,16 @@ class ComponentsController extends Controller
         $this->authorize('delete', $component);
 
         // Remove the image if one exists
-        if (Storage::disk('public')->exists('components/'.$component->image)) {
+        if ($component->image && Storage::disk('public')->exists('components/' . $component->image)) {
             try {
                 Storage::disk('public')->delete('components/'.$component->image);
             } catch (\Exception $e) {
                 Log::debug($e);
             }
+        }
+
+        if ($component->numCheckedOut() > 0) {
+            return redirect()->route('components.index')->with('error', trans('admin/components/message.delete.error_qty'));
         }
 
         $component->delete();
@@ -212,17 +223,9 @@ class ComponentsController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show($componentId = null)
+    public function show(Component $component)
     {
-        $component = Component::find($componentId);
-
-        if (isset($component->id)) {
             $this->authorize('view', $component);
-
             return view('components/view', compact('component'));
-        }
-        // Redirect to the user management page
-        return redirect()->route('components.index')
-            ->with('error', trans('admin/components/message.does_not_exist'));
     }
 }

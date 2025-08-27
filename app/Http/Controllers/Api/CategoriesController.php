@@ -39,6 +39,7 @@ class CategoriesController extends Controller
             'components_count',
             'licenses_count',
             'image',
+            'notes',
         ];
 
         $categories = Category::select([
@@ -52,9 +53,10 @@ class CategoriesController extends Controller
             'require_acceptance',
             'checkin_email',
             'image',
+            'notes',
             ])
             ->with('adminuser')
-            ->withCount('accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count');
+            ->withCount('accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count', 'models as models_count');
 
 
         /*
@@ -210,7 +212,7 @@ class CategoriesController extends Controller
     public function destroy($id) : JsonResponse
     {
         $this->authorize('delete', Category::class);
-        $category = Category::withCount('assets as assets_count', 'accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count')->findOrFail($id);
+        $category = Category::withCount('assets as assets_count', 'accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count', 'models as models_count')->findOrFail($id);
 
         if (! $category->isDeletable()) {
             return response()->json(

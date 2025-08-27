@@ -20,18 +20,12 @@
                     <div class="row">
                         <div class="col-md-12">
 
-        @if ($requestedItems->count() > 0)
         <div class="table-responsive">
             <table
                     name="requestedAssets"
                     data-toolbar="#toolbar"
                     class="table table-striped snipe-table"
                     id="requestedAssets"
-                    data-advanced-search="true"
-                    data-search="true"
-                    data-show-columns="true"
-                    data-show-export="true"
-                    data-pagination="true"
                     data-id-table="requestedAssets"
                     data-cookie-id-table="requestedAssets"
                     data-export-options='{
@@ -92,7 +86,7 @@
                             <td>
                                 @if ($request->requestingUser() && !$request->requestingUser()->trashed())
                                 <a href="{{ config('app.url') }}/users/{{ $request->requestingUser()->id }}">
-                                    {{ $request->requestingUser()->present()->fullName() }}
+                                    {{ $request->requestingUser()->display_name }}
                                 </a>
                                @else
                                     (deleted user)
@@ -100,18 +94,19 @@
                             </td>
                             <td>{{ App\Helpers\Helper::getFormattedDateObject($request->created_at, 'datetime', false) }}</td>
                             <td>
-                                {{ Form::open([
-                                    'method' => 'POST',
-                                    'route' => [
-                                        'account/request-item',
+                                <form
+                                    method="POST"
+                                    action="{{ route('account/request-item', [
                                         $request->itemType(),
                                         $request->requestable->id,
-                                        true,
-                                        $request->requestingUser()->id
-                                    ],
-                                    ]) }}
+                                         true,
+                                         $request->requestingUser()->id
+                                    ]) }}"
+                                    accept-charset="UTF-8"
+                                >
+                                    @csrf
                                     <button class="btn btn-warning btn-sm" data-tooltip="true" title="{{ trans('general.cancel_request') }}">{{ trans('button.cancel') }}</button>
-                                {{ Form::close() }}
+                                </form>
                             </td>
                             <td>
                                 @if ($request->itemType() == "asset")
@@ -132,14 +127,7 @@
             </table>
         </div>
 
-        @else
-        <div class="col-md-12">
-            <div class="alert alert-info alert-block">
-                <i class="fas fa-info-circle"></i>
-                {{ trans('general.no_results') }}
-            </div>
-        </div>
-        @endif
+
                         </div>
                     </div>
                 </div>

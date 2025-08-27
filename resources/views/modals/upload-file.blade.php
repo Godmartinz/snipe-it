@@ -6,11 +6,13 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="uploadFileModalLabel">{{ trans('general.file_upload') }}</h4>
             </div>
-            {{ Form::open([
-            'method' => 'POST',
-            'route' => ['upload/'.$item_type, $item_id],
-            'files' => true,
-            'class' => 'form-horizontal' ]) }}
+            <form
+                method="POST"
+                action="{{ route('ui.files.store', ['object_type' => str_plural($item_type), 'id' => $item_id]) }}"
+                accept-charset="UTF-8"
+                class="form-horizontal"
+                enctype="multipart/form-data"
+            >
             <input type="hidden" name="_token" value="{{ csrf_token() }}" />
             <div class="modal-body">
 
@@ -19,7 +21,7 @@
 
                         <label class="btn btn-default btn-block">
                             {{ trans('button.select_files')  }}
-                            <input type="file" name="file[]" multiple="true" class="js-uploadFile" id="uploadFile" data-maxsize="{{ Helper::file_upload_max_size() }}" accept="image/*,.csv,.zip,.rar,.doc,.docx,.xls,.xlsx,.xml,.lic,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,.pdf,application/rtf,application/json" style="display:none" required>
+                            <input type="file" name="file[]" multiple class="js-uploadFile" id="uploadFile" data-maxsize="{{ Helper::file_upload_max_size() }}" accept="{{ config('filesystems.allowed_upload_mimetypes') }}" style="display:none" required>
                         </label>
 
                     </div>
@@ -27,11 +29,17 @@
                         <span id="uploadFile-info"></span>
                     </div>
                     <div class="col-md-12">
-                        <p class="help-block" id="uploadFile-status">{{ trans('general.upload_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]) }}</p>
+                        <p class="help-block" id="uploadFile-status">{{ trans('general.upload_filetypes_help', ['allowed_filetypes' => config('filesystems.allowed_upload_extensions'), 'size' => Helper::file_upload_max_size_readable()]) }}</p>
                     </div>
 
                     <div class="col-md-12">
-                        {{ Form::textarea('notes', old('notes', old('notes')), ['class' => 'form-control','placeholder' => 'Notes (Optional)', 'rows'=>3, 'aria-label' => 'file']) }}
+                        <x-input.textarea
+                            name="notes"
+                            :value="old('notes')"
+                            placeholder="Notes (Optional)"
+                            rows="3"
+                            aria-label="file"
+                        />
                     </div>
                 </div>
 
@@ -40,7 +48,7 @@
                 <a href="#" class="pull-left" data-dismiss="modal">{{ trans('button.cancel') }}</a>
                 <button type="submit" class="btn btn-primary">{{ trans('button.upload') }}</button>
             </div>
-            {{ Form::close() }}
+            </form>
         </div>
     </div>
 </div>

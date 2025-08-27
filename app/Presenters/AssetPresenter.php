@@ -21,6 +21,8 @@ class AssetPresenter extends Presenter
             [
                 'field' => 'checkbox',
                 'checkbox' => true,
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
             ], [
                 'field' => 'id',
                 'searchable' => false,
@@ -35,7 +37,7 @@ class AssetPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.company'),
                 'visible' => false,
-                'formatter' => 'assetCompanyObjFilterFormatter',
+                'formatter' => 'companiesLinkObjFormatter',
             ], [
                 'field' => 'name',
                 'searchable' => true,
@@ -107,6 +109,13 @@ class AssetPresenter extends Presenter
                 'title' => trans('general.employee_number'),
                 'visible' => false,
                 'formatter' => 'employeeNumFormatter',
+            ],[
+                'field' => 'jobtitle',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/users/table.title'),
+                'visible' => false,
+                'formatter' => 'jobtitleFormatter',
             ], [
                 'field' => 'location',
                 'searchable' => true,
@@ -297,6 +306,7 @@ class AssetPresenter extends Presenter
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.byod'),
+                'class' => 'byod',
                 'formatter' => 'trueFalseFormatter',
 
             ],
@@ -318,7 +328,7 @@ class AssetPresenter extends Presenter
         // name can break the listings page. - snipe
         foreach ($fields as $field) {
             $layout[] = [
-                'field' => 'custom_fields.'.$field->db_column,
+                'field' => $field->db_column,
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -338,6 +348,7 @@ class AssetPresenter extends Presenter
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
             'formatter' => 'hardwareInOutFormatter',
+            'printIgnore' => true,
         ];
 
         $layout[] = [
@@ -347,6 +358,76 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('table.actions'),
             'formatter' => 'hardwareActionsFormatter',
+            'printIgnore' => true,
+        ];
+
+        return json_encode($layout);
+    }
+
+
+    public static function assignedAccessoriesDataTableLayout()
+    {
+        $layout = [
+            [
+                'field' => 'id',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.id'),
+                'visible' => false,
+            ],
+            [
+                'field' => 'accessory',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.accessory'),
+                'visible' => true,
+                'formatter' => 'accessoriesLinkObjFormatter',
+            ],
+            [
+                'field' => 'image',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
+            ],
+            [
+                'field' => 'note',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('admin/hardware/table.checkout_date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
+                'field' => 'available_actions',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
+            ],
         ];
 
         return json_encode($layout);
@@ -486,7 +567,7 @@ class AssetPresenter extends Presenter
      */
     public function statusMeta()
     {
-        if ($this->model->assigned) {
+        if ($this->model->assigned_to) {
             return 'deployed';
         }
 

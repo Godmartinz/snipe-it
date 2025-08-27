@@ -19,17 +19,10 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-body">
-        <div class="table-responsive">
             <table
                 data-cookie-id-table="kitsTable"
                 data-columns="{{ \App\Presenters\PredefinedKitPresenter::dataTableLayout() }}"
-                data-pagination="true"
-                data-search="true"
                 data-side-pagination="server"
-                data-show-columns="true"
-                data-show-fullscreen="true"
-                data-show-export="true"
-                data-show-refresh="true"
                 data-sort-order="asc"
                 data-sort-name="name"
                 id="kitsTable"
@@ -40,7 +33,6 @@
             "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
             }'>
           </table>
-        </div>
       </div> <!--.box-body-->
     </div> <!-- /.box.box-default-->
   </div> <!-- .col-md-12-->

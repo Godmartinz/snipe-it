@@ -32,7 +32,7 @@
                                     {{ trans('general.company') }}
                                 </label>
                                 <div class="col-md-8">
-                                    <p class="form-control-static">
+                                    <p class="form-control-static" style="padding-top: 7px;">
                                         {{ $asset->company->name }}
                                     </p>
                                 </div>
@@ -45,7 +45,7 @@
                                 {{ trans('admin/hardware/form.model') }}
                             </label>
                             <div class="col-md-8">
-                                <p class="form-control-static">
+                                <p class="form-control-static" style="padding-top: 7px;">
                                     @if (($asset->model) && ($asset->model->name))
                                         {{ $asset->model->name }}
                                     @else
@@ -82,7 +82,13 @@
                                 {{ trans('admin/hardware/form.status') }}
                             </label>
                             <div class="col-md-7 required">
-                                {{ Form::select('status_id', $statusLabel_list, $asset->status_id, array('class'=>'select2', 'style'=>'width:100%','', 'aria-label'=>'status_id')) }}
+                                <x-input.select
+                                    name="status_id"
+                                    :options="$statusLabel_list"
+                                    :selected="$asset->status_id"
+                                    style="width: 100%;"
+                                    aria-label="status_id"
+                                />
                                 {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
@@ -104,14 +110,15 @@
                                 {{ trans('admin/hardware/form.checkout_date') }}
                             </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="checkout_at"
-                                           id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
-                                    <span class="input-group-addon">
-                                        <x-icon type="calendar" /></span>
-                                </div>
+
+                                <x-input.datepicker
+                                        name="checkout_at"
+                                        end_date="0d"
+                                        col_size_class="col-md-7"
+                                        :value="old('expected_checkin', date('Y-m-d'))"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
+                                />
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
@@ -123,15 +130,12 @@
                             </label>
 
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-start-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="expected_checkin"
-                                           id="expected_checkin" value="{{ old('expected_checkin') }}">
-                                    <span class="input-group-addon">
-                                        <x-icon type="calendar" />
-                                    </span>
-                                </div>
+                                <x-input.datepicker
+                                        name="expected_checkin"
+                                        :value="old('expected_checkin', $item->expected_checkin)"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
+                                />
                                 {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
@@ -141,12 +145,21 @@
                             <label for="note" class="col-md-3 control-label">
                                 {{ trans('general.notes') }}
                             </label>
+
                             <div class="col-md-8">
-                                <textarea class="col-md-6 form-control" id="note"
-                                          name="note">{{ old('note', $asset->note) }}</textarea>
+                                <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
+                                name="note">{{ old('note', $asset->note) }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
+                        
+                        <!-- Custom fields -->
+                        @include("models/custom_fields_form", [
+                                'model' => $asset->model,
+                                'show_custom_fields_type' => 'checkout'
+                        ])
+
+
 
                         @if ($asset->requireAcceptance() || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
                             <div class="form-group notification-callout">
@@ -209,15 +222,4 @@
 
 @section('moar_scripts')
     @include('partials/assets-assigned')
-
-    <script>
-        //        $('#checkout_at').datepicker({
-        //            clearBtn: true,
-        //            todayHighlight: true,
-        //            endDate: '0d',
-        //            format: 'yyyy-mm-dd'
-        //        });
-
-
-    </script>
 @stop

@@ -31,6 +31,7 @@ return [
         'numeric' => 'Das Feld :attribute muss zwischen :min und :max liegen.',
         'string' => 'Das Feld :attribute muss zwischen :min und :max Zeichen lang sein.',
     ],
+    'valid_regex' => 'Der reguläre Ausdruck ist ungültig.',
     'boolean' => 'Das Feld :attribute muss wahr oder falsch sein.',
     'can' => 'Das Feld :attribute enthält einen nicht autorisierten Wert.',
     'confirmed' => 'Die Bestätigung für das Feld :attribute stimmt nicht überein.',
@@ -172,6 +173,8 @@ return [
     'url' => 'Das Feld :attribute muss eine gültige URL sein.',
     'ulid' => 'Das Feld :attribute muss eine gültige ULID sein.',
     'uuid' => 'Das Feld :attribute muss eine gültige UUID sein.',
+    'fmcs_location' => 'In den Admin-Einstellungen ist eine vollständige Mehrfachunterstützung für Unternehmen und Standortbereicherung aktiviert und der ausgewählte Standort und die ausgewählte Firma sind nicht kompatibel.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'Eine oder mehrere Email Adressen sind ungültig.',
+    'checkboxes'           => ':attribute enthält ungültige Optionen.',
+    'radio_buttons'        => ':attribute ist ungültig.',
+    
     'custom' => [
         'alpha_space' => 'Das :attribute Feld enthält ein nicht erlaubtes Zeichen.',
-        'email_array'      => 'Eine oder mehrere Email Adressen sind ungültig.',
+
         'hashed_pass'      => 'Ihr derzeitiges Passwort ist nicht korrekt',
         'dumbpwd'          => 'Das Passwort ist zu gebräuchlich.',
         'statuslabel_type' => 'Du musst einen gültigen Statuslabel-Typ auswählen',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'Dieses Feld scheint vorhanden zu sein, ist aber im Feldsatz dieses Asset-Modells nicht verfügbar.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => ':attribute muss ein gültiges Datum im Format JJJJ-MM-TT sein',
         'last_audit_date.date_format'   =>  ':attribute muss ein gültiges Datum im Format JJJJ-MM-TT hh:mm:ss sein',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  ':attribute muss ein gültiges Datum im Format JJJJ-MM-TT sein',
         'start_date.date_format'        =>  ':attribute muss ein gültiges Datum im Format JJJJ-MM-TT sein',
         'end_date.date_format'          =>  ':attribute muss ein gültiges Datum im Format JJJJ-MM-TT sein',
-        'checkboxes'           => ':attribute enthält ungültige Optionen.',
-        'radio_buttons'        => ':attribute ist ungültig.',
         'invalid_value_in_field' => 'Ungültiger Wert in diesem Feld enthalten',
+
+        'ldap_username_field' => [
+            'not_in' =>         '<code>sAMAccountName</code> (Groß- und Kleinschreibung) funktioniert wahrscheinlich nicht. Du solltest stattdessen <code>samaccountname</code> (Kleinschreibung) verwenden.'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> ist wahrscheinlich kein gültiger Authentifizierungsfilter. Du möchtest wahrscheinlich <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'Dieser Wert sollte wahrscheinlich nicht in Klammern gesetzt werden.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

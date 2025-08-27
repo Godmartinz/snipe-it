@@ -9,7 +9,7 @@ return [
     'city'                      => 'Ciudad',
     'state'                     => 'Provincia',
     'country'                   => 'País',
-    'create'                    => 'Crear Ubicación',
+    'create'                    => 'Crear ubicación',
     'update'                    => 'Actualizar ubicación',
     'print_assigned'            => 'Imprimir los asignados',
     'print_all_assigned'        => 'Imprimir todos los asignados',
@@ -39,4 +39,5 @@ return [
     'signed_by_finance_auditor' => 'Firmado por (Auditor de Finanzas):',
     'signed_by_location_manager' => 'Firmado por (Supervisor de la ubicación):',
     'signed_by'                 => 'Firmado por:',
+    'clone'  					=> 'Clonar ubicación',
 ];

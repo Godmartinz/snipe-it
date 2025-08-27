@@ -36,6 +36,9 @@ return [
         'testing_authentication' => 'LDAP認証のテスト中...',
         'authentication_success' => 'LDAPによるユーザー認証に成功しました！'
     ],
+    'labels' => [
+        'null_template' => 'Label template not found. Please select a template.',
+        ],
     'webhook' => [
         'sending' => ':app テストメッセージを送信しています...',
         'success' => 'あなたの:webhook_name連携は動作します！',
@@ -45,5 +48,12 @@ return [
         'error' => '問題が発生しました。:app 応答: :error_message',
         'error_redirect' => 'エラー: 301/302 :endpoint はリダイレクトを返します。セキュリティ上の理由から、リダイレクトには従いません。実際のエンドポイントを使用してください。',
         'error_misc' => '問題が発生しました。:( ',
-    ]
+        'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',
+        'webhook_channel_not_found' => ' webhook channel not found.',
+        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+    ],
+    'location_scoping' => [
+        'not_saved' => '設定は保存されませんでした。',
+        'mismatch' => '位置情報を有効にする前に対応が必要な項目が、データベースに 1 件あります。|位置情報を有効にする前に対応が必要な項目が、データベースに :count 件あります。',
+    ],
 ];

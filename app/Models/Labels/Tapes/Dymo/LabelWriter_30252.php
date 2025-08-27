@@ -16,18 +16,45 @@ class LabelWriter_30252 extends LabelWriter
 
 
 
-    public function getUnit()  { return 'mm'; }
-    public function getWidth() { return 96.52; }
-    public function getSupportAssetTag()  { return true; }
-    public function getSupport1DBarcode() { return true; }
-    public function getSupport2DBarcode() { return true; }
-    public function getSupportFields()    { return 3; }
-    public function getSupportLogo()      { return false; }
-    public function getSupportTitle()     { return true; }
+    public function getUnit()
+    {
+        return 'mm'; 
+    }
+    public function getWidth()
+    {
+        return 96.52; 
+    }
+    public function getSupportAssetTag()
+    {
+        return true; 
+    }
+    public function getSupport1DBarcode()
+    {
+        return true; 
+    }
+    public function getSupport2DBarcode()
+    {
+        return true; 
+    }
+    public function getSupportFields()
+    {
+        return 3; 
+    }
+    public function getSupportLogo()
+    {
+        return false; 
+    }
+    public function getSupportTitle()
+    {
+        return true; 
+    }
 
-    public function preparePDF($pdf) {}
+    public function preparePDF($pdf)
+    {
+    }
 
-    public function write($pdf, $record) {
+    public function write($pdf, $record)
+    {
         $pa = $this->getPrintableArea();
 
         $currentX = $pa->x1;
@@ -50,13 +77,6 @@ class LabelWriter_30252 extends LabelWriter
             );
             $currentX += $barcodeSize + self::BARCODE_MARGIN;
             $usableWidth -= $barcodeSize + self::BARCODE_MARGIN;
-        } else {
-            static::writeText(
-                $pdf, $record->get('tag'),
-                $pa->x1, $pa->y2 - self::TAG_SIZE,
-                'freemono', 'b', self::TAG_SIZE, 'R',
-                $usableWidth, self::TAG_SIZE, true, 0
-            );
         }
 
         if ($record->has('title')) {

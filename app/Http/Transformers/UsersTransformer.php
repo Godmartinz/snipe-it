@@ -4,8 +4,8 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Models\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class UsersTransformer
 {
@@ -22,23 +22,31 @@ class UsersTransformer
     public function transformUser(User $user)
     {
 
+        $role = '';
+        if ($user->isSuperUser()) {
+            $role = 'superadmin';
+        } elseif ($user->isAdmin()) {
+            $role = 'admin';
+        }
         $array = [
                 'id' => (int) $user->id,
                 'avatar' => e($user->present()->gravatar) ?? null,
-                'name' => e($user->getFullNameAttribute()),
-                'first_name' => e($user->first_name),
-                'last_name' => e($user->last_name),
-                'username' => e($user->username),
+                'name' => e($user->getFullNameAttribute()) ?? null,
+                'first_name' => e($user->first_name) ?? null,
+                'last_name' => e($user->last_name) ?? null,
+                'display_name' => e($user->getRawOriginal('display_name')) ?? null,
+                'username' => e($user->username) ?? null,
                 'remote' => ($user->remote == '1') ? true : false,
                 'locale' => ($user->locale) ? e($user->locale) : null,
                 'employee_num' => ($user->employee_num) ? e($user->employee_num) : null,
                 'manager' => ($user->manager) ? [
                     'id' => (int) $user->manager->id,
-                    'name'=> e($user->manager->first_name).' '.e($user->manager->last_name),
+                    'name'=> e($user->manager->display_name),
                 ] : null,
                 'jobtitle' => ($user->jobtitle) ? e($user->jobtitle) : null,
                 'vip' => ($user->vip == '1') ? true : false,
                 'phone' => ($user->phone) ? e($user->phone) : null,
+                'mobile' => ($user->mobile) ? e($user->mobile) : null,
                 'website' => ($user->website) ? e($user->website) : null,
                 'address' => ($user->address) ? e($user->address) : null,
                 'city' => ($user->city) ? e($user->city) : null,
@@ -50,11 +58,16 @@ class UsersTransformer
                     'id' => (int) $user->department->id,
                     'name'=> e($user->department->name),
                 ] : null,
+                'department_manager' => ($user->department?->manager) ? [
+                    'id' => (int) $user->department->manager->id,
+                    'name'=> e($user->department->manager->display_name),
+                ] : null,
                 'location' => ($user->userloc) ? [
                     'id' => (int) $user->userloc->id,
                     'name'=> e($user->userloc->name),
                 ] : null,
                 'notes'=> Helper::parseEscapedMarkedownInline($user->notes),
+                'role' => $role,
                 'permissions' => $user->decodePermissions(),
                 'activated' => ($user->activated == '1') ? true : false,
                 'autoassign_licenses' => ($user->autoassign_licenses == '1') ? true : false,
@@ -70,7 +83,7 @@ class UsersTransformer
                 'company' => ($user->company) ? ['id' => (int) $user->company->id, 'name'=> e($user->company->name)] : null,
                 'created_by' => ($user->createdBy) ? [
                     'id' => (int) $user->createdBy->id,
-                    'name'=> e($user->createdBy->present()->fullName),
+                    'name'=> e($user->createdBy->display_name),
                 ] : null,
                 'created_at' => Helper::getFormattedDateObject($user->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($user->updated_at, 'datetime'),
@@ -102,6 +115,38 @@ class UsersTransformer
         } else {
             $array['groups'] = null;
         }
+
+        return $array;
+    }
+
+    /**
+     * This gives a compact view of the user data without any additional relational queries,
+     * allowing us to 1) deliver a smaller payload and 2) avoid additional queries on relations that
+     * have not been easy/lazy loaded already
+     *
+     * @param User $user
+     * @return array
+     * @throws \Exception
+     */
+    public function transformUserCompact(User $user) : array
+    {
+
+        $array = [
+            'id' => (int) $user->id,
+            'image' => e($user->present()->gravatar) ?? null,
+            'type' => 'user',
+            'name' => e($user->getFullNameAttribute()),
+            'first_name' => e($user->first_name),
+            'last_name' => e($user->last_name),
+            'username' => e($user->username),
+            'display_name' => e($user->display_name),
+            'created_by' => $user->adminuser ? [
+                'id' => (int) $user->adminuser->id,
+                'name'=> e($user->adminuser->present()->fullName),
+            ]: null,
+            'created_at' => Helper::getFormattedDateObject($user->created_at, 'datetime'),
+            'deleted_at' => ($user->deleted_at) ? Helper::getFormattedDateObject($user->deleted_at, 'datetime') : null,
+        ];
 
         return $array;
     }

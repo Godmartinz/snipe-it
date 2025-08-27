@@ -79,7 +79,7 @@ class RequestAssetCancelation extends Notification
 
         $fields = [
             'QTY' => $qty,
-            'Canceled By' => '<'.$target->present()->viewUrl().'|'.$target->present()->fullName().'>',
+            'Canceled By' => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
         ];
 
         if (($this->expected_checkin) && ($this->expected_checkin != '')) {

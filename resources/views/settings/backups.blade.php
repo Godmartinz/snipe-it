@@ -12,7 +12,7 @@
     </a>
 
     <form method="POST" style="display: inline">
-      {{ Form::hidden('_token', csrf_token()) }}
+            @csrf
             <button class="btn btn-primary {{ (config('app.lock_passwords')) ? ' disabled': '' }}">{{ trans('admin/settings/general.generate_backup') }}</button>
       </form>
 
@@ -66,9 +66,7 @@
             <table
                     data-cookie="true"
                     data-cookie-id-table="system-backups"
-                    data-pagination="true"
                     data-id-table="system-backups"
-                    data-search="true"
                     data-side-pagination="client"
                     data-sort-order="desc"
                     data-sort-name="modified_display"
@@ -152,18 +150,14 @@
       <div class="box-body">
 
         <p>
-          {!! trans('admin/settings/general.backups_path', ['path'=> $path]) !!}
+          {!! trans('admin/settings/general.backups_path', ['path'=> 'storage/app/backup']) !!}
         </p>
 
         @if (config('app.lock_passwords')===true)
         <p class="alert alert-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
           @else
-              
-      {{ Form::open([
-        'method' => 'POST',
-        'route' => 'settings.backups.upload',
-        'files' => true,
-        'class' => 'form-horizontal' ]) }}
+
+      <form method="POST" action="{{ route('settings.backups.upload') }}" accept-charset="UTF-8" class="form-horizontal" enctype="multipart/form-data">
         @csrf
 
         
@@ -194,7 +188,7 @@
             
     </div>
     
-    {{ Form::close() }}
+    </form>
     @endif  
       </div>
     </div>

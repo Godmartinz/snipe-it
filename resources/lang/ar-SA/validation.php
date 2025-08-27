@@ -31,6 +31,7 @@ return [
         'numeric' => 'The :attribute field must be between :min and :max.',
         'string' => 'The :attribute field must be between :min and :max characters.',
     ],
+    'valid_regex' => 'The regular expression is invalid.',
     'boolean' => 'يجب أن يكون حقل السمة صحيحا أو خاطئا.',
     'can' => 'The :attribute field contains an unauthorized value.',
     'confirmed' => 'The :attribute field confirmation does not match.',
@@ -172,6 +173,8 @@ return [
     'url' => 'The :attribute field must be a valid URL.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
+    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'عنوان بريد إلكتروني واحد أو أكثر غير صالح.',
+    'checkboxes'           => ':attribute يحتوي على خيارات غير صالحة.',
+    'radio_buttons'        => ':attribute غير صالح.',
+    
     'custom' => [
         'alpha_space' => 'يحتوي الحقل :attribute على حرف غير مسموح به.',
-        'email_array'      => 'عنوان بريد إلكتروني واحد أو أكثر غير صالح.',
+
         'hashed_pass'      => 'كلمة المرور الحالية غير صحيحة',
         'dumbpwd'          => 'كلمة المرور هذه شائعة جدا.',
         'statuslabel_type' => 'يجب تحديد نوع تسمية حالة صالح',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'This field seems to exist, but is not available on this Asset Model\'s fieldset.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => 'يجب أن يكون :attribute تاريخ صالح بتنسيق YYY-MM-DD',
         'last_audit_date.date_format'   =>  'يجب أن يكون :attribute تاريخًا صحيحًا في تنسيق YYY-MM-DD hh:mm:ss',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  'يجب أن يكون :attribute تاريخ صالح بتنسيق YYY-MM-DD',
         'start_date.date_format'        =>  'يجب أن يكون :attribute تاريخ صالح بتنسيق YYY-MM-DD',
         'end_date.date_format'          =>  'يجب أن يكون :attribute تاريخ صالح بتنسيق YYY-MM-DD',
-        'checkboxes'           => ':attribute يحتوي على خيارات غير صالحة.',
-        'radio_buttons'        => ':attribute غير صالح.',
         'invalid_value_in_field' => 'القيمة غير صالحة المدرجة في هذا الحقل',
+
+        'ldap_username_field' => [
+            'not_in' =>         '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead.'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'This value should probably not be wrapped in parentheses.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

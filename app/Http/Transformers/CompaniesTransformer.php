@@ -38,8 +38,9 @@ class CompaniesTransformer
                 'users_count' => (int) $company->users_count,
                 'created_by' => ($company->adminuser) ? [
                     'id' => (int) $company->adminuser->id,
-                    'name'=> e($company->adminuser->present()->fullName()),
+                    'name'=> e($company->adminuser->display_name),
                 ] : null,
+                'notes' => Helper::parseEscapedMarkedownInline($company->notes),
                 'created_at' => Helper::getFormattedDateObject($company->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($company->updated_at, 'datetime'),
             ];

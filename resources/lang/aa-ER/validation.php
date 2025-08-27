@@ -31,6 +31,7 @@ return [
         'numeric' => 'crwdns12356:0crwdne12356:0',
         'string' => 'crwdns12358:0crwdne12358:0',
     ],
+    'valid_regex' => 'crwdns13402:0crwdne13402:0',
     'boolean' => 'crwdns12360:0crwdne12360:0',
     'can' => 'crwdns12362:0crwdne12362:0',
     'confirmed' => 'crwdns12364:0crwdne12364:0',
@@ -172,6 +173,8 @@ return [
     'url' => 'crwdns12550:0crwdne12550:0',
     'ulid' => 'crwdns12552:0crwdne12552:0',
     'uuid' => 'crwdns12554:0crwdne12554:0',
+    'fmcs_location' => 'crwdns13232:0crwdne13232:0',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'crwdns13164:0crwdne13164:0',
+    'checkboxes'           => 'crwdns13166:0crwdne13166:0',
+    'radio_buttons'        => 'crwdns13168:0crwdne13168:0',
+    
     'custom' => [
         'alpha_space' => 'crwdns1944:0crwdne1944:0',
-        'email_array'      => 'crwdns1945:0crwdne1945:0',
+
         'hashed_pass'      => 'crwdns1946:0crwdne1946:0',
         'dumbpwd'          => 'crwdns1947:0crwdne1947:0',
         'statuslabel_type' => 'crwdns1948:0crwdne1948:0',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'crwdns12652:0crwdne12652:0',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => 'crwdns11247:0crwdne11247:0',
         'last_audit_date.date_format'   =>  'crwdns11249:0crwdne11249:0',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  'crwdns11255:0crwdne11255:0',
         'start_date.date_format'        =>  'crwdns11257:0crwdne11257:0',
         'end_date.date_format'          =>  'crwdns11259:0crwdne11259:0',
-        'checkboxes'           => 'crwdns12556:0crwdne12556:0',
-        'radio_buttons'        => 'crwdns12558:0crwdne12558:0',
         'invalid_value_in_field' => 'crwdns12560:0crwdne12560:0',
+
+        'ldap_username_field' => [
+            'not_in' =>         'crwdns12762:0crwdne12762:0'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => 'crwdns12764:0crwdne12764:0'],
+        'ldap_filter' => ['regex' => 'crwdns12766:0crwdne12766:0'],
+
         ],
     /*
     |--------------------------------------------------------------------------

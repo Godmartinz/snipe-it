@@ -36,6 +36,9 @@ return [
         'testing_authentication' => 'Δοκιμή Πιστοποίησης Ldap...',
         'authentication_success' => 'Ο χρήστης πιστοποιήθηκε με επιτυχία στο LDAP!'
     ],
+    'labels' => [
+        'null_template' => 'Label template not found. Please select a template.',
+        ],
     'webhook' => [
         'sending' => 'Αποστολή δοκιμαστικού μηνύματος :app...',
         'success' => 'Το :webhook_name σας λειτουργεί!',
@@ -45,5 +48,12 @@ return [
         'error' => 'Κάτι πήγε στραβά. :app απάντησε με: :error_message',
         'error_redirect' => 'ΣΦΑΛΜΑ: 301/302:endpoint επιστρέφει μια ανακατεύθυνση. Για λόγους ασφαλείας, δεν ακολουθούμε ανακατευθύνσεις. Παρακαλούμε χρησιμοποιήστε το πραγματικό τελικό σημείο.',
         'error_misc' => 'Κάτι πήγε στραβά. :( ',
-    ]
+        'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',
+        'webhook_channel_not_found' => ' webhook channel not found.',
+        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+    ],
+    'location_scoping' => [
+        'not_saved' => 'Your settings were not saved.',
+        'mismatch' => 'There is 1 item in the database that need your attention before you can enable location scoping.|There are :count items in the database that need your attention before you can enable location scoping.',
+    ],
 ];

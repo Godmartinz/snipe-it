@@ -29,12 +29,21 @@ class LicenseSeatsController extends Controller
             $seats = LicenseSeat::with('license', 'user', 'asset', 'user.department')
                 ->where('license_seats.license_id', $licenseId);
 
+            if ($request->input('status') == 'available') {
+                $seats->whereNull('license_seats.assigned_to');
+            }
+
+            if ($request->input('status') == 'assigned') {
+                $seats->ByAssigned();
+            }
+
+
             $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
             if ($request->input('sort') == 'department') {
                 $seats->OrderDepartments($order);
             } else {
-                $seats->orderBy('id', $order);
+                $seats->orderBy('updated_at', $order);
             }
 
             $total = $seats->count();
@@ -136,13 +145,13 @@ class LicenseSeatsController extends Controller
         if ($licenseSeat->save()) {
 
             if ($is_checkin) {
-                $licenseSeat->logCheckin($target, $request->input('note'));
+                $licenseSeat->logCheckin($target, $request->input('notes'));
 
                 return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
             }
 
             // in this case, relevant fields are touched but it's not a checkin operation. so it must be a checkout operation.
-            $licenseSeat->logCheckout($request->input('note'), $target);
+            $licenseSeat->logCheckout($request->input('notes'), $target);
 
             return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
         }

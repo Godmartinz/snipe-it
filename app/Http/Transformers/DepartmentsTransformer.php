@@ -35,7 +35,7 @@ class DepartmentsTransformer
                 ] : null,
                 'manager' => ($department->manager) ? [
                     'id' => (int) $department->manager->id,
-                    'name' => e($department->manager->getFullNameAttribute()),
+                    'name' => e($department->manager->display_name),
                     'first_name'=> e($department->manager->first_name),
                     'last_name'=> e($department->manager->last_name),
                 ] : null,
@@ -44,6 +44,7 @@ class DepartmentsTransformer
                     'name' => e($department->location->name),
                 ] : null,
                 'users_count' => e($department->users_count),
+                'notes' => Helper::parseEscapedMarkedownInline($department->notes),
                 'created_at' => Helper::getFormattedDateObject($department->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($department->updated_at, 'datetime'),
             ];

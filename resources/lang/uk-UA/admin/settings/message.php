@@ -15,7 +15,7 @@ return [
         'restore_confirm'       => 'Ви дійсно бажаєте відновити базу даних з :filename?'
     ],
     'restore' => [
-        'success'               => 'Your system backup has been restored. Please log in again.'
+        'success'               => 'Ваше резервне копіювання відновлено. Будь ласка, увійдіть в систему знову.'
     ],
     'purge' => [
         'error'     => 'Під час очищення сталася помилка. ',
@@ -36,6 +36,9 @@ return [
         'testing_authentication' => 'Тестування авторизації LDAP...',
         'authentication_success' => 'Користувач успішно пройшов перевірку на зв\'язку з LDAP!'
     ],
+    'labels' => [
+        'null_template' => 'Ярличок не знайдено. Будь ласка, виберіть шаблон.',
+        ],
     'webhook' => [
         'sending' => 'Відправка :app тестове повідомлення...',
         'success' => 'Ваша функція з інтеграцією :webhook_name!',
@@ -45,5 +48,12 @@ return [
         'error' => 'Щось пішло не так. :app відповів(-ла) з: :error_message',
         'error_redirect' => 'ПОМИЛКА: 301/302 :endpoint повертає редиректор. З міркувань безпеки ми не слідуємо перенаправленням. Будь ласка, використовуйте фактичну кінцеву точку.',
         'error_misc' => 'Щось пішло не так. :( ',
-    ]
+        'webhook_fail' => 'не вдалося надіслати повідомлення webhook для перевірки: Переконайтесь, що посилання ще дійсне.',
+        'webhook_channel_not_found' => ' канал webhook не знайдено.',
+        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+    ],
+    'location_scoping' => [
+        'not_saved' => 'Ваші налаштування не були збережені.',
+        'mismatch' => 'Є 1 елемент у базі даних, який потребує вашої уваги перед тим, як ви зможете увімкнути визначення місцезнаходження. Є :count елементи в базі даних, які потребують вашої уваги перед тим, як ви зможете увімкнути визначення місцезнаходжень.',
+    ],
 ];

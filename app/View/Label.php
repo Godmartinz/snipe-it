@@ -7,6 +7,7 @@ use App\Models\Labels\Label as LabelModel;
 use App\Models\Labels\Sheet;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Traits\Macroable;
 use TCPDF;
@@ -24,6 +25,16 @@ class Label implements View
      */
     protected $data;
 
+
+    /**
+     * TCPDF output destination.
+     * "I" - inline by default.
+     * See TCPDF's Output method for details.
+     *
+     * @var string
+     */
+    private string $destination = 'I';
+
     public function __construct() {
         $this->data = new Collection();
     }
@@ -38,7 +49,7 @@ class Label implements View
         $settings = $this->data->get('settings');
         $assets = $this->data->get('assets');
         $offset = $this->data->get('offset');
-        $template = LabelModel::find($settings->label2_template);
+
 
         // If disabled, pass to legacy view
         if ((!$settings->label2_enable)) {
@@ -47,6 +58,12 @@ class Label implements View
                 ->with('settings', $settings)
                 ->with('bulkedit', $this->data->get('bulkedit'))
                 ->with('count', $this->data->get('count'));
+        }
+
+            $template = LabelModel::find($settings->label2_template);
+
+        if ($template === null) {
+            return redirect()->route('settings.labels.index')->with('error', trans('admin/settings/message.labels.null_template'));
         }
 
         $template->validate();
@@ -105,7 +122,7 @@ class Label implements View
                     }
                 }
 
-                if ($settings->alt_barcode_enabled) {
+
                     if ($template->getSupport1DBarcode()) {
                         $barcode1DType = $settings->label2_1d_type;
                         if ($barcode1DType != 'none') {
@@ -115,25 +132,39 @@ class Label implements View
                             ]);
                         }
                     }
-                }
-
-                if ($template->getSupport2DBarcode()) {
+              
+            if ($template->getSupport2DBarcode()) {
                     $barcode2DType = $settings->label2_2d_type;
-                    $barcode2DType = ($barcode2DType == 'default') ? 
-                        $settings->barcode_type :
-                        $barcode2DType;
-                    if (($barcode2DType != 'none') && (!is_null($barcode2DType))) {
+                if (($barcode2DType != 'none') && (!is_null($barcode2DType))) {
                         switch ($settings->label2_2d_target) {
-                            case 'ht_tag': $barcode2DTarget = route('ht/assetTag', $asset->asset_tag); break;
+                            case 'ht_tag': 
+                                $barcode2DTarget = route('ht/assetTag', $asset->asset_tag); 
+                                break;
+                            case 'plain_asset_id': 
+                                $barcode2DTarget = (string) $asset->id; 
+                                break;
+                            case 'plain_asset_tag': 
+                                $barcode2DTarget = $asset->asset_tag; 
+                                break;
+                            case 'plain_serial_number': 
+                                $barcode2DTarget = $asset->serial; 
+                                break;
+                            case 'location':
+                                $barcode2DTarget = $asset->location_id
+                                    ? route('locations.show', $asset->location_id)
+                                    : null;
+                                break;
                             case 'hardware_id':
-                            default: $barcode2DTarget = route('hardware.show', ['hardware' => $asset->id]); break;
+                            default:
+                                $barcode2DTarget = route('hardware.show', $asset);
+                                break;
+                            }
+                            $assetData->put('barcode2d', (object)[
+                                'type' => $barcode2DType,
+                                'content' => $barcode2DTarget,
+                            ]);
                         }
-                        $assetData->put('barcode2d', (object)[
-                            'type' => $barcode2DType,
-                            'content' => $barcode2DTarget,
-                        ]);
                     }
-                }
 
                 $fields = $fieldDefinitions
                     ->map(fn($field) => $field->toArray($asset))
@@ -165,16 +196,34 @@ class Label implements View
                                 // We'll set the label to an empty string since we
                                 // injected the label into the value field above.
                                 $previous['label'] = '';
-
                                 return $previous;
                             });
 
                         return $toAdd ? $myFields->push($toAdd) : $myFields;
                     }, new Collection());
 
-                $assetData->put('fields', $fields->take($template->getSupportFields()));
+                $emptyRowsCount = $settings->label2_empty_row_count;
+                if($emptyRowsCount) {
+                    // Create empty rows
+                    $emptyRows = collect(range(1, $emptyRowsCount))->map(function () {
+                        return [
+                            'label' => '',
+                            'value' => '',
+                            'dataSource' => null,
+                        ];
+                    });
 
-                return $assetData;
+                    // Prepend empty rows to the existing fields
+                    $fieldsWithEmpty = $emptyRows->merge($fields);
+
+                    $assetData->put('fields', $fieldsWithEmpty->take($template->getSupportFields()));
+                    return $assetData;
+                }
+               else{
+                   $assetData->put('fields', $fields->take($template->getSupportFields()));
+                   return $assetData;
+               }
+
             });
         
         if ($template instanceof Sheet) {
@@ -183,7 +232,7 @@ class Label implements View
         $template->writeAll($pdf, $data);
 
         $filename = $assets->count() > 1 ? 'assets.pdf' : $assets->first()->asset_tag.'.pdf';
-        $pdf->Output($filename, 'I');
+        $pdf->Output($filename, $this->destination);
     }
 
     /**

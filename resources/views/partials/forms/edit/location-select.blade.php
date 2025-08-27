@@ -1,9 +1,16 @@
 <!-- Location -->
 <div id="{{ $fieldname }}" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}"{!!  (isset($style)) ? ' style="'.e($style).'"' : ''  !!}>
 
-    {{ Form::label($fieldname, $translated_name, array('class' => 'col-md-3 control-label')) }}
+    <label for="{{ $fieldname }}" class="col-md-3 control-label">{{ $translated_name }}</label>
     <div class="col-md-7">
         <select class="js-data-ajax" data-endpoint="locations" data-placeholder="{{ trans('general.select_location') }}" name="{{ $fieldname }}" style="width: 100%" id="{{ $fieldname }}_location_select" aria-label="{{ $fieldname }}"{{ (isset($multiple) && ($multiple=='true')) ? " multiple='multiple'" : '' }}{!!  ((isset($item)) && (Helper::checkIfRequired($item, $fieldname))) ? ' required ' : '' !!}>
+            @isset($selected)
+                @foreach($selected as $location_id)
+                    <option value="{{ $location_id }}" selected="selected" role="option" aria-selected="true"  role="option">
+                        {{ (\App\Models\Location::find($location_id))->name }}
+                    </option>
+                @endforeach
+            @endisset
             @if ($location_id = old($fieldname, (isset($item)) ? $item->{$fieldname} : ''))
                 <option value="{{ $location_id }}" selected="selected" role="option" aria-selected="true"  role="option">
                     {{ (\App\Models\Location::find($location_id)) ? \App\Models\Location::find($location_id)->name : '' }}
@@ -33,11 +40,11 @@
     <div class="form-group">
         <div class="col-md-9 col-md-offset-3">
             <label class="form-control">
-                {{ Form::radio('update_default_location', '1', old('update_default_location'), ['checked'=> 'checked', 'aria-label'=>'update_default_location']) }}
+                <input name="update_default_location" type="radio" value="1" checked="checked" aria-label="update_default_location" />
                 {{ trans('admin/hardware/form.asset_location') }}
             </label>
             <label class="form-control">
-                {{ Form::radio('update_default_location', '0', old('update_default_location'), ['aria-label'=>'update_default_location']) }}
+                <input name="update_default_location" type="radio" value="0" aria-label="update_default_location" />
                 {{ trans('admin/hardware/form.asset_location_update_default_current') }}
             </label>
         </div>

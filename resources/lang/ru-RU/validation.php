@@ -31,6 +31,7 @@ return [
         'numeric' => 'Поле :attribute должно быть между :min и :max.',
         'string' => 'Поле :attribute должно содержать от :min до :max символов.',
     ],
+    'valid_regex' => 'Регулярное выражение является недопустимым.',
     'boolean' => 'Поле :attribute должно быть true или false.',
     'can' => 'Поле :attribute содержит недопустимое значение.',
     'confirmed' => 'Подтверждение поля :attribute не совпадает.',
@@ -172,6 +173,8 @@ return [
     'url' => 'Поле :attribute должно быть действительным URL-адресом.',
     'ulid' => 'Поле :attribute должно быть корректным значением UUID.',
     'uuid' => 'Поле :attribute должно быть корректным значением UUID.',
+    'fmcs_location' => 'Полная поддержка и определение местоположения нескольких компаний включены в настройках администратора, а выбранное местоположение и выбранная компания не совместимы.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'Один или несколько адресов эл. почты являются недействительным.',
+    'checkboxes'           => ':attribute содержит недопустимые параметры.',
+    'radio_buttons'        => ':attribute не верно.',
+    
     'custom' => [
         'alpha_space' => 'Поле атрибута: содержит символ, который не разрешен.',
-        'email_array'      => 'Один или несколько адресов электронной почты недействительны.',
+
         'hashed_pass'      => 'Ваш текущий пароль неверен',
         'dumbpwd'          => 'Этот пароль слишком распространен.',
         'statuslabel_type' => 'Вы должны выбрать допустимый тип метки статуса',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'Это поле существует, но недоступно в наборе полей этой модели актива.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => ':attribute должен быть допустимой датой в формате YYYY-MM-DD',
         'last_audit_date.date_format'   =>  ':attribute должен быть допустимой датой в формате YYYY-MM-DD hh:mm:ss',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  ':attribute должен быть допустимой датой в формате YYYY-MM-DD',
         'start_date.date_format'        =>  ':attribute должен быть допустимой датой в формате YYYY-MM-DD',
         'end_date.date_format'          =>  ':attribute должен быть допустимой датой в формате YYYY-MM-DD',
-        'checkboxes'           => ':attribute содержит недопустимые параметры.',
-        'radio_buttons'        => ':attribute не верно.',
         'invalid_value_in_field' => 'Недопустимое значение в этом поле',
+
+        'ldap_username_field' => [
+            'not_in' =>         '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead.'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'Это значение, вероятно, не должно быть заключено в скобки.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

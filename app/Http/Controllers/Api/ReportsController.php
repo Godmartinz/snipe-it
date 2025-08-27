@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Models\Actionlog;
+use App\Models\Company;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -18,9 +20,10 @@ class ReportsController extends Controller
      */
     public function index(Request $request) : JsonResponse | array
     {
-        $this->authorize('reports.view');
+        $this->authorize('activity.view');
 
         $actionlogs = Actionlog::with('item', 'user', 'adminuser', 'target', 'location');
+
 
         if ($request->filled('search')) {
             $actionlogs = $actionlogs->TextSearch(e($request->input('search')));
@@ -45,7 +48,7 @@ class ReportsController extends Controller
         }
 
         if ($request->filled('action_type')) {
-            $actionlogs = $actionlogs->where('action_type', '=', $request->input('action_type'))->orderBy('created_at', 'desc');
+            $actionlogs = $actionlogs->where('action_type', '=', $request->input('action_type'));
         }
 
         if ($request->filled('created_by')) {
@@ -53,15 +56,16 @@ class ReportsController extends Controller
         }
 
         if ($request->filled('action_source')) {
-            $actionlogs = $actionlogs->where('action_source', '=', $request->input('action_source'))->orderBy('created_at', 'desc');
+            $actionlogs = $actionlogs->where('action_source', '=', $request->input('action_source'));
+        }
+        
+        if ($request->filled('remote_ip')) {
+            $actionlogs = $actionlogs->where('remote_ip', '=', $request->input('remote_ip'));
         }
 
-        if ($request->filled('remote_ip')) {
-            $actionlogs = $actionlogs->where('remote_ip', '=', $request->input('remote_ip'))->orderBy('created_at', 'desc');
-        }
 
         if ($request->filled('uploads')) {
-            $actionlogs = $actionlogs->whereNotNull('filename')->orderBy('created_at', 'desc');
+            $actionlogs = $actionlogs->whereNotNull('filename');
         }
 
         $allowed_columns = [
@@ -74,6 +78,8 @@ class ReportsController extends Controller
             'note',
             'remote_ip',
             'user_agent',
+            'target_type',
+            'item_type',
             'action_source',
             'action_date',
         ];
@@ -91,7 +97,7 @@ class ReportsController extends Controller
                 $actionlogs->OrderByCreatedBy($order);
                 break;
             default:
-                $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
+                $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'action_logs.created_at';
                 $actionlogs = $actionlogs->orderBy($sort, $order);
                 break;
         }

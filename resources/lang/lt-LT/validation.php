@@ -31,6 +31,7 @@ return [
         'numeric' => ':attribute laukas turi būti nuo :min iki :max.',
         'string' => ':attribute lauke turi būti nuo :min iki :max simbolių.',
     ],
+    'valid_regex' => 'Paieškos reiškinys yra neteisingas.',
     'boolean' => ':attribute lauke turi būti „Taip“ arba „Ne“.',
     'can' => ':attribute lauke yra neleistina reikšmė.',
     'confirmed' => ':attribute lauko patvirtinimas nesutampa.',
@@ -172,6 +173,8 @@ return [
     'url' => ':attribute lauke turi būti galiojantis URL adresas.',
     'ulid' => ':attribute lauke turi būti galiojantis ULID identifikatorius.',
     'uuid' => ':attribute lauke turi būti galiojantis UUID identifikatorius.',
+    'fmcs_location' => 'Administratoriaus nustatymuose yra įjungtas pilnas kelių įmonių palaikymas ir vietos susiejimas, o pasirinkta vieta ir pasirinkta įmonė yra nesuderinamos.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => 'Vienas ar keli el. pašto adresai yra neteisingi.',
+    'checkboxes'           => ':attribute yra neteisingų parinkčių.',
+    'radio_buttons'        => ':atributas yra neteisingas.',
+    
     'custom' => [
         'alpha_space' => 'Lauke :attribute yra simbolis, kurio negalima naudoti.',
-        'email_array'      => 'Vienas ar keli el. pašto adresai yra neteisingi.',
+
         'hashed_pass'      => 'Jūsų dabartinis slaptažodis yra neteisingas',
         'dumbpwd'          => 'Šis slaptažodis yra per dažnas.',
         'statuslabel_type' => 'Turite pasirinkti tinkamą būsenos žymos tipą',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'Panašu, kad šis laukas egzistuoja, tačiau jo nėra šio turto modelio laukų rinkinyje.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => ':attribute turi būti galiojanti data YYYY-MM-DD formatu',
         'last_audit_date.date_format'   =>  ':attribute turi būti galiojanti data YYYY-MM-DD hh:mm:ss formatu',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  ':attribute turi būti galiojanti data YYYY-MM-DD formatu',
         'start_date.date_format'        =>  ':attribute turi būti galiojanti data YYYY-MM-DD formatu',
         'end_date.date_format'          =>  ':attribute turi būti galiojanti data YYYY-MM-DD formatu',
-        'checkboxes'           => ':attribute yra neteisingų parinkčių.',
-        'radio_buttons'        => ':attribute yra neteisingas.',
         'invalid_value_in_field' => 'Šiame lauke yra neteisinga reikšmė',
+
+        'ldap_username_field' => [
+            'not_in' =>         'Tikėtina, kad <code>sAMAccountName</code> (didžiosios ir mažosios raidės) neveiks. Vietoj to turėtumėte naudoti <code>samaccountname</code> (mažąsias raides).'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> tikriausiai nėra tinkamas autentifikavimo filtras. Tikriausiai jums reikia <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'Šios reikšmės tikriausiai nereikėtų rašyti skliausteliuose.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

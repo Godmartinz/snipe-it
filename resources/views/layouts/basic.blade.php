@@ -32,13 +32,6 @@
         .skin-blue .sidebar-menu > li:hover > a, .skin-blue .sidebar-menu > li.active > a {
         border-left-color: {{ $snipeSettings->header_color }};
         }
-
-        .btn-primary {
-        background-color: {{ $snipeSettings->header_color }};
-        border-color: {{ $snipeSettings->header_color }};
-        }
-
-
         </style>
     @endif
 
@@ -53,14 +46,14 @@
 <body class="hold-transition login-page">
 
     @if (($snipeSettings) && ($snipeSettings->logo!=''))
-        <center>
-            <a href="{{ config('app.url') }}"><img id="login-logo" src="{{ Storage::disk('public')->url('').e($snipeSettings->logo) }}"></a>
-        </center>
+        <div class="text-center">
+            <a href="{{ config('app.url') }}">
+                <img id="login-logo" src="{{ Storage::disk('public')->url('').e($snipeSettings->logo) }}" alt="{{ $snipeSettings->site_name }}">
+            </a>
+        </div>
     @endif
   <!-- Content -->
   @yield('content')
-
-
 
     <div class="text-center" style="padding-top: 100px;">
         @if (($snipeSettings) && ($snipeSettings->privacy_policy_link!=''))

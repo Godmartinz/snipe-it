@@ -30,6 +30,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
     protected $fillable = [
         'assigned_to',
         'asset_id',
+        'notes',
     ];
 
     use Acceptable;
@@ -43,7 +44,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
      * Determine whether the user should be required to accept the license
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     * @since  [v4.0]
      * @return bool
      */
     public function requireAcceptance()
@@ -63,7 +64,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
      * Establishes the seat -> license relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function license()
@@ -75,7 +76,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
      * Establishes the seat -> assignee relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function user()
@@ -87,7 +88,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
      * Establishes the seat -> asset relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     * @since  [v4.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function asset()
@@ -100,7 +101,7 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
      * or asset its assigned to
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     * @since  [v4.0]
      * @return string
      */
     public function location()
@@ -117,8 +118,8 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
     /**
      * Query builder scope to order on department
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  text                              $order         Order
+     * @param \Illuminate\Database\Query\Builder $query Query builder instance
+     * @param text                               $order Order
      *
      * @return \Illuminate\Database\Query\Builder          Modified query builder
      */
@@ -129,4 +130,22 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
             ->whereNotNull('license_seats.assigned_to')
             ->orderBy('license_user_dept.name', $order);
     }
+
+
+    public function scopeByAssigned($query)
+    {
+
+        return $query->where(
+            function ($query) {
+                $query->whereNotNull('assigned_to')
+                    ->orWhere(
+                        function ($query) {
+                            $query->whereNotNull('asset_id');
+                        }
+                    );
+            }
+        );
+
+    }
+
 }

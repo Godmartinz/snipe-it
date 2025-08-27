@@ -21,6 +21,13 @@ class ComponentsCheckoutTest extends TestCase
             ->assertForbidden();
     }
 
+    public function testPageRenders()
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('components.checkout.show', Component::factory()->create()->id))
+            ->assertOk();
+    }
+
     public function test_cannot_checkout_across_companies_when_full_company_support_enabled()
     {
         Event::fake([CheckoutableCheckedOut::class]);
@@ -55,6 +62,7 @@ class ComponentsCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('components.index'));
+        $this->assertHasTheseActionLogs($component, ['create', 'checkout']);
     }
 
     public function testComponentCheckoutPagePostIsRedirectedIfRedirectSelectionIsItem()
@@ -69,7 +77,8 @@ class ComponentsCheckoutTest extends TestCase
                 'assigned_qty' => 1,
             ])
             ->assertStatus(302)
-            ->assertRedirect(route('components.show', ['component' => $component->id]));
+            ->assertRedirect(route('components.show', $component));
+        $this->assertHasTheseActionLogs($component, ['create', 'checkout']);
     }
 
     public function testComponentCheckoutPagePostIsRedirectedIfRedirectSelectionIsTarget()
@@ -85,6 +94,7 @@ class ComponentsCheckoutTest extends TestCase
                 'assigned_qty' => 1,
             ])
             ->assertStatus(302)
-            ->assertRedirect(route('hardware.show', ['hardware' => $asset]));
+            ->assertRedirect(route('hardware.show', $asset));
+        $this->assertHasTheseActionLogs($component, ['create', 'checkout']);
     }
 }

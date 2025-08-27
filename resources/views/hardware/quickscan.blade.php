@@ -16,10 +16,10 @@
         }
     </style>
 
-    
+
 
     <div class="row">
-    {{ Form::open(['method' => 'POST', 'class' => 'form-horizontal', 'role' => 'form', 'id' => 'audit-form' ]) }}
+    <form method="POST" accept-charset="UTF-8" class="form-horizontal" role="form" id="audit-form">
         <!-- left column -->
         <div class="col-md-6">
             <div class="box box-default">
@@ -29,10 +29,10 @@
 
                     <!-- Next Audit -->
                         <div class="form-group {{ $errors->has('asset_tag') ? 'error' : '' }}">
-                            {{ Form::label('asset_tag', trans('general.asset_tag'), array('class' => 'col-md-3 control-label', 'id' => 'audit_tag')) }}
+                            <label for="asset_tag" class="col-md-3 control-label" id="audit_tag">{{ trans('general.asset_tag') }}</label>
                             <div class="col-md-9">
                                 <div class="input-group date col-md-11 required" data-date-format="yyyy-mm-dd">
-                                    <input type="text" class="form-control" name="asset_tag" id="asset_tag" value="{{ old('asset_tag') }}">
+                                    <input type="text" class="form-control" name="asset_tag" id="asset_tag" required value="{{ old('asset_tag') }}">
 
                                 </div>
                                 {!! $errors->first('asset_tag', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
@@ -60,7 +60,7 @@
 
                         <!-- Next Audit -->
                         <div class="form-group {{ $errors->has('next_audit_date') ? 'error' : '' }}">
-                            {{ Form::label('next_audit_date', trans('general.next_audit_date'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="next_audit_date" class="col-md-3 control-label">{{ trans('general.next_audit_date') }}</label>
                             <div class="col-md-9">
                                 <div class="input-group date col-md-5" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-clear-btn="true">
                                     <input type="text" class="form-control" placeholder="{{ trans('general.next_audit_date') }}" name="next_audit_date" id="next_audit_date" value="{{ old('next_audit_date', $next_audit_date) }}">
@@ -73,7 +73,7 @@
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
@@ -92,7 +92,7 @@
 
 
 
-            {{Form::close()}}
+            </form>
         </div> <!--/.col-md-6-->
 
         <div class="col-md-6">
@@ -101,7 +101,7 @@
                     <h2 class="box-title"> {{ trans('general.bulkaudit_status') }} (<span id="audit-counter">0</span> {{ trans('general.assets_audited') }}) </h2>
                 </div>
                 <div class="box-body">
-    
+
                     <table id="audited" class="table table-striped snipe-table">
                         <thead>
                         <tr>
@@ -112,7 +112,7 @@
                         <tr id="audit-loader" style="display: none;">
                             <td colspan="3">
                                 <x-icon type="spinner" />
-                                {{ trans('admin/hardware/form.processing_spinner') }}
+                                {{ trans('admin/hardware/form.processing') }}
                             </td>
                         </tr>
                         </thead>
@@ -140,9 +140,10 @@
 
             var form = $("#audit-form").get(0);
             var formData = $('#audit-form').serializeArray();
+            var asset_tag = $('#asset_tag').val();
 
             $.ajax({
-                url: "{{ route('api.asset.audit') }}",
+                url: "{{ route('api.asset.audit.legacy') }}",
                 type : 'POST',
                 headers: {
                     "X-Requested-With": 'XMLHttpRequest',
@@ -151,6 +152,7 @@
                 dataType : 'json',
                 data : formData,
                 success : function (data) {
+
                     if (data.status == 'success') {
                         $('#audited tbody').prepend("<tr class='success'><td>" + data.payload.asset_tag + "</td><td>" + data.messages + "</td><td><i class='fas fa-check text-success' style='font-size:18px;'></i></td></tr>");
 
@@ -158,15 +160,15 @@
                         var audio = new Audio('{{ config('app.url') }}/sounds/success.mp3');
                         audio.play()
                         @endif
-                            
+
                         incrementOnSuccess();
                     } else {
-                        handleAuditFail(data);
+                        handleAuditFail(data, asset_tag);
                     }
                     $('input#asset_tag').val('');
                 },
                 error: function (data) {
-                    handleAuditFail(data);
+                    handleAuditFail(data, asset_tag);
                 },
                 complete: function() {
                     $('#audit-loader').hide();
@@ -177,22 +179,29 @@
             return false;
         });
 
-        function handleAuditFail (data) {
+        function handleAuditFail (data, asset_tag) {
             @if ($user->enable_sounds)
             var audio = new Audio('{{ config('app.url') }}/sounds/error.mp3');
             audio.play()
             @endif
-            if (data.asset_tag) {
-                var asset_tag = data.asset_tag;
-            } else {
-                var asset_tag = '';
+
+
+            if ((!asset_tag) && (data.payload)  && (data.payload.asset_tag)) {
+                asset_tag = data.payload.asset_tag;
             }
-            if (data.messages) {
-                var messages = data.messages;
-            } else {
-                var messages = '';
+
+            asset_tag = jQuery('<span>' + asset_tag + '</span>').text();
+
+            let messages = "";
+
+            // Loop through the error messages
+            if ((data.messages)  && (data.messages)) {
+                for (let x in data.messages) {
+                    messages += data.messages[x];
+                }
             }
-            $('#audited tbody').prepend("<tr class='danger'><td>" + data.payload.asset_tag + "</td><td>" + messages + "</td><td><i class='fas fa-times text-danger' style='font-size:18px;'></i></td></tr>");
+
+            $('#audited tbody').prepend("<tr class='danger'><td>" + asset_tag + "</td><td>" + messages + "</td><td><i class='fas fa-times text-danger' style='font-size:18px;'></i></td></tr>");
         }
 
         function incrementOnSuccess() {

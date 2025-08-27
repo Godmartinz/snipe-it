@@ -12,17 +12,10 @@
     <div class="col-md-12">
         <div class="box box-default">
             <div class="box-body">
-                <div class="table-responsive">
-
                     <table
                             data-cookie-id-table="licensesReport"
-                            data-pagination="true"
                             data-id-table="licensesReport"
-                            data-search="true"
                             data-side-pagination="client"
-                            data-show-columns="true"
-                            data-show-export="true"
-                            data-show-refresh="true"
                             data-sort-order="asc"
                             id="licensesReport"
                             class="table table-striped snipe-table"
@@ -78,7 +71,6 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div> <!-- /.table-responsive-->
             </div>
         </div>
     </div>

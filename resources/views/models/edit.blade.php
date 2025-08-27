@@ -9,7 +9,6 @@
 
 {{-- Page content --}}
 @section('inputFields')
-
 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/models/table.name'), 'required' => 'true'])
 @include ('partials.forms.edit.category-select', ['translated_name' => trans('admin/categories/general.category_name'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'asset'])
 @include ('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id'])
@@ -36,7 +35,7 @@
 
 <!-- Custom Fieldset -->
 <!-- If $item->id is null we are cloning the model and we need the $model_id variable -->
-@livewire('custom-field-set-default-values-for-model',["model_id" => $item->id ?? $model_id ?? null  ])
+@livewire('custom-field-set-default-values-for-model', ["model_id" => $item->id ?? $model_id ?? null])
 
 @include ('partials.forms.edit.notes')
 @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/models/general.requestable')])

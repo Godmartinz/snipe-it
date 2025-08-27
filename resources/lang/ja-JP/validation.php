@@ -31,6 +31,7 @@ return [
         'numeric' => 'The :attribute field must be between :min and :max.',
         'string' => 'The :attribute field must be between :min and :max characters.',
     ],
+    'valid_regex' => 'The regular expression is invalid.',
     'boolean' => 'The :attribute field must be true or false.',
     'can' => 'The :attribute field contains an unauthorized value.',
     'confirmed' => 'The :attribute field confirmation does not match.',
@@ -172,6 +173,8 @@ return [
     'url' => 'The :attribute field must be a valid URL.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
+    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+
 
     /*
     |--------------------------------------------------------------------------
@@ -184,9 +187,13 @@ return [
     |
     */
 
+    'email_array'      => '1 つまたは複数の電子メール アドレスが無効です。',
+    'checkboxes'           => ':attribute に無効なオプションが含まれています。',
+    'radio_buttons'        => ':attribute は不正です。',
+    
     'custom' => [
         'alpha_space' => ':attribute フィールドに、禁止文字列が含まれています。',
-        'email_array'      => '1 つまたは複数の電子メール アドレスが無効です。',
+
         'hashed_pass'      => '現在のパスワードが正しくありません。',
         'dumbpwd'          => 'そのパスワードはあまりにも脆弱です。',
         'statuslabel_type' => '有効なステータスラベルの種類を選択する必要があります。',
@@ -194,7 +201,7 @@ return [
         'custom_field_not_found_on_model' => 'This field seems to exist, but is not available on this Asset Model\'s fieldset.',
 
         // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
-        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // We use this because the default error message for date_format reflects php Y-m-d, which non-PHP
         // people won't know how to format.
         'purchase_date.date_format'     => ':attribute は YYYY-MM-DD 形式の有効な日付にして下さい',
         'last_audit_date.date_format'   =>  ':attribute は YYYY-MM-DD hh:mm:ss 形式の有効な日時にして下さい',
@@ -203,9 +210,14 @@ return [
         'expected_checkin.date_format'  =>  ':attribute は YYYY-MM-DD 形式の有効な日付にして下さい',
         'start_date.date_format'        =>  ':attribute は YYYY-MM-DD 形式の有効な日付にして下さい',
         'end_date.date_format'          =>  ':attribute は YYYY-MM-DD 形式の有効な日付にして下さい',
-        'checkboxes'           => ':attribute に無効なオプションが含まれています。',
-        'radio_buttons'        => ':attribute は不正です。',
         'invalid_value_in_field' => 'このフィールドに含まれる値が無効です',
+
+        'ldap_username_field' => [
+            'not_in' =>         '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead.'
+        ],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> '],
+        'ldap_filter' => ['regex' => 'This value should probably not be wrapped in parentheses.'],
+
         ],
     /*
     |--------------------------------------------------------------------------

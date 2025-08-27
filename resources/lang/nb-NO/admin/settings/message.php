@@ -36,6 +36,9 @@ return [
         'testing_authentication' => 'Tester LDAP-autentisering...',
         'authentication_success' => 'Brukeren ble autentisert mot LDAP!'
     ],
+    'labels' => [
+        'null_template' => 'Label template not found. Please select a template.',
+        ],
     'webhook' => [
         'sending' => 'Sender :app test melding...',
         'success' => 'Ditt :webhook_name integrasjon fungerer!',
@@ -45,5 +48,12 @@ return [
         'error' => 'Noe gikk galt. :app svarte med: :error_message',
         'error_redirect' => 'FEIL: 301/302 :endpoint returnerer en omaddressering. Av sikkerhetsgrunner følger vi ikke omadressering. Vennligst bruk det faktiske endepunktet.',
         'error_misc' => 'Noe gikk galt. :( ',
-    ]
+        'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',
+        'webhook_channel_not_found' => ' webhook channel not found.',
+        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+    ],
+    'location_scoping' => [
+        'not_saved' => 'Your settings were not saved.',
+        'mismatch' => 'There is 1 item in the database that need your attention before you can enable location scoping.|There are :count items in the database that need your attention before you can enable location scoping.',
+    ],
 ];

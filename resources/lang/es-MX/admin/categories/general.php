@@ -3,7 +3,8 @@
 return array(
     'asset_categories' 					=> 'Categorías de activos',
     'category_name'  					=> 'Nombre de la categoría',
-    'checkin_email'                     => 'Enviar un correo al usuario al recibir/devolver.',
+    'checkin_email'                     => 'Enviar un correo electrónico al usuario al recibir/devolver.',
+    'email_to_initiator'                => 'Send email to you when user accepts or declines checkout.',
     'checkin_email_notification'        => 'A este usuario se le enviará un correo electrónico al recibir/devolver.',
     'clone'                             => 'Clonar categoría',
     'create'  							=> 'Crear categoría',
@@ -14,12 +15,16 @@ return array(
     'eula_text_help'					=> 'Este campo permite personalizar el acuerdo de uso para tipos específicos de activos. Si solo tiene un acuerdo de uso para todos sus activos, puede seleccionar la siguiente opción para usar la definición predeterminada.',
     'name'                              => 'Nombre de la categoría',
     'require_acceptance'				=> 'Requerir a los usuarios que confirmen la aceptación de los elementos en esta categoría.',
-    'required_acceptance'				=> 'Este usuario recibirá un correo con un enlace para confirmar la aceptación de este elemento.',
+    'required_acceptance'				=> 'Este usuario recibirá un correo electrónico con un enlace para confirmar la aceptación de este elemento.',
     'required_eula'						=> 'Se enviará un correo electrónico a este usuario con una copia del acuerdo de uso',
     'no_default_eula'					=> 'No se encontró una definición del acuerdo de uso por defecto. Agregue uno en Configuración.',
     'update'  							=> 'Actualizar categoría',
     'use_default_eula'					=> 'En su lugar, utilice el <a href="#" data-toggle="modal" data-target="#eulaModal">acuerdo de uso predeterminado</a>.',
     'use_default_eula_disabled'			=> '<del>En su lugar, utilice el acuerdo de uso predeterminado.</del> No se ha establecido el acuerdo de uso predeterminado. Por favor agregue uno en Configuración.',
     'use_default_eula_column'			=> 'Utilizar el acuerdo de uso predeterminado',
+    'import_require_acceptance'         => 'Require Acceptance',
+    'import_checkin_email'              => 'Send Checkin Email',
+    'import_eula_text'                  => 'EULA text',
+    'import_category_type'              => 'Category Type',
 
 );

@@ -78,7 +78,7 @@ class RequestAssetNotification extends Notification
 
         $fields = [
             'QTY' => $qty,
-            'Requested By' => '<'.$target->present()->viewUrl().'|'.$target->present()->fullName().'>',
+            'Requested By' => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
         ];
 
         return (new SlackMessage)

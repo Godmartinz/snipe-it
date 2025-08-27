@@ -77,7 +77,13 @@ class CategoryPresenter extends Presenter
                 "title" => trans('admin/categories/general.use_default_eula_column'),
                 'visible' => true,
                 "formatter" => 'trueFalseFormatter',
-            ],[
+            ], [
+                'field' => 'notes',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.notes'),
+            ], [
                 'field' => 'created_by',
                 'searchable' => false,
                 'sortable' => true,
@@ -106,7 +112,8 @@ class CategoryPresenter extends Presenter
                 'sortable' => false,
                 'switchable' => false,
                 'title' => trans('table.actions'),
-		'formatter' => 'categoriesActionsFormatter',
+		        'formatter' => 'categoriesActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 

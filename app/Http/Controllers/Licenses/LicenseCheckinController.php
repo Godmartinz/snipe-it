@@ -28,16 +28,11 @@ class LicenseCheckinController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create($seatId = null, $backTo = null)
+    public function create(LicenseSeat $licenseSeat, $backTo = null)
     {
         // Check if the asset exists
-        if (is_null($licenseSeat = LicenseSeat::find($seatId)) || is_null($license = License::find($licenseSeat->license_id))) {
-            // Redirect to the asset management page with error
-            return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.not_found'));
-        }
-
+        $license = License::find($licenseSeat->license_id);
         $this->authorize('checkout', $license);
-
         return view('licenses/checkin', compact('licenseSeat'))->with('backto', $backTo);
     }
 
@@ -71,7 +66,7 @@ class LicenseCheckinController extends Controller
 
         if (! $license->reassignable) {
             // Not allowed to checkin
-            Session::flash('error', 'License not reassignable.');
+            Session::flash('error', trans('admin/licenses/message.checkin.not_reassignable') . '.');
 
             return redirect()->back()->withInput();
         }
@@ -91,7 +86,10 @@ class LicenseCheckinController extends Controller
         }
 
         if($licenseSeat->assigned_to != null){
-            $return_to = User::find($licenseSeat->assigned_to);
+            $return_to = User::withTrashed()->find($licenseSeat->assigned_to);
+            if ($return_to) {
+                session()->put('checkedInFrom', $return_to->id);
+            }
         } else {
             $return_to = Asset::find($licenseSeat->asset_id);
         }
@@ -102,14 +100,17 @@ class LicenseCheckinController extends Controller
         $licenseSeat->notes = $request->input('notes');
 
         session()->put(['redirect_option' => $request->get('redirect_option')]);
-
+        if ($request->get('redirect_option') === 'target'){
+            session()->put(['checkout_to_type' => 'user']);
+        }
 
         // Was the asset updated?
         if ($licenseSeat->save()) {
             event(new CheckoutableCheckedIn($licenseSeat, $return_to, auth()->user(), $request->input('notes')));
 
 
-            return redirect()->to(Helper::getRedirectOption($request, $license->id, 'Licenses'))->with('success', trans('admin/licenses/message.checkin.success'));
+            return Helper::getRedirectOption($request, $license->id, 'Licenses')
+                ->with('success', trans('admin/licenses/message.checkin.success'));
         }
 
         // Redirect to the license page with error

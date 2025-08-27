@@ -7,6 +7,9 @@
 |        |          |
 | ------------- | ------------- |
 | **{{ trans('mail.user') }}** | {{ $assigned_to }} |
+@if (isset($user->location))
+| **{{ trans('general.location') }}** | {{ $user->location->name }} |
+@endif
 @if (isset($accepted_date))
 | **{{ ucfirst(trans('general.accepted')) }}** | {{ $accepted_date }} |
 @endif
@@ -22,6 +25,9 @@
 @if ((isset($item_tag)) && ($item_tag!=''))
 | **{{ trans('mail.asset_tag') }}** | {{ $item_tag }} |
 @endif
+@if (isset($item->model->category))
+| **{{ trans('general.category') }}** | {{ $item->model->category->name }} |
+@endif
 @if ((isset($item_model)) && ($item_model!=''))
 | **{{ trans('mail.asset_name') }}** | {{ $item_model }} |
 @endif
@@ -30,6 +36,9 @@
 @endif
 @if (isset($item_serial))
 | **{{ trans('mail.serial') }}** | {{ $item_serial }} |
+@endif
+@if (isset($admin))
+| **{{ trans('general.administrator') }}** | {{ $admin }} |
 @endif
 @endcomponent
 
