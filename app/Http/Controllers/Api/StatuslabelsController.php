@@ -13,6 +13,7 @@ use App\Models\Statuslabel;
 use Illuminate\Http\Request;
 use App\Http\Transformers\PieChartTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 
 class StatuslabelsController extends Controller
 {
@@ -97,7 +98,11 @@ class StatuslabelsController extends Controller
         $statuslabel = new Statuslabel;
         $statuslabel->fill($request->all());
 
-        $statusType = Statuslabel::getStatuslabelTypesForDB($request->input('type'));
+        $validated = $request->validate([
+            'type' => ['required', Rule::in(['deployable','pending','archived','undeployable'])],
+        ]);
+
+        $statusType = Statuslabel::getStatuslabelTypesForDB(strtolower($validated['type']));
         $statuslabel->deployable = $statusType['deployable'];
         $statuslabel->pending = $statusType['pending'];
         $statuslabel->archived = $statusType['archived'];
@@ -106,7 +111,7 @@ class StatuslabelsController extends Controller
         $statuslabel->default_label     =  $request->input('default_label', 0);
 
 
-        if ($statuslabel->validate() && $statuslabel->save()) {
+        if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.create.success')));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $statuslabel->getErrors()));
@@ -148,10 +153,12 @@ class StatuslabelsController extends Controller
         if (! $request->filled('type')) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Status label type is required.'));
         }
-
+        $validated = $request->validate([
+            'type' => ['required', Rule::in(['deployable','pending','archived', 'undeployable'])],
+        ]);
         $statuslabel->fill($request->all());
 
-        $statusType = Statuslabel::getStatuslabelTypesForDB($request->input('type'));
+        $statusType = Statuslabel::getStatuslabelTypesForDB(strtolower($validated['type']));
         $statuslabel->deployable = $statusType['deployable'];
         $statuslabel->pending = $statusType['pending'];
         $statuslabel->archived = $statusType['archived'];
