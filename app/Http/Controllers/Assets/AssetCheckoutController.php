@@ -31,7 +31,6 @@ class AssetCheckoutController extends Controller
     {
 
         $this->authorize('checkout', $asset);
-
         if (!$asset->model) {
             return redirect()->route('hardware.show', $asset)
                 ->with('error', trans('admin/hardware/general.model_invalid_fix'));
@@ -120,7 +119,8 @@ class AssetCheckoutController extends Controller
                 }
             }
 
-            session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+            session()->put(['redirect_option' => $request->get('redirect_option'),
+                            'checkout_to_type' => $request->get('checkout_to_type')]);
 
             if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
                 return Helper::getRedirectOption($request, $asset->id, 'Assets')
