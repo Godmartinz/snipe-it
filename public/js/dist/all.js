@@ -1,19 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./node_modules/admin-lte/build/less/AdminLTE.less":
-/*!*********************************************************!*\
-  !*** ./node_modules/admin-lte/build/less/AdminLTE.less ***!
-  \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
 /***/ "./node_modules/admin-lte/dist/js/adminlte.min.js":
 /*!********************************************************!*\
   !*** ./node_modules/admin-lte/dist/js/adminlte.min.js ***!
@@ -33,6 +20,1292 @@ __webpack_require__.r(__webpack_exports__);
 * @license MIT <http://opensource.org/licenses/MIT>
 */
 if("undefined"==typeof jQuery)throw new Error("AdminLTE requires jQuery");!function(i){"use strict";function s(t,e){if(this.element=t,this.options=e,this.$overlay=i(e.overlayTemplate),""===e.source)throw new Error("Source url was not defined. Please specify a url in your BoxRefresh source option.");this._setUpListeners(),this.load()}var r="lte.boxrefresh",a={source:"",params:{},trigger:".refresh-btn",content:".box-body",loadInContent:!0,responseType:"",overlayTemplate:'<div class="overlay"><div class="fa fa-refresh fa-spin"></div></div>',onLoadStart:function(){},onLoadDone:function(t){return t}},t='[data-widget="box-refresh"]';function e(n){return this.each(function(){var t=i(this),e=t.data(r);if(!e){var o=i.extend({},a,t.data(),"object"==typeof n&&n);t.data(r,e=new s(t,o))}if("string"==typeof e){if(void 0===e[n])throw new Error("No method named "+n);e[n]()}})}s.prototype.load=function(){this._addOverlay(),this.options.onLoadStart.call(i(this)),i.get(this.options.source,this.options.params,function(t){this.options.loadInContent&&i(this.element).find(this.options.content).html(t),this.options.onLoadDone.call(i(this),t),this._removeOverlay()}.bind(this),""!==this.options.responseType&&this.options.responseType)},s.prototype._setUpListeners=function(){i(this.element).on("click",this.options.trigger,function(t){t&&t.preventDefault(),this.load()}.bind(this))},s.prototype._addOverlay=function(){i(this.element).append(this.$overlay)},s.prototype._removeOverlay=function(){i(this.$overlay).remove()};var o=i.fn.boxRefresh;i.fn.boxRefresh=e,i.fn.boxRefresh.Constructor=s,i.fn.boxRefresh.noConflict=function(){return i.fn.boxRefresh=o,this},i(window).on("load",function(){i(t).each(function(){e.call(i(this))})})}(jQuery),function(i){"use strict";function s(t,e){this.element=t,this.options=e,this._setUpListeners()}var r="lte.boxwidget",a={animationSpeed:500,collapseTrigger:'[data-widget="collapse"]',removeTrigger:'[data-widget="remove"]',collapseIcon:"fa-minus",expandIcon:"fa-plus",removeIcon:"fa-times"},t=".box",e=".collapsed-box",d=".box-header",l=".box-body",c=".box-footer",h=".box-tools",f="collapsed-box",p="collapsing.boxwidget",u="collapsed.boxwidget",g="expanding.boxwidget",v="expanded.boxwidget",o="removing.boxwidget",n="removed.boxwidget";function b(n){return this.each(function(){var t=i(this),e=t.data(r);if(!e){var o=i.extend({},a,t.data(),"object"==typeof n&&n);t.data(r,e=new s(t,o))}if("string"==typeof n){if(void 0===e[n])throw new Error("No method named "+n);e[n]()}})}s.prototype.toggle=function(){!i(this.element).is(e)?this.collapse():this.expand()},s.prototype.expand=function(){var t=i.Event(v),e=i.Event(g),o=this.options.collapseIcon,n=this.options.expandIcon;i(this.element).removeClass(f),i(this.element).children(d+", "+l+", "+c).children(h).find("."+n).removeClass(n).addClass(o),i(this.element).children(l+", "+c).slideDown(this.options.animationSpeed,function(){i(this.element).trigger(t)}.bind(this)).trigger(e)},s.prototype.collapse=function(){var t=i.Event(u),e=i.Event(p),o=this.options.collapseIcon,n=this.options.expandIcon;i(this.element).children(d+", "+l+", "+c).children(h).find("."+o).removeClass(o).addClass(n),i(this.element).children(l+", "+c).slideUp(this.options.animationSpeed,function(){i(this.element).addClass(f),i(this.element).trigger(t)}.bind(this)).trigger(e)},s.prototype.remove=function(){var t=i.Event(n),e=i.Event(o);i(this.element).slideUp(this.options.animationSpeed,function(){i(this.element).trigger(t),i(this.element).remove()}.bind(this)).trigger(e)},s.prototype._setUpListeners=function(){var e=this;i(this.element).on("click",this.options.collapseTrigger,function(t){return t&&t.preventDefault(),e.toggle(i(this)),!1}),i(this.element).on("click",this.options.removeTrigger,function(t){return t&&t.preventDefault(),e.remove(i(this)),!1})};var m=i.fn.boxWidget;i.fn.boxWidget=b,i.fn.boxWidget.Constructor=s,i.fn.boxWidget.noConflict=function(){return i.fn.boxWidget=m,this},i(window).on("load",function(){i(t).each(function(){b.call(i(this))})})}(jQuery),function(i){"use strict";function s(t,e){this.element=t,this.options=e,this.hasBindedResize=!1,this.init()}var r="lte.controlsidebar",a={controlsidebarSlide:!0},e=".control-sidebar",t='[data-toggle="control-sidebar"]',o=".control-sidebar-open",n=".control-sidebar-bg",d=".wrapper",l=".layout-boxed",c="control-sidebar-open",h="control-sidebar-hold-transition",f="collapsed.controlsidebar",p="expanded.controlsidebar";function u(n){return this.each(function(){var t=i(this),e=t.data(r);if(!e){var o=i.extend({},a,t.data(),"object"==typeof n&&n);t.data(r,e=new s(t,o))}"string"==typeof n&&e.toggle()})}s.prototype.init=function(){i(this.element).is(t)||i(this).on("click",this.toggle),this.fix(),i(window).resize(function(){this.fix()}.bind(this))},s.prototype.toggle=function(t){t&&t.preventDefault(),this.fix(),i(e).is(o)||i("body").is(o)?this.collapse():this.expand()},s.prototype.expand=function(){i(e).show(),this.options.controlsidebarSlide?i(e).addClass(c):i("body").addClass(h).addClass(c).delay(50).queue(function(){i("body").removeClass(h),i(this).dequeue()}),i(this.element).trigger(i.Event(p))},s.prototype.collapse=function(){this.options.controlsidebarSlide?i(e).removeClass(c):i("body").addClass(h).removeClass(c).delay(50).queue(function(){i("body").removeClass(h),i(this).dequeue()}),i(e).fadeOut(),i(this.element).trigger(i.Event(f))},s.prototype.fix=function(){i("body").is(l)&&this._fixForBoxed(i(n))},s.prototype._fixForBoxed=function(t){t.css({position:"absolute",height:i(d).height()})};var g=i.fn.controlSidebar;i.fn.controlSidebar=u,i.fn.controlSidebar.Constructor=s,i.fn.controlSidebar.noConflict=function(){return i.fn.controlSidebar=g,this},i(document).on("click",t,function(t){t&&t.preventDefault(),u.call(i(this),"toggle")})}(jQuery),function(n){"use strict";function i(t){this.element=t}var s="lte.directchat",t='[data-widget="chat-pane-toggle"]',e=".direct-chat",o="direct-chat-contacts-open";function r(o){return this.each(function(){var t=n(this),e=t.data(s);e||t.data(s,e=new i(t)),"string"==typeof o&&e.toggle(t)})}i.prototype.toggle=function(t){t.parents(e).first().toggleClass(o)};var a=n.fn.directChat;n.fn.directChat=r,n.fn.directChat.Constructor=i,n.fn.directChat.noConflict=function(){return n.fn.directChat=a,this},n(document).on("click",t,function(t){t&&t.preventDefault(),r.call(n(this),"toggle")})}(jQuery),function(i){"use strict";function s(t){this.options=t,this.init()}var r="lte.pushmenu",a={collapseScreenSize:767,expandOnHover:!1,expandTransitionDelay:200},t=".sidebar-collapse",e=".main-sidebar",o=".content-wrapper",n=".sidebar-form .form-control",d='[data-toggle="push-menu"]',l=".sidebar-mini",c=".sidebar-expanded-on-hover",h=".fixed",f="sidebar-collapse",p="sidebar-open",u="sidebar-expanded-on-hover",g="sidebar-mini-expand-feature",v="expanded.pushMenu",b="collapsed.pushMenu";function m(n){return this.each(function(){var t=i(this),e=t.data(r);if(!e){var o=i.extend({},a,t.data(),"object"==typeof n&&n);t.data(r,e=new s(o))}"toggle"===n&&e.toggle()})}s.prototype.init=function(){(this.options.expandOnHover||i("body").is(l+h))&&(this.expandOnHover(),i("body").addClass(g)),i(o).click(function(){i(window).width()<=this.options.collapseScreenSize&&i("body").hasClass(p)&&this.close()}.bind(this)),i(n).click(function(t){t.stopPropagation()})},s.prototype.toggle=function(){var t=i(window).width(),e=!i("body").hasClass(f);t<=this.options.collapseScreenSize&&(e=i("body").hasClass(p)),e?this.close():this.open()},s.prototype.open=function(){i(window).width()>this.options.collapseScreenSize?i("body").removeClass(f).trigger(i.Event(v)):i("body").addClass(p).trigger(i.Event(v))},s.prototype.close=function(){i(window).width()>this.options.collapseScreenSize?i("body").addClass(f).trigger(i.Event(b)):i("body").removeClass(p+" "+f).trigger(i.Event(b))},s.prototype.expandOnHover=function(){i(e).hover(function(){i("body").is(l+t)&&i(window).width()>this.options.collapseScreenSize&&this.expand()}.bind(this),function(){i("body").is(c)&&this.collapse()}.bind(this))},s.prototype.expand=function(){setTimeout(function(){i("body").removeClass(f).addClass(u)},this.options.expandTransitionDelay)},s.prototype.collapse=function(){setTimeout(function(){i("body").removeClass(u).addClass(f)},this.options.expandTransitionDelay)};var y=i.fn.pushMenu;i.fn.pushMenu=m,i.fn.pushMenu.Constructor=s,i.fn.pushMenu.noConflict=function(){return i.fn.pushMenu=y,this},i(document).on("click",d,function(t){t.preventDefault(),m.call(i(this),"toggle")}),i(window).on("load",function(){m.call(i(d))})}(jQuery),function(i){"use strict";function s(t,e){this.element=t,this.options=e,this._setUpListeners()}var r="lte.todolist",a={onCheck:function(t){return t},onUnCheck:function(t){return t}},e={data:'[data-widget="todo-list"]'},o="done";function t(n){return this.each(function(){var t=i(this),e=t.data(r);if(!e){var o=i.extend({},a,t.data(),"object"==typeof n&&n);t.data(r,e=new s(t,o))}if("string"==typeof e){if(void 0===e[n])throw new Error("No method named "+n);e[n]()}})}s.prototype.toggle=function(t){t.parents(e.li).first().toggleClass(o),t.prop("checked")?this.check(t):this.unCheck(t)},s.prototype.check=function(t){this.options.onCheck.call(t)},s.prototype.unCheck=function(t){this.options.onUnCheck.call(t)},s.prototype._setUpListeners=function(){var t=this;i(this.element).on("change ifChanged","input:checkbox",function(){t.toggle(i(this))})};var n=i.fn.todoList;i.fn.todoList=t,i.fn.todoList.Constructor=s,i.fn.todoList.noConflict=function(){return i.fn.todoList=n,this},i(window).on("load",function(){i(e.data).each(function(){t.call(i(this))})})}(jQuery),function(s){"use strict";function n(t,e){this.element=t,this.options=e,s(this.element).addClass(h),s(a+o,this.element).addClass(c),this._setUpListeners()}var i="lte.tree",r={animationSpeed:500,accordion:!0,followLink:!1,trigger:".treeview a"},a=".treeview",d=".treeview-menu",l=".menu-open, .active",t='[data-widget="tree"]',o=".active",c="menu-open",h="tree",f="collapsed.tree",p="expanded.tree";function e(o){return this.each(function(){var t=s(this);if(!t.data(i)){var e=s.extend({},r,t.data(),"object"==typeof o&&o);t.data(i,new n(t,e))}})}n.prototype.toggle=function(t,e){var o=t.next(d),n=t.parent(),i=n.hasClass(c);n.is(a)&&(this.options.followLink&&"#"!==t.attr("href")||e.preventDefault(),i?this.collapse(o,n):this.expand(o,n))},n.prototype.expand=function(t,e){var o=s.Event(p);if(this.options.accordion){var n=e.siblings(l),i=n.children(d);this.collapse(i,n)}e.addClass(c),t.stop().slideDown(this.options.animationSpeed,function(){s(this.element).trigger(o),e.height("auto")}.bind(this))},n.prototype.collapse=function(t,e){var o=s.Event(f);e.removeClass(c),t.stop().slideUp(this.options.animationSpeed,function(){s(this.element).trigger(o),e.find(a).removeClass(c).find(d).hide()}.bind(this))},n.prototype._setUpListeners=function(){var e=this;s(this.element).on("click",this.options.trigger,function(t){e.toggle(s(this),t)})};var u=s.fn.tree;s.fn.tree=e,s.fn.tree.Constructor=n,s.fn.tree.noConflict=function(){return s.fn.tree=u,this},s(window).on("load",function(){s(t).each(function(){e.call(s(this))})})}(jQuery),function(a){"use strict";function i(t){this.options=t,this.bindedResize=!1,this.activate()}var s="lte.layout",r={slimscroll:!0,resetHeight:!0},d=".wrapper",l=".content-wrapper",c=".layout-boxed",h=".main-footer",f=".main-header",t=".main-sidebar",e="slimScrollDiv",p=".sidebar",u=".control-sidebar",o=".sidebar-menu",n=".main-header .logo",g="fixed",v="hold-transition";function b(n){return this.each(function(){var t=a(this),e=t.data(s);if(!e){var o=a.extend({},r,t.data(),"object"==typeof n&&n);t.data(s,e=new i(o))}if("string"==typeof n){if(void 0===e[n])throw new Error("No method named "+n);e[n]()}})}i.prototype.activate=function(){this.fix(),this.fixSidebar(),a("body").removeClass(v),this.options.resetHeight&&a("body, html, "+d).css({height:"auto","min-height":"100%"}),this.bindedResize||(a(window).resize(function(){this.fix(),this.fixSidebar(),a(n+", "+p).one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend",function(){this.fix(),this.fixSidebar()}.bind(this))}.bind(this)),this.bindedResize=!0),a(o).on("expanded.tree",function(){this.fix(),this.fixSidebar()}.bind(this)),a(o).on("collapsed.tree",function(){this.fix(),this.fixSidebar()}.bind(this))},i.prototype.fix=function(){a(c+" > "+d).css("overflow","hidden");var t=a(h).outerHeight()||0,e=a(f).outerHeight()||0,o=e+t,n=a(window).height(),i=a(p).outerHeight()||0;if(a("body").hasClass(g))a(l).css("min-height",n-t);else{var s;s=i+e<=n?(a(l).css("min-height",n-o),n-o):(a(l).css("min-height",i),i);var r=a(u);void 0!==r&&r.height()>s&&a(l).css("min-height",r.height())}},i.prototype.fixSidebar=function(){a("body").hasClass(g)?this.options.slimscroll&&void 0!==a.fn.slimScroll&&0===a(t).find(e).length&&a(p).slimScroll({height:a(window).height()-a(f).height()+"px"}):void 0!==a.fn.slimScroll&&a(p).slimScroll({destroy:!0}).height("auto")};var m=a.fn.layout;a.fn.layout=b,a.fn.layout.Constuctor=i,a.fn.layout.noConflict=function(){return a.fn.layout=m,this},a(window).on("load",function(){b.call(a("body"))})}(jQuery);
+
+/***/ }),
+
+/***/ "./resources/assets/js/extensions/pGenerator.jquery.js":
+/*!*************************************************************!*\
+  !*** ./resources/assets/js/extensions/pGenerator.jquery.js ***!
+  \*************************************************************/
+/***/ (() => {
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+/*!
+ * pGenerator jQuery Plugin v1.0.5
+ * https://github.com/M1Sh0u/pGenerator
+ *
+ * Created by Mihai MATEI <mihai.matei@outlook.com>
+ * Released under the MIT License (Feel free to copy, modify or redistribute this plugin.)
+ */
+
+(function ($) {
+  var numbers_array = [],
+    upper_letters_array = [],
+    lower_letters_array = [],
+    special_chars_array = [],
+    $pGeneratorElement = null;
+
+  /**
+   * Plugin methods.
+   *
+   * @type {{init: init, generatePassword: generatePassword}}
+   */
+  var methods = {
+    /**
+     * Initialize the object.
+     *
+     * @param options
+     * @param callbacks
+     *
+     * @returns {*}
+     */
+    init: function init(options, callbacks) {
+      var settings = $.extend({
+        'bind': 'click',
+        'passwordElement': null,
+        'displayElement': null,
+        'passwordLength': 16,
+        'uppercase': true,
+        'lowercase': true,
+        'numbers': true,
+        'specialChars': true,
+        'additionalSpecialChars': [],
+        'onPasswordGenerated': function onPasswordGenerated(generatedPassword) {}
+      }, options);
+      for (var i = 48; i < 58; i++) {
+        numbers_array.push(i);
+      }
+      for (i = 65; i < 91; i++) {
+        upper_letters_array.push(i);
+      }
+      for (i = 97; i < 123; i++) {
+        lower_letters_array.push(i);
+      }
+      special_chars_array = [33, 35, 64, 36, 38, 42, 91, 93, 123, 125, 92, 47, 63, 58, 59, 95, 45].concat(settings.additionalSpecialChars);
+      return this.each(function () {
+        $pGeneratorElement = $(this);
+        $pGeneratorElement.bind(settings.bind, function (e) {
+          e.preventDefault();
+          methods.generatePassword(settings);
+        });
+      });
+    },
+    /**
+     * Generate the password.
+     *
+     * @param {object} settings
+     */
+    generatePassword: function generatePassword(settings) {
+      var password = new Array(),
+        selOptions = settings.uppercase + settings.lowercase + settings.numbers + settings.specialChars,
+        selected = 0,
+        no_lower_letters = new Array();
+      var optionLength = Math.floor(settings.passwordLength / selOptions);
+      if (settings.uppercase) {
+        // uppercase letters
+        for (var i = 0; i < optionLength; i++) {
+          password.push(String.fromCharCode(upper_letters_array[randomFromInterval(0, upper_letters_array.length - 1)]));
+        }
+        no_lower_letters = no_lower_letters.concat(upper_letters_array);
+        selected++;
+      }
+      if (settings.numbers) {
+        // numbers letters
+        for (var i = 0; i < optionLength; i++) {
+          password.push(String.fromCharCode(numbers_array[randomFromInterval(0, numbers_array.length - 1)]));
+        }
+        no_lower_letters = no_lower_letters.concat(numbers_array);
+        selected++;
+      }
+      if (settings.specialChars) {
+        // numbers letters
+        for (var i = 0; i < optionLength; i++) {
+          password.push(String.fromCharCode(special_chars_array[randomFromInterval(0, special_chars_array.length - 1)]));
+        }
+        no_lower_letters = no_lower_letters.concat(special_chars_array);
+        selected++;
+      }
+      var remained = settings.passwordLength - selected * optionLength;
+      if (settings.lowercase) {
+        for (var i = 0; i < remained; i++) {
+          password.push(String.fromCharCode(lower_letters_array[randomFromInterval(0, lower_letters_array.length - 1)]));
+        }
+      } else {
+        for (var i = 0; i < remained; i++) {
+          password.push(String.fromCharCode(no_lower_letters[randomFromInterval(0, no_lower_letters.length - 1)]));
+        }
+      }
+      password = shuffle(password).join('');
+      if (settings.passwordElement !== null) {
+        $(settings.passwordElement).val(password);
+      }
+      if (settings.displayElement !== null) {
+        if ($(settings.displayElement).is("input")) {
+          $(settings.displayElement).val(password);
+        } else {
+          $(settings.displayElement).text(password);
+        }
+      }
+      settings.onPasswordGenerated(password);
+    }
+  };
+
+  /**
+   * Shuffle the password.
+   *
+   * @param {Array} o
+   *
+   * @returns {Array}
+   */
+  function shuffle(o) {
+    for (var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+  }
+
+  /**
+   * Get a random number in the given interval.
+   *
+   * @param {number} from
+   * @param {number} to
+   *
+   * @returns {number}
+   */
+  function randomFromInterval(from, to) {
+    return Math.floor(Math.random() * (to - from + 1) + from);
+  }
+
+  /**
+   * Define the pGenerator jQuery plugin.
+   *
+   * @param method
+   * @returns {*}
+   */
+  $.fn.pGenerator = function (method) {
+    if (methods[method]) {
+      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+    } else if (_typeof(method) === 'object' || !method) {
+      return methods.init.apply(this, arguments);
+    } else {
+      $.error('Method ' + method + ' does not exist on jQuery.pGenerator');
+    }
+  };
+})(jQuery);
+
+/***/ }),
+
+/***/ "./resources/assets/js/signature_pad.js":
+/*!**********************************************!*\
+  !*** ./resources/assets/js/signature_pad.js ***!
+  \**********************************************/
+/***/ (function(module, exports) {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+(function (root, factory) {
+  if (true) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+      return root['SignaturePad'] = factory();
+    }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+})(this, function () {
+  /*!
+   * Signature Pad v1.5.3
+   * https://github.com/szimek/signature_pad
+   *
+   * Copyright 2016 Szymon Nowak
+   * Released under the MIT license
+   *
+   * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
+   * http://corner.squareup.com/2012/07/smoother-signatures.html
+   *
+   * Implementation of interpolation using cubic Bézier curves is taken from:
+   * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
+   *
+   * Algorithm for approximated length of a Bézier curve is taken from:
+   * http://www.lemoda.net/maths/bezier-length/index.html
+   *
+   */
+  var SignaturePad = function (document) {
+    "use strict";
+
+    var SignaturePad = function SignaturePad(canvas, options) {
+      var self = this,
+        opts = options || {};
+      this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
+      this.minWidth = opts.minWidth || 0.5;
+      this.maxWidth = opts.maxWidth || 2.5;
+      this.dotSize = opts.dotSize || function () {
+        return (this.minWidth + this.maxWidth) / 2;
+      };
+      this.penColor = opts.penColor || "black";
+      this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
+      this.onEnd = opts.onEnd;
+      this.onBegin = opts.onBegin;
+      this._canvas = canvas;
+      this._ctx = canvas.getContext("2d");
+      this.clear();
+
+      // we need add these inline so they are available to unbind while still having
+      //  access to 'self' we could use _.bind but it's not worth adding a dependency
+      this._handleMouseDown = function (event) {
+        if (event.which === 1) {
+          self._mouseButtonDown = true;
+          self._strokeBegin(event);
+        }
+      };
+      this._handleMouseMove = function (event) {
+        if (self._mouseButtonDown) {
+          self._strokeUpdate(event);
+        }
+      };
+      this._handleMouseUp = function (event) {
+        if (event.which === 1 && self._mouseButtonDown) {
+          self._mouseButtonDown = false;
+          self._strokeEnd(event);
+        }
+      };
+      this._handleTouchStart = function (event) {
+        if (event.targetTouches.length == 1) {
+          var touch = event.changedTouches[0];
+          self._strokeBegin(touch);
+        }
+      };
+      this._handleTouchMove = function (event) {
+        // Prevent scrolling.
+        event.preventDefault();
+        var touch = event.targetTouches[0];
+        self._strokeUpdate(touch);
+      };
+      this._handleTouchEnd = function (event) {
+        var wasCanvasTouched = event.target === self._canvas;
+        if (wasCanvasTouched) {
+          event.preventDefault();
+          self._strokeEnd(event);
+        }
+      };
+      this._handleMouseEvents();
+      this._handleTouchEvents();
+    };
+    SignaturePad.prototype.clear = function () {
+      var ctx = this._ctx,
+        canvas = this._canvas;
+      ctx.fillStyle = this.backgroundColor;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      this._reset();
+    };
+    SignaturePad.prototype.toDataURL = function (imageType, quality) {
+      var canvas = this._canvas;
+      return canvas.toDataURL.apply(canvas, arguments);
+    };
+    SignaturePad.prototype.fromDataURL = function (dataUrl) {
+      var self = this,
+        image = new Image(),
+        ratio = window.devicePixelRatio || 1,
+        width = this._canvas.width / ratio,
+        height = this._canvas.height / ratio;
+      this._reset();
+      image.src = dataUrl;
+      image.onload = function () {
+        self._ctx.drawImage(image, 0, 0, width, height);
+      };
+      this._isEmpty = false;
+    };
+    SignaturePad.prototype._strokeUpdate = function (event) {
+      var point = this._createPoint(event);
+      this._addPoint(point);
+    };
+    SignaturePad.prototype._strokeBegin = function (event) {
+      this._reset();
+      this._strokeUpdate(event);
+      if (typeof this.onBegin === 'function') {
+        this.onBegin(event);
+      }
+    };
+    SignaturePad.prototype._strokeDraw = function (point) {
+      var ctx = this._ctx,
+        dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+      ctx.beginPath();
+      this._drawPoint(point.x, point.y, dotSize);
+      ctx.closePath();
+      ctx.fill();
+    };
+    SignaturePad.prototype._strokeEnd = function (event) {
+      var canDrawCurve = this.points.length > 2,
+        point = this.points[0];
+      if (!canDrawCurve && point) {
+        this._strokeDraw(point);
+      }
+      if (typeof this.onEnd === 'function') {
+        this.onEnd(event);
+      }
+    };
+    SignaturePad.prototype._handleMouseEvents = function () {
+      this._mouseButtonDown = false;
+      this._canvas.addEventListener("mousedown", this._handleMouseDown);
+      this._canvas.addEventListener("mousemove", this._handleMouseMove);
+      document.addEventListener("mouseup", this._handleMouseUp);
+    };
+    SignaturePad.prototype._handleTouchEvents = function () {
+      // Pass touch events to canvas element on mobile IE11 and Edge.
+      this._canvas.style.msTouchAction = 'none';
+      this._canvas.style.touchAction = 'none';
+      this._canvas.addEventListener("touchstart", this._handleTouchStart);
+      this._canvas.addEventListener("touchmove", this._handleTouchMove);
+      this._canvas.addEventListener("touchend", this._handleTouchEnd);
+    };
+    SignaturePad.prototype.on = function () {
+      this._handleMouseEvents();
+      this._handleTouchEvents();
+    };
+    SignaturePad.prototype.off = function () {
+      this._canvas.removeEventListener("mousedown", this._handleMouseDown);
+      this._canvas.removeEventListener("mousemove", this._handleMouseMove);
+      document.removeEventListener("mouseup", this._handleMouseUp);
+      this._canvas.removeEventListener("touchstart", this._handleTouchStart);
+      this._canvas.removeEventListener("touchmove", this._handleTouchMove);
+      this._canvas.removeEventListener("touchend", this._handleTouchEnd);
+    };
+    SignaturePad.prototype.isEmpty = function () {
+      return this._isEmpty;
+    };
+    SignaturePad.prototype._reset = function () {
+      this.points = [];
+      this._lastVelocity = 0;
+      this._lastWidth = (this.minWidth + this.maxWidth) / 2;
+      this._isEmpty = true;
+      this._ctx.fillStyle = this.penColor;
+    };
+    SignaturePad.prototype._createPoint = function (event) {
+      var rect = this._canvas.getBoundingClientRect();
+      return new Point(event.clientX - rect.left, event.clientY - rect.top);
+    };
+    SignaturePad.prototype._addPoint = function (point) {
+      var points = this.points,
+        c2,
+        c3,
+        curve,
+        tmp;
+      points.push(point);
+      if (points.length > 2) {
+        // To reduce the initial lag make it work with 3 points
+        // by copying the first point to the beginning.
+        if (points.length === 3) points.unshift(points[0]);
+        tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
+        c2 = tmp.c2;
+        tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
+        c3 = tmp.c1;
+        curve = new Bezier(points[1], c2, c3, points[2]);
+        this._addCurve(curve);
+
+        // Remove the first element from the list,
+        // so that we always have no more than 4 points in points array.
+        points.shift();
+      }
+    };
+    SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
+      var dx1 = s1.x - s2.x,
+        dy1 = s1.y - s2.y,
+        dx2 = s2.x - s3.x,
+        dy2 = s2.y - s3.y,
+        m1 = {
+          x: (s1.x + s2.x) / 2.0,
+          y: (s1.y + s2.y) / 2.0
+        },
+        m2 = {
+          x: (s2.x + s3.x) / 2.0,
+          y: (s2.y + s3.y) / 2.0
+        },
+        l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1),
+        l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2),
+        dxm = m1.x - m2.x,
+        dym = m1.y - m2.y,
+        k = l2 / (l1 + l2),
+        cm = {
+          x: m2.x + dxm * k,
+          y: m2.y + dym * k
+        },
+        tx = s2.x - cm.x,
+        ty = s2.y - cm.y;
+      return {
+        c1: new Point(m1.x + tx, m1.y + ty),
+        c2: new Point(m2.x + tx, m2.y + ty)
+      };
+    };
+    SignaturePad.prototype._addCurve = function (curve) {
+      var startPoint = curve.startPoint,
+        endPoint = curve.endPoint,
+        velocity,
+        newWidth;
+      velocity = endPoint.velocityFrom(startPoint);
+      velocity = this.velocityFilterWeight * velocity + (1 - this.velocityFilterWeight) * this._lastVelocity;
+      newWidth = this._strokeWidth(velocity);
+      this._drawCurve(curve, this._lastWidth, newWidth);
+      this._lastVelocity = velocity;
+      this._lastWidth = newWidth;
+    };
+    SignaturePad.prototype._drawPoint = function (x, y, size) {
+      var ctx = this._ctx;
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+      this._isEmpty = false;
+    };
+    SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
+      var ctx = this._ctx,
+        widthDelta = endWidth - startWidth,
+        drawSteps,
+        width,
+        i,
+        t,
+        tt,
+        ttt,
+        u,
+        uu,
+        uuu,
+        x,
+        y;
+      drawSteps = Math.floor(curve.length());
+      ctx.beginPath();
+      for (i = 0; i < drawSteps; i++) {
+        // Calculate the Bezier (x, y) coordinate for this step.
+        t = i / drawSteps;
+        tt = t * t;
+        ttt = tt * t;
+        u = 1 - t;
+        uu = u * u;
+        uuu = uu * u;
+        x = uuu * curve.startPoint.x;
+        x += 3 * uu * t * curve.control1.x;
+        x += 3 * u * tt * curve.control2.x;
+        x += ttt * curve.endPoint.x;
+        y = uuu * curve.startPoint.y;
+        y += 3 * uu * t * curve.control1.y;
+        y += 3 * u * tt * curve.control2.y;
+        y += ttt * curve.endPoint.y;
+        width = startWidth + ttt * widthDelta;
+        this._drawPoint(x, y, width);
+      }
+      ctx.closePath();
+      ctx.fill();
+    };
+    SignaturePad.prototype._strokeWidth = function (velocity) {
+      return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+    };
+    var Point = function Point(x, y, time) {
+      this.x = x;
+      this.y = y;
+      this.time = time || new Date().getTime();
+    };
+    Point.prototype.velocityFrom = function (start) {
+      return this.time !== start.time ? this.distanceTo(start) / (this.time - start.time) : 1;
+    };
+    Point.prototype.distanceTo = function (start) {
+      return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
+    };
+    var Bezier = function Bezier(startPoint, control1, control2, endPoint) {
+      this.startPoint = startPoint;
+      this.control1 = control1;
+      this.control2 = control2;
+      this.endPoint = endPoint;
+    };
+
+    // Returns approximated length.
+    Bezier.prototype.length = function () {
+      var steps = 10,
+        length = 0,
+        i,
+        t,
+        cx,
+        cy,
+        px,
+        py,
+        xdiff,
+        ydiff;
+      for (i = 0; i <= steps; i++) {
+        t = i / steps;
+        cx = this._point(t, this.startPoint.x, this.control1.x, this.control2.x, this.endPoint.x);
+        cy = this._point(t, this.startPoint.y, this.control1.y, this.control2.y, this.endPoint.y);
+        if (i > 0) {
+          xdiff = cx - px;
+          ydiff = cy - py;
+          length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        }
+        px = cx;
+        py = cy;
+      }
+      return length;
+    };
+    Bezier.prototype._point = function (t, start, c1, c2, end) {
+      return start * (1.0 - t) * (1.0 - t) * (1.0 - t) + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t + 3.0 * c2 * (1.0 - t) * t * t + end * t * t * t;
+    };
+    return SignaturePad;
+  }(document);
+  return SignaturePad;
+});
+
+/***/ }),
+
+/***/ "./resources/assets/js/snipeit.js":
+/*!****************************************!*\
+  !*** ./resources/assets/js/snipeit.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+
+var jQuery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+window.jQuery = jQuery;
+window.$ = jQuery;
+
+// window._ = require('lodash'); //the only place I saw this used was vue.js, and we don't use that anymore
+
+/****************************************
+ Much of what you'll see below is just plain require()'ed, this is because
+ it is mostly jQuery stuff, which attaches itself to the $() function/object
+ So we don't have to assign it to anything, it will just automagically attach
+ itself
+ *****************************************/
+
+__webpack_require__(/*! jquery-ui/dist/jquery-ui */ "./node_modules/jquery-ui/dist/jquery-ui.js");
+jQuery.fn.uitooltip = jQuery.fn.tooltip;
+__webpack_require__(/*! bootstrap-less */ "./node_modules/bootstrap-less/js/bootstrap.js");
+__webpack_require__(/*! select2 */ "./node_modules/select2/dist/js/select2.js");
+__webpack_require__(/*! admin-lte */ "./node_modules/admin-lte/dist/js/adminlte.min.js");
+__webpack_require__(/*! tether */ "./node_modules/tether/dist/js/tether.js");
+__webpack_require__(/*! jquery-slimscroll */ "./node_modules/jquery-slimscroll/jquery.slimscroll.js");
+__webpack_require__(/*! jquery.iframe-transport */ "./node_modules/jquery.iframe-transport/jquery.iframe-transport.js"); //probably not needed anymore, if I'm honest
+__webpack_require__(/*! blueimp-file-upload */ "./node_modules/blueimp-file-upload/js/jquery.fileupload.js");
+__webpack_require__(/*! bootstrap-colorpicker */ "./node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js");
+__webpack_require__(/*! bootstrap-datepicker */ "./node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.js");
+__webpack_require__(/*! ekko-lightbox */ "./node_modules/ekko-lightbox/dist/ekko-lightbox.min.js"); //TODO - this doesn't seem jquery-ish, we might need to do something weird here
+// it *does* require Bootstrap, which requires jquery, so maybe that's OK
+// it seems to work...
+__webpack_require__(/*! ./extensions/pGenerator.jquery */ "./resources/assets/js/extensions/pGenerator.jquery.js"); //WEIRD, but works
+//require('chart.js') // Weirdly, this seems to "just work." Without this line, the dashboard blows up
+// but it's *HUGE* - and we only use it one place. So we're taking it out of the bundle
+window.SignaturePad = __webpack_require__(/*! ./signature_pad */ "./resources/assets/js/signature_pad.js"); //ALSO WEIRD - but works
+__webpack_require__(/*! jquery-validation */ "./node_modules/jquery-validation/dist/jquery.validate.js");
+window.List = __webpack_require__(/*! list.js */ "./node_modules/list.js/src/index.js");
+window.ClipboardJS = __webpack_require__(/*! clipboard */ "./node_modules/clipboard/dist/clipboard.js");
+// TODO - find everything using moment.js and kill it or upgrade it? It's huge
+// - adminLTE (UGH)
+// - bootstrap-daterangepicker
+// - fullcalendar (what's that? it's used by AdminLTE)
+
+/**
+ * Module containing core application logic.
+ * @param  {jQuery} $        Insulated jQuery object
+ * @param  {JSON} settings Insulated `window.snipeit.settings` object.
+ * @return {IIFE}          Immediately invoked. Returns self.
+ */
+
+lineOptions = {
+  legend: {
+    position: "bottom"
+  },
+  scales: {
+    yAxes: [{
+      ticks: {
+        fontColor: "rgba(0,0,0,0.5)",
+        fontStyle: "bold",
+        beginAtZero: true,
+        maxTicksLimit: 5,
+        padding: 20
+      },
+      gridLines: {
+        drawTicks: false,
+        display: false
+      }
+    }],
+    xAxes: [{
+      gridLines: {
+        zeroLineColor: "transparent"
+      },
+      ticks: {
+        padding: 20,
+        fontColor: "rgba(0,0,0,0.5)",
+        fontStyle: "bold"
+      }
+    }]
+  }
+};
+pieOptions = {
+  //Boolean - Whether we should show a stroke on each segment
+  segmentShowStroke: true,
+  //String - The colour of each segment stroke
+  segmentStrokeColor: "#fff",
+  //Number - The width of each segment stroke
+  segmentStrokeWidth: 1,
+  //Number - The percentage of the chart that we cut out of the middle
+  percentageInnerCutout: 50,
+  // This is 0 for Pie charts
+  //Number - Amount of animation steps
+  animationSteps: 100,
+  //String - Animation easing effect
+  animationEasing: "easeOutBounce",
+  //Boolean - Whether we animate the rotation of the Doughnut
+  animateRotate: true,
+  //Boolean - Whether we animate scaling the Doughnut from the centre
+  animateScale: false,
+  //Boolean - whether to make the chart responsive to window resizing
+  responsive: true,
+  // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
+  maintainAspectRatio: false,
+  //String - A legend template
+  legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li>" + "<i class='fas fa-circle-o' style='color: <%=segments[i].fillColor%>'></i>" + "<%if(segments[i].label){%><%=segments[i].label%><%}%> foo</li><%}%></ul>",
+  //String - A tooltip template
+  tooltipTemplate: "<%=value %> <%=label%> "
+};
+
+//-----------------
+//- END PIE CHART -
+//-----------------
+
+var baseUrl = $('meta[name="baseUrl"]').attr('content');
+$(function () {
+  var $el = $('body');
+
+  // confirm restore modal
+
+  $el.on('click', '.restore-asset', function (evnt) {
+    var $context = $(this);
+    var $restoreConfirmModal = $('#restoreConfirmModal');
+    var href = $context.attr('href');
+    var message = $context.attr('data-content');
+    var title = $context.attr('data-title');
+    $('#confirmModalLabel').text(title);
+    $restoreConfirmModal.find('.modal-body').text(message);
+    $('#restoreForm').attr('action', href);
+    $restoreConfirmModal.modal({
+      show: true
+    });
+    return false;
+  });
+
+  // confirm delete modal
+  $el.on('click', '.delete-asset', function (evnt) {
+    var $context = $(this);
+    var $dataConfirmModal = $('#dataConfirmModal');
+    var href = $context.attr('href');
+    var message = $context.attr('data-content');
+    var headericon = $context.attr('data-icon');
+    var title = $context.attr('data-title');
+
+    // deleteForm is the ID of the modal form itself
+    $('#deleteForm').attr('action', href);
+    $dataConfirmModal.find('.modal-header-icon').addClass(headericon);
+    $dataConfirmModal.find('.modal-title').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
+    $dataConfirmModal.find('.modal-body').text(message);
+    $dataConfirmModal.attr('action', href);
+
+    // Fire the modal
+    $dataConfirmModal.modal({
+      show: true
+    });
+    return false;
+  });
+
+  /*
+  * Select2
+  */
+
+  $('select.select2:not(".select2-hidden-accessible")').each(function (i, obj) {
+    {
+      $(obj).select2();
+    }
+  });
+
+  // $('.datepicker').datepicker();
+  // var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
+  // $.fn.bootstrapDP = datepicker;
+  // $('.datepicker').datepicker();
+
+  // Crazy select2 rich dropdowns with images!
+  $('.js-data-ajax').each(function (i, item) {
+    var link = $(item);
+    var endpoint = link.data("endpoint");
+    var select = link.data("select");
+    link.select2({
+      /**
+       * Adds an empty placeholder, allowing every select2 instance to be cleared.
+       * This placeholder can be overridden with the "data-placeholder" attribute.
+       */
+      placeholder: '',
+      allowClear: true,
+      language: $('meta[name="language"]').attr('content'),
+      dir: $('meta[name="language-direction"]').attr('content'),
+      ajax: {
+        // the baseUrl includes a trailing slash
+        url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+        dataType: 'json',
+        delay: 250,
+        headers: {
+          "X-Requested-With": 'XMLHttpRequest',
+          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+        },
+        data: function data(params) {
+          var data = {
+            search: params.term,
+            page: params.page || 1,
+            assetStatusType: link.data("asset-status-type"),
+            companyId: link.data("company-id")
+          };
+          return data;
+        },
+        /* processResults: function (data, params) {
+             params.page = params.page || 1;
+             var answer =  {
+                results: data.items,
+                pagination: {
+                    more: data.pagination.more
+                }
+            };
+             return answer;
+        }, */
+        cache: true
+      },
+      //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+      templateResult: formatDatalistSafe
+      //templateSelection: formatDataSelection
+    });
+  });
+  function getSelect2Value(element) {
+    // if the passed object is not a jquery object, assuming 'element' is a selector
+    if (!(element instanceof jQuery)) element = $(element);
+    var select = element.data("select2");
+
+    // There's two different locations where the select2-generated input element can be. 
+    searchElement = select.dropdown.$search || select.$container.find(".select2-search__field");
+    var value = searchElement.val();
+    return value;
+  }
+  $(".select2-hidden-accessible").on('select2:selecting', function (e) {
+    var data = e.params.args.data;
+    var isMouseUp = false;
+    var element = $(this);
+    var value = getSelect2Value(element);
+    if (e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
+
+    // if selected item does not match typed text, do not allow it to pass - force close for ajax.
+    if (!isMouseUp) {
+      if (value.toLowerCase() && data.text.toLowerCase().indexOf(value) < 0) {
+        e.preventDefault();
+        element.select2('close');
+
+        // if it does match, we set a flag in the event (which gets passed to subsequent events), telling it not to worry about the ajax
+      } else if (value.toLowerCase() && data.text.toLowerCase().indexOf(value) > -1) {
+        e.params.args.noForceAjax = true;
+      }
+    }
+  });
+  $(".select2-hidden-accessible").on('select2:closing', function (e) {
+    var element = $(this);
+    var value = getSelect2Value(element);
+    var noForceAjax = false;
+    var isMouseUp = false;
+    if (e.params.args.originalSelect2Event) noForceAjax = e.params.args.originalSelect2Event.noForceAjax;
+    if (e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
+    if (value && !noForceAjax && !isMouseUp) {
+      var endpoint = element.data("endpoint");
+      var assetStatusType = element.data("asset-status-type");
+      $.ajax({
+        url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (assetStatusType ? '&assetStatusType=' + assetStatusType : ''),
+        dataType: 'json',
+        headers: {
+          "X-Requested-With": 'XMLHttpRequest',
+          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+        }
+      }).done(function (response) {
+        var currentlySelected = element.select2('data').map(function (x) {
+          return +x.id;
+        }).filter(function (x) {
+          return x !== 0;
+        });
+
+        // makes sure we're not selecting the same thing twice for multiples
+        var filteredResponse = response.results.filter(function (item) {
+          return currentlySelected.indexOf(+item.id) < 0;
+        });
+        var first = currentlySelected.length > 0 ? filteredResponse[0] : response.results[0];
+        if (first && first.id) {
+          first.selected = true;
+          if ($("option[value='" + first.id + "']", element).length < 1) {
+            var option = new Option(first.text, first.id, true, true);
+            element.append(option);
+          } else {
+            var isMultiple = element.attr("multiple") == "multiple";
+            element.val(isMultiple ? element.val().concat(first.id) : element.val(first.id));
+          }
+          element.trigger('change');
+          element.trigger({
+            type: 'select2:select',
+            params: {
+              data: first
+            }
+          });
+        }
+      });
+    }
+  });
+  function formatDatalist(datalist) {
+    var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+    if (datalist.loading) {
+      return loading_markup;
+    }
+    var markup = '<div class="clearfix">';
+    markup += '<div class="pull-left" style="padding-right: 10px;">';
+    if (datalist.image) {
+      markup += "<div style='width: 30px;'><img src='" + datalist.image + "' style='max-height: 20px; max-width: 30px;' alt='" + datalist.text + "'></div>";
+    } else {
+      markup += '<div style="height: 20px; width: 30px;"></div>';
+    }
+    markup += "</div><div>" + datalist.text + "</div>";
+    markup += "</div>";
+    return markup;
+  }
+  function formatDatalistSafe(datalist) {
+    // console.warn("What in the hell is going on with Select2?!?!!?!?");
+    // console.warn($.select2);
+    if (datalist.loading) {
+      return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
+    }
+    var root_div = $("<div class='clearfix'>");
+    var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
+    if (datalist.image) {
+      var inner_div = $("<div style='width: 30px;'>");
+      /******************************************************************
+       * 
+       * We are specifically chosing empty alt-text below, because this 
+       * image conveys no additional information, relative to the text
+       * that will *always* be there in any select2 list that is in use
+       * in Snipe-IT. If that changes, we would probably want to change
+       * some signatures of some functions, but right now, we don't want
+       * screen readers to say "HP SuperJet 5000, .... picture of HP 
+       * SuperJet 5000..." and so on, for every single row in a list of
+       * assets or models or whatever.
+       * 
+       *******************************************************************/
+      var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
+      // console.warn("Img is: ");
+      // console.dir(img);
+      // console.warn("Strigularly, that's: ");
+      // console.log(img);
+      img.attr("src", datalist.image);
+      inner_div.append(img);
+    } else {
+      var inner_div = $("<div style='height: 20px; width: 30px;'></div>");
+    }
+    left_pull.append(inner_div);
+    root_div.append(left_pull);
+    var name_div = $("<div>");
+    name_div.text(datalist.text);
+    root_div.append(name_div);
+    var safe_html = root_div.get(0).outerHTML;
+    var old_html = formatDatalist(datalist);
+    if (safe_html != old_html) {
+      //console.log("HTML MISMATCH: ");
+      //console.log("FormatDatalistSafe: ");
+      // console.dir(root_div.get(0));
+      //console.log(safe_html);
+      //console.log("FormatDataList: ");
+      //console.log(old_html);
+    }
+    return root_div;
+  }
+  function formatDataSelection(datalist) {
+    // This a heinous workaround for a known bug in Select2.
+    // Without this, the rich selectlists are vulnerable to XSS.
+    // Many thanks to @uberbrady for this fix. It ain't pretty,
+    // but it resolves the issue until Select2 addresses it on their end.
+    //
+    // Bug was reported in 2016 :{
+    // https://github.com/select2/select2/issues/4587
+
+    return datalist.text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  // This handles the radio button selectors for the checkout-to-foo options
+  // on asset checkout and also on asset edit
+  $(function () {
+    $('input[name=checkout_to_type]').on("change", function () {
+      var assignto_type = $('input[name=checkout_to_type]:checked').val();
+      var userid = $('#assigned_user option:selected').val();
+      if (assignto_type == 'asset') {
+        $('#current_assets_box').fadeOut();
+        $('#assigned_asset').show();
+        $('#assigned_user').hide();
+        $('#assigned_location').hide();
+        $('.notification-callout').fadeOut();
+        $('[name="assigned_location"]').val('').trigger('change.select2');
+        $('[name="assigned_user"]').val('').trigger('change.select2');
+      } else if (assignto_type == 'location') {
+        $('#current_assets_box').fadeOut();
+        $('#assigned_asset').hide();
+        $('#assigned_user').hide();
+        $('#assigned_location').show();
+        $('.notification-callout').fadeOut();
+        $('[name="assigned_asset"]').val('').trigger('change.select2');
+        $('[name="assigned_user"]').val('').trigger('change.select2');
+      } else {
+        $('#assigned_asset').hide();
+        $('#assigned_user').show();
+        $('#assigned_location').hide();
+        if (userid) {
+          $('#current_assets_box').fadeIn();
+        }
+        $('.notification-callout').fadeIn();
+        $('[name="assigned_asset"]').val('').trigger('change.select2');
+        $('[name="assigned_location"]').val('').trigger('change.select2');
+      }
+    });
+  });
+
+  // ------------------------------------------------
+  // Deep linking for Bootstrap tabs
+  // ------------------------------------------------
+  var taburl = document.location.toString();
+
+  // Allow full page URL to activate a tab's ID
+  // ------------------------------------------------
+  // This allows linking to a tab on page load via the address bar.
+  // So a URL such as, http://snipe-it.local/hardware/2/#my_tab will
+  // cause the tab on that page with an ID of “my_tab” to be active.
+  if (taburl.match('#')) {
+    $('.nav-tabs a[href="#' + taburl.split('#')[1] + '"]').tab('show');
+  }
+
+  // Allow internal page links to activate a tab's ID.
+  // ------------------------------------------------
+  // This allows you to link to a tab from anywhere on the page
+  // including from within another tab. Also note that internal page
+  // links either inside or out of the tabs need to include data-toggle="tab"
+  // Ex: <a href="#my_tab" data-toggle="tab">Click me</a>
+  $('a[data-toggle="tab"]').click(function (e) {
+    var href = $(this).attr("href");
+    history.pushState(null, null, href);
+    e.preventDefault();
+    $('a[href="' + $(this).attr('href') + '"]').tab('show');
+  });
+
+  // ------------------------------------------------
+  // End Deep Linking for Bootstrap tabs
+  // ------------------------------------------------
+
+  // Image preview
+  function readURL(input, $preview) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        $preview.attr('src', e.target.result);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + " Bytes";else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + " MB";else return (bytes / 1073741824).toFixed(2) + " GB";
+  }
+
+  // File size validation
+  $('.js-uploadFile').bind('change', function () {
+    var $this = $(this);
+    var id = '#' + $this.attr('id');
+    var status = id + '-status';
+    var $status = $(status);
+    var delete_id = $(id + '-deleteCheckbox');
+    var preview_container = $(id + '-previewContainer');
+    $status.removeClass('text-success').removeClass('text-danger');
+    $(status + ' .goodfile').remove();
+    $(status + ' .badfile').remove();
+    $(status + ' .previewSize').hide();
+    preview_container.hide();
+    $(id + '-info').html('');
+    var max_size = $this.data('maxsize');
+    var total_size = 0;
+    for (var i = 0; i < this.files.length; i++) {
+      total_size += this.files[i].size;
+      $(id + '-info').append('<span class="label label-default">' + htmlEntities(this.files[i].name) + ' (' + formatBytes(this.files[i].size) + ')</span> ');
+    }
+    if (total_size > max_size) {
+      $status.addClass('text-danger').removeClass('help-block').prepend('<i class="badfile fas fa-times"></i> ').append('<span class="previewSize"> Upload is ' + formatBytes(total_size) + '.</span>');
+    } else {
+      $status.addClass('text-success').removeClass('help-block').prepend('<i class="goodfile fas fa-check"></i> ');
+      var $preview = $(id + '-imagePreview');
+      readURL(this, $preview);
+      $preview.fadeIn();
+      preview_container.fadeIn();
+      delete_id.hide();
+    }
+  });
+});
+function htmlEntities(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Toggle disabled
+ */
+(function ($) {
+  $.fn.toggleDisabled = function (callback) {
+    return this.each(function () {
+      var disabled,
+        $this = $(this);
+      if ($this.attr('disabled')) {
+        $this.removeAttr('disabled');
+        disabled = false;
+      } else {
+        $this.attr('disabled', 'disabled');
+        disabled = true;
+      }
+      if (callback && typeof callback === 'function') {
+        callback(this, disabled);
+      }
+    });
+  };
+})(jQuery);
+
+/**
+ * Universal Livewire Select2 integration
+ *
+ * How to use:
+ *
+ * 1. Set the class of your select2 elements to 'livewire-select2').
+ * 2. Name your element to match a property in your Livewire component
+ * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
+ *    or just $this->getId() if not).
+ */
+document.addEventListener('livewire:init', function () {
+  $('.livewire-select2').select2();
+  $(document).on('select2:select', '.livewire-select2', function (event) {
+    var target = $(event.target);
+    if (!event.target.name || !target.data('livewire-component')) {
+      console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!");
+      console.error("For data-livewire-component, you probably want to use $this->getId() or {{ $this->getId() }}, as appropriate");
+      return false;
+    }
+    Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value);
+  });
+  Livewire.hook('request', function (_ref) {
+    var succeed = _ref.succeed;
+    succeed(function () {
+      queueMicrotask(function () {
+        $('.livewire-select2').select2();
+      });
+    });
+  });
+});
+
+/***/ }),
+
+/***/ "./resources/assets/js/snipeit_modals.js":
+/*!***********************************************!*\
+  !*** ./resources/assets/js/snipeit_modals.js ***!
+  \***********************************************/
+/***/ (() => {
+
+/* 
+ * 
+ * Snipe-IT Universal Modal support
+ * 
+ * Enables modal dialogs to create sub-resources throughout Snipe-IT
+ * 
+ */
+
+/* 
+HOW TO USE
+ Create a Button looking like this:
+ <a href='{{ route('modal.show', 'user') }}' data-toggle="modal"  data-target="#createModal" data-select='assigned_to' class="btn btn-sm btn-primary">New</a>
+ If you don't have access to Blade commands (like {{ and }}, etc), you can hard-code a URL as the 'href'
+ data-toggle="modal" - required for Bootstrap Modals
+data-target="#createModal" - fixed ID for the modal, do not change
+data-select="assigned_to" - What is the *ID* of the select-dropdown that you're going to be adding to, if the modal-create was a success? Be on the lookout for duplicate ID's, it will confuse this library!
+class="btn btn-sm btn-primary" - makes it look button-ey, feel free to change :)
+
+If you want to pass additional variables to the modal (In the Category Create one, for example, you can pass category_id), you can encode them as URL variables in the href
+
+*/
+
+$(function () {
+  var baseUrl = $('meta[name="baseUrl"]').attr('content');
+  //handle modal-add-interstitial calls
+  var model, select, refreshSelector;
+  if ($('#createModal').length == 0) {
+    $('body').append('<div class="modal fade" id="createModal"></div><!-- /.modal -->');
+  }
+  $('#createModal').on("show.bs.modal", function (event) {
+    var link = $(event.relatedTarget);
+    model = link.data("dependency");
+    select = link.data("select");
+    refreshSelector = link.data("refresh");
+    $('#createModal').load(link.attr('href'), function () {
+      // this sets the focus to be the name field
+      $('#modal-name').focus();
+
+      //do we need to re-select2 this, after load? Probably.
+      $('#createModal').find('select.select2').select2();
+      // Initialize the ajaxy select2 with images.
+      // This is a copy/paste of the code from snipeit.js, would be great to only have this in one place.
+
+      $('.js-data-ajax').each(function (i, item) {
+        var link = $(item);
+        var endpoint = link.data("endpoint");
+        var select = link.data("select");
+        link.select2({
+          ajax: {
+            // the baseUrl includes a trailing slash
+            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+            //WARNING - we're hoping that's defined on the page somewhere...
+            dataType: 'json',
+            delay: 250,
+            headers: {
+              "X-Requested-With": 'XMLHttpRequest',
+              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+            },
+            data: function data(params) {
+              var data = {
+                search: params.term,
+                page: params.page || 1,
+                assetStatusType: link.data("asset-status-type")
+              };
+              return data;
+            },
+            /*processResults: function (data, params) {
+                 params.page = params.page || 1;
+                 var answer =  {
+                    results: data.items,
+                    pagination: {
+                        more: data.pagination.more
+                    }
+                };
+                 return answer;
+            },*/
+            cache: true
+          },
+          //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+          templateResult: formatDatalistSafe
+          //templateSelection: formatDataSelection
+        });
+      });
+    });
+  });
+  $('#createModal').on('click', '#modal-save', function () {
+    $.ajax({
+      type: 'POST',
+      url: $('.modal-body form').attr('action'),
+      headers: {
+        "X-Requested-With": 'XMLHttpRequest',
+        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+      },
+      data: $('.modal-body form').serialize(),
+      success: function success(result) {
+        if (result.status == "error") {
+          var error_message = "";
+          for (var field in result.messages) {
+            error_message += "<li>Problem(s) with field <i><strong>" + field + "</strong></i>: " + result.messages[field];
+          }
+          $('#modal_error_msg').html(error_message).show();
+          return false;
+        }
+        var id = result.payload.id;
+        var name = result.payload.name || result.payload.first_name + " " + result.payload.last_name;
+        if (!id || !name) {
+          console.error("Could not find resulting name or ID from modal-create. Name: " + name + ", id: " + id);
+          return false;
+        }
+        $('#createModal').modal('hide');
+        $('#createModal').html("");
+        var refreshTable = $('#' + refreshSelector);
+        if (refreshTable.length > 0) {
+          refreshTable.bootstrapTable('refresh');
+        }
+
+        // "select" is the original drop-down menu that someone
+        // clicked 'add' on to add a new 'thing'
+        // this code adds the newly created object to that select
+        var selector = document.getElementById(select);
+        if (!selector) {
+          return false;
+        }
+        selector.options[selector.length] = new Option(name, id);
+        selector.selectedIndex = selector.length - 1;
+        $(selector).trigger("change");
+        if (window.fetchCustomFields) {
+          fetchCustomFields();
+        }
+      },
+      error: function error(result) {
+        msg = result.responseJSON.messages || result.responseJSON.error;
+        $('#modal_error_msg').html("Server Error: " + msg).show();
+      }
+    });
+  });
+});
+function formatDatalistSafe(datalist) {
+  // console.warn("What in the hell is going on with Select2?!?!!?!?");
+  // console.warn($.select2);
+  if (datalist.loading) {
+    return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
+  }
+  var root_div = $("<div class='clearfix'>");
+  var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
+  if (datalist.image) {
+    var inner_div = $("<div style='width: 30px;'>");
+    /******************************************************************
+     * 
+     * We are specifically chosing empty alt-text below, because this 
+     * image conveys no additional information, relative to the text
+     * that will *always* be there in any select2 list that is in use
+     * in Snipe-IT. If that changes, we would probably want to change
+     * some signatures of some functions, but right now, we don't want
+     * screen readers to say "HP SuperJet 5000, .... picture of HP 
+     * SuperJet 5000..." and so on, for every single row in a list of
+     * assets or models or whatever.
+     * 
+     *******************************************************************/
+    var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
+    // console.warn("Img is: ");
+    // console.dir(img);
+    // console.warn("Strigularly, that's: ");
+    // console.log(img);
+    img.attr("src", datalist.image);
+    inner_div.append(img);
+  } else {
+    var inner_div = $("<div style='height: 20px; width: 30px;'></div>");
+  }
+  left_pull.append(inner_div);
+  root_div.append(left_pull);
+  var name_div = $("<div>");
+  name_div.text(datalist.text);
+  root_div.append(name_div);
+  var safe_html = root_div.get(0).outerHTML;
+  var old_html = formatDatalist(datalist);
+  if (safe_html != old_html) {
+    // console.log("HTML MISMATCH: ");
+    // console.log("FormatDatalistSafe: ");
+    // console.dir(root_div.get(0));
+    // console.log(safe_html);
+    // console.log("FormatDataList: ");
+    // console.log(old_html);
+  }
+  return root_div;
+}
+function formatDatalist(datalist) {
+  var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+  if (datalist.loading) {
+    return loading_markup;
+  }
+  var markup = "<div class='clearfix'>";
+  markup += "<div class='pull-left' style='padding-right: 10px;'>";
+  if (datalist.image) {
+    markup += "<div style='width: 30px;'><img src='" + datalist.image + "' alt='" + datalist.tex + "' style='max-height: 20px; max-width: 30px;'></div>";
+  } else {
+    markup += "<div style='height: 20px; width: 30px;'></div>";
+  }
+  markup += "</div><div>" + datalist.text + "</div>";
+  markup += "</div>";
+  return markup;
+}
+function formatDataSelection(datalist) {
+  return datalist.text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
 
 /***/ }),
 
@@ -9583,14 +10856,14 @@ module.exports.TinyEmitter = E;
   \**************************************************/
 /***/ ((module, exports, __webpack_require__) => {
 
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! jQuery UI - v1.14.1 - 2024-10-30
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! jQuery UI - v1.13.3 - 2024-04-26
 * https://jqueryui.com
 * Includes: widget.js, position.js, data.js, disable-selection.js, effect.js, effects/effect-blind.js, effects/effect-bounce.js, effects/effect-clip.js, effects/effect-drop.js, effects/effect-explode.js, effects/effect-fade.js, effects/effect-fold.js, effects/effect-highlight.js, effects/effect-puff.js, effects/effect-pulsate.js, effects/effect-scale.js, effects/effect-shake.js, effects/effect-size.js, effects/effect-slide.js, effects/effect-transfer.js, focusable.js, form-reset-mixin.js, jquery-patch.js, keycode.js, labels.js, scroll-parent.js, tabbable.js, unique-id.js, widgets/accordion.js, widgets/autocomplete.js, widgets/button.js, widgets/checkboxradio.js, widgets/controlgroup.js, widgets/datepicker.js, widgets/dialog.js, widgets/draggable.js, widgets/droppable.js, widgets/menu.js, widgets/mouse.js, widgets/progressbar.js, widgets/resizable.js, widgets/selectable.js, widgets/selectmenu.js, widgets/slider.js, widgets/sortable.js, widgets/spinner.js, widgets/tabs.js, widgets/tooltip.js
 * Copyright OpenJS Foundation and other contributors; Licensed MIT */
 
 ( function( factory ) {
 	"use strict";
-
+	
 	if ( true ) {
 
 		// AMD. Register as an anonymous module.
@@ -9604,11 +10877,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 $.ui = $.ui || {};
 
-var version = $.ui.version = "1.14.1";
+var version = $.ui.version = "1.13.3";
 
 
 /*!
- * jQuery UI Widget 1.14.1
+ * jQuery UI Widget 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -9651,9 +10924,6 @@ $.widget = function( name, base, prototype ) {
 
 	var namespace = name.split( "." )[ 0 ];
 	name = name.split( "." )[ 1 ];
-	if ( name === "__proto__" || name === "constructor" ) {
-		return $.error( "Invalid widget name: " + name );
-	}
 	var fullName = namespace + "-" + name;
 
 	if ( !prototype ) {
@@ -10353,7 +11623,7 @@ var widget = $.widget;
 
 
 /*!
- * jQuery UI Position 1.14.1
+ * jQuery UI Position 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -10850,7 +12120,7 @@ var position = $.ui.position;
 
 
 /*!
- * jQuery UI :data 1.14.1
+ * jQuery UI :data 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -10865,15 +12135,21 @@ var position = $.ui.position;
 
 
 var data = $.extend( $.expr.pseudos, {
-	data: $.expr.createPseudo( function( dataName ) {
-		return function( elem ) {
-			return !!$.data( elem, dataName );
-		};
-	} )
+	data: $.expr.createPseudo ?
+		$.expr.createPseudo( function( dataName ) {
+			return function( elem ) {
+				return !!$.data( elem, dataName );
+			};
+		} ) :
+
+		// Support: jQuery <1.8
+		function( elem, i, match ) {
+			return !!$.data( elem, match[ 3 ] );
+		}
 } );
 
 /*!
- * jQuery UI Disable Selection 1.14.1
+ * jQuery UI Disable Selection 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -10916,15 +12192,16 @@ var jQuery = $;
 
 
 /*!
- * jQuery Color Animations v3.0.0
+ * jQuery Color Animations v2.2.0
  * https://github.com/jquery/jquery-color
  *
  * Copyright OpenJS Foundation and other contributors
  * Released under the MIT license.
  * https://jquery.org/license
  *
- * Date: Wed May 15 16:49:44 2024 +0200
+ * Date: Sun May 10 09:02:36 2020 +0200
  */
+
 
 
 	var stepHooks = "backgroundColor borderBottomColor borderLeftColor borderRightColor " +
@@ -11051,12 +12328,20 @@ var jQuery = $;
 			floor: true
 		}
 	},
+	support = color.support = {},
+
+	// element for support tests
+	supportElem = jQuery( "<p>" )[ 0 ],
 
 	// colors = jQuery.Color.names
 	colors,
 
 	// local aliases of functions called often
 	each = jQuery.each;
+
+// determine rgba support immediately
+supportElem.style.cssText = "background-color:rgba(1,1,1,.5)";
+support.rgba = supportElem.style.backgroundColor.indexOf( "rgba" ) > -1;
 
 // define cache name and alpha properties
 // for rgba and hsla spaces
@@ -11094,6 +12379,12 @@ function clamp( value, prop, allowEmpty ) {
 
 	// ~~ is an short way of doing floor for positive numbers
 	value = type.floor ? ~~value : parseFloat( value );
+
+	// IE will pass in empty strings as value for alpha,
+	// which will hit this case
+	if ( isNaN( value ) ) {
+		return prop.def;
+	}
 
 	if ( type.mod ) {
 
@@ -11207,10 +12498,7 @@ color.fn = jQuery.extend( color.prototype, {
 					} );
 
 					// everything defined but alpha?
-					if ( inst[ cache ] && jQuery.inArray(
-						null,
-						inst[ cache ].slice( 0, 3 )
-					) < 0 ) {
+					if ( inst[ cache ] && jQuery.inArray( null, inst[ cache ].slice( 0, 3 ) ) < 0 ) {
 
 						// use the default of 1
 						if ( inst[ cache ][ 3 ] == null ) {
@@ -11322,7 +12610,7 @@ color.fn = jQuery.extend( color.prototype, {
 			prefix = "rgb(";
 		}
 
-		return prefix + rgba.join( ", " ) + ")";
+		return prefix + rgba.join() + ")";
 	},
 	toHslaString: function() {
 		var prefix = "hsla(",
@@ -11342,7 +12630,7 @@ color.fn = jQuery.extend( color.prototype, {
 			hsla.pop();
 			prefix = "hsl(";
 		}
-		return prefix + hsla.join( ", " ) + ")";
+		return prefix + hsla.join() + ")";
 	},
 	toHexString: function( includeAlpha ) {
 		var rgba = this._rgba.slice(),
@@ -11355,11 +12643,12 @@ color.fn = jQuery.extend( color.prototype, {
 		return "#" + jQuery.map( rgba, function( v ) {
 
 			// default to 0 when nulls exist
-			return ( "0" + ( v || 0 ).toString( 16 ) ).substr( -2 );
+			v = ( v || 0 ).toString( 16 );
+			return v.length === 1 ? "0" + v : v;
 		} ).join( "" );
 	},
 	toString: function() {
-		return this.toRgbaString();
+		return this._rgba[ 3 ] === 0 ? "transparent" : this.toRgbaString();
 	}
 } );
 color.fn.parse.prototype = color.fn;
@@ -11526,15 +12815,37 @@ color.hook = function( hook ) {
 	each( hooks, function( _i, hook ) {
 		jQuery.cssHooks[ hook ] = {
 			set: function( elem, value ) {
-				var parsed;
+				var parsed, curElem,
+					backgroundColor = "";
 
-				if ( value !== "transparent" &&
-					( getType( value ) !== "string" ||
-						( parsed = stringParse( value ) ) ) ) {
+				if ( value !== "transparent" && ( getType( value ) !== "string" || ( parsed = stringParse( value ) ) ) ) {
 					value = color( parsed || value );
+					if ( !support.rgba && value._rgba[ 3 ] !== 1 ) {
+						curElem = hook === "backgroundColor" ? elem.parentNode : elem;
+						while (
+							( backgroundColor === "" || backgroundColor === "transparent" ) &&
+							curElem && curElem.style
+						) {
+							try {
+								backgroundColor = jQuery.css( curElem, "backgroundColor" );
+								curElem = curElem.parentNode;
+							} catch ( e ) {
+							}
+						}
+
+						value = value.blend( backgroundColor && backgroundColor !== "transparent" ?
+							backgroundColor :
+							"_default" );
+					}
+
 					value = value.toRgbaString();
 				}
-				elem.style[ hook ] = value;
+				try {
+					elem.style[ hook ] = value;
+				} catch ( e ) {
+
+					// wrapped to prevent IE from throwing errors on "invalid" values like 'auto' or 'inherit'
+				}
 			}
 		};
 		jQuery.fx.step[ hook ] = function( fx ) {
@@ -11593,7 +12904,7 @@ colors = jQuery.Color.names = {
 
 
 /*!
- * jQuery UI Effects 1.14.1
+ * jQuery UI Effects 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -11656,14 +12967,26 @@ function camelCase( string ) {
 
 function getElementStyles( elem ) {
 	var key, len,
-		style = elem.ownerDocument.defaultView.getComputedStyle( elem ),
+		style = elem.ownerDocument.defaultView ?
+			elem.ownerDocument.defaultView.getComputedStyle( elem, null ) :
+			elem.currentStyle,
 		styles = {};
 
-	len = style.length;
-	while ( len-- ) {
-		key = style[ len ];
-		if ( typeof style[ key ] === "string" ) {
-			styles[ camelCase( key ) ] = style[ key ];
+	if ( style && style.length && style[ 0 ] && style[ style[ 0 ] ] ) {
+		len = style.length;
+		while ( len-- ) {
+			key = style[ len ];
+			if ( typeof style[ key ] === "string" ) {
+				styles[ camelCase( key ) ] = style[ key ];
+			}
+		}
+
+	// Support: Opera, IE <9
+	} else {
+		for ( key in style ) {
+			if ( typeof style[ key ] === "string" ) {
+				styles[ key ] = style[ key ];
+			}
 		}
 	}
 
@@ -11686,6 +13009,15 @@ function styleDifference( oldStyle, newStyle ) {
 	}
 
 	return diff;
+}
+
+// Support: jQuery <1.8
+if ( !$.fn.addBack ) {
+	$.fn.addBack = function( selector ) {
+		return this.add( selector == null ?
+			this.prevObject : this.prevObject.filter( selector )
+		);
+	};
 }
 
 $.effects.animateClass = function( value, duration, easing, callback ) {
@@ -11827,7 +13159,7 @@ if ( $.expr && $.expr.pseudos && $.expr.pseudos.animated ) {
 	} )( $.expr.pseudos.animated );
 }
 
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 	$.extend( $.effects, {
 
 		// Saves a set of properties in a data storage
@@ -11956,7 +13288,7 @@ if ( $.uiBackCompat === true ) {
 }
 
 $.extend( $.effects, {
-	version: "1.14.1",
+	version: "1.13.3",
 
 	define: function( name, mode, effect ) {
 		if ( !effect ) {
@@ -12313,7 +13645,7 @@ $.fn.extend( {
 			// as toggle can be either show or hide depending on element state
 			args.mode = modes.shift();
 
-			if ( $.uiBackCompat === true && !defaultMode ) {
+			if ( $.uiBackCompat !== false && !defaultMode ) {
 				if ( elem.is( ":hidden" ) ? mode === "hide" : mode === "show" ) {
 
 					// Call the core method to track "olddisplay" properly
@@ -12524,7 +13856,7 @@ var effect = $.effects;
 
 
 /*!
- * jQuery UI Effects Blind 1.14.1
+ * jQuery UI Effects Blind 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12579,7 +13911,7 @@ var effectsEffectBlind = $.effects.define( "blind", "hide", function( options, d
 
 
 /*!
- * jQuery UI Effects Bounce 1.14.1
+ * jQuery UI Effects Bounce 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12674,7 +14006,7 @@ var effectsEffectBounce = $.effects.define( "bounce", function( options, done ) 
 
 
 /*!
- * jQuery UI Effects Clip 1.14.1
+ * jQuery UI Effects Clip 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12724,7 +14056,7 @@ var effectsEffectClip = $.effects.define( "clip", "hide", function( options, don
 
 
 /*!
- * jQuery UI Effects Drop 1.14.1
+ * jQuery UI Effects Drop 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12778,7 +14110,7 @@ var effectsEffectDrop = $.effects.define( "drop", "hide", function( options, don
 
 
 /*!
- * jQuery UI Effects Explode 1.14.1
+ * jQuery UI Effects Explode 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12874,7 +14206,7 @@ var effectsEffectExplode = $.effects.define( "explode", "hide", function( option
 
 
 /*!
- * jQuery UI Effects Fade 1.14.1
+ * jQuery UI Effects Fade 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12906,7 +14238,7 @@ var effectsEffectFade = $.effects.define( "fade", "toggle", function( options, d
 
 
 /*!
- * jQuery UI Effects Fold 1.14.1
+ * jQuery UI Effects Fold 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -12980,7 +14312,7 @@ var effectsEffectFold = $.effects.define( "fold", "hide", function( options, don
 
 
 /*!
- * jQuery UI Effects Highlight 1.14.1
+ * jQuery UI Effects Highlight 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13022,7 +14354,7 @@ var effectsEffectHighlight = $.effects.define( "highlight", "show", function( op
 
 
 /*!
- * jQuery UI Effects Size 1.14.1
+ * jQuery UI Effects Size 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13200,7 +14532,7 @@ var effectsEffectSize = $.effects.define( "size", function( options, done ) {
 
 
 /*!
- * jQuery UI Effects Scale 1.14.1
+ * jQuery UI Effects Scale 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13240,7 +14572,7 @@ var effectsEffectScale = $.effects.define( "scale", function( options, done ) {
 
 
 /*!
- * jQuery UI Effects Puff 1.14.1
+ * jQuery UI Effects Puff 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13266,7 +14598,7 @@ var effectsEffectPuff = $.effects.define( "puff", "hide", function( options, don
 
 
 /*!
- * jQuery UI Effects Pulsate 1.14.1
+ * jQuery UI Effects Pulsate 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13315,7 +14647,7 @@ var effectsEffectPulsate = $.effects.define( "pulsate", "show", function( option
 
 
 /*!
- * jQuery UI Effects Shake 1.14.1
+ * jQuery UI Effects Shake 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13374,7 +14706,7 @@ var effectsEffectShake = $.effects.define( "shake", function( options, done ) {
 
 
 /*!
- * jQuery UI Effects Slide 1.14.1
+ * jQuery UI Effects Slide 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13435,7 +14767,7 @@ var effectsEffectSlide = $.effects.define( "slide", "show", function( options, d
 
 
 /*!
- * jQuery UI Effects Transfer 1.14.1
+ * jQuery UI Effects Transfer 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13451,7 +14783,7 @@ var effectsEffectSlide = $.effects.define( "slide", "show", function( options, d
 
 
 var effect;
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 	effect = $.effects.define( "transfer", function( options, done ) {
 		$( this ).transfer( options, done );
 	} );
@@ -13460,7 +14792,7 @@ var effectsEffectTransfer = effect;
 
 
 /*!
- * jQuery UI Focusable 1.14.1
+ * jQuery UI Focusable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13509,9 +14841,19 @@ $.ui.focusable = function( element, hasTabindex ) {
 		focusableIfVisible = hasTabindex;
 	}
 
-	return focusableIfVisible && $( element ).is( ":visible" ) &&
-		$( element ).css( "visibility" ) === "visible";
+	return focusableIfVisible && $( element ).is( ":visible" ) && visible( $( element ) );
 };
+
+// Support: IE 8 only
+// IE 8 doesn't resolve inherit to visible/hidden for computed values
+function visible( element ) {
+	var visibility = element.css( "visibility" );
+	while ( visibility === "inherit" ) {
+		element = element.parent();
+		visibility = element.css( "visibility" );
+	}
+	return visibility === "visible";
+}
 
 $.extend( $.expr.pseudos, {
 	focusable: function( element ) {
@@ -13522,8 +14864,17 @@ $.extend( $.expr.pseudos, {
 var focusable = $.ui.focusable;
 
 
+
+// Support: IE8 Only
+// IE8 does not support the form attribute and when it is supplied. It overwrites the form prop
+// with a string, so we need to find the proper form.
+var form = $.fn._form = function() {
+	return typeof this[ 0 ].form === "string" ? this.closest( "form" ) : $( this[ 0 ].form );
+};
+
+
 /*!
- * jQuery UI Form Reset Mixin 1.14.1
+ * jQuery UI Form Reset Mixin 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13551,7 +14902,7 @@ var formResetMixin = $.ui.formResetMixin = {
 	},
 
 	_bindFormResetHandler: function() {
-		this.form = $( this.element.prop( "form" ) );
+		this.form = this.element._form();
 		if ( !this.form.length ) {
 			return;
 		}
@@ -13585,7 +14936,7 @@ var formResetMixin = $.ui.formResetMixin = {
 
 
 /*!
- * jQuery UI Legacy jQuery Core patches 1.14.1
+ * jQuery UI Support for jQuery core 1.8.x and newer 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13594,17 +14945,50 @@ var formResetMixin = $.ui.formResetMixin = {
  *
  */
 
-//>>label: Legacy jQuery Core patches
+//>>label: jQuery 1.8+ Support
 //>>group: Core
-//>>description: Backport `.even()`, `.odd()` and `$.escapeSelector` to older jQuery Core versions (deprecated)
+//>>description: Support version 1.8.x and newer of jQuery core
 
+
+// Support: jQuery 1.9.x or older
+// $.expr[ ":" ] is deprecated.
+if ( !$.expr.pseudos ) {
+	$.expr.pseudos = $.expr[ ":" ];
+}
+
+// Support: jQuery 1.11.x or older
+// $.unique has been renamed to $.uniqueSort
+if ( !$.uniqueSort ) {
+	$.uniqueSort = $.unique;
+}
 
 // Support: jQuery 2.2.x or older.
 // This method has been defined in jQuery 3.0.0.
 // Code from https://github.com/jquery/jquery/blob/e539bac79e666bba95bba86d690b4e609dca2286/src/selector/escapeSelector.js
 if ( !$.escapeSelector ) {
-	$.escapeSelector = function( id ) {
-		return CSS.escape( id + "" );
+
+	// CSS string/identifier serialization
+	// https://drafts.csswg.org/cssom/#common-serializing-idioms
+	var rcssescape = /([\0-\x1f\x7f]|^-?\d)|^-$|[^\x80-\uFFFF\w-]/g;
+
+	var fcssescape = function( ch, asCodePoint ) {
+		if ( asCodePoint ) {
+
+			// U+0000 NULL becomes U+FFFD REPLACEMENT CHARACTER
+			if ( ch === "\0" ) {
+				return "\uFFFD";
+			}
+
+			// Control characters and (dependent upon position) numbers get escaped as code points
+			return ch.slice( 0, -1 ) + "\\" + ch.charCodeAt( ch.length - 1 ).toString( 16 ) + " ";
+		}
+
+		// Other potentially-special ASCII characters get backslash-escaped
+		return "\\" + ch;
+	};
+
+	$.escapeSelector = function( sel ) {
+		return ( sel + "" ).replace( rcssescape, fcssescape );
 	};
 }
 
@@ -13627,7 +15011,7 @@ if ( !$.fn.even || !$.fn.odd ) {
 
 ;
 /*!
- * jQuery UI Keycode 1.14.1
+ * jQuery UI Keycode 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13662,7 +15046,7 @@ var keycode = $.ui.keyCode = {
 
 
 /*!
- * jQuery UI Labels 1.14.1
+ * jQuery UI Labels 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13688,8 +15072,9 @@ var labels = $.fn.labels = function() {
 		return this.pushStack( this[ 0 ].labels );
 	}
 
-	// If `control.labels` is empty - e.g. inside of document fragments - find
-	// the labels manually
+	// Support: IE <= 11, FF <= 37, Android <= 2.3 only
+	// Above browsers do not support control.labels. Everything below is to support them
+	// as well as document fragments. control.labels does not work on document fragments
 	labels = this.eq( 0 ).parents( "label" );
 
 	// Look for the label based on the id
@@ -13704,7 +15089,7 @@ var labels = $.fn.labels = function() {
 		ancestors = ancestor.add( ancestor.length ? ancestor.siblings() : this.siblings() );
 
 		// Create a selector for the label based on the id
-		selector = "label[for='" + CSS.escape( id ) + "']";
+		selector = "label[for='" + $.escapeSelector( id ) + "']";
 
 		labels = labels.add( ancestors.find( selector ).addBack( selector ) );
 
@@ -13716,7 +15101,7 @@ var labels = $.fn.labels = function() {
 
 
 /*!
- * jQuery UI Scroll Parent 1.14.1
+ * jQuery UI Scroll Parent 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13750,7 +15135,7 @@ var scrollParent = $.fn.scrollParent = function( includeHidden ) {
 
 
 /*!
- * jQuery UI Tabbable 1.14.1
+ * jQuery UI Tabbable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13774,7 +15159,7 @@ var tabbable = $.extend( $.expr.pseudos, {
 
 
 /*!
- * jQuery UI Unique ID 1.14.1
+ * jQuery UI Unique ID 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13812,7 +15197,7 @@ var uniqueId = $.fn.extend( {
 
 
 /*!
- * jQuery UI Accordion 1.14.1
+ * jQuery UI Accordion 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -13833,7 +15218,7 @@ var uniqueId = $.fn.extend( {
 
 
 var widgetsAccordion = $.widget( "ui.accordion", {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		active: 0,
 		animate: {},
@@ -13845,17 +15230,7 @@ var widgetsAccordion = $.widget( "ui.accordion", {
 		collapsible: false,
 		event: "click",
 		header: function( elem ) {
-			return elem
-				.find( "> li > :first-child" )
-				.add(
-					elem.find( "> :not(li)" )
-
-						// Support: jQuery <3.5 only
-						// We could use `.even()` but that's unavailable in older jQuery.
-						.filter( function( i ) {
-							return i % 2 === 0;
-						} )
-				);
+			return elem.find( "> li > :first-child" ).add( elem.find( "> :not(li)" ).even() );
 		},
 		heightStyle: "auto",
 		icons: {
@@ -13990,7 +15365,13 @@ var widgetsAccordion = $.widget( "ui.accordion", {
 		this._super( value );
 
 		this.element.attr( "aria-disabled", value );
+
+		// Support: IE8 Only
+		// #5332 / #6059 - opacity doesn't cascade to positioned elements in IE
+		// so we need to add the disabled class to the headers and panels
 		this._toggleClass( null, "ui-state-disabled", !!value );
+		this._toggleClass( this.headers.add( this.headers.next() ), null, "ui-state-disabled",
+			!!value );
 	},
 
 	_keydown: function( event ) {
@@ -14408,13 +15789,47 @@ var widgetsAccordion = $.widget( "ui.accordion", {
 		this._removeClass( prev, "ui-accordion-header-active" )
 			._addClass( prev, "ui-accordion-header-collapsed" );
 
+		// Work around for rendering bug in IE (#5421)
+		if ( toHide.length ) {
+			toHide.parent()[ 0 ].className = toHide.parent()[ 0 ].className;
+		}
 		this._trigger( "activate", null, data );
 	}
 } );
 
 
+
+var safeActiveElement = $.ui.safeActiveElement = function( document ) {
+	var activeElement;
+
+	// Support: IE 9 only
+	// IE9 throws an "Unspecified error" accessing document.activeElement from an <iframe>
+	try {
+		activeElement = document.activeElement;
+	} catch ( error ) {
+		activeElement = document.body;
+	}
+
+	// Support: IE 9 - 11 only
+	// IE may return null instead of an element
+	// Interestingly, this only seems to occur when NOT in an iframe
+	if ( !activeElement ) {
+		activeElement = document.body;
+	}
+
+	// Support: IE 11 only
+	// IE11 returns a seemingly empty object in some cases when accessing
+	// document.activeElement from an <iframe>
+	if ( !activeElement.nodeName ) {
+		activeElement = document.body;
+	}
+
+	return activeElement;
+};
+
+
 /*!
- * jQuery UI Menu 1.14.1
+ * jQuery UI Menu 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -14433,7 +15848,7 @@ var widgetsAccordion = $.widget( "ui.accordion", {
 
 
 var widgetsMenu = $.widget( "ui.menu", {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<ul>",
 	delay: 300,
 	options: {
@@ -14480,7 +15895,7 @@ var widgetsMenu = $.widget( "ui.menu", {
 			},
 			"click .ui-menu-item": function( event ) {
 				var target = $( event.target );
-				var active = $( this.document[ 0 ].activeElement );
+				var active = $( $.ui.safeActiveElement( this.document[ 0 ] ) );
 				if ( !this.mouseHandled && target.not( ".ui-state-disabled" ).length ) {
 					this.select( event );
 
@@ -14524,7 +15939,7 @@ var widgetsMenu = $.widget( "ui.menu", {
 				this._delay( function() {
 					var notContained = !$.contains(
 						this.element[ 0 ],
-						this.document[ 0 ].activeElement
+						$.ui.safeActiveElement( this.document[ 0 ] )
 					);
 					if ( notContained ) {
 						this.collapseAll( event );
@@ -15105,7 +16520,7 @@ var widgetsMenu = $.widget( "ui.menu", {
 
 
 /*!
- * jQuery UI Autocomplete 1.14.1
+ * jQuery UI Autocomplete 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -15124,7 +16539,7 @@ var widgetsMenu = $.widget( "ui.menu", {
 
 
 $.widget( "ui.autocomplete", {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<input>",
 	options: {
 		appendTo: null,
@@ -15168,9 +16583,9 @@ $.widget( "ui.autocomplete", {
 
 		// Textareas are always multi-line
 		// Inputs are always single-line, even if inside a contentEditable element
-		// All other element types are determined by whether they're contentEditable
-		this.isMultiLine = isTextarea ||
-			!isInput && this.element.prop( "contentEditable" ) === "true";
+		// IE also treats inputs as contentEditable
+		// All other element types are determined by whether or not they're contentEditable
+		this.isMultiLine = isTextarea || !isInput && this._isContentEditable( this.element );
 
 		this.valueMethod = this.element[ isTextarea || isInput ? "val" : "text" ];
 		this.isNewMenu = true;
@@ -15234,6 +16649,7 @@ $.widget( "ui.autocomplete", {
 
 						// Different browsers have different default behavior for escape
 						// Single press can mean undo or clear
+						// Double press in IE means clear the whole form
 						event.preventDefault();
 					}
 					break;
@@ -15302,6 +16718,16 @@ $.widget( "ui.autocomplete", {
 				role: null
 			} )
 			.hide()
+
+			// Support: IE 11 only, Edge <= 14
+			// For other browsers, we preventDefault() on the mousedown event
+			// to keep the dropdown from taking focus from the input. This doesn't
+			// work for IE/Edge, causing problems with selection and scrolling (#9638)
+			// Happily, IE and Edge support an "unselectable" attribute that
+			// prevents an element from receiving focus, exactly what we want here.
+			.attr( {
+				"unselectable": "on"
+			} )
 			.menu( "instance" );
 
 		this._addClass( this.menu.element, "ui-autocomplete", "ui-front" );
@@ -15314,7 +16740,7 @@ $.widget( "ui.autocomplete", {
 			menufocus: function( event, ui ) {
 				var label, item;
 
-				// Support: Firefox
+				// support: Firefox
 				// Prevent accidental activation of menu items in Firefox (#7024 #9118)
 				if ( this.isNewMenu ) {
 					this.isNewMenu = false;
@@ -15352,9 +16778,17 @@ $.widget( "ui.autocomplete", {
 					previous = this.previous;
 
 				// Only trigger when focus was lost (click on menu)
-				if ( this.element[ 0 ] !== this.document[ 0 ].activeElement ) {
+				if ( this.element[ 0 ] !== $.ui.safeActiveElement( this.document[ 0 ] ) ) {
 					this.element.trigger( "focus" );
 					this.previous = previous;
+
+					// #6109 - IE triggers two focus events and the second
+					// is asynchronous, so we need to reset the previous
+					// term synchronously and asynchronously :-(
+					this._delay( function() {
+						this.previous = previous;
+						this.selectedItem = item;
+					} );
 				}
 
 				if ( false !== this._trigger( "select", event, { item: item } ) ) {
@@ -15673,6 +17107,24 @@ $.widget( "ui.autocomplete", {
 			// Prevents moving cursor to beginning/end of the text field in some browsers
 			event.preventDefault();
 		}
+	},
+
+	// Support: Chrome <=50
+	// We should be able to just use this.element.prop( "isContentEditable" )
+	// but hidden elements always report false in Chrome.
+	// https://code.google.com/p/chromium/issues/detail?id=313082
+	_isContentEditable: function( element ) {
+		if ( !element.length ) {
+			return false;
+		}
+
+		var editable = element.prop( "contentEditable" );
+
+		if ( editable === "inherit" ) {
+			return this._isContentEditable( element.parent() );
+		}
+
+		return editable === "true";
 	}
 } );
 
@@ -15724,7 +17176,7 @@ var widgetsAutocomplete = $.ui.autocomplete;
 
 
 /*!
- * jQuery UI Controlgroup 1.14.1
+ * jQuery UI Controlgroup 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -15745,7 +17197,7 @@ var widgetsAutocomplete = $.ui.autocomplete;
 var controlgroupCornerRegex = /ui-corner-([a-z]){2,6}/g;
 
 var widgetsControlgroup = $.widget( "ui.controlgroup", {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<div>",
 	options: {
 		direction: "horizontal",
@@ -16009,7 +17461,7 @@ var widgetsControlgroup = $.widget( "ui.controlgroup", {
 } );
 
 /*!
- * jQuery UI Checkboxradio 1.14.1
+ * jQuery UI Checkboxradio 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -16029,7 +17481,7 @@ var widgetsControlgroup = $.widget( "ui.controlgroup", {
 
 
 $.widget( "ui.checkboxradio", [ $.ui.formResetMixin, {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		disabled: null,
 		label: null,
@@ -16147,7 +17599,7 @@ $.widget( "ui.checkboxradio", [ $.ui.formResetMixin, {
 	_getRadioGroup: function() {
 		var group;
 		var name = this.element[ 0 ].name;
-		var nameSelector = "input[name='" + CSS.escape( name ) + "']";
+		var nameSelector = "input[name='" + $.escapeSelector( name ) + "']";
 
 		if ( !name ) {
 			return $( [] );
@@ -16159,7 +17611,7 @@ $.widget( "ui.checkboxradio", [ $.ui.formResetMixin, {
 
 			// Not inside a form, check all inputs that also are not inside a form
 			group = $( nameSelector ).filter( function() {
-				return $( $( this ).prop( "form" ) ).length === 0;
+				return $( this )._form().length === 0;
 			} );
 		}
 
@@ -16280,7 +17732,7 @@ var widgetsCheckboxradio = $.ui.checkboxradio;
 
 
 /*!
- * jQuery UI Button 1.14.1
+ * jQuery UI Button 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -16299,7 +17751,7 @@ var widgetsCheckboxradio = $.ui.checkboxradio;
 
 
 $.widget( "ui.button", {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<button>",
 	options: {
 		classes: {
@@ -16366,9 +17818,9 @@ $.widget( "ui.button", {
 					if ( event.keyCode === $.ui.keyCode.SPACE ) {
 						event.preventDefault();
 
-						// If a native click is available use it, so we
-						// actually cause navigation. Otherwise, just trigger
-						// a click event.
+						// Support: PhantomJS <= 1.9, IE 8 Only
+						// If a native click is available use it so we actually cause navigation
+						// otherwise just trigger a click event
 						if ( this.element[ 0 ].click ) {
 							this.element[ 0 ].click();
 						} else {
@@ -16544,7 +17996,7 @@ $.widget( "ui.button", {
 } );
 
 // DEPRECATED
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Text and Icons options
 	$.widget( "ui.button", $.ui.button, {
@@ -16706,7 +18158,7 @@ var widgetsButton = $.ui.button;
 
 /* eslint-disable max-len, camelcase */
 /*!
- * jQuery UI Datepicker 1.14.1
+ * jQuery UI Datepicker 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -16724,7 +18176,7 @@ var widgetsButton = $.ui.button;
 //>>css.theme: ../../themes/base/theme.css
 
 
-$.extend( $.ui, { datepicker: { version: "1.14.1" } } );
+$.extend( $.ui, { datepicker: { version: "1.13.3" } } );
 
 var datepicker_instActive;
 
@@ -17123,7 +18575,6 @@ $.extend( Datepicker.prototype, {
 			$target.removeClass( this.markerClassName ).empty();
 		}
 
-		$.datepicker._hideDatepicker();
 		if ( datepicker_instActive === inst ) {
 			datepicker_instActive = null;
 			this._curInst = null;
@@ -17599,8 +19050,11 @@ $.extend( Datepicker.prototype, {
 		}
 	},
 
+	// #6694 - don't focus the input if it's already focused
+	// this breaks the change event in IE
+	// Support: IE and jQuery <1.9
 	_shouldFocusInput: function( inst ) {
-		return inst.input && inst.input.is( ":visible" ) && !inst.input.is( ":disabled" );
+		return inst.input && inst.input.is( ":visible" ) && !inst.input.is( ":disabled" ) && !inst.input.is( ":focus" );
 	},
 
 	/* Check positioning to remain on screen. */
@@ -17657,7 +19111,8 @@ $.extend( Datepicker.prototype, {
 				$.datepicker._tidyDialog( inst );
 			};
 
-			if ( $.effects && ( $.effects.effect[ showAnim ] ) ) {
+			// DEPRECATED: after BC for 1.8.x $.effects[ showAnim ] is not needed
+			if ( $.effects && ( $.effects.effect[ showAnim ] || $.effects[ showAnim ] ) ) {
 				inst.dpDiv.hide( showAnim, $.datepicker._get( inst, "showOptions" ), duration, postProcess );
 			} else {
 				inst.dpDiv[ ( showAnim === "slideDown" ? "slideUp" :
@@ -18918,13 +20373,17 @@ $.fn.datepicker = function( options ) {
 $.datepicker = new Datepicker(); // singleton instance
 $.datepicker.initialized = false;
 $.datepicker.uuid = new Date().getTime();
-$.datepicker.version = "1.14.1";
+$.datepicker.version = "1.13.3";
 
 var widgetsDatepicker = $.datepicker;
 
 
+
+// This file is deprecated
+var ie = $.ui.ie = !!/msie [\w.]+/.exec( navigator.userAgent.toLowerCase() );
+
 /*!
- * jQuery UI Mouse 1.14.1
+ * jQuery UI Mouse 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -18944,7 +20403,7 @@ $( document ).on( "mouseup", function() {
 } );
 
 var widgetsMouse = $.widget( "ui.mouse", {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		cancel: "input, textarea, button, select, option",
 		distance: 1,
@@ -18996,10 +20455,12 @@ var widgetsMouse = $.widget( "ui.mouse", {
 		this._mouseDownEvent = event;
 
 		var that = this,
-			btnIsLeft = event.which === 1,
-			elIsCancel = typeof this.options.cancel === "string" ?
-				$( event.target ).closest( this.options.cancel ).length :
-				false;
+			btnIsLeft = ( event.which === 1 ),
+
+			// event.target.nodeName works around a bug in IE 8 with
+			// disabled inputs (#7620)
+			elIsCancel = ( typeof this.options.cancel === "string" && event.target.nodeName ?
+				$( event.target ).closest( this.options.cancel ).length : false );
 		if ( !btnIsLeft || elIsCancel || !this._mouseCapture( event ) ) {
 			return true;
 		}
@@ -19045,17 +20506,28 @@ var widgetsMouse = $.widget( "ui.mouse", {
 	_mouseMove: function( event ) {
 
 		// Only check for mouseups outside the document if you've moved inside the document
-		// at least once.
-		if ( this._mouseMoved && !event.which ) {
+		// at least once. This prevents the firing of mouseup in the case of IE<9, which will
+		// fire a mousemove event if content is placed under the cursor. See #7778
+		// Support: IE <9
+		if ( this._mouseMoved ) {
 
-			// Support: Safari <=8 - 9
-			// Safari sets which to 0 if you press any of the following keys
-			// during a drag (#14461)
-			if ( event.originalEvent.altKey || event.originalEvent.ctrlKey ||
-					event.originalEvent.metaKey || event.originalEvent.shiftKey ) {
-				this.ignoreMissingWhich = true;
-			} else if ( !this.ignoreMissingWhich ) {
+			// IE mouseup check - mouseup happened when mouse was out of window
+			if ( $.ui.ie && ( !document.documentMode || document.documentMode < 9 ) &&
+					!event.button ) {
 				return this._mouseUp( event );
+
+			// Iframe mouseup check - mouseup occurred in another document
+			} else if ( !event.which ) {
+
+				// Support: Safari <=8 - 9
+				// Safari sets which to 0 if you press any of the following keys
+				// during a drag (#14461)
+				if ( event.originalEvent.altKey || event.originalEvent.ctrlKey ||
+						event.originalEvent.metaKey || event.originalEvent.shiftKey ) {
+					this.ignoreMissingWhich = true;
+				} else if ( !this.ignoreMissingWhich ) {
+					return this._mouseUp( event );
+				}
 			}
 		}
 
@@ -19161,8 +20633,19 @@ var plugin = $.ui.plugin = {
 };
 
 
+
+var safeBlur = $.ui.safeBlur = function( element ) {
+
+	// Support: IE9 - 10 only
+	// If the <body> is blurred, IE will switch windows, see #9420
+	if ( element && element.nodeName.toLowerCase() !== "body" ) {
+		$( element ).trigger( "blur" );
+	}
+};
+
+
 /*!
- * jQuery UI Draggable 1.14.1
+ * jQuery UI Draggable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -19179,7 +20662,7 @@ var plugin = $.ui.plugin = {
 
 
 $.widget( "ui.draggable", $.ui.mouse, {
-	version: "1.14.1",
+	version: "1.13.3",
 	widgetEventPrefix: "drag",
 	options: {
 		addClasses: true,
@@ -19286,7 +20769,7 @@ $.widget( "ui.draggable", $.ui.mouse, {
 	},
 
 	_blurActiveElement: function( event ) {
-		var activeElement = this.document[ 0 ].activeElement,
+		var activeElement = $.ui.safeActiveElement( this.document[ 0 ] ),
 			target = $( event.target );
 
 		// Don't blur if the event occurred on an element that is within
@@ -19297,7 +20780,7 @@ $.widget( "ui.draggable", $.ui.mouse, {
 		}
 
 		// Blur any element that currently has focus, see #4261
-		$( activeElement ).trigger( "blur" );
+		$.ui.safeBlur( activeElement );
 	},
 
 	_mouseStart: function( event ) {
@@ -20397,7 +21880,7 @@ var widgetsDraggable = $.ui.draggable;
 
 
 /*!
- * jQuery UI Resizable 1.14.1
+ * jQuery UI Resizable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -20416,7 +21899,7 @@ var widgetsDraggable = $.ui.draggable;
 
 
 $.widget( "ui.resizable", $.ui.mouse, {
-	version: "1.14.1",
+	version: "1.13.3",
 	widgetEventPrefix: "resize",
 	options: {
 		alsoResize: false,
@@ -20457,18 +21940,12 @@ $.widget( "ui.resizable", $.ui.mouse, {
 
 	_hasScroll: function( el, a ) {
 
-		var scroll,
-			has = false,
-			overflow = $( el ).css( "overflow" );
-
-		if ( overflow === "hidden" ) {
+		if ( $( el ).css( "overflow" ) === "hidden" ) {
 			return false;
 		}
-		if ( overflow === "scroll" ) {
-			return true;
-		}
 
-		scroll = ( a && a === "left" ) ? "scrollLeft" : "scrollTop";
+		var scroll = ( a && a === "left" ) ? "scrollLeft" : "scrollTop",
+			has = false;
 
 		if ( el[ scroll ] > 0 ) {
 			return true;
@@ -20532,8 +22009,9 @@ $.widget( "ui.resizable", $.ui.mouse, {
 			};
 
 			this.element.css( margins );
+			this.originalElement.css( "margin", 0 );
 
-			// Support: Safari
+			// support: Safari
 			// Prevent Safari textarea resize
 			this.originalResizeStyle = this.originalElement.css( "resize" );
 			this.originalElement.css( "resize", "none" );
@@ -20543,6 +22021,10 @@ $.widget( "ui.resizable", $.ui.mouse, {
 				zoom: 1,
 				display: "block"
 			} ) );
+
+			// Support: IE9
+			// avoid IE jump (hard set the margin)
+			this.originalElement.css( margins );
 
 			this._proportionallyResize();
 		}
@@ -20745,7 +22227,7 @@ $.widget( "ui.resizable", $.ui.mouse, {
 
 	_mouseStart: function( event ) {
 
-		var curleft, curtop, cursor, calculatedSize,
+		var curleft, curtop, cursor,
 			o = this.options,
 			el = this.element;
 
@@ -20764,24 +22246,20 @@ $.widget( "ui.resizable", $.ui.mouse, {
 		this.offset = this.helper.offset();
 		this.position = { left: curleft, top: curtop };
 
-		if ( !this._helper ) {
-			calculatedSize = this._calculateAdjustedElementDimensions( el );
-		}
-
 		this.size = this._helper ? {
 				width: this.helper.width(),
 				height: this.helper.height()
 			} : {
-				width: calculatedSize.width,
-				height: calculatedSize.height
+				width: el.width(),
+				height: el.height()
 			};
 
 		this.originalSize = this._helper ? {
 				width: el.outerWidth(),
 				height: el.outerHeight()
 			} : {
-				width: calculatedSize.width,
-				height: calculatedSize.height
+				width: el.width(),
+				height: el.height()
 			};
 
 		this.sizeDiff = {
@@ -21075,52 +22553,6 @@ $.widget( "ui.resizable", $.ui.mouse, {
 			height: widths[ 0 ] + widths[ 2 ],
 			width: widths[ 1 ] + widths[ 3 ]
 		};
-	},
-
-	_calculateAdjustedElementDimensions: function( element ) {
-		var elWidth, elHeight, paddingBorder,
-			ce = element.get( 0 );
-
-		if ( element.css( "box-sizing" ) !== "content-box" ||
-			( !this._hasScroll( ce ) && !this._hasScroll( ce, "left" ) ) ) {
-				return {
-					height: parseFloat( element.css( "height" ) ),
-					width: parseFloat( element.css( "width" ) )
-				};
-		}
-
-		// Check if CSS inline styles are set and use those (usually from previous resizes)
-		elWidth = parseFloat( ce.style.width );
-		elHeight = parseFloat( ce.style.height );
-
-		paddingBorder = this._getPaddingPlusBorderDimensions( element );
-		elWidth = isNaN( elWidth ) ?
-			this._getElementTheoreticalSize( element, paddingBorder, "width" ) :
-			elWidth;
-		elHeight = isNaN( elHeight ) ?
-			this._getElementTheoreticalSize( element, paddingBorder, "height" ) :
-			elHeight;
-
-		return {
-			height: elHeight,
-			width: elWidth
-		};
-	},
-
-	_getElementTheoreticalSize: function( element, extraSize, dimension ) {
-
-		// offsetWidth/offsetHeight is a rounded sum of content, padding, scroll gutter, and border
-		var size = Math.max( 0, Math.ceil(
-			element.get( 0 )[ "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 ) ] -
-			extraSize[ dimension ] -
-			0.5
-
-		// If offsetWidth/offsetHeight is unknown, then we can't determine theoretical size.
-		// Use an explicit zero to avoid NaN.
-		// See https://github.com/jquery/jquery/issues/3964
-		) ) || 0;
-
-		return size;
 	},
 
 	_proportionallyResize: function() {
@@ -21477,11 +22909,9 @@ $.ui.plugin.add( "resizable", "alsoResize", {
 			o = that.options;
 
 		$( o.alsoResize ).each( function() {
-			var el = $( this ),
-				elSize = that._calculateAdjustedElementDimensions( el );
-
+			var el = $( this );
 			el.data( "ui-resizable-alsoresize", {
-				width: elSize.width, height: elSize.height,
+				width: parseFloat( el.css( "width" ) ), height: parseFloat( el.css( "height" ) ),
 				left: parseFloat( el.css( "left" ) ), top: parseFloat( el.css( "top" ) )
 			} );
 		} );
@@ -21543,7 +22973,7 @@ $.ui.plugin.add( "resizable", "ghost", {
 
 		// DEPRECATED
 		// TODO: remove after 1.12
-		if ( $.uiBackCompat === true && typeof that.options.ghost === "string" ) {
+		if ( $.uiBackCompat !== false && typeof that.options.ghost === "string" ) {
 
 			// Ghost option
 			that.ghost.addClass( this.options.ghost );
@@ -21651,7 +23081,7 @@ var widgetsResizable = $.ui.resizable;
 
 
 /*!
- * jQuery UI Dialog 1.14.1
+ * jQuery UI Dialog 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -21670,7 +23100,7 @@ var widgetsResizable = $.ui.resizable;
 
 
 $.widget( "ui.dialog", {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		appendTo: "body",
 		autoOpen: true,
@@ -21706,7 +23136,6 @@ $.widget( "ui.dialog", {
 		resizable: true,
 		show: null,
 		title: null,
-		uiDialogTitleHeadingLevel: 0,
 		width: 300,
 
 		// Callbacks
@@ -21853,7 +23282,7 @@ $.widget( "ui.dialog", {
 			// Hiding a focused element doesn't trigger blur in WebKit
 			// so in case we have nothing to focus on, explicitly blur the active element
 			// https://bugs.webkit.org/show_bug.cgi?id=47182
-			$( this.document[ 0 ].activeElement ).trigger( "blur" );
+			$.ui.safeBlur( $.ui.safeActiveElement( this.document[ 0 ] ) );
 		}
 
 		this._hide( this.uiDialog, this.options.hide, function() {
@@ -21897,7 +23326,7 @@ $.widget( "ui.dialog", {
 		}
 
 		this._isOpen = true;
-		this.opener = $( this.document[ 0 ].activeElement );
+		this.opener = $( $.ui.safeActiveElement( this.document[ 0 ] ) );
 
 		this._size();
 		this._position();
@@ -21953,7 +23382,7 @@ $.widget( "ui.dialog", {
 	},
 
 	_restoreTabbableFocus: function() {
-		var activeElement = this.document[ 0 ].activeElement,
+		var activeElement = $.ui.safeActiveElement( this.document[ 0 ] ),
 			isActive = this.uiDialog[ 0 ] === activeElement ||
 				$.contains( this.uiDialog[ 0 ], activeElement );
 		if ( !isActive ) {
@@ -21964,6 +23393,11 @@ $.widget( "ui.dialog", {
 	_keepFocus: function( event ) {
 		event.preventDefault();
 		this._restoreTabbableFocus();
+
+		// support: IE
+		// IE <= 8 doesn't prevent moving focus even with event.preventDefault()
+		// so we check again later
+		this._delay( this._restoreTabbableFocus );
 	},
 
 	_createWrapper: function() {
@@ -21973,8 +23407,7 @@ $.widget( "ui.dialog", {
 
 				// Setting tabIndex makes the div focusable
 				tabIndex: -1,
-				role: "dialog",
-				"aria-modal": this.options.modal ? "true" : null
+				role: "dialog"
 			} )
 			.appendTo( this._appendTo() );
 
@@ -22047,6 +23480,9 @@ $.widget( "ui.dialog", {
 			}
 		} );
 
+		// Support: IE
+		// Use type="button" to prevent enter keypresses in textboxes from closing the
+		// dialog in IE (#9312)
 		this.uiDialogTitlebarClose = $( "<button type='button'></button>" )
 			.button( {
 				label: $( "<a>" ).text( this.options.closeText ).html(),
@@ -22063,13 +23499,7 @@ $.widget( "ui.dialog", {
 			}
 		} );
 
-		var uiDialogHeadingLevel = Number.isInteger( this.options.uiDialogTitleHeadingLevel ) &&
-			this.options.uiDialogTitleHeadingLevel > 0 &&
-			this.options.uiDialogTitleHeadingLevel <= 6 ?
-			"h" + this.options.uiDialogTitleHeadingLevel : "span";
-
-		uiDialogTitle = $( "<" + uiDialogHeadingLevel + ">" )
-			.uniqueId().prependTo( this.uiDialogTitlebar );
+		uiDialogTitle = $( "<span>" ).uniqueId().prependTo( this.uiDialogTitlebar );
 		this._addClass( uiDialogTitle, "ui-dialog-title" );
 		this._title( uiDialogTitle );
 
@@ -22395,10 +23825,6 @@ $.widget( "ui.dialog", {
 		if ( key === "title" ) {
 			this._title( this.uiDialogTitlebar.find( ".ui-dialog-title" ) );
 		}
-
-		if ( key === "modal" ) {
-			uiDialog.attr( "aria-modal", value ? "true" : null );
-		}
 	},
 
 	_size: function() {
@@ -22484,6 +23910,8 @@ $.widget( "ui.dialog", {
 			return;
 		}
 
+		var jqMinor = $.fn.jquery.substring( 0, 4 );
+
 		// We use a delay in case the overlay is created from an
 		// event that we're going to be cancelling (#2804)
 		var isOpening = true;
@@ -22505,6 +23933,18 @@ $.widget( "ui.dialog", {
 				if ( !instance._allowInteraction( event ) ) {
 					event.preventDefault();
 					instance._focusTabbable();
+
+					// Support: jQuery >=3.4 <3.7 only
+					// In jQuery 3.4-3.6, there are multiple issues with focus/blur
+					// trigger chains or when triggering is done on a hidden element
+					// at least once.
+					// Trigger focus in a delay in addition if needed to avoid the issues.
+					// See https://github.com/jquery/jquery/issues/4382
+					// See https://github.com/jquery/jquery/issues/4856
+					// See https://github.com/jquery/jquery/issues/4950
+					if ( jqMinor === "3.4." || jqMinor === "3.5." || jqMinor === "3.6." ) {
+						instance._delay( instance._restoreTabbableFocus );
+					}
 				}
 			}.bind( this ) );
 		}
@@ -22543,7 +23983,7 @@ $.widget( "ui.dialog", {
 
 // DEPRECATED
 // TODO: switch return back to widget declaration at top of file when this is removed
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Backcompat for dialogClass option
 	$.widget( "ui.dialog", $.ui.dialog, {
@@ -22569,7 +24009,7 @@ var widgetsDialog = $.ui.dialog;
 
 
 /*!
- * jQuery UI Droppable 1.14.1
+ * jQuery UI Droppable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -22585,7 +24025,7 @@ var widgetsDialog = $.ui.dialog;
 
 
 $.widget( "ui.droppable", {
-	version: "1.14.1",
+	version: "1.13.3",
 	widgetEventPrefix: "drop",
 	options: {
 		accept: "*",
@@ -23013,7 +24453,7 @@ $.ui.ddmanager = {
 
 // DEPRECATED
 // TODO: switch return back to widget declaration at top of file when this is removed
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Backcompat for activeClass and hoverClass options
 	$.widget( "ui.droppable", $.ui.droppable, {
@@ -23052,7 +24492,7 @@ var widgetsDroppable = $.ui.droppable;
 
 
 /*!
- * jQuery UI Progressbar 1.14.1
+ * jQuery UI Progressbar 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -23073,7 +24513,7 @@ var widgetsDroppable = $.ui.droppable;
 
 
 var widgetsProgressbar = $.widget( "ui.progressbar", {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		classes: {
 			"ui-progressbar": "ui-corner-all",
@@ -23215,7 +24655,7 @@ var widgetsProgressbar = $.widget( "ui.progressbar", {
 
 
 /*!
- * jQuery UI Selectable 1.14.1
+ * jQuery UI Selectable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -23232,7 +24672,7 @@ var widgetsProgressbar = $.widget( "ui.progressbar", {
 
 
 var widgetsSelectable = $.widget( "ui.selectable", $.ui.mouse, {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		appendTo: "body",
 		autoRefresh: true,
@@ -23513,7 +24953,7 @@ var widgetsSelectable = $.widget( "ui.selectable", $.ui.mouse, {
 
 
 /*!
- * jQuery UI Selectmenu 1.14.1
+ * jQuery UI Selectmenu 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -23534,7 +24974,7 @@ var widgetsSelectable = $.widget( "ui.selectable", $.ui.mouse, {
 
 
 var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<select>",
 	options: {
 		appendTo: null,
@@ -23657,6 +25097,12 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 				role: "listbox",
 				select: function( event, ui ) {
 					event.preventDefault();
+
+					// Support: IE8
+					// If the item was selected via a click, the text selection
+					// will be destroyed in IE
+					that._setSelection();
+
 					that._select( ui.item.data( "ui-selectmenu-item" ), event );
 				},
 				focus: function( event, ui ) {
@@ -23893,9 +25339,20 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 			return;
 		}
 
-		selection = window.getSelection();
-		selection.removeAllRanges();
-		selection.addRange( this.range );
+		if ( window.getSelection ) {
+			selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange( this.range );
+
+		// Support: IE8
+		} else {
+			this.range.select();
+		}
+
+		// Support: IE
+		// Setting the text selection kills the button focus in IE, but
+		// restoring the focus doesn't kill the selection.
+		this.button.trigger( "focus" );
 	},
 
 	_documentClick: {
@@ -23905,7 +25362,7 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 			}
 
 			if ( !$( event.target ).closest( ".ui-selectmenu-menu, #" +
-				CSS.escape( this.ids.button ) ).length ) {
+				$.escapeSelector( this.ids.button ) ).length ) {
 				this.close( event );
 			}
 		}
@@ -23915,9 +25372,17 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 
 		// Prevent text selection from being reset when interacting with the selectmenu (#10144)
 		mousedown: function() {
-			var selection = window.getSelection();
-			if ( selection.rangeCount ) {
-				this.range = selection.getRangeAt( 0 );
+			var selection;
+
+			if ( window.getSelection ) {
+				selection = window.getSelection();
+				if ( selection.rangeCount ) {
+					this.range = selection.getRangeAt( 0 );
+				}
+
+			// Support: IE8
+			} else {
+				this.range = document.selection.createRange();
 			}
 		},
 
@@ -24108,7 +25573,11 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 	_resizeMenu: function() {
 		this.menu.outerWidth( Math.max(
 			this.button.outerWidth(),
-			this.menu.width( "" ).outerWidth()
+
+			// Support: IE10
+			// IE10 wraps long text (possibly a rounding bug)
+			// so we add 1px to avoid the wrapping
+			this.menu.width( "" ).outerWidth() + 1
 		) );
 	},
 
@@ -24155,7 +25624,7 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 
 
 /*!
- * jQuery UI Slider 1.14.1
+ * jQuery UI Slider 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -24174,7 +25643,7 @@ var widgetsSelectmenu = $.widget( "ui.selectmenu", [ $.ui.formResetMixin, {
 
 
 var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
-	version: "1.14.1",
+	version: "1.13.3",
 	widgetEventPrefix: "slide",
 
 	options: {
@@ -24890,7 +26359,7 @@ var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
 
 
 /*!
- * jQuery UI Sortable 1.14.1
+ * jQuery UI Sortable 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -24907,7 +26376,7 @@ var widgetsSlider = $.widget( "ui.slider", $.ui.mouse, {
 
 
 var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
-	version: "1.14.1",
+	version: "1.13.3",
 	widgetEventPrefix: "sort",
 	ready: false,
 	options: {
@@ -25145,7 +26614,11 @@ var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
 		if ( o.cursor && o.cursor !== "auto" ) { // cursor option
 			body = this.document.find( "body" );
 
-			this._storedStylesheet =
+			// Support: IE
+			this.storedCursor = body.css( "cursor" );
+			body.css( "cursor", o.cursor );
+
+			this.storedStylesheet =
 				$( "<style>*{ cursor: " + o.cursor + " !important; }</style>" ).appendTo( body );
 		}
 
@@ -26062,9 +27535,11 @@ var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
 			po.top += this.scrollParent.scrollTop();
 		}
 
-		// This needs to be actually done for all browsers, since pageX/pageY includes
-		// this information.
-		if ( this.offsetParent[ 0 ] === this.document[ 0 ].body ) {
+		// This needs to be actually done for all browsers, since pageX/pageY includes this
+		// information with an ugly IE fix
+		if ( this.offsetParent[ 0 ] === this.document[ 0 ].body ||
+				( this.offsetParent[ 0 ].tagName &&
+				this.offsetParent[ 0 ].tagName.toLowerCase() === "html" && $.ui.ie ) ) {
 			po = { top: 0, left: 0 };
 		}
 
@@ -26412,9 +27887,9 @@ var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
 		}
 
 		//Do what was originally in plugins
-		if ( this._storedStylesheet ) {
-			this._storedStylesheet.remove();
-			this._storedStylesheet = null;
+		if ( this.storedCursor ) {
+			this.document.find( "body" ).css( "cursor", this.storedCursor );
+			this.storedStylesheet.remove();
 		}
 		if ( this._storedOpacity ) {
 			this.helper.css( "opacity", this._storedOpacity );
@@ -26477,7 +27952,7 @@ var widgetsSortable = $.widget( "ui.sortable", $.ui.mouse, {
 
 
 /*!
- * jQuery UI Spinner 1.14.1
+ * jQuery UI Spinner 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -26507,7 +27982,7 @@ function spinnerModifier( fn ) {
 }
 
 $.widget( "ui.spinner", {
-	version: "1.14.1",
+	version: "1.13.3",
 	defaultElement: "<input>",
 	widgetEventPrefix: "spin",
 	options: {
@@ -26588,6 +28063,11 @@ $.widget( "ui.spinner", {
 			this.previous = this.element.val();
 		},
 		blur: function( event ) {
+			if ( this.cancelBlur ) {
+				delete this.cancelBlur;
+				return;
+			}
+
 			this._stop();
 			this._refresh();
 			if ( this.previous !== this.element.val() ) {
@@ -26595,7 +28075,7 @@ $.widget( "ui.spinner", {
 			}
 		},
 		mousewheel: function( event, delta ) {
-			var activeElement = this.document[ 0 ].activeElement;
+			var activeElement = $.ui.safeActiveElement( this.document[ 0 ] );
 			var isActive = this.element[ 0 ] === activeElement;
 
 			if ( !isActive || !delta ) {
@@ -26623,19 +28103,36 @@ $.widget( "ui.spinner", {
 			// If the input is focused then this.previous is properly set from
 			// when the input first received focus. If the input is not focused
 			// then we need to set this.previous based on the value before spinning.
-			previous = this.element[ 0 ] === this.document[ 0 ].activeElement ?
+			previous = this.element[ 0 ] === $.ui.safeActiveElement( this.document[ 0 ] ) ?
 				this.previous : this.element.val();
 			function checkFocus() {
-				var isActive = this.element[ 0 ] === this.document[ 0 ].activeElement;
+				var isActive = this.element[ 0 ] === $.ui.safeActiveElement( this.document[ 0 ] );
 				if ( !isActive ) {
 					this.element.trigger( "focus" );
 					this.previous = previous;
+
+					// support: IE
+					// IE sets focus asynchronously, so we need to check if focus
+					// moved off of the input because the user clicked on the button.
+					this._delay( function() {
+						this.previous = previous;
+					} );
 				}
 			}
 
 			// Ensure focus is on (or stays on) the text field
 			event.preventDefault();
 			checkFocus.call( this );
+
+			// Support: IE
+			// IE doesn't prevent moving focus even with event.preventDefault()
+			// so we set a flag to know when we should ignore the blur event
+			// and check (again) if focus moved off of the input.
+			this.cancelBlur = true;
+			this._delay( function() {
+				delete this.cancelBlur;
+				checkFocus.call( this );
+			} );
 
 			if ( this._start( event ) === false ) {
 				return;
@@ -26989,7 +28486,7 @@ $.widget( "ui.spinner", {
 
 // DEPRECATED
 // TODO: switch return back to widget declaration at top of file when this is removed
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Backcompat for spinner html extension points
 	$.widget( "ui.spinner", $.ui.spinner, {
@@ -27016,7 +28513,7 @@ var widgetsSpinner = $.ui.spinner;
 
 
 /*!
- * jQuery UI Tabs 1.14.1
+ * jQuery UI Tabs 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -27035,7 +28532,7 @@ var widgetsSpinner = $.ui.spinner;
 
 
 $.widget( "ui.tabs", {
-	version: "1.14.1",
+	version: "1.13.3",
 	delay: 300,
 	options: {
 		active: null,
@@ -27118,14 +28615,14 @@ $.widget( "ui.tabs", {
 	_initialActive: function() {
 		var active = this.options.active,
 			collapsible = this.options.collapsible,
-			locationHashDecoded = decodeURIComponent( location.hash.substring( 1 ) );
+			locationHash = location.hash.substring( 1 );
 
 		if ( active === null ) {
 
 			// check the fragment identifier in the URL
-			if ( locationHashDecoded ) {
+			if ( locationHash ) {
 				this.tabs.each( function( i, tab ) {
-					if ( $( tab ).attr( "aria-controls" ) === locationHashDecoded ) {
+					if ( $( tab ).attr( "aria-controls" ) === locationHash ) {
 						active = i;
 						return false;
 					}
@@ -27167,7 +28664,7 @@ $.widget( "ui.tabs", {
 	},
 
 	_tabKeydown: function( event ) {
-		var focusedTab = $( this.document[ 0 ].activeElement ).closest( "li" ),
+		var focusedTab = $( $.ui.safeActiveElement( this.document[ 0 ] ) ).closest( "li" ),
 			selectedIndex = this.tabs.index( focusedTab ),
 			goingForward = true;
 
@@ -27309,6 +28806,10 @@ $.widget( "ui.tabs", {
 		}
 	},
 
+	_sanitizeSelector: function( hash ) {
+		return hash ? hash.replace( /[!"$%&'()*+,.\/:;<=>?@\[\]\^`{|}~]/g, "\\$&" ) : "";
+	},
+
 	refresh: function() {
 		var options = this.options,
 			lis = this.tablist.children( ":has(a[href])" );
@@ -27400,6 +28901,18 @@ $.widget( "ui.tabs", {
 				if ( $( this ).is( ".ui-state-disabled" ) ) {
 					event.preventDefault();
 				}
+			} )
+
+			// Support: IE <9
+			// Preventing the default action in mousedown doesn't prevent IE
+			// from focusing the element, so if the anchor gets focused, blur.
+			// We don't have to worry about focusing the previously focused
+			// element since clicking on a non-focusable element should focus
+			// the body anyway.
+			.on( "focus" + this.eventNamespace, ".ui-tabs-anchor", function() {
+				if ( $( this ).closest( "li" ).is( ".ui-state-disabled" ) ) {
+					this.blur();
+				}
 			} );
 
 		this.tabs = this.tablist.find( "> li:has(a[href])" )
@@ -27427,9 +28940,9 @@ $.widget( "ui.tabs", {
 
 			// Inline tab
 			if ( that._isLocal( anchor ) ) {
-				selector = decodeURIComponent( anchor.hash );
+				selector = anchor.hash;
 				panelId = selector.substring( 1 );
-				panel = that.element.find( "#" + CSS.escape( panelId ) );
+				panel = that.element.find( that._sanitizeSelector( selector ) );
 
 			// remote tab
 			} else {
@@ -27715,7 +29228,7 @@ $.widget( "ui.tabs", {
 		// meta-function to give users option to provide a href string instead of a numerical index.
 		if ( typeof index === "string" ) {
 			index = this.anchors.index( this.anchors.filter( "[href$='" +
-				CSS.escape( index ) + "']" ) );
+				$.escapeSelector( index ) + "']" ) );
 		}
 
 		return index;
@@ -27837,19 +29350,32 @@ $.widget( "ui.tabs", {
 
 		this.xhr = $.ajax( this._ajaxSettings( anchor, event, eventData ) );
 
-		if ( this.xhr.statusText !== "canceled" ) {
+		// Support: jQuery <1.8
+		// jQuery <1.8 returns false if the request is canceled in beforeSend,
+		// but as of 1.8, $.ajax() always returns a jqXHR object.
+		if ( this.xhr && this.xhr.statusText !== "canceled" ) {
 			this._addClass( tab, "ui-tabs-loading" );
 			panel.attr( "aria-busy", "true" );
 
 			this.xhr
 				.done( function( response, status, jqXHR ) {
-					panel.html( response );
-					that._trigger( "load", event, eventData );
 
-					complete( jqXHR, status );
+					// support: jQuery <1.8
+					// https://bugs.jquery.com/ticket/11778
+					setTimeout( function() {
+						panel.html( response );
+						that._trigger( "load", event, eventData );
+
+						complete( jqXHR, status );
+					}, 1 );
 				} )
 				.fail( function( jqXHR, status ) {
-					complete( jqXHR, status );
+
+					// support: jQuery <1.8
+					// https://bugs.jquery.com/ticket/11778
+					setTimeout( function() {
+						complete( jqXHR, status );
+					}, 1 );
 				} );
 		}
 	},
@@ -27857,7 +29383,10 @@ $.widget( "ui.tabs", {
 	_ajaxSettings: function( anchor, event, eventData ) {
 		var that = this;
 		return {
-			url: anchor.attr( "href" ),
+
+			// Support: IE <11 only
+			// Strip any hash that exists to prevent errors with the Ajax request
+			url: anchor.attr( "href" ).replace( /#.*$/, "" ),
 			beforeSend: function( jqXHR, settings ) {
 				return that._trigger( "beforeLoad", event,
 					$.extend( { jqXHR: jqXHR, ajaxSettings: settings }, eventData ) );
@@ -27867,13 +29396,13 @@ $.widget( "ui.tabs", {
 
 	_getPanelForTab: function( tab ) {
 		var id = $( tab ).attr( "aria-controls" );
-		return this.element.find( "#" + CSS.escape( id ) );
+		return this.element.find( this._sanitizeSelector( "#" + id ) );
 	}
 } );
 
 // DEPRECATED
 // TODO: Switch return back to widget declaration at top of file when this is removed
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Backcompat for ui-tab class (now ui-tabs-tab)
 	$.widget( "ui.tabs", $.ui.tabs, {
@@ -27888,7 +29417,7 @@ var widgetsTabs = $.ui.tabs;
 
 
 /*!
- * jQuery UI Tooltip 1.14.1
+ * jQuery UI Tooltip 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -27907,7 +29436,7 @@ var widgetsTabs = $.ui.tabs;
 
 
 $.widget( "ui.tooltip", {
-	version: "1.14.1",
+	version: "1.13.3",
 	options: {
 		classes: {
 			"ui-tooltip": "ui-corner-all ui-widget-shadow"
@@ -28095,20 +29624,25 @@ $.widget( "ui.tooltip", {
 
 		content = contentOption.call( target[ 0 ], function( response ) {
 
-			// Ignore async response if tooltip was closed already
-			if ( !target.data( "ui-tooltip-open" ) ) {
-				return;
-			}
+			// IE may instantly serve a cached response for ajax requests
+			// delay this call to _open so the other call to _open runs first
+			that._delay( function() {
 
-			// JQuery creates a special event for focusin when it doesn't
-			// exist natively. To improve performance, the native event
-			// object is reused and the type is changed. Therefore, we can't
-			// rely on the type being correct after the event finished
-			// bubbling, so we set it back to the previous value. (#8740)
-			if ( event ) {
-				event.type = eventType;
-			}
-			that._open( event, target, response );
+				// Ignore async response if tooltip was closed already
+				if ( !target.data( "ui-tooltip-open" ) ) {
+					return;
+				}
+
+				// JQuery creates a special event for focusin when it doesn't
+				// exist natively. To improve performance, the native event
+				// object is reused and the type is changed. Therefore, we can't
+				// rely on the type being correct after the event finished
+				// bubbling, so we set it back to the previous value. (#8740)
+				if ( event ) {
+					event.type = eventType;
+				}
+				this._open( event, target, response );
+			} );
 		} );
 		if ( content ) {
 			this._open( event, target, content );
@@ -28368,7 +29902,7 @@ $.widget( "ui.tooltip", {
 
 // DEPRECATED
 // TODO: Switch return back to widget declaration at top of file when this is removed
-if ( $.uiBackCompat === true ) {
+if ( $.uiBackCompat !== false ) {
 
 	// Backcompat for tooltipClass option
 	$.widget( "ui.tooltip", $.ui.tooltip, {
@@ -28416,7 +29950,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 $.ui = $.ui || {};
 
-return $.ui.version = "1.14.1";
+return $.ui.version = "1.13.3";
 
 } );
 
@@ -28430,7 +29964,7 @@ return $.ui.version = "1.14.1";
 /***/ ((module, exports, __webpack_require__) => {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Widget 1.14.1
+ * jQuery UI Widget 1.13.3
  * https://jqueryui.com
  *
  * Copyright OpenJS Foundation and other contributors
@@ -28486,9 +30020,6 @@ $.widget = function( name, base, prototype ) {
 
 	var namespace = name.split( "." )[ 0 ];
 	name = name.split( "." )[ 1 ];
-	if ( name === "__proto__" || name === "constructor" ) {
-		return $.error( "Invalid widget name: " + name );
-	}
 	var fullName = namespace + "-" + name;
 
 	if ( !prototype ) {
@@ -43686,6 +45217,253 @@ module.exports = function(s) {
 
 /***/ }),
 
+/***/ "./resources/assets/less/skins/skin-black.less":
+/*!*****************************************************!*\
+  !*** ./resources/assets/less/skins/skin-black.less ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-blue-dark.less":
+/*!*********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-blue-dark.less ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-blue.less":
+/*!****************************************************!*\
+  !*** ./resources/assets/less/skins/skin-blue.less ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-contrast.less":
+/*!********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-contrast.less ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-green-dark.less":
+/*!**********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-green-dark.less ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-green.less":
+/*!*****************************************************!*\
+  !*** ./resources/assets/less/skins/skin-green.less ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-orange-dark.less":
+/*!***********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-orange-dark.less ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-orange.less":
+/*!******************************************************!*\
+  !*** ./resources/assets/less/skins/skin-orange.less ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-purple-dark.less":
+/*!***********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-purple-dark.less ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-purple.less":
+/*!******************************************************!*\
+  !*** ./resources/assets/less/skins/skin-purple.less ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-red-dark.less":
+/*!********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-red-dark.less ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-red.less":
+/*!***************************************************!*\
+  !*** ./resources/assets/less/skins/skin-red.less ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-yellow-dark.less":
+/*!***********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-yellow-dark.less ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-yellow.less":
+/*!******************************************************!*\
+  !*** ./resources/assets/less/skins/skin-yellow.less ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./node_modules/admin-lte/build/less/AdminLTE.less":
+/*!*********************************************************!*\
+  !*** ./node_modules/admin-lte/build/less/AdminLTE.less ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/app.less":
+/*!****************************************!*\
+  !*** ./resources/assets/less/app.less ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/overrides.less":
+/*!**********************************************!*\
+  !*** ./resources/assets/less/overrides.less ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/_all-skins.less":
+/*!*****************************************************!*\
+  !*** ./resources/assets/less/skins/_all-skins.less ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/assets/less/skins/skin-black-dark.less":
+/*!**********************************************************!*\
+  !*** ./resources/assets/less/skins/skin-black-dark.less ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./node_modules/select2/dist/js/select2.js":
 /*!*************************************************!*\
   !*** ./node_modules/select2/dist/js/select2.js ***!
@@ -51746,1526 +53524,6 @@ TetherBase.modules.push({
 return Tether;
 
 }));
-
-
-/***/ }),
-
-/***/ "./resources/assets/js/extensions/pGenerator.jquery.js":
-/*!*************************************************************!*\
-  !*** ./resources/assets/js/extensions/pGenerator.jquery.js ***!
-  \*************************************************************/
-/***/ (() => {
-
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-/*!
- * pGenerator jQuery Plugin v1.0.5
- * https://github.com/M1Sh0u/pGenerator
- *
- * Created by Mihai MATEI <mihai.matei@outlook.com>
- * Released under the MIT License (Feel free to copy, modify or redistribute this plugin.)
- */
-
-(function ($) {
-  var numbers_array = [],
-    upper_letters_array = [],
-    lower_letters_array = [],
-    special_chars_array = [],
-    $pGeneratorElement = null;
-
-  /**
-   * Plugin methods.
-   *
-   * @type {{init: init, generatePassword: generatePassword}}
-   */
-  var methods = {
-    /**
-     * Initialize the object.
-     *
-     * @param options
-     * @param callbacks
-     *
-     * @returns {*}
-     */
-    init: function init(options, callbacks) {
-      var settings = $.extend({
-        'bind': 'click',
-        'passwordElement': null,
-        'displayElement': null,
-        'passwordLength': 16,
-        'uppercase': true,
-        'lowercase': true,
-        'numbers': true,
-        'specialChars': true,
-        'additionalSpecialChars': [],
-        'onPasswordGenerated': function onPasswordGenerated(generatedPassword) {}
-      }, options);
-      for (var i = 48; i < 58; i++) {
-        numbers_array.push(i);
-      }
-      for (i = 65; i < 91; i++) {
-        upper_letters_array.push(i);
-      }
-      for (i = 97; i < 123; i++) {
-        lower_letters_array.push(i);
-      }
-      special_chars_array = [33, 35, 64, 36, 38, 42, 91, 93, 123, 125, 92, 47, 63, 58, 59, 95, 45].concat(settings.additionalSpecialChars);
-      return this.each(function () {
-        $pGeneratorElement = $(this);
-        $pGeneratorElement.bind(settings.bind, function (e) {
-          e.preventDefault();
-          methods.generatePassword(settings);
-        });
-      });
-    },
-    /**
-     * Generate the password.
-     *
-     * @param {object} settings
-     */
-    generatePassword: function generatePassword(settings) {
-      var password = new Array(),
-        selOptions = settings.uppercase + settings.lowercase + settings.numbers + settings.specialChars,
-        selected = 0,
-        no_lower_letters = new Array();
-      var optionLength = Math.floor(settings.passwordLength / selOptions);
-      if (settings.uppercase) {
-        // uppercase letters
-        for (var i = 0; i < optionLength; i++) {
-          password.push(String.fromCharCode(upper_letters_array[randomFromInterval(0, upper_letters_array.length - 1)]));
-        }
-        no_lower_letters = no_lower_letters.concat(upper_letters_array);
-        selected++;
-      }
-      if (settings.numbers) {
-        // numbers letters
-        for (var i = 0; i < optionLength; i++) {
-          password.push(String.fromCharCode(numbers_array[randomFromInterval(0, numbers_array.length - 1)]));
-        }
-        no_lower_letters = no_lower_letters.concat(numbers_array);
-        selected++;
-      }
-      if (settings.specialChars) {
-        // numbers letters
-        for (var i = 0; i < optionLength; i++) {
-          password.push(String.fromCharCode(special_chars_array[randomFromInterval(0, special_chars_array.length - 1)]));
-        }
-        no_lower_letters = no_lower_letters.concat(special_chars_array);
-        selected++;
-      }
-      var remained = settings.passwordLength - selected * optionLength;
-      if (settings.lowercase) {
-        for (var i = 0; i < remained; i++) {
-          password.push(String.fromCharCode(lower_letters_array[randomFromInterval(0, lower_letters_array.length - 1)]));
-        }
-      } else {
-        for (var i = 0; i < remained; i++) {
-          password.push(String.fromCharCode(no_lower_letters[randomFromInterval(0, no_lower_letters.length - 1)]));
-        }
-      }
-      password = shuffle(password).join('');
-      if (settings.passwordElement !== null) {
-        $(settings.passwordElement).val(password);
-      }
-      if (settings.displayElement !== null) {
-        if ($(settings.displayElement).is("input")) {
-          $(settings.displayElement).val(password);
-        } else {
-          $(settings.displayElement).text(password);
-        }
-      }
-      settings.onPasswordGenerated(password);
-    }
-  };
-
-  /**
-   * Shuffle the password.
-   *
-   * @param {Array} o
-   *
-   * @returns {Array}
-   */
-  function shuffle(o) {
-    for (var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-    return o;
-  }
-
-  /**
-   * Get a random number in the given interval.
-   *
-   * @param {number} from
-   * @param {number} to
-   *
-   * @returns {number}
-   */
-  function randomFromInterval(from, to) {
-    return Math.floor(Math.random() * (to - from + 1) + from);
-  }
-
-  /**
-   * Define the pGenerator jQuery plugin.
-   *
-   * @param method
-   * @returns {*}
-   */
-  $.fn.pGenerator = function (method) {
-    if (methods[method]) {
-      return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } else if (_typeof(method) === 'object' || !method) {
-      return methods.init.apply(this, arguments);
-    } else {
-      $.error('Method ' + method + ' does not exist on jQuery.pGenerator');
-    }
-  };
-})(jQuery);
-
-/***/ }),
-
-/***/ "./resources/assets/js/signature_pad.js":
-/*!**********************************************!*\
-  !*** ./resources/assets/js/signature_pad.js ***!
-  \**********************************************/
-/***/ (function(module, exports) {
-
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-(function (root, factory) {
-  if (true) {
-    // AMD. Register as an anonymous module unless amdModuleId is set
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
-      return root['SignaturePad'] = factory();
-    }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
-		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-  } else {}
-})(this, function () {
-  /*!
-   * Signature Pad v1.5.3
-   * https://github.com/szimek/signature_pad
-   *
-   * Copyright 2016 Szymon Nowak
-   * Released under the MIT license
-   *
-   * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
-   * http://corner.squareup.com/2012/07/smoother-signatures.html
-   *
-   * Implementation of interpolation using cubic Bézier curves is taken from:
-   * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
-   *
-   * Algorithm for approximated length of a Bézier curve is taken from:
-   * http://www.lemoda.net/maths/bezier-length/index.html
-   *
-   */
-  var SignaturePad = function (document) {
-    "use strict";
-
-    var SignaturePad = function SignaturePad(canvas, options) {
-      var self = this,
-        opts = options || {};
-      this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
-      this.minWidth = opts.minWidth || 0.5;
-      this.maxWidth = opts.maxWidth || 2.5;
-      this.dotSize = opts.dotSize || function () {
-        return (this.minWidth + this.maxWidth) / 2;
-      };
-      this.penColor = opts.penColor || "black";
-      this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
-      this.onEnd = opts.onEnd;
-      this.onBegin = opts.onBegin;
-      this._canvas = canvas;
-      this._ctx = canvas.getContext("2d");
-      this.clear();
-
-      // we need add these inline so they are available to unbind while still having
-      //  access to 'self' we could use _.bind but it's not worth adding a dependency
-      this._handleMouseDown = function (event) {
-        if (event.which === 1) {
-          self._mouseButtonDown = true;
-          self._strokeBegin(event);
-        }
-      };
-      this._handleMouseMove = function (event) {
-        if (self._mouseButtonDown) {
-          self._strokeUpdate(event);
-        }
-      };
-      this._handleMouseUp = function (event) {
-        if (event.which === 1 && self._mouseButtonDown) {
-          self._mouseButtonDown = false;
-          self._strokeEnd(event);
-        }
-      };
-      this._handleTouchStart = function (event) {
-        if (event.targetTouches.length == 1) {
-          var touch = event.changedTouches[0];
-          self._strokeBegin(touch);
-        }
-      };
-      this._handleTouchMove = function (event) {
-        // Prevent scrolling.
-        event.preventDefault();
-        var touch = event.targetTouches[0];
-        self._strokeUpdate(touch);
-      };
-      this._handleTouchEnd = function (event) {
-        var wasCanvasTouched = event.target === self._canvas;
-        if (wasCanvasTouched) {
-          event.preventDefault();
-          self._strokeEnd(event);
-        }
-      };
-      this._handleMouseEvents();
-      this._handleTouchEvents();
-    };
-    SignaturePad.prototype.clear = function () {
-      var ctx = this._ctx,
-        canvas = this._canvas;
-      ctx.fillStyle = this.backgroundColor;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      this._reset();
-    };
-    SignaturePad.prototype.toDataURL = function (imageType, quality) {
-      var canvas = this._canvas;
-      return canvas.toDataURL.apply(canvas, arguments);
-    };
-    SignaturePad.prototype.fromDataURL = function (dataUrl) {
-      var self = this,
-        image = new Image(),
-        ratio = window.devicePixelRatio || 1,
-        width = this._canvas.width / ratio,
-        height = this._canvas.height / ratio;
-      this._reset();
-      image.src = dataUrl;
-      image.onload = function () {
-        self._ctx.drawImage(image, 0, 0, width, height);
-      };
-      this._isEmpty = false;
-    };
-    SignaturePad.prototype._strokeUpdate = function (event) {
-      var point = this._createPoint(event);
-      this._addPoint(point);
-    };
-    SignaturePad.prototype._strokeBegin = function (event) {
-      this._reset();
-      this._strokeUpdate(event);
-      if (typeof this.onBegin === 'function') {
-        this.onBegin(event);
-      }
-    };
-    SignaturePad.prototype._strokeDraw = function (point) {
-      var ctx = this._ctx,
-        dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-      ctx.beginPath();
-      this._drawPoint(point.x, point.y, dotSize);
-      ctx.closePath();
-      ctx.fill();
-    };
-    SignaturePad.prototype._strokeEnd = function (event) {
-      var canDrawCurve = this.points.length > 2,
-        point = this.points[0];
-      if (!canDrawCurve && point) {
-        this._strokeDraw(point);
-      }
-      if (typeof this.onEnd === 'function') {
-        this.onEnd(event);
-      }
-    };
-    SignaturePad.prototype._handleMouseEvents = function () {
-      this._mouseButtonDown = false;
-      this._canvas.addEventListener("mousedown", this._handleMouseDown);
-      this._canvas.addEventListener("mousemove", this._handleMouseMove);
-      document.addEventListener("mouseup", this._handleMouseUp);
-    };
-    SignaturePad.prototype._handleTouchEvents = function () {
-      // Pass touch events to canvas element on mobile IE11 and Edge.
-      this._canvas.style.msTouchAction = 'none';
-      this._canvas.style.touchAction = 'none';
-      this._canvas.addEventListener("touchstart", this._handleTouchStart);
-      this._canvas.addEventListener("touchmove", this._handleTouchMove);
-      this._canvas.addEventListener("touchend", this._handleTouchEnd);
-    };
-    SignaturePad.prototype.on = function () {
-      this._handleMouseEvents();
-      this._handleTouchEvents();
-    };
-    SignaturePad.prototype.off = function () {
-      this._canvas.removeEventListener("mousedown", this._handleMouseDown);
-      this._canvas.removeEventListener("mousemove", this._handleMouseMove);
-      document.removeEventListener("mouseup", this._handleMouseUp);
-      this._canvas.removeEventListener("touchstart", this._handleTouchStart);
-      this._canvas.removeEventListener("touchmove", this._handleTouchMove);
-      this._canvas.removeEventListener("touchend", this._handleTouchEnd);
-    };
-    SignaturePad.prototype.isEmpty = function () {
-      return this._isEmpty;
-    };
-    SignaturePad.prototype._reset = function () {
-      this.points = [];
-      this._lastVelocity = 0;
-      this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-      this._isEmpty = true;
-      this._ctx.fillStyle = this.penColor;
-    };
-    SignaturePad.prototype._createPoint = function (event) {
-      var rect = this._canvas.getBoundingClientRect();
-      return new Point(event.clientX - rect.left, event.clientY - rect.top);
-    };
-    SignaturePad.prototype._addPoint = function (point) {
-      var points = this.points,
-        c2,
-        c3,
-        curve,
-        tmp;
-      points.push(point);
-      if (points.length > 2) {
-        // To reduce the initial lag make it work with 3 points
-        // by copying the first point to the beginning.
-        if (points.length === 3) points.unshift(points[0]);
-        tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
-        c2 = tmp.c2;
-        tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
-        c3 = tmp.c1;
-        curve = new Bezier(points[1], c2, c3, points[2]);
-        this._addCurve(curve);
-
-        // Remove the first element from the list,
-        // so that we always have no more than 4 points in points array.
-        points.shift();
-      }
-    };
-    SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
-      var dx1 = s1.x - s2.x,
-        dy1 = s1.y - s2.y,
-        dx2 = s2.x - s3.x,
-        dy2 = s2.y - s3.y,
-        m1 = {
-          x: (s1.x + s2.x) / 2.0,
-          y: (s1.y + s2.y) / 2.0
-        },
-        m2 = {
-          x: (s2.x + s3.x) / 2.0,
-          y: (s2.y + s3.y) / 2.0
-        },
-        l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1),
-        l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2),
-        dxm = m1.x - m2.x,
-        dym = m1.y - m2.y,
-        k = l2 / (l1 + l2),
-        cm = {
-          x: m2.x + dxm * k,
-          y: m2.y + dym * k
-        },
-        tx = s2.x - cm.x,
-        ty = s2.y - cm.y;
-      return {
-        c1: new Point(m1.x + tx, m1.y + ty),
-        c2: new Point(m2.x + tx, m2.y + ty)
-      };
-    };
-    SignaturePad.prototype._addCurve = function (curve) {
-      var startPoint = curve.startPoint,
-        endPoint = curve.endPoint,
-        velocity,
-        newWidth;
-      velocity = endPoint.velocityFrom(startPoint);
-      velocity = this.velocityFilterWeight * velocity + (1 - this.velocityFilterWeight) * this._lastVelocity;
-      newWidth = this._strokeWidth(velocity);
-      this._drawCurve(curve, this._lastWidth, newWidth);
-      this._lastVelocity = velocity;
-      this._lastWidth = newWidth;
-    };
-    SignaturePad.prototype._drawPoint = function (x, y, size) {
-      var ctx = this._ctx;
-      ctx.moveTo(x, y);
-      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-      this._isEmpty = false;
-    };
-    SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
-      var ctx = this._ctx,
-        widthDelta = endWidth - startWidth,
-        drawSteps,
-        width,
-        i,
-        t,
-        tt,
-        ttt,
-        u,
-        uu,
-        uuu,
-        x,
-        y;
-      drawSteps = Math.floor(curve.length());
-      ctx.beginPath();
-      for (i = 0; i < drawSteps; i++) {
-        // Calculate the Bezier (x, y) coordinate for this step.
-        t = i / drawSteps;
-        tt = t * t;
-        ttt = tt * t;
-        u = 1 - t;
-        uu = u * u;
-        uuu = uu * u;
-        x = uuu * curve.startPoint.x;
-        x += 3 * uu * t * curve.control1.x;
-        x += 3 * u * tt * curve.control2.x;
-        x += ttt * curve.endPoint.x;
-        y = uuu * curve.startPoint.y;
-        y += 3 * uu * t * curve.control1.y;
-        y += 3 * u * tt * curve.control2.y;
-        y += ttt * curve.endPoint.y;
-        width = startWidth + ttt * widthDelta;
-        this._drawPoint(x, y, width);
-      }
-      ctx.closePath();
-      ctx.fill();
-    };
-    SignaturePad.prototype._strokeWidth = function (velocity) {
-      return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
-    };
-    var Point = function Point(x, y, time) {
-      this.x = x;
-      this.y = y;
-      this.time = time || new Date().getTime();
-    };
-    Point.prototype.velocityFrom = function (start) {
-      return this.time !== start.time ? this.distanceTo(start) / (this.time - start.time) : 1;
-    };
-    Point.prototype.distanceTo = function (start) {
-      return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
-    };
-    var Bezier = function Bezier(startPoint, control1, control2, endPoint) {
-      this.startPoint = startPoint;
-      this.control1 = control1;
-      this.control2 = control2;
-      this.endPoint = endPoint;
-    };
-
-    // Returns approximated length.
-    Bezier.prototype.length = function () {
-      var steps = 10,
-        length = 0,
-        i,
-        t,
-        cx,
-        cy,
-        px,
-        py,
-        xdiff,
-        ydiff;
-      for (i = 0; i <= steps; i++) {
-        t = i / steps;
-        cx = this._point(t, this.startPoint.x, this.control1.x, this.control2.x, this.endPoint.x);
-        cy = this._point(t, this.startPoint.y, this.control1.y, this.control2.y, this.endPoint.y);
-        if (i > 0) {
-          xdiff = cx - px;
-          ydiff = cy - py;
-          length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-        }
-        px = cx;
-        py = cy;
-      }
-      return length;
-    };
-    Bezier.prototype._point = function (t, start, c1, c2, end) {
-      return start * (1.0 - t) * (1.0 - t) * (1.0 - t) + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t + 3.0 * c2 * (1.0 - t) * t * t + end * t * t * t;
-    };
-    return SignaturePad;
-  }(document);
-  return SignaturePad;
-});
-
-/***/ }),
-
-/***/ "./resources/assets/js/snipeit.js":
-/*!****************************************!*\
-  !*** ./resources/assets/js/snipeit.js ***!
-  \****************************************/
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
-
-var jQuery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-window.jQuery = jQuery;
-window.$ = jQuery;
-
-// window._ = require('lodash'); //the only place I saw this used was vue.js, and we don't use that anymore
-
-/****************************************
- Much of what you'll see below is just plain require()'ed, this is because
- it is mostly jQuery stuff, which attaches itself to the $() function/object
- So we don't have to assign it to anything, it will just automagically attach
- itself
- *****************************************/
-
-__webpack_require__(/*! jquery-ui/dist/jquery-ui */ "./node_modules/jquery-ui/dist/jquery-ui.js");
-jQuery.fn.uitooltip = jQuery.fn.tooltip;
-__webpack_require__(/*! bootstrap-less */ "./node_modules/bootstrap-less/js/bootstrap.js");
-__webpack_require__(/*! select2 */ "./node_modules/select2/dist/js/select2.js");
-__webpack_require__(/*! admin-lte */ "./node_modules/admin-lte/dist/js/adminlte.min.js");
-__webpack_require__(/*! tether */ "./node_modules/tether/dist/js/tether.js");
-__webpack_require__(/*! jquery-slimscroll */ "./node_modules/jquery-slimscroll/jquery.slimscroll.js");
-__webpack_require__(/*! jquery.iframe-transport */ "./node_modules/jquery.iframe-transport/jquery.iframe-transport.js"); //probably not needed anymore, if I'm honest
-__webpack_require__(/*! blueimp-file-upload */ "./node_modules/blueimp-file-upload/js/jquery.fileupload.js");
-__webpack_require__(/*! bootstrap-colorpicker */ "./node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js");
-__webpack_require__(/*! bootstrap-datepicker */ "./node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.js");
-__webpack_require__(/*! ekko-lightbox */ "./node_modules/ekko-lightbox/dist/ekko-lightbox.min.js"); //TODO - this doesn't seem jquery-ish, we might need to do something weird here
-// it *does* require Bootstrap, which requires jquery, so maybe that's OK
-// it seems to work...
-__webpack_require__(/*! ./extensions/pGenerator.jquery */ "./resources/assets/js/extensions/pGenerator.jquery.js"); //WEIRD, but works
-//require('chart.js') // Weirdly, this seems to "just work." Without this line, the dashboard blows up
-// but it's *HUGE* - and we only use it one place. So we're taking it out of the bundle
-window.SignaturePad = __webpack_require__(/*! ./signature_pad */ "./resources/assets/js/signature_pad.js"); //ALSO WEIRD - but works
-__webpack_require__(/*! jquery-validation */ "./node_modules/jquery-validation/dist/jquery.validate.js");
-window.List = __webpack_require__(/*! list.js */ "./node_modules/list.js/src/index.js");
-window.ClipboardJS = __webpack_require__(/*! clipboard */ "./node_modules/clipboard/dist/clipboard.js");
-// TODO - find everything using moment.js and kill it or upgrade it? It's huge
-// - adminLTE (UGH)
-// - bootstrap-daterangepicker
-// - fullcalendar (what's that? it's used by AdminLTE)
-
-/**
- * Module containing core application logic.
- * @param  {jQuery} $        Insulated jQuery object
- * @param  {JSON} settings Insulated `window.snipeit.settings` object.
- * @return {IIFE}          Immediately invoked. Returns self.
- */
-
-lineOptions = {
-  legend: {
-    position: "bottom"
-  },
-  scales: {
-    yAxes: [{
-      ticks: {
-        fontColor: "rgba(0,0,0,0.5)",
-        fontStyle: "bold",
-        beginAtZero: true,
-        maxTicksLimit: 5,
-        padding: 20
-      },
-      gridLines: {
-        drawTicks: false,
-        display: false
-      }
-    }],
-    xAxes: [{
-      gridLines: {
-        zeroLineColor: "transparent"
-      },
-      ticks: {
-        padding: 20,
-        fontColor: "rgba(0,0,0,0.5)",
-        fontStyle: "bold"
-      }
-    }]
-  }
-};
-pieOptions = {
-  //Boolean - Whether we should show a stroke on each segment
-  segmentShowStroke: true,
-  //String - The colour of each segment stroke
-  segmentStrokeColor: "#fff",
-  //Number - The width of each segment stroke
-  segmentStrokeWidth: 1,
-  //Number - The percentage of the chart that we cut out of the middle
-  percentageInnerCutout: 50,
-  // This is 0 for Pie charts
-  //Number - Amount of animation steps
-  animationSteps: 100,
-  //String - Animation easing effect
-  animationEasing: "easeOutBounce",
-  //Boolean - Whether we animate the rotation of the Doughnut
-  animateRotate: true,
-  //Boolean - Whether we animate scaling the Doughnut from the centre
-  animateScale: false,
-  //Boolean - whether to make the chart responsive to window resizing
-  responsive: true,
-  // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
-  maintainAspectRatio: false,
-  //String - A legend template
-  legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li>" + "<i class='fas fa-circle-o' style='color: <%=segments[i].fillColor%>'></i>" + "<%if(segments[i].label){%><%=segments[i].label%><%}%> foo</li><%}%></ul>",
-  //String - A tooltip template
-  tooltipTemplate: "<%=value %> <%=label%> "
-};
-
-//-----------------
-//- END PIE CHART -
-//-----------------
-
-var baseUrl = $('meta[name="baseUrl"]').attr('content');
-$(function () {
-  var $el = $('body');
-
-  // confirm restore modal
-
-  $el.on('click', '.restore-asset', function (evnt) {
-    var $context = $(this);
-    var $restoreConfirmModal = $('#restoreConfirmModal');
-    var href = $context.attr('href');
-    var message = $context.attr('data-content');
-    var title = $context.attr('data-title');
-    $('#confirmModalLabel').text(title);
-    $restoreConfirmModal.find('.modal-body').text(message);
-    $('#restoreForm').attr('action', href);
-    $restoreConfirmModal.modal({
-      show: true
-    });
-    return false;
-  });
-
-  // confirm delete modal
-  $el.on('click', '.delete-asset', function (evnt) {
-    var $context = $(this);
-    var $dataConfirmModal = $('#dataConfirmModal');
-    var href = $context.attr('href');
-    var message = $context.attr('data-content');
-    var headericon = $context.attr('data-icon');
-    var title = $context.attr('data-title');
-
-    // deleteForm is the ID of the modal form itself
-    $('#deleteForm').attr('action', href);
-    $dataConfirmModal.find('.modal-header-icon').addClass(headericon);
-    $dataConfirmModal.find('.modal-title').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
-    $dataConfirmModal.find('.modal-body').text(message);
-    $dataConfirmModal.attr('action', href);
-
-    // Fire the modal
-    $dataConfirmModal.modal({
-      show: true
-    });
-    return false;
-  });
-
-  /*
-  * Select2
-  */
-
-  $('select.select2:not(".select2-hidden-accessible")').each(function (i, obj) {
-    {
-      $(obj).select2();
-    }
-  });
-
-  // $('.datepicker').datepicker();
-  // var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
-  // $.fn.bootstrapDP = datepicker;
-  // $('.datepicker').datepicker();
-
-  // Crazy select2 rich dropdowns with images!
-  $('.js-data-ajax').each(function (i, item) {
-    var link = $(item);
-    var endpoint = link.data("endpoint");
-    var select = link.data("select");
-    link.select2({
-      /**
-       * Adds an empty placeholder, allowing every select2 instance to be cleared.
-       * This placeholder can be overridden with the "data-placeholder" attribute.
-       */
-      placeholder: '',
-      allowClear: true,
-      language: $('meta[name="language"]').attr('content'),
-      dir: $('meta[name="language-direction"]').attr('content'),
-      ajax: {
-        // the baseUrl includes a trailing slash
-        url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-        dataType: 'json',
-        delay: 250,
-        headers: {
-          "X-Requested-With": 'XMLHttpRequest',
-          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-        },
-        data: function data(params) {
-          var data = {
-            search: params.term,
-            page: params.page || 1,
-            assetStatusType: link.data("asset-status-type"),
-            companyId: link.data("company-id")
-          };
-          return data;
-        },
-        /* processResults: function (data, params) {
-             params.page = params.page || 1;
-             var answer =  {
-                results: data.items,
-                pagination: {
-                    more: data.pagination.more
-                }
-            };
-             return answer;
-        }, */
-        cache: true
-      },
-      //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-      templateResult: formatDatalistSafe
-      //templateSelection: formatDataSelection
-    });
-  });
-  function getSelect2Value(element) {
-    // if the passed object is not a jquery object, assuming 'element' is a selector
-    if (!(element instanceof jQuery)) element = $(element);
-    var select = element.data("select2");
-
-    // There's two different locations where the select2-generated input element can be. 
-    searchElement = select.dropdown.$search || select.$container.find(".select2-search__field");
-    var value = searchElement.val();
-    return value;
-  }
-  $(".select2-hidden-accessible").on('select2:selecting', function (e) {
-    var data = e.params.args.data;
-    var isMouseUp = false;
-    var element = $(this);
-    var value = getSelect2Value(element);
-    if (e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-
-    // if selected item does not match typed text, do not allow it to pass - force close for ajax.
-    if (!isMouseUp) {
-      if (value.toLowerCase() && data.text.toLowerCase().indexOf(value) < 0) {
-        e.preventDefault();
-        element.select2('close');
-
-        // if it does match, we set a flag in the event (which gets passed to subsequent events), telling it not to worry about the ajax
-      } else if (value.toLowerCase() && data.text.toLowerCase().indexOf(value) > -1) {
-        e.params.args.noForceAjax = true;
-      }
-    }
-  });
-  $(".select2-hidden-accessible").on('select2:closing', function (e) {
-    var element = $(this);
-    var value = getSelect2Value(element);
-    var noForceAjax = false;
-    var isMouseUp = false;
-    if (e.params.args.originalSelect2Event) noForceAjax = e.params.args.originalSelect2Event.noForceAjax;
-    if (e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-    if (value && !noForceAjax && !isMouseUp) {
-      var endpoint = element.data("endpoint");
-      var assetStatusType = element.data("asset-status-type");
-      $.ajax({
-        url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (assetStatusType ? '&assetStatusType=' + assetStatusType : ''),
-        dataType: 'json',
-        headers: {
-          "X-Requested-With": 'XMLHttpRequest',
-          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-        }
-      }).done(function (response) {
-        var currentlySelected = element.select2('data').map(function (x) {
-          return +x.id;
-        }).filter(function (x) {
-          return x !== 0;
-        });
-
-        // makes sure we're not selecting the same thing twice for multiples
-        var filteredResponse = response.results.filter(function (item) {
-          return currentlySelected.indexOf(+item.id) < 0;
-        });
-        var first = currentlySelected.length > 0 ? filteredResponse[0] : response.results[0];
-        if (first && first.id) {
-          first.selected = true;
-          if ($("option[value='" + first.id + "']", element).length < 1) {
-            var option = new Option(first.text, first.id, true, true);
-            element.append(option);
-          } else {
-            var isMultiple = element.attr("multiple") == "multiple";
-            element.val(isMultiple ? element.val().concat(first.id) : element.val(first.id));
-          }
-          element.trigger('change');
-          element.trigger({
-            type: 'select2:select',
-            params: {
-              data: first
-            }
-          });
-        }
-      });
-    }
-  });
-  function formatDatalist(datalist) {
-    var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
-    if (datalist.loading) {
-      return loading_markup;
-    }
-    var markup = '<div class="clearfix">';
-    markup += '<div class="pull-left" style="padding-right: 10px;">';
-    if (datalist.image) {
-      markup += "<div style='width: 30px;'><img src='" + datalist.image + "' style='max-height: 20px; max-width: 30px;' alt='" + datalist.text + "'></div>";
-    } else {
-      markup += '<div style="height: 20px; width: 30px;"></div>';
-    }
-    markup += "</div><div>" + datalist.text + "</div>";
-    markup += "</div>";
-    return markup;
-  }
-  function formatDatalistSafe(datalist) {
-    // console.warn("What in the hell is going on with Select2?!?!!?!?");
-    // console.warn($.select2);
-    if (datalist.loading) {
-      return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
-    }
-    var root_div = $("<div class='clearfix'>");
-    var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
-    if (datalist.image) {
-      var inner_div = $("<div style='width: 30px;'>");
-      /******************************************************************
-       * 
-       * We are specifically chosing empty alt-text below, because this 
-       * image conveys no additional information, relative to the text
-       * that will *always* be there in any select2 list that is in use
-       * in Snipe-IT. If that changes, we would probably want to change
-       * some signatures of some functions, but right now, we don't want
-       * screen readers to say "HP SuperJet 5000, .... picture of HP 
-       * SuperJet 5000..." and so on, for every single row in a list of
-       * assets or models or whatever.
-       * 
-       *******************************************************************/
-      var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
-      // console.warn("Img is: ");
-      // console.dir(img);
-      // console.warn("Strigularly, that's: ");
-      // console.log(img);
-      img.attr("src", datalist.image);
-      inner_div.append(img);
-    } else {
-      var inner_div = $("<div style='height: 20px; width: 30px;'></div>");
-    }
-    left_pull.append(inner_div);
-    root_div.append(left_pull);
-    var name_div = $("<div>");
-    name_div.text(datalist.text);
-    root_div.append(name_div);
-    var safe_html = root_div.get(0).outerHTML;
-    var old_html = formatDatalist(datalist);
-    if (safe_html != old_html) {
-      //console.log("HTML MISMATCH: ");
-      //console.log("FormatDatalistSafe: ");
-      // console.dir(root_div.get(0));
-      //console.log(safe_html);
-      //console.log("FormatDataList: ");
-      //console.log(old_html);
-    }
-    return root_div;
-  }
-  function formatDataSelection(datalist) {
-    // This a heinous workaround for a known bug in Select2.
-    // Without this, the rich selectlists are vulnerable to XSS.
-    // Many thanks to @uberbrady for this fix. It ain't pretty,
-    // but it resolves the issue until Select2 addresses it on their end.
-    //
-    // Bug was reported in 2016 :{
-    // https://github.com/select2/select2/issues/4587
-
-    return datalist.text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-  }
-
-  // This handles the radio button selectors for the checkout-to-foo options
-  // on asset checkout and also on asset edit
-  $(function () {
-    $('input[name=checkout_to_type]').on("change", function () {
-      var assignto_type = $('input[name=checkout_to_type]:checked').val();
-      var userid = $('#assigned_user option:selected').val();
-      if (assignto_type == 'asset') {
-        $('#current_assets_box').fadeOut();
-        $('#assigned_asset').show();
-        $('#assigned_user').hide();
-        $('#assigned_location').hide();
-        $('.notification-callout').fadeOut();
-        $('[name="assigned_location"]').val('').trigger('change.select2');
-        $('[name="assigned_user"]').val('').trigger('change.select2');
-      } else if (assignto_type == 'location') {
-        $('#current_assets_box').fadeOut();
-        $('#assigned_asset').hide();
-        $('#assigned_user').hide();
-        $('#assigned_location').show();
-        $('.notification-callout').fadeOut();
-        $('[name="assigned_asset"]').val('').trigger('change.select2');
-        $('[name="assigned_user"]').val('').trigger('change.select2');
-      } else {
-        $('#assigned_asset').hide();
-        $('#assigned_user').show();
-        $('#assigned_location').hide();
-        if (userid) {
-          $('#current_assets_box').fadeIn();
-        }
-        $('.notification-callout').fadeIn();
-        $('[name="assigned_asset"]').val('').trigger('change.select2');
-        $('[name="assigned_location"]').val('').trigger('change.select2');
-      }
-    });
-  });
-
-  // ------------------------------------------------
-  // Deep linking for Bootstrap tabs
-  // ------------------------------------------------
-  var taburl = document.location.toString();
-
-  // Allow full page URL to activate a tab's ID
-  // ------------------------------------------------
-  // This allows linking to a tab on page load via the address bar.
-  // So a URL such as, http://snipe-it.local/hardware/2/#my_tab will
-  // cause the tab on that page with an ID of “my_tab” to be active.
-  if (taburl.match('#')) {
-    $('.nav-tabs a[href="#' + taburl.split('#')[1] + '"]').tab('show');
-  }
-
-  // Allow internal page links to activate a tab's ID.
-  // ------------------------------------------------
-  // This allows you to link to a tab from anywhere on the page
-  // including from within another tab. Also note that internal page
-  // links either inside or out of the tabs need to include data-toggle="tab"
-  // Ex: <a href="#my_tab" data-toggle="tab">Click me</a>
-  $('a[data-toggle="tab"]').click(function (e) {
-    var href = $(this).attr("href");
-    history.pushState(null, null, href);
-    e.preventDefault();
-    $('a[href="' + $(this).attr('href') + '"]').tab('show');
-  });
-
-  // ------------------------------------------------
-  // End Deep Linking for Bootstrap tabs
-  // ------------------------------------------------
-
-  // Image preview
-  function readURL(input, $preview) {
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        $preview.attr('src', e.target.result);
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-  function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + " Bytes";else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + " MB";else return (bytes / 1073741824).toFixed(2) + " GB";
-  }
-
-  // File size validation
-  $('.js-uploadFile').bind('change', function () {
-    var $this = $(this);
-    var id = '#' + $this.attr('id');
-    var status = id + '-status';
-    var $status = $(status);
-    var delete_id = $(id + '-deleteCheckbox');
-    var preview_container = $(id + '-previewContainer');
-    $status.removeClass('text-success').removeClass('text-danger');
-    $(status + ' .goodfile').remove();
-    $(status + ' .badfile').remove();
-    $(status + ' .previewSize').hide();
-    preview_container.hide();
-    $(id + '-info').html('');
-    var max_size = $this.data('maxsize');
-    var total_size = 0;
-    for (var i = 0; i < this.files.length; i++) {
-      total_size += this.files[i].size;
-      $(id + '-info').append('<span class="label label-default">' + htmlEntities(this.files[i].name) + ' (' + formatBytes(this.files[i].size) + ')</span> ');
-    }
-    if (total_size > max_size) {
-      $status.addClass('text-danger').removeClass('help-block').prepend('<i class="badfile fas fa-times"></i> ').append('<span class="previewSize"> Upload is ' + formatBytes(total_size) + '.</span>');
-    } else {
-      $status.addClass('text-success').removeClass('help-block').prepend('<i class="goodfile fas fa-check"></i> ');
-      var $preview = $(id + '-imagePreview');
-      readURL(this, $preview);
-      $preview.fadeIn();
-      preview_container.fadeIn();
-      delete_id.hide();
-    }
-  });
-});
-function htmlEntities(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-/**
- * Toggle disabled
- */
-(function ($) {
-  $.fn.toggleDisabled = function (callback) {
-    return this.each(function () {
-      var disabled,
-        $this = $(this);
-      if ($this.attr('disabled')) {
-        $this.removeAttr('disabled');
-        disabled = false;
-      } else {
-        $this.attr('disabled', 'disabled');
-        disabled = true;
-      }
-      if (callback && typeof callback === 'function') {
-        callback(this, disabled);
-      }
-    });
-  };
-})(jQuery);
-
-/**
- * Universal Livewire Select2 integration
- *
- * How to use:
- *
- * 1. Set the class of your select2 elements to 'livewire-select2').
- * 2. Name your element to match a property in your Livewire component
- * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
- *    or just $this->getId() if not).
- */
-document.addEventListener('livewire:init', function () {
-  $('.livewire-select2').select2();
-  $(document).on('select2:select', '.livewire-select2', function (event) {
-    var target = $(event.target);
-    if (!event.target.name || !target.data('livewire-component')) {
-      console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!");
-      console.error("For data-livewire-component, you probably want to use $this->getId() or {{ $this->getId() }}, as appropriate");
-      return false;
-    }
-    Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value);
-  });
-  Livewire.hook('request', function (_ref) {
-    var succeed = _ref.succeed;
-    succeed(function () {
-      queueMicrotask(function () {
-        $('.livewire-select2').select2();
-      });
-    });
-  });
-});
-
-/***/ }),
-
-/***/ "./resources/assets/js/snipeit_modals.js":
-/*!***********************************************!*\
-  !*** ./resources/assets/js/snipeit_modals.js ***!
-  \***********************************************/
-/***/ (() => {
-
-/* 
- * 
- * Snipe-IT Universal Modal support
- * 
- * Enables modal dialogs to create sub-resources throughout Snipe-IT
- * 
- */
-
-/* 
-HOW TO USE
- Create a Button looking like this:
- <a href='{{ route('modal.show', 'user') }}' data-toggle="modal"  data-target="#createModal" data-select='assigned_to' class="btn btn-sm btn-primary">New</a>
- If you don't have access to Blade commands (like {{ and }}, etc), you can hard-code a URL as the 'href'
- data-toggle="modal" - required for Bootstrap Modals
-data-target="#createModal" - fixed ID for the modal, do not change
-data-select="assigned_to" - What is the *ID* of the select-dropdown that you're going to be adding to, if the modal-create was a success? Be on the lookout for duplicate ID's, it will confuse this library!
-class="btn btn-sm btn-primary" - makes it look button-ey, feel free to change :)
-
-If you want to pass additional variables to the modal (In the Category Create one, for example, you can pass category_id), you can encode them as URL variables in the href
-
-*/
-
-$(function () {
-  var baseUrl = $('meta[name="baseUrl"]').attr('content');
-  //handle modal-add-interstitial calls
-  var model, select, refreshSelector;
-  if ($('#createModal').length == 0) {
-    $('body').append('<div class="modal fade" id="createModal"></div><!-- /.modal -->');
-  }
-  $('#createModal').on("show.bs.modal", function (event) {
-    var link = $(event.relatedTarget);
-    model = link.data("dependency");
-    select = link.data("select");
-    refreshSelector = link.data("refresh");
-    $('#createModal').load(link.attr('href'), function () {
-      // this sets the focus to be the name field
-      $('#modal-name').focus();
-
-      //do we need to re-select2 this, after load? Probably.
-      $('#createModal').find('select.select2').select2();
-      // Initialize the ajaxy select2 with images.
-      // This is a copy/paste of the code from snipeit.js, would be great to only have this in one place.
-
-      $('.js-data-ajax').each(function (i, item) {
-        var link = $(item);
-        var endpoint = link.data("endpoint");
-        var select = link.data("select");
-        link.select2({
-          ajax: {
-            // the baseUrl includes a trailing slash
-            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-            //WARNING - we're hoping that's defined on the page somewhere...
-            dataType: 'json',
-            delay: 250,
-            headers: {
-              "X-Requested-With": 'XMLHttpRequest',
-              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-            },
-            data: function data(params) {
-              var data = {
-                search: params.term,
-                page: params.page || 1,
-                assetStatusType: link.data("asset-status-type")
-              };
-              return data;
-            },
-            /*processResults: function (data, params) {
-                 params.page = params.page || 1;
-                 var answer =  {
-                    results: data.items,
-                    pagination: {
-                        more: data.pagination.more
-                    }
-                };
-                 return answer;
-            },*/
-            cache: true
-          },
-          //escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-          templateResult: formatDatalistSafe
-          //templateSelection: formatDataSelection
-        });
-      });
-    });
-  });
-  $('#createModal').on('click', '#modal-save', function () {
-    $.ajax({
-      type: 'POST',
-      url: $('.modal-body form').attr('action'),
-      headers: {
-        "X-Requested-With": 'XMLHttpRequest',
-        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-      },
-      data: $('.modal-body form').serialize(),
-      success: function success(result) {
-        if (result.status == "error") {
-          var error_message = "";
-          for (var field in result.messages) {
-            error_message += "<li>Problem(s) with field <i><strong>" + field + "</strong></i>: " + result.messages[field];
-          }
-          $('#modal_error_msg').html(error_message).show();
-          return false;
-        }
-        var id = result.payload.id;
-        var name = result.payload.name || result.payload.first_name + " " + result.payload.last_name;
-        if (!id || !name) {
-          console.error("Could not find resulting name or ID from modal-create. Name: " + name + ", id: " + id);
-          return false;
-        }
-        $('#createModal').modal('hide');
-        $('#createModal').html("");
-        var refreshTable = $('#' + refreshSelector);
-        if (refreshTable.length > 0) {
-          refreshTable.bootstrapTable('refresh');
-        }
-
-        // "select" is the original drop-down menu that someone
-        // clicked 'add' on to add a new 'thing'
-        // this code adds the newly created object to that select
-        var selector = document.getElementById(select);
-        if (!selector) {
-          return false;
-        }
-        selector.options[selector.length] = new Option(name, id);
-        selector.selectedIndex = selector.length - 1;
-        $(selector).trigger("change");
-        if (window.fetchCustomFields) {
-          fetchCustomFields();
-        }
-      },
-      error: function error(result) {
-        msg = result.responseJSON.messages || result.responseJSON.error;
-        $('#modal_error_msg').html("Server Error: " + msg).show();
-      }
-    });
-  });
-});
-function formatDatalistSafe(datalist) {
-  // console.warn("What in the hell is going on with Select2?!?!!?!?");
-  // console.warn($.select2);
-  if (datalist.loading) {
-    return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
-  }
-  var root_div = $("<div class='clearfix'>");
-  var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
-  if (datalist.image) {
-    var inner_div = $("<div style='width: 30px;'>");
-    /******************************************************************
-     * 
-     * We are specifically chosing empty alt-text below, because this 
-     * image conveys no additional information, relative to the text
-     * that will *always* be there in any select2 list that is in use
-     * in Snipe-IT. If that changes, we would probably want to change
-     * some signatures of some functions, but right now, we don't want
-     * screen readers to say "HP SuperJet 5000, .... picture of HP 
-     * SuperJet 5000..." and so on, for every single row in a list of
-     * assets or models or whatever.
-     * 
-     *******************************************************************/
-    var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
-    // console.warn("Img is: ");
-    // console.dir(img);
-    // console.warn("Strigularly, that's: ");
-    // console.log(img);
-    img.attr("src", datalist.image);
-    inner_div.append(img);
-  } else {
-    var inner_div = $("<div style='height: 20px; width: 30px;'></div>");
-  }
-  left_pull.append(inner_div);
-  root_div.append(left_pull);
-  var name_div = $("<div>");
-  name_div.text(datalist.text);
-  root_div.append(name_div);
-  var safe_html = root_div.get(0).outerHTML;
-  var old_html = formatDatalist(datalist);
-  if (safe_html != old_html) {
-    // console.log("HTML MISMATCH: ");
-    // console.log("FormatDatalistSafe: ");
-    // console.dir(root_div.get(0));
-    // console.log(safe_html);
-    // console.log("FormatDataList: ");
-    // console.log(old_html);
-  }
-  return root_div;
-}
-function formatDatalist(datalist) {
-  var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
-  if (datalist.loading) {
-    return loading_markup;
-  }
-  var markup = "<div class='clearfix'>";
-  markup += "<div class='pull-left' style='padding-right: 10px;'>";
-  if (datalist.image) {
-    markup += "<div style='width: 30px;'><img src='" + datalist.image + "' alt='" + datalist.tex + "' style='max-height: 20px; max-width: 30px;'></div>";
-  } else {
-    markup += "<div style='height: 20px; width: 30px;'></div>";
-  }
-  markup += "</div><div>" + datalist.text + "</div>";
-  markup += "</div>";
-  return markup;
-}
-function formatDataSelection(datalist) {
-  return datalist.text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-/***/ }),
-
-/***/ "./resources/assets/less/app.less":
-/*!****************************************!*\
-  !*** ./resources/assets/less/app.less ***!
-  \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/overrides.less":
-/*!**********************************************!*\
-  !*** ./resources/assets/less/overrides.less ***!
-  \**********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/_all-skins.less":
-/*!*****************************************************!*\
-  !*** ./resources/assets/less/skins/_all-skins.less ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-black-dark.less":
-/*!**********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-black-dark.less ***!
-  \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-black.less":
-/*!*****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-black.less ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-blue-dark.less":
-/*!*********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-blue-dark.less ***!
-  \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-blue.less":
-/*!****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-blue.less ***!
-  \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-contrast.less":
-/*!********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-contrast.less ***!
-  \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-green-dark.less":
-/*!**********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-green-dark.less ***!
-  \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-green.less":
-/*!*****************************************************!*\
-  !*** ./resources/assets/less/skins/skin-green.less ***!
-  \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-orange-dark.less":
-/*!***********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-orange-dark.less ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-orange.less":
-/*!******************************************************!*\
-  !*** ./resources/assets/less/skins/skin-orange.less ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-purple-dark.less":
-/*!***********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-purple-dark.less ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-purple.less":
-/*!******************************************************!*\
-  !*** ./resources/assets/less/skins/skin-purple.less ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-red-dark.less":
-/*!********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-red-dark.less ***!
-  \********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-red.less":
-/*!***************************************************!*\
-  !*** ./resources/assets/less/skins/skin-red.less ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-yellow-dark.less":
-/*!***********************************************************!*\
-  !*** ./resources/assets/less/skins/skin-yellow-dark.less ***!
-  \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
-/***/ "./resources/assets/less/skins/skin-yellow.less":
-/*!******************************************************!*\
-  !*** ./resources/assets/less/skins/skin-yellow.less ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
 
 
 /***/ })
