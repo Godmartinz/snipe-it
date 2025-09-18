@@ -302,14 +302,17 @@ class LoginController extends Controller
         if (Setting::getSettings()->ldap_enabled) { // avoid hitting the $this->ldap
             LOG::debug('LDAP is enabled.');
             try {
-                LOG::debug('Attempting to log user in by LDAP authentication.');
                 $user = $this->loginViaLdap($request);
-                Auth::login($user, $request->input('remember'));
-
-                // If the user was unable to login via LDAP, log the error and let them fall through to
-            // local authentication.
+                \Auth::login($user);
             } catch (\Exception $e) {
-                Log::debug('There was an error authenticating the LDAP user: '.$e->getMessage());
+
+                Session::flash('error', $e->getMessage());
+                Log::notice("LDAP bind failed ({$e}");
+                return back()->withInput();
+            } catch (\Throwable $e) {
+                Session::flash('error', 'Login failed. Please try again.');
+                Log::error($e);
+                return back()->withInput();
             }
         }
 

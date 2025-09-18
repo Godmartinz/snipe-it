@@ -97,7 +97,13 @@ class Ldap extends Model
         ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 20);
 
         if ($ldap_use_tls=='1') {
-            ldap_start_tls($connection);
+            //suppresses the error and grabs it.
+            if (! @ldap_start_tls($connection)) {
+                $code = ldap_errno($connection);
+                $err  = ldap_error($connection);
+
+                throw new \Exception("Could not start TLS with LDAP (code $code): $err.");
+            }
         }
 
 
@@ -108,14 +114,15 @@ class Ldap extends Model
     /**
      * Binds/authenticates the user to LDAP, and returns their attributes.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since  [v3.0]
      * @param  $username
      * @param  $password
-     * @param  bool|false $user
+     * @param bool|false $user
      * @return bool true    if the username and/or password provided are valid
      *              false   if the username and/or password provided are invalid
      *         array of ldap_attributes if $user is true
+     * @throws Exception
+     * @since  [v3.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public static function findAndBindUserLdap($username, $password)
     {
@@ -147,7 +154,28 @@ class Ldap extends Model
 
         Log::debug('Filter query: '.$filterQuery);
 
+        //Suppressing the error and handling it to be more friendly
         if (! $ldapbind = @ldap_bind($connection, $userDn, $password)) {
+            $code = ldap_errno($connection);
+            $err  = ldap_error($connection);
+
+            Log::warning("LDAP bind FAILED for DN={$userDn} code={$code} error={$err}");
+
+            //More codes can be found under Client side result codes at ldap.com
+            $friendly = match ($code) {
+                49 => 'Invalid username or password.',
+                34 => 'Invalid username format for LDAP.',
+                81 => 'Cannot reach the LDAP server. Please try again later.',
+                85 => 'LDAP request timed out. Please try again later.',
+                52 => 'LDAP service unavailable. Please try again later.',
+                default => 'Could not contact LDAP server. Please try again.',
+            };
+
+            throw new Exception(
+                $friendly,
+                $code,
+            );
+        }
             Log::debug("Status of binding user: $userDn to directory: (directly!) ".($ldapbind ? "success" : "FAILURE"));
             if (! $ldapbind = self::bindAdminToLdap($connection)) {
                 /*
@@ -166,7 +194,6 @@ class Ldap extends Model
                 Log::debug("Status of binding Admin user: $userDn to directory instead: ".($ldapbind ? "success" : "FAILURE"));
                 return false;
             }
-        }
 
         if (! $results = ldap_search($connection, $baseDn, $filterQuery)) {
             throw new Exception('Could not search LDAP: ');
