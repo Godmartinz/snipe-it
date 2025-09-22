@@ -97,7 +97,7 @@ class Ldap extends Model
         ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 20);
 
         if ($ldap_use_tls=='1') {
-            //suppresses the error and grabs it.
+            //suppresses the error and throws exception.
             if (! @ldap_start_tls($connection)) {
                 $code = ldap_errno($connection);
                 $err  = ldap_error($connection);
@@ -163,12 +163,10 @@ class Ldap extends Model
 
             //More codes can be found under Client side result codes at ldap.com
             $friendly = match ($code) {
-                49 => 'Invalid username or password.',
-                34 => 'Invalid username format for LDAP.',
                 81 => 'Cannot reach the LDAP server. Please try again later.',
                 85 => 'LDAP request timed out. Please try again later.',
                 52 => 'LDAP service unavailable. Please try again later.',
-                default => 'Could not contact LDAP server. Please try again.',
+                default => 'Could not contact LDAP server. Please try again. Hello',
             };
 
             throw new Exception(
