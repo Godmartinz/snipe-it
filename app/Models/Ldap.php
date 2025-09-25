@@ -163,10 +163,11 @@ class Ldap extends Model
 
             //More codes can be found under Client side result codes at ldap.com
             $friendly = match ($code) {
+                49 => 'Invalid username or password.',
                 81 => 'Cannot reach the LDAP server. Please try again later.',
                 85 => 'LDAP request timed out. Please try again later.',
                 52 => 'LDAP service unavailable. Please try again later.',
-                default => 'Could not contact LDAP server. Please try again. Hello',
+                default => 'Could not contact LDAP server. Please try again.',
             };
 
             throw new Exception(
