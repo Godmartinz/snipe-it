@@ -303,11 +303,11 @@ class LoginController extends Controller
             LOG::debug('LDAP is enabled.');
             try {
                 $user = $this->loginViaLdap($request);
-                \Auth::login($user);
+                Auth::login($user, $request->input('remember'));
             } catch (\Exception $e) {
 
                 Session::flash('error', $e->getMessage());
-                Log::notice("LDAP bind failed ({$e}");
+                Log::warning("LDAP bind failed ({$e}");
                 return back()->withInput();
             } catch (\Throwable $e) {
                 Session::flash('error', 'Login failed. Please try again.');
