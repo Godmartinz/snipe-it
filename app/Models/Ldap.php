@@ -162,7 +162,7 @@ class Ldap extends Model
             Log::warning("LDAP bind FAILED for DN={$userDn} code={$code} error={$err}");
 
             //More codes can be found under Client side result codes at ldap.com
-            $friendly = 'Invalid username or password.';
+            $friendly = trans('auth/message.account_not_found');
 
             throw new Exception(
                 $friendly,
