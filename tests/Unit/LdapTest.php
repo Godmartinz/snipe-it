@@ -86,7 +86,9 @@ class LdapTest extends TestCase
         $ldap_set_option = $this->getFunctionMock("App\\Models", "ldap_set_option");
         $ldap_set_option->expects($this->exactly(4));
 
-        $this->getFunctionMock("App\\Models", "ldap_bind")->expects($this->once())->willReturn(true);
+        $this->getFunctionMock("App\\Models", "ldap_bind")
+            ->expects($this->exactly(2))
+            ->willReturnOnConsecutiveCalls(true, true);
 
         $this->getFunctionMock("App\\Models", "ldap_search")->expects($this->once())->willReturn(true);
 
@@ -116,15 +118,25 @@ class LdapTest extends TestCase
         $ldap_set_option = $this->getFunctionMock("App\\Models", "ldap_set_option");
         $ldap_set_option->expects($this->exactly(4));
 
-        // note - we return FALSE first, to simulate a bad-bind, then TRUE the second time to simulate a successful admin bind
-        $this->getFunctionMock("App\\Models", "ldap_bind")->expects($this->exactly(2))->willReturn(false, true);
-
+        $this->getFunctionMock('App\\Models', 'ldap_bind')
+            ->expects($this->once())
+            ->willReturn(false);
+        $this->getFunctionMock('App\\Models', 'ldap_errno')
+            ->expects($this->once())
+            ->willReturn(49); // typical "invalid creds"
+        $this->getFunctionMock('App\\Models', 'ldap_error')
+            ->expects($this->once())
+            ->willReturn('Invalid credentials');
 //        $this->getFunctionMock("App\\Models","ldap_error")->expects($this->once())->willReturn("exception");
 
 
 //        $this->expectExceptionMessage("exception");
-        $results = Ldap::findAndBindUserLdap("username","password");
-        $this->assertFalse($results);
+        try {
+            Ldap::findAndBindUserLdap('username', 'password');
+            $this->fail('Expected exception not thrown');
+        } catch (\Exception $e) {
+            $this->assertSame(49, $e->getCode());
+        }
     }
 
     /**
