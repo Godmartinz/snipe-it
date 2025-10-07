@@ -170,26 +170,29 @@ class Ldap extends Model
             );
         }
             Log::debug("Status of binding user: $userDn to directory: (directly!) ".($ldapbind ? "success" : "FAILURE"));
-            if (! $ldapbind = self::bindAdminToLdap($connection)) {
-                /*
-                 * TODO PLEASE:
-                 *
-                 * this isn't very clear, so it's important to note: the $ldapbind value is never correctly returned - we never 'return true' from self::bindAdminToLdap() (the function
-                 * just "falls off the end" without ever explictly returning 'true')
-                 *
-                 * but it *does* have an interesting side-effect of checking for the LDAP password being incorrectly encrypted with the wrong APP_KEY, so I'm leaving it in for now.
-                 *
-                 * If it *did* correctly return 'true' on a succesful bind, it would _probably_ allow users to log in with an incorrect password. Which would be horrible!
-                 *
-                 * Let's definitely fix this at the next refactor!!!!
-                 *
-                 */
-                Log::debug("Status of binding Admin user: $userDn to directory instead: ".($ldapbind ? "success" : "FAILURE"));
-                return false;
-            }
+//            if (! $ldapbind = self::bindAdminToLdap($connection)) {
+//                /*
+//                 * TODO PLEASE:
+//                 *
+//                 * this isn't very clear, so it's important to note: the $ldapbind value is never correctly returned - we never 'return true' from self::bindAdminToLdap() (the function
+//                 * just "falls off the end" without ever explictly returning 'true')
+//                 *
+//                 * but it *does* have an interesting side-effect of checking for the LDAP password being incorrectly encrypted with the wrong APP_KEY, so I'm leaving it in for now.
+//                 *
+//                 * If it *did* correctly return 'true' on a succesful bind, it would _probably_ allow users to log in with an incorrect password. Which would be horrible!
+//                 *
+//                 * Let's definitely fix this at the next refactor!!!!
+//                 *
+//                 */
+//                Log::debug("Status of binding Admin user: $userDn to directory instead: ".($ldapbind ? "success" : "FAILURE"));
+//                return false;
+//            }
+
+        // BindAdminToLdap throws on failure now, and continues on success is the above block still needed? This could also be done by adding return true to the bindadmintoldap method, but Ill leave this here for now.
+        self::bindAdminToLdap($connection);
 
         if (! $results = ldap_search($connection, $baseDn, $filterQuery)) {
-            throw new Exception('Could not search LDAP: ');
+            return false;
         }
 
         if (! $entry = ldap_first_entry($connection, $results)) {
@@ -225,7 +228,7 @@ class Ldap extends Model
                 throw new Exception('Your app key has changed! Could not decrypt LDAP password using your current app key, so LDAP authentication has been disabled. Login with a local account, update the LDAP password and re-enable it in Admin > Settings.');
             }
 
-            if (! $ldapbind = @ldap_bind($connection, $ldap_username, $ldap_pass)) {
+            if (!@ldap_bind($connection, $ldap_username, $ldap_pass)) {
                 throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
             }
             // TODO - this just "falls off the end" but the function states that it should return true or false
@@ -235,7 +238,7 @@ class Ldap extends Model
             // at the next refactor, this should be appropriately modified to be more consistent.
         } else {
             // LDAP should also work with anonymous bind (no dn, no password available)
-            if (! $ldapbind = @ldap_bind($connection)) {
+            if (!@ldap_bind($connection)) {
                 throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
             }
         }
