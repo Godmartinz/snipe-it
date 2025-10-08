@@ -621,17 +621,19 @@ class BulkAssetsController extends Controller
     public function showCheckout() : View
     {
         $this->authorize('checkout', Asset::class);
-
         $alreadyAssigned = collect();
 
-        if (old('selected_assets') && is_array(old('selected_assets'))) {
-            $assets = Asset::findMany(old('selected_assets'));
+        if (!Setting::getSettings()->allow_bulk_asset_transfer) {
 
-            [$assignable, $alreadyAssigned] = $assets->partition(function (Asset $asset) {
-                return !$asset->assigned_to;
-            });
+            if (old('selected_assets') && is_array(old('selected_assets'))) {
+                $assets = Asset::findMany(old('selected_assets'));
 
-            session()->flashInput(['selected_assets' => $assignable->pluck('id')->values()->toArray()]);
+                [$assignable, $alreadyAssigned] = $assets->partition(function (Asset $asset) {
+                    return !$asset->assigned_to;
+                });
+
+                session()->flashInput(['selected_assets' => $assignable->pluck('id')->values()->toArray()]);
+            }
         }
 
         $do_not_change = ['' => trans('general.do_not_change')];
@@ -647,9 +649,9 @@ class BulkAssetsController extends Controller
      * Process Multiple Checkout Request
      */
     public function storeCheckout(AssetCheckoutRequest $request) : RedirectResponse | ModelNotFoundException
-    {
+    {   dd($request);
         $this->authorize('checkout', Asset::class);
-        Context::add('action', 'bulk_asset_checkout');
+        Context::add('action', 'bulk_transfer');
 
         try {
             $admin = auth()->user();
