@@ -3,6 +3,7 @@
 
 namespace App\Events;
 
+use App\Models\Asset;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -14,14 +15,17 @@ class AssetsTransferredInBulk
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public Collection $assets,
-        public Model      $target,
+        public Asset      $transferable,
+        public Model      $transferredTo,
+        public Model      $transferredFrom,
         public User       $admin,
-        public string     $checkout_at,
+        public string     $transferred_at,
         public string     $expected_checkin,
+        public string     $note,
+
+        public array     $originalValues,
     )
     {
     }
 
-    private static function
 }
