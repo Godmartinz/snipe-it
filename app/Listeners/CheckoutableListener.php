@@ -436,7 +436,7 @@ class CheckoutableListener
          */
 
         if (Context::get('action') === 'transfer') {
-            return false;
+            return true;
         }
 
         if ($checkoutable->requireAcceptance()) {

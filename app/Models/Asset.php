@@ -513,12 +513,12 @@ class Asset extends Depreciable
     }
 
     public function transfer($target, $transferredFrom, $admin= null, $transferred_at = null, $expected_checkin = null, $note = null, $name = null, $location = null ){
-            if (! $target) {
-                return false;
-            }
-            if ($this->is($target)) {
-                throw new CheckoutNotAllowed('You cannot transfer an asset to itself.');
-            }
+        if (! $target) {
+            return false;
+        }
+        if ($this->is($target)) {
+            throw new CheckoutNotAllowed('You cannot transfer an asset to itself.');
+        }
         if ($expected_checkin) {
             $this->expected_checkin = $expected_checkin;
         }
@@ -540,7 +540,6 @@ class Asset extends Depreciable
         }
 
         $originalValues = $this->getRawOriginal();
-
         // attempt to detect change in value if different from today's date
         if ($transferred_at && strpos($transferred_at, date('Y-m-d')) === false) {
             $originalValues['action_date'] = date('Y-m-d H:i:s');

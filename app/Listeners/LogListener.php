@@ -75,11 +75,14 @@ class LogListener
 
         $logaction->save();
     }
-    public function onAssetsTransferredInBulk(AssetsTransferredInBulk $event)
-    {
 
-        Log::debug('event passed to the onCheckoutAccepted listener:');
-        $event->transferable->logTransfer($event->note, $event->transferredTo, $event->transferable->last_checkout, $event->originalValues);
+    /**
+     * @throws \Exception
+     */
+    public function onAssetsTransferredInBulk(AssetsTransferredInBulk $event): void
+    {
+        Log::debug('event passed to the listener:');
+        $event->transferable->logCheckout($event->note, $event->transferredTo, $event->transferable->last_checkout, $event->originalValues, true);
 
     }
     public function onCheckoutDeclined(CheckoutDeclined $event)
@@ -147,6 +150,7 @@ class LogListener
         $list = [
             'CheckoutableCheckedIn',
             'CheckoutableCheckedOut',
+            'AssetsTransferredInBulk',
             'CheckoutAccepted',
             'CheckoutDeclined',
             'UserMerged',
