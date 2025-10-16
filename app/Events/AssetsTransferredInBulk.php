@@ -15,7 +15,7 @@ class AssetsTransferredInBulk
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public Asset      $transferable,
+        public Collection $transferable,
         public Model      $transferredTo,
         public Model      $transferredFrom,
         public User       $admin,

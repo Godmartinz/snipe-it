@@ -28,16 +28,14 @@ class TransferableListener
     {
         $events->listen(
             AssetsTransferredInBulk::class,
-            'App\Listeners\TransferrableListener@onTransfer'
+            'App\Listeners\TransferableListener@onTransfer'
         );
     }
     public function onTransfer($event){
-        if($this->shouldNotSendAnyNotifications($event->transferrable)){
-            return;
-        }
+
         $acceptance = $this->getTransferAcceptance($event);
 
-        $shouldSendEmailToUser = $this->shouldSendTransferEmailToUser($event->transferrable);
+        $shouldSendEmailToUser = $this->shouldSendTransferEmailToUser($event->transferable);
         $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($acceptance);
         $shouldSendWebhookNotification = $this->shouldSendWebhookNotification();
 
@@ -45,7 +43,7 @@ class TransferableListener
             return;
         }
         if ($shouldSendEmailToUser || $shouldSendEmailToAlertAddress) {
-            $mailable = new TransferredMail($event->transferrable, $event->transferedTo, $event->transferedBy, $acceptance, $event->transferred_at, $event->expected_checkin, $event->note);
+            $mailable = new TransferredMail($event->transferable, $event->transferredTo, $event->admin, $acceptance, $event->transferred_at, $event->expected_checkin, $event->note);
             $notifiable = $this->getNotifiableUser($event);
             $notifiableHasEmail = $notifiable instanceof User && $notifiable->email;
             $shouldSendEmailToUser = $shouldSendEmailToUser && $notifiableHasEmail;
@@ -93,7 +91,7 @@ class TransferableListener
         }
 
         $acceptance = new CheckoutAcceptance;
-        $acceptance->checkoutable()->associate($event->trasnferable);
+        $acceptance->checkoutable()->associate($event->transferable);
         $acceptance->assignedTo()->associate($event->transferredTo);
 
         $acceptance->qty = 1;
@@ -112,10 +110,7 @@ class TransferableListener
 
         return $acceptance;
     }
-    private function shouldNotSendAnyNotifications($transferable): bool
-    {
-        return in_array(get_class($transferable), $this->skipNotificationsFor);
-    }
+
     private function shouldSendWebhookNotification(): bool
     {
         return Setting::getSettings() && Setting::getSettings()->webhook_endpoint;

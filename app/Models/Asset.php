@@ -512,7 +512,7 @@ class Asset extends Depreciable
         return false;
     }
 
-    public function transfer($target, $transferredFrom, $admin= null, $transferred_at = null, $expected_checkin = null, $note = null, $name = null, $location = null ){
+    public function transfer($alreadyAssigned, $target, $transferredFrom, $admin= null, $transferred_at = null, $expected_checkin = null, $note = null, $name = null, $location = null ){
         if (! $target) {
             return false;
         }
@@ -554,7 +554,7 @@ class Asset extends Depreciable
                 $transferredBy = auth()->user();
             }
             event(new AssetsTransferredInBulk(
-                transferable: $this,
+                transferable: $alreadyAssigned,
                 transferredTo: $target,
                 transferredFrom: $transferredFrom,
                 admin: $transferredBy,
