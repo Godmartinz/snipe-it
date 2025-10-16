@@ -1,11 +1,12 @@
 <?php
-
+namespace App\Listeners;
 use App\Events\AssetsTransferredInBulk;
 use App\Mail\CheckoutAccessoryMail;
 use App\Mail\CheckoutAssetMail;
 use App\Mail\CheckoutComponentMail;
 use App\Mail\CheckoutConsumableMail;
 use App\Mail\CheckoutLicenseMail;
+use App\Mail\TransferredMail;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
@@ -18,9 +19,10 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpClient\Exception\ClientException;
 
-class TransferrableListener
+class TransferableListener
 {
     public function subscribe($events)
     {
@@ -43,7 +45,7 @@ class TransferrableListener
             return;
         }
         if ($shouldSendEmailToUser || $shouldSendEmailToAlertAddress) {
-            $mailable = new TransferredEmail($event->transferrable, $event->transferedTo, $event->transferedBy, $acceptance, $event->note);
+            $mailable = new TransferredMail($event->transferrable, $event->transferedTo, $event->transferedBy, $acceptance, $event->transferred_at, $event->expected_checkin, $event->note);
             $notifiable = $this->getNotifiableUser($event);
             $notifiableHasEmail = $notifiable instanceof User && $notifiable->email;
             $shouldSendEmailToUser = $shouldSendEmailToUser && $notifiableHasEmail;
@@ -79,7 +81,7 @@ class TransferrableListener
      * @param Event $event
      * @return mixed
      */
-    private function getTransferAcceptance(Event $event)
+    private function getTransferAcceptance($event)
     {
         $transferredToType = get_class($event->transferredTo);
         if ($transferredToType != "App\Models\User") {

@@ -21,9 +21,11 @@ class TransferredMail extends Mailable
         public Collection $items,
         public Model $target,
         public User $admin,
+        public Model $acceptance,
         public string $transferred_at,
         public string $expected_checkin,
         public string $note,
+
     ) {
         $this->require_acceptance = $this->requireAcceptance();
     }
@@ -45,6 +47,8 @@ class TransferredMail extends Mailable
             with: [
                 'introduction' => $this->getIntroduction(),
                 'requires_acceptance' => $this->requireAcceptance(),
+                'acceptance_url' => $this->acceptanceUrl(),
+                'eula' => $this->getEula(),
             ]
         );
     }
