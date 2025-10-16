@@ -14,6 +14,7 @@ use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
@@ -32,7 +33,7 @@ class TransferrableListener
         if($this->shouldNotSendAnyNotifications($event->transferrable)){
             return;
         }
-        $acceptance = $this->getTransferAcceptance($event->transferedTo);
+        $acceptance = $this->getTransferAcceptance($event);
 
         $shouldSendEmailToUser = $this->shouldSendTransferEmailToUser($event->transferrable);
         $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($acceptance);
@@ -75,31 +76,31 @@ class TransferrableListener
     }
     /**
      * Generates a checkout acceptance
-     * @param  Event $event
+     * @param Event $event
      * @return mixed
      */
-    private function getTransferAcceptance($event)
+    private function getTransferAcceptance(Event $event)
     {
-        $checkedOutToType = get_class($event->checkedOutTo);
-        if ($checkedOutToType != "App\Models\User") {
+        $transferredToType = get_class($event->transferredTo);
+        if ($transferredToType != "App\Models\User") {
             return null;
         }
 
-        if (!$event->checkoutable->requireAcceptance()) {
+        if (!$event->transferable->requireAcceptance()) {
             return null;
         }
 
         $acceptance = new CheckoutAcceptance;
-        $acceptance->checkoutable()->associate($event->checkoutable);
-        $acceptance->assignedTo()->associate($event->checkedOutTo);
+        $acceptance->checkoutable()->associate($event->trasnferable);
+        $acceptance->assignedTo()->associate($event->transferredTo);
 
         $acceptance->qty = 1;
 
-        if (isset($event->checkoutable->checkout_qty)) {
-            $acceptance->qty = $event->checkoutable->checkout_qty;
+        if (isset($event->trasnferable->checkout_qty)) {
+            $acceptance->qty = $event->trasnferable->checkout_qty;
         }
 
-        $category = $this->getCategoryFromCheckoutable($event->checkoutable);
+        $category = $event->transferable->model->category;
 
         if ($category?->alert_on_response) {
             $acceptance->alert_on_response_id = auth()->id();
@@ -109,16 +110,16 @@ class TransferrableListener
 
         return $acceptance;
     }
-    private function shouldNotSendAnyNotifications($transferrable): bool
+    private function shouldNotSendAnyNotifications($transferable): bool
     {
-        return in_array(get_class($transferrable), $this->skipNotificationsFor);
+        return in_array(get_class($transferable), $this->skipNotificationsFor);
     }
     private function shouldSendWebhookNotification(): bool
     {
         return Setting::getSettings() && Setting::getSettings()->webhook_endpoint;
     }
 
-    private function shouldSendTransferEmailToUser(Model $checkoutable): bool
+    private function shouldSendTransferEmailToUser(Model $transferable): bool
     {
         /**
          * Send an email if any of the following conditions are met:
@@ -131,15 +132,15 @@ class TransferrableListener
             return true;
         }
 
-        if ($checkoutable->requireAcceptance()) {
+        if ($transferable->requireAcceptance()) {
             return true;
         }
 
-        if ($checkoutable->getEula()) {
+        if ($transferable->getEula()) {
             return true;
         }
 
-        if ($this->checkoutableCategoryShouldSendEmail($checkoutable)) {
+        if ($this->checkoutableCategoryShouldSendEmail($transferable)) {
             return true;
         }
 
@@ -182,17 +183,17 @@ class TransferrableListener
     {
 
         // If it's assigned to an asset, get that asset's assignedTo object
-        if ($event->checkedOutTo instanceof Asset){
-            $event->checkedOutTo->load('assignedTo');
-            return $event->checkedOutTo->assignedto;
+        if ($event->transferredTo instanceof Asset){
+            $event->transferredTo->load('assignedTo');
+            return $event->transferredTo->assignedto;
 
             // If it's assigned to a location, get that location's manager object
-        } elseif ($event->checkedOutTo instanceof Location) {
-            return $event->checkedOutTo->manager;
+        } elseif ($event->transferredTo instanceof Location) {
+            return $event->transferredTo->manager;
 
             // Otherwise just return the assigned to object
         } else {
-            return $event->checkedOutTo;
+            return $event->transferredTo;
         }
     }
     private function generateEmailRecipients(
