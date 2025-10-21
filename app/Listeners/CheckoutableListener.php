@@ -467,12 +467,12 @@ class CheckoutableListener
     private function getFormattedAlertAddresses(): array
     {   $setting = Setting::getSettings();
         $alertAddresses = [
-            $setting->admin_cc_email?? '',
-            $setting->alert_email?? '',
+            $setting->admin_cc_email ?? '',
+            $setting->alert_email ?? '',
             ];
 
         if ($alertAddresses !== '') {
-            return array_filter(array_map('trim', explode(',', implode(',',$alertAddresses))));
+            return array_filter(array_map('trim', explode(',', implode(',', $alertAddresses))));
         }
 
         return [];
