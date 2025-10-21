@@ -461,15 +461,18 @@ class CheckoutableListener
             return false;
         }
 
-        return (bool) $setting->admin_cc_email;
+        return $setting->admin_cc_email || $setting->alert_email;
     }
 
     private function getFormattedAlertAddresses(): array
-    {
-        $alertAddresses = Setting::getSettings()->admin_cc_email;
+    {   $setting = Setting::getSettings();
+        $alertAddresses = [
+            $setting->admin_cc_email?? '',
+            $setting->alert_email?? '',
+            ];
 
         if ($alertAddresses !== '') {
-            return array_filter(array_map('trim', explode(',', $alertAddresses)));
+            return array_filter(array_map('trim', explode(',', implode(',',$alertAddresses))));
         }
 
         return [];
