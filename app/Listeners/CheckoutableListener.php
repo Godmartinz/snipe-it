@@ -33,6 +33,7 @@ use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Exception;
@@ -461,18 +462,14 @@ class CheckoutableListener
             return false;
         }
 
-        return $setting->admin_cc_email || $setting->alert_email;
+        return (bool) $setting->admin_cc_email;
     }
 
     private function getFormattedAlertAddresses(): array
-    {   $setting = Setting::getSettings();
-        $alertAddresses = [
-            $setting->admin_cc_email ?? '',
-            $setting->alert_email ?? '',
-            ];
+    {   $alertAddresses = Setting::getSettings()->admin_cc_email;
 
         if ($alertAddresses !== '') {
-            return array_filter(array_map('trim', explode(',', implode(',', $alertAddresses))));
+            return array_filter(array_map('trim', explode(',', $alertAddresses)));
         }
 
         return [];
@@ -499,7 +496,7 @@ class CheckoutableListener
 
         // if no user && cc: to admin
         if (!$shouldSendEmailToUser && $shouldSendEmailToAlertAddress) {
-            $to[] = $this->getFormattedAlertAddresses();
+             $cc[] = $this->getFormattedAlertAddresses();
         }
 
         return array($to, $cc);
