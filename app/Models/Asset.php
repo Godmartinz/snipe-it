@@ -950,7 +950,10 @@ class Asset extends Depreciable
                 })->orWhere(function ($query) use ($days) {
                     $query->whereNotNull('purchase_date')
                         ->whereNotNull('warranty_months')
-                        ->whereBetween('purchase_date', [Carbon::now(), Carbon::now()->addMonths('assets.warranty_months')->addDays($days)]);
+                        ->whereRaw(
+                            'DATE_ADD(purchase_date, INTERVAL warranty_months MONTH) BETWEEN ? AND ?',
+                            [now(), now()->addDays($days)]
+                        );
                 });
             })
             ->orderBy('asset_eol_date', 'ASC')
