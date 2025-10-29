@@ -304,6 +304,11 @@
                                         :options="['hardware_id'=>'/hardware/{id} ('.trans('admin/settings/general.default').')',
                                                    'ht_tag'=>'/ht/{asset_tag}',
                                                    'location' => '/location/{location_id}',
+                                                   'plain_asset_tag' => '{asset_tag}',
+                                                   'plain_serial_number' => '{serial_number}',
+                                                   'plain_model_number' => '{model_id}',
+                                                   'plain_asset_id' => '{asset_id}',
+                                                   'plain_manufacturer' => '{manufacturer}',
                                                    ]"
                                         :selected="old('label2_2d_target', $setting->label2_2d_target)"
                                         class="col-md-4"

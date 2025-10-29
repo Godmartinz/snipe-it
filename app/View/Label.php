@@ -144,19 +144,25 @@ class Label implements View
                             case 'ht_tag': 
                                 $barcode2DTarget = route('ht/assetTag', $asset->asset_tag); 
                                 break;
-                            case 'plain_asset_id': 
+                            case 'location':
+                                $barcode2DTarget = $asset->location_id
+                                    ? route('locations.show', $asset->location_id)
+                                    : null;
+                                break;
+                            case 'plain_asset_id':
                                 $barcode2DTarget = (string) $asset->id; 
                                 break;
                             case 'plain_asset_tag': 
                                 $barcode2DTarget = $asset->asset_tag; 
                                 break;
                             case 'plain_serial_number': 
-                                $barcode2DTarget = $asset->serial; 
+                                $barcode2DTarget = $asset->serial ?? 'None';
                                 break;
-                            case 'location':
-                                $barcode2DTarget = $asset->location_id
-                                    ? route('locations.show', $asset->location_id)
-                                    : null;
+                            case 'plain_model_number':
+                                $barcode2DTarget = $asset->model_id;
+                                break;
+                            case 'plain_manufacturer':
+                                $barcode2DTarget = $asset->model->manufacturer ?? '';
                                 break;
                             case 'hardware_id':
                             default:
