@@ -158,11 +158,11 @@ class Label implements View
                             case 'plain_serial_number': 
                                 $barcode2DTarget = $asset->serial ?? 'None';
                                 break;
-                            case 'plain_model_number':
-                                $barcode2DTarget = $asset->model_id;
+                            case 'plain_model_name':
+                                $barcode2DTarget = $asset->model->name;
                                 break;
                             case 'plain_manufacturer':
-                                $barcode2DTarget = $asset->model->manufacturer ?? '';
+                                $barcode2DTarget = $asset->model->manufacturer?->name ?? '';
                                 break;
                             case 'hardware_id':
                             default:
