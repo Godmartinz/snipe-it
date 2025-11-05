@@ -160,6 +160,9 @@
   background-color: #000000;
   color: #fff;
 }
+.btn-info {
+  border-color: #fff;
+}
 /**
 The dropdown is white, so use a darker color
  */
