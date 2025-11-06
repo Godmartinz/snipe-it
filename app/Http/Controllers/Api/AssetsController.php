@@ -1225,6 +1225,7 @@ class AssetsController extends Controller
      */
     public function requestable(Request $request): JsonResponse | array
     {
+
         $this->authorize('viewRequestable', Asset::class);
 
         $allowed_columns = [
@@ -1256,9 +1257,6 @@ class AssetsController extends Controller
                 'supplier',
                 'requests'
             );
-
-
-
 
         if ($request->filled('search')) {
             $assets->TextSearch($request->input('search'));
@@ -1299,7 +1297,7 @@ class AssetsController extends Controller
         $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $assets->count();
+        $total = (clone $assets)->count();
         $assets = $assets->skip($offset)->take($limit)->get();
 
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
