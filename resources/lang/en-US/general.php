@@ -327,7 +327,7 @@ return [
     'declined'			    => 'declined',
     'declined_note'         => 'Declined Notes',
     'unassigned'            => 'Unassigned',
-    'unaccepted_asset_report' => 'Unaccepted Assets',
+    'unaccepted_asset_report' => 'Unaccepted Items',
     'users'                 => 'Users',
     'viewall'				=> 'View All',
     'viewassets'  			=> 'View Assigned Items',
