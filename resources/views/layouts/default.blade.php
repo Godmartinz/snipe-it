@@ -839,7 +839,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </li>
                                     <li {{!! (request()->is('reports/unaccepted_assets') ? ' class="active"' : '') !!}}>
                                         <a href="{{ url('reports/unaccepted_assets') }}">
-                                            {{ trans('general.unaccepted_asset_report') }}
+                                            {{ trans('general.unaccepted_items_report') }}
                                         </a>
                                     </li>
                                     <li  {{!! (request()->is('reports/accessories') ? ' class="active"' : '') !!}}>

@@ -4,7 +4,7 @@
 
 {{-- Page title --}}
 @section('title')
-    {{ trans('general.unaccepted_asset_report') }}
+    {{ trans('general.unaccepted_items_report') }}
     @parent
 @stop
 
