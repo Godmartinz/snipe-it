@@ -39,12 +39,31 @@ class CurrentInventory extends Notification
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail()
-    {
+    {   $userAssets = $this->user->assets;
+        $userAccessories = $this->user->accessories;
+        $userLicenses = $this->user->licenses;
+        $assetsAssets = $userAssets->flatMap(fn ($asset) => $asset->assignedAssets);
+        $assetsAccessories = $userAssets->flatMap(fn ($asset) => $asset->assignedAccessories->map(fn ($checkout) => $checkout->accessory)->filter());
+        $assetsLicenses = $userAssets->flatMap(fn ($asset) => $asset->licenses);
+        $assetsComponents = $userAssets->flatMap(fn ($asset) => $asset->components);
+        $allAssets = $userAssets
+            ->concat($assetsAssets)
+            ->unique()
+            ->values();
+        $allLicenses = $userLicenses
+            ->concat($assetsLicenses)
+            ->unique()
+            ->values();
+        $allAccessories = $userAccessories
+            ->concat($assetsAccessories)
+            ->unique()
+            ->values();
+
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
-                'assets'  => $this->user->assets,
-                'accessories'  => $this->user->accessories,
-                'licenses'  => $this->user->licenses,
+                'assets'  => $allAssets,
+                'accessories'  => $allAccessories,
+                'licenses'  => $allLicenses,
                 'consumables'  => $this->user->consumables,
             ])
             ->subject(trans('mail.inventory_report'))
