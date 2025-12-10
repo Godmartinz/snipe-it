@@ -39,24 +39,27 @@ class CurrentInventory extends Notification
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail()
-    {   $userAssets = $this->user->assets;
+    {
+        //assigned to user
+        $userAssets = $this->user->assets;
         $userAccessories = $this->user->accessories;
         $userLicenses = $this->user->licenses;
+
+        //assigned through assets to user
         $assetsAssets = $userAssets->flatMap(fn ($asset) => $asset->assignedAssets);
         $assetsAccessories = $userAssets->flatMap(fn ($asset) => $asset->assignedAccessories->map(fn ($checkout) => $checkout->accessory)->filter());
         $assetsLicenses = $userAssets->flatMap(fn ($asset) => $asset->licenses);
         $assetsComponents = $userAssets->flatMap(fn ($asset) => $asset->components);
+
         $allAssets = $userAssets
             ->concat($assetsAssets)
             ->unique()
             ->values();
         $allLicenses = $userLicenses
             ->concat($assetsLicenses)
-            ->unique()
             ->values();
         $allAccessories = $userAccessories
             ->concat($assetsAccessories)
-            ->unique()
             ->values();
 
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
@@ -65,6 +68,7 @@ class CurrentInventory extends Notification
                 'accessories'  => $allAccessories,
                 'licenses'  => $allLicenses,
                 'consumables'  => $this->user->consumables,
+                'components'  => $assetsComponents,
             ])
             ->subject(trans('mail.inventory_report'))
             ->withSymfonyMessage(function (Email $message) {

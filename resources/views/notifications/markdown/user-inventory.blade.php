@@ -73,6 +73,18 @@
 </table>
 @endif
 
+@if ($components->count() > 0)
+## {{ $components->count() }} {{ trans('general.component') }}
+<table width="100%">
+<tr><th align="left">{{ trans('mail.name') }} </th> <th></th> </tr>
+@foreach($components as $component)
+<tr>
+<td>{{ $component->name }}</td>
+</tr>
+@endforeach
+</table>
+@endif
+
 
 @endcomponent
 
