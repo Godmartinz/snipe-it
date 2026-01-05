@@ -116,18 +116,33 @@ class LabelWriter_1933081 extends LabelWriter
         $fieldSize   = self::FIELD_SIZE   * $scale;
         $fieldMargin = self::FIELD_MARGIN * $scale;
 
+        $pdf->SetFont('freesans', '', $labelSize);
+
+        $maxLabelWidth = 0;
         foreach ($fields as $field) {
-            static::writeText(
-                $pdf, $field['label'],
-                $currentX, $currentY,
-                'freesans', '', $labelSize, 'L',
-                $usableWidth, $labelSize, true, 0
-            );
-            $currentY += $labelSize + $labelMargin;
+            $labelText = rtrim($field['label'], ':') . ':';
+            $w = $pdf->GetStringWidth($labelText);
+            if ($w > $maxLabelWidth) {
+                $maxLabelWidth = $w;
+            }
+        }
+        $labelPadding = 1.5 * $scale;          // breathing room after label text
+        $gap          = 1.5 * $scale;          // gap between label column and value column
+        $labelWidth   = $maxLabelWidth + $labelPadding;
+        foreach ($fields as $field) {
+            $labelText  = rtrim($field['label'], ':') . ':';
+            $valueX     = $currentX + $labelWidth + $gap;
+            $valueWidth = $usableWidth - $labelWidth - $gap;
 
             static::writeText(
-                $pdf, $field['value'],
+                $pdf,$labelText,
                 $currentX, $currentY,
+                'freesans', '', $labelSize, 'L',
+                $labelWidth, $labelSize, true, 0
+            );
+            static::writeText(
+                $pdf, $field['value'],
+                $valueX, $currentY,
                 'freemono', 'B', $fieldSize, 'L',
                 $usableWidth, $fieldSize, true, 0, 0.01
             );
