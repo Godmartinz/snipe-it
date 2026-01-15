@@ -843,7 +843,7 @@ class Helper
 
             $asset = new Asset();
             $total_owned = $asset->where('model_id', '=', $asset_model->id)->count();
-            $avail = $asset->where('model_id', '=', $asset_model->id)->whereIn('status_id', [1])->count();
+//            $avail = $asset->where('model_id', '=', $asset_model->id)->with('assetstatus')->where('deployable', '=', 1)->count();
 
             if ($avail <= ($asset_model->min_amt) + $alert_threshold) {
                 if ($avail > 0) {
