@@ -844,6 +844,7 @@ class Helper
             $asset = new Asset();
             $total_owned = $asset->where('model_id', '=', $asset_model->id)->count();
             $avail = $asset->where('model_id', '=', $asset_model->id)
+                ->whereNull('assigned_to')
                 ->whereHas('assetstatus', function ($query) {
                 $query->where('deployable', '=', '1');
                 })->count();
