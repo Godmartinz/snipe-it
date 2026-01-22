@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Actions\Assets\AssetCheckinAction;
 use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,7 @@ use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\LicenseSeat;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
@@ -72,12 +74,24 @@ class AssetCheckinController extends Controller
      */
     public function store(AssetCheckinRequest $request, $assetId = null, $backto = null) : RedirectResponse
     {
-        // Check if the asset exists
-        if (is_null($asset = Asset::find($assetId))) {
-            // Redirect to the asset management page with error
+        $assetIds = $request->input('asset_ids') ?? $assetId;
+        $assetIds = Arr::wrap($assetIds);
+        $assetIds = array_values(array_unique(array_filter($assetIds)));
+
+        if (empty($assetIds)) {
+            return redirect()->route('hardware.index')->with('error', 'No assets selected.');
+        }
+        $assets = Asset::query()
+            ->whereIn('id', $assetIds)
+            ->with(['assignedTo', 'model'])
+            ->get()
+            ->keyBy('id');
+
+        $missingIds = array_values(array_diff($assetIds, $assets->keys()->all()));
+        if(!empty($missingIds)){
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
-
+        $
         if (is_null($target = $asset->assignedTo)) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.already_checked_in'));
         }
@@ -95,66 +109,19 @@ class AssetCheckinController extends Controller
             'App\Models\Asset' => 'asset',
         });
 
-        $asset->expected_checkin = null;
-        $asset->assignedTo()->disassociate($asset);
-        $asset->accepted = null;
-        $asset->name = $request->input('name');
-
-        if ($request->filled('status_id')) {
-            $asset->status_id = e($request->input('status_id'));
-        }
-
-        // Add any custom fields that should be included in the checkout
-        $asset->customFieldsForCheckinCheckout('display_checkin');
-
-        $this->migrateLegacyLocations($asset);
-
-        $asset->location_id = $asset->rtd_location_id;
-
-        if ($request->filled('location_id')) {
-            Log::debug('NEW Location ID: '.$request->input('location_id'));
-            $asset->location_id = $request->input('location_id');
-
-            if ($request->input('update_default_location') == 0){
-                $asset->rtd_location_id = $request->input('location_id');
-            }
-        }
-
-        $originalValues = $asset->getRawOriginal();
-
-        // Handle last checkin date
-        $checkin_at = date('Y-m-d H:i:s');
-        if (($request->filled('checkin_at')) && ($request->input('checkin_at') != date('Y-m-d'))) {
-            $originalValues['action_date'] = $checkin_at;
-            $checkin_at = $request->input('checkin_at');
-
-        }
-        $asset->last_checkin = $checkin_at;
-
-        $asset->licenseseats->each(function (LicenseSeat $seat) {
-            $seat->update(['assigned_to' => null]);
-        });
-
-        // Get all pending Acceptances for this asset and delete them
-        $acceptances = CheckoutAcceptance::pending()->whereHasMorph('checkoutable',
-            [Asset::class],
-            function (Builder $query) use ($asset) {
-                $query->where('id', $asset->id);
-            })->get();
-        $acceptances->map(function($acceptance) {
-            $acceptance->delete();
-        });
-
-        session()->put('redirect_option', $request->input('redirect_option'));
-
-        // Add any custom fields that should be included in the checkout
-        $asset->customFieldsForCheckinCheckout('display_checkin');
-
-        if ($asset->save()) {
-
-            event(new CheckoutableCheckedIn($asset, $target, auth()->user(), $request->input('note'), $checkin_at, $originalValues));
-            return Helper::getRedirectOption($request, $asset->id, 'Assets')
+        $result = app(AssetCheckinAction::class)->execute($asset, $target, $backto);
+        if (count($result->assets == 1)){
+            session()->put('checkedInFrom', $result->asset[0]->assignedTo->id);
+            session()->put('checkout_to_type', match ($result->asset[0]->assigned_type) {
+                'App\Models\User' => 'user',
+                'App\Models\Location' => 'location',
+                'App\Models\Asset' => 'asset',
+            });
+            return Helper::getRedirectOption($request, $$result->assets[0]->id, 'Assets')
                 ->with('success', trans('admin/hardware/message.checkin.success'));
+        }
+        else if (count($result->assets > 1)){
+            return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkin.success'));
         }
         // Redirect to the asset management page with error
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.error').$asset->getErrors());
