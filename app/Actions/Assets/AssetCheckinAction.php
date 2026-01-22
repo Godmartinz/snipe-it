@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class AssetCheckinAction
 {
     use MigratesLegacyAssetLocations;
-    public function handle(AssetCheckinRequest $request, $asset) : CheckinActionResult
+    public function handle(AssetCheckinRequest $request, $asset) : bool
     {
         $target = $asset->assignedTo;
         $asset->expected_checkin = null;
@@ -75,11 +75,6 @@ class AssetCheckinAction
         $asset->save();
 
         event(new CheckoutableCheckedIn($asset, $target, auth()->user(), $request->input('note'), $checkin_at, $originalValues));
-        return new CheckinActionResult(
-            item: $asset,
-            target: $target,
-            checkinAt: $checkin_at,
-            originalValues: $originalValues,
-        );
+        return true;
     }
 }
