@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class AssetCheckinAction
 {
     use MigratesLegacyAssetLocations;
-    public function handle(AssetCheckinRequest $request, $asset, $assetId = null)
+    public function handle(AssetCheckinRequest $request, $asset) : CheckinActionResult
     {
         $target = $asset->assignedTo;
         $asset->expected_checkin = null;

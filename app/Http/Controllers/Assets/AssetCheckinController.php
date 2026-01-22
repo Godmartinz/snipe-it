@@ -106,7 +106,7 @@ class AssetCheckinController extends Controller
         //stores the session variables before disassociating
         if (count($assetIds) == 1) {
             $asset = $assets->get($assetIds[0]);
-            $checkedInFromId = $asset->assigned_to;     // safest (doesn't depend on relation)
+            $checkedInFromId = $asset->assigned_to;
             $checkedInFromType = $asset->assigned_type;
 
             session()->put('checkedInFrom', $checkedInFromId);
@@ -134,8 +134,8 @@ class AssetCheckinController extends Controller
         if (count($assetIds) == 1) {
             return Helper::getRedirectOption($request, $assetIds[0], 'Assets')
                 ->with('success', trans('admin/hardware/message.checkin.success'));
-        } else if (count($assetIds > 1)) {
-            return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkin.success'));
         }
+
+        return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkin.success'));
     }
 }
