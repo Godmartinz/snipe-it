@@ -88,42 +88,54 @@ class AssetCheckinController extends Controller
             ->keyBy('id');
 
         $missingIds = array_values(array_diff($assetIds, $assets->keys()->all()));
-        if(!empty($missingIds)){
+        if (!empty($missingIds)) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
-        $
-        if (is_null($target = $asset->assignedTo)) {
+        $isCheckedIn = $assets->filter(fn($asset) => $asset->assignedTo == null)->keys()->all();
+        if (empty($isCheckedIn)) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.already_checked_in'));
         }
-
-        if (!$asset->model) {
-            return redirect()->route('hardware.show', $asset->id)->with('error', trans('admin/hardware/general.model_invalid_fix'));
+        $missingModel = $assets->filter(fn($asset) => $asset->model == null)->keys()->all();
+        if (!empty($missingModel)) {
+            return redirect()->route('hardware.show', $missingModel[0])->with('error', trans('admin/hardware/general.model_invalid_fix'));
         }
 
-        $this->authorize('checkin', $asset);
+        foreach ($assets as $asset) {
+            $this->authorize('checkin', $asset);
+        }
+        //stores the session variables before disassociating
+        if (count($assetIds) == 1) {
+            $asset = $assets->get($assetIds[0]);
+            $checkedInFromId = $asset->assigned_to;     // safest (doesn't depend on relation)
+            $checkedInFromType = $asset->assigned_type;
 
-        session()->put('checkedInFrom', $asset->assignedTo->id);
-        session()->put('checkout_to_type', match ($asset->assigned_type) {
-            'App\Models\User' => 'user',
-            'App\Models\Location' => 'location',
-            'App\Models\Asset' => 'asset',
-        });
-
-        $result = app(AssetCheckinAction::class)->execute($asset, $target, $backto);
-        if (count($result->assets == 1)){
-            session()->put('checkedInFrom', $result->asset[0]->assignedTo->id);
-            session()->put('checkout_to_type', match ($result->asset[0]->assigned_type) {
+            session()->put('checkedInFrom', $checkedInFromId);
+            session()->put('checkout_to_type', match ($checkedInFromType) {
                 'App\Models\User' => 'user',
                 'App\Models\Location' => 'location',
                 'App\Models\Asset' => 'asset',
             });
-            return Helper::getRedirectOption($request, $$result->assets[0]->id, 'Assets')
-                ->with('success', trans('admin/hardware/message.checkin.success'));
         }
-        else if (count($result->assets > 1)){
+
+        try {
+            foreach ($assets as $asset) {
+
+                app(AssetCheckinAction::class)->handle($request, $asset);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Asset checkin failed', [
+                'asset_id' => $asset->id ?? null,
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.error') . $e->getMessage());
+        }
+        if (count($assetIds) == 1) {
+            return Helper::getRedirectOption($request, $assetIds[0], 'Assets')
+                ->with('success', trans('admin/hardware/message.checkin.success'));
+        } else if (count($assetIds > 1)) {
             return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkin.success'));
         }
-        // Redirect to the asset management page with error
-        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.error').$asset->getErrors());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Assets;
 
+use App\Actions\CheckinActionResult;
 use App\Events\CheckoutableCheckedIn;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
@@ -14,71 +15,68 @@ use Illuminate\Support\Facades\Log;
 class AssetCheckinAction
 {
     use MigratesLegacyAssetLocations;
-    public function handle(AssetCheckinRequest $request, array $assets, $assetId = null)
+    public function handle(AssetCheckinRequest $request, $asset, $assetId = null)
     {
-        foreach ($assets as $asset) {
-            $target = $asset->assignedTo;
-            $asset->expected_checkin = null;
-            $asset->assignedTo()->disassociate($asset);
-            $asset->accepted = null;
-            $asset->name = $request->input('name');
+        $target = $asset->assignedTo;
+        $asset->expected_checkin = null;
+        $asset->assignedTo()->disassociate($asset);
+        $asset->accepted = null;
+        $asset->name = $request->input('name');
 
-            if ($request->filled('status_id')) {
-                $asset->status_id = e($request->input('status_id'));
+        if ($request->filled('status_id')) {
+            $asset->status_id = e($request->input('status_id'));
+        }
+
+        // Add any custom fields that should be included in the checkout
+        $asset->customFieldsForCheckinCheckout('display_checkin');
+        $this->migrateLegacyLocations($asset);
+
+        $asset->location_id = $asset->rtd_location_id;
+
+        if ($request->filled('location_id')) {
+            Log::debug('NEW Location ID: ' . $request->input('location_id'));
+            $asset->location_id = $request->input('location_id');
+
+            if ($request->input('update_default_location') == 0) {
+                $asset->rtd_location_id = $request->input('location_id');
             }
+        }
 
-            // Add any custom fields that should be included in the checkout
-            $asset->customFieldsForCheckinCheckout('display_checkin');
-            $this->migrateLegacyLocations($asset);
+        $originalValues = $asset->getRawOriginal();
 
-            $asset->location_id = $asset->rtd_location_id;
-
-            if ($request->filled('location_id')) {
-                Log::debug('NEW Location ID: ' . $request->input('location_id'));
-                $asset->location_id = $request->input('location_id');
-
-                if ($request->input('update_default_location') == 0) {
-                    $asset->rtd_location_id = $request->input('location_id');
-                }
-            }
-
-            $originalValues = $asset->getRawOriginal();
-
-            // Handle last checkin date
-            $checkin_at = date('Y-m-d H:i:s');
-            if (($request->filled('checkin_at')) && ($request->input('checkin_at') != date('Y-m-d'))) {
-                $originalValues['action_date'] = $checkin_at;
-                $checkin_at = $request->input('checkin_at');
-
-            }
-            $asset->last_checkin = $checkin_at;
-
-            $asset->licenseseats->each(function (LicenseSeat $seat) {
-                $seat->update(['assigned_to' => null]);
-            });
-
-            // Get all pending Acceptances for this asset and delete them
-            $acceptances = CheckoutAcceptance::pending()->whereHasMorph('checkoutable',
-                [Asset::class],
-                function (Builder $query) use ($asset) {
-                    $query->where('id', $asset->id);
-                })->get();
-            $acceptances->map(function ($acceptance) {
-                $acceptance->delete();
-            });
-
-            session()->put('redirect_option', $request->input('redirect_option'));
-
-            // Add any custom fields that should be included in the checkout
-            $asset->customFieldsForCheckinCheckout('display_checkin');
-
-            $asset->save();
+        // Handle last checkin date
+        $checkin_at = date('Y-m-d H:i:s');
+        if (($request->filled('checkin_at')) && ($request->input('checkin_at') != date('Y-m-d'))) {
+            $originalValues['action_date'] = $checkin_at;
+            $checkin_at = $request->input('checkin_at');
 
         }
+        $asset->last_checkin = $checkin_at;
+
+        $asset->licenseseats->each(function (LicenseSeat $seat) {
+            $seat->update(['assigned_to' => null]);
+        });
+
+        // Get all pending Acceptances for this asset and delete them
+        $acceptances = CheckoutAcceptance::pending()->whereHasMorph('checkoutable',
+            [Asset::class],
+            function (Builder $query) use ($asset) {
+                $query->where('id', $asset->id);
+            })->get();
+        $acceptances->map(function ($acceptance) {
+            $acceptance->delete();
+        });
+
+        session()->put('redirect_option', $request->input('redirect_option'));
+
+        // Add any custom fields that should be included in the checkout
+        $asset->customFieldsForCheckinCheckout('display_checkin');
+
+        $asset->save();
 
         event(new CheckoutableCheckedIn($asset, $target, auth()->user(), $request->input('note'), $checkin_at, $originalValues));
         return new CheckinActionResult(
-            items: $assets,
+            item: $asset,
             target: $target,
             checkinAt: $checkin_at,
             originalValues: $originalValues,

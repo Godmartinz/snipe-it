@@ -9,7 +9,7 @@ use App\Models\LicenseSeat;
 
 class CheckinActionResult
 {
-    private function __construct(
+    public function __construct(
         public Asset|Accessory|Component|LicenseSeat $item,
         public mixed $target,
         public string $checkinAt,
