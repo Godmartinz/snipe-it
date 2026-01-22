@@ -2,7 +2,6 @@
 
 namespace App\Actions\Assets;
 
-use App\Actions\CheckinActionResult;
 use App\Events\CheckoutableCheckedIn;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
