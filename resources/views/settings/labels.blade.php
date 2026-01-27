@@ -387,15 +387,15 @@
                                 {{-- Label Font --}}
                                 <div class="col-md-6">
                                     <x-input.select
-                                            name="label_font"
-                                            id="label_font"
+                                            name="labels_font"
+                                            id="labels_font"
                                             :options="$plainFonts"
-                                            :selected="old('label_font', $setting->label_font)"
+                                            :selected="old('labels_font', $setting->labels_font)"
                                             class="form-control"
                                             aria-label="label_font"
                                     />
 
-                                    {!! $errors->first('label_font', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                                    {!! $errors->first('labels_font', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
                                 </div>
 
                                 {{-- Value Font --}}
