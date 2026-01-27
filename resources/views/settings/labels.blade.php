@@ -363,6 +363,32 @@
                                     {!! $errors->first('label2_empty_row_count', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                 </div>
                             </div>
+
+                    <!-- Label Font -->
+                    <div class="form-group{{ $errors->has('label_font') ? ' has-error' : '' }}">
+                        <div class="col-md-3 text-right">
+                            <label for="label_font" class="control-label">{{ trans('admin/settings/general.label_font') }}</label>
+                        </div>
+                        <div class="col-md-7">
+                            @php
+                                $plainFonts = [
+                                        'freesans'    => 'FreeSans',
+                                        'freemono'    => 'FreeMono',
+                                        'helvetica'   => 'Helvetica',
+                                        'dejavusans'  => 'DejaVu Sans',
+                                    ];
+                            @endphp
+                            <x-input.select
+                                    name="label_font"
+                                    id="label_font"
+                                    :options="$plainFonts"
+                                    :selected="old('label_font', $setting->label_font)"
+                                    class="col-md-4"
+                                    aria-label="label_font"
+                            />
+                            {!! $errors->first('label_font', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        </div>
+                    </div>
                     </fieldset>
 
 
