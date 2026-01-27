@@ -382,7 +382,7 @@
                             </label>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <x-input.select
                                     name="labels_font"
                                     id="labels_font"
@@ -408,7 +408,7 @@
                             </label>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <x-input.select
                                     name="labels_value_font"
                                     id="labels_value_font"
