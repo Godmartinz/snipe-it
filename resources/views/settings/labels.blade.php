@@ -365,30 +365,57 @@
                             </div>
 
                     <!-- Label Font -->
-                    <div class="form-group{{ $errors->has('label_font') ? ' has-error' : '' }}">
+                    <div class="form-group{{ ($errors->has('label_font') || $errors->has('labels_value_font')) ? ' has-error' : '' }}">
                         <div class="col-md-3 text-right">
-                            <label for="label_font" class="control-label">{{ trans('admin/settings/general.label_font') }}</label>
+                            <label class="control-label">
+                                {{ trans('admin/settings/general.labels_font') }} /
+                                {{ trans('admin/settings/general.labels_value_font') }}
+                            </label>
                         </div>
+
                         <div class="col-md-7">
                             @php
                                 $plainFonts = [
-                                        'freesans'    => 'FreeSans',
-                                        'freemono'    => 'FreeMono',
-                                        'helvetica'   => 'Helvetica',
-                                        'dejavusans'  => 'DejaVu Sans',
-                                    ];
+                                    'freesans'    => 'FreeSans',
+                                    'freemono'    => 'FreeMono',
+                                    'helvetica'   => 'Helvetica',
+                                    'dejavusans'  => 'DejaVu Sans',
+                                ];
                             @endphp
-                            <x-input.select
-                                    name="label_font"
-                                    id="label_font"
-                                    :options="$plainFonts"
-                                    :selected="old('label_font', $setting->label_font)"
-                                    class="col-md-4"
-                                    aria-label="label_font"
-                            />
-                            {!! $errors->first('label_font', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+
+                            <div class="row">
+                                {{-- Label Font --}}
+                                <div class="col-md-6">
+                                    <x-input.select
+                                            name="label_font"
+                                            id="label_font"
+                                            :options="$plainFonts"
+                                            :selected="old('label_font', $setting->label_font)"
+                                            class="form-control"
+                                            aria-label="label_font"
+                                    />
+
+                                    {!! $errors->first('label_font', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                                </div>
+
+                                {{-- Value Font --}}
+                                <div class="col-md-6">
+
+                                    <x-input.select
+                                            name="labels_value_font"
+                                            id="labels_value_font"
+                                            :options="$plainFonts"
+                                            :selected="old('labels_value_font', $setting->labels_value_font)"
+                                            class="form-control"
+                                            aria-label="labels_value_font"
+                                    />
+
+                                    {!! $errors->first('labels_value_font', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                     </fieldset>
 
 

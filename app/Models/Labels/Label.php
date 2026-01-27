@@ -3,6 +3,7 @@
 namespace App\Models\Labels;
 
 use App\Helpers\Helper;
+use App\Models\Setting;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use TCPDF;
@@ -720,7 +721,14 @@ abstract class Label
                 }
             );
     }
+    public function getLabelFont(): string
+    {
+        return Setting::getSettings()->labels_font;
+    }
 
-    
+    public function getLabelValueFont(): string
+    {
+        return Setting::getSettings()->labels_value_font;
+    }
 
 }
