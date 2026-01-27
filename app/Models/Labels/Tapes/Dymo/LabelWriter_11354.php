@@ -132,7 +132,7 @@ class LabelWriter_11354 extends LabelWriter
             static::writeText(
                 $pdf, $title,
                 $currentX, $currentY,
-                $this->getLabelFont(), 'b', $field_layout['titleSize'], 'L',
+                $this->getLabelValueFont(), 'b', $field_layout['titleSize'], 'L',
                 $usableWidth, $field_layout['titleSize'], true, 0
             );
             $currentY += $field_layout['titleAdvance'];
