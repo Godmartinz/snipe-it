@@ -3,6 +3,8 @@
 namespace App\Models\Labels\Sheets\Avery;
 
 
+use App\Helpers\Helper;
+
 class L7162_A extends L7162
 {
     private const BARCODE_MARGIN =   1.60;
@@ -100,35 +102,82 @@ class L7162_A extends L7162
             );
             $titleShiftX = $barcodeSize;
         }
-        
-        if ($record->has('title')) {
-            static::writeText(
-                $pdf, $record->get('title'),
-                $currentX + $titleShiftX, $currentY,
-                'freesans', '', self::TITLE_SIZE, 'L',
-                $usableWidth, self::TITLE_SIZE, true, 0
-            );
-            $currentY += self::TITLE_SIZE + self::TITLE_MARGIN;
+
+        $title = $record->has('title') ? $record->get('title') : null;
+        $fields = $record->get('fields');
+        $maxFields = $this->getSupportFields();
+        $fields = collect($fields);
+        if ($title) {
+            $maxFields = max(0, $maxFields - 1); // title consumes one row’s worth of space
         }
 
-        foreach ($record->get('fields') as $field) {
+        $fields = $fields->take($maxFields)->values();
+
+        $usableHeight = $pa->h
+            - self::TAG_SIZE           // bottom tag text
+            - self::BARCODE_MARGIN;    // gap between fields and 1D
+
+        $field_layout = Helper::labelFieldLayoutScaling(
+            pdf: $pdf,
+            fields: $fields,
+            currentX: $currentX,
+            usableWidth: $usableWidth,
+            usableHeight: $usableHeight,
+            baseLabelSize: self::LABEL_SIZE,
+            baseFieldSize: self::FIELD_SIZE,
+            baseFieldMargin: self::FIELD_MARGIN,
+            title: $title,
+            baseTitleSize: self::TITLE_SIZE,
+            baseTitleMargin: self::TITLE_MARGIN,
+            baseLabelPadding: 1.5,
+            baseGap: 1.5,
+            maxScale: 1.8,
+            labelFont: 'freesans',
+        );
+
+        if ($field_layout['hasTitle']) {
             static::writeText(
-                $pdf, $field['label'],
+                $pdf, $title,
                 $currentX, $currentY,
-                'freesans', '', self::LABEL_SIZE, 'L',
-                $usableWidth, self::LABEL_SIZE, true, 0
+                $this->getLabelValueFont(), 'b', $field_layout['titleSize'], 'L',
+                $usableWidth, $field_layout['titleSize'], true, 0
             );
-            $currentY += self::LABEL_SIZE + self::LABEL_MARGIN;
+            $currentY += $field_layout['titleAdvance'];
+        }
+        foreach ($fields as $field) {
+            $rawLabel = $field['label'] ?? null;
+            $value = (string)($field['value'] ?? '');
+
+            // No label: value takes the whole row
+            if (!is_string($rawLabel) || trim($rawLabel) === '') {
+                static::writeText(
+                    $pdf, $value,
+                    $currentX, $currentY,
+                    $this->getLabelValueFont(), 'B', $field_layout['fieldSize'], 'L',
+                    $usableWidth, $field_layout['rowAdvance'], true, 0, 0.01
+                );
+
+                $currentY += $field_layout['rowAdvance'];
+                continue;
+            }
+
+            $labelText = rtrim($field['label'], ':') . ':';
+
+            static::writeText(
+                $pdf, $labelText,
+                $currentX, $currentY,
+                $this->getLabelFont(), '', $field_layout['labelSize'], 'L',
+                $field_layout['labelWidth'], $field_layout['rowAdvance'], true,
+            );
 
             static::writeText(
                 $pdf, $field['value'],
-                $currentX, $currentY,
-                'freemono', 'B', self::FIELD_SIZE, 'L',
-                $usableWidth, self::FIELD_SIZE, true, 0, 0.3
+                $field_layout['valueX'], $currentY,
+                $this->getLabelValueFont(), 'B', $field_layout['fieldSize'], 'L',
+                $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
             );
-            $currentY += self::FIELD_SIZE + self::FIELD_MARGIN;
+            $currentY += $field_layout['rowAdvance'];;
         }
-
     }
 }
 
