@@ -95,7 +95,6 @@ class LabelWriter_11354 extends LabelWriter
             $usableWidth -= $barcodeSize + self::BARCODE_MARGIN;
         }
 
-        // Right column
         $title = $record->has('title') ? $record->get('title') : null;
         $fields = $record->get('fields');
         $maxFields = $this->getSupportFields();
