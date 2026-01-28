@@ -364,6 +364,7 @@
                                 </div>
                             </div>
 
+                @if(\App\Helpers\Helper::shouldAllowFontSelection())
                     <!-- Label Font -->
                     @php
                         $plainFonts = [
@@ -425,8 +426,8 @@
                             {!! $errors->first('labels_value_font', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                         </div>
                     </div>
-
                     </fieldset>
+                @endif
 
 
                         <fieldset name="field-definitions">

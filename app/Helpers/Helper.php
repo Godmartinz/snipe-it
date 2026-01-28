@@ -464,7 +464,15 @@ class Helper
         return preg_match('/[\x{3130}-\x{318F}\x{AC00}-\x{D7AF}]/u', $string);
     }
 
-
+    public static function isCjkLocale(): bool
+    {
+        return in_array(app()->getLocale(), ['zh-CN','zh-TW','ja-JP','ko-KR']);
+    }
+    public static function shouldAllowFontSelection(): bool
+    {
+        return self::determineLanguageDirection() !== 'rtl'
+            && ! self::isCjkLocale();
+    }
     /**
      * Increases or decreases the brightness of a color by a percentage of the current brightness.
      *
