@@ -446,7 +446,7 @@
 
                     <fieldset name="label-preview">
                         <x-form.legend>
-                            Label Preview
+                            {{ trans('admin/settings/general.label2_label_preview') }}: <code>{{ $setting->label2_template}}</code>
                         </x-form.legend>
                             <div class="col-md-12" style="margin-bottom: 10px;">
                                 @include('partials.label2-preview')
