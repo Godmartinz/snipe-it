@@ -9,11 +9,11 @@ class L7162_A extends L7162
 {
     private const BARCODE_MARGIN =   1.60;
     private const TAG_SIZE       =   4.60;
-    private const TITLE_SIZE     =   4.20;
-    private const TITLE_MARGIN   =   1.40;
-    private const LABEL_SIZE     =   2.20;
+    private const TITLE_SIZE     =   2.90;
+    private const TITLE_MARGIN   =   1.00;
+    private const LABEL_SIZE     =   2.00;
     private const LABEL_MARGIN   = - 0.50;
-    private const FIELD_SIZE     =   4.60;
+    private const FIELD_SIZE     =   3.40;
     private const FIELD_MARGIN   =   0.30;
 
     public function getUnit()
@@ -75,109 +75,88 @@ class L7162_A extends L7162
         $usableHeight = $pa->h;
         $currentX = $pa->x1;
         $currentY = $pa->y1;
-        $titleShiftX = 0;
 
-        $barcodeSize = $pa->h - self::TAG_SIZE;
+
+
+        $barcodeSize = $pa->h - self::TITLE_SIZE - self::TITLE_MARGIN - self::TAG_SIZE;
 
         if ($record->has('barcode2d')) {
-            static::writeText(
-                $pdf, $record->get('tag'),
-                $pa->x1, $pa->y2 - self::TAG_SIZE,
-                'freemono', 'b', self::TAG_SIZE, 'C',
-                $barcodeSize, self::TAG_SIZE, true, 0
-            );
             static::write2DBarcode(
                 $pdf, $record->get('barcode2d')->content, $record->get('barcode2d')->type,
-                $pa->x1, $pa->y1,
+                $pa->x1, $currentY,
                 $barcodeSize, $barcodeSize
+            );
+
+            $tagGap = 0.6;
+            $tagY   = $currentY + $barcodeSize + $tagGap;
+            static::writeText(
+                $pdf, $record->get('tag'),
+                $pa->x1, $tagY,
+                'freemono', 'b', self::TAG_SIZE, 'C',
+                $barcodeSize, self::TAG_SIZE, true, 0
             );
             $currentX += $barcodeSize + self::BARCODE_MARGIN;
             $usableWidth -= $barcodeSize + self::BARCODE_MARGIN;
         } else {
             static::writeText(
                 $pdf, $record->get('tag'),
-                $pa->x1, $pa->y1,
-                'freemono', 'b', self::TITLE_SIZE, 'L',
-                $barcodeSize, self::TITLE_SIZE, true, 0
+                $pa->x1, $pa->y2 - self::TAG_SIZE,
+                'freemono', 'b', self::TAG_SIZE, 'R',
+                $usableWidth, self::TAG_SIZE, true, 0
             );
-            $titleShiftX = $barcodeSize;
         }
-
-        $title = $record->has('title') ? $record->get('title') : null;
-        $fields = $record->get('fields');
-        $maxFields = $this->getSupportFields();
-        $fields = collect($fields);
-        if ($title) {
-            $maxFields = max(0, $maxFields - 1); // title consumes one row’s worth of space
-        }
-
-        $fields = $fields->take($maxFields)->values();
-
-        $usableHeight = $pa->h
-            - self::TAG_SIZE           // bottom tag text
-            - self::BARCODE_MARGIN;    // gap between fields and 1D
-
-        $field_layout = Helper::labelFieldLayoutScaling(
-            pdf: $pdf,
-            fields: $fields,
-            currentX: $currentX,
-            usableWidth: $usableWidth,
-            usableHeight: $usableHeight,
-            baseLabelSize: self::LABEL_SIZE,
-            baseFieldSize: self::FIELD_SIZE,
-            baseFieldMargin: self::FIELD_MARGIN,
-            title: $title,
-            baseTitleSize: self::TITLE_SIZE,
-            baseTitleMargin: self::TITLE_MARGIN,
-            baseLabelPadding: 1.5,
-            baseGap: 1.5,
-            maxScale: 1.8,
-            labelFont: 'freesans',
-        );
-
-        if ($field_layout['hasTitle']) {
+        if ($record->has('title')) {
             static::writeText(
-                $pdf, $title,
+                $pdf, $record->get('title'),
                 $currentX, $currentY,
-                $this->getLabelValueFont(), 'b', $field_layout['titleSize'], 'L',
-                $usableWidth, $field_layout['titleSize'], true, 0
+                'freesans', '', self::TITLE_SIZE, 'C',
+                $usableWidth, self::TITLE_SIZE, true, 0
             );
-            $currentY += $field_layout['titleAdvance'];
+            $currentY += self::TITLE_SIZE + self::TITLE_MARGIN;
         }
+        $fields = $record->get('fields');
+        $labelLineH = max(2.0, self::LABEL_SIZE * 0.9);  // mm-ish line height
+        $valueLineH = max(3.5, self::FIELD_SIZE * 1.05);
+        $pairGap    = 0.6;
+
         foreach ($fields as $field) {
-            $rawLabel = $field['label'] ?? null;
-            $value = (string)($field['value'] ?? '');
+            $rawLabel = trim((string)($field['label'] ?? ''));
+            $value    = trim((string)($field['value'] ?? ''));
 
-            // No label: value takes the whole row
-            if (!is_string($rawLabel) || trim($rawLabel) === '') {
-                static::writeText(
-                    $pdf, $value,
-                    $currentX, $currentY,
-                    $this->getLabelValueFont(), 'B', $field_layout['fieldSize'], 'L',
-                    $usableWidth, $field_layout['rowAdvance'], true, 0, 0.01
-                );
-
-                $currentY += $field_layout['rowAdvance'];
+            if ($rawLabel === '' && $value === '') {
                 continue;
             }
 
-            $labelText = rtrim($field['label'], ':') . ':';
+            // LABEL (small, above)
+            if ($rawLabel !== '') {
+                $labelText = rtrim($rawLabel, ':'); // in your screenshot there’s no colon
 
-            static::writeText(
-                $pdf, $labelText,
-                $currentX, $currentY,
-                $this->getLabelFont(), '', $field_layout['labelSize'], 'L',
-                $field_layout['labelWidth'], $field_layout['rowAdvance'], true,
-            );
+                static::writeText(
+                    $pdf, $labelText,
+                    $currentX, $currentY,
+                    $this->getLabelFont(), '', self::LABEL_SIZE, 'L',
+                    $usableWidth, $labelLineH, true, 0
+                );
 
-            static::writeText(
-                $pdf, $field['value'],
-                $field_layout['valueX'], $currentY,
-                $this->getLabelValueFont(), 'B', $field_layout['fieldSize'], 'L',
-                $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
-            );
-            $currentY += $field_layout['rowAdvance'];;
+                $currentY += $labelLineH;
+            }
+
+            // VALUE (big, below)
+            if ($value !== '') {
+                static::writeText(
+                    $pdf, $value,
+                    $currentX, $currentY,
+                    $this->getLabelValueFont(), 'B', self::FIELD_SIZE, 'L',
+                    $usableWidth, $valueLineH, true, 0, 0.01
+                );
+
+                $currentY += $valueLineH;
+            }
+
+            // gap before next pair
+            $currentY += $pairGap;
         }
+
     }
 }
 
