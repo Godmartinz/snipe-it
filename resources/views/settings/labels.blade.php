@@ -396,7 +396,7 @@
                         </div>
                         <div class="col-md-9 col-md-offset-3">
                             <p class="help-block">{!! trans('admin/settings/general.labels_font_help') !!}</p>
-                            {!! $errors->first('labels_value_font', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            {!! $errors->first('labels_font', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                         </div>
                     </div>
 
