@@ -406,6 +406,7 @@ return [
     'select_template'         => 'Select a Template',
     'label2_fields'           => 'Field Definitions',
     'label2_fields_help'      => 'Fields can be added, removed, and reordered in the left column. For each field, multiple options for Label and DataSource can be added, removed, and reordered in the right column. Field changes made here will be reflected immediately in the preview below but must be saved for them to apply to new labels.',
+    "label2_label_preview"    => 'Label Preview',
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Text entered as <code>**text**</code> will be displayed as bold',
     'help_blank_to_use'     => 'Leave blank to use the value from <code>:setting_name</code>',
