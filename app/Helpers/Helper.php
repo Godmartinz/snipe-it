@@ -1757,6 +1757,7 @@ class Helper
         float $baseLabelSize,
         float $baseFieldSize,
         float $baseFieldMargin,
+        bool $scaleLabel = false,
         ?string $title            = null,
         float $baseTitleSize      = 0.0,
         float $baseTitleMargin    = 0.0,
@@ -1781,7 +1782,11 @@ class Helper
 
         $scale = min($scale, $maxScale);
 
-        $labelSize = $baseLabelSize;
+        if($scaleLabel) {
+            $labelSize = $baseLabelSize * $scale;
+        } else {
+            $labelSize = $baseLabelSize;
+        }
         $fieldSize = $baseFieldSize * $scale;
         $fieldMargin = $baseFieldMargin * $scale;
 
