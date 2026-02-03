@@ -52,6 +52,7 @@ class ComponentsTransformer
             'model_number' => ($component->model_number) ? e($component->model_number) : null,
             'order_number'  => e($component->order_number),
             'purchase_date' =>  Helper::getFormattedDateObject($component->purchase_date, 'date'),
+            'purchase_cost_raw' => (float) $component->purchase_cost, //used with the sumFormatterQuantity
             'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
             'total_cost' => Helper::formatCurrencyOutput($component->totalCostSum()),
             'remaining'  => (int) $component->numRemaining(),

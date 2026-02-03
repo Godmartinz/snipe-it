@@ -1892,7 +1892,7 @@
                 return 'no quantity';
             }
             var total_sum = data.reduce(function(sum, row) {
-                return (sum) + (cleanFloat(row["purchase_cost"])*row[multiplier] || 0);
+                return (sum) + (cleanFloat(row["purchase_cost_raw"])*row[multiplier] || 0);
             }, 0);
             return numberWithCommas(total_sum.toFixed(2));
         }

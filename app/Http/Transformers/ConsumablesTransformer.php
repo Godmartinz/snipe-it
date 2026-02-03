@@ -56,6 +56,7 @@ class ConsumablesTransformer
             'model_number'  => ($consumable->model_number != '') ? e($consumable->model_number) : null,
             'remaining'  => $consumable->numRemaining(),
             'order_number'  => e($consumable->order_number),
+            'purchase_cost_raw' => (float) $consumable->purchase_cost, //used with the sumFormatterQuantity
             'purchase_cost'  => Helper::formatCurrencyOutput($consumable->purchase_cost),
             'total_cost' => Helper::formatCurrencyOutput($consumable->totalCostSum()),
             'purchase_date'  => Helper::getFormattedDateObject($consumable->purchase_date, 'date'),
