@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table("assets", function (Blueprint $table) {
             $table->timestamp('first_checkout_at')->after('next_audit_date')->nullable();
         });
-        $batchSize = 5000;
+        $batchSize = 500;
         $minId = (int)DB::table('assets')->min('id');
         $maxId = (int)DB::table('assets')->max('id');
         $assetModel = App\Models\Asset::class;
