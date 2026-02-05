@@ -29,22 +29,22 @@ return new class extends Migration
             $end = $start + $batchSize - 1;
 
             DB::update("
-            UPDATE assets a
-            SET a.first_checkout_at = (
-                SELECT MIN(al.created_at)
-                FROM action_logs al
-                WHERE al.item_type = ?
-                    AND al.action_type = 'checkout'
-                    AND al.item_id = a.id
+            UPDATE assets asset
+            SET asset.first_checkout_at = (
+                SELECT MIN(log.created_at)
+                FROM action_logs log
+                WHERE log.item_type = ?
+                    AND log.action_type = 'checkout'
+                    AND log.item_id = asset.id
             )
-            WHERE a.id BETWEEN {$start} AND {$end}
-                AND a.first_checkout_at IS NULL
+            WHERE asset.id BETWEEN {$start} AND {$end}
+                AND asset.first_checkout_at IS NULL
             AND EXISTS(
                 SELECT 1
-                FROM action_logs al
-                WHERE al.item_type = ?
-                    AND al.action_type = 'checkout'
-                    AND al.item_id = a.id
+                FROM action_logs log
+                WHERE log.item_type = ?
+                    AND log.action_type = 'checkout'
+                    AND log.item_id = asset.id
             )
             ", [$assetModel, $assetModel]);
         }
