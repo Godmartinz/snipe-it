@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Assets;
 
 use App\Actions\Assets\AssetCheckinAction;
 use App\Events\CheckoutableCheckedIn;
+use App\Exceptions\AssetModelUnknown;
 use App\Exceptions\AssetsCheckedInAlready;
 use App\Exceptions\AssetsDoNotExist;
 use App\Exceptions\NoAssetsSelected;
@@ -82,7 +83,7 @@ class AssetCheckinController extends Controller
         $assetIds = array_values(array_unique(array_filter($assetIds)));
 
         if (empty($assetIds)) {
-            throw new NoAssetsSelected();
+            throw new NoAssetsSelected($assetIds);
         }
         $assets = Asset::query()
             ->whereIn('id', $assetIds)
@@ -92,7 +93,7 @@ class AssetCheckinController extends Controller
 
         $missingIds = array_values(array_diff($assetIds, $assets->keys()->all()));
         if (!empty($missingIds)) {
-            throw new AssetsDoNotExist($missingIds);
+            throw new AssetsDoNotExist();
         }
         $isCheckedIn = $assets->filter(fn($asset) => $asset->assignedTo == null)->keys()->all();
         if (empty($isCheckedIn)) {
@@ -100,7 +101,7 @@ class AssetCheckinController extends Controller
         }
         $missingModel = $assets->filter(fn($asset) => $asset->model == null)->keys()->all();
         if (!empty($missingModel)) {
-            return redirect()->route('hardware.show', $missingModel[0])->with('error', trans('admin/hardware/general.model_invalid_fix'));
+            throw new AssetModelUnknown();
         }
 
         foreach ($assets as $asset) {
