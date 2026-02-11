@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Assets;
 
 use App\Actions\Assets\AssetCheckinAction;
 use App\Events\CheckoutableCheckedIn;
+use App\Exceptions\AssetsCheckedInAlready;
+use App\Exceptions\AssetsDoNotExist;
+use App\Exceptions\NoAssetsSelected;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckinRequest;
@@ -79,7 +82,7 @@ class AssetCheckinController extends Controller
         $assetIds = array_values(array_unique(array_filter($assetIds)));
 
         if (empty($assetIds)) {
-            return redirect()->route('hardware.index')->with('error', 'No assets selected.');
+            throw new NoAssetsSelected();
         }
         $assets = Asset::query()
             ->whereIn('id', $assetIds)
@@ -89,11 +92,11 @@ class AssetCheckinController extends Controller
 
         $missingIds = array_values(array_diff($assetIds, $assets->keys()->all()));
         if (!empty($missingIds)) {
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            throw new AssetsDoNotExist($missingIds);
         }
         $isCheckedIn = $assets->filter(fn($asset) => $asset->assignedTo == null)->keys()->all();
         if (empty($isCheckedIn)) {
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.already_checked_in'));
+            throw new AssetsCheckedInAlready();
         }
         $missingModel = $assets->filter(fn($asset) => $asset->model == null)->keys()->all();
         if (!empty($missingModel)) {
