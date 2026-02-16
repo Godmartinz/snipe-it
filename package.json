@@ -47,10 +47,11 @@
         "jquery-validation": "^1.21.0",
         "jquery.iframe-transport": "^1.0.0",
         "jspdf": ">=4.0.0",
-        "jspdf-autotable": "^5.0.2",
+        "jspdf-autotable": "^5.0.7",
         "less": "^4.2.2",
         "less-loader": "^6.0",
         "list.js": "^1.5.0",
+        "matter-js": "^0.20.0",
         "morris.js": "github:morrisjs/morris.js",
         "papaparse": "5.5.2",
         "select2": "4.0.13",
@@ -60,14 +61,14 @@
         "tether": "^1.4.0"
     },
     "overrides": {
-      "pbkdf2": {
-        "sha.js": ">=2.4.12"
-      },
-      "create-hmac": {
-        "sha.js": ">=2.4.12"
-      },
-      "create-hash": {
-        "sha.js": ">=2.4.12"
-      }
+        "pbkdf2": {
+            "sha.js": ">=2.4.12"
+        },
+        "create-hmac": {
+            "sha.js": ">=2.4.12"
+        },
+        "create-hash": {
+            "sha.js": ">=2.4.12"
+        }
     }
 }

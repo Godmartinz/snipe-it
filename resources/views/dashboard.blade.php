@@ -1,4 +1,5 @@
 @extends('layouts/default')
+
 {{-- Page title --}}
 @section('title')
 {{ trans('general.dashboard') }}
