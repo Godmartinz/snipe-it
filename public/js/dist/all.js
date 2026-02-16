@@ -62988,35 +62988,158 @@ return Tether;
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! matter-js */ "./node_modules/matter-js/build/matter.js");
 /* harmony import */ var matter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(matter_js__WEBPACK_IMPORTED_MODULE_0__);
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 var Engine = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Engine),
   Render = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Render),
   Runner = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Runner),
   Bodies = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies),
-  Composite = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite);
+  Composite = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite),
+  Mouse = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Mouse),
+  MouseConstraint = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().MouseConstraint),
+  Events = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events);
+var mount = document.createElement("div");
+mount.id = "matter-prank";
+mount.style.position = "fixed";
+mount.style.inset = "0";
+mount.style.zIndex = "9999";
+mount.style.pointerEvents = "none";
+document.body.appendChild(mount);
 var engine = Engine.create();
+engine.gravity.y = 1;
 var render = Render.create({
-  element: document.body,
+  element: mount,
   engine: engine,
   options: {
     width: window.innerWidth,
     height: window.innerHeight,
     wireframes: false,
-    background: "transparent"
+    background: "transparent",
+    pixelRatio: window.devicePixelRatio || 1
   }
 });
-var floor = Bodies.rectangle(window.innerWidth / 2, window.innerHeight + 30, window.innerWidth, 60, {
-  isStatic: true
+var wallT = 120;
+var floor, ceiling, leftWall, rightWall;
+function makeWalls() {
+  floor = Bodies.rectangle(window.innerWidth / 2, window.innerHeight + wallT / 2, window.innerWidth, wallT, {
+    isStatic: true
+  });
+  ceiling = Bodies.rectangle(window.innerWidth / 2, -wallT / 2, window.innerWidth, wallT, {
+    isStatic: true
+  });
+  leftWall = Bodies.rectangle(-wallT / 2, window.innerHeight / 2, wallT, window.innerHeight, {
+    isStatic: true
+  });
+  rightWall = Bodies.rectangle(window.innerWidth + wallT / 2, window.innerHeight / 2, wallT, window.innerHeight, {
+    isStatic: true
+  });
+  Composite.add(engine.world, [floor, ceiling, leftWall, rightWall]);
+}
+makeWalls();
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function spawn() {
+  var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 18;
+  var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -60;
+  var bodies = [];
+  for (var i = 0; i < n; i++) {
+    var size = rand(18, 54);
+    var bx = x !== null && x !== void 0 ? x : rand(0, window.innerWidth);
+    var by = y + rand(-10, 10);
+    var body = Math.random() < 0.5 ? Bodies.circle(bx, by, size / 2, {
+      restitution: 0.9,
+      friction: 0.05,
+      frictionAir: 0.01
+    }) : Bodies.rectangle(bx, by, size, size, {
+      restitution: 0.85,
+      friction: 0.06,
+      frictionAir: 0.01
+    });
+
+    // simple fun styling
+    body.render.fillStyle = "hsl(".concat(Math.floor(rand(150, 330)), " 90% 60%)");
+    body.render.strokeStyle = "rgba(255,255,255,.18)";
+    body.render.lineWidth = 1;
+    bodies.push(body);
+  }
+  Composite.add(engine.world, bodies);
+}
+function reset() {
+  var all = Composite.allBodies(engine.world);
+  var _iterator = _createForOfIteratorHelper(all),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var b = _step.value;
+      if (!b.isStatic) Composite.remove(engine.world, b);
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+}
+
+// Optional: mouse drag (only works if pointerEvents is "auto")
+var mouse = Mouse.create(render.canvas);
+var mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+  constraint: {
+    stiffness: 0.2,
+    render: {
+      visible: false
+    }
+  }
 });
-var box = Bodies.rectangle(200, 50, 80, 80, {
-  restitution: 0.6,
-  // bounciness
-  friction: 0.2 // sliding resistance
+Composite.add(engine.world, mouseConstraint);
+render.mouse = mouse;
+window.addEventListener("keydown", function (e) {
+  var k = e.key.toLowerCase();
+  if (k === "r") reset();
+  if (k === "b") spawn(1);
+  if (k === "g") engine.gravity.y = engine.gravity.y ? 0 : 1; // toggle gravity
 });
-Composite.add(engine.world, [floor, box]);
+render.canvas.addEventListener("pointerdown", function (e) {
+  // even with pointerEvents:none, this won’t fire; if you want click-spawn, set pointerEvents:auto
+  spawn(18, e.clientX, e.clientY);
+});
+window.addEventListener("resize", function () {
+  // Resize canvas
+  render.canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+  render.canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+  render.options.width = window.innerWidth;
+  render.options.height = window.innerHeight;
+
+  // Rebuild walls (simple + reliable)
+  Composite.remove(engine.world, [floor, ceiling, leftWall, rightWall]);
+  makeWalls();
+});
+Events.on(engine, "afterUpdate", function () {
+  // cleanup offscreen bodies
+  var _iterator2 = _createForOfIteratorHelper(Composite.allBodies(engine.world)),
+    _step2;
+  try {
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var b = _step2.value;
+      if (!b.isStatic && b.position.y > window.innerHeight + 600) {
+        Composite.remove(engine.world, b);
+      }
+    }
+  } catch (err) {
+    _iterator2.e(err);
+  } finally {
+    _iterator2.f();
+  }
+});
 Render.run(render);
 Runner.run(Runner.create(), engine);
-alert("dashboard prank loaded");
+
+// Start with a burst so it’s obvious on video
+spawn(1);
 
 /***/ }),
 
