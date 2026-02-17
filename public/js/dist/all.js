@@ -62993,153 +62993,327 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 var Engine = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Engine),
-  Render = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Render),
   Runner = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Runner),
   Bodies = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Bodies),
   Composite = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Composite),
-  Mouse = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Mouse),
-  MouseConstraint = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().MouseConstraint),
-  Events = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events);
-var mount = document.createElement("div");
-mount.id = "matter-prank";
-mount.style.position = "fixed";
-mount.style.inset = "0";
-mount.style.zIndex = "9999";
-mount.style.pointerEvents = "none";
-document.body.appendChild(mount);
+  Events = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Events),
+  Body = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Body),
+  Constraint = (matter_js__WEBPACK_IMPORTED_MODULE_0___default().Constraint);
 var engine = Engine.create();
-engine.gravity.y = 1;
-var render = Render.create({
-  element: mount,
-  engine: engine,
-  options: {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    wireframes: false,
-    background: "transparent",
-    pixelRatio: window.devicePixelRatio || 1
-  }
-});
-var wallT = 120;
-var floor, ceiling, leftWall, rightWall;
-function makeWalls() {
-  floor = Bodies.rectangle(window.innerWidth / 2, window.innerHeight + wallT / 2, window.innerWidth, wallT, {
-    isStatic: true
-  });
-  ceiling = Bodies.rectangle(window.innerWidth / 2, -wallT / 2, window.innerWidth, wallT, {
-    isStatic: true
-  });
-  leftWall = Bodies.rectangle(-wallT / 2, window.innerHeight / 2, wallT, window.innerHeight, {
-    isStatic: true
-  });
-  rightWall = Bodies.rectangle(window.innerWidth + wallT / 2, window.innerHeight / 2, wallT, window.innerHeight, {
-    isStatic: true
-  });
-  Composite.add(engine.world, [floor, ceiling, leftWall, rightWall]);
-}
-makeWalls();
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
-function spawn() {
-  var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 18;
-  var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -60;
-  var bodies = [];
-  for (var i = 0; i < n; i++) {
-    var size = rand(18, 54);
-    var bx = x !== null && x !== void 0 ? x : rand(0, window.innerWidth);
-    var by = y + rand(-10, 10);
-    var body = Math.random() < 0.5 ? Bodies.circle(bx, by, size / 2, {
-      restitution: 0.9,
-      friction: 0.05,
-      frictionAir: 0.01
-    }) : Bodies.rectangle(bx, by, size, size, {
-      restitution: 0.85,
-      friction: 0.06,
-      frictionAir: 0.01
-    });
+engine.gravity.y = 1.4;
+Runner.run(Runner.create(), engine);
 
-    // simple fun styling
-    body.render.fillStyle = "hsl(".concat(Math.floor(rand(150, 330)), " 90% 60%)");
-    body.render.strokeStyle = "rgba(255,255,255,.18)";
-    body.render.lineWidth = 1;
-    bodies.push(body);
-  }
-  Composite.add(engine.world, bodies);
+// ------------------------------------
+// Overlay for physics visuals
+// ------------------------------------
+var overlay = document.createElement("div");
+overlay.style.position = "fixed";
+overlay.style.inset = "0";
+overlay.style.zIndex = "999999";
+overlay.style.pointerEvents = "none";
+document.body.appendChild(overlay);
+
+// ------------------------------------
+// World bounds
+// ------------------------------------
+var wallT = 200;
+var walls = [];
+function addWalls() {
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var floor = Bodies.rectangle(w / 2, h + wallT / 2, w + wallT * 2, wallT, {
+    isStatic: true
+  });
+  var ceil = Bodies.rectangle(w / 2, -wallT / 2, w + wallT * 2, wallT, {
+    isStatic: true
+  });
+  var left = Bodies.rectangle(-wallT / 2, h / 2, wallT, h + wallT * 2, {
+    isStatic: true
+  });
+  var right = Bodies.rectangle(w + wallT / 2, h / 2, wallT, h + wallT * 2, {
+    isStatic: true
+  });
+  walls = [floor, ceil, left, right];
+  Composite.add(engine.world, walls);
 }
-function reset() {
-  var all = Composite.allBodies(engine.world);
-  var _iterator = _createForOfIteratorHelper(all),
+addWalls();
+window.addEventListener("resize", function () {
+  Composite.remove(engine.world, walls);
+  addWalls();
+});
+
+// ------------------------------------
+// Visual sync
+// ------------------------------------
+var visuals = new Map();
+Events.on(engine, "afterUpdate", function () {
+  var _iterator = _createForOfIteratorHelper(visuals.values()),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var b = _step.value;
-      if (!b.isStatic) Composite.remove(engine.world, b);
+      var _step$value = _step.value,
+        body = _step$value.body,
+        el = _step$value.el,
+        w = _step$value.w,
+        h = _step$value.h;
+      var x = body.position.x - w / 2;
+      var y = body.position.y - h / 2;
+      el.style.transform = "translate(".concat(x, "px, ").concat(y, "px) rotate(").concat(body.angle, "rad)");
     }
+    // Clamp flipper angles
   } catch (err) {
     _iterator.e(err);
   } finally {
     _iterator.f();
   }
+  if (leftFlipper) {
+    if (leftFlipper.angle < -1.15) Body.setAngle(leftFlipper, -1.15);
+    if (leftFlipper.angle > -0.25) Body.setAngle(leftFlipper, -0.25);
+  }
+  if (rightFlipper) {
+    if (rightFlipper.angle > 1.15) Body.setAngle(rightFlipper, 1.15);
+    if (rightFlipper.angle < 0.25) Body.setAngle(rightFlipper, 0.25);
+  }
+});
+function spawnCircularPanelBumper(originalBox) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+    x = _ref.x,
+    y = _ref.y,
+    _ref$diameter = _ref.diameter,
+    diameter = _ref$diameter === void 0 ? 220 : _ref$diameter;
+  if (!originalBox) return;
+  var clone = originalBox.cloneNode(true);
+  clone.style.position = "fixed";
+  clone.style.left = "0";
+  clone.style.top = "0";
+  clone.style.width = "".concat(diameter, "px");
+  clone.style.height = "".concat(diameter, "px");
+  clone.style.borderRadius = "50%";
+  clone.style.overflow = "hidden";
+  clone.style.pointerEvents = "none";
+  clone.style.zIndex = "999999";
+  clone.style.boxShadow = "0 14px 20px rgba(0,0,0,.35)";
+  overlay.appendChild(clone);
+  var radius = diameter / 2;
+  var body = Bodies.circle(x, y, radius, {
+    isStatic: true,
+    restitution: 1.2,
+    friction: 0
+  });
+  Composite.add(engine.world, body);
+  visuals.set(body.id, {
+    body: body,
+    el: clone,
+    w: diameter,
+    h: diameter
+  });
+  bumperBodies.push(body);
 }
 
-// Optional: mouse drag (only works if pointerEvents is "auto")
-var mouse = Mouse.create(render.canvas);
-var mouseConstraint = MouseConstraint.create(engine, {
-  mouse: mouse,
-  constraint: {
-    stiffness: 0.2,
-    render: {
-      visible: false
-    }
+// ------------------------------------
+// Pie Chart Ball
+// ------------------------------------
+var ballBody = null;
+var ballEl = null;
+function createPieBall() {
+  var scale = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0.45;
+  if (ballBody) Composite.remove(engine.world, ballBody);
+  if (ballEl) ballEl.remove();
+  var chart = document.getElementById("statusPieChart");
+  if (!chart) return;
+  var rect = chart.getBoundingClientRect();
+  var diameter = Math.min(rect.width, rect.height) * scale;
+  var radius = diameter / 2;
+  ballEl = chart.cloneNode(true);
+  ballEl.removeAttribute("id");
+  ballEl.style.position = "fixed";
+  ballEl.style.left = "0";
+  ballEl.style.top = "0";
+  ballEl.style.width = "".concat(diameter, "px");
+  ballEl.style.height = "".concat(diameter, "px");
+  ballEl.style.borderRadius = "50%";
+  ballEl.style.overflow = "hidden";
+  ballEl.style.pointerEvents = "none";
+  ballEl.style.zIndex = "999999";
+  ballEl.style.boxShadow = "0 14px 20px rgba(0,0,0,.35)";
+  overlay.appendChild(ballEl);
+  var startX = rect.left + rect.width / 2;
+  var startY = rect.top + rect.height / 2;
+  ballBody = Bodies.circle(startX, startY, radius, {
+    restitution: 0.7,
+    friction: 0.02,
+    frictionAir: 0.01
+  });
+  Composite.add(engine.world, ballBody);
+  visuals.set(ballBody.id, {
+    body: ballBody,
+    el: ballEl,
+    w: diameter,
+    h: diameter
+  });
+}
+createPieBall();
+
+// ------------------------------------
+// Flippers
+// ------------------------------------
+function createPanelFlipperVisual(panelBox, flipperW, flipperH) {
+  var clone = panelBox.cloneNode(true);
+
+  // Resize to flipper size
+  clone.style.position = "fixed";
+  clone.style.left = "0";
+  clone.style.top = "0";
+  clone.style.width = "".concat(flipperW, "px");
+  clone.style.height = "".concat(flipperH, "px");
+
+  // FLIPPER SHAPE (pill)
+  clone.style.borderRadius = "9999px";
+  clone.style.overflow = "hidden";
+
+  // Keep original look/colors; just make it look like a paddle
+  clone.style.pointerEvents = "none";
+  clone.style.zIndex = "999999";
+  clone.style.boxSizing = "border-box";
+
+  // Minimal polish (optional, remove if you want *zero* styling)
+  clone.style.boxShadow = "0 10px 18px rgba(0,0,0,.28)";
+  clone.style.outline = "1px solid rgba(255,255,255,.08)";
+
+  // Make inner content fit in a short paddle
+  var header = clone.querySelector(".box-header");
+  if (header) {
+    header.style.padding = "6px 12px";
   }
-});
-Composite.add(engine.world, mouseConstraint);
-render.mouse = mouse;
+  var body = clone.querySelector(".box-body");
+  if (body) {
+    body.style.padding = "6px 12px";
+    body.style.maxHeight = "".concat(flipperH - 30, "px");
+    body.style.overflow = "hidden";
+  }
+
+  // Remove collapse tools so you don't have buttons inside a paddle
+  var tools = clone.querySelector(".box-tools");
+  if (tools) tools.remove();
+  overlay.appendChild(clone);
+  return clone;
+}
+var leftFlipper, rightFlipper;
+function createFlippers() {
+  var _document$querySelect, _document$querySelect2;
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var flipperW = 240;
+  var flipperH = 64;
+  var y = h * 0.78;
+  var locationsBox = (_document$querySelect = document.querySelector("#dashLocationSummary")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.closest(".box");
+  var categoriesBox = (_document$querySelect2 = document.querySelector("#dashCategorySummary")) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.closest(".box"); // change if needed
+
+  // Physics bodies (rectangles)
+  leftFlipper = Bodies.rectangle(w * 0.40, y, flipperW, flipperH, {
+    density: 0.004,
+    friction: 0,
+    restitution: 0.2
+  });
+  var leftHinge = Constraint.create({
+    pointA: {
+      x: w * 0.33,
+      y: y
+    },
+    bodyB: leftFlipper,
+    pointB: {
+      x: -flipperW / 2 + 12,
+      y: 0
+    },
+    stiffness: 1,
+    length: 0
+  });
+  rightFlipper = Bodies.rectangle(w * 0.60, y, flipperW, flipperH, {
+    density: 0.004,
+    friction: 0,
+    restitution: 0.2
+  });
+  var rightHinge = Constraint.create({
+    pointA: {
+      x: w * 0.67,
+      y: y
+    },
+    bodyB: rightFlipper,
+    pointB: {
+      x: flipperW / 2 - 12,
+      y: 0
+    },
+    stiffness: 1,
+    length: 0
+  });
+  Composite.add(engine.world, [leftFlipper, rightFlipper, leftHinge, rightHinge]);
+
+  // Visuals = masked panel clones
+  if (locationsBox) {
+    var leftEl = createPanelFlipperVisual(locationsBox, flipperW, flipperH);
+    visuals.set(leftFlipper.id, {
+      body: leftFlipper,
+      el: leftEl,
+      w: flipperW,
+      h: flipperH
+    });
+  } else {
+    console.warn("Locations box not found for left flipper.");
+  }
+  if (categoriesBox) {
+    var rightEl = createPanelFlipperVisual(categoriesBox, flipperW, flipperH);
+    visuals.set(rightFlipper.id, {
+      body: rightFlipper,
+      el: rightEl,
+      w: flipperW,
+      h: flipperH
+    });
+  } else {
+    console.warn("Categories box not found for right flipper (check table id).");
+  }
+
+  // Rest angles (like a real table)
+  Body.setAngle(leftFlipper, -0.35);
+  Body.setAngle(rightFlipper, 0.35);
+}
+createFlippers();
+
+// ------------------------------------
+// Input
+// ------------------------------------
+function flickToward(px, py) {
+  var strength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.08;
+  if (!ballBody) return;
+  var dx = px - ballBody.position.x;
+  var dy = py - ballBody.position.y;
+  var mag = Math.max(1, Math.hypot(dx, dy));
+  Body.applyForce(ballBody, ballBody.position, {
+    x: dx / mag * strength,
+    y: dy / mag * strength - 0.03
+  });
+}
+var FLIP_V = 1.2;
+var RETURN_V = 0.8;
 window.addEventListener("keydown", function (e) {
-  var k = e.key.toLowerCase();
-  if (k === "r") reset();
-  if (k === "b") spawn(1);
-  if (k === "g") engine.gravity.y = engine.gravity.y ? 0 : 1; // toggle gravity
+  if (e.key === "ArrowLeft") Body.setAngularVelocity(leftFlipper, -FLIP_V);
+  if (e.key === "ArrowRight") Body.setAngularVelocity(rightFlipper, FLIP_V);
 });
-render.canvas.addEventListener("pointerdown", function (e) {
-  // even with pointerEvents:none, this won’t fire; if you want click-spawn, set pointerEvents:auto
-  spawn(18, e.clientX, e.clientY);
+window.addEventListener("keyup", function (e) {
+  if (e.key === "ArrowLeft") Body.setAngularVelocity(leftFlipper, RETURN_V);
+  if (e.key === "ArrowRight") Body.setAngularVelocity(rightFlipper, -RETURN_V);
 });
-window.addEventListener("resize", function () {
-  // Resize canvas
-  render.canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
-  render.canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
-  render.options.width = window.innerWidth;
-  render.options.height = window.innerHeight;
-
-  // Rebuild walls (simple + reliable)
-  Composite.remove(engine.world, [floor, ceiling, leftWall, rightWall]);
-  makeWalls();
+window.addEventListener("pointerdown", function (e) {
+  flickToward(e.clientX, e.clientY, 0.09);
 });
-Events.on(engine, "afterUpdate", function () {
-  // cleanup offscreen bodies
-  var _iterator2 = _createForOfIteratorHelper(Composite.allBodies(engine.world)),
-    _step2;
-  try {
-    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-      var b = _step2.value;
-      if (!b.isStatic && b.position.y > window.innerHeight + 600) {
-        Composite.remove(engine.world, b);
-      }
-    }
-  } catch (err) {
-    _iterator2.e(err);
-  } finally {
-    _iterator2.f();
-  }
+window.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowLeft") Body.setAngularVelocity(leftFlipper, -0.8);
+  if (e.key === "ArrowRight") Body.setAngularVelocity(rightFlipper, 0.8);
+  if (e.key === " ") Body.applyForce(ballBody, ballBody.position, {
+    x: 0,
+    y: -0.15
+  });
+  if (e.key === "r") createPieBall();
 });
-Render.run(render);
-Runner.run(Runner.create(), engine);
-
-// Start with a burst so it’s obvious on video
-spawn(1);
 
 /***/ }),
 
