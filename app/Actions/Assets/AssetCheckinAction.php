@@ -2,6 +2,7 @@
 
 namespace App\Actions\Assets;
 
+use App\Actions\BaseAction;
 use App\Events\CheckoutableCheckedIn;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
@@ -11,10 +12,11 @@ use App\Models\LicenseSeat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 
-class AssetCheckinAction
+class AssetCheckinAction extends BaseAction
 {
     use MigratesLegacyAssetLocations;
-    public function handle(AssetCheckinRequest $request, $asset) : bool
+
+    protected function handle(AssetCheckinRequest $request, $asset): bool
     {
         $target = $asset->assignedTo;
         $asset->expected_checkin = null;
