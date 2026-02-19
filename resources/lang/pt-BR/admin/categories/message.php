@@ -22,7 +22,7 @@ return array(
         'error'                  => 'Houve um problema ao excluir a categoria. Tente novamente.',
         'success'                => 'Category was deleted successfully.',
         'bulk_success'           => 'Categories were deleted successfully.',
-        'partial_success'        => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
+        'partial_success'        => 'Categorias excluídas com sucesso. Veja as informações adicionais abaixo. :count categorias foram excluídas com sucesso. Veja as informações adicionais abaixo.',
     )
 
 );

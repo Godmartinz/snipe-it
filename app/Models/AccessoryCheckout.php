@@ -20,6 +20,7 @@ use Watson\Validating\ValidatingTrait;
  */
 class AccessoryCheckout extends Model
 {
+    use HasFactory;
     use Searchable;
 
     protected $fillable = [
@@ -41,7 +42,7 @@ class AccessoryCheckout extends Model
      */
     public function accessory()
     {
-        return $this->hasOne(Accessory::class, 'id', 'accessory_id');
+        return $this->belongsTo(Accessory::class);
     }
 
     public function accessories()
@@ -57,7 +58,7 @@ class AccessoryCheckout extends Model
      */
     public function adminuser()
     {
-        return $this->hasOne(\App\Models\User::class, 'id', 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**

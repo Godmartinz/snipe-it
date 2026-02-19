@@ -18,10 +18,12 @@ class CheckoutAccessoryMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
+    private bool $firstTimeSending;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(Accessory $accessory, $checkedOutTo, User $checkedOutBy, $acceptance, $note)
+    public function __construct(Accessory $accessory, $checkedOutTo, User $checkedOutBy, $acceptance, $note, bool $firstTimeSending = true)
     {
         $this->item = $accessory;
         $this->admin = $checkedOutBy;
@@ -29,6 +31,7 @@ class CheckoutAccessoryMail extends BaseMailable
         $this->checkout_qty = $accessory->checkout_qty;
         $this->target = $checkedOutTo;
         $this->acceptance = $acceptance;
+        $this->firstTimeSending = $firstTimeSending;
         $this->settings = Setting::getSettings();
     }
 
@@ -41,7 +44,7 @@ class CheckoutAccessoryMail extends BaseMailable
 
         return new Envelope(
             from: $from,
-            subject: trans_choice('mail.Accessory_Checkout_Notification', $this->checkout_qty),
+            subject: $this->getSubject(),
         );
     }
 
@@ -88,12 +91,16 @@ class CheckoutAccessoryMail extends BaseMailable
             return trans_choice('mail.new_item_checked_location', $this->checkout_qty, ['location' => $this->target->name]);
         }
 
-        if ($this->requiresAcceptance()) {
+        if ($this->firstTimeSending && $this->requiresAcceptance()) {
             return trans_choice('mail.new_item_checked_with_acceptance', $this->checkout_qty);
         }
 
-        if (!$this->requiresAcceptance()) {
+        if ($this->firstTimeSending && !$this->requiresAcceptance()) {
             return trans_choice('mail.new_item_checked', $this->checkout_qty);
+        }
+
+        if (!$this->firstTimeSending && $this->requiresAcceptance()) {
+            return trans('mail.recent_item_checked');
         }
 
         // we shouldn't get here but let's send a default message just in case
@@ -112,5 +119,14 @@ class CheckoutAccessoryMail extends BaseMailable
     public function attachments(): array
     {
         return [];
+    }
+
+    private function getSubject(): string
+    {
+        if ($this->firstTimeSending) {
+            return trans_choice('mail.Accessory_Checkout_Notification', $this->checkout_qty);
+        }
+
+        return trans('mail.unaccepted_asset_reminder');
     }
 }

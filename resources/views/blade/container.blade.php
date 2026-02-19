@@ -13,6 +13,7 @@
         </x-page-column>
 
     @else
+
         <!-- the page using this should specify column names via the page-column component -->
         {{ $slot }}
     @endif

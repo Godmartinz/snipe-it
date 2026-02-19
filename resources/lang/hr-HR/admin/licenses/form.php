@@ -16,7 +16,7 @@ return array(
     'seats'             => 'sjedala',
     'termination_date'  => 'Datum završetka',
     'to_email'          => 'Licencirano na e-poštu',
-    'to_name'           => 'Licencirano za ime',
+    'to_name'           => 'Licencirano',
     'update'            => 'Ažuriraj licencu',
     'checkout_help'     => 'Morate provjeriti licencu na hardversku imovinu ili osobu. Možete odabrati oboje, ali vlasnik imovine mora odgovarati osobi kojoj provjeravate imovinu.'
 );

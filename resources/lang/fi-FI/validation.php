@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Sarjanumero',
+        'asset_tags.*' => 'Laitetunniste',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -241,8 +244,8 @@ return [
 
     'generic' => [
         'invalid_value_in_field' => 'Virheellinen arvo sisältyy tähän kenttään',
-        'required' => 'This field is required',
-        'email' => 'Please enter a valid email address',
+        'required' => 'Tämä kenttä on pakollinen',
+        'email' => 'Kirjoita kelvollinen sähköpostiosoite',
     ],
 
 

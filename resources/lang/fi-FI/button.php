@@ -22,12 +22,13 @@ return [
     'add_maintenance'           => 'Lisää Huolto',
     'append'                    => 'Lisää',
     'new'                       => 'Uusi',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Clone :item_type',
-        'edit'      => 'Edit :item_type',
-        'delete'    => 'Delete :item_type',
-        'restore'   => 'Restore :item_type',
-        'create'    => 'Create New :item_type',
+        'edit'      => 'Muokkaa :item_type',
+        'delete'    => 'Poista :item_type',
+        'restore'   => 'Palauta :item_type',
+        'create'    => 'Luo uusi :item_type',
         'checkout'  => 'Checkout :item_type',
         'checkin'   => 'Checkin :item_type',
     ]

@@ -2,7 +2,7 @@
 
 return [
     'send_password_link'	        => 'Siųsti slaptažodžio nustatymo iš naujo nuorodą',
-    'email_reset_password'			=> 'Siųsti slaptažodžio nustatymo iš naujo nuorodą',
+    'email_reset_password'			=> 'Siųsti slaptažodžio keitimo nuorodą',
     'reset_password'			    => 'Nustatyti slaptažodį iš naujo',
     'saml_login'                    => 'Prisijungti naudojant SAML',
     'login'                         => 'Prisijungti',

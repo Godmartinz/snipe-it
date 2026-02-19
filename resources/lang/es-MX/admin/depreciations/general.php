@@ -16,5 +16,5 @@ return [
     'depreciation_method'                   => 'Informe de amortización',
     'linear_depreciation'                   => 'Lineal (por defecto)',
     'half_1'                                => 'Convención de Half-year siempre aplicada',
-    'half_2'                                => 'Convención semestral, aplicada con condición',
+    'half_2'                                => 'Convención Half-year aplicada con condición',
 ];

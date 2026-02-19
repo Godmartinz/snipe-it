@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'មានតែ superadmins ប៉ុណ្ណោះដែលអាចផ្តល់សិទ្ធិចូលប្រើ superadmin អ្នកប្រើប្រាស់។',
     'admin_permission_warning' => 'មាន​តែ​អ្នក​ប្រើ​ដែល​មាន​សិទ្ធិ​ជា​អ្នក​គ្រប់គ្រង ឬ​ខ្ពស់​ជាង​នេះ​ប៉ុណ្ណោះ​ដែល​អាច​ផ្ដល់​សិទ្ធិ​ឱ្យ​អ្នក​ប្រើ​ជា​អ្នក​គ្រប់គ្រង។',
     'remove_group_memberships' => 'ដកសមាជិកភាពក្រុមចេញ',
-    'warning_deletion_information' => 'អ្នកហៀបនឹងប្រគល់ត្រលប់វិញធាតុទាំងអស់ពី :count user(s) ដែលបានរាយខាងក្រោម។ ឈ្មោះអ្នកគ្រប់គ្រងជាន់ខ្ពស់ត្រូវបានបន្លិចជាពណ៌ក្រហម។',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'អាប់ដេតទ្រព្យសកម្មទាំងអស់សម្រាប់អ្នកប្រើប្រាស់ទាំងនេះទៅកាន់ស្ថានភាពនេះ។',
     'checkin_user_properties' => 'ប្រគល់មកវិញលក្ខណៈសម្បត្តិទាំងអស់ដែលទាក់ទងនឹងអ្នកប្រើប្រាស់ទាំងនេះ',
     'remote_label'   => 'នេះគឺជាអ្នកប្រើប្រាស់ពីចម្ងាយ',

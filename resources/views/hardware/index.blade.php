@@ -54,38 +54,12 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
-
-                @include('partials.asset-bulk-actions', ['status' => $requestStatus])
-                   
-              <table
-                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                data-cookie-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
-                data-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
-                data-side-pagination="server"
-                data-show-footer="true"
-                data-sort-order="asc"
-                data-sort-name="name"
-                data-fixed-number="2"
-                data-search-text="{{ session()->get('search') }}"
-                data-show-columns-search="true"
-                data-toolbar="#assetsBulkEditToolbar"
-                data-bulk-button-id="#bulkAssetEditButton"
-                data-bulk-form-id="#assetsBulkForm"
-                data-buttons="assetButtons"
-                id="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
-                class="table table-striped snipe-table"
-                data-url="{{ route('api.assets.index',
+        <x-box name="assets">
+            <x-table.assets :route="route('api.assets.index',
                     array('status' => e($requestStatus),
                     'order_number'=>e(strval($requestOrderNumber)),
                     'company_id'=>e($requestCompanyId),
-                    'status_id'=>e($requestStatusId))) }}"
-                data-export-options='{
-                "fileName": "export{{ (Request::has('status')) ? '-'.str_slug($requestStatus) : '' }}-assets-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-              </table>
-
+                    'status_id'=>e($requestStatusId)))" />
         </x-box>
     </x-container>
 @stop

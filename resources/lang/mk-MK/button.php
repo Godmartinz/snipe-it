@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Додади одржување',
     'append'                    => 'Додади',
     'new'                       => 'Ново',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Клонирај :item_type',
         'edit'      => 'Измени :item_type',

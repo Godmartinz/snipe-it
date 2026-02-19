@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'about'      	=> 'About Status Types',
+    'about'      	=> 'Tietoja tilatyypeistä',
     'archived'      	=> 'Arkistoitu',
     'create'      	=> 'Uusi tilamerkintä',
     'color'      	=> 'Kaavion väri',

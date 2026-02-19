@@ -319,7 +319,12 @@ class LicensePresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('licenses.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\License', $this])) {
+            return (string)link_to_route('licenses.show', e($this->display_name), $this->id);
+        } else {
+            return e($this->display_name);
+        }
+        
     }
 
     /**

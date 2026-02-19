@@ -54,6 +54,9 @@ return [
     'backups_large'             => 'پشتیبان‌گیری‌های بسیار بزرگ ممکن است در تلاش بازیابی به پایان برسد و ممکن است همچنان نیاز باشد از طریق خط فرمان اجرا شوند.
 ',
     'barcode_settings'			=> 'تنظیمات بارکد',
+    'color_preferences'         => 'Color & Theme Settings',
+    'color_settings_help'       => 'These settings will be used throughout Snipe-IT.  Users are able to override the link colors by editing their account preferences to meet their individual readability requirements.',
+    'color_reset'              => 'Reset to Default',
     'confirm_purge'			    => 'تایید پاکسازی',
     'confirm_purge_help'		=> 'متن "DELETE" را در کادر زیر وارد کنید تا رکوردهای حذف شده خود را پاک کنید. این عمل قابل واگرد نیست و همه موارد و کاربران حذف شده را برای همیشه حذف می کند. (برای حفظ امنیت، ابتدا باید یک نسخه پشتیبان تهیه کنید.)
 ',
@@ -98,12 +101,20 @@ return [
 ',
     'footer_text_placeholder'   => 'Optional footer text',
     'general_settings'			=> 'تنظیمات عمومی',
+    'api_url'			        => 'API Base URL',
+    'scim_url'			        => 'SCIM Base URL',
     'general_settings_help'     => 'EULA پیش فرض و موارد دیگر
 ',
     'generate_backup'			=> 'تولید پشتیبان گیری',
     'google_workspaces'         => 'Google Workspaces',
-    'header_color'              => 'رنگ هدر',
-    'header_color_help'         => 'Scroll up to the top of the screen to preview the header color.',
+    'header_color'              => 'Primary Theme Color',
+    'header_color_help'         => 'Selecting a new color here will let you preview the color with your logo selection (if you have a site logo uploaded) in the header, however it will not be saved until you click the Save button.',
+    'link_dark_color'           => 'Link Color for Dark Mode',
+    'nav_link_color'            => 'Header Nav Link Color',
+    'nav_link_color_help'       => 'Select a color for the links in your top level navigation. This color should be high enough contrast against your header color to be easily readable.',
+    'link_dark_color_help'      => 'Select a color that will provide enough contrast for people that use Snipe-IT in dark mode.',
+    'link_light_color'          => 'Link Color for Light Mode',
+    'link_light_color_help'     => 'Select a color that will provide enough contrast for people that use Snipe-IT in light mode.',
     'info'                      => 'این تنظیمات به شما اجازه سفارشی کردن جنبه های خاصی از نصب و راه اندازی خود را می دهد.',
     'label_logo_size'           => 'آرم های مربعی بهترین ظاهر را دارند - در سمت راست بالای هر برچسب دارایی نمایش داده می شوند.
 ',
@@ -466,8 +477,7 @@ return [
 ',
     'labels_title_help' => 'Changes made here must be saved before they will be reflected in the labels or the preview below.',
     'labels_help' => 'Barcodes &amp; label settings',
-    'purge_help' => 'پاک کردن رکوردهای حذف شده
-',
+    'purge_help' => 'Permanently delete soft-deleted records',
     'ldap_extension_warning' => 'به نظر نمی رسد که برنامه افزودنی LDAP روی این سرور نصب یا فعال باشد. همچنان می‌توانید تنظیمات خود را ذخیره کنید، اما قبل از اینکه همگام‌سازی یا ورود به سیستم LDAP کار کند، باید افزونه LDAP را برای PHP فعال کنید.
 ',
     'ldap_ad' => 'LDAP/AD
@@ -481,8 +491,7 @@ return [
     'create_admin_user' => 'ایجاد کاربر جدید ::',
     'create_admin_success' => 'موفقیت! کاربر ادمین شما اضافه شد!
 ',
-    'create_admin_redirect' => 'برای رفتن به ورود به برنامه خود اینجا را کلیک کنید!
-',
+    'create_admin_redirect' => 'Go To Dashboard',
     'setup_migrations' => 'مهاجرت های پایگاه داده ::
 ',
     'setup_no_migrations' => 'چیزی برای مهاجرت وجود نداشت. جداول پایگاه داده شما قبلاً تنظیم شده بود!
@@ -491,10 +500,10 @@ return [
 ',
     'setup_migration_output' => 'خروجی مهاجرت:
 ',
-    'setup_migration_create_user' => 'بعدی: ایجاد کاربر
-',
+    'setup_migration_create_user' => 'Save User and Finish',
     'ldap_settings_link' => 'صفحه تنظیمات LDAP
 ',
+    'setup_create_user_page_explanation' => 'Here you will create your first superadmin user and set some basic application setting defaults. (These can always be changed later in the Admin Settings section.) ',
     'slack_test' => 'تست <i class="fab fa-slack"></i> یکپارچه سازی
 ',
     'status_label_name' => 'Status Label Name',
@@ -504,7 +513,7 @@ return [
     'label2_template'         => 'Template',
     'label2_template_help'    => 'Select which template to use for label generation',
     'label2_title'            => 'عنوان',
-    'label2_title_help'       => 'The title to show on labels that support it',
+    'label2_title_help'       => 'The title to show on labels that support it. <br>This will occupy the first Label Field row.',
     'label2_title_help_phold' => 'The placeholder <code>{COMPANY}</code> will be replaced with the asset&apos;s company name',
     'label2_asset_logo'       => 'Use Asset Logo',
     'label2_asset_logo_help'  => 'Use the logo of the asset&apos;s assigned company, rather than the value at <code>:setting_name</code>',
@@ -519,6 +528,7 @@ return [
     'select_template'         => 'انتخاب قالب',
     'label2_fields'           => 'Field Definitions',
     'label2_fields_help'      => 'Fields can be added, removed, and reordered in the left column. For each field, multiple options for Label and DataSource can be added, removed, and reordered in the right column. Field changes made here will be reflected immediately in the preview below but must be saved for them to apply to new labels.',
+    "label2_label_preview"    => 'Label Preview',
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Text entered as <code>**text**</code> will be displayed as bold',
     'help_blank_to_use'     => 'Leave blank to use the value from <code>:setting_name</code>',
@@ -622,11 +632,13 @@ return [
         'general' => 'General',
         'intervals' => 'Intervals & Thresholds',
         'logos' => 'Logos & Display',
+        'display' => 'Display Preferences',
         'mapping' => 'LDAP Field Mapping',
         'test' => 'Test LDAP Connection',
         'misc' => 'Miscellaneous',
         'misc_display' => 'Miscellaneous Display Options',
         'profiles' => 'User Profiles',
+        'your_details' => 'Your Details',
         'server' => 'Server Settings',
         'scoping' => 'Scoping',
         'security' => 'Security Preferences',

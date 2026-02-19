@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		 => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
+    'undeployable' 		 => '以下資產無法被部署且已經從 借出: :資產標籤 中移除',
     'does_not_exist' 	 => '資產不存在',
     'does_not_exist_var' => 'Asset with tag :asset_tag not found.',
     'no_tag' 	         => 'No asset tag provided.',

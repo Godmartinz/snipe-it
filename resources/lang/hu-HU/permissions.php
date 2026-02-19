@@ -16,63 +16,63 @@ return array(
     */
 
     "superuser" => [
-        'name' => 'Super User',
-        'note'       => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
+        'name' => 'Super user',
+        'note'       => 'Meghatározza, hogy a felhasználó teljes hozzáféréssel rendelkezik-e az adminisztráció minden területéhez. Ez a beállítás felülír minden egyéb, a rendszerben megadott specifikusabb és korlátozóbb jogosultságot ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
-        'note'       => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
+        'name' => 'Adminisztrátori hozzáférés',
+        'note'       => 'Meghatározza, hogy a felhasználó hozzáfér-e a rendszer legtöbb területéhez, KIVÉVE a Rendszeradminisztrátori beállításokat. Ezek a felhasználók kezelhetik a felhasználókat, helyszíneket, kategóriákat stb., de a Teljes többvállalatos támogatás beállításai korlátozzák őket, amennyiben az engedélyezve van.',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
-        'note'       => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'name' => 'CSV betöltés',
+        'note'       => 'Ez lehetővé teszi a felhasználók számára az importálást akkor is, ha máshol a rendszerben nincs hozzáférésük a felhasználókhoz, eszközökhöz stb.',
     ],
 
     'reports' => [
-        'name' => 'Reports Access',
-        'note'       => 'Determines whether the user has access to the Reports section of the application.',
+        'name' => 'Hozzáférés a jelentésekhez',
+        'note'       => 'Meghatározza, hogy a felhasználó hozzáfér-e az alkalmazás Jelentések menüpontjához.',
     ],
 
     'assets' =>
         [
             'name' => 'Eszközök',
-            'note' => 'Grants access to the Assets section of the application.',
+            'note' => 'Hozzáférést biztosít az alkalmazás Eszközök menüpontjához.',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'Eszközök megtekintése',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'Új eszközök létrehozása',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'Eszközök szerkesztése',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'Eszközök törlése',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'Visszavételezés',
+        'note' => 'A jelenleg kiadott eszközök visszavételezése a készletbe.',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
-        'note' => 'Assign assets in inventory by checking them out.',
+        'name' => 'Kiadás',
+        'note' => 'Eszközök hozzárendelése a készletből kiadással.',
     ],
 
     'assetsaudit' => [
-        'name' => 'Audit Assets',
-        'note' => 'Allows the user to mark an asset as physically inventoried.',
+        'name' => 'Eszközök auditálása',
+        'note' => 'Lehetővé teszi a felhasználó számára, hogy egy eszközt fizikailag leltározottként jelöljön meg.',
     ],
 
     'assetsviewrequestable' => [
-        'name' => 'View Requestable Assets',
+        'name' => 'Igényelhető eszközök megtekintése',
         'note' => 'Allows the user to view assets that are marked as requestable.',
     ],
 

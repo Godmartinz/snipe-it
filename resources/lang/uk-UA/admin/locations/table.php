@@ -12,8 +12,8 @@ return [
     'create'                    => 'Створити розташування',
     'update'                    => 'Оновити розташування',
     'print_assigned'            => 'Друк призначено',
-    'print_inventory'           => 'Print Inventory',
-    'print_all_assigned'        => 'Print Inventory and Assigned',
+    'print_inventory'           => 'Друкувати інвентар',
+    'print_all_assigned'        => 'Друк інвентарю та призначеного',
     'name'                      => 'Назва розташування',
     'address'                   => 'Адреса',
     'address2'                   => 'Адресний рядок 2',
@@ -40,5 +40,5 @@ return [
     'signed_by_finance_auditor' => 'Підписано (Фінансовий Аудитор):',
     'signed_by_location_manager' => 'Підписано (Менеджер Місцезнаходження):',
     'signed_by'                 => 'Підписався від:',
-    'clone'  					=> 'Clone Location',
+    'clone'  					=> 'Клонувати локацію',
 ];

@@ -600,6 +600,7 @@
                                                <div class="controls">
                                                 <select
                                                         name="groups[]"
+                                                        size="{{ ($groups->count() > 25) ? '25' : '10' }}"
                                                         aria-label="groups[]"
                                                         id="groups[]"
                                                         multiple="multiple"

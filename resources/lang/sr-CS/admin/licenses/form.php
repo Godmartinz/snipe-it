@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Mesta',
     'termination_date'  => 'Datum završetka',
     'to_email'          => 'Licensed to Email',
-    'to_name'           => 'Licencirano za ime',
+    'to_name'           => 'Licencirano',
     'update'            => 'Ažuriraj licencu',
     'checkout_help'     => 'You must check a license out to a hardware asset or a person. You can select both, but the owner of the asset must match the person you\'re checking the asset out to.'
 );

@@ -40,7 +40,7 @@ class StatuslabelsTransformer
 
         $permissions_array['available_actions'] = [
             'update' => Gate::allows('update', Statuslabel::class) ? true : false,
-            'delete' => (Gate::allows('delete', Statuslabel::class) && ($statuslabel->assets_count == 0)) ? true : false,
+            'delete' => (Gate::allows('delete', Statuslabel::class) && ($statuslabel->isDeletable())) ? true : false,
         ];
         $array += $permissions_array;
 

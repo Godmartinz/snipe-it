@@ -46,7 +46,7 @@ return array(
         'not_enough_seats' => 'Lisenssipaikkoja ei ole riittävästi saatavilla kassalle',
         'mismatch' => 'The license seat provided does not match the license',
         'unavailable' => 'This seat is not available for checkout.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'license_is_inactive' => 'Tämä lisenssi on vanhentunut tai päätetty.',
     ),
 
     'checkin' => array(

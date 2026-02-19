@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Sēdvietas',
     'termination_date'  => 'Izbeigšanas datums',
     'to_email'          => 'Licencēta uz e-pastu',
-    'to_name'           => 'Licencēta uz vārdu',
+    'to_name'           => 'Licencēts',
     'update'            => 'Atjaunināt licenci',
     'checkout_help'     => 'Jums jāpārbauda licence aparatūras aktīvam vai personai. Jūs varat izvēlēties abus, bet īpašnieka īpašumam ir jāatbilst personai, kurai veicat īpašuma pārbaudi.'
 );

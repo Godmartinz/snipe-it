@@ -118,6 +118,19 @@ class DepartmentPresenter extends Presenter
     }
 
 
+    /**
+     * Url to view this item.
+     * @return string
+     */
+    public function viewUrl()
+    {
+        if (auth()->user()->can('view', ['\App\Models\Location', $this])) {
+            return (string)link_to_route('locations.show', $this->display_name, $this->id);
+        } else {
+            return $this->display_name;
+        }
+    }
+
     public function formattedNameLink() {
 
         if (auth()->user()->can('view', ['\App\Models\Department', $this])) {

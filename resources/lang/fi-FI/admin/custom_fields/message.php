@@ -5,7 +5,7 @@ return array(
     'field' => array(
         'invalid'   => 'Tätä kenttää ei ole.',
         'already_added'   => 'Kentässä jo lisätty',
-        'none_selected'   => 'No field selected',
+        'none_selected'   => 'Kenttää ei ole valittu',
 
         'create' => array(
             'error'   => 'Kenttää ei luotu, yritä uudelleen.',

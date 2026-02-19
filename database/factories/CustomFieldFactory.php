@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\CustomField;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomFieldFactory extends Factory
@@ -27,6 +28,7 @@ class CustomFieldFactory extends Factory
             'element' => 'text',
             'auto_add_to_fieldsets' => '0',
             'show_in_requestable_list' => '0',
+            'created_by' => User::factory()->superuser(),
         ];
     }
 

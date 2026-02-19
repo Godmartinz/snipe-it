@@ -7,7 +7,7 @@
 
 
 <!-- Start box component -->
-<div class="box box-{{ $box_style }}">
+<div {{ $attributes->merge(['class' => 'box box-'.$box_style]) }}>
 
     @if ($header)
         <div class="box-header with-border">
@@ -25,7 +25,14 @@
             </div>
         @endif
 
-        {{ $slot }}
+            @if ((isset($content)) && (!$content->isEmpty()))
+                {{ $content }}
+            @endif
+
+            @if (($slot) && (!$slot->isEmpty()))
+                {{ $slot }}
+            @endif
+
     </div>
 
     @if ($route)

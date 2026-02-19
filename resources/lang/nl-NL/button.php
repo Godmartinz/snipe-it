@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Onderhoud toevoegen',
     'append'                    => 'Aanvullen',
     'new'                       => 'Nieuw',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Dupliceer :item_type',
         'edit'      => ':item_type bewerken',

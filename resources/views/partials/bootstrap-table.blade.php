@@ -396,14 +396,14 @@
         },
 
         btnShowDeleted: {
-            text: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+            text: '{{ (request()->input('status') == "deleted") ? trans('general.show_current') : trans('general.show_deleted') }}',
             icon: 'fa-solid fa-trash',
             event () {
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('locations.index') : route('locations.index', ['status' => 'deleted']) }}';
             },
             attributes: {
                 class: '{{ (request()->input('status') == "deleted") ? 'btn-selected' : '' }}',
-                title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+                title: '{{ (request()->input('status') == "deleted") ? trans('general.show_current') : trans('general.show_deleted') }}',
 
             }
         },

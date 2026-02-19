@@ -31,7 +31,7 @@ return [
         'numeric' => 'Поле :attribute має бути в межах від :min до :max.',
         'string' => 'Поле :attribute має містити від :min до :max символів.',
     ],
-    'valid_regex' => 'The regular expression is invalid.',
+    'valid_regex' => 'Неправильний регулярний вираз.',
     'boolean' => 'Поле :attribute повинне містити логічний тип.',
     'can' => 'Поле :attribute містить недозволене значення.',
     'confirmed' => 'Поле підтвердження :attribute не збігається.',
@@ -173,8 +173,8 @@ return [
     'url' => 'Поле :attribute має бути коректним URL.',
     'ulid' => 'Поле :attribute має бути дійсним ULID.',
     'uuid' => 'Поле :attribute має бути коректним UUID.',
-    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
-    'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
+    'fmcs_location' => 'У налаштуваннях адміністратора увімкнено повну підтримку декількох компаній та обмеження видимості за локаціями, проте вибрана локація та вибрана компанія несумісні.',
+    'is_unique_across_company_and_location' => 'Поле :attribute має бути унікальним у межах вибраної компанії та локації.',
 
     /*
     |--------------------------------------------------------------------------
@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Серійний номер',
+        'asset_tags.*' => 'Тег активу',
+    ],
 
     /*
     |--------------------------------------------------------------------------

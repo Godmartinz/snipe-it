@@ -14,28 +14,28 @@ return [
     */
 
     'accepted' => 'A :attribute el kell fogadni.',
-    'accepted_if' => 'The :attribute field must be accepted when :other is :value.',
-    'active_url' => 'The :attribute field must be a valid URL.',
-    'after' => 'The :attribute field must be a date after :date.',
-    'after_or_equal' => 'The :attribute field must be a date after or equal to :date.',
-    'alpha' => 'The :attribute field must only contain letters.',
-    'alpha_dash' => 'The :attribute field must only contain letters, numbers, dashes, and underscores.',
-    'alpha_num' => 'The :attribute field must only contain letters and numbers.',
-    'array' => 'The :attribute field must be an array.',
-    'ascii' => 'The :attribute field must only contain single-byte alphanumeric characters and symbols.',
-    'before' => 'The :attribute field must be a date before :date.',
-    'before_or_equal' => 'The :attribute field must be a date before or equal to :date.',
+    'accepted_if' => 'A :attribute mezőt el kell fogadni amikor :other értéke :value.',
+    'active_url' => 'A :attribute nem egy valós dátum.',
+    'after' => 'Az :attribute ezután a dátum után kell, hogy legyen :date.',
+    'after_or_equal' => 'A :attribútumnak dátumnak kell lennie, vagy egyenlőnek kell lennie: date.',
+    'alpha' => 'A :attribute csak betűket tartalmazhat.',
+    'alpha_dash' => 'A :attribute csak betűket, számokat és perjelet tartalmazhat.',
+    'alpha_num' => 'A :attribute csak betűket, számokat tartalmazhat.',
+    'array' => 'A(z) :attribute mező nem lehet tömb.',
+    'ascii' => 'A :attribute mező csak egybájtos alfanumerikus karaktereket és szimbólumokat tartalmazhat.',
+    'before' => 'Az :attribute ezután a dátum után kell, hogy legyen :date.',
+    'before_or_equal' => 'A: attribútumnak dátumnak kell lennie, vagy egyenlőnek kell lennie: date.',
     'between' => [
-        'array' => 'The :attribute field must have between :min and :max items.',
-        'file' => 'The :attribute field must be between :min and :max kilobytes.',
-        'numeric' => 'The :attribute field must be between :min and :max.',
-        'string' => 'The :attribute field must be between :min and :max characters.',
+        'array' => 'A :attribute mezőnek :min és :max közötti számú elemet kell tartalmaznia.',
+        'file' => 'A :attribute mező méretének :min és :max kilobájt között kell lennie.',
+        'numeric' => 'A :attribute mező értékének :min és :max között kell lennie.',
+        'string' => 'A :attribute mező hossza :min és :max karakter között kell legyen.',
     ],
-    'valid_regex' => 'The regular expression is invalid.',
+    'valid_regex' => 'A reguláris kifejezés érvénytelen.',
     'boolean' => 'Az :attribute igaznak vagy hamisnak kell lennie.',
-    'can' => 'The :attribute field contains an unauthorized value.',
-    'confirmed' => 'The :attribute field confirmation does not match.',
-    'contains' => 'The :attribute field is missing a required value.',
+    'can' => 'A :attribute mező jogosulatlan értéket tartalmaz.',
+    'confirmed' => 'A :attribute mező megerősítése nem egyezik.',
+    'contains' => 'A :attribute mezőből hiányzik egy kötelező érték.',
     'current_password' => 'Érvénytelen jelszó.',
     'date' => 'A :attribute nem egy valós dátum.',
     'date_equals' => 'The :attribute field must be a date equal to :date.',
@@ -170,7 +170,7 @@ return [
     'unique' => 'A :attribute már foglalt.',
     'uploaded' => 'A: attribútum nem sikerült feltölteni.',
     'uppercase' => 'The :attribute field must be uppercase.',
-    'url' => 'The :attribute field must be a valid URL.',
+    'url' => 'A :attribute nem egy valós dátum.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
     'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Sorozatszám',
+        'asset_tags.*' => 'Eszköz azonosító',
+    ],
 
     /*
     |--------------------------------------------------------------------------

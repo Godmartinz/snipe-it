@@ -13,6 +13,7 @@ use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 
@@ -129,6 +130,13 @@ class Consumable extends SnipeModel
             $value = null;
         }
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && ($this->numCheckedOut() === 0)
+            && ($this->deleted_at == '');
     }
 
     /**

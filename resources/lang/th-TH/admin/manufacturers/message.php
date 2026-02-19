@@ -24,8 +24,8 @@ return array(
     'delete' => array(
         'confirm' => 'คุณแน่ใจที่จะลบผู้ผลิตนี้?',
         'error'   => 'มีปัญหาระหว่างการลบผู้ผลิต กรุณาลองใหม่อีกครั้ง',
-        'success'                => 'Manufacturer deleted successfully.',
-        'bulk_success'           => 'Manufacturers deleted successfully.',
+        'success'                => 'ลบบริษัทผู้ผลิตแล้ว',
+        'bulk_success'           => 'ลบบริษัทผู้ผลิตแล้ว',
         'partial_success'        => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     )
 

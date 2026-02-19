@@ -2,11 +2,12 @@
 
 return array(
 
-    'accepted'                  => 'You have successfully accepted this item.',
+    'accepted'                  => 'Вы успешно приняли этот элемент.',
     'declined'                  => 'You have successfully declined this item.',
     'bulk_manager_warn'	        => 'Ваши пользователи были успешно обновлены, однако запись менеджера не была сохранена, потому что выбранный менеджер также присутствовал в редактируемом списке пользователей, и пользователи не могут быть менеджерами самим себе. Пожалуйста выберите ваших пользователей снова, за исключением их менеджера.',
     'user_exists'               => 'Пользователь уже существует!',
-    'user_not_found'            => 'User does not exist or you do not have permission view them.',
+    'cannot_delete'             => 'Пользователь не существует или у вас нет прав на его удаление.',
+    'user_not_found'            => 'Пользователь не существует или у вас нет разрешения на его просмотр.',
     'user_login_required'       => 'Поле "Логин" является обязательным',
     'user_has_no_assets_assigned' => 'Нет активов закреплённых за этим пользователем.',
     'user_password_required'    => 'Поле "Пароль" является обязательным.',
@@ -53,7 +54,7 @@ return array(
         'ldap_could_not_search' => 'Не могу найти сервер LDAP. Проверьте настройки LDAP сервера в файле конфигурации LDAP.<br>Ошибка от LDAP сервера:',
         'ldap_could_not_get_entries' => 'Не могу загрузить записи с сервера LDAP. Проверьте настройки LDAP сервера в файле конфигурации LDAP.<br>Ошибка от LDAP сервера:',
         'password_ldap' => 'Пароль для этой учетной записи управляется LDAP/Active Directory. Пожалуйста, свяжитесь с департаментом ИТ, чтобы изменить свой пароль. ',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.'
+        'multi_company_items_assigned' => 'У этого пользователя есть назначенные ему элементы, принадлежащие другой компании. Пожалуйста, зарегистрируйте их или отредактируйте название компании.'
     ),
 
     'deletefile' => array(

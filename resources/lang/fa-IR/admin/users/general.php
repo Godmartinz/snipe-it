@@ -48,8 +48,7 @@ return [
 ',
     'remove_group_memberships' => 'حذف عضویت در گروه
 ',
-    'warning_deletion_information' => 'شما در شرف بررسی همه موارد از کاربر(های) :count فهرست شده در زیر هستید. نام های فوق ادمین با رنگ قرمز مشخص شده اند.
-',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'همه دارایی های این کاربران را به این وضعیت به روز کنید
 ',
     'checkin_user_properties' => 'تمام ویژگی های مرتبط با این کاربران را بررسی کنید

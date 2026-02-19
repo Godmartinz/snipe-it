@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
 
 class Depreciation extends SnipeModel
@@ -51,6 +52,16 @@ class Depreciation extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [];
+
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && (($this->licenses_count ?? $this->licenses()->count()) === 0)
+            && (($this->models_count ?? $this->models()->count()) === 0)
+            && ($this->deleted_at == '');
+    }
 
     /**
      * Establishes the depreciation -> models relationship

@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Tambah Pemeliharaan',
     'append'                    => 'Tambahkan',
     'new'                       => 'Baru',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Duplikat :item_type',
         'edit'      => 'Edit :item_type',

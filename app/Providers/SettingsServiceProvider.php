@@ -85,6 +85,10 @@ class SettingsServiceProvider extends ServiceProvider
             return 'models/';
         });
 
+        app()->singleton('licenses_upload_url', function () {
+            return 'licenses/';
+        });
+
         // Categories
         app()->singleton('categories_upload_path', function () {
             return 'categories/';

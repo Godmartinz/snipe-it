@@ -49,4 +49,11 @@ class LicenseSeatFactory extends Factory
             $seat->license->update(['reassignable' => false]);
         });
     }
+
+    public function requiringAcceptance()
+    {
+        return $this->afterCreating(function ($seat) {
+            $seat->license->category->update(['require_acceptance' => 1]);
+        });
+    }
 }

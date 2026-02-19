@@ -187,6 +187,58 @@ class ConsumablePresenter extends Presenter
         return json_encode($layout);
     }
 
+    public static function checkedOut()
+    {
+        $layout = [
+
+            [
+                'field' => 'avatar',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
+            ],
+            [
+                'field' => 'user',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+
+            [
+                'field' => 'note',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.created_by'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+
+
+        ];
+
+        return json_encode($layout);
+    }
+
     /**
      * Url to view this item.
      * @return string

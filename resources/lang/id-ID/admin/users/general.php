@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Hanya superadmin yang dapat memberikan akses superadmin kepada pengguna.',
     'admin_permission_warning' => 'Hanya pengguna dengan hak admin atau lebih tinggi yang dapat memberikan akses admin kepada pengguna.',
     'remove_group_memberships' => 'Hapus Keanggotaan Grup',
-    'warning_deletion_information' => 'Anda akan mengembalikan SEMUA item dari :count pengguna (-pengguna) yang terdaftar di bawah ini. Nama superadmin disorot dengan warna merah.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Perbarui semua aset untuk pengguna ini ke status ini',
     'checkin_user_properties' => 'Kembalikan semua properti yang terkait dengan pengguna ini',
     'remote_label'   => 'Ini adalah pengguna jarak jauh',

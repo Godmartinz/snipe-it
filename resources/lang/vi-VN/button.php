@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Thêm bảo trì',
     'append'                    => 'Thêm vào',
     'new'                       => 'Mới',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Nhân bản :item_type',
         'edit'      => 'Sửa :item_type',

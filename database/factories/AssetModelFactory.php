@@ -28,10 +28,10 @@ class AssetModelFactory extends Factory
     public function definition()
     {
         return [
-            'created_by' => User::factory()->superuser(),
-            'name' => $this->faker->catchPhrase(),
             'category_id' => Category::factory(),
+            'created_by' => User::factory()->superuser(),
             'model_number' => $this->faker->creditCardNumber(),
+            'name' => $this->faker->catchPhrase(),
             'notes' => 'Created by demo seeder',
             'require_serial' => 0,
 

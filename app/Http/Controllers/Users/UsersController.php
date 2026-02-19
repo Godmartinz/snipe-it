@@ -56,7 +56,7 @@ class UsersController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', User::class);
-        $groups = Group::pluck('name', 'id');
+        $groups = Group::orderBy('name', 'asc')->pluck('name', 'id');
 
         $userGroups = collect();
 
@@ -151,7 +151,9 @@ class UsersController extends Controller
             }
 
             if ($request->filled('groups')) {
-                $user->groups()->sync($request->input('groups'));
+                if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+                    $user->groups()->sync($request->input('groups'));
+                }
             } else {
                 $user->groups()->sync([]);
             }
@@ -199,7 +201,7 @@ class UsersController extends Controller
             }
 
             $permissions = config('permissions');
-            $groups = Group::pluck('name', 'id');
+            $groups = Group::orderBy('name', 'asc')->pluck('name', 'id');
 
             $userGroups = $user->groups()->pluck('name', 'id');
             $user->permissions = $user->decodePermissions();

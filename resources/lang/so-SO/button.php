@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Ku dar Dayactirka',
     'append'                    => 'Ku lifaaq',
     'new'                       => 'Cusub',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Clone :item_type',
         'edit'      => 'Edit :item_type',

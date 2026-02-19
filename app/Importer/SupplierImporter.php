@@ -76,6 +76,7 @@ class SupplierImporter extends ItemImporter
         $this->item['contact'] = trim($this->findCsvMatch($row, 'contact'));
         $this->item['url'] = trim($this->findCsvMatch($row, 'url'));
         $this->item['notes'] = trim($this->findCsvMatch($row, 'notes'));
+        $this->item['tag_color'] = trim($this->findCsvMatch($row, 'tag_color'));
 
 
         Log::debug('Item array is: ');

@@ -6,6 +6,7 @@ return array(
     'declined'                  => 'You have successfully declined this item.',
     'bulk_manager_warn'	        => 'Uživatelé byli úspěšně aktualizováni, položka správce však nebyla uložena, protože správce, který jste si vybrali, byl také v seznamu uživatelů, který má být upraven, a uživatelé nemusí být jejich vlastní správce. Zvolte své uživatele znovu, kromě správce.',
     'user_exists'               => 'Uživatel již existuje!',
+    'cannot_delete'             => 'User does not exist or you do not have permission to delete them.',
     'user_not_found'            => 'Uživatel neexistuje nebo nemáte oprávnění k jeho zobrazení.',
     'user_login_required'       => 'Přihlašovací pole je povinné',
     'user_has_no_assets_assigned' => 'Momentálně nejsou uživateli přiřazeny žádné položky.',

@@ -264,14 +264,21 @@ class Component extends SnipeModel
         // In case there are elements checked out to assets that belong to a different company
         // than this asset and full multiple company support is on we'll remove the global scope,
         // so they are included in the count.
-        if (is_null($this->sum_unconstrained_assets) || $recalculate) {
-            // This, in a components-listing context, is mostly important for when it sets a 'zero' which
-            // is *not* null - so we don't have to keep recalculating for un-checked-out components
+
+        // the 'sum' query returns NULL when there are zero checkouts - which can inadvertently re-trigger the following query
+        // for un-checked-out components. So we have to do this very careful process of fetching the 'attributes'
+        // of the component, then see if sum_unconstrained_assets exists as an attribute. If it doesn't, we run the
+        // query. But if it *does* exist as an attribute - even a null - we skip the query, because that means that this
+        // component was fetched using withCount() - and that count *is* accurate, even if null. We just do a quick
+        // null-coalesce at the end to zero for the null case.
+        $raw_attributes = $this->getAttributes();
+        if (!array_key_exists('sum_unconstrained_assets', $raw_attributes) || $recalculate) {
+            // This part should *only* run if the component was fetched *without* withCount() (or you've asked to recalculate)
             // NOTE: doing this will add a 'pseudo-attribute' to the component in question, so we need to _remove_ this
             // before we save - so that gets handled in the 'saving' callback defined in the 'booted' method, above.
-            $this->sum_unconstrained_assets = $this->uncontrainedAssets()->sum('assigned_qty') ?? 0;
+            $this->sum_unconstrained_assets = $this->unconstrainedAssets()->sum('assigned_qty') ?? 0;
         }
-        return $this->sum_unconstrained_assets;
+        return $this->sum_unconstrained_assets ?? 0;
     }
 
 
@@ -280,7 +287,7 @@ class Component extends SnipeModel
      *
      * This allows us to get the assets with assigned components without the company restriction
      */
-    public function uncontrainedAssets()
+    public function unconstrainedAssets()
     {
 
         return $this->belongsToMany(\App\Models\Asset::class, 'components_assets')

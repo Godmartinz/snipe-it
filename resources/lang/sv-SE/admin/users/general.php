@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Endast huvudanvändare kan ge en användare huvudanvändaråtkomst.',
     'admin_permission_warning' => 'Endast användare med administratörsrättigheter eller högre kan ge administratörsbehörighet.',
     'remove_group_memberships' => 'Ta bort gruppmedlemskap',
-    'warning_deletion_information' => 'Du är på väg att checka in ALLA objekt från :count användare som anges nedan. Huvudanvändares namn markeras i rött.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Uppdatera alla tillgångar för dessa användare till denna status',
     'checkin_user_properties' => 'Checka in alla egenskaper som är associerade med dessa användare',
     'remote_label'   => 'Detta är en fjärranvändare',

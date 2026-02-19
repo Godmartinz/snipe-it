@@ -778,7 +778,7 @@ class Helper
         $consumables = Consumable::withCount('consumableAssignments as consumable_assignments_count')->whereNotNull('min_amt')->get();
         $accessories = Accessory::withCount('checkouts as checkouts_count')->whereNotNull('min_amt')->get();
         $components = Component::whereNotNull('min_amt')->get();
-        $asset_models = AssetModel::where('min_amt', '>', 0)->get();
+        $asset_models = AssetModel::where('min_amt', '>', 0)->withCount(['availableAssets', 'assets'])->get();
         $licenses = License::where('min_amt', '>', 0)->get();
 
         $items_array = [];
@@ -844,8 +844,8 @@ class Helper
         foreach ($asset_models as $asset_model){
 
             $asset = new Asset();
-            $total_owned = $asset->where('model_id', '=', $asset_model->id)->count();
-            $avail = $asset->where('model_id', '=', $asset_model->id)->whereNull('assigned_to')->count();
+            $total_owned = $asset_model->assets_count; //requires the withCount() clause in the initial query!
+            $avail = $asset_model->available_assets_count; //requires the withCount() clause in the initial query!
 
             if ($avail <= ($asset_model->min_amt) + $alert_threshold) {
                 if ($avail > 0) {
@@ -1402,43 +1402,6 @@ class Helper
 
         return $settings;
         }
-
-
-    /**
-     * Generic helper (largely used by livewire right now) that returns the font-awesome icon
-     * for the object type.
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since 6.1.0
-     *
-     * @return string
-     */
-    public static function iconTypeByItem($item) {
-
-        switch ($item) {
-            case 'asset':
-                return 'fas fa-barcode';
-            case 'accessory':
-                return 'fas fa-keyboard';
-            case 'component':
-                return 'fas fa-hdd';
-            case 'consumable':
-                return 'fas fa-tint';
-            case 'license':
-                return 'far fa-save';
-            case 'location':
-                return 'fas fa-map-marker-alt';
-            case 'user':
-                return 'fas fa-user';
-            case 'supplier':
-                return 'fa-solid fa-store';
-            case 'manufacturer':
-                return 'fa-solid fa-building';
-            case 'category':
-                return 'fa-solid fa-table-columns';
-        }
-
-    }
 
 
      /*

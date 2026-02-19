@@ -3,9 +3,9 @@
 return array(
 
     'field' => array(
-        'invalid'   => 'That field does not exist.',
+        'invalid'   => 'Þessi reitur er ekki til.',
         'already_added'   => 'Field already added',
-        'none_selected'   => 'No field selected',
+        'none_selected'   => 'Enginn reitur valinn',
 
         'create' => array(
             'error'   => 'Field was not created, please try again.',
@@ -22,7 +22,7 @@ return array(
             'confirm'   	=> 'Are you sure you wish to delete this field?',
             'error'   => 'There was an issue deleting the field. Please try again.',
             'success' => 'The field was deleted successfully.',
-            'in_use'   => 'Field is still in use.',
+            'in_use'   => 'Reiturinn er ennþá í notkun.',
         )
 
     ),

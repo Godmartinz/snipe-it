@@ -2,11 +2,12 @@
 
 return array(
 
-    'accepted'                  => 'You have successfully accepted this item.',
-    'declined'                  => 'You have successfully declined this item.',
+    'accepted'                  => 'Je hebt het item succesvol geaccepteerd.',
+    'declined'                  => 'Je hebt dit item succesvol afgewezen.',
     'bulk_manager_warn'	        => 'Uw gebruikers zijn succesvol bijgewerkt, de gekozen manager kon echter niet toegepast worden omdat deze persoon ook in de lijst staat, gebruikers mogen niet hun eigen manager zijn. Probeer het nogmaals en selecteer de gebruikers zonder de manager.',
     'user_exists'               => 'Gebruiker bestaat reeds!',
-    'user_not_found'            => 'Gebruiker bestaat niet of je hebt geen toestemming om deze gebruiker te bekijken.',
+    'cannot_delete'             => 'User does not exist or you do not have permission to delete them.',
+    'user_not_found'            => 'Gebruiker bestaat niet of je hebt geen toestemming om deze te bekijken.',
     'user_login_required'       => 'Het veld gebruikersnaam is verplicht.',
     'user_has_no_assets_assigned' => 'Geen assets toegewezen aan de gebruiker.',
     'user_password_required'    => 'Het veld wachtwoord is verplicht.',
@@ -53,7 +54,7 @@ return array(
         'ldap_could_not_search' => 'Kan niet zoeken in de LDAP server. Controleer je LDAP server configuratie in de LDAP configuratie bestand. <br>Fout van LDAP server:',
         'ldap_could_not_get_entries' => 'Kan geen gegeven van de LDAP server krijgen. Controleer je LDAP server configuratie in de LDAP configuratie bestand. <br>Fout van LDAP server:',
         'password_ldap' => 'Het wachtwoord voor deze account wordt beheerd door LDAP/Active Directory. Neem contact op met uw IT-afdeling om uw wachtwoord te wijzigen. ',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.'
+        'multi_company_items_assigned' => 'Deze gebruiker heeft items toegewezen welke tot een andere organisatie behoren. Check deze alstublieft in of bewerk het bedrijf van de gebruiker.'
     ),
 
     'deletefile' => array(

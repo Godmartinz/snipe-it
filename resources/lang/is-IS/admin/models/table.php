@@ -3,7 +3,7 @@
 return array(
 
     'create'				=> 'Búa til eignategund',
-    'created_at' 			=> 'Created at',
+    'created_at' 			=> 'Stofnað',
     'eol'	 				=> 'Lok línu',
     'modelnumber'   		=> 'Tegundar Nr.',
     'name'      			=> 'Nafn eignategundar',

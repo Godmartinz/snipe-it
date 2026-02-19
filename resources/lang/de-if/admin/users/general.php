@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Nur Superadmins dürfen einem Benutzer Superadmin Zugriff gewähren.',
     'admin_permission_warning' => 'Nur Benutzer mit Administratorrechten oder höher dürfen einem Benutzer Administratorzugriff gewähren.',
     'remove_group_memberships' => 'Gruppenmitgliedschaften entfernen',
-    'warning_deletion_information' => 'Du bist dabei, ALLE Assets von :count Benutzer(s) einzuchecken. Super-Admins werden rot hervorgehoben.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Alle Assets für diese Benutzer auf diesen Status aktualisieren',
     'checkin_user_properties' => 'Alle diesen Benutzern zugeordneten Objekte zurücknehmen',
     'remote_label'   => 'Dies ist ein externer Benutzer',

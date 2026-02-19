@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Bakım ekle',
     'append'                    => 'Ekle',
     'new'                       => 'Yeni',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Klon :item_type',
         'edit'      => 'Düzenle :item_type',

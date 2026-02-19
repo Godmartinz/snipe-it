@@ -1228,12 +1228,14 @@ class ReportsController extends Controller
         ];
         $mailable= $lookup[get_class($acceptance->checkoutable)];
 
-        return new $mailable($acceptance->checkoutable,
+        return new $mailable(
+            $acceptance->checkoutable,
             $acceptance->checkedOutTo ?? $acceptance->assignedTo,
             $logItem->adminuser,
             $acceptance,
-            $acceptance->note);
-
+            $acceptance->note,
+            firstTimeSending: false,
+        );
     }
     /**
      * sentAssetAcceptanceReminder

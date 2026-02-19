@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Vain superylläpitäjät voivat myöntää käyttäjän superadmin käyttöoikeuden.',
     'admin_permission_warning' => 'Vain käyttäjät, joilla on ylläpitäjän oikeudet tai enemmän, voivat myöntää käyttäjän järjestelmänvalvojan käyttöoikeuden.',
     'remove_group_memberships' => 'Poista Ryhmäjäsenyydet',
-    'warning_deletion_information' => 'Olet tarkistamassa KAIKKI kohteita :count käyttäjiltä (käyttäjistä) jotka on lueteltu alla. Super admin names on korostettu punaisella.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Päivitä kaikki nimikkeet näille käyttäjille tähän tilaan',
     'checkin_user_properties' => 'Tarkista kaikki ominaisuudet, jotka liittyvät näihin käyttäjiin',
     'remote_label'   => 'Tämä on etäkäyttäjä',
@@ -53,7 +53,7 @@ return [
     'next_save_user' => 'Seuraava: Tallenna Käyttäjä',
     'all_assigned_list_generation' => 'Luotu:',
     'email_user_creds_on_create' => 'Lähetä tälle käyttäjälle käyttäjätunnukset?',
-    'department_manager' => 'Department Manager',
-    'generate_password' => 'Generate random password',
+    'department_manager' => 'Osastopäällikkö',
+    'generate_password' => 'Luo satunnainen salasana',
     'individual_override' => 'This user has at least one individual permission set, which may override group permissions.',
 ];

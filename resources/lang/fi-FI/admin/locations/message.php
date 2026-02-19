@@ -9,7 +9,7 @@ return array(
     'assigned_assets' => 'Luovutetut laitteet',
     'current_location' => 'Nykyinen sijainti',
     'open_map' => 'Open in :map_provider_icon Maps',
-    'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
+    'deleted_warning' => 'Tämä sijainti on poistettu. Palauta se, ennen kuin yrität tehdä muutoksia.',
 
 
     'create' => array(
@@ -23,8 +23,8 @@ return array(
     ),
 
     'restore' => array(
-        'error'   => 'Location was not restored, please try again',
-        'success' => 'Location restored successfully.'
+        'error'   => 'Sijaintia ei palautettu, yritä uudelleen',
+        'success' => 'Sijainti palautettu onnistuneesti.'
     ),
 
     'delete' => array(

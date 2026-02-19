@@ -25,7 +25,7 @@ return [
     'default_location'	=> 'Sede predefinita',
     'default_location_phone' => 'Telefono Sede Predefinita',
     'eol_date'			=> 'Data EOL',
-    'eol_rate'			=> 'EOL tra:',
+    'eol_rate'			=> 'Durata EOL',
     'expected_checkin'  => 'Restituzione Prevista il',
     'expires'			=> 'Scade',
     'fully_depreciated'	=> 'Pienamente Deprezzato',

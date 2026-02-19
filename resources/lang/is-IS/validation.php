@@ -15,12 +15,12 @@ return [
 
     'accepted' => 'The :attribute field must be accepted.',
     'accepted_if' => 'The :attribute field must be accepted when :other is :value.',
-    'active_url' => 'The :attribute field must be a valid URL.',
-    'after' => 'The :attribute field must be a date after :date.',
+    'active_url' => 'Reiturinn :attribute þarf að vera gild vefslóð (URL).',
+    'after' => 'Reiturinn :attribute þarf að vera dagsetning eftir :date.',
     'after_or_equal' => 'The :attribute field must be a date after or equal to :date.',
-    'alpha' => 'The :attribute field must only contain letters.',
-    'alpha_dash' => 'The :attribute field must only contain letters, numbers, dashes, and underscores.',
-    'alpha_num' => 'The :attribute field must only contain letters and numbers.',
+    'alpha' => 'Reiturinn :attribute má eingöngu innihalda bókstafi.',
+    'alpha_dash' => 'Reiturinn :attribute má eingöngu innihalda bókstafi, tölustafi, bandstrik eða undirstrik.',
+    'alpha_num' => 'Reiturinn :attribute má eingöngu innihalda bókstafi eða tölustafi.',
     'array' => 'The :attribute field must be an array.',
     'ascii' => 'The :attribute field must only contain single-byte alphanumeric characters and symbols.',
     'before' => 'The :attribute field must be a date before :date.',
@@ -36,8 +36,8 @@ return [
     'can' => 'The :attribute field contains an unauthorized value.',
     'confirmed' => 'The :attribute field confirmation does not match.',
     'contains' => 'The :attribute field is missing a required value.',
-    'current_password' => 'The password is incorrect.',
-    'date' => 'The :attribute field must be a valid date.',
+    'current_password' => 'Lykilorðið er rangt.',
+    'date' => 'Reiturinn :attribute þarf að vera gild dagsetning.',
     'date_equals' => 'The :attribute field must be a date equal to :date.',
     'date_format' => 'The :attribute field must match the format :format.',
     'decimal' => 'The :attribute field must have :decimal decimal places.',
@@ -170,7 +170,7 @@ return [
     'unique' => 'The :attribute has already been taken.',
     'uploaded' => 'The :attribute failed to upload.',
     'uppercase' => 'The :attribute field must be uppercase.',
-    'url' => 'The :attribute field must be a valid URL.',
+    'url' => 'Reiturinn :attribute þarf að vera gild vefslóð (URL).',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
     'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Serial Number',
+        'asset_tags.*' => 'Eignamerking',
+    ],
 
     /*
     |--------------------------------------------------------------------------

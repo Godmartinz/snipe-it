@@ -7,7 +7,6 @@
     'show_advanced_search' => false,
     'fixed_number' => false,
     'fixed_right_number' => false,
-    'show_footer' => false,
     'sort_order' => 'asc',
     'sort_field' => 'name',
 
@@ -27,6 +26,8 @@
     id="{{ $name }}ListingTable"
     data-show-columns-search="{{ $show_column_search }}"
     data-show-advanced-search="{{ $show_advanced_search }}"
+    data-footer-style="footerStyle"
+    data-show-footer="true"
 
     @if ($presenter)
         data-columns="{{ $presenter }}"
@@ -44,14 +45,9 @@
         data-buttons="{{ $buttons }}"
     @endif
 
-    @if ($show_footer)
-        data-show-footer="{{ $show_footer }}"
-        data-footer-style="footerStyle"
-    @endif
-
     @if ($api_url)
         data-side-pagination="server"
-        data-url="{!! $api_url !!}"
+        data-url="{!!  $api_url !!}"
     @endif
 
     data-export-options='{

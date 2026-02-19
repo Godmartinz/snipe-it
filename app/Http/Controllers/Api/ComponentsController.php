@@ -59,7 +59,7 @@ class ComponentsController extends Controller
 
         $components = Component::select('components.*')
             ->with('company', 'location', 'category', 'supplier', 'adminuser', 'manufacturer')
-            ->withSum('uncontrainedAssets as sum_unconstrained_assets', 'components_assets.assigned_qty');
+            ->withSum('unconstrainedAssets as sum_unconstrained_assets', 'components_assets.assigned_qty');
 
         $filter = [];
 
@@ -85,6 +85,10 @@ class ComponentsController extends Controller
 
         if ($request->filled('company_id')) {
             $components->where('components.company_id', '=', $request->input('company_id'));
+        }
+
+        if ($request->filled('order_number')) {
+            $components->where('components.order_number', '=', $request->input('order_number'));
         }
 
         if ($request->filled('category_id')) {

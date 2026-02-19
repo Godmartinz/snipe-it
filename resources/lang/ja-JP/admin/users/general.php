@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'スーパー管理者のみがユーザーにスーパー管理者権限を付与できます。',
     'admin_permission_warning' => '管理者権限以上のユーザーのみがユーザーの管理者権限を付与できます。',
     'remove_group_memberships' => 'グループメンバーシップを削除',
-    'warning_deletion_information' => '以下の :count ユーザーからのすべてのアイテムをチェックインしようとしています。スーパー管理者名は赤でハイライトされます。',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'これらのユーザーのすべてのアセットをこのステータスに更新します',
     'checkin_user_properties' => 'これらのユーザーに関連付けられているすべてのプロパティをチェック',
     'remote_label'   => 'これはリモートのユーザーです',

@@ -4,7 +4,7 @@ return array(
     'about_suppliers_title' => 'O Dostawcach',
     'about_suppliers_text'  => 'Dostawcy są wykorzystywani do śledzenia źródeł elementów',
     'address'               => 'Adres Dostawcy',
-    'assets'                => 'Aktywa',
+    'assets'                => 'Środki',
     'city'                  => 'Miasto',
     'contact'               => 'Osoba Kontaktowa',
     'country'               => 'Kraj',
@@ -20,7 +20,7 @@ return array(
     'suppliers'             => 'Dostawcy',
     'update'                => 'Zaktualizuj Dostawcę',
     'view'                  => 'Podgląd dostawcy',
-    'view_assets_for'       => 'Podgląd aktywa dla',
+    'view_assets_for'       => 'Wyświetl środki: ',
     'zip'                   => 'Kod Pocztowy',
 
 );

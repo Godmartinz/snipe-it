@@ -12,7 +12,7 @@ return [
     'create'                    => 'Создать местоположение',
     'update'                    => 'Обновить местоположение',
     'print_assigned'            => 'Печать назначенных',
-    'print_inventory'           => 'Print Inventory',
+    'print_inventory'           => 'Печать инвентаризационной описи',
     'print_all_assigned'        => 'Print Inventory and Assigned',
     'name'                      => 'Название',
     'address'                   => 'Адрес',

@@ -13,8 +13,8 @@ return array(
     |
     */
 
-    'week_start_select' => 'Select Day of Week',
-    'week_start' => 'Day the Week Starts On',
+    'week_start_select' => 'Wybierz dzień tygodnia',
+    'week_start' => 'Tydzień zaczyna się w',
     'today' => 'Dzisiaj',
     'clear' => 'Wyczyść',
     'days' => [

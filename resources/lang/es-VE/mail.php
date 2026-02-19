@@ -4,7 +4,7 @@ return [
 
     'Accessory_Checkin_Notification' => 'Accesorio ingresado',
     'Accessory_Checkout_Notification' => 'Accessory checked out|:count Accessories checked out',
-    'Asset_Checkin_Notification' => 'Asset checked in: :tag',
+    'Asset_Checkin_Notification' => 'Activo Devuelto',
     'Asset_Checkout_Notification' => 'Asset checked out: :tag',
     'Confirm_Accessory_Checkin' => 'Confirmación de ingreso de accesorio',
     'Confirm_Asset_Checkin' => 'Confirmación de ingreso de activo',

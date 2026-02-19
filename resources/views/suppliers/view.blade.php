@@ -10,54 +10,21 @@
 @stop
 
 @section('header_right')
-    <a href="{{ route('suppliers.edit', $supplier->id) }}" class="btn btn-theme pull-right">
-        {{ trans('general.update') }}</a>
-@stop
-
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
 
 {{-- Page content --}}
 @section('content')
     <x-container columns="2">
-        <x-page-column class="col-md-9">
+        <x-page-column class="col-md-9 main-panel">
             <x-tabs>
                 <x-slot:tabnav>
-                    @can('view', \App\Models\Asset::class)
-                        <x-tabs.nav-item
-                            name="assets"
-                            class="active"
-                            icon="fas fa-barcode fa-fw"
-                            label="{{ trans('general.assets') }}"
-                            count="{{ $supplier->assets()->AssetsForShow()->count() }}"
-                        />
-                    @endcan
 
-                    @can('view', \App\Models\Accessory::class)
-                        <x-tabs.nav-item
-                                name="accessories"
-                                icon="far fa-keyboard fa-fw"
-                                label="{{ trans('general.accessories') }}"
-                                count="{{ $supplier->accessories()->count() }}"
-                        />
-                    @endcan
-
-
-                    @can('view', \App\Models\Consumable::class)
-                        <x-tabs.nav-item
-                                name="consumables"
-                                icon="fas fa-tint fa-fw"
-                                label="{{ trans('general.consumables') }}"
-                                count="{{ $supplier->consumables()->count() }}"
-                        />
-                    @endcan
-
-                    @can('view', \App\Models\Component::class)
-                        <x-tabs.nav-item
-                                name="components"
-                                icon="fas fa-hdd fa-fw"
-                                label="{{ trans('general.components') }}"
-                                count="{{ $supplier->components->count() }}"
-                        />
-                    @endcan
+                    <x-tabs.asset-tab count="{{ $supplier->assets()->AssetsForShow()->count() }}" class="active" />
+                    <x-tabs.license-tab count="{{ $supplier->licenses->count() }}" class="active" />
+                    <x-tabs.accessory-tab count="{{ $supplier->accessories->count() }}" />
+                    <x-tabs.consumable-tab count="{{ $supplier->consumables->count() }}" />
+                    <x-tabs.component-tab count="{{ $supplier->components->count() }}" />
 
                     @can('view', \App\Models\AssetMaintenance::class)
                         <x-tabs.nav-item
@@ -93,7 +60,7 @@
                             </x-slot:header>
 
                             <x-slot:bulkactions>
-                                <x-table.bulk-users />
+                                <x-table.bulk-assets />
                             </x-slot:bulkactions>
 
                             <x-slot:content>
@@ -111,6 +78,26 @@
                     @endcan
                     <!-- end assets tab pane -->
 
+                    <!-- start licenses tab pane -->
+                    @can('view', \App\Models\License::class)
+                        <x-tabs.pane name="licenses">
+                            <x-slot:header>
+                                {{ trans('general.licenses') }}
+                            </x-slot:header>
+
+                            <x-slot:content>
+                                <x-table
+                                        show_advanced_search="true"
+                                        buttons="licenseButtons"
+                                        api_url="{{ route('api.licenses.index', ['supplier_id' => $supplier->id]) }}"
+                                        :presenter="\App\Presenters\LicensePresenter::dataTableLayout()"
+                                        export_filename="export-{{ str_slug($supplier->name) }}-licenses-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end licenses tab pane -->
 
                     <!-- start accessories tab pane -->
                     @can('view', \App\Models\Accessory::class)
@@ -133,26 +120,6 @@
                     @endcan
                     <!-- end accessories tab pane -->
 
-                    <!-- start licenses tab pane -->
-                    @can('view', \App\Models\License::class)
-                        <x-tabs.pane name="licenses">
-                            <x-slot:header>
-                                {{ trans('general.licenses') }}
-                            </x-slot:header>
-
-                            <x-slot:content>
-                                <x-table
-                                        show_advanced_search="true"
-                                        buttons="licenseButtons"
-                                        api_url="{{ route('api.licenses.index', ['supplier_id' => $supplier->id]) }}"
-                                        :presenter="\App\Presenters\LicensePresenter::dataTableLayout()"
-                                        export_filename="export-{{ str_slug($supplier->name) }}-licenses-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-
-                        </x-tabs.pane>
-                    @endcan
-                    <!-- end licenses tab pane -->
 
                     <!-- start components tab pane -->
                     @can('view', \App\Models\Component::class)
@@ -232,8 +199,16 @@
         <x-page-column class="col-md-3">
 
             <x-box>
-                <x-box.contact :contact="$supplier" img_path="{{ app('suppliers_upload_url') }}">
-                </x-box.contact>
+                <x-box.info-panel :infoPanelObj="$supplier" img_path="{{ app('suppliers_upload_url') }}">
+
+                    <x-slot:before_list>
+
+                        <x-button.wide-edit :item="$supplier" :route="route('suppliers.edit', $supplier->id)" />
+                        <x-button.wide-delete :item="$supplier" />
+
+                    </x-slot:before_list>
+
+                </x-box.info-panel>
             </x-box>
         </x-page-column>
 

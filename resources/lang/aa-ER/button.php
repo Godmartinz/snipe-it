@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'crwdns6307:0crwdne6307:0',
     'append'                    => 'crwdns6309:0crwdne6309:0',
     'new'                       => 'crwdns6311:0crwdne6311:0',
+    'show_hide_info'            => 'crwdns14496:0crwdne14496:0',
     'var' => [
         'clone'     => 'crwdns12598:0crwdne12598:0',
         'edit'      => 'crwdns12600:0crwdne12600:0',

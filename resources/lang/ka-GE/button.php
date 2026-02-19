@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'სარემონტო ჩანაწერის დამატება',
     'append'                    => 'მიმაგრება',
     'new'                       => 'ახალი',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => ':item_type-ის კლონირება',
         'edit'      => ':item_type-ის რედაქტირება',

@@ -10,7 +10,9 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
+use App\Presenters\MaintenancesPresenter;
 
 /**
  * Model for Asset Maintenances.
@@ -27,7 +29,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
     use Loggable, Presentable;
 
 
-
+    protected $presenter = MaintenancesPresenter::class;
     protected $table = 'maintenances';
     protected $rules = [
         'asset_id'               => 'required|integer',
@@ -116,6 +118,12 @@ class Maintenance extends SnipeModel implements ICompanyableChild
             trans('admin/maintenances/general.hardware_support')      => trans('admin/maintenances/general.hardware_support'),
             trans('admin/maintenances/general.configuration_change')     => trans('admin/maintenances/general.configuration_change'),
         ];
+    }
+
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this);
     }
 
     public function setIsWarrantyAttribute($value)

@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Nambarada taxan',
+        'asset_tags.*' => 'Hantida Tag',
+    ],
 
     /*
     |--------------------------------------------------------------------------

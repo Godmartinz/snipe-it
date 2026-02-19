@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Samo superadministratori mogu odobriti korisniku superadministratorski pristup.',
     'admin_permission_warning' => 'Samo korisnici sa administratorskim pravima ili većim mogu odobriti korisniku administratorski pristup.',
     'remove_group_memberships' => 'Uklonite članstvo u grupi',
-    'warning_deletion_information' => 'Potrebno je da obeležite SVE stavke navedene ispod počevši od stavke :broj korisnika. Imena superadministratora su istaknuta crvenom bojom.',
+    'warning_deletion_information' => 'Razdužićete SVE stavke od :count korisnika izlistanih ispod.',
     'update_user_assets_status' => 'Uredi svu imovinu ovih korisnika u ovaj status',
     'checkin_user_properties' => 'Proverite sva svojstva povezana sa ovim korisnicima',
     'remote_label'   => 'Ovo je udaljeni korisnik',

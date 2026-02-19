@@ -86,6 +86,10 @@ class ConsumablesController extends Controller
             $consumables->where('consumables.company_id', '=', $request->input('company_id'));
         }
 
+        if ($request->filled('order_number')) {
+            $consumables->where('consumables.order_number', '=', $request->input('order_number'));
+        }
+
         if ($request->filled('category_id')) {
             $consumables->where('category_id', '=', $request->input('category_id'));
         }

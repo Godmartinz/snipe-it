@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Tööjaamu',
     'termination_date'  => 'Lõpetamise kuupäev',
     'to_email'          => 'Litsenseeritud e-mailile',
-    'to_name'           => 'Litsenseeritud nimele',
+    'to_name'           => 'Litsentseeritud',
     'update'            => 'Muuda litsentsi',
     'checkout_help'     => 'Peate litsentsi kontrollima riistvara vara või isiku jaoks. Võite valida mõlemad, kuid vara omanik peab sobima selle isikuga, kellele vara kontrollitakse.'
 );

@@ -2,11 +2,12 @@
 
 return array(
 
-    'accepted'                  => 'You have successfully accepted this item.',
-    'declined'                  => 'You have successfully declined this item.',
+    'accepted'                  => 'Pomyślnie potwierdziłeś odbiór tego przedmiotu.',
+    'declined'                  => 'Pomyślnie odrzuciłeś odbiór tego przedmiotu.',
     'bulk_manager_warn'	        => 'Użytkownicy zostały pomyślnie zaktualizowane, jednak Twój wpis manager nie został zapisany, bo dyrektor wybrano był również na liście użytkowników do edycji i użytkowników nie może być ich Menedżer. Wybierz użytkowników, z wyjątkiem Menedżera.',
     'user_exists'               => 'Użytkownik już istnieje!',
-    'user_not_found'            => 'Użytkownik nie istnieje lub nie masz uprawnień.',
+    'cannot_delete'             => 'Użytkownik nie istnieje lub nie masz uprawnień do jego usunięcia.',
+    'user_not_found'            => 'Użytkownik nie istnieje lub nie masz uprawnień do ich przeglądania.',
     'user_login_required'       => 'Pole login jest wymagane',
     'user_has_no_assets_assigned' => 'Brak aktywów aktualnie przypisanych do użytkownika.',
     'user_password_required'    => 'Pole hasło jest wymagane.',
@@ -37,9 +38,9 @@ return array(
         'update' => 'Podczas aktualizacji użytkownika wystąpił problem. Spróbuj ponownie.',
         'delete' => 'Wystąpił błąd podczas usuwania użytkownika. Spróbuj ponownie.',
         'delete_has_assets' => 'Ten użytkownik posiada elementy przypisane i nie może być usunięty.',
-        'delete_has_assets_var' => 'Ten użytkownik nadal ma przypisany zasób. Proszę sprawdzić to najpierw.|Ten użytkownik nadal ma :count przypisanych zasobów. Proszę najpierw sprawdzić jego aktywa.',
+        'delete_has_assets_var' => 'Ten użytkownik nadal ma przypisany zasób. Proszę sprawdzić to najpierw.|Ten użytkownik nadal ma :count przypisanych zasobów. Proszę najpierw sprawdzić jego środki.',
         'delete_has_licenses_var' => 'Ten użytkownik nadal ma przypisaną licencję. Proszę sprawdzić ją najpierw. | Ten użytkownik nadal ma przypisaną licencję :count. Proszę sprawdzić je najpierw.',
-        'delete_has_accessories_var' => 'Ten użytkownik nadal ma przypisane akcesoria. Proszę sprawdzić to najpierw. | Ten użytkownik nadal ma :count przyporządkowanych akcesoriów. Proszę najpierw sprawdzić ich aktywa.',
+        'delete_has_accessories_var' => 'Ten użytkownik nadal ma przypisane akcesoria. Proszę sprawdzić to najpierw. | Ten użytkownik nadal ma :count przyporządkowanych akcesoriów. Proszę najpierw sprawdzić ich środki.',
         'delete_has_locations_var' => 'Ten użytkownik nadal zarządza lokalizacją. Proszę najpierw wybrać innego menedżera.|Ten użytkownik nadal zarządza :count lokalizacji. Proszę najpierw wybrać innego menedżera.',
         'delete_has_users_var' => 'Ten użytkownik nadal zarządza innym użytkownikiem. Proszę najpierw wybrać innego menedżera dla tego użytkownika. Ten użytkownik nadal zarządza :count użytkowników. Najpierw wybierz innego menedżera.',
         'unsuspend' => 'Wystąpił problem podczas odblokowania użytkownika. Spróbuj ponownie.',

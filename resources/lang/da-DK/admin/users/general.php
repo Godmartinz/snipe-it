@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Kun superadmins kan give en bruger superadmin adgang.',
     'admin_permission_warning' => 'Kun brugere med administratorrettigheder eller større kan give en brugeradministrator adgang.',
     'remove_group_memberships' => 'Fjern Gruppemedlemskaber',
-    'warning_deletion_information' => 'Du er ved at tjekke alle elementer fra :count bruger(e) nedenfor. Super admin navne er fremhævet med rødt.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Opdater alle aktiver for disse brugere til denne status',
     'checkin_user_properties' => 'Check in all properties associated with these users (Automatic Copy)',
     'remote_label'   => 'Dette er en fjernbruger',

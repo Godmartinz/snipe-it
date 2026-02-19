@@ -16,7 +16,7 @@ return array(
     */
 
     "superuser" => [
-        'name' => 'Super User',
+        'name' => 'Súper Usuario',
         'note'       => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
     ],
     'admin' => [
@@ -37,43 +37,43 @@ return array(
     'assets' =>
         [
             'name' => 'Activos',
-            'note' => 'Grants access to the Assets section of the application.',
+            'note' => 'Otorga acceso a la sección Activos de la aplicación.',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'Ver activos',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'Crear nuevos activos',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'Editar activos',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'Eliminar activos',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'Devolver',
+        'note' => 'Devolver activos entregados a inventario.',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
+        'name' => 'Entregar',
         'note' => 'Assign assets in inventory by checking them out.',
     ],
 
     'assetsaudit' => [
-        'name' => 'Audit Assets',
-        'note' => 'Allows the user to mark an asset as physically inventoried.',
+        'name' => 'Auditar activos',
+        'note' => 'Permite al usuario marcar un activo como inventoriado físicamente.',
     ],
 
     'assetsviewrequestable' => [
-        'name' => 'View Requestable Assets',
-        'note' => 'Allows the user to view assets that are marked as requestable.',
+        'name' => 'Ver activos solicitables',
+        'note' => 'Permite al usuario ver activos marcados como solicitables.',
     ],
 
     'assetsviewencrypted-custom-fields' => [
@@ -83,95 +83,95 @@ return array(
 
     'accessories'   => [
         'name' => 'Accesorios',
-        'note'       => 'Grants access to the Accessories section of the application.',
+        'note'       => 'Otorga acceso a la sección Accesorios de la aplicación.',
     ],
 
     'accessoriesview' => [
-        'name' => 'View Accessories',
+        'name' => 'Ver Accesorios',
     ],
     'accessoriescreate' => [
-        'name' => 'Create New Accessories',
+        'name' => 'Crear nuevo Accesorio',
     ],
     'accessoriesedit' => [
-        'name' => 'Edit Accessories',
+        'name' => 'Editar Accesorios',
     ],
     'accessoriesdelete' => [
-        'name' => 'Delete Accessories',
+        'name' => 'Eliminar Accesorios',
     ],
     'accessoriescheckout' => [
-        'name' => 'Check Out Accessories',
-        'note' => 'Assign accessories in inventory by checking them out.',
+        'name' => 'Entregar Accesorios',
+        'note' => 'Asignar accesiorios en inventario al entregarlos.',
     ],
     'accessoriescheckin' => [
-        'name' => 'Check In Accessories',
-        'note' => 'Check accessories back into inventory that are currently checked out.',
+        'name' => 'Devolver accesorios.',
+        'note' => 'Devolver accesorios que están entregados al inventario.',
     ],
     'accessoriesfiles' => [
-        'name' => 'Manage Accessory Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with accessories.',
+        'name' => 'Administrar archivos de accesorios',
+        'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a accesorios.',
     ],
     'consumables'   => [
         'name' => 'Consumibles',
-        'note'       => 'Grants access to the Consumables section of the application.',
+        'note'       => 'Otorga acceso a la sección Consumibles de la aplicación.',
     ],
     'consumablesview' => [
-        'name' => 'View Consumables',
+        'name' => 'Ver consumibles',
     ],
     'consumablescreate' => [
-        'name' => 'Create New Consumables',
+        'name' => 'Crear nuevos consumibles',
     ],
     'consumablesedit' => [
-        'name' => 'Edit Consumables',
+        'name' => 'Editar consumibles',
     ],
     'consumablesdelete' => [
-        'name' => 'Delete Consumables',
+        'name' => 'Eliminar consumibles',
     ],
     'consumablescheckout' => [
-        'name' => 'Check Out Consumables',
-        'note' => 'Assign consumables in inventory by checking them out.',
+        'name' => 'Entregar Consumibles',
+        'note' => 'Asignar consumibles en inventario al entregarlos.',
     ],
     'consumablesfiles' => [
-        'name' => 'Manage Consumable Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with consumables.',
+        'name' => 'Administrar archivos de Consumibles.',
+        'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a consumibles.',
     ],
     'licenses'   => [
         'name' => 'Licencias',
-        'note'       => 'Grants access to the Licenses section of the application.',
+        'note'       => 'Otorga acceso a la sección Licencias de la aplicación.',
     ],
     'licensesview' => [
-        'name' => 'View Licenses',
+        'name' => 'Ver Licencias',
     ],
     'licensescreate' => [
-        'name' => 'Create New Licenses',
+        'name' => 'Crear nueva Licencia',
     ],
     'licensesedit' => [
-        'name' => 'Edit Licenses',
+        'name' => 'Editar Licencias',
     ],
     'licensesdelete' => [
-        'name' => 'Delete Licenses',
+        'name' => 'Eliminar Licencias',
     ],
     'licensescheckout' => [
-        'name' => 'Assign Licenses',
-        'note' => 'Allows the user to assign licenses to assets or users.',
+        'name' => 'Asignar Licencias',
+        'note' => 'Permite al usuario asignar licencias a activos o usuarios.',
         ],
     'licensescheckin' => [
-        'name' => 'Unassign Licenses',
-        'note' => 'Allows the user to unassign licenses from assets or users.',
+        'name' => 'Desasignar Licencias',
+        'note' => 'Permite al usuario desasignar licencias a activos o usuarios.',
     ],
     'licensesfiles' => [
-        'name' => 'Manage License Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with licenses.',
+        'name' => 'Administrar archivos de Licencias',
+        'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a licencias.',
     ],
     'licenseskeys' => [
-        'name' => 'Manage License Keys',
-        'note' => 'Allows the user to view product keys associated with licenses.',
+        'name' => 'Administrar claves de licencia',
+        'note' => 'Permite al usuario ver las claves de producto asociadas a licencias.',
     ],
     'components'   => [
         'name' => 'Componentes',
-        'note'       => 'Grants access to the Components section of the application.',
+        'note'       => 'Otorga acceso a la sección Componentes de la aplicación.',
     ],
     'componentsview' => [
-        'name' => 'View Components',
+        'name' => 'Ver Componentes',
     ],
     'componentscreate' => [
         'name' => 'Create New Components',
@@ -183,7 +183,7 @@ return array(
         'name' => 'Delete Components',
     ],
     'componentsfiles' => [
-        'name' => 'Manage Component Files',
+        'name' => '',
         'note' => 'Allows the user to upload, download, and delete files associated with components.',
     ],
     'componentscheckout' => [

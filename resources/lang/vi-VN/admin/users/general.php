@@ -38,7 +38,7 @@ return [
     'superadmin_permission_warning' => 'Chỉ quyền superadmins mới cấp quyền người dùng truy cập.',
     'admin_permission_warning' => 'Chỉ có quyền admins trở lên mới có thể cấp quyền truy cập cho người dùng.',
     'remove_group_memberships' => 'Xóa thành viên nhóm',
-    'warning_deletion_information' => 'Bạn sắp kiểm tra TẤT CẢ các thiết bị từ :count người dùng được liệt kê bên dưới. Tên quản trị viên cấp cao được đánh dấu màu đỏ.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Cập nhật tất cả tài sản của những người dùng này vào trạng thái này',
     'checkin_user_properties' => 'Kiểm tra tất cả các thuộc tính được liên kết với những người dùng này',
     'remote_label'   => 'Đây là người dùng từ xa',

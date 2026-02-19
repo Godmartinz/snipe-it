@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'பராமரிப்பைச் சேர்',
     'append'                    => 'இணைக்கவும்',
     'new'                       => 'புதிய',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Clone :item_type',
         'edit'      => 'Edit :item_type',

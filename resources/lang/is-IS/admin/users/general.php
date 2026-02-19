@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Only superadmins may grant a user superadmin access.',
     'admin_permission_warning' => 'Only users with admins rights or greater may grant a user admin access.',
     'remove_group_memberships' => 'Remove Group Memberships',
-    'warning_deletion_information' => 'Þú ert að fara skrá ALLA hluti inn frá :count user(s) hér að neðan. Nöfn kerfisstjórar eru uppljómuð með rauðu.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Uppfæra allar eignir fyrir þessa notendur í þessa stöðu',
     'checkin_user_properties' => 'Check in all properties associated with these users',
     'remote_label'   => 'This is a remote user',

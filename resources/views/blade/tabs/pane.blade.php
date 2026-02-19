@@ -17,6 +17,14 @@
         </div>
     @endif
 
-    {{ $content }}
+        @if ((isset($content)) && (!$content->isEmpty()))
+            {{ $content }}
+        @endif
+
+        @if (($slot) && (!$slot->isEmpty()))
+            {{ $slot }}
+        @endif
+
+
 </div>
 <!-- /.tab-pane -->

@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Nº de utilização',
     'termination_date'  => 'Data de Término',
     'to_email'          => 'Licenciado para o Email',
-    'to_name'           => 'Licenciado para o Nome',
+    'to_name'           => 'Licenciado A',
     'update'            => 'Atualizar Licença',
     'checkout_help'     => 'Você precisa alocar uma licença para um ativo de hardware ou pessoa. Você pode selecionar ambos, mas o responsável pelo ativo deve coincidir com a pessoa para quem você está tentando alocar.'
 );

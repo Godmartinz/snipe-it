@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
+use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
+
 
 class Statuslabel extends SnipeModel
 {
@@ -14,11 +17,14 @@ class Statuslabel extends SnipeModel
     use SoftDeletes;
     use ValidatingTrait;
     use UniqueUndeletedTrait;
+    use Presentable;
 
     protected $injectUniqueIdentifier = true;
 
     protected $table = 'status_labels';
     protected $hidden = ['user_id', 'deleted_at'];
+    protected $presenter = \App\Presenters\StatusLabelPresenter::class;
+
 
     protected $rules = [
         'name'  => 'required|max:255|string|unique_undeleted',
@@ -51,6 +57,13 @@ class Statuslabel extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [];
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && ($this->deleted_at == '');
+    }
 
     /**
      * Establishes the status label -> assets relationship

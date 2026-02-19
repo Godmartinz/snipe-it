@@ -18,7 +18,7 @@ return array(
         'confirm'   => 'Er du sikker på, at du vil slette denne komponent?',
         'error'   => 'Der opstod et problem ved at slette komponenten. Prøv igen.',
         'success' => 'Komponenten blev slettet korrekt.',
-        'error_qty'   => 'Some components of this type are still checked out. Please check them in and try again.',
+        'error_qty'   => 'Nogle komponenter af denne type er stadig låst. Tjek dem ind, og forsøg igen.',
     ),
 
      'checkout' => array(

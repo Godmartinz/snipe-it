@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Kun superbrukere kan gjøre en annen bruker til superbruker.',
     'admin_permission_warning' => 'Kun brukere med adminrettigheter eller høyere kan gi en annen bruker admintilgang.',
     'remove_group_memberships' => 'Fjern gruppemedlemskap',
-    'warning_deletion_information' => 'Du er i ferd med å sjekke inn ALLE elementene fra :count bruker(e) nedenfor. Super admin navn er uthevet med rødt.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Oppdater alle ressursene til disse brukerne til denne statusen',
     'checkin_user_properties' => 'Sjekk inn alt tilbehør koblet til disse brukerne',
     'remote_label'   => 'Dette er en ekstern bruker',

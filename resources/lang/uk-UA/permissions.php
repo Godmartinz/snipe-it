@@ -16,376 +16,376 @@ return array(
     */
 
     "superuser" => [
-        'name' => 'Super User',
-        'note'       => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
+        'name' => 'Cуперкористувач',
+        'note'       => 'Визначає, чи має користувач повний доступ до всіх розділів адміністрування. Це налаштування ПЕРЕКРИВАЄ всі інші специфічні та обмежувальні дозволи в системі. ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
-        'note'       => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
+        'name' => 'Доступ адміністратора',
+        'note'       => 'Визначає, чи має користувач доступ до більшості розділів системи, ЗА ВИНЯТКОМ налаштувань системного адміністратора. Ці користувачі зможуть керувати користувачами, локаціями, категоріями тощо, але ПІДПОРЯДКОВУЮТЬСЯ обмеженням повної підтримки декількох компаній, якщо вона увімкнена.',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
-        'note'       => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'name' => 'Імпорт із CSV',
+        'note'       => 'Це дозволить користувачам виконувати імпорт, навіть якщо доступ до користувачів, активів тощо заборонено в інших розділах.',
     ],
 
     'reports' => [
-        'name' => 'Reports Access',
-        'note'       => 'Determines whether the user has access to the Reports section of the application.',
+        'name' => 'Доступ до звітів',
+        'note'       => 'Визначає, чи має користувач доступ до розділу «Звіти» в додатку.',
     ],
 
     'assets' =>
         [
             'name' => 'Активи',
-            'note' => 'Grants access to the Assets section of the application.',
+            'note' => 'Надає доступ до розділу «Активи» в додатку.',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'Переглянути активи',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'Створити нові активи',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'Редагувати активи',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'Видалити активи',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'Повернути на склад',
+        'note' => 'Повернення на склад активів, які наразі видані користувачам або на локації.',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
-        'note' => 'Assign assets in inventory by checking them out.',
+        'name' => 'Видати',
+        'note' => 'Призначення активів зі складу шляхом їх видачі.',
     ],
 
     'assetsaudit' => [
-        'name' => 'Audit Assets',
-        'note' => 'Allows the user to mark an asset as physically inventoried.',
+        'name' => 'Аудит активів',
+        'note' => 'Дозволяє користувачеві позначати актив як такий, що пройшов фізичну інвентаризацію.',
     ],
 
     'assetsviewrequestable' => [
-        'name' => 'View Requestable Assets',
-        'note' => 'Allows the user to view assets that are marked as requestable.',
+        'name' => 'Перегляд активів, доступних для запиту',
+        'note' => 'Дозволяє користувачеві переглядати активи, позначені як доступні для запиту.',
     ],
 
     'assetsviewencrypted-custom-fields' => [
-        'name' => 'View Encrypted Custom Fields',
-        'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
+        'name' => 'Перегляд зашифрованих користувацьких полів',
+        'note' => 'Дозволяє користувачеві переглядати та змінювати зашифровані користувацькі поля активів.',
     ],
 
     'accessories'   => [
         'name' => 'Аксесуари',
-        'note'       => 'Grants access to the Accessories section of the application.',
+        'note'       => 'Надає доступ до розділу «Аксесуари» в додатку.',
     ],
 
     'accessoriesview' => [
-        'name' => 'View Accessories',
+        'name' => 'Перегляд аксесуарів',
     ],
     'accessoriescreate' => [
-        'name' => 'Create New Accessories',
+        'name' => 'Створення нових аксесуарів',
     ],
     'accessoriesedit' => [
-        'name' => 'Edit Accessories',
+        'name' => 'Редагування аксесуарів',
     ],
     'accessoriesdelete' => [
-        'name' => 'Delete Accessories',
+        'name' => 'Видалення аксесуарів',
     ],
     'accessoriescheckout' => [
-        'name' => 'Check Out Accessories',
-        'note' => 'Assign accessories in inventory by checking them out.',
+        'name' => 'Видавати аксесуари',
+        'note' => 'Призначення аксесуарів зі складу шляхом їх видачі.',
     ],
     'accessoriescheckin' => [
-        'name' => 'Check In Accessories',
-        'note' => 'Check accessories back into inventory that are currently checked out.',
+        'name' => 'Повернути аксесуари',
+        'note' => 'Повернення на склад аксесуарів, які зараз видані.',
     ],
     'accessoriesfiles' => [
-        'name' => 'Manage Accessory Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with accessories.',
+        'name' => 'Керування файлами аксесуарів',
+        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з аксесуарами.',
     ],
     'consumables'   => [
         'name' => 'Витратні матеріали',
-        'note'       => 'Grants access to the Consumables section of the application.',
+        'note'       => 'Надає доступ до розділу «Витратні матеріали» в додатку.',
     ],
     'consumablesview' => [
-        'name' => 'View Consumables',
+        'name' => 'Перегляд витратних матеріалів',
     ],
     'consumablescreate' => [
-        'name' => 'Create New Consumables',
+        'name' => 'Створення нових витратних матеріалів',
     ],
     'consumablesedit' => [
-        'name' => 'Edit Consumables',
+        'name' => 'Редагування витратних матеріалів',
     ],
     'consumablesdelete' => [
-        'name' => 'Delete Consumables',
+        'name' => 'Видалення витратних матеріалів',
     ],
     'consumablescheckout' => [
-        'name' => 'Check Out Consumables',
-        'note' => 'Assign consumables in inventory by checking them out.',
+        'name' => 'Видавати витратні матеріали',
+        'note' => 'Призначення витратних матеріалів зі складу шляхом їх видачі.',
     ],
     'consumablesfiles' => [
-        'name' => 'Manage Consumable Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with consumables.',
+        'name' => 'Керування файлами витратних матеріалів',
+        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з витратними матеріалами.',
     ],
     'licenses'   => [
         'name' => 'Ліцензії',
-        'note'       => 'Grants access to the Licenses section of the application.',
+        'note'       => 'Надає доступ до розділу «Ліцензії» в додатку.',
     ],
     'licensesview' => [
-        'name' => 'View Licenses',
+        'name' => 'Перегляд ліцензій',
     ],
     'licensescreate' => [
-        'name' => 'Create New Licenses',
+        'name' => 'Створення нових ліцензій',
     ],
     'licensesedit' => [
-        'name' => 'Edit Licenses',
+        'name' => 'Редагування ліцензій',
     ],
     'licensesdelete' => [
-        'name' => 'Delete Licenses',
+        'name' => 'Видалення ліцензій',
     ],
     'licensescheckout' => [
-        'name' => 'Assign Licenses',
-        'note' => 'Allows the user to assign licenses to assets or users.',
+        'name' => 'Призначення ліцензій',
+        'note' => 'Дозволяє користувачеві призначати ліцензії активам або користувачам.',
         ],
     'licensescheckin' => [
-        'name' => 'Unassign Licenses',
-        'note' => 'Allows the user to unassign licenses from assets or users.',
+        'name' => 'Скасування призначення ліцензій',
+        'note' => 'Дозволяє користувачеві скасовувати призначення ліцензій активам або користувачам.',
     ],
     'licensesfiles' => [
-        'name' => 'Manage License Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with licenses.',
+        'name' => 'Керування файлами ліцензій',
+        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з ліцензіями.',
     ],
     'licenseskeys' => [
-        'name' => 'Manage License Keys',
-        'note' => 'Allows the user to view product keys associated with licenses.',
+        'name' => 'Керування ліцензійними ключами',
+        'note' => 'Дозволяє користувачеві переглядати ключі продуктів, пов’язані з ліцензіями.',
     ],
     'components'   => [
         'name' => 'Компоненти',
-        'note'       => 'Grants access to the Components section of the application.',
+        'note'       => 'Надає доступ до розділу «Компоненти» в додатку.',
     ],
     'componentsview' => [
-        'name' => 'View Components',
+        'name' => 'Перегляд компонентів',
     ],
     'componentscreate' => [
-        'name' => 'Create New Components',
+        'name' => 'Створення нових компонентів',
     ],
     'componentsedit' => [
-        'name' => 'Edit Components',
+        'name' => 'Редагування компонентів',
     ],
     'componentsdelete' => [
-        'name' => 'Delete Components',
+        'name' => 'Видалення компонентів',
     ],
     'componentsfiles' => [
-        'name' => 'Manage Component Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with components.',
+        'name' => 'Керування файлами компонентів',
+        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з компонентами.',
     ],
     'componentscheckout' => [
-        'name' => 'Check Out Components',
-        'note' => 'Assign components in inventory by checking them out.',
+        'name' => 'Видача компонентів',
+        'note' => 'Призначайте компоненти в інвентарі, видаючи їх.',
     ],
     'componentscheckin' => [
-        'name' => 'Check In Components',
-        'note' => 'Check components back into inventory that are currently checked out.',
+        'name' => 'Повернення компонентів',
+        'note' => 'Повертати компоненти, які наразі видані, назад до інвентарю.',
     ],
     'kits'   => [
         'name' => 'Попередньо визначені набори',
-        'note'       => 'Grants access to the Predefined Kits section of the application.',
+        'note'       => 'Надає доступ до розділу «Попередньо визначені набори» в додатку.',
     ],
     'kitsview' => [
-        'name' => 'View Predefined Kits',
+        'name' => 'Перегляд попередньо визначених наборів',
     ],
     'kitscreate' => [
-        'name' => 'Create New Predefined Kits',
+        'name' => 'Створення нових попередньо визначених наборів',
     ],
     'kitsedit' => [
-        'name' => 'Edit Predefined Kits',
+        'name' => 'Редагування попередньо визначених наборів',
     ],
     'kitsdelete' => [
-        'name' => 'Delete Predefined Kits',
+        'name' => 'Видалення попередньо визначених наборів',
     ],
     'users'   => [
         'name' => 'Користувачі',
-        'note'       => 'Grants access to the Users section of the application.',
+        'note'       => 'Надає доступ до розділу «Користувачі» в додатку.',
     ],
     'usersview' => [
         'name' => 'Переглянути користувачів',
     ],
     'userscreate' => [
-        'name' => 'Create New Users',
+        'name' => 'Створення нових користувачів',
     ],
     'usersedit' => [
-        'name' => 'Edit Users',
+        'name' => 'Редагування користувачів',
     ],
     'usersdelete' => [
-        'name' => 'Delete Users',
+        'name' => 'Видалення користувачів',
     ],
     'models'   => [
-        'name' => 'Models',
-        'note'       => 'Grants access to the Models section of the application.',
+        'name' => 'Моделі',
+        'note'       => 'Надає доступ до розділу «Моделі» в додатку.',
     ],
     'modelsview' => [
         'name' => 'Переглянути моделі',
     ],
 
     'modelscreate' => [
-        'name' => 'Create New Models',
+        'name' => 'Створення нових моделей',
     ],
     'modelsedit' => [
-        'name' => 'Edit Models',
+        'name' => 'Редагування моделей',
     ],
     'modelsdelete' => [
-        'name' => 'Delete Models',
+        'name' => 'Видалення моделей',
     ],
     'categories'   => [
         'name' => 'Категорії',
-        'note'       => 'Grants access to the Categories section of the application.',
+        'note'       => 'Надає доступ до розділу «Категорії» в додатку.',
     ],
     'categoriesview' => [
-        'name' => 'View Categories',
+        'name' => 'Перегляд категорій',
     ],
     'categoriescreate' => [
-        'name' => 'Create New Categories',
+        'name' => 'Створення нових категорій',
     ],
     'categoriesedit' => [
-        'name' => 'Edit Categories',
+        'name' => 'Редагування категорій',
     ],
     'categoriesdelete' => [
-        'name' => 'Delete Categories',
+        'name' => 'Видалення категорій',
     ],
     'departments'   => [
         'name' => 'Відділи',
-        'note'       => 'Grants access to the Departments section of the application.',
+        'note'       => 'Надає доступ до розділу «Відділи» в додатку.',
     ],
     'departmentsview' => [
-        'name' => 'View Departments',
+        'name' => 'Перегляд відділів',
     ],
     'departmentscreate' => [
-        'name' => 'Create New Departments',
+        'name' => 'Створення нових відділів',
     ],
     'departmentsedit' => [
-        'name' => 'Edit Departments',
+        'name' => 'Редагування відділів',
     ],
     'departmentsdelete' => [
-        'name' => 'Delete Departments',
+        'name' => 'Видалення відділів',
     ],
     'locations'   => [
         'name' => 'Розташування',
-        'note'       => 'Grants access to the Locations section of the application.',
+        'note'       => 'Надає доступ до розділу «Локації» в додатку.',
     ],
     'locationsview' => [
-        'name' => 'View Locations',
+        'name' => 'Перегляд локацій',
     ],
     'locationscreate' => [
-        'name' => 'Create New Locations',
+        'name' => 'Створення нових локацій',
     ],
     'locationsedit' => [
-        'name' => 'Edit Locations',
+        'name' => 'Редагування локацій',
     ],
     'locationsdelete' => [
-        'name' => 'Delete Locations',
+        'name' => 'Видалення локацій',
     ],
     'status-labels'   => [
         'name' => 'Статуси активів',
-        'note'       => 'Grants access to the Status Labels section of the application used by Assets.',
+        'note'       => 'Надає доступ до розділу «Мітки статусів», що використовуються для активів.',
     ],
     'statuslabelsview' => [
-        'name' => 'View Status Labels',
+        'name' => 'Перегляд міток статусів',
     ],
     'statuslabelscreate' => [
-        'name' => 'Create New Status Labels',
+        'name' => 'Створення нових міток статусів',
     ],
     'statuslabelsedit' => [
-        'name' => 'Edit Status Labels',
+        'name' => 'Редагування міток статусів',
     ],
     'statuslabelsdelete' => [
-        'name' => 'Delete Status Labels',
+        'name' => 'Видалення міток статусів',
     ],
     'custom-fields'   => [
-        'name' => 'Індивідуальні поля',
-        'note'       => 'Grants access to the Custom Fields section of the application used by Assets.',
+        'name' => 'Користувацькі поля',
+        'note'       => 'Надає доступ до розділу «Користувацькі поля», що використовуються для активів.',
     ],
     'customfieldsview' => [
-        'name' => 'View Custom Fields',
+        'name' => 'Перегляд користувацьких полів',
     ],
     'customfieldscreate' => [
-        'name' => 'Create New Custom Fields',
+        'name' => 'Створення нових користувацьких полів',
     ],
     'customfieldsedit' => [
-        'name' => 'Edit Custom Fields',
+        'name' => 'Редагування користувацьких полів',
     ],
     'customfieldsdelete' => [
-        'name' => 'Delete Custom Fields',
+        'name' => 'Видалення користувацьких полів',
     ],
     'suppliers'   => [
         'name' => 'Постачальники',
-        'note'       => 'Grants access to the Suppliers section of the application.',
+        'note'       => 'Надає доступ до розділу «Постачальники» в додатку.',
     ],
     'suppliersview' => [
-        'name' => 'View Suppliers',
+        'name' => 'Перегляд постачальників',
     ],
     'supplierscreate' => [
-        'name' => 'Create New Suppliers',
+        'name' => 'Створення нових постачальників',
     ],
     'suppliersedit' => [
-        'name' => 'Edit Suppliers',
+        'name' => 'Редагування постачальників',
     ],
     'suppliersdelete' => [
-        'name' => 'Delete Suppliers',
+        'name' => 'Видалення постачальників',
     ],
     'manufacturers'   => [
         'name' => 'Виробники',
-        'note'       => 'Grants access to the Manufacturers section of the application.',
+        'note'       => 'Надає доступ до розділу «Виробники» в додатку.',
     ],
     'manufacturersview' => [
-        'name' => 'View Manufacturers',
+        'name' => 'Перегляд виробників',
     ],
     'manufacturerscreate' => [
-        'name' => 'Create New Manufacturers',
+        'name' => 'Створення нових виробників',
     ],
     'manufacturersedit' => [
-        'name' => 'Edit Manufacturers',
+        'name' => 'Редагування виробників',
     ],
     'manufacturersdelete' => [
-        'name' => 'Delete Manufacturers',
+        'name' => 'Видалення виробників',
     ],
     'companies'   => [
         'name' => 'Компанії',
-        'note'       => 'Grants access to the Companies section of the application.',
+        'note'       => 'Надає доступ до розділу «Компанії» в додатку.',
     ],
     'companiesview' => [
-        'name' => 'View Companies',
+        'name' => 'Перегляд компаній',
     ],
     'companiescreate' => [
-        'name' => 'Create New Companies',
+        'name' => 'Створення нових компаній',
     ],
     'companiesedit' => [
-        'name' => 'Edit Companies',
+        'name' => 'Редагування компаній',
     ],
     'companiesdelete' => [
-        'name' => 'Delete Companies',
+        'name' => 'Видалення компаній',
     ],
     'user-self-accounts' => [
-        'name' => 'User Self Accounts',
-        'note'       => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
+        'name' => 'Власні облікові записи',
+        'note'       => 'Надає користувачам без прав адміністратора можливість керувати певними аспектами власних облікових записів.',
     ],
     'selftwo-factor' => [
-        'name' => 'Manage Two-Factor Authentication',
-        'note'       => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
+        'name' => 'Керування двофакторною автентифікацією',
+        'note'       => 'Дозволяє користувачам вмикати, вимикати та керувати двофакторною автентифікацією для своїх облікових записів.',
     ],
     'selfapi' => [
-        'name' => 'Manage API Tokens',
-        'note'       => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
+        'name' => 'Керування токенами API',
+        'note'       => 'Дозволяє користувачам створювати, переглядати та відкликати власні токени API. Токени матимуть ті самі дозволи, що й користувач, який їх створив.',
     ],
     'selfedit-location' => [
-        'name' => 'Edit Location',
-        'note'       => 'Allows users to edit the location associated with their own user account.',
+        'name' => 'Редагування локації',
+        'note'       => 'Дозволяє користувачам редагувати локацію, пов’язану з їхнім власним обліковим записом.',
     ],
     'selfcheckout-assets' => [
         'name' => 'Self Check Out Assets',

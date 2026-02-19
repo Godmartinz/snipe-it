@@ -151,14 +151,15 @@ class AssetPresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.purchase_date'),
                 'formatter' => 'dateDisplayFormatter',
-            ], [
-                'field' => 'first_checkout',
-                'searchable' => true,
-                'sortable' => true,
-                'visible' => false,
-                'title' => trans('general.first_checkout'),
-                'formatter' => 'dateDisplayFormatter',
             ],
+//            [
+//                'field' => 'first_checkout',
+//                'searchable' => true,
+//                'sortable' => true,
+//                'visible' => false,
+//                'title' => trans('general.first_checkout'),
+//                'formatter' => 'dateDisplayFormatter',
+//            ],
             [
                 'field' => 'age',
                 'searchable' => false,
@@ -447,7 +448,11 @@ class AssetPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('hardware.show', e($this->name), $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Asset', $this])) {
+            return (string)link_to_route('hardware.show', e($this->display_name), $this->id);
+        } else {
+            return e($this->display_name);
+        }
     }
 
     public function modelUrl()
