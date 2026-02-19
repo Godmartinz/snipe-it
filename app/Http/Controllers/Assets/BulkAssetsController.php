@@ -711,7 +711,7 @@ class BulkAssetsController extends Controller
                     if ($request->filled('status_id')) {
                         $asset->status_id = $request->input('status_id');
                     }
-                    if (empty($asset->first_checkout_at)){
+                    if (is_null($asset->first_checkout_at)){
                         $asset->first_checkout_at = $checkout_at;
                     }
                     $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);

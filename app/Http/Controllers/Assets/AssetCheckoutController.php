@@ -92,7 +92,7 @@ class AssetCheckoutController extends Controller
                 $checkout_at = $request->input('checkout_at');
             }
 
-            if (empty($asset->first_checkout_at)){
+            if (is_null($asset->first_checkout_at)){
                 $asset->first_checkout_at = $checkout_at;
             }
 
