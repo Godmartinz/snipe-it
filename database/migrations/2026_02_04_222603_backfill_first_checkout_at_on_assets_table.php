@@ -13,13 +13,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table("assets", function (Blueprint $table) {
-            $table->timestamp('first_checkout_at')->after('next_audit_date')->nullable();
-        });
         $batchSize = 500;
         $minId = (int)DB::table('assets')->min('id');
         $maxId = (int)DB::table('assets')->max('id');
-        $assetModel = App\Models\Asset::class;
 
         if (!$minId || !$maxId) {
             return;
@@ -29,24 +25,17 @@ return new class extends Migration
             $end = $start + $batchSize - 1;
 
             DB::update("
-            UPDATE assets asset
-            SET asset.first_checkout_at = (
-                SELECT MIN(log.created_at)
-                FROM action_logs log
-                WHERE log.item_type = ?
-                    AND log.action_type = 'checkout'
-                    AND log.item_id = asset.id
-            )
-            WHERE asset.id BETWEEN {$start} AND {$end}
-                AND asset.first_checkout_at IS NULL
-            AND EXISTS(
-                SELECT 1
-                FROM action_logs log
-                WHERE log.item_type = ?
-                    AND log.action_type = 'checkout'
-                    AND log.item_id = asset.id
-            )
-            ", [$assetModel, $assetModel]);
+                UPDATE assets asset
+                SET asset.first_checkout_at = (
+                    SELECT MIN(log.created_at)
+                    FROM action_logs log
+                    WHERE log.item_type = 'App\\\\Models\\\\Asset'
+                      AND log.action_type = 'checkout'
+                      AND log.item_id = asset.id
+                )
+                WHERE asset.id BETWEEN {$start} AND {$end}
+                  AND asset.first_checkout_at IS NULL
+            ");
         }
     }
     /**
@@ -54,8 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table("assets", function (Blueprint $table) {
-            $table->dropColumn('first_checkout_at');
-        });
+        DB::table('assets')->update(['first_checkout_at' => null]);
     }
 };
