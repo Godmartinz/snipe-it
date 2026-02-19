@@ -123,8 +123,7 @@ class AssetCheckinController extends Controller
 
         try {
             foreach ($assets as $asset) {
-
-                app(AssetCheckinAction::class)->handle($request, $asset);
+                AssetCheckinAction::run($request, $asset);
             }
         } catch (\Exception $e) {
             \Log::error('Asset checkin failed', [
