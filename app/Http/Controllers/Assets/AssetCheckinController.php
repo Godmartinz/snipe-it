@@ -83,7 +83,7 @@ class AssetCheckinController extends Controller
         $assetIds = array_values(array_unique(array_filter($assetIds)));
 
         if (empty($assetIds)) {
-            throw new NoAssetsSelected($assetIds);
+            return redirect()->route('hardware.index')->with('error', 'No assets selected.');
         }
         $assets = Asset::query()
             ->whereIn('id', $assetIds)
@@ -93,15 +93,12 @@ class AssetCheckinController extends Controller
 
         $missingIds = array_values(array_diff($assetIds, $assets->keys()->all()));
         if (!empty($missingIds)) {
-            throw new AssetsDoNotExist();
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
+        //have to validate assignedTo here for the redirect
         $isCheckedIn = $assets->filter(fn($asset) => $asset->assignedTo == null)->keys()->all();
         if (empty($isCheckedIn)) {
-            throw new AssetsCheckedInAlready();
-        }
-        $missingModel = $assets->filter(fn($asset) => $asset->model == null)->keys()->all();
-        if (!empty($missingModel)) {
-            throw new AssetModelUnknown();
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.already_checked_in'));
         }
 
         foreach ($assets as $asset) {

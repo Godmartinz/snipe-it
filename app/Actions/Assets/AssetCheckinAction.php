@@ -4,6 +4,8 @@ namespace App\Actions\Assets;
 
 use App\Actions\BaseAction;
 use App\Events\CheckoutableCheckedIn;
+use App\Exceptions\AssetModelUnknown;
+use App\Exceptions\AssetsCheckedInAlready;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
 use App\Models\Asset;
@@ -18,6 +20,10 @@ class AssetCheckinAction extends BaseAction
 
     protected function handle(AssetCheckinRequest $request, $asset): bool
     {
+        $missingModel = $asset->model;
+        if (!empty($missingModel)) {
+            throw new AssetModelUnknown($missingModel);
+        }
         $target = $asset->assignedTo;
         $asset->expected_checkin = null;
         $asset->assignedTo()->disassociate($asset);
