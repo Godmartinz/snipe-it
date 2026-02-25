@@ -52,7 +52,7 @@
 <tr>
     <td>{{ $license->name }}</td>
     <td>{{ $license->serial }}</td>
-    <td>{{ $license->seat->created_at }}</td>
+    <td>{{ $license->pivot->created_at }}</td>
 </tr>
 @endforeach
 </table>
@@ -62,7 +62,12 @@
 ## {{ $accessories->count() }} {{ trans('general.accessories') }}
 
 <table width="100%">
-    <tr><th align="left">{{ trans('mail.name') }} </th> <th></th> </tr>
+    <tr>
+        <th align="left">{{ trans('mail.name') }} </th>
+        <th></th>
+        <th align="left">{{ trans('general.category') }} </th>
+        <th align="left">{{ trans('mail.checkout_date') }} </th>
+    </tr>
     @foreach($accessories as $accessory)
         <tr>
             <td>{{ $accessory->name }}</td>
@@ -71,6 +76,8 @@
                     <img src="{{ asset($accessory->getImageUrl()) }}" alt="Accessory" style="max-width: 64px;">
                 </td>
             @endif
+            <td>{{ $accessory->category->name }}</td>
+            <td>{{ $accessory->pivot->created_at }}</td>
         </tr>
     @endforeach
 </table>
@@ -80,10 +87,16 @@
 ## {{ $consumables->count() }} {{ trans('general.consumables') }}
 
 <table width="100%">
-<tr><th align="left">{{ trans('mail.name') }} </th> <th></th> </tr>
+<tr>
+    <th align="left">{{ trans('mail.name') }} </th>
+    <th align="left">{{ trans('general.category') }} </th>
+    <th align="left">{{ trans('mail.checkout_date') }} </th>
+</tr>
 @foreach($consumables as $consumable)
 <tr>
 <td>{{ $consumable->name }}</td>
+    <td>{{ $consumable->category->name }}</td>
+    <td>{{ $consumable->pivot->created_at }}</td>
 </tr>
 @endforeach
 </table>

@@ -43,8 +43,10 @@ class CurrentInventory extends Notification
         //assigned to user
         $userAssets = $this->user->assets;
         $userAccessories = $this->user->accessories;
-        $userLicenses = $this->user->licenses;
-
+        $userLicenses = $this->user->licenses()
+            ->wherePivotNull('asset_id')
+            ->get();;
+//        dd($userAccessories);
         //assigned through assets to user
         $assetsAssets = $userAssets->flatMap(fn ($asset) => $asset->assignedAssets);
         $assetsAccessories = $userAssets->flatMap(fn ($asset) => $asset->assignedAccessories->map(fn ($checkout) => $checkout->accessory)->filter());
@@ -64,9 +66,9 @@ class CurrentInventory extends Notification
 
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
-                'assets'  => $allAssets,
-                'accessories'  => $allAccessories,
-                'licenses'  => $allLicenses,
+                'assets'  => $userAssets,
+                'accessories'  => $userAccessories,
+                'licenses'  => $userLicenses,
                 'consumables'  => $this->user->consumables,
                 'components'  => $assetsComponents,
             ])
