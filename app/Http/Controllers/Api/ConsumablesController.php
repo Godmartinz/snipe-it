@@ -86,6 +86,10 @@ class ConsumablesController extends Controller
             $consumables->where('consumables.company_id', '=', $request->input('company_id'));
         }
 
+        if ($request->filled('order_number')) {
+            $consumables->where('consumables.order_number', '=', $request->input('order_number'));
+        }
+
         if ($request->filled('category_id')) {
             $consumables->where('category_id', '=', $request->input('category_id'));
         }
@@ -326,8 +330,14 @@ class ConsumablesController extends Controller
             );
         }
 
-
-        event(new CheckoutableCheckedOut($consumable, $user, auth()->user(), $request->input('note')));
+        event(new CheckoutableCheckedOut(
+            $consumable,
+            $user,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $consumable->checkout_qty,
+        ));
 
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/consumables/message.checkout.success')));
 
@@ -346,7 +356,7 @@ class ConsumablesController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->get('search').'%');
+            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);

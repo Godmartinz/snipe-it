@@ -102,12 +102,20 @@ class ConsumableCheckoutController extends Controller
         }
 
         $consumable->checkout_qty = $quantity;
-        event(new CheckoutableCheckedOut($consumable, $user, auth()->user(), $request->input('note')));
+
+        event(new CheckoutableCheckedOut(
+            $consumable,
+            $user,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $consumable->checkout_qty,
+        ));
 
         $request->request->add(['checkout_to_type' => 'user']);
         $request->request->add(['assigned_user' => $user->id]);
 
-        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
 
         // Redirect to the new consumable page

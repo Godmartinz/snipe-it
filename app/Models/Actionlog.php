@@ -375,7 +375,7 @@ class Actionlog extends SnipeModel
         }
 
         // Show as negative number if the next audit date is before the audit date we're looking at
-        if ($this->created_at > $override_default_next) {
+        if ($this->created_at->toDateString() > $override_default_next->toDateString()) {
             $next_audit_days = '-'.$next_audit_days;
         }
 

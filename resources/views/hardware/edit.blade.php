@@ -24,7 +24,7 @@
 
   <!-- Asset Tag -->
     <div class="form-group {{ ($errors->has('asset_tag') || $errors->has('asset_tags.1')) ? ' has-error' : '' }}">
-    <label for="asset_tag" class="col-md-3 control-label">{{ trans('admin/hardware/form.tag') }}</label>
+      <label for="asset_tag" class="col-md-3 control-label">{{ trans('admin/hardware/form.tag') }}</label>
 
 
 
@@ -134,16 +134,16 @@
     </div>
 
 
-        <div class="col-md-12 col-sm-12">
+    <div class="col-md-12 col-sm-12">
 
         <fieldset name="optional-details">
 
-            <x-form-legend>
+            <x-form.legend>
                 <a id="optional_info">
                     <x-icon type="caret-right" class="fa-fw" id="optional_info_icon" />
                     {{ trans('admin/hardware/form.optional_infos') }}
                 </a>
-            </x-form-legend>
+            </x-form.legend>
 
             <div id="optional_details" class="col-md-12" style="display:none">
                 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
@@ -166,38 +166,36 @@
             </div> <!-- end optional details -->
         </fieldset>
 
-        </div><!-- end col-md-12 col-sm-12-->
-
-
-
-        <div class="col-md-12 col-sm-12">
-            <fieldset name="order-info">
-                <x-form-legend>
-                    <a id="order_info">
-                        <x-icon type="caret-right" class="fa-fw" id="order_info_icon" />
-                        {{ trans('admin/hardware/form.order_details') }}
-                    </a>
-                </x-form-legend>
-
-                <div id='order_details' class="col-md-12" style="display:none">
-                    @include ('partials.forms.edit.order_number')
-                    @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.purchase_date'),'fieldname' => 'purchase_date'])
-                    @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.eol_date'),'fieldname' => 'asset_eol_date'])
-                    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
-
-                    @php
-                        $currency_type = null;
-                        if ($item->id && $item->location) {
-                            $currency_type = $item->location->currency;
-                        }
-                    @endphp
-
-                    @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
-
-                </div> <!-- end order details -->
-            </fieldset>
-        </div><!-- end col-md-12 col-sm-12-->
     </div><!-- end col-md-12 col-sm-12-->
+
+
+
+    <div class="col-md-12 col-sm-12">
+        <fieldset name="order-info">
+            <x-form.legend>
+                <a id="order_info">
+                    <x-icon type="caret-right" class="fa-fw" id="order_info_icon" />
+                    {{ trans('admin/hardware/form.order_details') }}
+                </a>
+            </x-form.legend>
+
+            <div id='order_details' class="col-md-12" style="display:none">
+                @include ('partials.forms.edit.order_number')
+                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.purchase_date'),'fieldname' => 'purchase_date'])
+                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.eol_date'),'fieldname' => 'asset_eol_date'])
+                @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
+
+                @php
+                    $currency_type = null;
+                    if ($item->id && $item->location) {
+                        $currency_type = $item->location->currency;
+                    }
+                @endphp
+
+                @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
+
+            </div> <!-- end order details -->
+        </fieldset>
     </div><!-- end col-md-12 col-sm-12-->
    
 @stop

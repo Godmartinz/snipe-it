@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Tik superadministratoriai gali suteikti superadministratoriaus prieigą.',
     'admin_permission_warning' => 'Tik administratoriai ir aukštesnes teises turintys naudotojai gali suteikti administratoriaus prieigą.',
     'remove_group_memberships' => 'Pašalinti grupių narystes',
-    'warning_deletion_information' => 'Ketinate paimti VISUS elementus iš žemiau išvardintų :count naudotojų. Superadministratorių vardai yra paryškinti raudonai.',
+    'warning_deletion_information' => 'Jūs ketinate paimti VISUS daiktus iš :count žemiau išvardintų naudotojų.',
     'update_user_assets_status' => 'Atnaujinti viso šių naudotojų turto būsenas į šią būseną',
     'checkin_user_properties' => 'Paimti visą su šiais naudotojais susietą turtą',
     'remote_label'   => 'Tai nuotolinis naudotojas',

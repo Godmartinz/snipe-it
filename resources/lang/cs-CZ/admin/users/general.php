@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Pouze superadmini mohou povolit uživateli superadmin přístup.',
     'admin_permission_warning' => 'Pouze uživatelé s právy administrátorů a výše mohou udělit uživatelskému adminovi přístup.',
     'remove_group_memberships' => 'Odebrat členství ve skupině',
-    'warning_deletion_information' => 'Chystáte se zaškrtnout VŠECHNY položky od níže uvedených :count uživatelů. Super administrátorská jména jsou zvýrazněna červeně.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Aktualizovat všechny položky pro tyto uživatele na tento stav',
     'checkin_user_properties' => 'Zkontrolujte všechny vlastnosti spojené s těmito uživateli',
     'remote_label'   => 'Toto je vzdálený uživatel',

@@ -2,6 +2,8 @@
 
 namespace App\Models\Labels\Sheets\Avery;
 
+use App\Helpers\Helper;
+
 class L6009_A extends L6009
 {
     private const BARCODE_MARGIN = 1.80;
@@ -60,43 +62,36 @@ class L6009_A extends L6009
             $usableWidth -= $barcodeSize + self::BARCODE_MARGIN;
         }
         $fields = $record->get('fields');
-        // Below rescales the size of the field box to fit, it feels like it could/should be abstracted one class above
-        // to be usable on other labels but im unsure of how to implement that, since it uses a lot of private
-        // constants.
 
-        // Figure out how tall the label fields wants to be
-        $fieldCount = count($fields);
-        $perFieldHeight = (self::LABEL_SIZE + self::LABEL_MARGIN)
-                        + (self::FIELD_SIZE + self::FIELD_MARGIN);
-
-        $baseHeight = $fieldCount * $perFieldHeight;
-        // If it doesn't fit in the available height, scale everything down
-        $scale = 1.0;
-        if ($baseHeight > $usableHeight && $baseHeight > 0) {
-            $scale = $usableHeight / $baseHeight;
-        }
-
-        $labelSize   = self::LABEL_SIZE   * $scale;
-        $labelMargin = self::LABEL_MARGIN * $scale;
-        $fieldSize   = self::FIELD_SIZE   * $scale;
-        $fieldMargin = self::FIELD_MARGIN * $scale;
-
+        $field_layout = Helper::labelFieldLayoutScaling(
+            pdf: $pdf,
+            fields: $fields,
+            currentX: $currentX,
+            usableWidth: $usableWidth,
+            usableHeight: $usableHeight,
+            baseLabelSize: self::LABEL_SIZE,
+            baseFieldSize: self::FIELD_SIZE,
+            baseFieldMargin: self::FIELD_MARGIN,
+            baseLabelPadding: 1.5,
+            baseGap: 1.5,
+            maxScale: 1.8,
+            labelFont: 'freesans',
+        );
         foreach ($fields as $field) {
             static::writeText(
                 $pdf, $field['label'],
                 $currentX, $currentY,
-                'freesans', '', $labelSize, 'L',
-                $usableWidth, $labelSize, true, 0
+                'freesans', '', $field_layout['labelSize'], 'L',
+                $field_layout['labelWidth'], $field_layout['rowAdvance'], true, 0
             );
-            $currentY += $labelSize + $labelMargin;
 
             static::writeText(
                 $pdf, $field['value'],
-                $currentX, $currentY,
-                'freemono', 'B', $fieldSize, 'L',
-                $usableWidth, $fieldSize, true, 0, 0.01
+                $field_layout['valueX'], $currentY,
+                'freemono', 'B', $field_layout['fieldSize'], 'L',
+                $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
             );
-            $currentY += $fieldSize + $fieldMargin;
+            $currentY += $field_layout['rowAdvance'];
         }
     }
 }

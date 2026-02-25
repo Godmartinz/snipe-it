@@ -20,9 +20,9 @@ return array(
     'delete' => array(
         'confirm'                => 'คุณแน่ใจที่ต้องการจะลบหมวดหมู่นี้?',
         'error'                  => 'มีปัญหาขณะลบหมวดหมู่นี้ กรุณาลองอีกครั้ง.',
-        'success'                => 'Category was deleted successfully.',
-        'bulk_success'           => 'Categories were deleted successfully.',
-        'partial_success'        => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
+        'success'                => 'หมวดหมู่ถูกลบแล้ว',
+        'bulk_success'           => 'หมวดหมู่ถูกลบแล้ว',
+        'partial_success'        => 'หมวดหมู่ถูกลบแล้ว ดูข้อมูลเพิ่มเติมด้านล่าง | :count หมวดหมู่ได้ถูกลบแล้ว ดูข้อมูลเพิ่มเติมด้านล่าง',
     )
 
 );

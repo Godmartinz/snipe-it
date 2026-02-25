@@ -18,14 +18,14 @@ return array(
         'confirm'   => 'คุณแน่ใจหรือไม่ว่าต้องการลบคอมโพเนนต์นี้',
         'error'   => 'เกิดปัญหาในการลบคอมโพเนนต์ กรุณาลองอีกครั้ง.',
         'success' => 'คอมโพเนนต์ถูกลบเรียบร้อยแล้ว',
-        'error_qty'   => 'Some components of this type are still checked out. Please check them in and try again.',
+        'error_qty'   => 'บางคอมโพเนนต์ถูกเบิกจ่ายไปแล้ว กรุณาส่งคืนและลองใหม่อีกครั้ง',
     ),
 
      'checkout' => array(
         'error'   		=> 'ตรวจสอบคอมโพเนนต์แล้วโปรดลองอีกครั้ง',
         'success' 		=> 'ตรวจสอบคอมโพเนนต์เรียบร้อยแล้ว',
         'user_does_not_exist' => 'ผู้ใช้รายนั้นไม่ถูกต้อง กรุณาลองอีกครั้ง.',
-        'unavailable'      => 'Not enough components remaining: :remaining remaining, :requested requested ',
+        'unavailable'      => 'คอมโพเนนต์ไม่เพียงพอ: จำนวนที่เหลืออยู่ :remaining, จำนวนที่ร้องขอ :requested ',
     ),
 
     'checkin' => array(

@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Само суперадминистраторите можат на корисник да доделат суперадминистраторски пристап.',
     'admin_permission_warning' => 'Само корисници со администраторски права можат на корисник да доделат администраторски пристап.',
     'remove_group_memberships' => 'Отстранете членство во група',
-    'warning_deletion_information' => 'Ќе ги означите СИТЕ предмети од :count корисник(ци) прикажани подолу. Суперадминистраторските имина се истакнати во црвено.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Ажурирајте ги сите средства за овие корисници на овој статус',
     'checkin_user_properties' => 'Проверете ги сите својства поврзани со овие корисници',
     'remote_label'   => 'Ова е далечински корисник',

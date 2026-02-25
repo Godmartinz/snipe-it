@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Pridėti aptarnavimą',
     'append'                    => 'Papildyti',
     'new'                       => 'Naujas',
+    'show_hide_info'            => 'Rodyti / Slėpti papildomą informaciją',
     'var' => [
         'clone'     => 'Klonuoti :item_type',
         'edit'      => 'Redaguoti :item_type',

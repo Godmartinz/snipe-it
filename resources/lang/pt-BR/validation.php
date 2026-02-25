@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Número de Série',
+        'asset_tags.*' => 'Marcação do Ativo',
+    ],
 
     /*
     |--------------------------------------------------------------------------

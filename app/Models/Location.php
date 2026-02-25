@@ -26,7 +26,7 @@ class Location extends SnipeModel
 
     protected $table = 'locations';
     protected $rules = [
-        'name'          => 'required|min:2|max:255|unique_undeleted',
+        'name'          => 'required|max:255|unique_undeleted',
         'address'       => 'max:191|nullable',
         'address2'      => 'max:191|nullable',
         'city'          => 'max:191|nullable',
@@ -149,7 +149,7 @@ class Location extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**

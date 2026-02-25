@@ -14,6 +14,72 @@ use Tests\TestCase;
 
 class AccessoryAcceptanceTest extends TestCase
 {
+    public function test_can_accept_accessory_checkout()
+    {
+        $assignee = User::factory()->create();
+        $accessory = Accessory::factory()->create();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->pending()
+            ->for($assignee, 'assignedTo')
+            ->for($accessory, 'checkoutable')
+            ->create(['qty' => 2]);
+
+        $this->actingAs($assignee)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+                'note' => 'A note here',
+            ])
+            ->assertRedirect();
+
+        $this->assertNotNull($checkoutAcceptance->refresh()->accepted_at);
+        $this->assertEquals('A note here', $checkoutAcceptance->note);
+
+        $assignee->accessories->contains($accessory);
+
+        $this->assertDatabaseHas('action_logs', [
+            'action_type' => 'accepted',
+            'target_id' => $assignee->id,
+            'target_type' => User::class,
+            'item_id' => $accessory->id,
+            'item_type' => Accessory::class,
+            'quantity' => 2,
+        ]);
+    }
+
+    public function test_can_decline_accessory_checkout()
+    {
+        $assignee = User::factory()->create();
+        $accessory = Accessory::factory()->create();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->pending()
+            ->for($assignee, 'assignedTo')
+            ->for($accessory, 'checkoutable')
+            ->create(['qty' => 2]);
+
+        $this->actingAs($assignee)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'declined',
+                'note' => 'A note here',
+            ])
+            ->assertRedirect();
+
+        $this->assertNotNull($checkoutAcceptance->refresh()->declined_at);
+        $this->assertEquals('A note here', $checkoutAcceptance->note);
+
+        $assignee->accessories->doesntContain($accessory);
+
+        $this->assertDatabaseHas('action_logs', [
+            'action_type' => 'declined',
+            'target_id' => $assignee->id,
+            'target_type' => User::class,
+            'item_id' => $accessory->id,
+            'item_type' => Accessory::class,
+            'quantity' => 2,
+        ]);
+    }
+
     /**
      * This can be absorbed into a bigger test
      */

@@ -24,9 +24,9 @@ return array(
     'delete' => array(
         'confirm' => 'Biztosan törölni szeretnéd ezt a gyártót?',
         'error'   => 'Probléma adódott a gyártó törlése közben. Próbálkozz újra.',
-        'success'                => 'Manufacturer deleted successfully.',
-        'bulk_success'           => 'Manufacturers deleted successfully.',
-        'partial_success'        => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
+        'success'                => 'A gyártó sikeresen törlésre került.',
+        'bulk_success'           => 'A gyártók sikeresen törlésre kerültek.',
+        'partial_success'        => 'A gyártó sikeresen törlésre került. További információk alább. | :count gyártó sikeresen törlésre került. További információk alább.',
     )
 
 );

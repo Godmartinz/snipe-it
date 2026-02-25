@@ -48,12 +48,12 @@ return [
         'error' => 'Что-то пошло не так. :app ответил: :error_message',
         'error_redirect' => 'ОШИБКА: 301/302 :endpoint возвращает редирект. По соображениям безопасности мы не переходим по редиректам. Пожалуйста, используйте фактическую конечную точку.',
         'error_misc' => 'Что-то пошло не так. :( ',
-        'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',
-        'webhook_channel_not_found' => ' webhook channel not found.',
-        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+        'webhook_fail' => ' cбой уведомления webhook: Проверьте, действителен ли URL-адрес.',
+        'webhook_channel_not_found' => ' канал webhook не найден.',
+        'ms_teams_deprecation' => 'Выбранный URL-адрес webhook Microsoft Teams будет устаревшим 31 декабря 2025 года. Пожалуйста, используйте URL-адрес рабочего процесса. Документацию Microsoft по созданию рабочего процесса можно найти  <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> здесь.</a>',
     ],
     'location_scoping' => [
-        'not_saved' => 'Your settings were not saved.',
+        'not_saved' => 'Ваши настройки не были сохранены.',
         'mismatch' => 'There is 1 item in the database that need your attention before you can enable location scoping.|There are :count items in the database that need your attention before you can enable location scoping.',
     ],
 ];

@@ -3,7 +3,7 @@
 return array(
     'activated'  			=> 'Aktywny',
     'allow'  				=> 'Pozwól',
-    'checkedout'  			=> 'Aktywa',
+    'checkedout'  			=> 'Środki',
     'created_at' 			=> 'Utworzone',
     'createuser' 			=> 'Dodaj Użytkownika',
     'deny'  				=> 'Odmów',

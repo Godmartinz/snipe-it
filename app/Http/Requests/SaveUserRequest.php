@@ -44,7 +44,7 @@ class SaveUserRequest extends FormRequest
             case 'POST':
                 $rules['first_name'] = 'required|string|min:1';
                 $rules['username'] = 'required_unless:ldap_import,1|string|min:1';
-                if ($this->request->get('ldap_import') == false) {
+                if ($this->input('ldap_import') == false) {
                     $rules['password'] = Setting::passwordComplexityRulesSaving('store').'|confirmed';
                 }
                 break;

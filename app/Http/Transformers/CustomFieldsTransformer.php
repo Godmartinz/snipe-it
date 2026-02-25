@@ -44,6 +44,7 @@ class CustomFieldsTransformer
             'db_column_name' => e($field->db_column_name()),
             'format'   =>  e($field->format),
             'field_values'   => ($field->field_values) ? e($field->field_values) : null,
+            'field_encrypted' => $field->field_encrypted,
             'field_values_array'   => ($field->field_values) ? explode("\r\n", e($field->field_values)) : null,
             'type'   =>  e($field->element),
             'required'   =>  (($field->pivot) && ($field->pivot->required=='1')) ? true : false,

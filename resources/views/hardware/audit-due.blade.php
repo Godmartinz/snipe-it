@@ -45,10 +45,9 @@
                                 'id_formname' => 'dueAssetEditForm',
                                 'id_button'   => 'dueAssetEditButton'])
 
-                    <div class="row">
-                            <div class="table table-responsive">
-                        <div class="col-md-12">
-                            <table
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table
 
                                     data-columns="{{ \App\Presenters\AssetAuditPresenter::dataTableLayout() }}"
                                     data-cookie-id-table="dueAssetAuditListing"
@@ -64,12 +63,11 @@
                                     class="table table-striped snipe-table"
                                     data-url="{{ route('api.assets.list-upcoming', ['action' => 'audits', 'upcoming_status' => 'due']) }}"
                                     data-export-options='{
-                "fileName": "export-assets-due-audit-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-                            </table>
-                                </div> <!-- end col-md-12 -->
-                            </div><!-- end table-responsive -->
+                                        "fileName": "export-assets-due-audit-{{ date('Y-m-d') }}",
+                                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                        }'>
+                                </table>
+                            </div> <!-- end col-md-12 -->
                         </div><!-- end row -->
                     </div><!-- end tab-pane -->
 
@@ -82,7 +80,6 @@
                                     'id_button'   => 'overdueAssetEditButton'])
 
                         <div class="row">
-                            <div class="table table-responsive">
                                 <div class="col-md-12">
                                     <table
                                         data-columns="{{ \App\Presenters\AssetAuditPresenter::dataTableLayout() }}"
@@ -104,7 +101,6 @@
             }'>
                                     </table>
                                 </div> <!-- end col-md-12 -->
-                            </div><!-- end table-responsive -->
                         </div><!-- end row -->
                     </div><!-- end tab-pane -->
                 </div><!-- end tab-content -->

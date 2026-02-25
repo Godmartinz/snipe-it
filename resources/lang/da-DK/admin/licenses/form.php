@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Sæder',
     'termination_date'  => 'Opsigelsesdato',
     'to_email'          => 'Licenseret til Email',
-    'to_name'           => 'Licenseret til Navn',
+    'to_name'           => 'Licenseret til',
     'update'            => 'Opdater licens',
     'checkout_help'     => 'Du skal tjekke en licens ud til et hardware aktiv eller en person. Du kan vælge begge dele, men ejeren af aktivet skal svare til den person, du tjekker aktivet ud til.'
 );

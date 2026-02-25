@@ -214,7 +214,7 @@
                             <label class="col-md-3 control-label" for="groups"> {{ trans('general.groups') }}</label>
                             <div class="col-md-6">
                                 @if ((config('app.lock_passwords') || (!Auth::user()->isSuperUser())))
-                                    <span class="help-block">{{  trans('admin/users/general.group_memberships_helpblock') }}</p>
+                                    <p class="help-block">{{  trans('admin/users/general.group_memberships_helpblock') }}</p>
                                 @else
                                     <div class="controls">
                                         <select name="groups[]" id="groups[]" multiple="multiple" class="form-control" aria-label="groups">
@@ -232,6 +232,21 @@
                         @endif
                     </div> <!--/col-md-5-->
                     </div>
+
+                        <!-- Display Name -->
+                        <div class="form-group {{ $errors->has('display_name') ? ' has-error' : '' }}">
+                            <label for="display_name" class="col-md-3 control-label">{{ trans('admin/users/table.display_name') }}</label>
+                            <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="{{ trans('admin/users/table.display_name') }}" name="display_name" id="display_name" value="{{ old('display_name') }}">
+                                {!! $errors->first('display_name', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-control">
+                                    <input type="checkbox" name="null_display_name" value="1" />
+                                    {{ trans_choice('general.set_to_null', count($users),['selection_count' => count($users)]) }}
+                                </label>
+                            </div>
+                        </div>
 
 
                         <!-- Start Date -->

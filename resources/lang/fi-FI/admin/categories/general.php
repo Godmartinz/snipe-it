@@ -23,9 +23,9 @@ return array(
     'use_default_eula'					=> 'Käytä <a href="#" data-toggle="modal" data-target="#eulaModal"> yleisiä käyttöehtoja</a>.',
     'use_default_eula_disabled'			=> '<del>Käytä yleisiä käyttöehtoja.</del> Yleisiä käyttöehtoja ei ole määritetty. Voit lisätä ne asetuksista.',
     'use_default_eula_column'			=> 'Käytä yleisiä käyttöehtoja',
-    'import_require_acceptance'         => 'Require Acceptance',
+    'import_require_acceptance'         => 'Vaadi hyväksyntä',
     'import_checkin_email'              => 'Send Checkin Email',
-    'import_eula_text'                  => 'EULA text',
-    'import_category_type'              => 'Category Type',
+    'import_eula_text'                  => 'Käyttöehtojen teksti',
+    'import_category_type'              => 'Kategorian tyyppi',
 
 );

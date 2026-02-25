@@ -195,7 +195,7 @@ class DepartmentsController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $departments = $departments->where('name', 'LIKE', '%'.$request->get('search').'%');
+            $departments = $departments->where('name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $departments = $departments->orderBy('name', 'ASC')->paginate(50);

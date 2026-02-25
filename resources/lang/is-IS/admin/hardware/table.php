@@ -9,7 +9,7 @@ return [
     'change' 		=> 'Inn/Út',
     'checkout_date' => 'Ráðstöfunardagsetning',
     'checkoutto' 	=> 'Ráðstafað',
-    'components_cost' => 'Total Components Cost',
+    'components_cost' => 'Heildarkostnaður íhluta',
     'current_value' => 'Núvirði',
     'diff' 			=> 'Mismunur',
     'dl_csv' 		=> 'Hlaða niður CSV',

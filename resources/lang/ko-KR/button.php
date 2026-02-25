@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => '유지 보수 정보 추가',
     'append'                    => 'Append',
     'new'                       => '신규',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => ':item_type 복제',
         'edit'      => ':item_type 편집',

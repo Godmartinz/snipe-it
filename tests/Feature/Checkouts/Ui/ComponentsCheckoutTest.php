@@ -97,4 +97,30 @@ class ComponentsCheckoutTest extends TestCase
             ->assertRedirect(route('hardware.show', $asset));
         $this->assertHasTheseActionLogs($component, ['create', 'checkout']);
     }
+
+    public function test_quantity_stored_in_action_log()
+    {
+        $component = Component::factory()->create();
+        $asset = Asset::factory()->create();
+
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->from(route('components.index'))
+            ->post(route('components.checkout.store', $component), [
+                'asset_id' => $asset->id,
+                'redirect_option' => 'index',
+                'assigned_qty' => 2,
+            ]);
+
+        $this->assertDatabaseHas('action_logs', [
+            'action_type' => 'checkout',
+            'target_id' => $asset->id,
+            'target_type' => Asset::class,
+            'item_id' => $component->id,
+            'item_type' => Component::class,
+            'quantity' => 2,
+            'created_by' => $admin->id,
+        ]);
+    }
 }

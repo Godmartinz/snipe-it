@@ -107,6 +107,8 @@
                         <tr>
                             <th>{{ trans('general.asset_tag') }}</th>
                             <th>{{ trans('general.bulkaudit_status') }}</th>
+                            <th>{{ trans('general.status') }}</th>
+                            <th>{{ trans('general.notes') }}</th>
                             <th></th>
                         </tr>
                         <tr id="audit-loader" style="display: none;">
@@ -154,7 +156,7 @@
                 success : function (data) {
 
                     if (data.status == 'success') {
-                        $('#audited tbody').prepend("<tr class='success'><td>" + data.payload.asset_tag + "</td><td>" + data.messages + "</td><td><i class='fas fa-check text-success' style='font-size:18px;'></i></td></tr>");
+                        $('#audited tbody').prepend("<tr class='success'><td>" + data.payload.asset_tag + "</td><td>" + data.messages + "</td><td>" + data.payload.status_label + " (" + data.payload.status_type + ")</td><td>" + data.payload.note + "</td><td><i class='fas fa-check text-success' style='font-size:18px;'></i></td></tr>");
 
                         @if ($user->enable_sounds)
                         var audio = new Audio('{{ config('app.url') }}/sounds/success.mp3');
@@ -201,7 +203,7 @@
                 }
             }
 
-            $('#audited tbody').prepend("<tr class='danger'><td>" + asset_tag + "</td><td>" + messages + "</td><td><i class='fas fa-times text-danger' style='font-size:18px;'></i></td></tr>");
+            $('#audited tbody').prepend("<tr class='danger'><td>" + asset_tag + "</td><td>" + messages + "</td><td></td><td></td><td><i class='fas fa-times text-danger' style='font-size:18px;'></i></td></tr>");
         }
 
         function incrementOnSuccess() {

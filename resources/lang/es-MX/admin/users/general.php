@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Solo los superadmins pueden conceder acceso de superadmin a un usuario.',
     'admin_permission_warning' => 'Solo los usuarios con derechos administrativos o superiores pueden conceder acceso administrativo a un usuario.',
     'remove_group_memberships' => 'Remover membresías de grupo',
-    'warning_deletion_information' => 'Está a punto de ingresar TODOS los elementos de :count usuario(s) listados a continuación. Los nombres de usuarios con permisos Super Administrador están resaltados en rojo.',
+    'warning_deletion_information' => 'Estás a punto de devolver TODOS los artículos de :count usuario(s) listado(s) a continuación.',
     'update_user_assets_status' => 'Actualizar todos los activos para estos usuarios a este estado',
     'checkin_user_properties' => 'Comprobar todas las propiedades asociadas a estos usuarios',
     'remote_label'   => 'Este es un usuario remoto',

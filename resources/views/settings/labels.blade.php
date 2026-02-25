@@ -64,9 +64,9 @@
                             <!-- New Settings -->
 
                         <fieldset name="select-template">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.select_template') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Template -->
                             <div class="form-group{{ $errors->has('label2_template') ? ' has-error' : '' }}">
@@ -104,9 +104,9 @@
                         </fieldset>
 
                         <fieldset name="label-settings">
-                            <x-form-legend help_text="{{ trans('admin/settings/general.labels_title_help') }}">
+                            <x-form.legend help_text="{{ trans('admin/settings/general.labels_title_help') }}">
                                 {{ trans('admin/settings/general.labels_title') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Title -->
                             <div class="form-group{{ $errors->has('label2_title') ? ' has-error' : '' }}">
@@ -367,9 +367,9 @@
 
 
                         <fieldset name="field-definitions">
-                            <x-form-legend help_text="{!! trans('admin/settings/general.label2_fields_help') !!}">
+                            <x-form.legend help_text="{!! trans('admin/settings/general.label2_fields_help') !!}">
                                Label Fields
-                            </x-form-legend>
+                            </x-form.legend>
                             <!-- Fields -->
                             <div class="form-group {{ $errors->has('label2_fields') ? 'error' : '' }}">
                                 <div class="col-md-12">
@@ -381,9 +381,9 @@
                     </fieldset>
 
                     <fieldset name="label-preview">
-                        <x-form-legend>
-                            Label Preview
-                        </x-form-legend>
+                        <x-form.legend>
+                            {{ trans('admin/settings/general.label2_label_preview') }}: <code>{{ $setting->label2_template}}</code>
+                        </x-form.legend>
                             <div class="col-md-12" style="margin-bottom: 10px;">
                                 @include('partials.label2-preview')
                             </div>

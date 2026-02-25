@@ -6,6 +6,7 @@ return array(
     'declined'                  => 'You have successfully declined this item.',
     'bulk_manager_warn'	        => 'Pengguna Anda telah berhasil diperbarui, namun entri pengelola Anda tidak disimpan karena manajer yang Anda pilih juga ada dalam daftar pengguna untuk diedit, dan pengguna mungkin bukan manajer mereka sendiri. Silakan pilih pengguna Anda lagi, tidak termasuk manajernya.',
     'user_exists'               => 'Pengguna sudah ada!',
+    'cannot_delete'             => 'User does not exist or you do not have permission to delete them.',
     'user_not_found'            => 'Pengguna tidak ada atau Anda tidak memiliki izin untuk melihatnya.',
     'user_login_required'       => 'Kolom login wajib di-isi',
     'user_has_no_assets_assigned' => 'Tidak ada aset yang saat ini ditetapkan kepada pengguna.',

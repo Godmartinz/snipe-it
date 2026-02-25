@@ -2,7 +2,7 @@
 
 return array(
     'component_name'                  => 'Heiti íhlutar',
-    'checkin'                             => 'Checkin Component',
+    'checkin'                             => 'Skila íhlut',
     'checkout'                             => 'Checkout Component',
     'cost'				=> 'Innkaupsverð',
     'create'                             => 'Skrá íhlut',
@@ -12,5 +12,5 @@ return array(
     'remaining' 			             => 'Eftir',
     'total' 			                 => 'Samtals',
     'update'                            => 'Uppfæra íhlut',
-    'checkin_limit'            => 'Amount checked in must be equal to or less than :assigned_qty'
+    'checkin_limit'            => 'Fjöldi sem er skilað þarf að vera jafn eða minni en :assigned_qty'
 );

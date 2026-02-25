@@ -52,6 +52,27 @@ class ConsumableCheckoutTest extends TestCase
         $this->assertHasTheseActionLogs($consumable, ['create', 'checkout']);
     }
 
+    public function testConsumableCanBeCheckedOutWithQuantity()
+    {
+        $consumable = Consumable::factory()->create();
+        $user = User::factory()->create();
+
+        $this->actingAsForApi(User::factory()->checkoutConsumables()->create())
+            ->postJson(route('api.consumables.checkout', $consumable), [
+                'assigned_to' => $user->id,
+                'checkout_qty' => 2,
+            ]);
+
+        $this->assertDatabaseHas('action_logs', [
+            'item_type' => Consumable::class,
+            'item_id' => $consumable->id,
+            'target_type' => User::class,
+            'target_id' => $user->id,
+            'action_type' => 'checkout',
+            'quantity' => 2,
+        ]);
+    }
+
     public function testUserSentNotificationUponCheckout()
     {
         Mail::fake();

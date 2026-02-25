@@ -9,168 +9,139 @@
 @stop
 
 @section('header_right')
-    <div class="btn-group pull-right">
-        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a href="{{ route('depreciations.edit', ['depreciation' => $depreciation->id]) }}">{{ trans('general.update') }}</a></li>
-            <li><a href="{{ route('depreciations.create') }}">{{ trans('general.create') }}</a></li>
-        </ul>
-    </div>
-@stop
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
 
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-tabs>
+                <x-slot:tabnav>
+                    @can('view', \App\Models\Asset::class)
+                        <x-tabs.nav-item
+                                class="active"
+                                name="assets"
+                                icon_type="asset"
+                                label="{{ trans('general.assets') }}"
+                                count="{{ $depreciation->assets()->AssetsForShow()->count() }}"
+                                tooltip="{{ trans('general.assets') }}"
+                        />
+                    @endcan
 
-    <div class="row">
-        <div class="col-md-12">
+                    @can('view', \App\Models\License::class)
+                        <x-tabs.nav-item
+                                name="licenses"
+                                icon_type="licenses"
+                                label="{{ trans('general.licenses') }}"
+                                count="{{ $depreciation->licenses()->count() }}"
+                                tooltip="{{ trans('general.licenses') }}"
+                        />
+                    @endcan
 
+                    @can('view', \App\Models\AssetModel::class)
+                        <x-tabs.nav-item
+                                name="models"
+                                icon="fa-solid fa-boxes-packing"
+                                label="{{ trans('general.asset_models') }}"
+                                count="{{ $depreciation->models_count }}"
+                                tooltip="{{ trans('general.asset_models') }}"
+                        />
+                    @endcan
 
-            <!-- Custom Tabs -->
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
-                    <li class="active">
-                        <a href="#assets" data-toggle="tab">
-                            {{ trans('general.assets') }}
+                </x-slot:tabnav>
 
-                            {!! ($depreciation->assets()->AssetsForShow()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($depreciation->assets()->AssetsForShow()->count()).'</span>' : '' !!}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#licenses" data-toggle="tab">
-                            {{ trans('general.licenses') }}
+                <x-slot:tabpanes>
 
-                            {!! ($depreciation->licenses_count > 0 ) ? '<span class="badge badge-secondary">'.number_format($depreciation->licenses_count).'</span>' : '' !!}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#models" data-toggle="tab">
-                            {{ trans('general.asset_models') }}
+                    <!-- start assets tab pane -->
+                    @can('view', \App\Models\Asset::class)
+                        <x-tabs.pane name="assets" class="in active">
+                            <x-slot:header>
+                                {{ trans('general.assets') }}
+                            </x-slot:header>
 
-                            {!! ($depreciation->models_count > 0 ) ? '<span class="badge badge-secondary">'.number_format($depreciation->models_count).'</span>' : '' !!}
-                        </a>
-                    </li>
-                </ul>
+                            <x-slot:bulkactions>
+                                <x-table.bulk-assets />
+                            </x-slot:bulkactions>
 
-                <div class="tab-content">
-
-                    <div class="tab-pane active" id="assets">
-
-                        @include('partials.asset-bulk-actions', [
-                                'id_divname' => 'assetsBulkEditToolbar',
-                                'id_formname' => 'assetsBulkForm',
-                                'id_button' => 'assetEditButton'
-                                ])
-
-                        <table
-                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                data-show-columns-search="true"
-                                data-cookie-id-table="depreciationsAssetTable"
-                                data-id-table="depreciationsAssetTable"
-                                id="depreciationsAssetTable"
-                                data-side-pagination="server"
-                                data-sort-order="asc"
-                                data-sort-name="name"
-                                data-toolbar="#assetsBulkEditToolbar"
-                                data-bulk-button-id="#assetEditButton"
-                                data-bulk-form-id="#assetsBulkForm"
-                                class="table table-striped snipe-table"
-                                data-url="{{ route('api.assets.index',['depreciation_id'=> $depreciation->id]) }}"
-                                data-export-options='{
-                        "fileName": "export-depreciations-{{ date('Y-m-d') }}",
-                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                        }'>
-                        </table>
-
-                    </div> <!-- end tab-pane -->
-
-                    <!-- tab-pane -->
-                    <div class="tab-pane" id="licenses">
-                        <div class="row">
-                            <div class="col-md-12">
-
-                                <div class="table-responsive">
-
-                                    <table
-                                            data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
-                                            data-cookie-id-table="depreciationsLicenseTable"
-                                            data-id-table="depreciationsLicenseTable"
-                                            id="depreciationsLicenseTable"
-                                            data-side-pagination="server"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{ route('api.licenses.index',['depreciation_id'=> $depreciation->id]) }}"
-                                            data-export-options='{
-                        "fileName": "export-depreciations-{{ date('Y-m-d') }}",
-                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                        }'>
-                                    </table>
-
-                                </div>
-
-                            </div>
-
-                        </div> <!--/.row-->
-                    </div> <!-- /.tab-pane -->
-
-                    <!-- tab-pane -->
-                    <div class="tab-pane" id="models">
-
-                        <div class="row">
-                            <form method="POST" action="{{ route('models.bulkedit.index') }}" accept-charset="UTF-8" class="form-inline" id="bulkForm">
-                            @csrf
-                            <div class="col-md-12">
-                                <div id="toolbar">
-                                    <label for="bulk_actions" class="sr-only">{{ trans('general.bulk_actions') }}</label>
-                                    <select name="bulk_actions" class="form-control select2" aria-label="bulk_actions" style="width: 300px;">
-                                        <option value="edit">{{ trans('general.bulk_edit') }}</option>
-                                        <option value="delete">{{ trans('general.bulk_delete') }}</option>
-                                    </select>
-                                    <button class="btn btn-primary" id="AssetModelsBulkEditButton" disabled>{{ trans('button.go') }}</button>
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table
-                                            data-columns="{{ \App\Presenters\AssetModelPresenter::dataTableLayout() }}"
-                                            data-cookie-id-table="depreciationsModelsTable"
-                                            data-id-table="depreciationsModelsTable"
-                                            id="depreciationsModelsTable"
-                                            data-toolbar="#toolbar"
-                                            data-side-pagination="server"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            data-bulk-button-id="#AssetModelsBulkEditButton"
-                                            data-bulk-form-id="#bulkForm"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{ route('api.models.index',['depreciation_id'=> $depreciation->id]) }}"
-                                            data-export-options='{
-                        "fileName": "export-depreciations-bymodel-{{ date('Y-m-d') }}",
-                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                        }'>
-                                    </table>
+                            <x-slot:content>
+                                <x-table
+                                        show_column_search="true"
+                                        show_advanced_search="true"
+                                        buttons="assetButtons"
+                                        api_url="{{ route('api.assets.index', ['depreciation_id' => $depreciation->id]) }}"
+                                        :presenter="\App\Presenters\AssetPresenter::dataTableLayout()"
+                                        export_filename="export-depreciation-{{ str_slug($depreciation->name) }}-assets-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                        <!-- end assets tab pane -->
+                    @endcan
 
 
-                                </div>
+                    <!-- start licenses tab pane -->
+                    @can('view', \App\Models\License::class)
+                        <x-tabs.pane name="licenses">
+                            <x-slot:header>
+                                {{ trans('general.licenses') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="licenses"
+                                        buttons="licenseButtons"
+                                        api_url="{{ route('api.licenses.index', ['depreciation_id' => $depreciation->id]) }}"
+                                        :presenter="\App\Presenters\LicensePresenter::dataTableLayout()"
+                                        export_filename="export-depreciation-{{ str_slug($depreciation->name) }}-licences-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end licenses tab pane -->
 
-                            </div>
-                            </form>
-
-                        </div> <!--/.row-->
-                    </div> <!-- /.tab-pane -->
-
-                </div> <!-- /.tab-content -->
+                    <!-- start models tab pane -->
+                    @can('view', \App\Models\AssetModel::class)
+                        <x-tabs.pane name="models">
+                            <x-slot:header>
+                                {{ trans('general.models') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="models"
+                                        buttons="modelButtons"
+                                        api_url="{{ route('api.models.index', ['depreciation_id' => $depreciation->id]) }}"
+                                        :presenter="\App\Presenters\AssetModelPresenter::dataTableLayout()"
+                                        export_filename="export-depreciation-{{ str_slug($depreciation->name) }}-models-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end licenses tab pane -->
 
 
 
-            </div> <!-- /.tab-content -->
-            </div> <!-- nav-tabs-custom -->
+                </x-slot:tabpanes>
+
+            </x-tabs>
 
 
-        </div>
 
-    </div>
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box>
+                <x-box.info-panel :infoPanelObj="$depreciation">
+
+                    <x-slot:before_list>
+
+                        <x-button.wide-edit :item="$depreciation" :route="route('depreciations.edit', $depreciation->id)" />
+                        <x-button.wide-delete :item="$depreciation" />
+
+                    </x-slot:before_list>
+                </x-box.info-panel>
+            </x-box>
+
+        </x-page-column>
+
+    </x-container>
 
 @stop
 

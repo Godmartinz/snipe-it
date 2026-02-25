@@ -10,10 +10,15 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\AuditNotification;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Osama\LaravelTeamsNotification\TeamsNotification;
+use Throwable;
 
 trait Loggable
 {
@@ -40,7 +45,7 @@ trait Loggable
      * @since  [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckout($note, $target, $action_date = null, $originalValues = [])
+    public function logCheckout($note, $target, $action_date = null, $originalValues = [], $quantity = 1)
     {
 
         $log = new Actionlog;
@@ -94,7 +99,7 @@ trait Loggable
 
         $log->note = $note;
         $log->action_date = $action_date;
-
+        $log->quantity = $quantity;
 
         $changed = [];
         $array_to_flip = array_keys($fields_array);
@@ -282,10 +287,50 @@ trait Loggable
             'location' => ($location) ? $location->name : '',
             'note' => $note,
         ];
+
         if(Setting::getSettings()->webhook_selected === 'microsoft' && Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
-            $message = AuditNotification::toMicrosoftTeams($params);
-            $notification = new TeamsNotification(Setting::getSettings()->webhook_endpoint);
-            $notification->success()->sendMessage($message[0], $message[1]);
+
+            $endpoint = Setting::getSettings()->webhook_endpoint;
+
+            try {
+                $message = AuditNotification::toMicrosoftTeams($params);
+                $notification = new TeamsNotification($endpoint);
+                $notification->success()->sendMessage($message[0], $message[1]);
+
+            } catch (ConnectException $e) {
+                Log::warning('Teams webhook connection failed', [
+                    'endpoint' => $endpoint,
+                    'error' => $e->getMessage()
+                ]);
+
+            } catch (ServerException $e) {
+
+                Log::error('Teams webhook server error', [
+                    'endpoint' => $endpoint,
+                    'status' => $e->getResponse()?->getStatusCode(),
+                    'error' => $e->getMessage(),
+                ]);
+
+            } catch (ClientException $e) {
+
+                Log::warning('Teams webhook client error', [
+                    'endpoint' => $endpoint,
+                    'status' => $e->getResponse()?->getStatusCode(),
+                    'error' => $e->getMessage(),
+                ]);
+            } catch (RequestException $e) {
+
+                Log::error('Teams webhook request failure', [
+                    'endpoint' => $endpoint,
+                    'error' => $e->getMessage(),
+                ]);
+            }catch (Throwable $e) {
+                Log::error('Teams webhook failed unexpectedly', [
+                    'endpoint' => $endpoint,
+                    'exception' => get_class($e),
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
         else {
             Setting::getSettings()->notify(new AuditNotification($params));

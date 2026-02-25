@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Μόνο οι υπερδιαχειριστές μπορούν να παρέχουν πρόσβαση σε υπερδιαχειριστή χρήστη.',
     'admin_permission_warning' => 'Μόνο χρήστες με δικαιώματα διαχειριστών ή μεγαλύτερα μπορούν να παρέχουν πρόσβαση σε έναν διαχειριστή χρήστη.',
     'remove_group_memberships' => 'Αφαίρεση Μελών Ομάδας',
-    'warning_deletion_information' => 'Πρόκειται να ελέγξετε όλα τα στοιχεία από τους :count χρήστες παρακάτω. Τα ονόματα Super admin επισημαίνονται με κόκκινο χρώμα.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Ενημέρωση όλων των περιουσιακών στοιχείων για αυτούς τους χρήστες σε αυτή την κατάσταση',
     'checkin_user_properties' => 'Ελέγξτε όλες τις ιδιότητες που σχετίζονται με αυτούς τους χρήστες',
     'remote_label'   => 'Αυτός είναι ένας απομακρυσμένος χρήστης',

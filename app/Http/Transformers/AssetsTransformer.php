@@ -104,6 +104,7 @@ class AssetsTransformer
             'next_audit_date' => Helper::getFormattedDateObject($asset->next_audit_date, 'date'),
             'deleted_at' => Helper::getFormattedDateObject($asset->deleted_at, 'datetime'),
             'purchase_date' => Helper::getFormattedDateObject($asset->purchase_date, 'date'),
+//            'first_checkout' => Helper::getFormattedDateObject($asset->first_checkout_at, 'datetime'),
             'age' => $asset->purchase_date ? $asset->purchase_date->locale(app()->getLocale())->diffForHumans() : '',
             'last_checkout' => Helper::getFormattedDateObject($asset->last_checkout, 'datetime'),
             'last_checkin' => Helper::getFormattedDateObject($asset->last_checkin, 'datetime'),
@@ -210,7 +211,7 @@ class AssetsTransformer
             return $asset->assigned ? [
                     'id' => (int) $asset->assigned->id,
                     'username' => e($asset->assigned->username),
-                    'name' => e($asset->assigned->getFullNameAttribute()),
+                    'name' => e($asset->assigned->display_name),
                     'first_name'=> e($asset->assigned->first_name),
                     'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
                     'email'=> ($asset->assigned->email) ? e($asset->assigned->email) : null,

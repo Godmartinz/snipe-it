@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Yalnızca süper yöneticiler bir kullanıcıya süper yönetici erişimi verebilir.',
     'admin_permission_warning' => 'Yalnızca yönetici haklarına veya daha fazlasına sahip kullanıcılar, bir kullanıcıya yönetici erişimi verebilir.',
     'remove_group_memberships' => 'Grup Üyeliklerini Kaldır',
-    'warning_deletion_information' => 'Aşağıda listelenen :sayılan kullanıcı(lar) daki TÜM öğeleri kontrol etmek üzeresiniz. Süper yönetici adları kırmızıyla vurgulanır.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Bu kullanıcılar için tüm varlıkları bu duruma güncelleyin',
     'checkin_user_properties' => 'Bu kullanıcılarla ilişkili tüm mülkleri kontrol edin',
     'remote_label'   => 'Bu uzak bir kullanıcı',

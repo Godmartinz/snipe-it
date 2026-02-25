@@ -22,7 +22,7 @@ return array(
         'error'                  => 'Er is een probleem opgetreden bij het verwijderen van deze categorie. Probeer het opnieuw.',
         'success'                => 'De categorie is succesvol verwijderd.',
         'bulk_success'           => 'De categorieën zijn succesvol verwijderd.',
-        'partial_success'        => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
+        'partial_success'        => 'Categorie succesvol verwijderd. Zie additionele informatie hieronder. | :count categorieën succesvol verwijderd. Zie additionele informatie hieronder.',
     )
 
 );

@@ -31,7 +31,7 @@ return [
         'numeric' => 'El campo :attribute debe estar entre :min y :max.',
         'string' => 'El campo :attribute debe tener entre :min y :max caracteres.',
     ],
-    'valid_regex' => 'La expresión regular no es válida.',
+    'valid_regex' => 'La expresion regular no es válida.',
     'boolean' => 'El campo :attribute debe ser verdadero o falso.',
     'can' => 'El campo :attribute contiene un valor no autorizado.',
     'confirmed' => 'La confirmación del campo :attribute no coincide.',
@@ -174,7 +174,7 @@ return [
     'ulid' => 'El campo :attribute debe ser un ULID válido.',
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
     'fmcs_location' => 'El soporte completo de múltiples empresas y el alcance de la ubicación están habilitados en la Configuración de Administración, y la ubicación seleccionada y la empresa seleccionada no son compatibles.',
-    'is_unique_across_company_and_location' => 'El :attribute debe ser único dentro de la empresa y localización seleccionados.',
+    'is_unique_across_company_and_location' => 'El campo :attribute debe ser único en la compañía y ubicación seleccionadas.',
 
     /*
     |--------------------------------------------------------------------------
@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Número de serie',
+        'asset_tags.*' => 'Placa del activo',
+    ],
 
     /*
     |--------------------------------------------------------------------------

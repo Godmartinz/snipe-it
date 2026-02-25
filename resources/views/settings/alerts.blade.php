@@ -42,9 +42,9 @@
 
 
                         <fieldset name="remote-login">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.general') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Menu Alerts Enabled -->
                             <div class="form-group{{ $errors->has('show_alerts_in_menu') ? ' error' : '' }}">
@@ -69,9 +69,9 @@
                         </fieldset>
 
                         <fieldset name="alert-addresses">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.email') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Alert Email -->
                             <div class="form-group {{ $errors->has('alert_email') ? 'error' : '' }}">
@@ -132,9 +132,9 @@
 
                         <fieldset name="remote-login">
 
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.intervals') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Inventory alert threshold -->
                             <div class="form-group {{ $errors->has('alert_threshold') ? 'error' : '' }}">
@@ -202,6 +202,16 @@
                                     <p class="help-block">
                                         {{ trans('admin/settings/general.audit_interval_help') }}
                                     </p>
+                                </div>
+                            </div>
+
+                            <!-- Alerts Enabled -->
+                            <div class="form-group {{ $errors->has('update_existing_dates') ? 'error' : '' }}">
+                                <div class="col-md-9 col-md-offset-3">
+                                    <label class="form-control">
+                                        <input type="checkbox" name="update_existing_dates" value="1" @checked(old('update_existing_dates'))>
+                                        {{  trans('admin/settings/general.update_existing_dates') }}
+                                    </label>
                                 </div>
                             </div>
 

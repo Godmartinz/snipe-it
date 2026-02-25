@@ -105,7 +105,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
 
     protected $rules = [
-        'first_name'              => 'required|string|min:1|max:191',
+        'first_name'              => 'required|string|max:191',
         'last_name'               => 'nullable|string|max:191',
         'display_name'            => 'nullable|string|max:191',
         'username'                => 'required|string|min:1|unique_undeleted|max:191',

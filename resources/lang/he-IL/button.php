@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'הוסף לתחזוקה',
     'append'                    => 'הוסף',
     'new'                       => 'חדש',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'שכפל :item_type',
         'edit'      => 'ערוך :item_type',

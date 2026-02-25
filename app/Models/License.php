@@ -47,7 +47,7 @@ class License extends Depreciable
     ];
 
     protected $rules = [
-        'name'   => 'required|string|min:3|max:255',
+        'name'   => 'required|string|max:255',
         'seats' => 'required|min:1|integer|limit_change:10000', // limit_change is a "pseudo-rule" that translates into 'between', see prepareLimitChangeRule() below
         'license_email'   => 'email|nullable|max:120',
         'license_name'   => 'string|nullable|max:100',
@@ -223,6 +223,7 @@ class License extends Depreciable
             $logAction->created_by = auth()->id() ?: 1; // We don't have an id while running the importer from CLI.
             $logAction->note = "deleted {$change} seats";
             $logAction->target_id = null;
+            $logAction->quantity = $change;
             $logAction->logaction('delete seats');
 
             return true;
@@ -259,6 +260,7 @@ class License extends Depreciable
             $logAction->created_by = auth()->id() ?: 1; // Importer.
             $logAction->note = "added {$change} seats";
             $logAction->target_id = null;
+            $logAction->quantity = $change;
             $logAction->logaction('add seats');
         }
 
@@ -387,7 +389,7 @@ class License extends Depreciable
      */
     public function category()
     {
-        return $this->belongsTo(\App\Models\Category::class, 'category_id');
+        return $this->belongsTo(\App\Models\Category::class, 'category_id')->withTrashed();
     }
 
     /**
@@ -399,7 +401,7 @@ class License extends Depreciable
      */
     public function manufacturer()
     {
-        return $this->belongsTo(\App\Models\Manufacturer::class, 'manufacturer_id');
+        return $this->belongsTo(\App\Models\Manufacturer::class, 'manufacturer_id')->withTrashed();
     }
 
     /**
@@ -476,7 +478,7 @@ class License extends Depreciable
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**

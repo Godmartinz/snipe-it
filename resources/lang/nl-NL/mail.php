@@ -3,9 +3,9 @@
 return [
 
     'Accessory_Checkin_Notification' => 'Accessoire ingecheckt',
-    'Accessory_Checkout_Notification' => 'Accessory checked out|:count Accessories checked out',
-    'Asset_Checkin_Notification' => 'Asset checked in: :tag',
-    'Asset_Checkout_Notification' => 'Asset checked out: :tag',
+    'Accessory_Checkout_Notification' => 'Accessoire is uitgecheckt',
+    'Asset_Checkin_Notification' => 'Item is ingecheckt: :tag',
+    'Asset_Checkout_Notification' => 'Item is toegewezen: :tag',
     'Confirm_Accessory_Checkin' => 'Accessoire check in bevestiging',
     'Confirm_Asset_Checkin' => 'Asset check in bevestiging',
     'Confirm_component_checkin' => 'Component checkin confirmation',
@@ -81,8 +81,8 @@ return [
     'low_inventory_alert' => 'Er is :count item dat onder de minimumvoorraad ligt of binnenkort laag zal zijn.|Er zijn :count items die onder de minimumvoorraad zijn of binnenkort laag zullen zijn.',
     'min_QTY' => 'Minimale hoeveelheid',
     'name' => 'Naam',
-    'new_item_checked' => 'A new item has been checked out under your name, details are below.|:count new items have been checked out under your name, details are below.',
-    'new_item_checked_with_acceptance' => 'A new item has been checked out under your name that requires acceptance, details are below.|:count new items have been checked out under your name that requires acceptance, details are below.',
+    'new_item_checked' => 'Een nieuw item is toegewezen aan jou en wacht op acceptatie, hieronder kun je de details terugvinden.|:count items zijn toegewezen aan jou en wachten op acceptatie, hieronder kun je de details terugvinden.',
+    'new_item_checked_with_acceptance' => 'Een nieuw item is toegewezen aan jou en wacht op acceptatie, hieronder kun je de details terugvinden.|:count items zijn toegewezen aan jou en wachten op acceptatie, hieronder kun je de details terugvinden.',
     'new_item_checked_location' => 'A new item has been checked out to :location, details are below.|:count new items have been checked out to :location, details are below.',
     'recent_item_checked' => 'Er is onlangs een activa onder uw naam uitgeleend dat moet worden geaccepteerd. Hieronder vindt u de details.',
     'notes' => 'Opmerkingen',

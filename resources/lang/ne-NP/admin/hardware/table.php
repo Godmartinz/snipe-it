@@ -3,7 +3,7 @@
 return [
 
     'asset_tag'   	=> 'Asset Tag',
-    'asset_model'       => 'Model',
+    'asset_model'       => 'मोडेल',
     'assigned_to'   => 'Assigned To',
     'book_value'  	=> 'Current Value',
     'change' 		=> 'In/Out',
@@ -14,7 +14,7 @@ return [
     'diff' 			=> 'Diff',
     'dl_csv' 		=> 'Download CSV',
     'eol' 			=> 'EOL',
-    'id'      		=> 'ID',
+    'id'      		=> 'आईडी',
     'last_checkin_date' => 'Last Checkin Date',
     'location' 		=> 'Location',
     'purchase_cost'	=> 'Cost',

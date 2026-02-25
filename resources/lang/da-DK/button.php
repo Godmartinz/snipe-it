@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Tilføj vedligehold',
     'append'                    => 'Tilføj',
     'new'                       => 'Ny',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Clone :item_type',
         'edit'      => 'Edit :item_type',

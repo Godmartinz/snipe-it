@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Ang mga seat',
     'termination_date'  => 'Ang Petsa ng Pagpatigil',
     'to_email'          => 'Ang Lisensya para Makapag-email',
-    'to_name'           => 'Ang Lisensya para sa Pangalan',
+    'to_name'           => 'Ang Lisensya Para sa',
     'update'            => 'I-update ang Lisensya',
     'checkout_help'     => 'Dapat mong suriin ang isang lisensya na naipalabas sa asset ng hardware o sa isang tao. Pwedeng mong piliin ang dalawa, pero ang may-ari ng asset ay dapat na tumugma sa taong iyong tinitingnan ang asset nai-out sa.'
 );

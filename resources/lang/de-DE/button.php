@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Füge Wartung hinzu',
     'append'                    => 'Anhängen',
     'new'                       => 'Neu',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => ':item_type duplizieren',
         'edit'      => ':item_type bearbeiten',

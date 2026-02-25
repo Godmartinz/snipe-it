@@ -169,6 +169,7 @@ class BulkUsersController extends Controller
             ->conditionallyAddItem('remote')
             ->conditionallyAddItem('ldap_import')
             ->conditionallyAddItem('activated')
+            ->conditionallyAddItem('display_name')
             ->conditionallyAddItem('start_date')
             ->conditionallyAddItem('end_date')
             ->conditionallyAddItem('city')
@@ -214,6 +215,10 @@ class BulkUsersController extends Controller
             $this->update_array['locale'] = null;
         }
 
+        if ($request->input('null_display_name')=='1') {
+            $this->update_array['display_name'] = null;
+        }
+
         if (! $manager_conflict) {
             $this->conditionallyAddItem('manager_id');
         }
@@ -229,8 +234,11 @@ class BulkUsersController extends Controller
 
         // Only sync groups if groups were selected
         if ($request->filled('groups')) {
+
             foreach ($users as $user) {
-                $user->groups()->sync($request->input('groups'));
+                if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+                    $user->groups()->sync($request->input('groups'));
+                }
             }
         }
 
@@ -312,7 +320,9 @@ class BulkUsersController extends Controller
         foreach ($users as $user) {
             $user->accessories()->sync([]);
             if ($request->input('delete_user')=='1') {
-                $user->delete();
+                if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+                    $user->delete();
+                }
             }
         }
 

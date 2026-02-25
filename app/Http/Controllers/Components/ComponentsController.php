@@ -7,8 +7,8 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Models\Company;
 use App\Models\Component;
 use App\Helpers\Helper;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -88,10 +88,10 @@ class ComponentsController extends Controller
 
         $component = $request->handleImages($component);
 
-        if($request->get('redirect_option') === 'back'){
+        if($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
 
@@ -168,7 +168,7 @@ class ComponentsController extends Controller
 
         $component = $request->handleImages($component);
 
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
+        session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($component->save()) {
             return Helper::getRedirectOption($request, $component->id, 'Components')
@@ -226,6 +226,20 @@ class ComponentsController extends Controller
     public function show(Component $component)
     {
             $this->authorize('view', $component);
-            return view('components/view', compact('component'));
+            return view('components/view', compact('component'))->with('snipe_component', $component);
+    }
+
+    public function getClone(Component $component) : View | RedirectResponse
+    {
+        $this->authorize('create', Component::class);
+
+        $cloned_component = clone $component;
+        $cloned_component->id = null;
+        $cloned_component->deleted_at = null;
+
+        // Show the page
+        return view('components/edit')
+            ->with('item', $cloned_component)
+            ->with('component', $cloned_component);
     }
 }

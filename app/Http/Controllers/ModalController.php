@@ -38,7 +38,7 @@ class ModalController extends Controller
 
 
         if (in_array($type, $allowed_types)) {
-        $view = view("modals.${type}");
+        $view = view("modals.{$type}");
 
             if ($type == "statuslabel") {
                 $view->with('statuslabel_types', Helper::statusTypeList());

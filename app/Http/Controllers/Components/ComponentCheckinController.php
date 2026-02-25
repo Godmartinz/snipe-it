@@ -98,7 +98,7 @@ class ComponentCheckinController extends Controller
 
             event(new CheckoutableCheckedIn($component, $asset, auth()->user(), $request->input('note'), Carbon::now()));
 
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
 
             return Helper::getRedirectOption($request, $component->id, 'Components')
                 ->with('success', trans('admin/components/message.checkin.success'));

@@ -324,7 +324,7 @@ class StatuslabelsController extends Controller
         $statuslabels = Statuslabel::orderBy('default_label', 'desc')->orderBy('name', 'asc')->orderBy('deployable', 'desc');
 
         if ($request->filled('search')) {
-            $statuslabels = $statuslabels->where('name', 'LIKE', '%'.$request->get('search').'%');
+            $statuslabels = $statuslabels->where('name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         if ($request->filled('deployable')) {

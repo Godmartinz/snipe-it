@@ -195,7 +195,7 @@ class Ldap extends Model
         $connection = self::connectToLdap();
         $ldap_username_field = $settings->ldap_username_field;
         $baseDn = $settings->ldap_basedn;
-        $userDn = $ldap_username_field.'='.$username.','.$settings->ldap_basedn;
+        $userDn = $ldap_username_field . '=' . ldap_escape($username, '', LDAP_ESCAPE_DN) . ',' . $settings->ldap_basedn;
 
         if ($settings->is_ad == '1') {
             // Check if they are using the userprincipalname for the username field.
@@ -213,7 +213,7 @@ class Ldap extends Model
             }
         }
 
-        $filterQuery = $settings->ldap_auth_filter_query.$username;
+        $filterQuery = $settings->ldap_auth_filter_query . ldap_escape($username, '', LDAP_ESCAPE_FILTER);
         $filter = Setting::getSettings()->ldap_filter; //FIXME - this *does* respect the ldap filter, but I believe that AdLdap2 did *not*.
         $filterQuery = "({$filter}({$filterQuery}))";
 

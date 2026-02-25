@@ -274,7 +274,7 @@ class ManufacturersController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $manufacturers = $manufacturers->where('name', 'LIKE', '%'.$request->get('search').'%');
+            $manufacturers = $manufacturers->where('name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $manufacturers = $manufacturers->orderBy('name', 'ASC')->paginate(50);

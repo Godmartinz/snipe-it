@@ -92,6 +92,7 @@ class UploadedFilesPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'deleteUploadFormatter',
+                'printIgnore' => true,
             ],
         ];
 

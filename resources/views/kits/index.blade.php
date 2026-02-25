@@ -21,6 +21,8 @@
                 data-sort-order="asc"
                 data-sort-name="name"
                 id="kitsTable"
+                data-fixed-number="1"
+                data-fixed-right-number="2"
                 class="table table-striped snipe-table"
                 data-buttons="kitButtons"
                 data-url="{{ route('api.kits.index') }}"

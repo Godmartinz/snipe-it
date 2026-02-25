@@ -24,7 +24,7 @@ class LabelsController extends Controller
         $labels = Label::find();
 
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = $request->input('search');
             $labels = $labels->filter(function ($label, $index) use ($search) {
                 return stripos($label->getName(), $search) !== false;
             });
@@ -32,11 +32,11 @@ class LabelsController extends Controller
 
         $total = $labels->count();
 
-        $offset = $request->get('offset', 0);
+        $offset = $request->input('offset', 0);
         $offset = ($offset > $total) ? $total : $offset;
 
         $maxLimit = config('app.max_results');
-        $limit = $request->get('limit', $maxLimit);
+        $limit = $request->input('limit', $maxLimit);
         $limit = ($limit > $maxLimit) ? $maxLimit : $limit;
         
         $labels = $labels->skip($offset)->take($limit);

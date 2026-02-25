@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Solo i superamministratori possono concedere il permesso di superamministratore a un altro utente.',
     'admin_permission_warning' => 'Solo gli utenti con diritti di amministratore o superiore possono nominare altri utenti come amministratore.',
     'remove_group_memberships' => 'Rimuove Membri del Gruppo',
-    'warning_deletion_information' => 'Stai per effettuare la restituzione di TUTTI gli articoli da :count utente/i elencati di seguito. I nomi dei super amministratori sono evidenziati in rosso.',
+    'warning_deletion_information' => 'Si sta per eseguire la restituzione di TUTTI gli elementi da :count utente(i) elencato/i di seguito.',
     'update_user_assets_status' => 'Aggiorna tutti i beni per questi utenti a questo stato',
     'checkin_user_properties' => 'Esegui la restituzione di tutte le assegnazioni associate a questi utenti',
     'remote_label'   => 'Questo è un utente remoto',

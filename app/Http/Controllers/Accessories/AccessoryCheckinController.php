@@ -76,7 +76,7 @@ class AccessoryCheckinController extends Controller
         if ($accessory_checkout->delete()) {
             event(new CheckoutableCheckedIn($accessory, $accessory_checkout->assignedTo, auth()->user(), $request->input('note'), $checkin_at));
 
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
 
             return Helper::getRedirectOption($request, $accessory->id, 'Accessories')
                 ->with('success', trans('admin/accessories/message.checkin.success'));

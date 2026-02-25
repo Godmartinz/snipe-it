@@ -12,7 +12,6 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Queue\SerializesModels;
 
 class CheckoutAssetMail extends BaseMailable
@@ -25,7 +24,7 @@ class CheckoutAssetMail extends BaseMailable
      * Create a new message instance.
      * @throws \Exception
      */
-    public function __construct(Asset $asset, $checkedOutTo, User $checkedOutBy, $acceptance, $note, bool $firstTimeSending = true)
+    public function __construct(Asset $asset, $checkedOutTo, ?User $checkedOutBy, $acceptance, $note, bool $firstTimeSending = true)
     {
         $this->item = $asset;
         $this->admin = $checkedOutBy;

@@ -242,7 +242,8 @@ class ReportsController extends Controller
         ini_set('max_execution_time', 12000);
         $this->authorize('reports.view');
 
-        \Debugbar::disable();
+        $this->disableDebugbar();
+
         $response = new StreamedResponse(function () {
             Log::debug('Starting streamed response');
 
@@ -437,8 +438,8 @@ class ReportsController extends Controller
         ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); //12000 seconds = 200 minutes
         $this->authorize('reports.view');
 
+        $this->disableDebugbar();
 
-        \Debugbar::disable();
         $customfields = CustomField::get();
         $response = new StreamedResponse(function () use ($customfields, $request) {
             Log::debug('Starting streamed response');
@@ -547,6 +548,10 @@ class ReportsController extends Controller
 
             if ($request->filled('username')) {
                 $header[] = 'Username';
+            }
+
+            if ($request->filled('email')) {
+                $header[] = 'Email';
             }
 
             if ($request->filled('employee_num')) {
@@ -818,7 +823,7 @@ class ReportsController extends Controller
                     }
 
                     if ($request->filled('eol')) {
-                        $row[] = ($asset->purchase_date != '') ? $asset->asset_eol_date : '';
+                        $row[] = ($asset->asset_eol_date != '') ? $asset->asset_eol_date : '';
                     }
 
                     if ($request->filled('warranty')) {
@@ -877,6 +882,15 @@ class ReportsController extends Controller
                         // Only works if we're checked out to a user, not anything else.
                         if ($asset->checkedOutToUser()) {
                             $row[] = ($asset->assignedto) ? $asset->assignedto->username : '';
+                        } else {
+                            $row[] = ''; // Empty string if unassigned
+                        }
+                    }
+
+                    if ($request->filled('email')) {
+                        // Only works if we're checked out to a user, not anything else.
+                        if ($asset->checkedOutToUser()) {
+                            $row[] = ($asset->assignedto) ? $asset->assignedto->email : '';
                         } else {
                             $row[] = ''; // Empty string if unassigned
                         }
@@ -1228,12 +1242,14 @@ class ReportsController extends Controller
         ];
         $mailable= $lookup[get_class($acceptance->checkoutable)];
 
-        return new $mailable($acceptance->checkoutable,
+        return new $mailable(
+            $acceptance->checkoutable,
             $acceptance->checkedOutTo ?? $acceptance->assignedTo,
             $logItem->adminuser,
             $acceptance,
-            $acceptance->note);
-
+            $acceptance->note,
+            firstTimeSending: false,
+        );
     }
     /**
      * sentAssetAcceptanceReminder

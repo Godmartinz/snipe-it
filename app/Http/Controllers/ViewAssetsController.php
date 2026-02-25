@@ -206,7 +206,7 @@ class ViewAssetsController extends Controller
         if ($fullItemType == Asset::class) {
             $data['item_url'] = route('hardware.show', $item->id);
         } else {
-            $data['item_url'] = route("view/${itemType}", $item->id);
+            $data['item_url'] = route("view/{$itemType}", $item->id);
         }
 
         $settings = Setting::getSettings();

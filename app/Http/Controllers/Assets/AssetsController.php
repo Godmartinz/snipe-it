@@ -249,7 +249,7 @@ class AssetsController extends Controller
                     }
 
                     if (isset($target)) {
-                        $asset->checkOut($target, auth()->user(), date('Y-m-d H:i:s'), $request->input('expected_checkin', null), 'Checked out on asset creation', $request->get('name'), $location);
+                        $asset->checkOut($target, auth()->user(), date('Y-m-d H:i:s'), $request->input('expected_checkin', null), 'Checked out on asset creation', $request->input('name'), $location);
                     }
 
                     $successes[] = "<a href='" . route('hardware.show', $asset) . "' style='color: white;'>" . e($asset->asset_tag) . "</a>";
@@ -266,13 +266,13 @@ class AssetsController extends Controller
         }
         DB::commit();
 
-        if($request->get('redirect_option') === 'back'){
+        if($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
-        session()->put(['checkout_to_type' => $request->get('checkout_to_type'),
+        session()->put(['checkout_to_type' => $request->input('checkout_to_type'),
                        'other_redirect' =>  'model' ]);
 
 
@@ -454,7 +454,7 @@ class AssetsController extends Controller
         // Update custom fields in the database.
         // FIXME: No idea why this is returning a Builder error on db_column_name.
         // Need to investigate and fix. Using static method for now.
-        $model = AssetModel::find($request->get('model_id'));
+        $model = AssetModel::find($request->input('model_id'));
         if (($model) && ($model->fieldset)) {
             foreach ($model->fieldset->fields as $field) {
                 if ($field->element == 'checkbox' && !$request->has($field->db_column)) {
@@ -480,9 +480,9 @@ class AssetsController extends Controller
             }
         }
         session()->put([
-            'redirect_option' => $request->get('redirect_option'),
-            'checkout_to_type' => $request->get('checkout_to_type'),
-            'other_redirect' => $request->get('redirect_option') === 'other_redirect' ? 'model' : null,
+            'redirect_option' => $request->input('redirect_option'),
+            'checkout_to_type' => $request->input('checkout_to_type'),
+            'other_redirect' => $request->input('redirect_option') === 'other_redirect' ? 'model' : null,
         ]);
 
 
@@ -552,9 +552,9 @@ class AssetsController extends Controller
      */
     public function getAssetBySerial(Request $request) : RedirectResponse
     {
-        $topsearch = ($request->get('topsearch')=="true");
+        $topsearch = ($request->input('topsearch')=="true");
 
-        if (!$asset = Asset::where('serial', '=', $request->get('serial'))->first()) {
+        if (!$asset = Asset::where('serial', '=', $request->input('serial'))->first()) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
         $this->authorize('view', $asset);
@@ -570,8 +570,8 @@ class AssetsController extends Controller
      */
     public function getAssetByTag(Request $request, $tag=null) : RedirectResponse
     {
-        $tag = $tag ? $tag : $request->get('assetTag');
-        $topsearch = ($request->get('topsearch') == 'true');
+        $tag = $tag ? $tag : $request->input('assetTag');
+        $topsearch = ($request->input('topsearch') == 'true');
 
         // Search for an exact and unique asset tag match
         $assets = Asset::where('asset_tag', '=', $tag);
@@ -682,8 +682,8 @@ class AssetsController extends Controller
             return (new Label())
                 ->with('assets', collect([ $asset ]))
                 ->with('settings', Setting::getSettings())
-                ->with('template', request()->get('template'))
-                ->with('offset', request()->get('offset'))
+                ->with('template', request()->input('template'))
+                ->with('offset', request()->input('offset'))
                 ->with('bulkedit', false)
                 ->with('count', 0);
         }
@@ -982,7 +982,7 @@ class AssetsController extends Controller
 
         $this->authorize('audit', Asset::class);
 
-        session()->put('redirect_option', $request->get('redirect_option'));
+        session()->put('redirect_option', $request->input('redirect_option'));
         session()->put('other_redirect', 'audit');
 
 

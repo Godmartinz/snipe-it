@@ -97,8 +97,8 @@ class LicenseCheckinController extends Controller
             $licenseSeat->unreassignable_seat = true;
         }
 
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
-        if ($request->get('redirect_option') === 'target'){
+        session()->put(['redirect_option' => $request->input('redirect_option')]);
+        if ($request->input('redirect_option') === 'target'){
             session()->put(['checkout_to_type' => 'user']);
         }
 

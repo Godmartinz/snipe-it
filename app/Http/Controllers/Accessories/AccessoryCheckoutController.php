@@ -67,7 +67,7 @@ class AccessoryCheckoutController extends Controller
      */
     public function store(AccessoryCheckoutRequest $request, Accessory $accessory) : RedirectResponse
     {
-        
+
         $this->authorize('checkout', $accessory);
 
         $target = $this->determineCheckoutTarget();
@@ -89,12 +89,19 @@ class AccessoryCheckoutController extends Controller
             $accessory_checkout->save();
         }
 
-        event(new CheckoutableCheckedOut($accessory,  $target, auth()->user(), $request->input('note')));
+        event(new CheckoutableCheckedOut(
+            $accessory,
+            $target,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $accessory->checkout_qty,
+        ));
 
         $request->request->add(['checkout_to_type' => request('checkout_to_type')]);
         $request->request->add(['assigned_to' => $target->id]);
 
-        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
 
         // Redirect to the new accessory page

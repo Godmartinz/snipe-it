@@ -23,6 +23,13 @@ class AccessoryPresenter extends Presenter
                 'visible' => false,
                 'printIgnore' => true,
             ], [
+                'field' => 'name',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'formatter' => 'accessoriesLinkFormatter',
+            ], [
                 'field' => 'image',
                 'searchable' => false,
                 'sortable' => true,
@@ -38,14 +45,7 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('admin/companies/table.title'),
                 'visible' => false,
                 'formatter' => 'companiesLinkObjFormatter',
-            ], [
-                'field' => 'name',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => false,
-                'title' => trans('general.name'),
-                'formatter' => 'accessoriesLinkFormatter',
-            ], [
+            ],  [
                 'field' => 'category',
                 'searchable' => true,
                 'sortable' => true,
@@ -172,6 +172,7 @@ class AccessoryPresenter extends Presenter
                 'visible' => true,
                 'title' => trans('general.change'),
                 'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
             ], [
                 'field' => 'available_actions',
                 'searchable' => false,
@@ -261,7 +262,11 @@ class AccessoryPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('accessories.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Accessory', $this])) {
+            return (string)link_to_route('accessories.show', e($this->display_name), $this->id);
+        } else {
+            return e($this->display_name);
+        }
     }
 
     /**

@@ -570,7 +570,7 @@ class Asset extends Depreciable
                             if (is_array(request()->input($field->db_column))) {
                                 $this->{$field->db_column} = Crypt::encrypt(implode(', ', request()->input($field->db_column)));
                             } else {
-                                $this->{$field->db_column} = Crypt::encrypt(request()->get($field->db_column));
+                                $this->{$field->db_column} = Crypt::encrypt(request()->input($field->db_column));
                             }
                         }
 
@@ -907,7 +907,7 @@ class Asset extends Depreciable
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
 
@@ -1271,6 +1271,7 @@ class Asset extends Depreciable
             $query = $query
                 ->orWhere('assets_users.first_name', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.last_name', 'LIKE', '%'.$term.'%')
+                ->orWhere('assets_users.display_name', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.jobtitle', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.username', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.employee_num', 'LIKE', '%'.$term.'%')
@@ -1915,6 +1916,7 @@ class Asset extends Depreciable
                                     function ($query) use ($search_val) {
                                         $query->where('users.first_name', 'LIKE', '%'.$search_val.'%')
                                             ->orWhere('users.last_name', 'LIKE', '%'.$search_val.'%')
+                                            ->orWhere('users.display_name', 'LIKE', '%'.$search_val.'%')
                                             ->orWhere('users.username', 'LIKE', '%'.$search_val.'%');
                                     }
                                 );

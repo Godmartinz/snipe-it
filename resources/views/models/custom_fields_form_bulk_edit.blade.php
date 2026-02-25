@@ -14,9 +14,9 @@
 
 @if ($anyModelHasCustomFields > 0)
     <fieldset name="custom-fields"">
-        <x-form-legend>
+        <x-form.legend>
             {{ trans('admin/custom_fields/general.custom_fields') }}
-        </x-form-legend>
+        </x-form.legend>
 @endif
 
 @foreach($models as $model)

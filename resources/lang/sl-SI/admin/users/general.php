@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Samo superadmin lahko dodeli uporabniku superadminske pravice.',
     'admin_permission_warning' => 'Samo uporabniki z adminskimi pravicami ali večjimi lahko dodelijo uporabniku adminske pravice.',
     'remove_group_memberships' => 'Odstrani članstva skupinam',
-    'warning_deletion_information' => 'Prijavili boste VSE predmete od spodaj navedenih uporabnikov :seštevek. Imena superadminov so označena z rdečo barvo.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Posodobi vsa sredstva za te uporabnike do tega statusa',
     'checkin_user_properties' => 'Prijavite vse lastnosti, povezane s temi uporabniki',
     'remote_label'   => 'To je oddaljen uporabnik',

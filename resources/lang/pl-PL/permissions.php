@@ -16,58 +16,58 @@ return array(
     */
 
     "superuser" => [
-        'name' => 'Super User',
+        'name' => 'Super użytkownik',
         'note'       => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
+        'name' => 'Dostęp administratora',
         'note'       => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
-        'note'       => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'name' => 'Importuj CSV',
+        'note'       => 'Pozwoli to użytkownikom importować, nawet jeśli dostęp do użytkowników, zasobów itd. został odebrany w innym miejscu.',
     ],
 
     'reports' => [
         'name' => 'Reports Access',
-        'note'       => 'Determines whether the user has access to the Reports section of the application.',
+        'note'       => 'Określa czy użytkownik ma dostęp do sekcji "Raporty".',
     ],
 
     'assets' =>
         [
             'name' => 'Środki',
-            'note' => 'Grants access to the Assets section of the application.',
+            'note' => 'Udziela dostęp do sekcji "Zasoby".',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'Pokaż zasoby',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'Stwórz nowe zasoby',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'Edytuj zasoby',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'Usuń zasoby',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'Zarejestruj',
+        'note' => 'Zwróć obecnie zajęte zasoby, do puli dostępnych.',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
+        'name' => '',
         'note' => 'Assign assets in inventory by checking them out.',
     ],
 
     'assetsaudit' => [
-        'name' => 'Audit Assets',
+        'name' => 'Audyt zasobów',
         'note' => 'Allows the user to mark an asset as physically inventoried.',
     ],
 
@@ -136,26 +136,26 @@ return array(
     ],
     'licenses'   => [
         'name' => 'Licencje',
-        'note'       => 'Grants access to the Licenses section of the application.',
+        'note'       => 'Udziela dostępu do części licencyjnej aplikacji.',
     ],
     'licensesview' => [
-        'name' => 'View Licenses',
+        'name' => 'Pokaż licencje',
     ],
     'licensescreate' => [
-        'name' => 'Create New Licenses',
+        'name' => 'Stwórz nowe licencje',
     ],
     'licensesedit' => [
-        'name' => 'Edit Licenses',
+        'name' => 'Edytuj licencje',
     ],
     'licensesdelete' => [
-        'name' => 'Delete Licenses',
+        'name' => 'Usuń licencje',
     ],
     'licensescheckout' => [
-        'name' => 'Assign Licenses',
-        'note' => 'Allows the user to assign licenses to assets or users.',
+        'name' => 'Przypisz licencje',
+        'note' => 'Pozwala użytkownikowi przypisać licencję do zasobu bądź użytkownika.',
         ],
     'licensescheckin' => [
-        'name' => 'Unassign Licenses',
+        'name' => 'Odepnij licencje',
         'note' => 'Allows the user to unassign licenses from assets or users.',
     ],
     'licensesfiles' => [

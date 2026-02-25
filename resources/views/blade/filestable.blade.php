@@ -5,7 +5,7 @@
 ])
 
 <!-- begin non-ajaxed file listing table -->
-<div class="table-responsive">
+
     <table
             data-columns="{{ \App\Presenters\UploadedFilesPresenter::dataTableLayout() }}"
             data-cookie-id-table="{{ $object_type }}-FileUploadsTable"
@@ -17,6 +17,7 @@
             data-sort-name="created_at"
             data-show-custom-view="true"
             data-custom-view="customViewFormatter"
+            data-show-advanced-search="false"
             data-show-custom-view-button="true"
             data-url="{{ route('api.files.index', ['object_type' => $object_type, 'id' => $object->id]) }}"
             class="table table-striped snipe-table"
@@ -28,7 +29,6 @@
 
     <x-gallery-card />
 
-</div>
 
 
 

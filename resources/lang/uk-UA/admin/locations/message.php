@@ -3,13 +3,13 @@
 return array(
 
     'does_not_exist' => 'Розташування не існує.',
-    'assoc_users'    => 'This location is not currently deletable because it is the location of record for at least one item or user, has assets assigned to it, or is the parent location of another location. Please update your records to no longer reference this location and try again ',
+    'assoc_users'    => 'Цю локацію наразі неможливо видалити, оскільки вона є основною для принаймні одного об’єкта чи користувача, до неї прив’язані активи або вона є батьківською для іншої локації. Будь ласка, оновіть свої записи, щоб вони більше не посилалися на цю локацію, і спробуйте знову ',
     'assoc_assets'	 => 'Це розташування в даний час пов\'язано принаймні з одним активом і не може бути видалений. Будь ласка, оновіть ваші медіафайли, щоб більше не посилатися на це розташування і повторіть спробу. ',
     'assoc_child_loc'	 => 'Це місцезнаходження наразі батько принаймні одного дочірнього місця і не може бути видалений. Будь ласка, оновіть ваше місцеположення, щоб більше не посилатися на це місце і повторіть спробу. ',
     'assigned_assets' => 'Призначені активи',
     'current_location' => 'Поточне місцезнаходження',
     'open_map' => 'Відкрити в картах :map_provider_icon',
-    'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
+    'deleted_warning' => 'Цю локацію було видалено. Будь ласка, відновіть її, перш ніж намагатися внести будь-які зміни.',
 
 
     'create' => array(

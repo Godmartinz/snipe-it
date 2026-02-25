@@ -102,10 +102,10 @@ class LicensesController extends Controller
         $license->created_by           = auth()->id();
         $license->min_amt           = $request->input('min_amt');
 
-        if($request->get('redirect_option') === 'back'){
+        if($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
         if ($license->save()) {
@@ -183,7 +183,7 @@ class LicensesController extends Controller
         $license->category_id       = $request->input('category_id');
         $license->min_amt           = $request->input('min_amt');
 
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
+        session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($license->save()) {
             return Helper::getRedirectOption($request, $license->id, 'Licenses')
@@ -315,7 +315,8 @@ class LicensesController extends Controller
     public function getExportLicensesCsv()
     {
         $this->authorize('view', License::class);
-        \Debugbar::disable();
+
+        $this->disableDebugbar();
 
         $response = new StreamedResponse(function () {
             // Open output stream

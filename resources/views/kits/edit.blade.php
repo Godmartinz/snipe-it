@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="box-body">
-                <div class="table-responsive">
+
                 <table
                 data-cookie-id-table="kitModelsTable"
                 data-columns="{{ \App\Presenters\PredefinedKitPresenter::dataTableModels() }}"
@@ -48,7 +48,6 @@
                 }'>
                 </table>
 
-                </div>
             </div> <!--.box-body-->
         </div> <!-- /.box.box-default-->
     </div> <!-- .col-md-12-->
@@ -73,7 +72,7 @@
 
 {{--                </div>--}}
 {{--                <div class="box-body">--}}
-{{--                    <div class="table-responsive">--}}
+{{--                    --}}
 {{--                    <table--}}
 {{--                    data-cookie-id-table="kitLicensesTable"--}}
 {{--                    data-columns="{{ \App\Presenters\PredefinedKitPresenter::dataTableLicenses() }}"--}}
@@ -88,7 +87,6 @@
 {{--                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]--}}
 {{--                    }'>--}}
 {{--                    </table>--}}
-{{--                    </div>--}}
 {{--                </div> <!--.box-body-->--}}
 {{--            </div> <!-- /.box.box-default-->--}}
 {{--        </div> <!-- .col-md-12-->--}}
@@ -111,7 +109,7 @@
 {{--                    </div>--}}
 {{--                </div>--}}
 {{--                <div class="box-body">--}}
-{{--                    <div class="table-responsive">--}}
+{{--                    --}}
 {{--                    <table--}}
 {{--                    data-cookie-id-table="kitConsumablesTable"--}}
 {{--                    data-columns="{{ \App\Presenters\PredefinedKitPresenter::dataTableConsumables() }}"--}}
@@ -126,7 +124,6 @@
 {{--                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]--}}
 {{--                    }'>--}}
 {{--                    </table>--}}
-{{--                    </div>--}}
 {{--                </div> <!--.box-body-->--}}
 {{--            </div> <!-- /.box.box-default-->--}}
 {{--        </div> <!-- .col-md-12-->--}}
@@ -149,7 +146,7 @@
 
 {{--                </div>--}}
 {{--                <div class="box-body">--}}
-{{--                    <div class="table-responsive">--}}
+{{--                    --}}
 {{--                    <table--}}
 {{--                    data-cookie-id-table="kitAccessoriesTable"--}}
 {{--                    data-columns="{{ \App\Presenters\PredefinedKitPresenter::dataTableAccessories() }}"--}}
@@ -164,7 +161,6 @@
 {{--                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]--}}
 {{--                    }'>--}}
 {{--                    </table>--}}
-{{--                    </div>--}}
 {{--                </div> <!--.box-body-->--}}
 {{--            </div> <!-- /.box.box-default-->--}}
 {{--        </div> <!-- .col-md-12-->--}}

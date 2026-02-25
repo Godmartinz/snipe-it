@@ -257,6 +257,11 @@
                 {{ trans('admin/users/table.username') }}
               </label>
 
+            <label class="form-control">
+                <input type="checkbox" name="email" value="1" @checked($template->checkmarkValue('email')) />
+                {{ trans('admin/users/table.email') }}
+            </label>
+
               <label class="form-control">
                   <input type="checkbox" name="employee_num" value="1" @checked($template->checkmarkValue('employee_num')) />
                 {{ trans('general.employee_number') }}

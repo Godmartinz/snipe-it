@@ -7,7 +7,7 @@
         </strong>
     </div>
     <div class="col-md-9">
-        <label class="btn btn-default{{ (config('app.lock_passwords')) ? ' disabled' : '' }}">
+        <label class="btn btn-theme{{ (config('app.lock_passwords')) ? ' disabled' : '' }}">
             {{ trans('button.select_file')  }}
             <input type="file" name="{{ $logoVariable }}" class="js-uploadFile" id="{{ $logoId }}"
                    accept="{{  $allowedTypes ?? "image/gif,image/jpeg,image/webp,image/png,image/svg,image/svg+xml,image/avif" }}"

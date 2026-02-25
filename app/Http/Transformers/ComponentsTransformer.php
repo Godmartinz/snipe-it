@@ -74,6 +74,7 @@ class ComponentsTransformer
             'checkout' => Gate::allows('checkout', Component::class),
             'checkin' => Gate::allows('checkin', Component::class),
             'update' => Gate::allows('update', Component::class),
+            'clone' => Gate::allows('create', Component::class),
             'delete' => $component->isDeletable(),
         ];
         $array += $permissions_array;

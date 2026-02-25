@@ -23,9 +23,9 @@ return [
         'success'               => 'ล้างระเบียนเรียบร้อยแล้ว',
     ],
     'mail' => [
-        'sending' => 'Sending Test Email...',
-        'success' => 'Mail sent!',
-        'error' => 'Mail could not be sent.',
+        'sending' => 'กำลังส่งอีเมลทดสอบ...',
+        'success' => 'อีเมลถูกส่งแล้ว',
+        'error' => 'ไม่สามารถส่งอีเมลได้',
         'additional' => 'No additional error message provided. Check your mail settings and your app log.'
     ],
     'ldap' => [
@@ -33,7 +33,7 @@ return [
         '500' => '500 Server Error. Please check your server logs for more information.',
         'error' => 'Something went wrong :(',
         'sync_success' => 'A sample of 10 users returned from the LDAP server based on your settings:',
-        'testing_authentication' => 'Testing LDAP Authentication...',
+        'testing_authentication' => 'กำลังทดสอบการพิสูจน์ตัวตนด้วย LDAP...',
         'authentication_success' => 'User authenticated against LDAP successfully!'
     ],
     'labels' => [

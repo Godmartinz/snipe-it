@@ -8,10 +8,8 @@
 
 {{-- Page content --}}
 @section('content')
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-      <div class="box-body">
+    <x-container>
+        <x-box>
             <table
                     data-cookie-id-table="maintenancesReport"
                     data-show-footer="true"
@@ -47,10 +45,8 @@
                 </tr>
                 </thead>
             </table>
-      </div>
-    </div>
-  </div>
-</div>
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

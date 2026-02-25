@@ -2,11 +2,12 @@
 
 return array(
 
-    'accepted'                  => 'Sie haben diesen Gegenstand erfolgreich angenommen.',
-    'declined'                  => 'Sie haben diesen Gegenstand erfolgreich abgelehnt.',
+    'accepted'                  => 'Du hast den Gegenstand erfolgreich angenommen.',
+    'declined'                  => 'Du hast diesen Gegenstand erfolgreich abgelehnt.',
     'bulk_manager_warn'	        => 'Deine Benutzer wurden erfolgreich aktualisiert, aber dein Manager-Eintrag wurde nicht gespeichert, da der Manager, den du ausgewählt hast, auch in der zu bearbeitenden Liste war, und Benutzer dürfen nicht ihr eigener Manager sein. Bitte wähle deine Benutzer erneut aus, ohne diesen Manager.',
     'user_exists'               => 'Benutzer existiert bereits!',
-    'user_not_found'            => 'Der Benutzer existiert nicht oder du bistnicht berechtigt, ihn anzuzeigen.',
+    'cannot_delete'             => 'Benutzer existiert nicht oder du hast nicht die Berechtigung zum Löschen.',
+    'user_not_found'            => 'Benutzer existiert nicht oder Sie haben keine Berechtigung, sie anzusehen.',
     'user_login_required'       => 'Das Loginfeld ist erforderlich',
     'user_has_no_assets_assigned' => 'Derzeit sind keine Assets dem Benutzer zugewiesen.',
     'user_password_required'    => 'Das Passswortfeld ist erforderlich.',

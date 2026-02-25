@@ -80,8 +80,8 @@ class ComponentCheckoutController extends Controller
         $max_to_checkout = $component->numRemaining();
 
         // Make sure there are at least the requested number of components available to checkout
-        if ($max_to_checkout < $request->get('assigned_qty')) {
-            return redirect()->back()->withInput()->with('error', trans('admin/components/message.checkout.unavailable', ['remaining' => $max_to_checkout, 'requested' => $request->get('assigned_qty')]));
+        if ($max_to_checkout < $request->input('assigned_qty')) {
+            return redirect()->back()->withInput()->with('error', trans('admin/components/message.checkout.unavailable', ['remaining' => $max_to_checkout, 'requested' => $request->input('assigned_qty')]));
         }
 
         $validator = Validator::make($request->all(), [
@@ -115,12 +115,19 @@ class ComponentCheckoutController extends Controller
             'note' => $request->input('note'),
         ]);
 
-        event(new CheckoutableCheckedOut($component, $asset, auth()->user(), $request->input('note')));
+        event(new CheckoutableCheckedOut(
+            $component,
+            $asset,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $component->checkout_qty,
+        ));
 
         $request->request->add(['checkout_to_type' => 'asset']);
         $request->request->add(['assigned_asset' => $asset->id]);
 
-        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
         return Helper::getRedirectOption($request, $component->id, 'Components')
             ->with('success', trans('admin/components/message.checkout.success'));

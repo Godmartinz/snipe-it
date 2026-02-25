@@ -38,9 +38,9 @@
                     <div class="col-md-12">
 
                         <fieldset name="password-preferences">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.security') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Two Factor -->
                             <div class="form-group {{ $errors->has('brand') ? 'error' : '' }}">
@@ -67,9 +67,9 @@
                                 </div>
                             </div>
 
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.passwords') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Min characters -->
                             <div class="form-group {{ $errors->has('pwd_secure_min') ? 'error' : '' }}">
@@ -129,9 +129,9 @@
                         </fieldset>
 
                         <fieldset name="remote-login">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.login_remote_user_text') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             <!-- Remote User Authentication -->
                             <div class="form-group {{ $errors->has('login_remote_user') ? 'error' : '' }}">

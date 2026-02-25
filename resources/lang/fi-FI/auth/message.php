@@ -12,8 +12,8 @@ return array(
         'success'               => 'Sisäänkirjautuminen onnistui.',
         'code_required'         => 'MFA koodi on pakollinen.',
         'invalid_code'          => 'MFA koodi on virheellinen.',
-        'enter_two_factor_code' => 'Please enter your two-factor authentication code.',
-        'please_enroll'         => 'Please enroll a device in two-factor authentication.',
+        'enter_two_factor_code' => 'Anna kaksivaiheisen todennuksen koodi.',
+        'please_enroll'         => 'Rekisteröi laite kaksivaiheiseista todennusta varten.',
     ),
 
     'signin' => array(

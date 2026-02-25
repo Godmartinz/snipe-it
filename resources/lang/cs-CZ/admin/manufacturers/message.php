@@ -24,9 +24,9 @@ return array(
     'delete' => array(
         'confirm' => 'Opravdu chcete smazat tohoto výrobce?',
         'error'   => 'Vyskytl se problém se smazáním výrobce. Zkuste to znovu.',
-        'success'                => 'Manufacturer deleted successfully.',
-        'bulk_success'           => 'Manufacturers deleted successfully.',
-        'partial_success'        => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
+        'success'                => 'Výrobce úspěšně vymazán.',
+        'bulk_success'           => 'Výrobci úspěšně vymazáni.',
+        'partial_success'        => 'Výrobce byl úspěšně odstraněn. Viz další informace níže. | :count výrobci byly úspěšně odstraněny. Viz další informace níže.',
     )
 
 );

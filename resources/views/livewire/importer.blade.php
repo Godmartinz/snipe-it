@@ -97,9 +97,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12 table-responsive" style="padding-top: 30px;">
-                                <table
-                                        data-id-table="upload-table"
-
+                                <table data-id-table="upload-table"
                                         data-side-pagination="client"
                                         id="upload-table"
                                         class="col-md-12 table table-striped snipe-table">
@@ -126,21 +124,48 @@
                                     @foreach($this->files as $currentFile)
 
                                     		<tr style="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? 'font-weight: bold' : '' }}" class="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? '' : '' }}">
-                                    			<td>{{ $currentFile->file_path }}</td>
+                                    			<td>
+
+                                                    @if ((auth()->user()->id == $currentFile->adminuser?->id) || (auth()->user()->isSuperUser()))
+                                                        <a href="{{ route('imports.download', $currentFile) }}">{{ $currentFile->file_path }}</a>
+                                                    @else
+                                                        {{ $currentFile->file_path }}
+                                                    @endif
+                                                </td>
                                     			<td>{{ Helper::getFormattedDateObject($currentFile->created_at, 'datetime', false) }}</td>
-                                                <td>{{ ($currentFile->adminuser) ? $currentFile->adminuser->present()->fullName : '--'}}</td>
+                                                <td>
+                                                    @if ($currentFile->adminuser)
+                                                        @can('view', $currentFile->adminuser)
+                                                            <a href="{{ route('users.show', $currentFile->adminuser) }}">{{ $currentFile->adminuser->display_name }}</a>
+                                                        @else
+                                                            {{ $currentFile->adminuser->display_name }}
+                                                        @endcan
+                                                    @else
+                                                        ---
+                                                    @endif
+
+                                                </td>
                                     			<td>{{ Helper::formatFilesizeUnits($currentFile->filesize) }}</td>
                                                 <td class="col-md-1 text-right" style="white-space: nowrap;">
                                                     <button class="btn btn-sm btn-info" wire:click="selectFile({{ $currentFile->id }})" data-tooltip="true" data-title="{{ trans('general.import_this_file') }}">
                                                         <i class="fa-solid fa-list-check" aria-hidden="true"></i>
                                                         <span class="sr-only">{{ trans('general.import') }}</span>
                                                     </button>
-                                                    <a href="#" wire:click.prevent="$set('activeFileId',null)" data-tooltip="true" data-title="{{ trans('general.delete') }}">
-                                                    <button class="btn btn-sm btn-danger" wire:click="destroy({{ $currentFile->id }})">
-                                                        <i class="fas fa-trash icon-white" aria-hidden="true"></i>
-                                                        <span class="sr-only">{{ trans('general.delete') }}</span>
-                                                    </button>
-                                                    </a>
+
+                                                    @if ((auth()->user()->id == $currentFile->adminuser?->id) || (auth()->user()->isSuperUser()))
+                                                        <a href="#" wire:click.prevent="$set('activeFileId',null)" data-tooltip="true" data-title="{{ trans('general.delete') }}">
+                                                            <button class="btn btn-sm btn-danger" wire:click="destroy({{ $currentFile->id }})">
+                                                                <i class="fas fa-trash icon-white" aria-hidden="true"></i>
+                                                                <span class="sr-only">{{ trans('general.delete') }}</span>
+                                                            </button>
+                                                        </a>
+                                                    @else
+                                                        <a data-tooltip="true" class="btn btn-sm btn-danger disabled" data-title="{{ trans('general.delete') }}">
+                                                            <i class="fas fa-trash icon-white" aria-hidden="true"></i>
+                                                            <span class="sr-only">{{ trans('general.delete') }}</span>
+                                                        </a>
+                                                    @endif
+
                                     			</td>
                                     		</tr>
 
@@ -218,7 +243,7 @@
                                                                 <div class="form-group col-md-12">
                                                                     <hr style="border-top: 1px solid lightgray">
                                                                     <h3>
-                                                                        <i class="{{ Helper::iconTypeByItem($typeOfImport) }}">
+                                                                        <i class="{{ \App\Helpers\IconHelper::icon($typeOfImport) }}">
                                                                         </i>
                                                                         {{ trans('general.map_fields', ['item_type' => ucwords($typeOfImport)]) }}
                                                                        </h3>

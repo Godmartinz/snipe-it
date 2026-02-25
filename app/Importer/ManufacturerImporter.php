@@ -72,6 +72,7 @@ class ManufacturerImporter extends ItemImporter
         $this->item['support_url'] = trim($this->findCsvMatch($row, 'support_url'));
         $this->item['warranty_lookup_url'] = trim($this->findCsvMatch($row, 'warranty_lookup_url'));
         $this->item['notes'] = trim($this->findCsvMatch($row, 'notes'));
+        $this->item['tag_color'] = trim($this->findCsvMatch($row, 'tag_color'));
 
 
         Log::debug('Item array is: ');

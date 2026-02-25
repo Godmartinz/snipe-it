@@ -17,7 +17,7 @@ return [
 
     'audit_help' => 'Zaznaczenie tego pola spowoduje edycję rekordu aktywów, aby odzwierciedlić tę nową lokalizację. Pozostawienie go niezaznaczone spowoduje po prostu odnotowanie lokalizacji w dzienniku audytu.<br><br>Zauważ, że jeśli ten zasób jest zablokowany, nie zmieni lokalizacji osoby, składnika aktywów lub miejsca, w którym jest ona kontrolowana.',
 
-    'assets' => 'Aktywa są to elementy identyfikowane przez numer seryjny lub etykietę.  Są to przedmioty o większej wartości, gdzie liczy się identyfikacja określonego elementu.',
+    'assets' => 'Środki są to elementy identyfikowane przez numer seryjny lub etykietę.  Są to przedmioty o większej wartości, gdzie liczy się identyfikacja określonego elementu.',
 
     'categories' => 'Kategorie pozwolą zorganizować twoje przedmioty. Przykłady kategorii to np. &quot; Stacje robocze&quot;, &quot;Laptopy&quot;, &quot;Telefony&quot;, &quot;Tablety&quot; itp., ale możesz używać kategorii w dowolny sensowny dla siebie sposób.',
 

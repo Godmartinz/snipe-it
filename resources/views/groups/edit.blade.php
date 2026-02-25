@@ -41,9 +41,9 @@
 
 
 <fieldset>
-    <x-form-legend icon="warning" help_text="{{ (isset($all_users_count) && ($all_users_count < config('app.max_unpaginated_records'))) ? trans('general.add_users_to_group_help') : trans('admin/settings/general.too_many_users_to_show', ['count'=> $all_users_count, 'max' => config('app.max_unpaginated_records')]) }}">
+    <x-form.legend icon="warning" help_text="{{ (isset($all_users_count) && ($all_users_count < config('app.max_unpaginated_records'))) ? trans('general.add_users_to_group_help') : trans('admin/settings/general.too_many_users_to_show', ['count'=> $all_users_count, 'max' => config('app.max_unpaginated_records')]) }}">
        {{ trans('general.add_users_to_group') }}
-    </x-form-legend>
+    </x-form.legend>
 
 <!-- this is a temp fix for the select2 not working inside modals -->
 
@@ -55,7 +55,7 @@
         @if(($all_users_count ) && ($all_users_count < config('app.max_unpaginated_records')))
 
         <!-- This hidden input will store the selected user IDs as a comma-separated string to avoid max_input_vars and max_multipart_body_parts php.ini issues -->
-        <input type="hidden" name="users_to_sync" id="hidden_ids_box" class="form-control" value="{{ ($associated_users && is_array($associated_users)) ? implode(",", $associated_users->pluck('id')->toArray()) :  '' }}"/>
+        <input type="hidden" name="users_to_sync" id="hidden_ids_box" class="form-control" value="{{ $associated_users->pluck('id')->implode(',') }}"/>
 
         <div class="addremove-multiselect">
                 <div class="col-lg-5 col-sm-5 col-xs-12">

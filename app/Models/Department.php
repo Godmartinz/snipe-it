@@ -7,6 +7,7 @@ use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
 
 class Department extends SnipeModel
@@ -76,6 +77,13 @@ class Department extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [];
+
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this) && (($this->users_count ?? $this->users()->count()) === 0);
+    }
+
 
     /**
      * Establishes the department -> company relationship

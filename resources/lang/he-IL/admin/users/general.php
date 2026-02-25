@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'רק סופר אשמינים יכולים לתת הרשאת סופר אדמין.',
     'admin_permission_warning' => 'רק משתמשי אדמין ומעלה מורשים לתת למשתמש הרשאות גישה של אדמין.',
     'remove_group_memberships' => 'הסר חברויות בקבוצה',
-    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below. Super admin names are highlighted in red.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'עדכן את כלל הפריטים עבור משתמש זה לסטטוס הבא',
     'checkin_user_properties' => 'החזר את כלל ההגדרות המושייכות למשתמשים אלו',
     'remote_label'   => 'זהו משתמש מרוחק',

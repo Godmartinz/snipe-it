@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => '添加维护',
     'append'                    => '追加',
     'new'                       => '新建',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => '克隆 :item_type',
         'edit'      => '编辑 :item_type',

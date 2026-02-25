@@ -2,7 +2,7 @@
 
 return array(
 
-    'invalid_category_type' => 'The category must be a consumable category.',
+    'invalid_category_type' => 'หมวดหมู่ต้องเป็นหมวดหมู่ของวัสดุสิ้นเปลือง',
     'does_not_exist' => 'ไม่มีรายการวัสดุสิ้นเปลืองนี้',
 
     'create' => array(
@@ -25,7 +25,7 @@ return array(
         'error'   		=> 'วัสดุสิ้นเปลืองยังไม่ถูกเช็คเอ้าท์ กรุณาลองใหม่อีกครั้ง',
         'success' 		=> 'เช็คเอ้าท์วัสดุสิ้นเปลืองแล้ว',
         'user_does_not_exist' => 'ผู้ใช้งานไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง.',
-         'unavailable'      => 'There are not enough consumables for this checkout. Please check the quantity left. ',
+         'unavailable'      => 'วัสดุสิ้นเปลืองมีไม่พอสำหรับการแจกจ่าย กรุณาตรวจสอบยอดคงเหลือ ',
     ),
 
     'checkin' => array(

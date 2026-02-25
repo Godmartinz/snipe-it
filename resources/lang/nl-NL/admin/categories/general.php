@@ -10,8 +10,8 @@ return array(
     'clone'                             => 'Categorie dupliceren',
     'create'  							=> 'Categorie aanmaken',
     'edit'                              => 'Categorie bewerken',
-    'email_will_be_sent_due_to_global_eula' => 'An email will be sent to the user upon checkout because the global EULA is being used.',
-    'email_will_be_sent_due_to_category_eula' => 'An email will be sent to the user upon checkout because a EULA is set for this category.',
+    'email_will_be_sent_due_to_global_eula' => 'Er wordt een e-mail naar de gebruiker verzonden omdat er gebruik gemaakt word van de algemene gebruikersovereenkomst.',
+    'email_will_be_sent_due_to_category_eula' => 'Er wordt een e-mail verzonden naar de gebruiker omdat er een Gebruikersovereenkomst is ingesteld voor deze categorie.',
     'eula_text'							=> 'Categorie-gebruikersovereenkomst',
     'eula_text_help'					=> 'Dit veld geeft je de mogelijkheid om je gebruikersovereenkomsten aan te passen voor specifieke activa. Als je maar één gebruikersovereenkomst hebt voor al je activa, vink dan het vakje hieronder aan om de primaire als standaard in te stellen.',
     'name'                              => 'Categorienaam',
@@ -23,9 +23,9 @@ return array(
     'use_default_eula'					=> 'Gebruik de <a href="#" data-toggle="modal" data-target="#eulaModal"> standaard gebruikersovereenkomst</a>.',
     'use_default_eula_disabled'			=> '<del>Gebruik de standaard gebruikersovereenkomst.</del> Geen standaard gebruikersovereenkomst ingesteld. Ga naar Instellingen en voeg er één toe.',
     'use_default_eula_column'			=> 'Std. geb. overeenkomst gebruiken',
-    'import_require_acceptance'         => 'Require Acceptance',
+    'import_require_acceptance'         => 'Acceptatie vereist',
     'import_checkin_email'              => 'Stuur checkin e-mail',
-    'import_eula_text'                  => 'EULA text',
+    'import_eula_text'                  => 'Gebruikersovereenkomst text',
     'import_category_type'              => 'Categorietype',
 
 );

@@ -249,7 +249,7 @@ class AssetModelsController extends Controller
          * it, but I'll be damned if I can think of one. - snipe
          */
         if ($request->filled('custom_fieldset_id')) {
-            $assetmodel->fieldset_id = $request->get('custom_fieldset_id');
+            $assetmodel->fieldset_id = $request->input('custom_fieldset_id');
         }
 
 

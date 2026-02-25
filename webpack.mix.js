@@ -91,6 +91,7 @@ mix
     [
       "./node_modules/bootstrap-table/dist/bootstrap-table.css",
       "./node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.css",
+      "./node_modules/bootstrap-table/dist/extensions/fixed-columns/bootstrap-table-fixed-columns.css",
      "./resources/assets/css/dragtable.css",
     ],
     "public/css/dist/bootstrap-table.css"
@@ -109,6 +110,7 @@ mix
             './node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
             './node_modules/bootstrap-table/dist/extensions/cookie/bootstrap-table-cookie.js',
             './node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.js',
+            './node_modules/bootstrap-table/dist/extensions/fixed-columns/bootstrap-table-fixed-columns.min.js',
             './node_modules/bootstrap-table/dist/extensions/addrbar/bootstrap-table-addrbar.js',
             './node_modules/bootstrap-table/dist/extensions/print/bootstrap-table-print.min.js',
             './node_modules/bootstrap-table/dist/extensions/custom-view/bootstrap-table-custom-view.js',

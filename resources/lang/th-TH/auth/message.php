@@ -8,12 +8,12 @@ return array(
     'account_suspended'      => 'บัญชีผู้ใช้นี้ถูกระงับการใช้งาน',
 
     'two_factor' => array(
-        'already_enrolled'      => 'Your device is already enrolled.',
+        'already_enrolled'      => 'อุปกรณ์ของคุณได้รับการลงทะเบียนเรียบร้อยแล้ว',
         'success'               => 'คุณได้เข้าสู่ระบบเรียบร้อย',
-        'code_required'         => 'Two-factor code is required.',
-        'invalid_code'          => 'Two-factor code is invalid.',
-        'enter_two_factor_code' => 'Please enter your two-factor authentication code.',
-        'please_enroll'         => 'Please enroll a device in two-factor authentication.',
+        'code_required'         => 'จำเป็นต้องใช้รหัสยืนยันตัวตนสองปัจจัย',
+        'invalid_code'          => 'การยืนยันตัวตนสองปัจจัยไม่ถูกต้อง',
+        'enter_two_factor_code' => 'โปรดป้อนรหัสยืนยันตัวตนสองปัจจัยของคุณ',
+        'please_enroll'         => 'โปรดลงทะเบียนอุปกรณ์ของคุณเพื่อใช้การตรวจสอบสิทธิ์แบบสองปัจจัย',
     ),
 
     'signin' => array(
@@ -22,8 +22,8 @@ return array(
     ),
 
     'logout' => array(
-        'error'   => 'There was a problem while trying to log you out, please try again.',
-        'success' => 'You have successfully logged out.',
+        'error'   => 'เกิดข้อผิดพลาดขณะพยายามออกจากระบบ โปรดลองอีกครั้ง',
+        'success' => 'คุณออกจากระบบแล้ว',
     ),
 
     'signup' => array(
@@ -33,7 +33,7 @@ return array(
 
     'forgot-password' => array(
         'error'   => 'มีปัญหาในการรับรหัสตั้งค่ารหัสผ่านใหม่ โปรดลองอีกครั้ง',
-        'success' => 'If that email address exists in our system, a password recovery email has been sent.',
+        'success' => 'หากที่อยู่อีเมลนั้นมีอยู่ในระบบ ระบบได้ส่งอีเมลกู้คืนรหัสผ่านไปแล้ว',
     ),
 
     'forgot-password-confirm' => array(

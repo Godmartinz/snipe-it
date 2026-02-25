@@ -8,5 +8,5 @@ return array(
     'remaining' 			            => 'คงค้าง',
     'total' 			                => 'รวมทั้งหมด',
     'update'                            => 'ปรับปรุงวัสดุสิ้นเปลือง',
-    'inventory_warning'                 => 'The inventory of this consumable is below the minimum amount of :min_count',
+    'inventory_warning'                 => 'วัสดุสิ้นเปลืองนี้มีจำนวนต่ำกว่า :min_count ซึ่งเป็นจำนวนต่ำสุด',
 );

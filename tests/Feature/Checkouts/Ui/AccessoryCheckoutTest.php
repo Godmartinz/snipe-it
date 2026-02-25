@@ -81,6 +81,7 @@ class AccessoryCheckoutTest extends TestCase
             'target_type' => User::class,
             'item_id' => $accessory->id,
             'item_type' => Accessory::class,
+            'quantity' => 1,
             'note' => 'oh hi there',
         ]);
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);
@@ -108,6 +109,7 @@ class AccessoryCheckoutTest extends TestCase
             'target_type' => User::class,
             'item_id' => $accessory->id,
             'item_type' => Accessory::class,
+            'quantity' => 3,
             'note' => 'oh hi there',
         ]);
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);
@@ -135,6 +137,7 @@ class AccessoryCheckoutTest extends TestCase
             'target_type' => Location::class,
             'item_id' => $accessory->id,
             'item_type' => Accessory::class,
+            'quantity' => 3,
             'note' => 'oh hi there',
         ]);
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);
@@ -162,6 +165,7 @@ class AccessoryCheckoutTest extends TestCase
             'target_type' => Asset::class,
             'item_id' => $accessory->id,
             'item_type' => Accessory::class,
+            'quantity' => 3,
             'note' => 'oh hi there',
         ]);
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);

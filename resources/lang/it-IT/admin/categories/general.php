@@ -6,7 +6,7 @@ return array(
     'email_to_user_upon_checkin' => 'Invia un\'e-mail all\'utente al momento del check-in.',
     'email_to_user_upon_checkin_and_checkout' => 'Invia un\'e-mail all\'utente al momento del check-in/check-out.',
     'email_to_initiator'                => 'Ricevi un\'email quando l\'utente accetta o rifiuta l\'assegnazione.',
-    'checkin_email_notification'        => 'A questo utente verrà inviata un\'email alla Restituzione o Assegnazione.',
+    'checkin_email_notification'        => 'Questo utente riceverà un\'email alla Restituzione o Assegnazione.',
     'clone'                             => 'Clona Categoria',
     'create'  							=> 'Crea Categoria',
     'edit'                              => 'Modifica Categoria',
@@ -24,7 +24,7 @@ return array(
     'use_default_eula_disabled'			=> '<del>Usa l\'EULA predefinita.</del> Nessuna EULA predefinita in uso. Per favore aggiungine una nelle Impostazioni.',
     'use_default_eula_column'			=> 'Usa l\'EULA predefinita',
     'import_require_acceptance'         => 'Richiedere Accettazione',
-    'import_checkin_email'              => 'Invia email di check-in',
+    'import_checkin_email'              => 'Invia Email Restituzione',
     'import_eula_text'                  => 'Testo dell\'EULA',
     'import_category_type'              => 'Tipo di categoria',
 

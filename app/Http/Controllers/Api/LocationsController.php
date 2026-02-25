@@ -200,7 +200,7 @@ class LocationsController extends Controller
 
         // Only scope location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
-            $location->company_id = Company::getIdForCurrentUser($request->get('company_id'));
+            $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
             // check if parent is set and has a different company
             if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
                 response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
@@ -278,13 +278,13 @@ class LocationsController extends Controller
         if ($request->filled('company_id')) {
             // Only scope location if the setting is enabled
             if (Setting::getSettings()->scope_locations_fmcs) {
-                $location->company_id = Company::getIdForCurrentUser($request->get('company_id'));
+                $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
                 // check if there are related objects with different company
                 if (Helper::test_locations_fmcs(false, $id, $location->company_id)) {
                     return response()->json(Helper::formatStandardApiResponse('error', null, 'error scoped locations'));
                 }                
             } else {
-                $location->company_id = $request->get('company_id');
+                $location->company_id = $request->input('company_id');
             }
         }
 

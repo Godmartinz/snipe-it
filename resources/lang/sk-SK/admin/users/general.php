@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Iba superadmini môžu garantovať superadmin prístup.',
     'admin_permission_warning' => 'Iba používatelia s administrátorskými oprávneniami môžu garantovať administrátorsky prístup.',
     'remove_group_memberships' => 'Odstrániť členstvo v skupine',
-    'warning_deletion_information' => 'Chystáte sa prevziať všetky položky od :count používateľov uvedených nižšie. Mena superadmin používateľov sú zobrazené červeným.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Aktualizovať všetky asety pre týchto užívateľov na tento status',
     'checkin_user_properties' => 'Prevziať všetky vlastnosti spojené s týmito používateľmi',
     'remote_label'   => 'Toto je vzdialený používateľ',

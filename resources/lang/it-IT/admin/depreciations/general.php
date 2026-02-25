@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'about_asset_depreciations'  			=> 'Riguardo al deprezzamento dei Beni',
+    'about_asset_depreciations'  			=> 'Riguardo al Deprezzamento Beni',
     'about_depreciations'  					=> 'Puoi impostare il deprezzamento dei beni per deprezzare su base lineare, su base semestrale con condizione, o su base semestrale (sempre applicata).',
     'asset_depreciations'  					=> 'Deprezzamento Beni',
     'create'  					            => 'Crea un deprezzamento',

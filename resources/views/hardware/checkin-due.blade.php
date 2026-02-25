@@ -44,31 +44,28 @@
                                 'id_button'   => 'dueAssetEditButton'])
 
                         <div class="row">
-                            <div class="table table-responsive">
                                 <div class="col-md-12">
                                     <table
-
-                                            data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                            data-show-columns-search="true"
-                                            data-cookie-id-table="dueAssetcheckinListing"
-                                            data-id-table="dueAssetcheckinListing"
-                                            data-side-pagination="server"
-                                            data-show-footer="true"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            data-toolbar="#dueAssetEditToolbar"
-                                            data-bulk-button-id="#dueAssetEditButton"
-                                            data-bulk-form-id="#dueAssetEditForm"
-                                            id="#dueAssetcheckinListing"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{ route('api.assets.list-upcoming', ['action' => 'checkins', 'upcoming_status' => 'due']) }}"
-                                            data-export-options='{
-            "fileName": "export-assets-due-checkin-{{ date('Y-m-d') }}",
-            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-            }'>
+                                        data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                                        data-show-columns-search="true"
+                                        data-cookie-id-table="dueAssetcheckinListing"
+                                        data-id-table="dueAssetcheckinListing"
+                                        data-side-pagination="server"
+                                        data-show-footer="true"
+                                        data-sort-order="asc"
+                                        data-sort-name="name"
+                                        data-toolbar="#dueAssetEditToolbar"
+                                        data-bulk-button-id="#dueAssetEditButton"
+                                        data-bulk-form-id="#dueAssetEditForm"
+                                        id="#dueAssetcheckinListing"
+                                        class="table table-striped snipe-table"
+                                        data-url="{{ route('api.assets.list-upcoming', ['action' => 'checkins', 'upcoming_status' => 'due']) }}"
+                                        data-export-options='{
+                                            "fileName": "export-assets-due-checkin-{{ date('Y-m-d') }}",
+                                            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                            }'>
                                     </table>
                                 </div> <!-- end col-md-12 -->
-                            </div><!-- end table-responsive -->
                         </div><!-- end row -->
                     </div><!-- end tab-pane -->
 
@@ -81,30 +78,27 @@
                                     'id_button'   => 'overdueAssetEditButton'])
 
                         <div class="row">
-                            <div class="table table-responsive">
-                                <div class="col-md-12">
-                                    <table
-
-                                            data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                            data-cookie-id-table="overdueAssetcheckinListing"
-                                            data-id-table="overdueAssetcheckinListing"
-                                            data-side-pagination="server"
-                                            data-show-footer="true"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            data-toolbar="#overdueAssetEditToolbar"
-                                            data-bulk-button-id="#overdueAssetEditButton"
-                                            data-bulk-form-id="#overdueAssetEditForm"
-                                            id="#overdueAssetcheckinListing"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{ route('api.assets.list-upcoming', ['action' => 'checkins', 'upcoming_status' => 'overdue']) }}"
-                                            data-export-options='{
-            "fileName": "export-assets-overdue-checkin-{{ date('Y-m-d') }}",
-            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-            }'>
-                                    </table>
-                                </div> <!-- end col-md-12 -->
-                            </div><!-- end table-responsive -->
+                            <div class="col-md-12">
+                                <table
+                                    data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                                    data-cookie-id-table="overdueAssetcheckinListing"
+                                    data-id-table="overdueAssetcheckinListing"
+                                    data-side-pagination="server"
+                                    data-show-footer="true"
+                                    data-sort-order="asc"
+                                    data-sort-name="name"
+                                    data-toolbar="#overdueAssetEditToolbar"
+                                    data-bulk-button-id="#overdueAssetEditButton"
+                                    data-bulk-form-id="#overdueAssetEditForm"
+                                    id="#overdueAssetcheckinListing"
+                                    class="table table-striped snipe-table"
+                                    data-url="{{ route('api.assets.list-upcoming', ['action' => 'checkins', 'upcoming_status' => 'overdue']) }}"
+                                    data-export-options='{
+                                        "fileName": "export-assets-overdue-checkin-{{ date('Y-m-d') }}",
+                                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                        }'>
+                                </table>
+                            </div> <!-- end col-md-12 -->
                         </div><!-- end row -->
                     </div><!-- end tab-pane -->
                 </div><!-- end tab-content -->

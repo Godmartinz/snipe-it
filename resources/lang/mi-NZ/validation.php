@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Serial Number',
+        'asset_tags.*' => 'Tae Taonga',
+    ],
 
     /*
     |--------------------------------------------------------------------------

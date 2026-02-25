@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => '只有超級管理員能夠授予使用者超級管理員存取權限。',
     'admin_permission_warning' => '只有管理員或更高等級的使用者才能賦予使用者管理員存取權限。',
     'remove_group_memberships' => '移除群組成員',
-    'warning_deletion_information' => '您將要簽收以下列出的 :count 位使用者的所有項目。超級管理員名稱會以紅色標出。',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => '將這些使用者的所有資產更新為此狀態',
     'checkin_user_properties' => '簽收所有與這些使用者相關的財產',
     'remote_label'   => '這是遠端使用者',

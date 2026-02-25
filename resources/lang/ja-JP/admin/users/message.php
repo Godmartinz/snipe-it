@@ -6,6 +6,7 @@ return array(
     'declined'                  => 'You have successfully declined this item.',
     'bulk_manager_warn'	        => 'あなたの利用者は正常に更新されました。しかしながら、あなたの管理者エントリーは保存されませんでした。あなたが選択した管理者が、編集対象の利用者一覧に選択されていたため更新されませんでした。および利用者は彼ら自身の管理者でない場合があります。再度、管理者を除いた上で、あなたの利用者を選択してください。',
     'user_exists'               => '利用者が既に存在しています!',
+    'cannot_delete'             => 'User does not exist or you do not have permission to delete them.',
     'user_not_found'            => 'ユーザーが存在しないか、表示する権限がありません。',
     'user_login_required'       => 'ログインフィールドが必要です。',
     'user_has_no_assets_assigned' => 'ユーザーに割り当てられているアセットはありません。',

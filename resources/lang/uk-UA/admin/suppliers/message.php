@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Ви дійсно хочете видалити цього постачальника?',
         'error'   => 'Виникла проблема при видаленні постачальника. Будь ласка, спробуйте ще раз.',
         'success' => 'Постачальника успішно видалено.',
-        'not_found'               => 'Supplier not found.',
-        'bulk_success'            => 'Suppliers were deleted successfully.',
-        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
+        'not_found'               => 'Постачальника не знайдено.',
+        'bulk_success'            => 'Постачальники успішно видалені.',
+        'partial_success'        => 'Постачальник успішно видалений. Переглянути додаткову інформацію нижче. | :count постачальників успішно видалено. Див. додаткові відомості нижче.',
     )
 
 );

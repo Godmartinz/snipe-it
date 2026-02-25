@@ -114,7 +114,7 @@ class SettingsController extends Controller
         $setting->email_domain = $request->input('email_domain');
         $setting->email_format = $request->input('email_format');
         $setting->username_format = $request->input('username_format');
-        $setting->require_accept_signature = $request->input('require_accept_signature');
+        $setting->require_accept_signature = $request->input('require_accept_signature', '0');
         $setting->show_assigned_assets = $request->input('show_assigned_assets', '0');
         if (! config('app.lock_passwords')) {
             $setting->login_note = $request->input('login_note');
@@ -403,24 +403,23 @@ class SettingsController extends Controller
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
         }
 
-        // Check if the audit interval has changed - if it has, we want to update ALL of the assets audit dates
-        if ($request->input('audit_interval') != $setting->audit_interval) {
 
-            // This could be a negative number if the user is trying to set the audit interval to a lower number than it was before
-            $audit_diff_months = ((int)$request->input('audit_interval') - (int)($setting->audit_interval));
+        // Check if the audit interval has changed - if it has, check if we should update all of the assets audit dates
+        if ((($request->input('audit_interval') != $setting->audit_interval)) && ($request->input('update_existing_dates') == 1)) {
 
-            // Batch update the dates. We have to use this method to avoid time limit exceeded errors on very large datasets,
-            // but it DOES mean this change doesn't get logged in the action logs, since it skips the observer.
-            // @see https://stackoverflow.com/questions/54879160/laravel-observer-not-working-on-bulk-insert
-            $affected = Asset::whereNotNull('next_audit_date')
-                ->whereNull('deleted_at')
-                ->update(
-                    ['next_audit_date' => DB::raw('DATE_ADD(next_audit_date, INTERVAL '.$audit_diff_months.' MONTH)')]
-            );
+                // This could be a negative number if the user is trying to set the audit interval to a lower number than it was before
+                $audit_diff_months = ((int)$request->input('audit_interval') - (int)($setting->audit_interval));
 
-            Log::debug($affected .' assets affected by audit interval update');
+                // Batch update the dates. We have to use this method to avoid time limit exceeded errors on very large datasets,
+                // but it DOES mean this change doesn't get logged in the action logs, since it skips the observer.
+                // @see https://stackoverflow.com/questions/54879160/laravel-observer-not-working-on-bulk-insert
+                $affected = Asset::whereNotNull('next_audit_date')
+                    ->whereNull('deleted_at')
+                    ->update(
+                        ['next_audit_date' => DB::raw('DATE_ADD(next_audit_date, INTERVAL ' . $audit_diff_months . ' MONTH)')]
+                    );
 
-
+                Log::debug($affected . ' assets affected by audit interval update');
         }
 
         $alert_email = rtrim($request->input('alert_email'), ',');

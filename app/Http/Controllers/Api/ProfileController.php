@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ProfileTransformer;
 use App\Models\CheckoutRequest;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -182,19 +183,22 @@ class ProfileController extends Controller
      */
     public function eulas(ProfileTransformer $transformer, Request $request)
     {
-        if($request->filled('user_id') && $request->input('user_id') != 0) {
-            // Return selected user's EULAs
-            $eulas = User::find($request->input('user_id'))->eulas;
-        }
-        else {
-            // Only return this user's EULAs
+
+        if (($request->filled('user_id')) && ($request->input( 'user_id') != 0)) {
+
+            $eula_user = User::find($request->input('user_id'));
+
+            if (($eula_user) && (Setting::getSettings()->manager_view_enabled) && (auth()->user()->isManagerOf($eula_user))) {
+                $eulas = $eula_user->eulas;
+            } else {
+                return response()->json(Helper:: formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found')));
+            }
+        } else {
             $eulas = auth()->user()->eulas;
         }
 
-        return response()->json(
-            $transformer->transformFiles($eulas, $eulas->count())
-        );
-    }
+       return response()->json($transformer->transformFiles($eulas, $eulas->count()));
 
+    }
 
 }

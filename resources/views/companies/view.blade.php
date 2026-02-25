@@ -6,222 +6,244 @@
     @parent
 @stop
 
+@section('header_right')
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
+
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-tabs>
+                <x-slot:tabnav>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
+                    @can('view', \App\Models\Asset::class)
+                        <x-tabs.nav-item
+                                class="active"
+                                name="assets"
+                                icon_type="asset"
+                                label="{{ trans('general.assets') }}"
+                                count="{{ $company->assets()->AssetsForShow()->count() }}"
+                                tooltip="{{ trans('general.assets') }}"
+                        />
+                    @endcan
+
+                    @can('view', \App\Models\License::class)
+                        <x-tabs.nav-item
+                                name="licenses"
+                                icon_type="licenses"
+                                label="{{ trans('general.licenses') }}"
+                                count="{{ $company->licenses()->count() }}"
+                                tooltip="{{ trans('general.licenses') }}"
+                        />
+                    @endcan
+
+                    @can('view', \App\Models\Accessory::class)
+                        <x-tabs.nav-item
+                                name="accessories"
+                                icon_type="accessories"
+                                label="{{ trans('general.accessories') }}"
+                                count="{{ $company->accessories()->count() }}"
+                                tooltip="{{ trans('general.accessories') }}"
+                        />
+                    @endcan
+
+                    @can('view', \App\Models\Consumable::class)
+                        <x-tabs.nav-item
+                                name="consumables"
+                                icon_type="consumables"
+                                label="{{ trans('general.consumables') }}"
+                                count="{{ $company->consumables()->count() }}"
+                                tooltip="{{ trans('general.consumables') }}"
+                        />
+                    @endcan
+
+                    @can('view', \App\Models\Component::class)
+                        <x-tabs.nav-item
+                                name="components"
+                                icon_type="components"
+                                label="{{ trans('general.components') }}"
+                                count="{{ $company->components()->count() }}"
+                                tooltip="{{ trans('general.components') }}"
+                        />
+                    @endcan
 
 
-                    <li class="active">
-                        <a href="#asset_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="fas fa-barcode" aria-hidden="true"></i>
-                            </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.assets') }}
-                                {!! ($company->assets()->AssetsForShow()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($company->assets()->AssetsForShow()->count()).'</span>' : '' !!}
-
-                            </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#licenses_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-save"></i>
-                            </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.licenses') }}
-                                {!! ($company->licenses->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($company->licenses->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#accessories_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-keyboard"></i>
-                            </span> <span class="hidden-xs hidden-sm">{{ trans('general.accessories') }}
-                                {!! ($company->accessories->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($company->accessories->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#consumables_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="fas fa-tint"></i></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.consumables') }}
-                                {!! ($company->consumables->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($company->consumables->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#components_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-hdd"></i></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                                {!! (($company->components) && ($company->components->count() > 0 )) ? '<span class="badge badge-secondary">'.number_format($company->components->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="#users_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <x-icon type="users" /></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.people') }}
-                                {!! (($company->users) && ($company->users->count() > 0 )) ? '<span class="badge badge-secondary">'.number_format($company->users->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                    @can('view', \App\Models\User::class)
+                        <x-tabs.nav-item
+                                name="users"
+                                icon_type="users"
+                                label="{{ trans('general.users') }}"
+                                count="{{ $company->users()->count() }}"
+                                tooltip="{{ trans('general.users') }}"
+                        />
+                    @endcan
 
 
 
-                </ul>
-
-                <div class="tab-content">
-
-                    <div class="tab-pane fade in active" id="asset_tab">
-                        <!-- checked out assets table -->
-                        <div class="table table-responsive">
-                            @include('partials.asset-bulk-actions')
-
-                            <table
-                                    data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="assetsListingTable"
-                                    data-id-table="assetsListingTable"
-                                    data-side-pagination="server"
-                                    data-show-columns-search="true"
-                                    data-sort-order="asc"
-                                    data-toolbar="#assetsBulkEditToolbar"
-                                    data-bulk-button-id="#bulkAssetEditButton"
-                                    data-bulk-form-id="#assetsBulkForm"
-                                    id="assetsListingTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.assets.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-                        </div>
-                    </div><!-- /asset_tab -->
-
-                    <div class="tab-pane" id="licenses_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="licensesTable"
-                                    data-id-table="licensesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="licensesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.licenses.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-licenses-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /licenses-tab -->
-
-                    <div class="tab-pane" id="accessories_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\AccessoryPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="accessoriesTable"
-                                    data-id-table="accessoriesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="accessoriesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.accessories.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-accessories-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /accessories-tab -->
-
-                    <div class="tab-pane" id="consumables_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="consumablesTable"
-                                    data-id-table="consumablesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="consumablesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.consumables.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-consumables-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /consumables-tab -->
-
-                    <div class="tab-pane" id="components_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="componentsTable"
-                                    data-id-table="componentsTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="componentsTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.components.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-
-                            </table>
-                        </div>
-                    </div><!-- /consumables-tab -->
-
-                    <div class="tab-pane" id="users_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\UserPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="usersTable"
-                                    data-id-table="usersTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="usersTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.users.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-users-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-
-                            </table>
-                        </div>
-                    </div><!-- /consumables-tab -->
+                    @can('update', $company)
+                        <x-tabs.nav-item-upload />
+                    @endcan
 
 
+                </x-slot:tabnav>
+
+                <x-slot:tabpanes>
+
+                    <!-- start assets tab pane -->
+                    @can('view', \App\Models\Asset::class)
+                        <x-tabs.pane name="assets" class="in active">
+                            <x-slot:header>
+                                {{ trans('general.assets') }}
+                            </x-slot:header>
+
+                            <x-slot:bulkactions>
+                                <x-table.bulk-assets />
+                            </x-slot:bulkactions>
+
+                            <x-slot:content>
+                                <x-table
+                                        show_column_search="true"
+                                        show_advanced_search="true"
+                                        buttons="assetButtons"
+                                        api_url="{{ route('api.assets.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\AssetPresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-assets-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                        <!-- end assets tab pane -->
+                    @endcan
 
 
-                </div><!-- /.tab-content -->
-            </div><!-- nav-tabs-custom -->
-        </div>
-    </div>
+                    <!-- start licenses tab pane -->
+                    @can('view', \App\Models\License::class)
+                        <x-tabs.pane name="licenses">
+                            <x-slot:header>
+                                {{ trans('general.licenses') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="licenses"
+                                        buttons="licenseButtons"
+                                        api_url="{{ route('api.licenses.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\LicensePresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-licences-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end licenses tab pane -->
+
+
+                    <!-- start accessory tab pane -->
+                    @can('view', \App\Models\Accessory::class)
+                        <x-tabs.pane name="accessories">
+                            <x-slot:header>
+                                {{ trans('general.accessories') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="accessories"
+                                        buttons="accessoryButtons"
+                                        api_url="{{ route('api.accessories.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\AccessoryPresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-accessories-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end accessory tab pane -->
+
+
+                    <!-- start consumables tab pane -->
+                    @can('view', \App\Models\Consumable::class)
+                        <x-tabs.pane name="consumables">
+                            <x-slot:header>
+                                {{ trans('general.consumables') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="consumables"
+                                        buttons="consumableButtons"
+                                        api_url="{{ route('api.consumables.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\ConsumablePresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-consumables-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end components tab pane -->
+
+
+                    <!-- start components tab pane -->
+                    @can('view', \App\Models\Component::class)
+                        <x-tabs.pane name="components">
+                            <x-slot:header>
+                                {{ trans('general.components') }}
+                            </x-slot:header>
+                            <x-slot:content>
+                                <x-table
+                                        name="components"
+                                        buttons="componentButtons"
+                                        api_url="{{ route('api.components.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\ComponentPresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end components tab pane -->
+
+
+                    <!-- start user tab pane -->
+                    @can('view', \App\Models\User::class)
+                        <x-tabs.pane name="users">
+                            <x-slot:header>
+                                {{ trans('general.users') }}
+                            </x-slot:header>
+
+                            <x-slot:bulkactions>
+                                <x-table.bulk-users />
+                            </x-slot:bulkactions>
+
+
+                            <x-slot:content>
+                                <x-table
+                                        name="users"
+                                        buttons="userButtons"
+                                        api_url="{{ route('api.users.index', ['company_id' => $company->id]) }}"
+                                        :presenter="\App\Presenters\UserPresenter::dataTableLayout()"
+                                        export_filename="export-company-{{ str_slug($company->name) }}-users-{{ date('Y-m-d') }}"
+                                />
+                            </x-slot:content>
+                        </x-tabs.pane>
+                    @endcan
+                    <!-- end accessory tab pane -->
+
+                </x-slot:tabpanes>
+
+            </x-tabs>
+
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box>
+                <x-box.info-panel :infoPanelObj="$company" img_path="{{ app('companies_upload_url') }}">
+
+                    <x-slot:before_list>
+
+                        <x-button.wide-edit :item="$company" :route="route('companies.edit', $company->id)" />
+                        <x-button.wide-delete :item="$company" />
+
+                    </x-slot:before_list>
+
+
+                </x-box.info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
+
+
 
 @stop
 @section('moar_scripts')

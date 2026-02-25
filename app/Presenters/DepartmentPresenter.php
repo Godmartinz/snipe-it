@@ -22,17 +22,7 @@ class DepartmentPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
-            ],
-            [
-                'field' => 'company',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.company'),
-                'visible' => false,
-                'formatter' => 'companiesLinkObjFormatter'
-            ],
-            [
+            ], [
                 'field' => 'name',
                 'searchable' => true,
                 'sortable' => true,
@@ -40,6 +30,14 @@ class DepartmentPresenter extends Presenter
                 'title' => trans('general.name'),
                 'visible' => true,
                 'formatter' => 'departmentsLinkFormatter',
+            ], [
+                'field' => 'company',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.company'),
+                'visible' => false,
+                'formatter' => 'companiesLinkObjFormatter'
             ], [
                 'field' => 'image',
                 'searchable' => false,
@@ -112,12 +110,26 @@ class DepartmentPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'departmentsActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 
         return json_encode($layout);
     }
 
+
+    /**
+     * Url to view this item.
+     * @return string
+     */
+    public function viewUrl()
+    {
+        if (auth()->user()->can('view', ['\App\Models\Location', $this])) {
+            return (string)link_to_route('locations.show', $this->display_name, $this->id);
+        } else {
+            return $this->display_name;
+        }
+    }
 
     public function formattedNameLink() {
 

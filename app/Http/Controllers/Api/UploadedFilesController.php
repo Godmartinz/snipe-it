@@ -110,15 +110,18 @@ class UploadedFilesController extends Controller
             foreach ($request->file('file') as $file) {
                 $file_name = $request->handleFile(self::$map_storage_path[$object_type], self::$map_file_prefix[$object_type].'-'.$object->id, $file);
                 $files[] = $file_name;
-                $object->logUpload($file_name, $request->get('notes'));
+                $object->logUpload($file_name, $request->input('notes'));
             }
 
-            $files = Actionlog::select('action_logs.*')->where('action_type', '=', 'uploaded')
-                ->where('item_type', '=', self::$map_object_type[$object_type])
-                ->where('item_id', '=', $id)->whereIn('filename', $files)
-                ->get();
+            if (isset($files)) {
+                $file_results = Actionlog::select('action_logs.*')->where('action_type', '=', 'uploaded')
+                    ->where('item_type', '=', self::$map_object_type[$object_type])
+                    ->where('item_id', '=', $id)->whereIn('filename', $files)
+                    ->get();
 
-            return response()->json(Helper::formatStandardApiResponse('success', (new UploadedFilesTransformer())->transformFiles($files, count($files)), trans_choice('general.file_upload_status.upload.success',  count($files))));
+                return response()->json(Helper::formatStandardApiResponse('success', (new UploadedFilesTransformer())->transformFiles($file_results, count($file_results)), trans_choice('general.file_upload_status.upload.success',  count($files))));
+            }
+
         }
 
         // No files were submitted

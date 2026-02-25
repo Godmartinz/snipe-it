@@ -42,6 +42,8 @@
                 data-sort-name="created_at"
                 data-advanced-search="false"
                 id="unacceptedAssetsReport"
+                data-fixed-number="false"
+                data-fixed-right-number="false"
                 class="table table-striped snipe-table"
                 data-export-options='{
                     "fileName": "maintenance-report-{{ date('Y-m-d') }}",
@@ -49,8 +51,8 @@
                     }'>
             <thead>
               <tr role="row">
-                  <th class="col-sm-1" data-field="created_at" data-searchable="false" data-sortable="true">{{ trans('general.date') }}</th>
-                  <th class="col-sm-1" data-sortable="true" >{{ trans('general.type') }}</th>
+                <th class="col-sm-1" data-field="created_at" data-searchable="false" data-sortable="true">{{ trans('general.date') }}</th>
+                <th class="col-sm-1" data-sortable="true" >{{ trans('general.type') }}</th>
                 <th class="col-sm-1" data-sortable="true" >{{ trans('admin/companies/table.title') }}</th>
                 <th class="col-sm-1" data-sortable="true" >{{ trans('general.category') }}</th>
                 <th class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/form.model') }}</th>
@@ -71,16 +73,16 @@
                           {{-- Item Type --}}
                           <td>{{ $item->type }}</td>
                           {{-- Company name --}}
-                          <td>{!! $item->company !!}</td>
+                          <td>{{ $item->plain_text_company }}</td>
 
                           {{-- Category --}}
-                          <td>{!! $item->category !!}</td>
+                          <td>{{ $item->plain_text_category }}</td>
 
                           {{-- Model --}}
-                          <td>{!! $item->model !!}</td>
+                          <td>{{ $item->plain_text_model }}</td>
 
                           {{-- Name --}}
-                          <td>{!! $item->name !!}</td>
+                          <td>{{ $item->plain_text_name }}</td>
 
                           {{-- Asset tag or blank --}}
                           <td>{{ $item->asset_tag }}</td>

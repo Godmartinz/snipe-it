@@ -128,7 +128,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($item instanceof User) {
 
                 // if they can only edit users, deny them if the user is admin or superadmin
-                if (($user->hasAccess('users.edit')) && (!$user->isAdmin()) && (!$user->isAdmin())) {
+                if (!$user->isAdmin()) {
 
                     if ($item->isAdmin() || $item->isSuperUser()) {
                         return false;

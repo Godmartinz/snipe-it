@@ -94,9 +94,9 @@
                                 <div class="col-md-9">
                                     <div class="form-inline" style="display: flex; align-items: center; gap: 8px;">
                                         <input type="checkbox" name="require_serial" value="1" id="require_serial" aria-label="require_serial" />
-                                        <x-form-tooltip>
+                                        <x-form.tooltip>
                                             {{ trans('admin/hardware/general.require_serial_help') }}
-                                        </x-form-tooltip>
+                                        </x-form.tooltip>
                                     </div>
                                 </div>
                             </div>

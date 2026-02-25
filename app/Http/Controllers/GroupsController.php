@@ -44,7 +44,11 @@ class GroupsController extends Controller
         $permissions = config('permissions');
         $groupPermissions = Helper::selectedPermissionsArray($permissions, $permissions);
         $selectedPermissions = $request->old('permissions', $groupPermissions);
-        $users_query = User::where('show_in_list', 1)->whereNull('deleted_at');
+        $users_query = User::query()
+            ->select(['users.id', 'users.first_name', 'users.last_name', 'users.username'])
+            ->where('show_in_list', 1)
+            ->whereNull('deleted_at');
+
         $users_count = $users_query->count();
 
         $users = collect();
@@ -55,7 +59,7 @@ class GroupsController extends Controller
         // Show the page
         return view('groups/edit', compact('permissions', 'selectedPermissions', 'groupPermissions'))
             ->with('group', $group)
-            ->with('associated_users', [])
+            ->with('associated_users', collect())
             ->with('unselected_users', $users)
             ->with('all_users_count', $users_count);
     }
@@ -114,8 +118,11 @@ class GroupsController extends Controller
 
         $selected_array = Helper::selectedPermissionsArray($permissions, $groupPermissions);
 
+        $users_query = User::query()
+            ->select(['users.id', 'users.first_name', 'users.last_name', 'users.username'])
+            ->where('show_in_list', 1)
+            ->whereNull('deleted_at');
 
-        $users_query = User::where('show_in_list', 1)->whereNull('deleted_at');
         $users_count = $users_query->count();
 
         $associated_users = collect();
@@ -124,7 +131,13 @@ class GroupsController extends Controller
         if ($users_count <= config('app.max_unpaginated_records')) {
             $associated_users = $group->users()->where('show_in_list', 1)->orderBy('first_name', 'asc')->orderBy('last_name', 'asc')->get();
             // Get the unselected users
-            $unselected_users = User::where('show_in_list', 1)->whereNotIn('id', $associated_users->pluck('id')->toArray())->orderBy('first_name', 'asc')->orderBy('last_name', 'asc')->get();
+            $unselected_users = User::query()
+                ->select(['users.id', 'users.first_name', 'users.last_name', 'users.username'])
+                ->where('show_in_list', 1)
+                ->whereNotIn('id', $associated_users->pluck('id')->toArray())
+                ->orderBy('first_name', 'asc')
+                ->orderBy('last_name', 'asc')
+                ->get();
         }
 
         return view('groups.edit', compact('group', 'permissions', 'selected_array', 'groupPermissions'))

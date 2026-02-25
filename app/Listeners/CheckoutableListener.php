@@ -33,6 +33,7 @@ use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Exception;
@@ -128,11 +129,18 @@ class CheckoutableListener
                         ->notify($this->getCheckoutNotification($event, $acceptance));
                 }
             } catch (ClientException $e) {
+                $status = $e->getResponse()->getStatusCode();
+
                 if (strpos($e->getMessage(), 'channel_not_found') !== false) {
                     Log::warning(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
                     return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_channel_not_found'));
                 } else {
-                    Log::error("ClientException caught during checkin notification: " . $e->getMessage());
+                    if ($status >= 500 || $status === null) {
+                        Log::error(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
+                    } else {
+                        Log::warning("ClientException caught during checkin notification: " . $e->getMessage());
+                        return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    }
                 }
                 return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
             } catch (Exception $e) {
@@ -224,12 +232,18 @@ class CheckoutableListener
                         ->notify($this->getCheckinNotification($event));
                 }
             } catch (ClientException $e) {
+                $status = $e->getResponse()->getStatusCode();
+
                 if (strpos($e->getMessage(), 'channel_not_found') !== false) {
                     Log::warning(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
                     return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_channel_not_found'));
                 } else {
-                    Log::error("ClientException caught during checkin notification: " . $e->getMessage());
-                    return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    if ($status >= 500 || $status === null) {
+                        Log::error(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
+                    } else {
+                        Log::warning("ClientException caught during checkin notification: " . $e->getMessage());
+                        return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    }
                 }
             } catch (Exception $e) {
                 Log::warning(ucfirst(Setting::getSettings()->webhook_selected) . ' webhook notification failed:', [
@@ -428,11 +442,16 @@ class CheckoutableListener
     private function shouldSendCheckoutEmailToUser(Model $checkoutable): bool
     {
         /**
-         * Send an email if any of the following conditions are met:
+         * Send an email if we didn't get here from a bulk checkout
+         * and any of the following conditions are met:
          * 1. The asset requires acceptance
          * 2. The item has a EULA
          * 3. The item should send an email at check-in/check-out
          */
+
+        if (Context::get('action') === 'bulk_asset_checkout') {
+            return false;
+        }
 
         if ($checkoutable->requireAcceptance()) {
             return true;
@@ -451,6 +470,10 @@ class CheckoutableListener
 
     private function shouldSendEmailToAlertAddress($acceptance = null): bool
     {
+        if (Context::get('action') === 'bulk_asset_checkout') {
+            return false;
+        }
+
         $setting = Setting::getSettings();
 
         if (!$setting) {

@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Ben je zeker dat je de leverancier wil verwijderen?',
         'error'   => 'Er ging iets mis tijdens het verwijderen van de leverancier. Probeer het nog een keer.',
         'success' => 'De leverancier is succesvol verwijderd.',
-        'not_found'               => 'Supplier not found.',
-        'bulk_success'            => 'Suppliers were deleted successfully.',
-        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
+        'not_found'               => 'Leverancier niet gevonden.',
+        'bulk_success'            => 'De leveranciers zijn succesvol verwijderd.',
+        'partial_success'        => 'Categorie succesvol verwijderd. Zie additionele informatie hieronder. | : count categorieën succesvol verwijderd. Zie additionele informatie hieronder.',
     )
 
 );

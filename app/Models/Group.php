@@ -13,7 +13,7 @@ class Group extends SnipeModel
     protected $table = 'permission_groups';
 
     public $rules = [
-        'name' => 'required|min:2|max:255|unique',
+        'name' => 'required|max:255|unique',
     ];
 
     protected $fillable = [
@@ -68,7 +68,7 @@ class Group extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**

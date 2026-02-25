@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Numai superadminii pot acorda acces la superadminul utilizatorului.',
     'admin_permission_warning' => 'Numai utilizatorii cu drepturi de administrator sau mai mari pot acorda acces de administrator de utilizator.',
     'remove_group_memberships' => 'Elimină membrii grupului',
-    'warning_deletion_information' => 'Sunteți pe cale să verificați TOATE articolele din :count utilizator(i) listat(e) mai jos. Numele Super Administratorului sunt evidențiate cu roșu.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Actualizați toate activele pentru acești utilizatori la această stare',
     'checkin_user_properties' => 'Bifează în toate proprietățile asociate cu acești utilizatori',
     'remote_label'   => 'Acesta este un utilizator extern',

@@ -139,7 +139,11 @@ class CategoryPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('categories.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Category', $this])) {
+            return (string)link_to_route('categories.show', e($this->display_name), $this->id);
+        } else {
+            return e($this->display_name);
+        }
     }
 
     /**
@@ -153,10 +157,16 @@ class CategoryPresenter extends Presenter
 
     public function formattedNameLink() {
 
-        if (auth()->user()->can('view', ['\App\Models\Category', $this])) {
-            return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('categories.show', e($this->id)).'">'.e($this->name).'</a>';
+        // We use soft-deletes for categories, but we don't give you a way to restore them right now. This would be the method we'd use when that happens
+//        if (auth()->user()->can('view', ['\App\Models\Category', $this])) {
+//            return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('models.show', e($this->id)).'" class="'. (($this->deleted_at!='') ? 'deleted' : '').'">'.e($this->display_name).'</a>';
+//        }
+
+        if ((auth()->user()->can('view', ['\App\Models\Category', $this])) && ($this->deleted_at=='')) {
+           return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('categories.show', e($this->id)).'">'.e($this->name).'</a>';
         }
 
-        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i> " : '').$this->name;
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<span class="'. (($this->deleted_at!='') ? 'deleted' : '').'">'.e($this->display_name).'</span>';
+
     }
 }

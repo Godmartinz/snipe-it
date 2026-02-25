@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Število licenc',
     'termination_date'  => 'Datum prenehanja',
     'to_email'          => 'Licenca registrirana na e-pošto',
-    'to_name'           => 'Licenca registrirana na ime',
+    'to_name'           => 'Licencirano na',
     'update'            => 'Posodobi licenco',
     'checkout_help'     => 'Preveriti je potrebno ali je licenca vezana na strojno opremo ali osebo. Izberete lahko obe, vendar mora lastnik sredstva ustrezati osebi, s katero preverjate sredstva.'
 );

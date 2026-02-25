@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Account;
 use App\Http\Controllers\ActionlogController;
+use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -333,12 +334,24 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 |
 */
 
-Route::get('/import', Importer::class)
-    ->middleware('auth')
-    ->name('imports.index')
-    ->breadcrumbs(fn (Trail $trail) =>
-    $trail->parent('home')
-        ->push(trans('general.import'), route('imports.index')));
+Route::group(['prefix' => 'import', 'middleware' => ['auth']], function () {
+
+    Route::get('download/{import}',
+        [
+            UploadedFilesController::class,
+            'downloadImport'
+        ]
+    )->name('imports.download');
+
+    Route::get('/', Importer::class)
+        ->middleware('auth')
+        ->name('imports.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('home')
+            ->push(trans('general.import'), route('imports.index')));
+
+});
+
 
 /*
 |--------------------------------------------------------------------------

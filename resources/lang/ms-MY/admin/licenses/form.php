@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Kekosongan',
     'termination_date'  => 'Tarikh Penamatan',
     'to_email'          => 'Lesen Untuk Di \'email\'',
-    'to_name'           => 'Lesen Untuk Dinamakan',
+    'to_name'           => 'Lesen Kepada',
     'update'            => 'Kemaskini Lesen',
     'checkout_help'     => 'Anda mesti menyemak lesen keluar kepada perkakasan atau persorangan. Anda boleh memilih keduanya, tetapi pemilik harta mesti sama dengan orang yang anda semak dimana harta diagihkan.'
 );

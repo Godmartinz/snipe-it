@@ -90,10 +90,10 @@ class AccessoriesController extends Controller
             $accessory = $request->handleImages($accessory);
         }
 
-        if($request->get('redirect_option') === 'back'){
+        if($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
         // Was the accessory created?
@@ -182,10 +182,10 @@ class AccessoriesController extends Controller
 
             $accessory = $request->handleImages($accessory);
 
-            if($request->get('redirect_option') === 'back'){
+            if($request->input('redirect_option') === 'back'){
                 session()->put(['redirect_option' => 'index']);
             } else {
-                session()->put(['redirect_option' => $request->get('redirect_option')]);
+                session()->put(['redirect_option' => $request->input('redirect_option')]);
             }
 
             if ($accessory->save()) {

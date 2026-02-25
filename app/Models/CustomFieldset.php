@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Loggable;
+use App\Presenters\Presentable;
 use App\Rules\AlphaEncrypted;
 use App\Rules\BooleanEncrypted;
 use App\Rules\DateEncrypted;
@@ -18,10 +20,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Watson\Validating\ValidatingTrait;
 
-class CustomFieldset extends Model
+class CustomFieldset extends SnipeModel
 {
     use HasFactory;
     use ValidatingTrait;
+    use Presentable;
+
+    protected $presenter = \App\Presenters\CustomFieldsetPresenter::class;
 
     protected $guarded = ['id'];
 

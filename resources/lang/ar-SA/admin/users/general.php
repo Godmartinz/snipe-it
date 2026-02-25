@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'فقط للمشرفين العامين يمكنهم منح مستخدم صلاحية المشرف العام.',
     'admin_permission_warning' => 'يمكن فقط للمستخدمين الذين لديهم حقوق المشرفين أو أعلى منح صلاحية مشرف لمستخدم.',
     'remove_group_memberships' => 'إزالة عضويات مجموعة',
-    'warning_deletion_information' => 'أنت على وشك تسجيل جميع العناصر من :count المستخدم (المستخدمين) المدرجة أدناه. يتم تسليط الضوء على أسماء المشرف الممتاز بالأحمر.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'تحديث جميع الأصول لهؤلاء المستخدمين إلى هذه الحالة',
     'checkin_user_properties' => 'تحقق من جميع الخصائص المرتبطة بهؤلاء المستخدمين',
     'remote_label'   => 'هذا مستخدم بعيد',

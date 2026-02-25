@@ -13,6 +13,7 @@ use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 
@@ -42,7 +43,7 @@ class Consumable extends SnipeModel
      * Category validation rules
      */
     public $rules = [
-        'name'        => 'required|min:3|max:255',
+        'name'        => 'required|max:255',
         'qty'         => 'required|integer|min:0|max:99999',
         'category_id' => 'required|integer',
         'company_id'  => 'integer|nullable',
@@ -131,6 +132,13 @@ class Consumable extends SnipeModel
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && ($this->numCheckedOut() === 0)
+            && ($this->deleted_at == '');
+    }
+
     /**
      * Establishes the consumable -> admin user relationship
      *
@@ -140,7 +148,7 @@ class Consumable extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

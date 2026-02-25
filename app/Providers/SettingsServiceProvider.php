@@ -85,6 +85,10 @@ class SettingsServiceProvider extends ServiceProvider
             return 'models/';
         });
 
+        app()->singleton('licenses_upload_url', function () {
+            return 'licenses/';
+        });
+
         // Categories
         app()->singleton('categories_upload_path', function () {
             return 'categories/';
@@ -173,6 +177,10 @@ class SettingsServiceProvider extends ServiceProvider
 
         app()->singleton('components_upload_url', function () {
             return 'components/';
+        });
+
+        app()->singleton('maintenances_upload_url', function () {
+            return 'maintenances/';
         });
 
         // Set the monetary locale to the configured locale to make helper::parseFloat work.

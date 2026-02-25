@@ -20,18 +20,15 @@
 
     @can('create', \App\Models\User::class)
         @if ($snipeSettings->ldap_enabled == 1)
-            <a href="{{ route('ldap/user') }}" class="btn btn-default pull-right"><i class="fas fa-sitemap"></i> {{trans('general.ldap_sync')}}</a>
+            <a href="{{ route('ldap/user') }}" class="btn btn-theme pull-right"><i class="fas fa-sitemap"></i> {{trans('general.ldap_sync')}}</a>
         @endif
     @endcan
 @stop
 
 {{-- Page content --}}
 @section('content')
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-        <div class="box-body">
+    <x-container>
+        <x-box>
 
             @include('partials.users-bulk-actions')
 
@@ -45,6 +42,7 @@
                     data-bulk-form-id="#usersBulkForm"
                     data-show-columns-search="true"
                     id="usersTable"
+                    data-fixed-number="2"
                     data-buttons="userButtons"
                     class="table table-striped snipe-table"
                     data-url="{{ route('api.users.index',
@@ -62,10 +60,8 @@
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
                     </table>
-                </div><!-- /.box-body -->
-            </div><!-- /.box -->
-        </div>
-    </div>
+        </x-box>
+    </x-container>
 
 
 @stop

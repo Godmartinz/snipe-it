@@ -2,6 +2,8 @@
 
 namespace App\Models\Labels\Tapes\Brother;
 
+use App\Helpers\Helper;
+
 class TZe_24mm_E extends TZe_24mm
 {
     private const BARCODE_MARGIN =   1.75;
@@ -71,49 +73,39 @@ class TZe_24mm_E extends TZe_24mm
         }
 
         $fields = $record->get('fields');
-        // Figure out how tall the label fields wants to be
-        $fieldCount = count($fields);
-        $perFieldHeight = (self::LABEL_SIZE + self::LABEL_MARGIN)
-            + (self::FIELD_SIZE + self::FIELD_MARGIN);
 
-        $baseHeight = $fieldCount * $perFieldHeight;
-        // If it doesn't fit in the available height, scale everything down
-        $scale = 1.0;
-        if ($baseHeight > $usableHeight && $baseHeight > 0) {
-            $scale = $usableHeight / $baseHeight;
-        }
+        $field_layout = Helper::labelFieldLayoutScaling(
+            pdf: $pdf,
+            fields: $fields,
+            currentX: $currentX,
+            usableWidth: $usableWidth,
+            usableHeight: $usableHeight,
+            baseLabelSize: self::LABEL_SIZE,
+            baseFieldSize: self::FIELD_SIZE,
+            baseFieldMargin: self::FIELD_MARGIN,
+            baseLabelPadding: 1.5,
+            baseGap: 1.5,
+            maxScale: 1.8,
+            labelFont: 'freesans',
+        );
 
-        $labelSize   = self::LABEL_SIZE   * $scale;
-        $fieldSize   = self::FIELD_SIZE   * $scale;
-        $fieldMargin = self::FIELD_MARGIN * $scale;
+            foreach ($fields as $field) {
+                static::writeText(
+                    $pdf, $field['label'],
+                    $currentX, $currentY,
+                    'freesans', '', $field_layout['labelSize'], 'L',
+                    $field_layout['labelWidth'], $field_layout['rowAdvance'], true, 0
+                );
 
-        foreach ($fields as $field) {
-            // Write label and value on the same line
-            // Calculate label width with proportional character spacing
-            $labelWidth = $pdf->GetStringWidth($field['label'], 'freesans', '', $labelSize);
-            $charCount = strlen($field['label']);
-            $spacingPerChar = 0.5;
-            $totalSpacing = $charCount * $spacingPerChar;
-            $adjustedWidth = $labelWidth + $totalSpacing;
+                static::writeText(
+                    $pdf, $field['value'],
+                    $field_layout['valueX'], $currentY,
+                    'freemono', 'B', $field_layout['fieldSize'], 'L',
+                    $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
+                );
+                $currentY += $field_layout['rowAdvance'];
+            }
 
-            static::writeText(
-                $pdf, $field['label'],
-                $currentX, $currentY,
-                'freesans', 'B', $labelSize, 'L',
-                $adjustedWidth, $labelSize, true, 0, $spacingPerChar
-            );
-
-            static::writeText(
-                $pdf, $field['value'],
-                $currentX + $adjustedWidth + 2, $currentY,
-                'freesans', 'B', $fieldSize, 'L',
-                $usableWidth - $adjustedWidth - 2, $fieldSize, true, 0, 0.3
-            );
-
-            $currentY += max($labelSize, $fieldSize) +$fieldMargin;
-        }
-
-        
         if ($record->has('barcode1d')) {
             static::write1DBarcode(
                 $pdf, $record->get('barcode1d')->content, $record->get('barcode1d')->type,

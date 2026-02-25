@@ -21,7 +21,7 @@ class Manufacturer extends SnipeModel
 
     // Declare the rules for the form validation
     protected $rules = [
-        'name'   => 'required|min:2|max:255|unique:manufacturers,name,NULL,id,deleted_at,NULL',
+        'name'   => 'required|max:255|unique:manufacturers,name,NULL,id,deleted_at,NULL',
         'url'   => 'nullable|starts_with:http://,https://,afp://,facetime://,file://,irc://',
         'support_email'   => 'email|nullable',
         'support_url'   => 'nullable|starts_with:http://,https://,afp://,facetime://,file://,irc://',
@@ -116,7 +116,7 @@ class Manufacturer extends SnipeModel
 
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
 

@@ -85,9 +85,9 @@ class AssetImporter extends ItemImporter
         if ($this->findCsvMatch($row, 'id')!='') {
             // Override asset if an ID was given
             \Log::debug('Finding asset by ID: '.$this->findCsvMatch($row, 'id'));
-            $asset = Asset::find($this->findCsvMatch($row, 'id'));
+            $asset = Asset::with('assignedTo')->find($this->findCsvMatch($row, 'id'));
         } else {
-            $asset = Asset::where(['asset_tag'=> (string) $asset_tag])->first();
+            $asset = Asset::with('assignedTo')->where(['asset_tag' => (string) $asset_tag])->first();
         }
         
         if ($asset) {
@@ -203,7 +203,7 @@ class AssetImporter extends ItemImporter
             if (isset($target) && ($target !== false)) {
                 if (!is_null($asset->assigned_to)){
                     if ($asset->assigned_to != $target->id) {
-                        event(new CheckoutableCheckedIn($asset, User::find($asset->assigned_to), auth()->user(), 'Checkin from CSV Importer', $checkin_date));
+                        event(new CheckoutableCheckedIn($asset, $asset->assigned, auth()->user(), 'Checkin from CSV Importer', $checkin_date));
                     }
                 }
 

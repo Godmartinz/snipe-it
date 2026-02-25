@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Transformers;
 
+use App\Enums\ActionType;
 use App\Helpers\Helper;
 use App\Helpers\StorageHelper;
 use App\Models\Actionlog;
@@ -80,7 +81,7 @@ class ActionlogsTransformer
 
                     // this is a custom field
                     if (str_starts_with($fieldname, '_snipeit_')) {
-                        
+
                         foreach ($custom_fields as $custom_field) {
 
                             if ($custom_field->db_column == $fieldname) {
@@ -185,9 +186,9 @@ class ActionlogsTransformer
                 'name' => e($actionlog->target->display_name) ?? null,
                 'type' => e($actionlog->targetType()),
             ] : null,
-
+            'quantity' => $this->getQuantity($actionlog),
             'note'          => ($actionlog->note) ? Helper::parseEscapedMarkedownInline($actionlog->note): null,
-            'signature_file'   => ($actionlog->accept_signature) ? route('log.signature.view', ['filename' => $actionlog->accept_signature ]) : null,
+            'signature_file'   => (($actionlog->accept_signature) && Storage::exists('private_uploads/signatures/'.$actionlog->accept_signature)) ? route('log.signature.view', ['filename' => $actionlog->accept_signature ]) : null,
             'log_meta'          => ((isset($clean_meta)) && (is_array($clean_meta))) ? $clean_meta: null,
             'remote_ip' => e($actionlog->remote_ip) ?? null,
             'user_agent' => e($actionlog->user_agent) ?? null,
@@ -336,6 +337,26 @@ class ActionlogsTransformer
 
     }
 
+    private function getQuantity(Actionlog $actionlog): ?int
+    {
+        if (!$actionlog->quantity) {
+            return null;
+        }
+
+        // only a few action types will have a quantity we are interested in.
+        if (!in_array($actionlog->action_type, [
+            ActionType::Checkout->value,
+            ActionType::Accepted->value,
+            ActionType::Declined->value,
+            ActionType::CheckinFrom->value,
+            ActionType::AddSeats->value,
+            ActionType::DeleteSeats->value,
+        ])) {
+            return null;
+        }
+
+        return (int) $actionlog->quantity;
+    }
 
 
 }

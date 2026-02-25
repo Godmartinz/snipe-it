@@ -28,23 +28,41 @@ class HealthController extends BaseController
      */
     public function get()
     {
+
         try {
 
             if (DB::select('select 2 + 2')) {
-                return response()->json([
-                    'status' => 'ok',
-                ]);
+                $db_status = 'ok';
+            } else {
+                $db_status = 'Could not connect to database';
             }
 
         } catch (\Exception $e) {
-            \Log::error('Could not connect to database');
-            return response()->json([
-                'status' => 'database connection failed',
-            ], 500);
+            $db_status = 'Could not connect to database';
 
         }
 
 
+        if (is_writable(storage_path('logs'))) {
+            $filesystem_status = 'ok';
+        } else {
+            $filesystem_status = 'Could not write to storage/logs';
+        }
+
+        if (($filesystem_status!='ok') || ($db_status!='ok')) {
+            return response()->json([
+                'status' =>
+                    [
+                        'database' => $db_status,
+                        'filesystem' => $filesystem_status,
+                    ]
+            ], 500);
+        }
+
+
+        return response()->json([
+            'status' => 'ok',
+        ]);
 
     }
 }

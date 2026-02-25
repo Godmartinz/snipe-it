@@ -244,7 +244,7 @@ return array(
         'name' => 'Delete Models',
     ],
     'categories'   => [
-        'name' => 'Categories',
+        'name' => '',
         'note'       => 'Grants access to the Categories section of the application.',
     ],
     'categoriesview' => [

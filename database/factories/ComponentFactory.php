@@ -33,18 +33,19 @@ class ComponentFactory extends Factory
     {
 
         return [
-            'name' => $this->faker->text(20),
             'category_id' => Category::factory(),
-            'location_id' => Location::factory(),
-            'serial'   => $this->faker->uuid(),
-            'qty' => $this->faker->numberBetween(3, 10),
-            'order_number' => $this->faker->numberBetween(1000000, 50000000),
-            'purchase_date' => $this->faker->dateTime()->format('Y-m-d'),
-            'purchase_cost' => $this->faker->randomFloat(2),
-            'min_amt' => $this->faker->numberBetween($min = 1, $max = 2),
             'company_id' => Company::factory(),
-            'supplier_id' => Supplier::factory(),
+            'created_by' => User::factory()->superuser(),
+            'location_id' => Location::factory(),
+            'min_amt' => $this->faker->numberBetween($min = 1, $max = 2),
             'model_number' => $this->faker->numberBetween(1000000, 50000000),
+            'name' => $this->faker->text(20),
+            'order_number' => $this->faker->numberBetween(1000000, 50000000),
+            'purchase_cost' => $this->faker->randomFloat(2),
+            'purchase_date' => $this->faker->dateTime()->format('Y-m-d'),
+            'qty' => $this->faker->numberBetween(3, 10),
+            'serial'   => $this->faker->uuid(),
+            'supplier_id' => Supplier::factory(),
         ];
     }
 

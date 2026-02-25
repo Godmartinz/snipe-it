@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Додати тех. обслуговування',
     'append'                    => 'Додати',
     'new'                       => 'Нове',
+    'show_hide_info'            => 'Показати/приховати більше інформації',
     'var' => [
         'clone'     => 'Клонувати :item_type',
         'edit'      => 'Редагувати :item_type',

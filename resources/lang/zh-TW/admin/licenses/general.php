@@ -14,7 +14,7 @@ return array(
     'info'  					=> '授權訊息',
     'license_seats'  			=> '授權數量',
     'seat'  					=> '數量',
-    'seat_count'  				=> 'Seat :count',
+    'seat_count'  				=> '授權數 :count',
     'seats'  					=> '數量',
     'software_licenses'  		=> '軟體授權',
     'user'  					=> '使用者
@@ -25,7 +25,7 @@ return array(
         [
             'checkin_all'           => [
                 'button'            => '歸還所有名額',
-                'modal'             => 'This action will checkin one seat. | This action will checkin all :checkedout_seats_count seats for this license.',
+                'modal'             => '此操作將歸還一個授權數量。| 此操作將歸還全部 :checkedout_seats_count 個授權數量。',
                 'enabled_tooltip'   => '從使用者和資產中歸還此授權的所有名額',
                 'disabled_tooltip'  => '此功能已停用，因為目前沒有名額在借出中',
                 'disabled_tooltip_reassignable'  => 'This is disabled because the License is not reassignable',

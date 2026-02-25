@@ -16,7 +16,7 @@ return array(
     'seats'             => 'Izihlalo',
     'termination_date'  => 'Usuku lokuphela',
     'to_email'          => 'Ilayisensi ye-imeyili',
-    'to_name'           => 'Ilayisensi Yegama',
+    'to_name'           => 'Kulayisensi',
     'update'            => 'Buyekeza i-License',
     'checkout_help'     => 'Kumele uhlole ilayisense ku-hardware yefa noma umuntu. Ungakhetha kokubili, kodwa umnikazi wefa kufanele afane nomuntu ohlola ifa lakho.'
 );

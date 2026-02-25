@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Seri Numarası',
+        'asset_tags.*' => 'Demirbaş Etiketi',
+    ],
 
     /*
     |--------------------------------------------------------------------------

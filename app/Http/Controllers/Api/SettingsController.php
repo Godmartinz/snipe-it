@@ -226,7 +226,7 @@ class SettingsController extends Controller
 
         $login_attempts = DB::table('login_attempts');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort = in_array($request->get('sort'), $allowed_columns) ? $request->get('sort') : 'created_at';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
         $total = $login_attempts->count();
         $login_attempts->orderBy($sort, $order);

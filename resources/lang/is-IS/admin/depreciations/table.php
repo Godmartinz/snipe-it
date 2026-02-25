@@ -6,6 +6,6 @@ return [
     'months'   => 'Mánuðir',
     'term'   => 'Tími',
     'title'      => 'Heiti ',
-    'depreciation_min' => 'Floor Value',
+    'depreciation_min' => 'Hrakvirði',
 
 ];

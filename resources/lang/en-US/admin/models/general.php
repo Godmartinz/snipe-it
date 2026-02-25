@@ -15,4 +15,9 @@ return array(
     'fieldset'                  => 'Fieldset',
     'no_custom_field'           => 'No custom fields',
     'add_default_values'        => 'Add default values',
+    'importer'        =>
+        [
+            'require_serial' => 'Require Serial',
+            'serial_required' => 'Serial Required',
+        ],
 );

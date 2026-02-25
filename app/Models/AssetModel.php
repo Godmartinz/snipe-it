@@ -234,7 +234,7 @@ class AssetModel extends SnipeModel
     public function isDeletable()
     {
         return Gate::allows('delete', $this)
-            && ($this->assets_count == 0)
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
             && ($this->deleted_at == '');
     }
 

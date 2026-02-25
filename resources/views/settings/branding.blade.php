@@ -72,6 +72,11 @@
                                 </div>
                             </div>
 
+                        <fieldset name="color-preferences">
+                            <x-form.legend help_text="{!! trans('admin/settings/general.color_settings_help') !!}">
+                                {{ trans('admin/settings/general.color_preferences') }}
+                            </x-form.legend>
+
                             <!-- Header color -->
                             <div class="form-group {{ $errors->has('header_color') ? 'error' : '' }}">
                                 <label for="header_color" class="col-md-3 control-label">{{ trans('admin/settings/general.header_color') }}</label>
@@ -86,7 +91,7 @@
                         <div class="form-group {{ $errors->has('nav_link_color') ? 'error' : '' }}">
                             <label for="nav_link_color" class="col-md-3 control-label">{{ trans('admin/settings/general.nav_link_color') }}</label>
                             <div class="col-md-9">
-                                <x-input.colorpicker :item="$setting" placeholder="#ffffff" div_id="nav-link-color" id="nav-link-color" :value="old('nav_link_color', ($setting->nav_link_color ?? '#ffffff'))" name="nav_link_color" />
+                                <x-input.colorpicker :item="$setting" placeholder="#ffffff" div_id="nav-link-color" id="nav_link_color" :value="old('nav_link_color', ($setting->nav_link_color ?? '#ffffff'))" name="nav_link_color" />
                                 {!! $errors->first('nav_link_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                 <p class="help-block">{{ trans('admin/settings/general.nav_link_color_help') }}</p>
                             </div>
@@ -112,10 +117,21 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <p class="form-control-static" style="padding-top: 7px;">
+                                    <a data-theme-toggle-clear class="btn btn-theme" onClick(return false;);>
+                                        {{ trans('admin/settings/general.color_reset') }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        </fieldset>
+
                         <fieldset name="logo-preferences">
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.logos') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                             @php
                                 $optionTypes = trans('admin/settings/general.logo_option_types');
@@ -269,10 +285,10 @@
                         </fieldset>
                         <!-- colors and skins -->
 
-                        <fieldset name="color-preferences">
-                            <x-form-legend>
+                        <fieldset name="css-preferences">
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.custom_css') }}
-                            </x-form-legend>
+                            </x-form.legend>
                             <!-- Custom css -->
                             <div class="form-group {{ $errors->has('custom_css') ? 'error' : '' }}">
 
@@ -308,9 +324,9 @@
                             <!-- colors and skins -->
 
                             <fieldset name="footer-preferences">
-                                <x-form-legend>
+                                <x-form.legend>
                                     {{ trans('admin/settings/general.legends.footer') }}
-                                </x-form-legend>
+                                </x-form.legend>
 
                                 <!-- Support Footer -->
                                 <div class="form-group {{ $errors->has('support_footer') ? 'error' : '' }}">
@@ -439,6 +455,7 @@
 
         // This takes the color from the color picker to show a live preview
         $(function() {
+
             $('#header-color').colorpicker().on('changeColor', function(e) {
                 var color = e.color.toString('rgba');
                 $('.main-header .navbar, .header-preview, .left-navblock, .navbar-custom-menu > .navbar-nav, .navbar-custom-menu > .navbar-nav > li > .navbar-form, .navbar-nav > li > a:link, .navbar-nav > li > a').css('background-color', color);
@@ -448,16 +465,37 @@
             $('#nav-link-color').colorpicker().on('changeColor', function(e) {
                 var color = e.color.toString('rgba');
                 var header_color = $('#header_color').val();
-                console.log(header_color);
 
                 // $('.navbar-nav > li > a').css('background-color', header_color);
                 $('.navbar-nav > li > a:link').attr('style','color: '+ color +' !important').css('background-color', header_color);
                 $('.btn-theme').attr('style','color: '+ color +' !important').css('background-color', header_color);
 
-
-
-
             });
+
+            /**
+             * 5. Add an event listener to toggle the reset
+             */
+            clearButton.addEventListener("click", (event) => {
+
+                var header_color = '#3c8dbc';
+                var nav_link_color = '#ffffff';
+                var link_light_color = '#296282';
+                var link_dark_color = '#5fa4cc';
+
+                $('#header_color').val(header_color);
+                $('#nav_link_color').val(nav_link_color);
+                $('#link_light_color').val(link_light_color);
+                $('#link_dark_color').val(link_dark_color);
+
+                $('.main-header .navbar, .header-preview, .left-navblock, .navbar-custom-menu > .navbar-nav, .navbar-custom-menu > .navbar-nav > li > .navbar-form, .navbar-nav > li > a:link, .navbar-nav > li > a').css('background-color', header_color);
+                $('.btn-theme').css('background-color', header_color);
+
+                $('.navbar-nav > li > a:link').attr('style','color: '+ nav_link_color +' !important').css('background-color', header_color);
+                $('.btn-theme').attr('style','color: '+ nav_link_color +' !important').css('background-color', header_color);
+
+                return false;
+            });
+
         });
 
     </script>

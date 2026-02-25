@@ -20,9 +20,9 @@ return array(
     'delete' => array(
         'confirm'                => 'Er du sikker på at du vil slette denne kategori?',
         'error'                  => 'Der opstod et problem under sletning af kategorien. Prøv igen.',
-        'success'                => 'Category was deleted successfully.',
-        'bulk_success'           => 'Categories were deleted successfully.',
-        'partial_success'        => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
+        'success'                => 'Kategori er slettet.',
+        'bulk_success'           => 'Kategorier er slettet.',
+        'partial_success'        => 'Kategori er slettet. Se yderligere information nedenfor. | :count kategorier er slettet. Se yderligere information nedenfor.',
     )
 
 );

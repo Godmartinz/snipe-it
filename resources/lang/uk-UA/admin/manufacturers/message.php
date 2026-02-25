@@ -24,9 +24,9 @@ return array(
     'delete' => array(
         'confirm' => 'Ви впевнені що хочете видалити виробника?',
         'error'   => 'Виникла проблема при видаленні виробника. Будь ласка, спробуйте знову.',
-        'success'                => 'Manufacturer deleted successfully.',
-        'bulk_success'           => 'Manufacturers deleted successfully.',
-        'partial_success'        => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
+        'success'                => 'Виробник успішно видалений.',
+        'bulk_success'           => 'Виробники успішно видалені.',
+        'partial_success'        => 'Виробник успішно видалений. Див. додаткову інформацію нижче. | :count виробники успішно видалені. Див. додаткову інформацію нижче.',
     )
 
 );

@@ -9,33 +9,27 @@
 
 {{-- Page content --}}
 @section('content')
+    <x-container>
+        <x-box>
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-      <div class="box-body">
+              <table
+                  data-columns="{{ \App\Presenters\MaintenancesPresenter::dataTableLayout() }}"
+                  data-cookie-id-table="maintenancesTable"
+                  data-side-pagination="server"
+                  data-show-footer="true"
+                  data-advanced-search="false"
+                  id="maintenancesTable"
+                  data-buttons="maintenanceButtons"
+                  class="table table-striped snipe-table"
+                  data-url="{{route('api.maintenances.index') }}"
+                  data-export-options='{
+                    "fileName": "export-maintenances-{{ date('Y-m-d') }}",
+                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+            </table>
 
-          <table
-              data-columns="{{ \App\Presenters\MaintenancesPresenter::dataTableLayout() }}"
-              data-cookie-id-table="maintenancesTable"
-              data-side-pagination="server"
-              data-show-footer="true"
-              data-advanced-search="false"
-              id="maintenancesTable"
-              data-buttons="maintenanceButtons"
-              class="table table-striped snipe-table"
-              data-url="{{route('api.maintenances.index') }}"
-              data-export-options='{
-                "fileName": "export-maintenances-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-              }'>
-
-        </table>
-
-      </div>
-    </div>
-  </div>
-</div>
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

@@ -70,6 +70,7 @@ class CategoryImporter extends ItemImporter
         $this->item['use_default_eula'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'use_default_eula'))) == 1) ? 1 : 0;
         $this->item['require_acceptance'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'require_acceptance'))) == 1) ? 1 : 0;
         $this->item['checkin_email'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'checkin_email'))) == 1) ? 1 : 0;
+        $this->item['tag_color'] = trim($this->findCsvMatch($row, 'tag_color'));
 
 
         Log::debug('Item array is: ');

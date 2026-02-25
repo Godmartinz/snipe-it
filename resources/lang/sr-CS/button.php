@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Dodaj održavanje',
     'append'                    => 'Nadoveži',
     'new'                       => 'Novo',
+    'show_hide_info'            => 'Prikaži/sakrij dodatne informacije',
     'var' => [
         'clone'     => 'Dupliraj :item_type',
         'edit'      => 'Izmeni :item_type',

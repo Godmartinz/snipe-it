@@ -101,7 +101,7 @@ class UsersTransformer
 
         $permissions_array['available_actions'] = [
             'update' => (Gate::allows('update', User::class) && ($user->deleted_at == '')),
-            'delete' => $user->isDeletable(),
+            'delete' => ($user->isDeletable() && (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo'))),
             'clone' => (Gate::allows('create', User::class) && ($user->deleted_at == '')),
             'restore' => (Gate::allows('create', User::class) && ($user->deleted_at != '')),
         ];
@@ -141,7 +141,7 @@ class UsersTransformer
             'id' => (int) $user->id,
             'image' => e($user->present()->gravatar) ?? null,
             'type' => 'user',
-            'name' => e($user->getFullNameAttribute()),
+            'name' => e($user->display_name),
             'first_name' => e($user->first_name),
             'last_name' => e($user->last_name),
             'username' => e($user->username),

@@ -62,8 +62,8 @@ class ItemImportRequest extends FormRequest
         }
         $importer->setCallbacks([$this, 'log'], [$this, 'progress'], [$this, 'errorCallback'])
                  ->setCreatedBy(auth()->id())
-                 ->setUpdating($this->get('import-update'))
-                 ->setShouldNotify($this->get('send-welcome'))
+                 ->setUpdating($this->input('import-update'))
+                 ->setShouldNotify($this->input('send-welcome'))
                  ->setUsernameFormat('firstname.lastname')
                  ->setFieldMappings($fieldMappings);
         $importer->import();

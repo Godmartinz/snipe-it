@@ -21,8 +21,15 @@ class ConsumablePresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
-            ],
-            [
+            ], [
+                'field' => 'name',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'consumablesLinkFormatter',
+            ], [
                 'field' => 'company',
                 'searchable' => true,
                 'sortable' => true,
@@ -31,15 +38,7 @@ class ConsumablePresenter extends Presenter
                 'visible' => false,
                 'formatter' => 'companiesLinkObjFormatter',
             ],
-            [
-                'field' => 'name',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => false,
-                'title' => trans('general.name'),
-                'visible' => true,
-                'formatter' => 'consumablesLinkFormatter',
-            ],
+
             [
                 'field' => 'image',
                 'searchable' => false,
@@ -172,6 +171,7 @@ class ConsumablePresenter extends Presenter
                 'visible' => true,
                 'title' => trans('general.change'),
                 'formatter' => 'consumablesInOutFormatter',
+                'printIgnore' => true,
             ], [
                 'field' => 'actions',
                 'searchable' => false,
@@ -182,6 +182,58 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'consumablesActionsFormatter',
                 'printIgnore' => true,
             ],
+        ];
+
+        return json_encode($layout);
+    }
+
+    public static function checkedOut()
+    {
+        $layout = [
+
+            [
+                'field' => 'avatar',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
+            ],
+            [
+                'field' => 'user',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+
+            [
+                'field' => 'note',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.created_by'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+
+
         ];
 
         return json_encode($layout);

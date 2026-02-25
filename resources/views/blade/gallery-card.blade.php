@@ -15,6 +15,7 @@
                     %FILE_EMBED%
                 </div>
                 <div class="col-md-12">
+                    <br>
                     <p>
                         %NOTE%
                         <br>

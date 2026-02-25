@@ -43,10 +43,24 @@ class LicenseSeatFactory extends Factory
         });
     }
 
+    public function unreassignable()
+    {
+        return $this->afterMaking(function (LicenseSeat $seat) {
+            $seat->license->update(['reassignable' => false]);
+        });
+    }
+
     public function notReassignable()
     {
         return $this->afterMaking(function (LicenseSeat $seat) {
             $seat->license->update(['reassignable' => false]);
+        });
+    }
+
+    public function requiringAcceptance()
+    {
+        return $this->afterCreating(function ($seat) {
+            $seat->license->category->update(['require_acceptance' => 1]);
         });
     }
 }

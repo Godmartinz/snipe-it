@@ -230,7 +230,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'serials.*' => 'Pořadové číslo',
+        'asset_tags.*' => 'Označení majetku',
+    ],
 
     /*
     |--------------------------------------------------------------------------

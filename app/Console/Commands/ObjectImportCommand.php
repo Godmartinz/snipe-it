@@ -34,6 +34,11 @@ class ObjectImportCommand extends Command
     protected ProgressIndicator $progressIndicator;
 
     /**
+     * Logger instance with configurable log path
+     */
+    protected $logger;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -65,9 +70,11 @@ class ObjectImportCommand extends Command
                  ->setShouldNotify($this->option('send-welcome'))
                  ->setUsernameFormat($this->option('username_format'));
 
-        // This $logFile/useFiles() bit is currently broken, so commenting it out for now
-        // $logFile = $this->option('logfile');
-        // Log::useFiles($logFile);
+        $this->logger = Log::build([
+            'driver' => 'single',
+            'path' => $this->option('logfile'),
+          ]);
+
         $this->progressIndicator->start('======= Importing Items from '.$filename.' =========');
 
         $importer->import();
@@ -99,10 +106,10 @@ class ObjectImportCommand extends Command
     public function log($string, $level = 'info')
     {
         if ($level === 'warning') {
-            Log::warning($string);
+            $this->logger->warning($string);
             $this->comment($string);
         } else {
-            Log::Info($string);
+            $this->logger->Info($string);
             if ($this->option('verbose')) {
                 $this->comment($string);
             }

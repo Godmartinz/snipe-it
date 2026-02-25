@@ -265,7 +265,7 @@ class CategoriesController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $categories = $categories->where('name', 'LIKE', '%'.$request->get('search').'%');
+            $categories = $categories->where('name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $categories = $categories->where('category_type', $category_type)->orderBy('name', 'ASC')->paginate(50);

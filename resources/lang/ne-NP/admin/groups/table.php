@@ -2,7 +2,7 @@
 
 return array(
 
-    'id'         => 'Id',
+    'id'         => 'आईडी',
     'name'       => 'Name',
     'users'      => '# of Users',
 

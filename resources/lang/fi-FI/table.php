@@ -6,6 +6,6 @@ return array(
     'action' 		        => 'Toiminto',
     'by'      		        => 'Suorittaja',
     'item' 			        => 'Nimike',
-    'no_matching_records'   => 'No matching records found',
+    'no_matching_records'   => 'Vastaavia tietueita ei löytynyt',
 
 );

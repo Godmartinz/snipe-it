@@ -415,7 +415,7 @@
                                     </div>
                                 @endif
                                 @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
-                                    <div class="col-md-12 text-center" style="padding-top: 15px;">
+                                    <div class="col-md-12 text-center asset-qr-img" style="padding-top: 15px;">
                                         <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
                                     </div>
                                 @endif
@@ -1105,6 +1105,18 @@
                                             </div>
                                         @endif
 
+{{--                                        <div class="row">--}}
+{{--                                            <div class="col-md-3">--}}
+{{--                                                <strong>--}}
+{{--                                                    {!! trans('general.first_checkout') !!}--}}
+{{--                                                </strong>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="col-md-9">--}}
+{{--                                                {{ Helper::getFormattedDateObject($asset->first_checkout_at, 'datetime')['formatted'] ?? '' }}--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+
+
                                         @if ($asset->last_checkin!='')
                                             <div class="row">
                                                 <div class="col-md-3">
@@ -1262,39 +1274,30 @@
                                     @include('partials.asset-bulk-actions')
 
                                         <!-- checked out assets table -->
-                                        <div class="table-responsive">
-
                                             <table
-                                                    data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                                    data-show-columns-search="true"
-                                                    data-cookie-id-table="assetsTable"
-                                                    data-id-table="assetsTable"
-                                                    data-side-pagination="server"
-                                                    data-sort-order="asc"
-                                                    data-toolbar="#assetsBulkEditToolbar"
-                                                    data-bulk-button-id="#bulkAssetEditButton"
-                                                    data-bulk-form-id="#assetsBulkForm"
-                                                    id="assetsListingTable"
-                                                    class="table table-striped snipe-table"
-                                                    data-url="{{route('api.assets.index',['assigned_to' => $asset->id, 'assigned_type' => 'App\Models\Asset']) }}"
-                                                    data-export-options='{
-                                  "fileName": "export-assets-{{ str_slug($asset->name) }}-assets-{{ date('Y-m-d') }}",
-                                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                                  }'>
-
+                                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                                                data-show-columns-search="true"
+                                                data-cookie-id-table="assetsTable"
+                                                data-id-table="assetsTable"
+                                                data-side-pagination="server"
+                                                data-sort-order="asc"
+                                                data-toolbar="#assetsBulkEditToolbar"
+                                                data-bulk-button-id="#bulkAssetEditButton"
+                                                data-bulk-form-id="#assetsBulkForm"
+                                                id="assetsListingTable"
+                                                class="table table-striped snipe-table"
+                                                data-url="{{route('api.assets.index',['assigned_to' => $asset->id, 'assigned_type' => 'App\Models\Asset']) }}"
+                                                data-export-options='{
+                                                  "fileName": "export-assets-{{ str_slug($asset->name) }}-assets-{{ date('Y-m-d') }}",
+                                                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                                  }'>
                                             </table>
-                                        </div>
-
-
                                 </div><!-- /col -->
                             </div> <!-- row -->
                         </div> <!-- /.tab-pane software -->
 
 
                     <div class="tab-pane" id="accessories_assigned">
-
-
-                        <div class="table table-responsive">
 
                             <h2 class="box-title" style="float:left">
                                 {{ trans('general.accessories_assigned') }}
@@ -1315,7 +1318,6 @@
                                   }'>
                             </table>
 
-                        </div><!-- /.table-responsive -->
                     </div><!-- /.tab-pane -->
 
 
@@ -1391,8 +1393,8 @@
                                     <table
                                             data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                                             class="table table-striped snipe-table"
-                                            id="assetHistory"
-                                            data-id-table="assetHistory"
+                                            id="assetHistory_{{  $asset->id }}"
+                                            data-id-table="assetHistory_{{  $asset->id }}"
                                             data-side-pagination="server"
                                             data-sort-order="desc"
                                             data-sort-name="created_at"
@@ -1401,7 +1403,7 @@
                                                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                                                }'
                                             data-url="{{ route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset']) }}"
-                                            data-cookie-id-table="assetHistory"
+                                            data-cookie-id-table="assetHistory_{{  $asset->id }}"
                                             data-cookie="true">
                                     </table>
                                 </div>

@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Alleen superbeheerders mogen superadmin toegang verlenen aan een gebruiker.',
     'admin_permission_warning' => 'Alleen gebruikers met beheerdersrechten of hogere rechten mogen een gebruiker admin toegang verlenen.',
     'remove_group_memberships' => 'Groep lidmaatschappen verwijderen',
-    'warning_deletion_information' => 'U staat op het punt ALLE items in te checken van de :count gebruiker(s) hieronder vermeld. Superadmin namen worden rood gemarkeerd.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Alle bezittingen voor deze gebruikers naar deze status bijwerken',
     'checkin_user_properties' => 'Check-in alle eigendommen gekoppeld aan deze gebruikers',
     'remote_label'   => 'Dit is een externe gebruiker',

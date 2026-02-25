@@ -17,122 +17,122 @@ return array(
 
     "superuser" => [
         'name' => 'Super User',
-        'note'       => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
+        'note'       => 'กำหนดว่าผู้ใช้มีสิทธิ์เข้าถึงทุกส่วนของระบบผู้ดูแลระบบหรือไม่ การตั้งค่านี้จะแทนที่สิทธิ์ที่เฉพาะเจาะจงและจำกัดกว่าทั้งหมดในระบบ ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
-        'note'       => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
+        'name' => 'เข้าถึงส่วนจัดการระบบ',
+        'note'       => 'กำหนดว่าผู้ใช้รายใดสามารถเข้าถึงส่วนต่างๆ ของระบบได้เกือบทั้งหมด ยกเว้นการตั้งค่าผู้ดูแลระบบ ผู้ใช้เหล่านี้จะสามารถจัดการผู้ใช้ สถานที่ หมวดหมู่ ฯลฯ ได้ แต่จะถูกจำกัดด้วยการสนับสนุนหลายบริษัทแบบเต็มรูปแบบ หากเปิดใช้งานไว้',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
-        'note'       => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'name' => 'นำเข้าไฟล์ CSV',
+        'note'       => 'สิ่งนี้จะช่วยให้ผู้ใช้สามารถนำเข้าข้อมูลได้ แม้ว่าการเข้าถึงผู้ใช้ ทรัพย์สิน ฯลฯ จะถูกปฏิเสธในส่วนอื่นๆ ก็ตาม',
     ],
 
     'reports' => [
-        'name' => 'Reports Access',
-        'note'       => 'Determines whether the user has access to the Reports section of the application.',
+        'name' => 'รายงานการเข้าถึง',
+        'note'       => 'ตรวจสอบว่าผู้ใช้มีสิทธิ์เข้าถึงส่วนรายงานของแอปพลิเคชันหรือไม่',
     ],
 
     'assets' =>
         [
             'name' => 'สินทรัพย์',
-            'note' => 'Grants access to the Assets section of the application.',
+            'note' => 'อนุญาตให้เข้าถึงส่วนสินทรัพย์ของแอปพลิเคชันได้',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'ดูสินทรัพย์',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'สร้างสินทรัพย์ใหม่',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'แก้ไขสินทรัพย์',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'ลบสินทรัพย์',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'ส่งคืน',
+        'note' => 'ตรวจสอบว่าสินทรัพย์ที่ส่งกลับเข้าคลังนั้น ได้ดำเนินการเบิกจ่ายแล้ว',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
-        'note' => 'Assign assets in inventory by checking them out.',
+        'name' => 'เบิกจ่าย',
+        'note' => 'บันทึกรายการสินทรัพย์ในคลังสินค้าโดยการเบิกจ่ายสินทรัพย์เหล่านั้น',
     ],
 
     'assetsaudit' => [
-        'name' => 'Audit Assets',
-        'note' => 'Allows the user to mark an asset as physically inventoried.',
+        'name' => 'ตรวจสอบสินทรัพย์',
+        'note' => 'อนุญาตให้ผู้ใช้ทำเครื่องหมายสินทรัพย์ว่าได้รับการตรวจสอบสินค้าคงคลังแล้ว',
     ],
 
     'assetsviewrequestable' => [
-        'name' => 'View Requestable Assets',
-        'note' => 'Allows the user to view assets that are marked as requestable.',
+        'name' => 'ดูสินทรัพย์ที่สามารถขอได้',
+        'note' => 'อนุญาตให้ผู้ใช้ดูสินทรัพย์ที่ถูกทำเครื่องหมายว่าสามารถร้องขอได้',
     ],
 
     'assetsviewencrypted-custom-fields' => [
-        'name' => 'View Encrypted Custom Fields',
+        'name' => 'ดูฟิลด์กำหนดเองที่เข้ารหัส',
         'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
     ],
 
     'accessories'   => [
         'name' => 'อุปกรณ์',
-        'note'       => 'Grants access to the Accessories section of the application.',
+        'note'       => 'อนุญาตให้เข้าถึงส่วนอุปกรณ์เสริมของแอปพลิเคชันได้',
     ],
 
     'accessoriesview' => [
-        'name' => 'View Accessories',
+        'name' => 'ดูอุปกรณ์เสริม',
     ],
     'accessoriescreate' => [
-        'name' => 'Create New Accessories',
+        'name' => 'สร้างอุปกรณ์เสริมใหม่',
     ],
     'accessoriesedit' => [
-        'name' => 'Edit Accessories',
+        'name' => 'แก้ไขอุปกรณ์เสริม',
     ],
     'accessoriesdelete' => [
-        'name' => 'Delete Accessories',
+        'name' => 'ลบอุปกรณ์เสริม',
     ],
     'accessoriescheckout' => [
-        'name' => 'Check Out Accessories',
-        'note' => 'Assign accessories in inventory by checking them out.',
+        'name' => 'เบิกจ่ายอุปกรณ์เสริม',
+        'note' => 'บันทึกอุปกรณ์เสริมในคลังสินค้าโดยการเบิกจ่าย',
     ],
     'accessoriescheckin' => [
-        'name' => 'Check In Accessories',
-        'note' => 'Check accessories back into inventory that are currently checked out.',
+        'name' => 'ส่งคืนอุปกรณ์เสริม',
+        'note' => 'ตรวจสอบว่าอุปกรณ์เสริมที่ถูกยืมออกไปแล้ว ได้ดำเนินการเบิกจ่ายแล้ว',
     ],
     'accessoriesfiles' => [
-        'name' => 'Manage Accessory Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with accessories.',
+        'name' => 'จัดการไฟล์อุปกรณ์เสริม',
+        'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับอุปกรณ์เสริมได้',
     ],
     'consumables'   => [
         'name' => 'การใช้งาน',
-        'note'       => 'Grants access to the Consumables section of the application.',
+        'note'       => 'อนุญาตให้เข้าถึงส่วนวัสดุสิ้นเปลืองของแอปพลิเคชันได้',
     ],
     'consumablesview' => [
-        'name' => 'View Consumables',
+        'name' => 'ดูวัสดุสิ้นเปลือง',
     ],
     'consumablescreate' => [
-        'name' => 'Create New Consumables',
+        'name' => 'สร้างวัสดุสิ้นเปลืองใหม่',
     ],
     'consumablesedit' => [
-        'name' => 'Edit Consumables',
+        'name' => 'แก้ไขวัสดุสิ้นเปลือง',
     ],
     'consumablesdelete' => [
-        'name' => 'Delete Consumables',
+        'name' => 'ลบวัสดุสิ้นเปลือง',
     ],
     'consumablescheckout' => [
-        'name' => 'Check Out Consumables',
-        'note' => 'Assign consumables in inventory by checking them out.',
+        'name' => 'เบิกจ่ายวัสดุสิ้นเปลือง',
+        'note' => 'บันทึกรายการวัสดุสิ้นเปลืองในคลังสินค้าโดยการเบิกจ่าย',
     ],
     'consumablesfiles' => [
-        'name' => 'Manage Consumable Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with consumables.',
+        'name' => 'จัดการไฟล์วัสดุสิ้นเปลือง',
+        'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับวัสดุสิ้นเปลืองได้',
     ],
     'licenses'   => [
         'name' => 'ลิขสิทธิ์',
@@ -277,19 +277,19 @@ return array(
     ],
     'locations'   => [
         'name' => 'สถานที่',
-        'note'       => 'Grants access to the Locations section of the application.',
+        'note'       => 'อนุญาตให้เข้าถึงส่วนตำแหน่งที่ตั้งของแอปพลิเคชันได้',
     ],
     'locationsview' => [
-        'name' => 'View Locations',
+        'name' => 'ดูที่ตั้ง',
     ],
     'locationscreate' => [
-        'name' => 'Create New Locations',
+        'name' => 'สร้างที่ตั้งใหม่',
     ],
     'locationsedit' => [
-        'name' => 'Edit Locations',
+        'name' => 'แก้ไขที่ตั้ง',
     ],
     'locationsdelete' => [
-        'name' => 'Delete Locations',
+        'name' => 'ลบที่ตั้ง',
     ],
     'status-labels'   => [
         'name' => 'ป้ายสถานะ',

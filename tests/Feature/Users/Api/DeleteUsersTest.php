@@ -152,4 +152,40 @@ class DeleteUsersTest extends TestCase implements TestsFullMultipleCompaniesSupp
 
         $this->assertSoftDeleted($user);
     }
+
+    public function testAdminCannotDeleteSuperUser()
+    {
+        $superuser = User::factory()->superuser()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAsForApi($admin)
+            ->deleteJson(route('api.users.destroy', $superuser))
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+    }
+
+    public function testUserCannotDeleteAdminUser()
+    {
+        $user = User::factory()->deleteUsers()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAsForApi($user)
+            ->deleteJson(route('api.users.destroy', $admin))
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+    }
+
+    public function testUserCannotDeleteSuperUser()
+    {
+        $user = User::factory()->deleteUsers()->create();
+        $superuser = User::factory()->superuser()->create();
+
+        $this->actingAsForApi($user)
+            ->deleteJson(route('api.users.destroy', $superuser))
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+    }
 }

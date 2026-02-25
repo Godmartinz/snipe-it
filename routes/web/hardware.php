@@ -185,10 +185,11 @@ Route::resource('hardware',
 
 // Asset Maintenances
 Route::resource('maintenances',
-    MaintenancesController::class, [
-        'parameters' => ['maintenance' => 'maintenance', 'asset' => 'asset_id'],
-    ]);
+    MaintenancesController::class,
+    ['middleware' => ['auth']
+    ])->parameters(['maintenance' => 'maintenance', 'asset' => 'asset_id']);
 
 Route::get('ht/{any?}',
-    [AssetsController::class, 'getAssetByTag']
-)->where('any', '.*')->name('ht/assetTag');
+    [AssetsController::class, 'getAssetByTag'])
+    ->where('any', '.*')
+    ->name('ht/assetTag');

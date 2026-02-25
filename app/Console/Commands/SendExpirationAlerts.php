@@ -55,6 +55,8 @@ class SendExpirationAlerts extends Command
             // Expiring Assets
             $assets = Asset::getExpiringWarrantyOrEol($alert_interval);
 
+            $assets->load(['assignedTo', 'supplier']);
+
             if ($assets->count() > 0) {
 
                 Mail::to($recipients)->send(new ExpiringAssetsMail($assets, $alert_interval));

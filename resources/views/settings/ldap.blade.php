@@ -14,6 +14,7 @@
 {{-- Page content --}}
 @section('content')
 
+
     <style>
         .checkbox label {
             padding-right: 40px;
@@ -25,13 +26,26 @@
         }
 
         /*
-           Don't make the password field *look* readonly - this is for usability, so admins don't think they can't edit this field.
-         */
-        .form-control[readonly] {
-            background-color: white;
-            color: #555555;
-            cursor:text;
+          Don't make the password field *look* readonly - this is for usability, so admins don't think they can't edit this field.
+        */
+        
+        input[type='text'][disabled],
+        input[disabled],
+        textarea[disabled],
+        input[readonly],
+        textarea[readonly],
+        .form-control[disabled],
+        .form-control[readonly],
+        fieldset[disabled]
+        {
+            cursor:text !important;
+            background-color: var(--table-stripe-bg) !important;
+            color: var(--color-fg) !important;
         }
+        input:required, select:required {
+            border-right: 5px solid orange !important;
+        }
+
 
         .table-wrapper {
             overflow-x: auto;
@@ -80,9 +94,9 @@
                     <div class="col-md-12">
 
                         <fieldset>
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.server') }}
-                            </x-form-legend>
+                            </x-form.legend>
                                 <!-- Enable LDAP -->
                                 <div class="form-group {{ $errors->has('ldap_integration') ? 'error' : '' }}">
                                     <div class="col-md-3 control-label">
@@ -482,10 +496,10 @@
 
                         <fieldset>
 
-                            <x-form-legend
+                            <x-form.legend
                             help_text="{!! trans('admin/settings/general.ldap_mapping_help') !!}">
                                 {{ trans('admin/settings/general.legends.mapping') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
 
                             <!-- LDAP  username field-->
@@ -882,10 +896,10 @@
                         </fieldset>
 
                         <fieldset id="ldap_test_settings">
-                            <x-form-legend
+                            <x-form.legend
                                help_text="{{ trans('admin/settings/general.save_ldap_first') }}">
                                         {{ trans('admin/settings/general.legends.test') }}
-                            </x-form-legend>
+                            </x-form.legend>
                             @if ($setting->ldap_enabled)
 
                                 <!-- LDAP Login test -->
@@ -902,7 +916,7 @@
                                                 <input type="password" name="ldaptest_password" id="ldaptest_password" class="form-control" placeholder="{{trans('admin/settings/general.ldap_password_placeholder')}}" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                                             </div>
                                             <div class="col-md-3">
-                                                <a class="btn btn-default btn-sm" id="ldaptestlogin" style="margin-right: 10px;">{{ trans('admin/settings/general.ldap_test') }}</a>
+                                                <a class="btn btn-theme btn-sm" id="ldaptestlogin" style="margin-right: 10px;">{{ trans('admin/settings/general.ldap_test') }}</a>
                                             </div>
 
 
@@ -922,7 +936,7 @@
                                 <!-- LDAP test -->
                                 <div class="form-group">
                                     <div class="col-md-8 col-md-offset-3" id="ldaptestrow">
-                                        <a class="btn btn-default btn-sm" id="ldaptest" style="margin-right: 10px;">{{ trans('admin/settings/general.ldap_test_sync') }}</a>
+                                        <a class="btn btn-theme btn-sm" id="ldaptest" style="margin-right: 10px;">{{ trans('admin/settings/general.ldap_test_sync') }}</a>
                                         <p class="help-block">{{ trans('admin/settings/general.ldap_login_sync_help') }}</p>
                                     </div>
                                     <div class="col-md-12">
@@ -945,9 +959,9 @@
 
 
                         <fieldset>
-                            <x-form-legend>
+                            <x-form.legend>
                                 {{ trans('admin/settings/general.legends.misc') }}
-                            </x-form-legend>
+                            </x-form.legend>
 
                                 <!-- LDAP Forgotten password -->
                                 <div class="form-group {{ $errors->has('custom_forgot_pass_url') ? 'error' : '' }}">
@@ -1137,11 +1151,11 @@
             html += '</ul>'
             html += '<div style="overflow:auto;">'
             html += '<div>{{ trans('admin/settings/message.ldap.sync_success') }}<br><br></div>'
-            html += '<div class="table-wrapper"><table class="table table-bordered table-condensed">'
+            html += '<table class="table table-striped snipe-table table-bordered table-condensed">'
             html += buildLdapResultsTableHeader()
             html += buildLdapResultsTableBody(results.user_sync.users)
             html += '</table></div>'
-            html += '</div>'
+            html += ''
             return html;
         }
 

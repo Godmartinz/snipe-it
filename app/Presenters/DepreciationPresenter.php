@@ -102,4 +102,17 @@ class DepreciationPresenter extends Presenter
 
         return json_encode($layout);
     }
+
+    public function formattedNameLink() {
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i> " : '').e($this->display_name);
+    }
+
+    public function nameUrl()
+    {
+        if (auth()->user()->can('view', ['\App\Models\Depreciation', $this])) {
+            return (string)link_to_route('depreciations.show', e($this->display_name), $this->id);
+        } else {
+            return e($this->display_name);
+        }
+    }
 }

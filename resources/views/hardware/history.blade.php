@@ -6,9 +6,6 @@
     @parent
 @stop
 
-@section('header_right')
-    <a href="{{ route('hardware.index') }}" class="btn btn-default"> {{ trans('general.back') }}</a>
-@stop
 
 {{-- Page content --}}
 @section('content')
@@ -68,7 +65,7 @@
                             <div class="form-group">
                                 <div class="col-md-9 col-md-offset-2">
 
-                                    <label class="btn btn-default" aria-hidden="true">
+                                    <label class="btn btn-theme" aria-hidden="true">
                                         {{ trans('button.select_file')  }}
                                         <input type="file" name="user_import_csv" class="js-uploadFile" id="uploadFile" data-maxsize="user_import_csv" accept=".csv,.xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain" style="display:none; max-width: 90%" aria-label="user_import_csv" aria-hidden="true"{{ (config('app.lock_passwords')===true) ? ' disabled' : ''}}>
                                     </label>

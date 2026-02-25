@@ -98,10 +98,10 @@ class AssetCheckinController extends Controller
         $asset->expected_checkin = null;
         $asset->assignedTo()->disassociate($asset);
         $asset->accepted = null;
-        $asset->name = $request->get('name');
+        $asset->name = $request->input('name');
 
         if ($request->filled('status_id')) {
-            $asset->status_id = e($request->get('status_id'));
+            $asset->status_id = e($request->input('status_id'));
         }
 
         // Add any custom fields that should be included in the checkout
@@ -112,11 +112,11 @@ class AssetCheckinController extends Controller
         $asset->location_id = $asset->rtd_location_id;
 
         if ($request->filled('location_id')) {
-            Log::debug('NEW Location ID: '.$request->get('location_id'));
-            $asset->location_id = $request->get('location_id');
+            Log::debug('NEW Location ID: '.$request->input('location_id'));
+            $asset->location_id = $request->input('location_id');
 
-            if ($request->get('update_default_location') == 0){
-                $asset->rtd_location_id = $request->get('location_id');
+            if ($request->input('update_default_location') == 0){
+                $asset->rtd_location_id = $request->input('location_id');
             }
         }
 
@@ -124,9 +124,9 @@ class AssetCheckinController extends Controller
 
         // Handle last checkin date
         $checkin_at = date('Y-m-d H:i:s');
-        if (($request->filled('checkin_at')) && ($request->get('checkin_at') != date('Y-m-d'))) {
+        if (($request->filled('checkin_at')) && ($request->input('checkin_at') != date('Y-m-d'))) {
             $originalValues['action_date'] = $checkin_at;
-            $checkin_at = $request->get('checkin_at');
+            $checkin_at = $request->input('checkin_at');
 
         }
         $asset->last_checkin = $checkin_at;
@@ -145,7 +145,7 @@ class AssetCheckinController extends Controller
             $acceptance->delete();
         });
 
-        session()->put('redirect_option', $request->get('redirect_option'));
+        session()->put('redirect_option', $request->input('redirect_option'));
 
         // Add any custom fields that should be included in the checkout
         $asset->customFieldsForCheckinCheckout('display_checkin');

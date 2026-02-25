@@ -245,26 +245,26 @@ class LdapSync extends Command
         // Assign the mapped LDAP attributes for each user to the Snipe-IT user fields
         for ($i = 0; $i < $results['count']; $i++) {
             $item = [];
-            $item['username'] = $results[$i][$ldap_map["username"]][0] ?? '';
-            $item['display_name'] = $results[$i][$ldap_map["display_name"]][0] ?? '';
-            $item['employee_number'] = $results[$i][$ldap_map["emp_num"]][0] ?? '';
-            $item['lastname'] = $results[$i][$ldap_map["last_name"]][0] ?? '';
-            $item['firstname'] = $results[$i][$ldap_map["first_name"]][0] ?? '';
-            $item['email'] = $results[$i][$ldap_map["email"]][0] ?? '';
-            $item['ldap_location_override'] = $results[$i]['ldap_location_override'] ?? '';
-            $item['location_id'] = $results[$i]['location_id'] ?? '';
-            $item['telephone'] = $results[$i][$ldap_map["phone"]][0] ?? '';
-            $item['mobile'] = $results[$i][$ldap_map["mobile"]][0] ?? '';
-            $item['jobtitle'] = $results[$i][$ldap_map["jobtitle"]][0] ?? '';
-            $item['address'] = $results[$i][$ldap_map["address"]][0] ?? '';
-            $item['city'] = $results[$i][$ldap_map["city"]][0] ?? '';
-            $item['state'] = $results[$i][$ldap_map["state"]][0] ?? '';
-            $item['country'] = $results[$i][$ldap_map["country"]][0] ?? '';
-            $item['zip'] = $results[$i][$ldap_map["zip"]][0] ?? '';
-            $item['department'] = $results[$i][$ldap_map["dept"]][0] ?? '';
-            $item['manager'] = $results[$i][$ldap_map["manager"]][0] ?? '';
-            $item['location'] = $results[$i][$ldap_map["location"]][0] ?? '';
-            $location = $default_location; //initially, set '$location' to the default_location (which may just be `null`)
+            $item['username'] = $results[$i][$ldap_map["username"]][0] ?? null;
+            $item['display_name'] = $results[$i][$ldap_map["display_name"]][0] ?? null;
+            $item['employee_number'] = $results[$i][$ldap_map["emp_num"]][0] ?? null;
+            $item['lastname'] = $results[$i][$ldap_map["last_name"]][0] ?? null;
+            $item['firstname'] = $results[$i][$ldap_map["first_name"]][0] ?? null;
+            $item['email'] = $results[$i][$ldap_map["email"]][0] ?? null;
+            $item['ldap_location_override'] = $results[$i]['ldap_location_override'] ?? null;
+            $item['location_id'] = $results[$i]['location_id'] ?? null;
+            $item['telephone'] = $results[$i][$ldap_map["phone"]][0] ?? null;
+            $item['mobile'] = $results[$i][$ldap_map["mobile"]][0] ?? null;
+            $item['jobtitle'] = $results[$i][$ldap_map["jobtitle"]][0] ?? null;
+            $item['address'] = $results[$i][$ldap_map["address"]][0] ?? null;
+            $item['city'] = $results[$i][$ldap_map["city"]][0] ?? null;
+            $item['state'] = $results[$i][$ldap_map["state"]][0] ?? null;
+            $item['country'] = $results[$i][$ldap_map["country"]][0] ?? null;
+            $item['zip'] = $results[$i][$ldap_map["zip"]][0] ?? null;
+            $item['department'] = $results[$i][$ldap_map["dept"]][0] ?? null;
+            $item['manager'] = $results[$i][$ldap_map["manager"]][0] ?? null;
+            $item['location'] = $results[$i][$ldap_map["location"]][0] ?? null;
+            $location = $default_location; //initially, set '$location' to the default_location (which may just be null)
 
             // ONLY if you are using the "ldap_location" option *AND* you have an actual result
             if ($ldap_map["location"] && $item['location']) {
@@ -464,6 +464,7 @@ class LdapSync extends Command
             $errors = '';
 
             if ($user->save()) {
+                $item['id'] = $user->id;
                 $item['note'] = $item['createorupdate'];
                 $item['status'] = 'success';
                 if ($item['createorupdate'] === 'created' && $ldap_default_group) {

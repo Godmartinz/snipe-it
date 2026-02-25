@@ -202,7 +202,7 @@ class CompaniesController extends Controller
 
 
         if ($request->filled('search')) {
-            $companies = $companies->where('companies.name', 'LIKE', '%'.$request->get('search').'%');
+            $companies = $companies->where('companies.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $companies = $companies->orderBy('name', 'ASC')->paginate(50);

@@ -21,6 +21,35 @@ abstract class Presenter
         $this->model = $model;
     }
 
+    public function displayAddress() {
+        $address = '';
+        if ($this->model->address) {
+            $address .= e($this->model->address)."\n";
+        }
+
+        if ($this->model->address2) {
+            $address .= e($this->model->address2)."\n";
+        }
+
+        if ($this->model->city) {
+            $address .= e($this->model->city).', ';
+        }
+
+        if ($this->model->state) {
+            $address .= e($this->model->state).' ';
+        }
+
+        if ($this->model->zip) {
+            $address .= e($this->model->zip).' ';
+        }
+
+        if ($this->model->country) {
+            $address .= e($this->model->country).' ';
+        }
+
+        return $address;
+    }
+
     // Convenience functions for datatables stuff
     public function categoryUrl()
     {
@@ -70,30 +99,7 @@ abstract class Presenter
         return '';
     }
 
-//    public function name()
-//    {
-//        return $this->model->name;
-//    }
-//
-//    public function display_name()
-//    {
-//        return $this->model->display_name;
-//    }
 
-
-//    protected function displayName(): Attribute
-//    {
-//        // This override should only kick in if the model has a display_name prope
-//        if ($this->getRawOriginal('display_name')) {
-//            return Attribute:: make (
-//                get: fn(mixed $value) => 'Poop:'.$this->display_name
-//            );
-//        }
-//
-//        return Attribute:: make(
-//            get: fn(mixed $value) => 'Fart: '.$this->name,
-//        );
-//    }
 
     public function __get($property)
     {
@@ -108,4 +114,6 @@ abstract class Presenter
     {
         return $this->model->$method($args);
     }
+
+
 }

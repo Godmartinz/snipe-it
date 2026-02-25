@@ -15,7 +15,7 @@ return [
 
     'more_info_title' => 'ข้อมูลเพิ่มเติม',
 
-    'audit_help' => 'Checking this box will edit the asset record to reflect this new location. Leaving it unchecked will simply note the location in the audit log.<br><br>Note that if this asset is checked out, it will not change the location of the person, asset or location it is checked out to.',
+    'audit_help' => 'การทำเครื่องหมายในช่องนี้จะแก้ไขบันทึกสินทรัพย์เพื่อให้สะท้อนถึงสถานที่ใหม่นี้ การไม่ทำเครื่องหมายในช่องนี้จะบันทึกสถานที่ลงในบันทึกการตรวจสอบเท่านั้น<br><br>โปรดทราบว่า หากมีการยืมสินทรัพย์นี้ออกไปแล้ว สถานที่ตั้งของบุคคล สินทรัพย์ หรือสถานที่ที่ยืมออกไปจะไม่เปลี่ยนแปลง',
 
     'assets' => 'สินทรัพย์คือรายการที่ติดตามโดยใช้หมายเลขซีเรียลหรือแท็กเนื้อหา พวกเขามีแนวโน้มที่จะเป็นรายการมูลค่าที่สูงขึ้นซึ่งจะระบุรายการที่เฉพาะเจาะจง',
 
@@ -31,5 +31,5 @@ return [
 
     'depreciations' => 'คุณสามารถกำหนดการคิดค่าเสื่อมราคาเพื่อตัดค่าเสื่อมราคาโดยวิธีการคิดค่าเสื่อมราคาแบบเส้นตรง',
     
-    'empty_file'    => 'The importer detects that this file is empty.'
+    'empty_file'    => 'ระบบตรวจพบว่าไฟล์นี้ว่างเปล่า'
 ];

@@ -98,10 +98,10 @@ class ConsumablesController extends Controller
             $consumable = $request->handleImages($consumable);
         }
 
-        if($request->get('redirect_option') === 'back'){
+        if($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
 
@@ -175,7 +175,7 @@ class ConsumablesController extends Controller
 
         $consumable = $request->handleImages($consumable);
 
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
+        session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($consumable->save()) {
             return Helper::getRedirectOption($request, $consumable->id, 'Consumables')

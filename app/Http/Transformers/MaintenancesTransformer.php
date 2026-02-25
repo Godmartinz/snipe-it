@@ -37,7 +37,8 @@ class MaintenancesTransformer
             'image' => ($assetmaintenance->image != '') ? Storage::disk('public')->url('maintenances/'.e($assetmaintenance->image)) : null,
             'model' => (($assetmaintenance->asset) && ($assetmaintenance->asset->model)) ? [
                 'id' => (int) $assetmaintenance->asset->model->id,
-                'name'=> ($assetmaintenance->asset->model->name) ? e($assetmaintenance->asset->model->name).' '.e($assetmaintenance->asset->model->model_number) : null,
+                'name'=> ($assetmaintenance->asset->model->name) ? e($assetmaintenance->asset->model->name) : null,
+                'model_number'=> ($assetmaintenance->asset->model->model_number) ? e($assetmaintenance->asset->model->model_number) : null,
             ] : null,
             'status_label' => (($assetmaintenance->asset) && ($assetmaintenance->asset->assetstatus)) ? [
                 'id' => (int) $assetmaintenance->asset->assetstatus->id,

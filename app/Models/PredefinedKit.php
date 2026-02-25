@@ -25,7 +25,7 @@ class PredefinedKit extends SnipeModel
      * Category validation rules
      */
     public $rules = [
-        'name' => 'required|min:1|max:255|unique',
+        'name' => 'required|max:255|unique',
     ];
 
     use ValidatingTrait;

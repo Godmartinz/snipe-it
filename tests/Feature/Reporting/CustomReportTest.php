@@ -100,7 +100,7 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
                 'asset_tag' => '1',
                 'serial' => '1',
             ])->assertOk()
-            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertHeader('content-type', 'text/csv; charset=utf-8')
             ->assertSeeTextInStreamedResponse('Asset A')
             ->assertSeeTextInStreamedResponse('Asset B');
     }
@@ -168,7 +168,7 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
                 'checkin_date_start' => '2023-08-02',
                 'checkin_date_end' => '2023-08-04',
             ])->assertOk()
-            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertHeader('content-type', 'text/csv; charset=utf-8')
             ->assertDontSeeTextInStreamedResponse('Asset A')
             ->assertSeeTextInStreamedResponse('Asset B')
             ->assertSeeTextInStreamedResponse('Asset C')

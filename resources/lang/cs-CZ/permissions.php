@@ -72,7 +72,7 @@ return array(
     ],
 
     'assetsviewrequestable' => [
-        'name' => 'View Requestable Assets',
+        'name' => '',
         'note' => 'Allows the user to view assets that are marked as requestable.',
     ],
 

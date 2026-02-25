@@ -103,7 +103,11 @@ return [
     'created_at' 			=> 'ايجاد شده در',
     'created_by'            => 'ایجاد شده توسط',
     'record_created' 		=> 'رکورد ایجاد شد',
-    'updated_at' 			=> 'به روز شده در',
+    'updated_at' 			=> 'Updated At',
+    'updated_plain' 		=> 'Updated',
+    'deleted_plain' 		=> 'حذف شد',
+    'purchased_plain' 		=> 'خریداری شده',
+    'created_plain' 		=> 'ایجاد شده',
     'currency'  			=> '$', // this is deprecated
     'currency_text'  		=> 'Currency', //
     'current'  				=> 'کنونی',
@@ -122,7 +126,7 @@ return [
     'debug_warning_text'    => 'این برنامه در حالت تولید با استفاده از اشکال زدایی فعال است. این می تواند اطلاعات حساس را در صورت درخواست شما برای جهان خارج در دسترس قرار دهد. با تنظیم مقداری <code>APP_DEBUG</code> در <code>.env</code> فایل خود را به <code>false</code> غیرفعال کنید.',
     'delete'  				=> 'حذف',
     'delete_confirm'  		=> 'آیا اطمینان دارید که می خواهید این را حذف نمایید؟',
-    'delete_confirm_no_undo' => 'Are you sure you wish to delete :item? This cannot be undone.',
+    'delete_confirm_no_undo' => 'آیا مطمپنید که می‌خواهید :item را حذف کنید؟ این کار غیرقابل بازگشت است.',
     'deleted'  				=> 'حذف شد',
     'delete_seats'  		=> 'صندلی ها حذف شده
 ',
@@ -137,7 +141,7 @@ return [
     'details'               => 'جزئیات',
     'download'				=> 'دانلود',
     'download_all'		    => 'دانلود تمام موارد',
-    'editprofile'  			=> 'ویرایش پروفایل شما',
+    'editprofile'  			=> 'Edit Profile',
     'eol'					=> 'EOL',
     'email_domain'			=> 'دامنه ایمیل',
     'employee_number'       => 'تعداد کارکنان
@@ -149,13 +153,13 @@ return [
     'exclude_deleted'       => 'دارایی های بایگانی شده را حذف کنید
 ',
     'example'				=> ' مثال: ',
-
     'files'                 => 'فایل ها',
     'file_name'				=> 'File Name',
     'file_type'             => 'نوع فايل',
     'filesize'              => 'اندازه فایل',
     'file_uploads'			=> 'بارگذاری پرونده',
     'file_upload'           => 'آپلود فایل',
+    'first_checkout'        => '1<sup>st</sup> Checkout',
     'generate'				=> 'تولید',
     'generate_labels'       => 'تولید برچسب ها',
     'github_markdown'      => 'این فیلد اجازه می دهد تا <a href="https://help.github.com/articles/github-flavored-markdown/">گیت هاب به سلیقه خود نشانه گذاری کند. markdown</a>.',
@@ -172,12 +176,13 @@ return [
     'image_upload'         	=> 'آپلود تصویر',
     'filetypes_accepted_help'    => 'نوع فایل پذیرفته شده :types است. حداکثر اندازه مجاز آپلود :size است.|نوع فایل های پذیرفته شده عبارتند از :types. حداکثر اندازه مجاز بارگذاری: اندازه است.',
     'filetypes_size_help'   => 'حداکثر سایز مجاز آپلود: سایز.',
-    'image_filetypes_help'  => 'Accepted filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',
+    'image_filetypes_help'  => 'نوع فایل های قابل قبول: jpg, webp, png, gif, و svg. حداکثر سایز فایل :size است.',
     'unaccepted_image_type'  => 'امکان خواندن تصویر وجود ندارد. نوع فایل های قابل قبول: jpg, webp, png, gif, و svg است. mimetype این فایل :mimetype است.',
     'import'         	    => 'واردات',
+    'documentation'         => 'Open documentation in a new link',
     'import_this_file'      => 'انتخاب نظیر به نظیر فیلدها و پردازش فایل',
     'importing'         	=> 'در حال وارد کردن',
-    'importing_help'        => 'The CSV should be comma-delimited and formatted with headers that match the ones in the <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSVs in the documentation</a>.',
+    'importing_help'        => 'The CSV should be comma-delimited and formatted with headers that match the ones in the <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSVs in the documentation <i class="fa fa-external-link"></i></a>.',
     'import-history'        => 'واردات تاریخ',
     'asset_maintenance'        => 'نگهداشت دارایی',
     'asset_maintenance_report' => 'گزارش  تعمیر و نگهداری دارایی ها',
@@ -220,8 +225,7 @@ return [
     'manufacturers'			=> 'تولیدکننده‌ها',
     'markdown'				=> 'این فیلد اجازه می دهد تا <a href="https://help.github.com/articles/github-flavored-markdown/">گیت هاب به سلیقه خود نشانه گذاری کند . markdown</a>.',
     'min_amt'				=> 'حداقل تعداد',
-    'min_amt_help'          => 'حداقل تعداد مواردی که باید قبل از شروع یک هشدار در دسترس باشد. ترک حداقل اگر نمی‌خواهید هشدارهای موجودی کم را دریافت کنید، QTY خالی است.
-',
+    'min_amt_help'          => 'Minimum number of this item that should be available for checkout before an alert gets triggered. Leave blank if you do not wish to receive alerts for low inventory.',
     'model_no'				=> 'شماره مدل',
     'months'				=> 'ماه ها',
     'moreinfo'				=> 'اطلاعات بیشتر',
@@ -257,7 +261,7 @@ return [
     'previous'				=> 'قبلي',
     'previous_page'			=> 'Previous Page',
     'processing'			=> 'در حال پردازش',
-    'profile'				=> 'Your Profile',
+    'profile'				=> 'View Profile',
     'purchase_cost'                              => 'هزینه خرید',
     'purchase_date'         => 'تاریخ خرید',
     'qty'		            => 'QTY',
@@ -283,7 +287,7 @@ return [
     'requested_date'        => 'تاریخ درخواست',
     'requested_assets'      => 'دارایی های درخواستی
 ',
-    'requested_assets_menu' => 'آیتم های قابل درخواست',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'درخواست لغو شد',
     'request_item'          => 'درخواست این آیتم',
     'external_link_tooltip' => 'لینک خارجی به',
@@ -354,6 +358,7 @@ return [
     'password'				=> 'رمز عبور',
     'accepted'			    => 'تأیید شد',
     'declined'			    => 'خودداری شد',
+    'declined_date'			=> 'Date Declined',
     'declined_note'         => 'یادداشت های رد شده',
     'unassigned'            => 'محول نشده',
     'unaccepted_asset_report' => 'Unaccepted Items',
@@ -373,7 +378,7 @@ return [
     'file_not_inlineable'        => 'The requested file cannot be opened inline in your browser. You can download it instead.',
     'open_new_window'       => 'Open this file in a new window',
     'file_upload_success'   => 'فایل با موفقیت بارگذاری شد!',
-    'no_files_uploaded'     => 'فایل با موفقیت بارگذاری شد!',
+    'no_files_uploaded'     => 'No files were uploaded.',
     'token_expired'         => 'اعتبار فرم شما تمام شده است. لطفا دوباره تلاش کنید.',
     'login_enabled'         => 'ورود فعال شد
 ',
@@ -416,10 +421,10 @@ return [
     'setup_step_4'          => 'مرحله 4',
     'setup_config_check'    => 'بررسی پیکربندی
 ',
-    'setup_create_database' => 'Create database tables',
-    'setup_create_admin'    => 'Create an admin user',
-    'setup_done'            => 'تمام شده!
-',
+    'setup_create_database' => 'ایجاد جدول های پایگاه داده',
+    'setup_create_admin'    => 'Create an Admin User',
+    'setup_next'            => 'بعدی',
+    'setup_done'            => 'Setup Complete!',
     'bulk_edit_about_to'    => 'شما در حال ویرایش موارد زیر هستید:
 ',
     'checked_out'           => 'بررسی شد
@@ -520,6 +525,7 @@ return [
 ',
     'clone_item'            => 'مورد کلون
 ',
+    'clone'                 => 'Clone',
     'checkout_tooltip' => 'این مورد را بررسی کنید
 ',
     'checkin_tooltip' => 'Check this item in so that it is available for re-issue, re-imaging, etc',
@@ -539,8 +545,7 @@ return [
 ',
     'shitty_browser'        => 'هیچ امضایی شناسایی نشد اگر از مرورگر قدیمی‌تری استفاده می‌کنید، لطفاً از یک مرورگر مدرن‌تر برای تکمیل پذیرش دارایی خود استفاده کنید.
 ',
-    'bulk_soft_delete'      =>'همچنین این کاربران را به صورت نرم حذف کنید. سابقه دارایی آنها دست نخورده باقی می ماند مگر اینکه/تا زمانی که سوابق حذف شده را در تنظیمات سرپرست پاک کنید.
-',
+    'bulk_soft_delete'      =>'Also soft-delete these users. Their item history will remain intact unless/until you purge deleted records in the Admin Settings.',
     'bulk_checkin_delete_success' => 'کاربران انتخابی شما حذف شده اند و موارد آنها بررسی شده است.
 ',
     'bulk_checkin_success' => 'موارد برای کاربران انتخاب شده بررسی شده است.
@@ -617,6 +622,12 @@ return [
     'serial_number'        => 'شماره سریال',
     'item_notes' => 'یادداشت های:item',
     'item_name_var' => ':نام کالا',
+    'light_mode' => 'Light Mode',
+    'dark_mode' => 'Dark Mode',
+    'light_dark' => 'Light/Dark Mode',
+    'system_default' => 'Use System Settings',
+    'system_default_help' => 'This will reset your light/dark mode preferences to use the defaults set in your computer operating system preferences.',
+    'theme' => 'Theme',
     'error_user_company' => 'Checkout target company and asset company do not match',
     'error_user_company_multiple' => 'One or more of the checkout target company and asset company do not match',
     'error_user_company_accept_view' => 'An Asset assigned to you belongs to a different company so you can\'t accept nor deny it, please check with your manager',
@@ -701,6 +712,7 @@ return [
     'something_went_wrong' => 'Something went wrong with your request.',
     'close' => 'Close',
     'expires' => 'منقضی می شود',
+    'filename' => 'File Name',
     'map_fields'=> 'Map :item_type Fields',
     'remaining_var' => ':count Remaining',
     'label' => 'Label',
@@ -719,10 +731,12 @@ return [
     'use_cloned_image' => 'Clone image from original',
     'use_cloned_image_help' => 'You may clone the original image or you can upload a new one using the upload field below.',
     'use_cloned_no_image_help' => 'This item does not have an associated image and instead inherits from the model or category it belongs to. If you would like to use a specific image for this item, you can upload a new one below.',
-    'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by Grokability, Inc.',
     'set_password' => 'Set a Password',
     'upload_deleted'        => 'Upload Deleted',
     'child_locations' => 'Child Locations',
+    'append' => 'افزودن',
+    'optional' => 'OPTIONAL',
 
 // Add form placeholders here
     'placeholders' => [

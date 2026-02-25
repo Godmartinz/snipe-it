@@ -18,7 +18,7 @@
 </div>
 
 <div class="row">
-    <div class="table-responsive">
+
         <table id="example">
             <thead>
                 <tr role="row">
@@ -85,7 +85,6 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
 </div>
 
 @stop

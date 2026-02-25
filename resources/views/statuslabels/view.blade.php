@@ -5,40 +5,54 @@
     @parent
 @stop
 
+@section('header_right')
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
+
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-box>
+                @include('partials.asset-bulk-actions')
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
-                <div class="box-body">
-                    @include('partials.asset-bulk-actions')
+                    <table
+                        data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                        data-cookie-id-table="assetsListingTable"
+                        data-id-table="assetsListingTable"
+                        data-side-pagination="server"
+                        data-sort-order="asc"
+                        data-toolbar="#assetsBulkEditToolbar"
+                        data-bulk-button-id="#bulkAssetEditButton"
+                        data-bulk-form-id="#assetsBulkForm"
+                        id="assetsListingTable"
+                        data-show-columns-search="true"
+                        data-buttons="assetButtons"
+                        class="table table-striped snipe-table"
+                        data-url="{{route('api.assets.index', ['status_id' => $statuslabel->id]) }}"
+                        data-export-options='{
+                          "fileName": "export-assets-{{ str_slug($statuslabel->name) }}-assets-{{ date('Y-m-d') }}",
+                          "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                          }'>
+                    </table>
+            </x-box>
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box>
+                <x-box.info-panel :infoPanelObj="$statuslabel">
 
-                                <table
-                                        data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                        data-cookie-id-table="assetsListingTable"
-                                        data-id-table="assetsListingTable"
-                                        data-side-pagination="server"
-                                        data-sort-order="asc"
-                                        data-toolbar="#assetsBulkEditToolbar"
-                                        data-bulk-button-id="#bulkAssetEditButton"
-                                        data-bulk-form-id="#assetsBulkForm"
-                                        id="assetsListingTable"
-                                        data-show-columns-search="true"
-                                        data-buttons="assetButtons"
-                                        class="table table-striped snipe-table"
-                                        data-url="{{route('api.assets.index', ['status_id' => $statuslabel->id]) }}"
-                                        data-export-options='{
-                              "fileName": "export-assets-{{ str_slug($statuslabel->name) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                                </table>
-                        </div><!-- /.col -->
-                    </div><!-- /.row -->
-                </div><!-- ./box-body -->
-            </div><!-- /.box -->
-        </div>
-    </div>
+                    <x-slot:before_list>
+
+                        <x-button.wide-edit :item="$statuslabel" :route="route('statuslabels.edit', $statuslabel->id)" />
+                        <x-button.wide-delete :item="$statuslabel" />
+
+                    </x-slot:before_list>
+
+
+                </x-box.info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
 @stop
 
 @section('moar_scripts')

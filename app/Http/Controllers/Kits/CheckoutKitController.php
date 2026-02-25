@@ -47,7 +47,7 @@ class CheckoutKitController extends Controller
      */
     public function store(Request $request, $kit_id)
     {
-        $user_id = e($request->get('user_id'));
+        $user_id = e($request->input('user_id'));
         if (is_null($user = User::find($user_id))) {
             return redirect()->back()->with('error', trans('admin/users/message.user_not_found'));
         }

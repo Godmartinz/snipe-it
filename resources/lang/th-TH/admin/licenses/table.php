@@ -4,7 +4,7 @@ return array(
 
     'assigned_to'   	=> 'ได้รับมอบหมายให้',
     'checkout'   		=> 'In / Out',
-    'deleted_at'        => 'Deleted at',
+    'deleted_at'        => 'ถูกลบเมื่อ',
     'id'      			=> 'ID',
     'license_email'   	=> 'อีเมลใบอนุญาต',
     'license_name'   	=> 'ได้รับอนุญาตให้',

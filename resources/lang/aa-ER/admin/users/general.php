@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'crwdns6751:0crwdne6751:0',
     'admin_permission_warning' => 'crwdns6753:0crwdne6753:0',
     'remove_group_memberships' => 'crwdns6755:0crwdne6755:0',
-    'warning_deletion_information' => 'crwdns10534:0crwdne10534:0',
+    'warning_deletion_information' => 'crwdns14444:0crwdne14444:0',
     'update_user_assets_status' => 'crwdns10488:0crwdne10488:0',
     'checkin_user_properties' => 'crwdns6763:0crwdne6763:0',
     'remote_label'   => 'crwdns6828:0crwdne6828:0',

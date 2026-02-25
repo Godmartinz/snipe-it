@@ -37,7 +37,7 @@ return [
     'superadmin_permission_warning' => 'Само админ може да даде администраторски достъп на потребител.',
     'admin_permission_warning' => 'Само потребители с административни права може да дадат админ достъп.',
     'remove_group_memberships' => 'Премахни членовете на групата',
-    'warning_deletion_information' => 'Вие ще заведете всички активи от :count потребител(и) от списъка по-долу. Администраторските имена са оцветени в червено.',
+    'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',
     'update_user_assets_status' => 'Обнови всички активи за следните потребители към този статус',
     'checkin_user_properties' => 'Впиши всички асоцирани настройки към тези потребители',
     'remote_label'   => 'Това е отдалечен потребител',

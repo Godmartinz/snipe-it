@@ -6,6 +6,7 @@ return array(
     'declined'                  => 'Odmietnutie majetku bolo úspešné.',
     'bulk_manager_warn'	        => 'Používatelia boli úspešné aktualizovaný, avčak položka manažér nebola uložená, pretože zvolený manažér sa taktiež nachádzal v zoznam na úpravu a používatel nemôže byť sám sebe manazérom. Prosim zvoľte Vašich používateľov znovu s vynechaním manažéera.',
     'user_exists'               => 'Používateľ už existuje!',
+    'cannot_delete'             => 'User does not exist or you do not have permission to delete them.',
     'user_not_found'            => 'Používateľ neexistuje alebo nemáte oprávnenie na jeho zobrazenie.',
     'user_login_required'       => 'Prihlasovacie meno je povinné',
     'user_has_no_assets_assigned' => 'Momentálne nie je priradený používateľovi žiaden majetok.',

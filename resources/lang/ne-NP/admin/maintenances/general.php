@@ -2,7 +2,7 @@
 
     return [
         'asset_maintenances' => 'Asset Maintenances', // not used anymore
-        'maintenances'       => 'Maintenances',
+        'maintenances'       => 'मर्मतसम्भार',
         'edit'               => 'Edit Asset Maintenance',
         'delete'             => 'Delete Asset Maintenance',
         'view'               => 'View Asset Maintenance Details',

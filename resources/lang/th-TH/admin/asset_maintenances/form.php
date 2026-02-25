@@ -1,7 +1,7 @@
 <?php
 
     return [
-        'select_type'            => 'Select Maintenance Type',
+        'select_type'            => 'เลือกประเภทการซ่อมบำรุง',
         'asset_maintenance_type' => 'ประเภทการซ่อมบำรุงสินทรัพย์',
         'title'                  => 'ชื่อเรื่อง',
         'start_date'             => 'วันที่เริ่มต้น',

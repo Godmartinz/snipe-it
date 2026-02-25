@@ -37,9 +37,9 @@
 @include ('partials.forms.edit.image-upload', ['image_path' => app('suppliers_upload_path')])
 
 <fieldset name="color-preferences">
-    <x-form-legend help_text="{{ trans('general.tag_color_help') }}">
+    <x-form.legend help_text="{{ trans('general.tag_color_help') }}">
         {{ trans('general.tag_color') }}
-    </x-form-legend>
+    </x-form.legend>
     <!--  color -->
     <div class="form-group {{ $errors->has('tag_color') ? 'error' : '' }}">
         <label for="tag_color" class="col-md-3 control-label">

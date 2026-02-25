@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Checkouts\Ui;
 
+use App\Mail\BulkAssetCheckoutMail;
 use App\Mail\CheckoutAssetMail;
 use App\Models\Asset;
 use App\Models\Company;
@@ -59,10 +60,16 @@ class BulkAssetCheckoutTest extends TestCase
             $asset->last_checkout = $checkoutAt;
             $asset->expected_checkin = $expectedCheckin;
             $this->assertHasTheseActionLogs($asset, ['create', 'checkout']); //Note: '$this' gets auto-bound in closures, so this does work.
+            $this->assertDatabaseHas('checkout_acceptances', [
+                'checkoutable_type' => Asset::class,
+                'checkoutable_id' => $asset->id,
+                'assigned_to_id' => $user->id,
+                'qty' => 1,
+            ]);
         });
 
-        Mail::assertSent(CheckoutAssetMail::class, 2);
-        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+        Mail::assertNotSent(CheckoutAssetMail::class);
+        Mail::assertSent(BulkAssetCheckoutMail::class, function (BulkAssetCheckoutMail $mail) {
             return $mail->hasTo('someone@example.com');
         });
     }

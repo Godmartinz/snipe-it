@@ -46,7 +46,7 @@ class Checkoutable
             $category = optional($unaccepted_row->license?->category?->present())->nameUrl() ?? '';
             $company = optional($unaccepted_row->license?->company?->present())?->nameUrl() ?? '';
             $model = '';
-            $name = $unaccepted_row->license->present()->nameUrl() ?? '';
+            $name = $unaccepted_row->license?->present()->nameUrl() ?? '';
         }
         if($unaccepted_row instanceof Consumable){
             $category = optional($unaccepted_row->category?->present())->nameUrl() ?? '';

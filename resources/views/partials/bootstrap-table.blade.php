@@ -102,6 +102,7 @@
                 paginationNextText: "{{ trans('general.next') }}",
                 paginationPreText: "{{ trans('general.previous') }}",
                 search: data_with_default('search', true),
+                searchText: "{{ request()->get('assetTag') ?? session()->get('search') }}", // this is needed so that people who incorrectly use the topsearch as an omnibar will not have an additional filter from BS tables
                 searchHighlight: data_with_default('search-highlight', true),
                 showColumns: data_with_default('show-columns', true),
                 showColumnsToggleAll: data_with_default('show-columns-toggle-all', true),
@@ -112,6 +113,8 @@
                 showSearchClearButton: data_with_default('show-search-clear-button', true),
                 sortName: data_with_default('sort-name', 'created_at'),
                 sortOrder: data_with_default('sort-order', 'desc'),
+                fixedColumns: data_with_default('fixed-columns', 'true'),
+                fixedRightNumber: data_with_default('fixed-right-number', '1'),
                 stickyHeader: true,
                 stickyHeaderOffsetLeft: parseInt($('body').css('padding-left'), 10),
                 stickyHeaderOffsetRight: parseInt($('body').css('padding-right'), 10),
@@ -264,7 +267,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('users.index') : route('users.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected text-danger ' : '' }}',
+                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
 
             }
@@ -368,7 +371,7 @@
                 window.location.href = '{{ (request()->input('status') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status' => 'Deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "Deleted") ? 'btn-selected text-danger' : '' }}',
+                class: '{{ (request()->input('status') == "Deleted") ? 'btn-selected' : '' }}',
                 title: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
@@ -394,14 +397,14 @@
         },
 
         btnShowDeleted: {
-            text: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+            text: '{{ (request()->input('status') == "deleted") ? trans('general.show_current') : trans('general.show_deleted') }}',
             icon: 'fa-solid fa-trash',
             event () {
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('locations.index') : route('locations.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected text-danger' : '' }}',
-                title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected' : '' }}',
+                title: '{{ (request()->input('status') == "deleted") ? trans('general.show_current') : trans('general.show_deleted') }}',
 
             }
         },
@@ -554,7 +557,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('manufacturers.index') : route('manufacturers.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected text-danger' : '' }}',
+                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
@@ -706,7 +709,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('models.index') : route('models.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected text-danger' : '' }}',
+                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
@@ -745,7 +748,7 @@
                 window.location.href = '{{ route('licenses.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -761,7 +764,6 @@
                 window.location.href = '{{ route('licenses.export', ['category_id' => (isset($category)) ? $category->id :'' ]) }}';
             },
             attributes: {
-                class: 'btn-warning',
                 title: '{{ trans('general.export_all_to_csv') }}',
             }
         },
@@ -1167,7 +1169,7 @@
                 value.name = value.name + ' (' + value.username + ')';
             }
 
-            return '<nobr><a href="{{ config('app.url') }}/' + item_destination +'/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';
+            return '<nobr><a href="{{ config('app.url') }}/' + item_destination +'/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="' + item_icon + ' fa-fw"></i> ' + value.name + '</a></nobr>';
 
         } else {
             return '';

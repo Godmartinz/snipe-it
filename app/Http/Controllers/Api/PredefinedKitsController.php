@@ -145,7 +145,7 @@ class PredefinedKitsController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $kits = $kits->where('name', 'LIKE', '%'.$request->get('search').'%');
+            $kits = $kits->where('name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $kits = $kits->orderBy('name', 'ASC')->paginate(50);
@@ -184,7 +184,7 @@ class PredefinedKitsController extends Controller
             $quantity = 1;
         }
 
-        $license_id = $request->get('license');
+        $license_id = $request->input('license');
         $relation = $kit->licenses();
         if ($relation->find($license_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['license' => trans('admin/kits/general.license_error')]));
@@ -254,7 +254,7 @@ class PredefinedKitsController extends Controller
 
         $kit = PredefinedKit::findOrFail($kit_id);
 
-        $model_id = $request->get('model');
+        $model_id = $request->input('model');
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -332,7 +332,7 @@ class PredefinedKitsController extends Controller
             $quantity = 1;
         }
 
-        $consumable_id = $request->get('consumable');
+        $consumable_id = $request->input('consumable');
         $relation = $kit->consumables();
         if ($relation->find($consumable_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['consumable' => trans('admin/kits/general.consumable_error')]));
@@ -406,7 +406,7 @@ class PredefinedKitsController extends Controller
             $quantity = 1;
         }
 
-        $accessory_id = $request->get('accessory');
+        $accessory_id = $request->input('accessory');
         $relation = $kit->accessories();
         if ($relation->find($accessory_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['accessory' => trans('admin/kits/general.accessory_error')]));

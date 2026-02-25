@@ -2,20 +2,21 @@
 
 return array(
 
-    'accepted'                  => 'You have successfully accepted this item.',
-    'declined'                  => 'You have successfully declined this item.',
+    'accepted'                  => 'คุณได้ยอมรับสิ่งของนี้แล้ว',
+    'declined'                  => 'คุณได้ปฏิเสธสิ่งของนี้แล้ว',
     'bulk_manager_warn'	        => 'ผู้ใช้ของคุณได้รับการอัปเดตแล้วแม้ว่ารายการผู้จัดการจะไม่ได้รับการบันทึกเนื่องจากผู้จัดการที่คุณเลือกอยู่ในรายชื่อผู้ใช้ที่จะแก้ไขและผู้ใช้ต้องไม่เป็นผู้จัดการของตัวเอง โปรดเลือกผู้ใช้ของคุณอีกครั้งโดยไม่รวมผู้จัดการ',
     'user_exists'               => 'มีผู้ใช้งานนี้แล้ว',
-    'user_not_found'            => 'User does not exist or you do not have permission view them.',
+    'cannot_delete'             => 'ไม่มีผู้ใช้นี้ หรือคุณไม่มีสิทธิ์ในการลบ',
+    'user_not_found'            => 'ไม่มีผู้ใช้นี้ หรือคุณไม่มีสิทธิ์ในการดู',
     'user_login_required'       => 'ต้องการชื่อผู้ใช้งาน',
-    'user_has_no_assets_assigned' => 'No assets currently assigned to user.',
+    'user_has_no_assets_assigned' => 'ไม่มีสินทรัพย์ใดอยู่ในความรับผิดชอบของผู้ใช้',
     'user_password_required'    => 'ต้องการรหัสผ่าน',
     'insufficient_permissions'  => 'สิทธิ์การใช้งานไม่เพียงพอ',
     'user_deleted_warning'      => 'ผู้ใช้งานนี้ถูกลบแล้ว คุณจำเป็นต้องกู้คืนผู้ใช้งานก่อนแก้ไข',
     'ldap_not_configured'        => 'การทำงานร่วมกับ LDAP ไม่ได้ถูกตั้งค่าไว้สำหรับการติดตั้งนี้',
-    'password_resets_sent'      => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'password_resets_sent'      => 'ผู้ใช้งานที่เลือกซึ่งเปิดใช้งานแล้วและมีที่อยู่อีเมลที่ถูกต้อง ได้รับลิงก์สำหรับรีเซ็ตรหัสผ่านแล้ว',
     'password_reset_sent'       => 'A password reset link has been sent to :email!',
-    'user_has_no_email'         => 'This user does not have an email address in their profile.',
+    'user_has_no_email'         => 'ผู้ใช้นี้ยังไม่มีอีเมล์ในโปรไฟล์',
     'log_record_not_found'        => 'A matching log record for this user could not be found.',
 
 
@@ -53,7 +54,7 @@ return array(
         'ldap_could_not_search' => 'ไม่สามารถค้นหา LDAP Server ได้ กรุณาตรวจสอบการตั้งค่า LDAP Server ของคุณในไฟล์ตั้งค่า LDAP <br>ผิดพลาดจาก LDAP Server:',
         'ldap_could_not_get_entries' => 'ไม่สามารถดึงข้อมูลจาก LDAP Server ได้ กรุณาตรวจสอบการตั้งค่า LDAP Server ของคุณในไฟล์ตั้งค่า LDAP <br>ผิดพลาดจาก LDAP Server:',
         'password_ldap' => 'รหัสผ่านสำหรับบัญชีนี้ได้รับการจัดการโดย LDAP / Active Directory โปรดติดต่อฝ่ายไอทีของคุณเพื่อเปลี่ยนรหัสผ่านของคุณ',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.'
+        'multi_company_items_assigned' => 'ผู้ใช้นี้มีสิ่งของที่ได้รับมอบหมายซึ่งเป็นของบริษัทอื่น โปรดตรวจสอบรายการเหล่านั้นหรือแก้ไขข้อมูลบริษัทของผู้ใช้'
     ),
 
     'deletefile' => array(

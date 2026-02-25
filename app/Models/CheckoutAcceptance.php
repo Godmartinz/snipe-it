@@ -49,6 +49,30 @@ class CheckoutAcceptance extends Model
         };
     }
     /**
+     * Accessor for the checkoutable item's category name.
+     *
+     * @return Attribute
+     */
+    protected function checkoutableCategoryName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $item = $this->checkoutable;
+
+                if ($item instanceof Asset) {
+
+                    return $item->model?->category?->name;
+                }
+                if ($item instanceof LicenseSeat) {
+
+                    return $item->license?->category?->name;
+                }
+
+                return $item->category?->name;
+            },
+        );
+    }
+    /**
      * The resource that was is out
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
@@ -61,7 +85,7 @@ class CheckoutAcceptance extends Model
     /**
      * The user that the checkoutable was checked out to
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function assignedTo()
     {
@@ -160,6 +184,10 @@ class CheckoutAcceptance extends Model
         return Attribute:: make(
             get: fn(mixed $value) => strtolower(str_replace('App\Models\\', '', $this->checkoutable_type)),
         );
+    }
+
+    protected function scopeHasFiles(Builder $query) {
+        return $query->whereNotNull('signature_filename')->orWhereNotNull('stored_eula_file');
     }
 
     public function generateAcceptancePdf($data, $pdf_filename) {

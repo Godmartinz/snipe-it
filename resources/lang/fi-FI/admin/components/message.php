@@ -18,7 +18,7 @@ return array(
         'confirm'   => 'Haluatko varmasti poistaa tämän komponentin?',
         'error'   => 'Komponentti poisto ei onnistunut. Yritä uudelleen.',
         'success' => 'Komponentti poistettiin.',
-        'error_qty'   => 'Some components of this type are still checked out. Please check them in and try again.',
+        'error_qty'   => 'Jotkut tämän tyyppiset komponentit ovat vielä luovutettuna. Palauta ne ja yritä uudelleen.',
     ),
 
      'checkout' => array(

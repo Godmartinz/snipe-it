@@ -6,6 +6,6 @@ return array(
     'action' 		        => 'การกระทำ',
     'by'      		        => 'โดย',
     'item' 			        => 'รายการ',
-    'no_matching_records'   => 'No matching records found',
+    'no_matching_records'   => 'ไม่พบรายการที่ตรงกัน',
 
 );

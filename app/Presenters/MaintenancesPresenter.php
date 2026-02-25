@@ -81,6 +81,14 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
                 'formatter' => 'modelsLinkObjFormatter',
             ], [
+                'field' => 'model.model_number',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.model_no'),
+                'visible' => true,
+            ],
+            [
                 'field' => 'supplier',
                 'searchable' => true,
                 'sortable' => true,

@@ -22,6 +22,7 @@ return [
     'add_maintenance'           => 'Añadir mantenimiento',
     'append'                    => 'Añadir',
     'new'                       => 'Nuevo',
+    'show_hide_info'            => 'Show/Hide More Information',
     'var' => [
         'clone'     => 'Clonar :item_type',
         'edit'      => 'Editar :item_type',

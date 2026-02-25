@@ -14,7 +14,7 @@ class ActionlogPresenter extends Presenter
                 return $user->present()->nameUrl();
             }
             // The user was deleted
-            return '<del>'.$user->getFullNameAttribute().'</del> (deleted)';
+            return '<del>'.$user->display_name.'</del> (deleted)';
         }
 
         return '';
