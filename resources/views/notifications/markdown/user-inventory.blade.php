@@ -102,6 +102,7 @@
 </table>
 @endif
 
+@if($asset2AssetCount > 0)
 ## {{ $asset2AssetCount }} {{ trans('mail.assigned_to_assets') }}
 <table width="100%">
     <tr>
@@ -146,7 +147,7 @@
         @endforeach
     @endforeach
 </table>
-
+@endif
 @endcomponent
 
 
