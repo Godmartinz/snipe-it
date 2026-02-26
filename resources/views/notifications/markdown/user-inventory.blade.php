@@ -119,7 +119,7 @@
     <tr>
         <th align="left">{{ trans('mail.assigned_to') }} </th>
         <th align="left">{{ trans('mail.item') }} </th>
-        <th align="left">{{ trans('mail.qty') }} </th>
+        <th align="left">{{ trans('general.quantity') }} </th>
         <th></th>
     </tr>
     @foreach($assetsAccessories as $accessory)
@@ -142,7 +142,7 @@
         <tr>
             <td>{{ $asset->asset_tag }}</td>
             <td>{{ $component->name }}</td>
-            <td>{{ $component->assigned_qty }}</td>
+            <td>{{ $component->pivot->assigned_qty }}</td>
         </tr>
         @endforeach
     @endforeach
