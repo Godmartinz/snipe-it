@@ -102,36 +102,35 @@
 </table>
 @endif
 
-@if ($components->count() > 0)
-## {{ $components->count() }} {{ trans('general.components') }}
-<table width="100%">
-<tr><th align="left">{{ trans('mail.name') }} </th> <th></th> </tr>
-@foreach($components as $component)
-<tr>
-<td>{{ $component->name }}</td>
-</tr>
-@endforeach
-</table>
-@endif
-
-## {{ $assetsAssets->count() }} {{ trans('mail.assigned_from_assets') }}
+## {{ $asset2AssetCount }} {{ trans('mail.assigned_to_assets') }}
 <table width="100%">
     <tr>
         <th align="left">{{ trans('mail.assigned_to') }} </th>
+        <th align="left">{{ trans('general.category') }} </th>
         <th align="left">{{ trans('mail.item') }} </th>
         <th align="left">{{ trans('general.quantity') }} </th>
         <th></th>
     </tr>
+    @foreach($assetsAssets as $asset)
+        <tr>
+            <td>{{ $asset->assignedTo?->display_name ?? '' }}</td>
+            <td>{{ $asset->model->name }}</td>
+            <td>{{ $asset->display_name }}</td>
+            <td></td>
+        </tr>
+    @endforeach
     @foreach($assetsAccessories as $accessory)
         <tr>
-            <td>{{ $accessory->assigned?->asset_tag ?? '' }}</td>
+            <td>{{ $accessory->assigned?->display_name ?? '' }}</td>
+            <td>{{ $accessory->accessory->category->name }}</td>
             <td>{{ $accessory->accessory->name }}</td>
             <td></td>
         </tr>
     @endforeach
     @foreach($assetsLicenseSeats as $license)
         <tr>
-            <td>{{ $license->asset?->asset_tag}}</td>
+            <td>{{ $license->asset?->display_name}}</td>
+            <td>{{ $license->license->category->name }}</td>
             <td>{{ $license->name }}</td>
             <td>{{ $license->serial }}</td>
             <td></td>
@@ -140,7 +139,8 @@
     @foreach($assetsComponents as $asset)
         @foreach($asset->components as $component)
         <tr>
-            <td>{{ $asset->asset_tag }}</td>
+            <td>{{$asset->display_name}}</td>
+            <td>{{ $component->category->name }}</td>
             <td>{{ $component->name }}</td>
             <td>{{ $component->pivot->assigned_qty }}</td>
         </tr>

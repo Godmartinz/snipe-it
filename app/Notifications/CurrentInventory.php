@@ -53,21 +53,20 @@ class CurrentInventory extends Notification
         $assetsAssets = $userAssets->flatMap(fn ($asset) => $asset->assignedAssets);
         $assetsAccessories = $userAssets->flatMap(function ($asset) {
             return $asset->assignedAccessories()
-                ->with('assignedTo', 'accessory')
+                ->with('assignedTo', 'accessory.category')
                 ->get();
         })->values();
         $assetsLicenseSeats = \App\Models\LicenseSeat::query()
             ->whereIn('asset_id', $assetIds)
-            ->with(['license', 'asset'])
+            ->with(['license.category', 'asset'])
             ->get();
         $assetsComponents = \App\Models\Asset::query()
             ->whereIn('id', $assetIds)
             ->whereHas('components')
             ->with('components')
             ->get();
-//        $assetsComponents = $userAssets->flatMap(fn($asset) => $asset->components);
-//        dd($assetIds, $assetsComponents);
-//dd($assetsComponents);
+
+       $assetsAssignmentCount = $assetsComponents->count() + $assetsLicenseSeats->count() + $assetsAssets->count() + $assetsAccessories->count();
 
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
@@ -80,6 +79,7 @@ class CurrentInventory extends Notification
                 'assetsAccessories'  => $assetsAccessories,
                 'assetsLicenseSeats'  => $assetsLicenseSeats,
                 'assetsComponents'  => $assetsComponents,
+                'asset2AssetCount' => $assetsAssignmentCount,
             ])
             ->subject(trans('mail.inventory_report'))
             ->withSymfonyMessage(function (Email $message) {
