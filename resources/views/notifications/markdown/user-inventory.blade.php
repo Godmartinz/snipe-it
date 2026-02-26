@@ -114,6 +114,39 @@
 </table>
 @endif
 
+## {{ $assetsAssets->count() }} {{ trans('mail.assigned_from_assets') }}
+<table width="100%">
+    <tr>
+        <th align="left">{{ trans('mail.assigned_to') }} </th>
+        <th align="left">{{ trans('mail.item') }} </th>
+        <th align="left">{{ trans('mail.qty') }} </th>
+        <th></th>
+    </tr>
+    @foreach($assetsAccessories as $accessory)
+        <tr>
+            <td>{{ $accessory->assigned?->asset_tag ?? '' }}</td>
+            <td>{{ $accessory->accessory->name }}</td>
+            <td></td>
+        </tr>
+    @endforeach
+    @foreach($assetsLicenseSeats as $license)
+        <tr>
+            <td>{{ $license->asset?->asset_tag}}</td>
+            <td>{{ $license->name }}</td>
+            <td>{{ $license->serial }}</td>
+            <td></td>
+        </tr>
+    @endforeach
+    @foreach($assetsComponents as $asset)
+        @foreach($asset->components as $component)
+        <tr>
+            <td>{{ $asset->asset_tag }}</td>
+            <td>{{ $component->name }}</td>
+            <td>{{ $component->assigned_qty }}</td>
+        </tr>
+        @endforeach
+    @endforeach
+</table>
 
 @endcomponent
 
