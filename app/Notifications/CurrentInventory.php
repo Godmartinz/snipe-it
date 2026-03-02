@@ -57,7 +57,7 @@ class CurrentInventory extends Notification
         $assetsAssignmentCount = 0;
 
         //assigned through assets to user
-        $show_assigned_assets = Setting::getSettings();
+        $show_assigned_assets = Setting::getSettings()->show_assigned_assets;
         if($show_assigned_assets) {
             $assetsAssets = $userAssets->flatMap(fn($asset) => $asset->assignedAssets);
             $assetsAccessories = $userAssets->flatMap(function ($asset) {
