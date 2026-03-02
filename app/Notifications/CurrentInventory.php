@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Asset;
+use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -49,24 +50,33 @@ class CurrentInventory extends Notification
             ->wherePivotNull('asset_id')
             ->get();;
 
-        //assigned through assets to user
-        $assetsAssets = $userAssets->flatMap(fn ($asset) => $asset->assignedAssets);
-        $assetsAccessories = $userAssets->flatMap(function ($asset) {
-            return $asset->assignedAccessories()
-                ->with('assignedTo', 'accessory.category')
-                ->get();
-        })->values();
-        $assetsLicenseSeats = \App\Models\LicenseSeat::query()
-            ->whereIn('asset_id', $assetIds)
-            ->with(['license.category', 'asset'])
-            ->get();
-        $assetsComponents = \App\Models\Asset::query()
-            ->whereIn('id', $assetIds)
-            ->whereHas('components')
-            ->with('components')
-            ->get();
+        $assetsAssets = collect();
+        $assetsAccessories = collect();
+        $assetsLicenseSeats = collect();
+        $assetsComponents = collect();
+        $assetsAssignmentCount = 0;
 
-       $assetsAssignmentCount = $assetsComponents->count() + $assetsLicenseSeats->count() + $assetsAssets->count() + $assetsAccessories->count();
+        //assigned through assets to user
+        $show_assigned_assets = Setting::getSettings();
+        if($show_assigned_assets) {
+            $assetsAssets = $userAssets->flatMap(fn($asset) => $asset->assignedAssets);
+            $assetsAccessories = $userAssets->flatMap(function ($asset) {
+                return $asset->assignedAccessories()
+                    ->with('assignedTo', 'accessory.category')
+                    ->get();
+            })->values();
+            $assetsLicenseSeats = \App\Models\LicenseSeat::query()
+                ->whereIn('asset_id', $assetIds)
+                ->with(['license.category', 'asset'])
+                ->get();
+            $assetsComponents = \App\Models\Asset::query()
+                ->whereIn('id', $assetIds)
+                ->whereHas('components')
+                ->with('components')
+                ->get();
+
+            $assetsAssignmentCount = $assetsComponents->count() + $assetsLicenseSeats->count() + $assetsAssets->count() + $assetsAccessories->count();
+        }
 
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
@@ -79,7 +89,7 @@ class CurrentInventory extends Notification
                 'assetsAccessories'  => $assetsAccessories,
                 'assetsLicenseSeats'  => $assetsLicenseSeats,
                 'assetsComponents'  => $assetsComponents,
-                'asset2AssetCount' => $assetsAssignmentCount,
+                'item2AssetCount' => $assetsAssignmentCount,
             ])
             ->subject(trans('mail.inventory_report'))
             ->withSymfonyMessage(function (Email $message) {

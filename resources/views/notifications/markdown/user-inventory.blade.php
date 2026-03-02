@@ -102,8 +102,8 @@
 </table>
 @endif
 
-@if($asset2AssetCount > 0)
-## {{ $asset2AssetCount }} {{ trans('mail.assigned_to_assets') }}
+@if($item2AssetCount > 0)
+## {{ $item2AssetCount }} {{ trans('mail.assigned_to_assets') }}
 <table width="100%">
     <tr>
         <th align="left">{{ trans('mail.assigned_to') }} </th>
