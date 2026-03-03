@@ -522,6 +522,54 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return (int) $totalCount;
     }
 
+    public function InventoryReportData() : array {
+        //assigned to user
+        $userAssets = $this->assets;
+        $assetIds = $userAssets->pluck('id')->toArray();
+        $userAccessories = $this->accessories;
+        $userLicenses = $this->licenses()
+            ->wherePivotNull('asset_id')
+            ->get();;
+
+        $assetsAssets = collect();
+        $assetsAccessories = collect();
+        $assetsLicenseSeats = collect();
+        $assetsComponents = collect();
+        $assetsAssignmentCount = 0;
+
+        //assigned through assets to user
+        $show_assigned_assets = Setting::getSettings()->show_assigned_assets;
+        if($show_assigned_assets) {
+            $assetsAssets = $userAssets->flatMap(fn($asset) => $asset->assignedAssets);
+            $assetsAccessories = $userAssets->flatMap(function ($asset) {
+                return $asset->assignedAccessories()
+                    ->with('assignedTo', 'accessory.category')
+                    ->get();
+            })->values();
+            $assetsLicenseSeats = \App\Models\LicenseSeat::query()
+                ->whereIn('asset_id', $assetIds)
+                ->with(['license.category', 'asset'])
+                ->get();
+            $assetsComponents = \App\Models\Asset::query()
+                ->whereIn('id', $assetIds)
+                ->whereHas('components')
+                ->with('components')
+                ->get();
+
+            $assetsAssignmentCount = $assetsComponents->count() + $assetsLicenseSeats->count() + $assetsAssets->count() + $assetsAccessories->count();
+        }
+        return [
+            'userAssets' => $userAssets,
+            'userAccessories' => $userAccessories,
+            'userLicenses' => $userLicenses,
+            'assetsAssets' => $assetsAssets,
+            'assetsLicenseSeats' => $assetsLicenseSeats,
+            'assetsAccessories' => $assetsAccessories,
+            'assetsComponents' => $assetsComponents,
+            'assetsAssignmentCount' => $assetsAssignmentCount
+        ];
+    }
+
     /**
      * Establishes the user -> actionlogs relationship
      *

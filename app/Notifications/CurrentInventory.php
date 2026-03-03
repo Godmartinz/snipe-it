@@ -22,6 +22,8 @@ class CurrentInventory extends Notification
     public function __construct($user)
     {
         $this->user = $user;
+        $this->inventory = $user->inventoryReportData();
+
     }
 
     /**
@@ -42,54 +44,17 @@ class CurrentInventory extends Notification
      */
     public function toMail()
     {
-        //assigned to user
-        $userAssets = $this->user->assets;
-        $assetIds = $userAssets->pluck('id')->toArray();
-        $userAccessories = $this->user->accessories;
-        $userLicenses = $this->user->licenses()
-            ->wherePivotNull('asset_id')
-            ->get();;
-
-        $assetsAssets = collect();
-        $assetsAccessories = collect();
-        $assetsLicenseSeats = collect();
-        $assetsComponents = collect();
-        $assetsAssignmentCount = 0;
-
-        //assigned through assets to user
-        $show_assigned_assets = Setting::getSettings()->show_assigned_assets;
-        if($show_assigned_assets) {
-            $assetsAssets = $userAssets->flatMap(fn($asset) => $asset->assignedAssets);
-            $assetsAccessories = $userAssets->flatMap(function ($asset) {
-                return $asset->assignedAccessories()
-                    ->with('assignedTo', 'accessory.category')
-                    ->get();
-            })->values();
-            $assetsLicenseSeats = \App\Models\LicenseSeat::query()
-                ->whereIn('asset_id', $assetIds)
-                ->with(['license.category', 'asset'])
-                ->get();
-            $assetsComponents = \App\Models\Asset::query()
-                ->whereIn('id', $assetIds)
-                ->whereHas('components')
-                ->with('components')
-                ->get();
-
-            $assetsAssignmentCount = $assetsComponents->count() + $assetsLicenseSeats->count() + $assetsAssets->count() + $assetsAccessories->count();
-        }
-
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
-                'assets'  => $userAssets,
-                'accessories'  => $userAccessories,
-                'licenses'  => $userLicenses,
-                'consumables'  => $this->user->consumables,
-                'components'  => $assetsComponents,
-                'assetsAssets'  => $assetsAssets,
-                'assetsAccessories'  => $assetsAccessories,
-                'assetsLicenseSeats'  => $assetsLicenseSeats,
-                'assetsComponents'  => $assetsComponents,
-                'item2AssetCount' => $assetsAssignmentCount,
+                'assets' => $this->inventory['userAssets'],
+                'accessories' => $this->inventory['userAccessories'],
+                'consumables' => $this->user->consumables,
+                'licenses' => $this->inventory['userLicenses'],
+                'assetsAssets' => $this->inventory['assetsAssets'],
+                'assetsAccessories' => $this->inventory['assetsAccessories'],
+                'assetsLicenseSeats' => $this->inventory['assetsLicenseSeats'],
+                'assetsComponents' => $this->inventory['assetsComponents'],
+                'item2AssetCount' => $this->inventory['assetsAssignmentCount'],
             ])
             ->subject(trans('mail.inventory_report'))
             ->withSymfonyMessage(function (Email $message) {
