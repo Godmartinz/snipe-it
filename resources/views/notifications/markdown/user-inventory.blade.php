@@ -102,8 +102,8 @@
 </table>
 @endif
 
-@if($item2AssetCount > 0)
-## {{ $item2AssetCount }} {{ trans('mail.assigned_to_assets') }}
+@if($indirectItemsCount > 0)
+## {{ $indirectItemsCount }} {{ trans('mail.assigned_to_assets') }}
 <table width="100%">
     <tr>
         <th align="left">{{ trans('mail.assigned_to') }} </th>
@@ -112,34 +112,34 @@
         <th align="left">{{ trans('general.quantity') }} </th>
         <th></th>
     </tr>
-    @foreach($assetsAssets as $asset)
-        <tr>
-            <td>{{ $asset->assignedTo?->display_name ?? '' }}</td>
-            <td>{{ $asset->model?->name  ?? ''}}</td>
-            <td>{{ $asset->display_name ?? '' }}</td>
-            <td></td>
-        </tr>
-    @endforeach
-    @foreach($assetsAccessories as $accessory)
-        <tr>
-            <td>{{ $accessory->assigned?->display_name ?? '' }}</td>
-            <td>{{ $accessory->accessory->category?->name ?? '' }}</td>
-            <td>{{ $accessory->accessory->name ?? '' }}</td>
-            <td></td>
-        </tr>
-    @endforeach
-    @foreach($assetsLicenseSeats as $license)
-        <tr>
-            <td>{{ $license->asset?->display_name ?? ''}}</td>
-            <td>{{ $license->license->category?->name ?? '' }}</td>
-            <td>{{ $license->name ?? '' }}</td>
-            <td></td>
-        </tr>
-    @endforeach
-    @foreach($assetsComponents as $asset)
+    @foreach($assets as $asset)
+        @foreach($asset->assignedAssets as $indirectAsset)
+            <tr>
+                <td>{{ $indirectAsset->assignedTo?->display_name ?? '' }}</td>
+                <td>{{ $indirectAsset->model?->name  ?? ''}}</td>
+                <td>{{ $indirectAsset->display_name ?? '' }}</td>
+                <td></td>
+            </tr>
+        @endforeach
+        @foreach($asset->assignedAccessories as $accessory)
+            <tr>
+                <td>{{ $asset->display_name ?? '' }}</td>
+                <td>{{ $accessory->accessory->category?->name ?? '' }}</td>
+                <td>{{ $accessory->accessory->name ?? '' }}</td>
+                <td></td>
+            </tr>
+        @endforeach
+        @foreach($asset->licenses as $license)
+            <tr>
+                <td>{{ $asset->display_name ?? ''}}</td>
+                <td>{{ $license->category?->name ?? '' }}</td>
+                <td>{{ $license->name ?? '' }}</td>
+                <td></td>
+            </tr>
+        @endforeach
         @foreach($asset->components as $component)
         <tr>
-            <td>{{$asset->display_name ?? ''}}</td>
+            <td>{{ $asset->display_name ?? ''}}</td>
             <td>{{ $component->category?->name ?? '' }}</td>
             <td>{{ $component->name }}</td>
             <td>{{ $component->pivot->assigned_qty }}</td>

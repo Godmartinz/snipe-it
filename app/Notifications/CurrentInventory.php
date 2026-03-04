@@ -22,7 +22,7 @@ class CurrentInventory extends Notification
     public function __construct($user)
     {
         $this->user = $user;
-        $this->inventory = $user->inventoryReportData();
+        $this->indirectItemsCount = $this->user?->assets?->flatMap->assignedAssets->count() + $this->user?->assets?->flatMap->components->count() + $this->user?->assets?->flatMap->licenses->count() + $this->user?->assets?->flatMap->assignedAccessories->count();
 
     }
 
@@ -46,15 +46,11 @@ class CurrentInventory extends Notification
     {
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
-                'assets' => $this->inventory['userAssets'],
-                'accessories' => $this->inventory['userAccessories'],
+                'assets' => $this->user->assets,
+                'accessories' => $this->user->accessories,
                 'consumables' => $this->user->consumables,
-                'licenses' => $this->inventory['userLicenses'],
-                'assetsAssets' => $this->inventory['assetsAssets'],
-                'assetsAccessories' => $this->inventory['assetsAccessories'],
-                'assetsLicenseSeats' => $this->inventory['assetsLicenseSeats'],
-                'assetsComponents' => $this->inventory['assetsComponents'],
-                'item2AssetCount' => $this->inventory['assetsAssignmentCount'],
+                'licenses' => $this->user->directLicenses,
+                'indirectItemsCount' => $this->indirectItemsCount,
             ])
             ->subject(trans('mail.inventory_report'))
             ->withSymfonyMessage(function (Email $message) {

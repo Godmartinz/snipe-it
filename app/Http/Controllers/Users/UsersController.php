@@ -669,7 +669,31 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::find($id);
+        $user = User::where('id', $id)
+            ->with([
+                'assets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'assets.assignedAssets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'assets.assignedAssets.defaultLoc',
+                'assets.assignedAssets.location',
+                'assets.assignedAssets.model.category',
+                'assets.components',
+                'assets.assignedAccessories',
+                'assets.defaultLoc',
+                'assets.location',
+                'assets.licenses',
+                'assets.model.category',
+                'accessories.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'accessories.category',
+                'accessories.manufacturer',
+                'consumables.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'consumables.category',
+                'consumables.manufacturer',
+                'licenses.category',
+            ])
+            ->withTrashed()
+            ->first();
+
+        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
 
         // Make sure they can view this particular user
         $this->authorize('view', $user);
@@ -680,7 +704,7 @@ class UsersController extends Controller
                 return redirect()->back()->with('error', trans('admin/users/message.user_has_no_email'));
             }
 
-            $user->notify((new CurrentInventory($user)));
+            $user->notify((new CurrentInventory($user, $indirectItemsCount)));
             return redirect()->back()->with('success', trans('admin/users/general.user_notified'));
         }
 
