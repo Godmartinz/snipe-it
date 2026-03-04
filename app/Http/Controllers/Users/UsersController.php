@@ -693,8 +693,6 @@ class UsersController extends Controller
             ->withTrashed()
             ->first();
 
-        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
-
         // Make sure they can view this particular user
         $this->authorize('view', $user);
 
@@ -704,7 +702,7 @@ class UsersController extends Controller
                 return redirect()->back()->with('error', trans('admin/users/message.user_has_no_email'));
             }
 
-            $user->notify((new CurrentInventory($user, $indirectItemsCount)));
+            $user->notify((new CurrentInventory($user)));
             return redirect()->back()->with('success', trans('admin/users/general.user_notified'));
         }
 
