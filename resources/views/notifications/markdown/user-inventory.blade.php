@@ -115,7 +115,7 @@
     @foreach($assets as $asset)
         @foreach($asset->assignedAssets as $indirectAsset)
             <tr>
-                <td>{{ $indirectAsset->assignedTo?->display_name ?? '' }}</td>
+                <td>{{ $asset->display_name ?? '' }}</td>
                 <td>{{ $indirectAsset->model?->name  ?? ''}}</td>
                 <td>{{ $indirectAsset->display_name ?? '' }}</td>
                 <td></td>

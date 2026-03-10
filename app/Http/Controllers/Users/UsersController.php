@@ -669,29 +669,7 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::where('id', $id)
-            ->with([
-                'assets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.defaultLoc',
-                'assets.assignedAssets.location',
-                'assets.assignedAssets.model.category',
-                'assets.components',
-                'assets.assignedAccessories',
-                'assets.defaultLoc',
-                'assets.location',
-                'assets.licenses',
-                'assets.model.category',
-                'accessories.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'accessories.category',
-                'accessories.manufacturer',
-                'consumables.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'consumables.category',
-                'consumables.manufacturer',
-                'licenses.category',
-            ])
-            ->withTrashed()
-            ->first();
+        $user = User::withInventoryRelations($id)->first();
 
         // Make sure they can view this particular user
         $this->authorize('view', $user);
