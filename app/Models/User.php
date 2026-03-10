@@ -1289,6 +1289,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
                     ->where('action_type', 'accepted'),
                 'consumables.category',
                 'consumables.manufacturer',
+                'directLicenses.category',
                 'licenses.category',
             ])
             ->withTrashed();

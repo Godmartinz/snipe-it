@@ -118,7 +118,7 @@
                 <td>{{ $asset->display_name ?? '' }}</td>
                 <td>{{ $indirectAsset->model?->name  ?? ''}}</td>
                 <td>{{ $indirectAsset->display_name ?? '' }}</td>
-                <td></td>
+                <td>1</td>
             </tr>
         @endforeach
         @foreach($asset->assignedAccessories as $accessory)
@@ -126,7 +126,7 @@
                 <td>{{ $asset->display_name ?? '' }}</td>
                 <td>{{ $accessory->accessory->category?->name ?? '' }}</td>
                 <td>{{ $accessory->accessory->name ?? '' }}</td>
-                <td></td>
+                <td>1</td>
             </tr>
         @endforeach
         @foreach($asset->licenses as $license)
@@ -134,7 +134,7 @@
                 <td>{{ $asset->display_name ?? ''}}</td>
                 <td>{{ $license->category?->name ?? '' }}</td>
                 <td>{{ $license->name ?? '' }}</td>
-                <td></td>
+                <td>1</td>
             </tr>
         @endforeach
         @foreach($asset->components as $component)
