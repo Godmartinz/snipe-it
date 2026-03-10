@@ -725,8 +725,8 @@ class UsersController extends Controller
 
     {
         $this->authorize('update', User::class);
-
-        if ($user = User::find($id)) {
+        $user = User::withInventoryRelations($id)->first();
+        if ($user) {
             $this->authorize('update', $user);
 
             if (empty($user->email)) {
