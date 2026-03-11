@@ -1646,7 +1646,7 @@
                                     </li>
                                     <li {{!! (request()->is('reports/expiring-items') ? ' class="active"' : '') !!}}>
                                         <a href="{{ url('reports/expiring-items') }}">
-                                            {{ trans('general.expiriing_items_report') }}
+                                            {{ trans('general.Expiring_Items_Report') }}
                                         </a>
                                     </li>
                                     <li {{!! (request()->is('reports/licenses') ? ' class="active"' : '') !!}}>
