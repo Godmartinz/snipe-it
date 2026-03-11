@@ -144,6 +144,85 @@ class ReportsController extends Controller
 
         return view('reports.expiring_items', compact('assets', 'licenses'));
     }
+    public function postExpiringItemsReport() : Response
+    {
+        $this->authorize('reports.view');
+
+        $settings = Setting::getSettings();
+        $alert_interval = $settings->alert_interval;
+
+        $assets = Asset::getExpiringWarrantyOrEol($alert_interval);
+        $assets->load(['assignedTo', 'supplier']);
+
+        $licenses = License::query()
+            ->expiringLicenses($alert_interval)              // <-- this is the right call
+            ->with(['manufacturer', 'category'])
+            ->orderBy('expiration_date', 'ASC')
+            ->orderBy('termination_date', 'ASC')
+            ->get();
+
+        $header = [
+            trans('general.id'),
+            trans('admin/hardware/form.tag'),
+            trans('admin/hardware/form.model'),
+            trans('general.model_no'),
+            trans('general.purchase_date'),
+            trans('admin/hardware/form.eol_rate'),
+            trans('admin/hardware/form.eol_date'),
+            trans('admin/hardware/form.warranty_expires'),
+        ];
+
+        $header = array_map('trim', $header);
+        $rows[] = implode(',', $header);
+
+        foreach ($assets as $asset) {
+            $eol_date = e($asset->eol_date ? $asset->eol_formatted_date : '');
+            $warranty_date = e($asset->warranty_expires ? $asset->warranty_expires_formatted_date : '');
+            $purchase_date = e(Helper::getFormattedDateObject($asset->purchase_date, 'date', false));
+            $row = [];
+
+            $row[] = e($asset->id);
+            $row[] = e($asset->asset_tag);
+            $row[] = e($asset->model->name ?? '');
+            $row[] = e($asset->model->model_number ?? '');
+            $row[] = '"'.str_replace('"', '""', $purchase_date).'"';
+            $row[] = e($asset->model->eol ?? '');
+            $row[] = '"'.str_replace('"', '""', $eol_date).'"';;
+            $row[] = '"'.str_replace('"', '""', $warranty_date).'"';
+            $rows[] = implode(',', $row);
+        }
+
+        $csv = implode("\n", $rows);
+
+        $response = response()->make($csv, 200);
+        $response->header('Content-Type', 'text/csv; charset=UTF-8');
+        $response->header('Content-Disposition', 'attachment; filename=expiring-items-report.csv');
+
+        return $response;
+
+
+        /*
+         |---------------------------------------
+         | Licenses
+         |---------------------------------------
+         */
+
+//        foreach ($licenses as $license) {
+//
+//            $row = [];
+//
+//            $row[] = e($license->id);
+//            $row[] = e($license->name);
+//            $row[] = Helper::getFormattedDateObject($license->purchase_date, 'date', false);
+//            $row[] = Helper::getFormattedDateObject($license->expiration_date, 'date', false);
+//            $row[] = $license->expires_formatted_date ? e($license->expires_diff_for_humans) : '';
+//            $row[] = Helper::getFormattedDateObject($license->termination_date, 'date', false);
+//            $row[] = e($license->terminates_diff_for_humans);
+//
+//            $csv->insertOne($row);
+//        }
+    }
+
     /**
     * Exports the depreciations to CSV
     *
