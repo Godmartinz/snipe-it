@@ -162,6 +162,7 @@ class ReportsController extends Controller
             ->get();
 
         $header = [
+            trans('general.assets'),
             trans('general.id'),
             trans('admin/hardware/form.tag'),
             trans('admin/hardware/form.model'),
@@ -176,22 +177,48 @@ class ReportsController extends Controller
         $rows[] = implode(',', $header);
 
         foreach ($assets as $asset) {
-            $eol_date = e($asset->eol_date ? $asset->eol_formatted_date : '');
-            $warranty_date = e($asset->warranty_expires ? $asset->warranty_expires_formatted_date : '');
             $purchase_date = e(Helper::getFormattedDateObject($asset->purchase_date, 'date', false));
-            $row = [];
+            $expiration_date = e($asset->eol_date ? $asset->eol_formatted_date : '');
+            $warranty_date = e($asset->warranty_expires ? $asset->warranty_expires_formatted_date : '');
 
+            $row = [];
+            $row[] = '';
             $row[] = e($asset->id);
             $row[] = e($asset->asset_tag);
             $row[] = e($asset->model->name ?? '');
             $row[] = e($asset->model->model_number ?? '');
             $row[] = '"'.str_replace('"', '""', $purchase_date).'"';
             $row[] = e($asset->model->eol ?? '');
-            $row[] = '"'.str_replace('"', '""', $eol_date).'"';;
+            $row[] = '"'.str_replace('"', '""', $expiration_date).'"';
             $row[] = '"'.str_replace('"', '""', $warranty_date).'"';
             $rows[] = implode(',', $row);
         }
 
+        $rows[] = '';
+
+        $rows[] = implode(',', [
+                trans('general.licenses'),
+                trans('general.id'),
+                trans('general.name'),
+                trans('general.purchase_date'),
+                trans('admin/licenses/form.expiration'),
+                trans('admin/licenses/form.termination_date'),
+            ]);
+
+        foreach ($licenses as $license) {
+            $purchase_date = e($license->purchase_date ? $license->purchase_date_formatted : '');
+            $expiration_date = e($license->expires_formatted_date ?? '');
+            $termination_date = e($license->termination_date ? $license->terminates_formatted_date : '');
+
+            $row = [];
+            $row[] = '';
+            $row[] = e($license->id);
+            $row[] = e($license->name);
+            $row[] = '"'.str_replace('"', '""', $purchase_date).'"';
+            $row[] = '"'.str_replace('"', '""', $expiration_date).'"';
+            $row[] = '"'.str_replace('"', '""', $termination_date).'"';
+            $rows[] = implode(',', $row);
+        }
         $csv = implode("\n", $rows);
 
         $response = response()->make($csv, 200);
