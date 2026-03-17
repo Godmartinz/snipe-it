@@ -19,7 +19,7 @@
                             </span>
                             <span class="hidden-xs hidden-sm">
                                 {{ trans('general.assets') }}
-                                {!! ($assets->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($assets->count()).'</span>' : '' !!}
+                                {!! ($assets_count > 0 ) ? '<span class="badge badge-secondary">'.number_format($assets_count).'</span>' : '' !!}
                             </span>
                         </a>
                     </li>
@@ -31,7 +31,7 @@
                             </span>
                             <span class="hidden-xs hidden-sm">
                                 {{ trans('general.licenses') }}
-                                {!! ($licenses->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($licenses->count()).'</span>' : '' !!}
+                                {!! ($licenses_count > 0 ) ? '<span class="badge badge-secondary">'.number_format($licenses_count).'</span>' : '' !!}
                             </span>
                         </a>
                     </li>

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ExpiringItemsTransformer;
 use App\Models\Actionlog;
+use App\Models\Asset;
+use App\Models\License;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -102,6 +103,7 @@ class ReportsController extends Controller
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($actionlogs, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
+
     public function expiringAssetsReport(Request $request)
     {
         $this->authorize('reports.view');
@@ -109,7 +111,7 @@ class ReportsController extends Controller
         $assets = Asset::getExpiringWarrantyOrEol($days);
 
         return response()->json(
-            (new ExpiringItemsTransformer())->transformAssets($assets, $assets->count())
+            (new ExpiringItemsTransformer)->transformAssets($assets, $assets->count())
         );
     }
 
@@ -125,7 +127,7 @@ class ReportsController extends Controller
             ->get();
 
         return response()->json(
-            (new ExpiringItemsTransformer())->transformLicenses($licenses, $licenses->count())
+            (new ExpiringItemsTransformer)->transformLicenses($licenses, $licenses->count())
         );
     }
 }
