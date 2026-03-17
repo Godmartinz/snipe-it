@@ -133,6 +133,7 @@ return [
     'details'               => 'Details',
     'download'				=> 'Download',
     'download_all'		    => 'Download All',
+    'download_selected'		=> 'Download :selected',
     'editprofile'  			=> 'Edit Profile',
     'eol'					=> 'EOL',
     'email_domain'			=> 'Email Domain',

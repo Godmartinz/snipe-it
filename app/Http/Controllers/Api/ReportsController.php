@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ActionlogsTransformer;
+use App\Http\Transformers\AssetsTransformer;
+use App\Http\Transformers\ExpiringItemsTransformer;
+use App\Http\Transformers\LicensesTransformer;
 use App\Models\Actionlog;
+use App\Models\Asset;
+use App\Models\License;
 use App\Models\Company;
 use App\Models\Setting;
+use App\Presenters\ExpiringItemsPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -105,5 +112,31 @@ class ReportsController extends Controller
         $actionlogs = $actionlogs->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($actionlogs, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
+    }
+    public function expiringAssetsReport(Request $request)
+    {
+        $this->authorize('reports.view');
+        $days = $request->get('days', 30);
+        $assets = Asset::getExpiringWarrantyOrEol($days);
+
+        return response()->json(
+            (new ExpiringItemsTransformer())->transformAssets($assets, $assets->count())
+        );
+    }
+
+    public function expiringLicensesReport(Request $request)
+    {
+        $this->authorize('reports.view');
+
+        $days = (int) $request->get('days', 30);
+        $includeExpired = $request->boolean('include_expired', false);
+
+        $licenses = License::query()
+            ->expiringLicenses($days, $includeExpired)
+            ->get();
+
+        return response()->json(
+            (new ExpiringItemsTransformer())->transformLicenses($licenses, $licenses->count())
+        );
     }
 }
