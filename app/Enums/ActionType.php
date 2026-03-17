@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Enums;
+
 enum ActionType: string
 {
     // General

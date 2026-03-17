@@ -8,14 +8,14 @@ use Tests\TestCase;
 
 class ViewUserTest extends TestCase
 {
-    public function testRequiresPermissionToViewUser()
+    public function test_requires_permission_to_view_user()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('users.show', User::factory()->create()))
             ->assertStatus(403);
     }
 
-    public function testCanViewUser()
+    public function test_can_view_user()
     {
         $actor = User::factory()->viewUsers()->create();
 
@@ -25,7 +25,7 @@ class ViewUserTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function testCannotViewUserFromAnotherCompany()
+    public function test_cannot_view_user_from_another_company()
     {
         $this->settings->enableMultipleFullCompanySupport();
 

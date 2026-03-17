@@ -36,7 +36,7 @@ return [
     'License_Checkin_Notification' => 'مجوز بررسی شد
 ',
     'License_Checkout_Notification' => 'License checked out',
-    'license_for'   => 'License for',
+    'license_for' => 'License for',
     'Low_Inventory_Report' => 'گزارش موجودی کم',
     'a_user_canceled' => 'یک کاربر یک درخواست اقساط در وب سایت را لغو کرده است',
     'a_user_requested' => 'یک کاربر یک مورد را در وبسایت درخواست کرده است',
@@ -62,7 +62,7 @@ return [
 ',
     'checkout_date' => 'چک کردن تاریخ',
     'checkedout_from' => 'Checked out from',
-    'checkedin_from'  => 'Checked in from',
+    'checkedin_from' => 'Checked in from',
     'checked_into' => 'Checked into',
     'click_on_the_link_accessory' => 'لطفا روی لینک زیر کلیک کنید تا تأیید کنید که لوازم جانبی را دریافت کرده اید.',
     'click_on_the_link_asset' => 'لطفا روی لینک زیر کلیک کنید تا تأیید کنید که دارایی را دریافت کرده اید.',

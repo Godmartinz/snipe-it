@@ -102,7 +102,12 @@
                                <label for="username_format" class="col-md-3 control-label">{{ trans('admin/settings/general.username_formats.username_format') }}</label>
 
                                <div class="col-md-8">
-                                   {!! Form::username_format('username_format', old('username_format', $setting->username_format), 'select2') !!}
+                                   <x-input.username-select
+                                       name="username_format"
+                                       :selected="old('username_format', $setting->username_format)"
+                                       style="width: 100%"
+                                       aria-label="username_format"
+                                   />
                                    {!! $errors->first('username_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
 
                                    <p class="help-block">

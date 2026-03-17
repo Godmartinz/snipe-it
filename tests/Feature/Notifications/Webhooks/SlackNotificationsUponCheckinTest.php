@@ -2,23 +2,23 @@
 
 namespace Tests\Feature\Notifications\Webhooks;
 
-use App\Models\AssetModel;
-use App\Models\Category;
-use App\Notifications\CheckinComponentNotification;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use App\Events\CheckoutableCheckedIn;
 use App\Models\Accessory;
 use App\Models\Asset;
+use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Component;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
+use App\Notifications\CheckinComponentNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Notification;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 #[Group('notifications')]
@@ -34,21 +34,21 @@ class SlackNotificationsUponCheckinTest extends TestCase
     public static function assetCheckInTargets(): array
     {
         return [
-            'Asset checked out to user' => [fn() => User::factory()->create()],
-            'Asset checked out to asset' => [fn() => Asset::factory()->laptopMbp()->create()],
-            'Asset checked out to location' => [fn() => Location::factory()->create()],
+            'Asset checked out to user' => [fn () => User::factory()->create()],
+            'Asset checked out to asset' => [fn () => Asset::factory()->laptopMbp()->create()],
+            'Asset checked out to location' => [fn () => Location::factory()->create()],
         ];
     }
 
     public static function licenseCheckInTargets(): array
     {
         return [
-            'License checked out to user' => [fn() => User::factory()->create()],
-            'License checked out to asset' => [fn() => Asset::factory()->laptopMbp()->create()],
+            'License checked out to user' => [fn () => User::factory()->create()],
+            'License checked out to asset' => [fn () => Asset::factory()->laptopMbp()->create()],
         ];
     }
 
-    public function testAccessoryCheckinSendsSlackNotificationWhenSettingEnabled()
+    public function test_accessory_checkin_sends_slack_notification_when_setting_enabled()
     {
         $this->settings->enableSlackWebhook();
 
@@ -60,7 +60,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
         $this->assertSlackNotificationSent(CheckinAccessoryNotification::class);
     }
 
-    public function testAccessoryCheckinDoesNotSendSlackNotificationWhenSettingDisabled()
+    public function test_accessory_checkin_does_not_send_slack_notification_when_setting_disabled()
     {
         $this->settings->disableSlackWebhook();
 
@@ -73,7 +73,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
     }
 
     #[DataProvider('assetCheckInTargets')]
-    public function testAssetCheckinSendsSlackNotificationWhenSettingEnabled($checkoutTarget)
+    public function test_asset_checkin_sends_slack_notification_when_setting_enabled($checkoutTarget)
     {
         $this->settings->enableSlackWebhook();
 
@@ -86,7 +86,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
     }
 
     #[DataProvider('assetCheckInTargets')]
-    public function testAssetCheckinDoesNotSendSlackNotificationWhenSettingDisabled($checkoutTarget)
+    public function test_asset_checkin_does_not_send_slack_notification_when_setting_disabled($checkoutTarget)
     {
         $this->settings->disableSlackWebhook();
 
@@ -97,8 +97,9 @@ class SlackNotificationsUponCheckinTest extends TestCase
 
         $this->assertNoSlackNotificationSent(CheckinAssetNotification::class);
     }
+
     #[DataProvider('assetCheckInTargets')]
-    public function testComponentCheckinSendsSlackNotificationWhenSettingEnabled($checkoutTarget)
+    public function test_component_checkin_sends_slack_notification_when_setting_enabled($checkoutTarget)
     {
         $this->settings->enableSlackWebhook();
 
@@ -111,7 +112,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
     }
 
     #[DataProvider('assetCheckInTargets')]
-    public function testComponentCheckinDoesNotSendSlackNotificationWhenSettingDisabled($checkoutTarget)
+    public function test_component_checkin_does_not_send_slack_notification_when_setting_disabled($checkoutTarget)
     {
         $this->settings->disableSlackWebhook();
 
@@ -123,7 +124,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
         $this->assertNoSlackNotificationSent(CheckinComponentNotification::class);
     }
 
-    public function testSlackNotificationIsStillSentWhenCategoryEmailIsNotSetToSendEmails()
+    public function test_slack_notification_is_still_sent_when_category_email_is_not_set_to_send_emails()
     {
         $this->settings->enableSlackWebhook();
 
@@ -145,7 +146,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
     }
 
     #[DataProvider('licenseCheckInTargets')]
-    public function testLicenseCheckinSendsSlackNotificationWhenSettingEnabled($checkoutTarget)
+    public function test_license_checkin_sends_slack_notification_when_setting_enabled($checkoutTarget)
     {
         $this->settings->enableSlackWebhook();
 
@@ -158,7 +159,7 @@ class SlackNotificationsUponCheckinTest extends TestCase
     }
 
     #[DataProvider('licenseCheckInTargets')]
-    public function testLicenseCheckinDoesNotSendSlackNotificationWhenSettingDisabled($checkoutTarget)
+    public function test_license_checkin_does_not_send_slack_notification_when_setting_disabled($checkoutTarget)
     {
         $this->settings->disableSlackWebhook();
 

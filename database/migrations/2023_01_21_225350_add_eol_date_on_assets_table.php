@@ -1,10 +1,10 @@
 <?php
 
+use App\Models\Asset;
+use App\Models\AssetModel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Asset;
-use App\Models\AssetModel;
 
 class AddEolDateOnAssetsTable extends Migration
 {
@@ -17,8 +17,8 @@ class AddEolDateOnAssetsTable extends Migration
     {
 
         Schema::table('assets', function (Blueprint $table) {
-            
-            if (!Schema::hasColumn('assets', 'asset_eol_date')) {
+
+            if (! Schema::hasColumn('assets', 'asset_eol_date')) {
                 $table->date('asset_eol_date')->after('purchase_date')->nullable()->default(null);
             }
 
@@ -26,7 +26,7 @@ class AddEolDateOnAssetsTable extends Migration
             // there is a large version difference. (See the AssetObserver notes). This column gets created
             // later in 2023_07_13_052204_denormalized_eol_and_add_column_for_explicit_date_to_assets.php
             // but we have to temporarily create it now so the save method below doesn't break
-            if (!Schema::hasColumn('assets', 'eol_explicit')) {
+            if (! Schema::hasColumn('assets', 'eol_explicit')) {
                 $table->boolean('eol_explicit')->default(false)->after('asset_eol_date');
             }
         });
@@ -38,7 +38,7 @@ class AddEolDateOnAssetsTable extends Migration
             foreach ($models as $model) {
                 foreach ($model->assets as $asset) {
 
-                    if ($asset->purchase_date!='') {
+                    if ($asset->purchase_date != '') {
                         $asset->asset_eol_date = $asset->present()->eol_date();
                         $asset->saveQuietly();
                     }

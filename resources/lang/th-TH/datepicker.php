@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -21,30 +21,30 @@ return array(
         'sunday' => 'อาทิตย์',
         'monday' => 'จันทร์',
         'tuesday' => 'อังคาร',
-        'wednesday' =>  'พุธ',
-        'thursday' =>  'พฤหัสบดี',
-        'friday' =>  'ศุกร์',
-        'saturday' =>  'เสาร์',
-        ],
+        'wednesday' => 'พุธ',
+        'thursday' => 'พฤหัสบดี',
+        'friday' => 'ศุกร์',
+        'saturday' => 'เสาร์',
+    ],
 
     'short_days' => [
         'sunday' => 'อา',
         'monday' => 'จ',
         'tuesday' => 'อ',
-        'wednesday' =>  'พ',
-        'thursday' =>  'พฤ',
-        'friday' =>  'ศ',
-        'saturday' =>  'ส',
+        'wednesday' => 'พ',
+        'thursday' => 'พฤ',
+        'friday' => 'ศ',
+        'saturday' => 'ส',
     ],
 
     'min_days' => [
         'sunday' => 'อา',
         'monday' => 'จ',
         'tuesday' => 'อ',
-        'wednesday' =>  'พ',
-        'thursday' =>  'พฤ',
-        'friday' =>  'ศ',
-        'saturday' =>  'ส',
+        'wednesday' => 'พ',
+        'thursday' => 'พฤ',
+        'friday' => 'ศ',
+        'saturday' => 'ส',
     ],
 
     'months' => [
@@ -77,4 +77,4 @@ return array(
         'december' => 'ธ.ค.',
     ],
 
-);
+];

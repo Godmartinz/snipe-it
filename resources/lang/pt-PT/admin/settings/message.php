@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'Ocorreu um erro ao atualizar. ',
-        'success'               => 'Configurações atualizadas com sucesso.',
+        'error' => 'Ocorreu um erro ao atualizar. ',
+        'success' => 'Configurações atualizadas com sucesso.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Tem a certeza que pretende eliminar o ficheiro de backup? Não poderá reverter a acção. ',
-        'file_deleted'          => 'Ficheiro de backup eliminado com sucesso. ',
-        'generated'             => 'Ficheiro de backup criado com sucesso.',
-        'file_not_found'        => 'O ficheiro de backup não foi encontrado no servidor.',
-        'restore_warning'       => 'Sim, restaurar. Eu reconheço que isso irá substituir quaisquer dados existentes atualmente na base de dados. Isto também irá desligar todos os utilizadores existentes (incluindo você).',
-        'restore_confirm'       => 'Tem a certeza que deseja restaurar a sua base de dados a partir de :filename?'
+        'delete_confirm' => 'Tem a certeza que pretende eliminar o ficheiro de backup? Não poderá reverter a acção. ',
+        'file_deleted' => 'Ficheiro de backup eliminado com sucesso. ',
+        'generated' => 'Ficheiro de backup criado com sucesso.',
+        'file_not_found' => 'O ficheiro de backup não foi encontrado no servidor.',
+        'restore_warning' => 'Sim, restaurar. Eu reconheço que isso irá substituir quaisquer dados existentes atualmente na base de dados. Isto também irá desligar todos os utilizadores existentes (incluindo você).',
+        'restore_confirm' => 'Tem a certeza que deseja restaurar a sua base de dados a partir de :filename?',
     ],
     'restore' => [
-        'success'               => 'Your system backup has been restored. Please log in again.'
+        'success' => 'Your system backup has been restored. Please log in again.',
     ],
     'purge' => [
-        'error'     => 'Ocorreu um erro ao eliminar os dados. ',
-        'validation_failed'     => 'A confirmação para limpar os dados correu mal. Digite a palavra "Apagar" na caixa de confirmação.',
-        'success'               => 'Os dados foram apagados com sucesso.',
+        'error' => 'Ocorreu um erro ao eliminar os dados. ',
+        'validation_failed' => 'A confirmação para limpar os dados correu mal. Digite a palavra "Apagar" na caixa de confirmação.',
+        'success' => 'Os dados foram apagados com sucesso.',
     ],
     'mail' => [
         'sending' => 'Enviar e-mail de teste...',
         'success' => 'E-mail enviado!',
         'error' => 'O e-mail não pode ser enviado.',
-        'additional' => 'Nenhuma mensagem de erro adicional foi fornecida. Verifique as suas configurações de e-mail e o log do aplicativo.'
+        'additional' => 'Nenhuma mensagem de erro adicional foi fornecida. Verifique as suas configurações de e-mail e o log do aplicativo.',
     ],
     'ldap' => [
         'testing' => 'Testando a conexão LDAP, ligação e pesquisa ...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Ocorreu um erro :(',
         'sync_success' => 'Uma amostra de 10 utilizadores retornaram do servidor LDAP com base nas suas configurações:',
         'testing_authentication' => 'Testando Autenticação LDAP...',
-        'authentication_success' => 'Utilizador autenticado no LDAP com sucesso!'
+        'authentication_success' => 'Utilizador autenticado no LDAP com sucesso!',
     ],
     'labels' => [
         'null_template' => 'Label template not found. Please select a template.',
-        ],
+    ],
     'webhook' => [
         'sending' => 'A enviar mensagem :app de teste...',
         'success' => 'Sua integração com :webhook_name funciona!',

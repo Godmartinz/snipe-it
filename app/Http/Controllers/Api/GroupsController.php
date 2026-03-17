@@ -6,9 +6,8 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\GroupsTransformer;
 use App\Models\Group;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Http\Request;
 
 class GroupsController extends Controller
 {
@@ -16,9 +15,10 @@ class GroupsController extends Controller
      * Display a listing of the resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('superadmin');
 
@@ -33,7 +33,6 @@ class GroupsController extends Controller
         if ($request->filled('name')) {
             $groups->where('name', '=', $request->input('name'));
         }
-
 
         $offset = ($request->input('offset') > $groups->count()) ? $groups->count() : app('api_offset_value');
         $limit = app('api_limit_value');
@@ -69,10 +68,10 @@ class GroupsController extends Controller
      * Store a newly created resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
      */
-    public function store(Request $request) : JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('superadmin');
         $group = new Group;
@@ -96,13 +95,16 @@ class GroupsController extends Controller
      * Display the specified resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function show($id) : array
+    public function show($id): array
     {
         $this->authorize('superadmin');
         $group = Group::findOrFail($id);
+
         return (new GroupsTransformer)->transformGroup($group);
     }
 
@@ -110,11 +112,12 @@ class GroupsController extends Controller
      * Update the specified resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  int  $id
      */
-    public function update(Request $request, $id) : JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
         $this->authorize('superadmin');
         $group = Group::findOrFail($id);
@@ -134,10 +137,12 @@ class GroupsController extends Controller
      * Remove the specified resource from storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function destroy($id) : JsonResponse
+    public function destroy($id): JsonResponse
     {
         $this->authorize('superadmin');
         $group = Group::findOrFail($id);

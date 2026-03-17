@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Checkouts\Ui;
 
+use App\Mail\BulkAssetCheckoutMail;
 use App\Mail\CheckoutAssetMail;
 use App\Models\Asset;
 use App\Models\Company;
@@ -14,7 +15,7 @@ use Tests\TestCase;
 
 class BulkAssetCheckoutTest extends TestCase
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAs(User::factory()->create())
             ->post(route('hardware.bulkcheckout.store'), [
@@ -29,7 +30,7 @@ class BulkAssetCheckoutTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testCanBulkCheckoutAssets()
+    public function test_can_bulk_checkout_assets()
     {
         Mail::fake();
 
@@ -58,16 +59,22 @@ class BulkAssetCheckoutTest extends TestCase
             $asset->assignedTo()->is($user);
             $asset->last_checkout = $checkoutAt;
             $asset->expected_checkin = $expectedCheckin;
-            $this->assertHasTheseActionLogs($asset, ['create', 'checkout']); //Note: '$this' gets auto-bound in closures, so this does work.
+            $this->assertHasTheseActionLogs($asset, ['create', 'checkout']); // Note: '$this' gets auto-bound in closures, so this does work.
+            $this->assertDatabaseHas('checkout_acceptances', [
+                'checkoutable_type' => Asset::class,
+                'checkoutable_id' => $asset->id,
+                'assigned_to_id' => $user->id,
+                'qty' => 1,
+            ]);
         });
 
-        Mail::assertSent(CheckoutAssetMail::class, 2);
-        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+        Mail::assertNotSent(CheckoutAssetMail::class);
+        Mail::assertSent(BulkAssetCheckoutMail::class, function (BulkAssetCheckoutMail $mail) {
             return $mail->hasTo('someone@example.com');
         });
     }
 
-    public function testHandleMissingModelBeingIncluded()
+    public function test_handle_missing_model_being_included()
     {
         Mail::fake();
 
@@ -101,7 +108,7 @@ class BulkAssetCheckoutTest extends TestCase
                     'type' => 'user',
                     'target' => User::factory()->forCompany()->create(),
                 ];
-            }
+            },
         ];
 
         yield 'Checkout to asset' => [
@@ -110,7 +117,7 @@ class BulkAssetCheckoutTest extends TestCase
                     'type' => 'asset',
                     'target' => Asset::factory()->forCompany()->create(),
                 ];
-            }
+            },
         ];
 
         yield 'Checkout to location' => [
@@ -119,7 +126,7 @@ class BulkAssetCheckoutTest extends TestCase
                     'type' => 'location',
                     'target' => Location::factory()->forCompany()->create(),
                 ];
-            }
+            },
         ];
     }
 

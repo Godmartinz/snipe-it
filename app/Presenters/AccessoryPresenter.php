@@ -9,6 +9,7 @@ class AccessoryPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout()
@@ -101,7 +102,7 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('admin/accessories/general.remaining'),
                 'footerFormatter' => 'qtySumFormatter',
                 'class' => 'text-right text-padding-number-cell',
-            ],[
+            ], [
                 'field' => 'checkouts_count',
                 'searchable' => false,
                 'sortable' => true,
@@ -135,13 +136,13 @@ class AccessoryPresenter extends Presenter
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.order_number'),
-            ],[
+            ], [
                 'field' => 'notes',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
-                'formatter' => 'notesFormatter'
+                'formatter' => 'notesFormatter',
             ], [
                 'field' => 'created_by',
                 'searchable' => false,
@@ -181,12 +182,12 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesActionsFormatter',
                 'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
         return json_encode($layout);
     }
-
 
     public static function assignedDataTableLayout()
     {
@@ -250,6 +251,7 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesInOutFormatter',
                 'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -258,12 +260,13 @@ class AccessoryPresenter extends Presenter
 
     /**
      * Pregenerated link to this accessories view page.
+     *
      * @return string
      */
     public function nameUrl()
     {
         if (auth()->user()->can('view', ['\App\Models\Accessory', $this])) {
-            return (string)link_to_route('accessories.show', e($this->display_name), $this->id);
+            return '<a href="'.route('accessories.show', $this->id).'">'.e($this->display_name).'</a>';
         } else {
             return e($this->display_name);
         }
@@ -271,6 +274,7 @@ class AccessoryPresenter extends Presenter
 
     /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()

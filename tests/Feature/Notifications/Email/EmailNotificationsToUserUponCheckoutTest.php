@@ -16,8 +16,11 @@ use Tests\TestCase;
 class EmailNotificationsToUserUponCheckoutTest extends TestCase
 {
     private Asset $asset;
+
     private AssetModel $assetModel;
+
     private Category $category;
+
     private User $user;
 
     protected function setUp(): void

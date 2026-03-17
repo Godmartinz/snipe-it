@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CloneComponentTest extends TestCase
 {
-    public function testPermissionRequiredToCreateComponent()
+    public function test_permission_required_to_create_component()
     {
         $component = Component::factory()->create();
         $this->actingAs(User::factory()->create())
@@ -16,7 +16,7 @@ class CloneComponentTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testPageCanBeAccessed(): void
+    public function test_page_can_be_accessed(): void
     {
         $component = Component::factory()->create();
         $response = $this->actingAs(User::factory()->createComponents()->create())
@@ -24,14 +24,14 @@ class CloneComponentTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testComponentCanBeCloned()
+    public function test_component_can_be_cloned()
     {
-        $component_to_clone = Component::factory()->create(['name'=>'Component to clone']);
+        $component_to_clone = Component::factory()->create(['name' => 'Component to clone']);
         $this->actingAs(User::factory()->createComponents()->create())
             ->get(route('components.clone.create', $component_to_clone))
             ->assertOk()
             ->assertSee([
-                'Component to clone'
+                'Component to clone',
             ], false);
     }
 }

@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'Errore durante l\'aggiornamento. ',
-        'success'               => 'Impostazioni aggiornate correttamente.',
+        'error' => 'Errore durante l\'aggiornamento. ',
+        'success' => 'Impostazioni aggiornate correttamente.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Sei sicuro di voler cancellare questo file di backup? Questa operazione è irreversibile. ',
-        'file_deleted'          => 'Il file di backup è stato cancellato con successo. ',
-        'generated'             => 'Un nuovo file di backup è stato creato con successo.',
-        'file_not_found'        => 'Quel file di backup non può essere trovato sul server.',
-        'restore_warning'       => 'Si, ripristina. Riconosco che il ripristino sovrascriverà tutti i dati al momento presenti nel database. Inoltre, tutti gli utenti verranno disconnessi (incluso te).',
-        'restore_confirm'       => 'Sei sicuro di voler ripristinare il tuo database da :filename?'
+        'delete_confirm' => 'Sei sicuro di voler cancellare questo file di backup? Questa operazione è irreversibile. ',
+        'file_deleted' => 'Il file di backup è stato cancellato con successo. ',
+        'generated' => 'Un nuovo file di backup è stato creato con successo.',
+        'file_not_found' => 'Quel file di backup non può essere trovato sul server.',
+        'restore_warning' => 'Si, ripristina. Riconosco che il ripristino sovrascriverà tutti i dati al momento presenti nel database. Inoltre, tutti gli utenti verranno disconnessi (incluso te).',
+        'restore_confirm' => 'Sei sicuro di voler ripristinare il tuo database da :filename?',
     ],
     'restore' => [
-        'success'               => 'Il backup del sistema è stato ripristinato. Effettua nuovamente il login.'
+        'success' => 'Il backup del sistema è stato ripristinato. Effettua nuovamente il login.',
     ],
     'purge' => [
-        'error'     => 'Si è verificato un errore durante la pulizia. ',
-        'validation_failed'     => 'La conferma dell\'eliminazione non è corretta. Digita "DELETE" nel box di conferma.',
-        'success'               => 'I record cancellati sono stati correttamente eliminati.',
+        'error' => 'Si è verificato un errore durante la pulizia. ',
+        'validation_failed' => 'La conferma dell\'eliminazione non è corretta. Digita "DELETE" nel box di conferma.',
+        'success' => 'I record cancellati sono stati correttamente eliminati.',
     ],
     'mail' => [
         'sending' => 'Invio Email Di Prova...',
         'success' => 'Mail inviata!',
         'error' => 'Non è stato possibile inviare l\'email.',
-        'additional' => 'Nessun messaggio di errore aggiuntivo fornito. Controlla le impostazioni della posta e il log dell\'app.'
+        'additional' => 'Nessun messaggio di errore aggiuntivo fornito. Controlla le impostazioni della posta e il log dell\'app.',
     ],
     'ldap' => [
         'testing' => 'Testo Connessione, Binding e Query LDAP ...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Qualcosa è andato storto :(',
         'sync_success' => 'Un campione di 10 utenti restituiti dal server LDAP in base alle tue impostazioni:',
         'testing_authentication' => 'Testo l\'Autenticazione LDAP...',
-        'authentication_success' => 'Utente autenticato correttamente con LDAP!'
+        'authentication_success' => 'Utente autenticato correttamente con LDAP!',
     ],
     'labels' => [
         'null_template' => 'Modello di etichetta non trovato. Si prega di selezionare un modello.',
-        ],
+    ],
     'webhook' => [
         'sending' => 'Invio a :app un messaggio di prova...',
         'success' => 'La tua integrazione :webhook_name funziona!',

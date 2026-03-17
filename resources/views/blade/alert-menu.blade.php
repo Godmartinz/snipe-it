@@ -6,7 +6,7 @@
 <!-- Tasks: style can be found in dropdown.less -->
 <?php
     $alert_items = \App\Helpers\Helper::checkLowInventory();
-    $deprecations = \App\Helpers\Helper::deprecationCheck()
+    $deprecations = \App\Helpers\Helper::deprecationCheck();
 ?>
 
 <li class="dropdown tasks-menu">

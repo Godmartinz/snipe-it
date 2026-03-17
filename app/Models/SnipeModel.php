@@ -20,45 +20,40 @@ class SnipeModel extends Model
         $this->attributes['purchase_date'] = $value;
     }
 
-
     protected function purchaseDateFormatted(): Attribute
     {
-        return Attribute:: make(
-            get: fn(mixed $value, array $attributes) => $attributes['purchase_date']  ? Helper::getFormattedDateObject(Carbon::parse($attributes['purchase_date']), 'date', false) : null,
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['purchase_date'] ? Helper::getFormattedDateObject(Carbon::parse($attributes['purchase_date']), 'date', false) : null,
         );
     }
-
 
     protected function expiresDiffInDays(): Attribute
     {
-        return Attribute:: make(
-            get: fn(mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Carbon::now()->diffInDays($attributes['expiration_date']) : null,
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Carbon::now()->diffInDays($attributes['expiration_date']) : null,
         );
     }
 
-
     protected function expiresDiffForHumans(): Attribute
     {
-        return Attribute:: make(
-            get: fn(mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Carbon::parse($attributes['expiration_date'])->diffForHumans() : null,
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Carbon::parse($attributes['expiration_date'])->diffForHumans() : null,
         );
     }
 
     protected function expiresFormattedDate(): Attribute
     {
-        return Attribute:: make(
-            get: fn(mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Helper::getFormattedDateObject($attributes['expiration_date'], 'date', false) : null,
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => array_key_exists('expiration_date', $attributes) ? Helper::getFormattedDateObject($attributes['expiration_date'], 'date', false) : null,
         );
     }
 
-    /**
-     * @param $value
-     */
     public function setPurchaseCostAttribute($value)
     {
         if (is_numeric($value)) {
-            //value is *already* a floating-point number. Just assign it directly
+            // value is *already* a floating-point number. Just assign it directly
             $this->attributes['purchase_cost'] = $value;
+
             return;
         }
         $value = Helper::ParseCurrency($value);
@@ -193,8 +188,6 @@ class SnipeModel extends Model
     /**
      * Applies offset (from request) and limit to query.
      *
-     * @param  Builder  $query
-     * @param  int  $total
      * @return void
      */
     public function scopeApplyOffsetAndLimit(Builder $query, int $total)
@@ -207,11 +200,10 @@ class SnipeModel extends Model
 
     protected function displayName(): Attribute
     {
-        return Attribute:: make(
-            get: fn(mixed $value) => $this->name,
+        return Attribute::make(
+            get: fn (mixed $value) => $this->name,
         );
     }
-
 
     public function getEula()
     {
@@ -225,7 +217,7 @@ class SnipeModel extends Model
             } else {
                 return false;
             }
-        // For everything else, just check the category for EULA info
+            // For everything else, just check the category for EULA info
         } elseif (($this->category) && ($this->category->eula_text)) {
             return $this->category->eula_text;
         } elseif ((Setting::getSettings()->default_eula_text) && (($this->category) && ($this->category->use_default_eula == '1'))) {
@@ -234,6 +226,4 @@ class SnipeModel extends Model
 
         return null;
     }
-
-
 }

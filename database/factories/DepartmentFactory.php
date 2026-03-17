@@ -26,8 +26,8 @@ class DepartmentFactory extends Factory
         return [
             'created_by' => User::factory()->superuser(),
             'location_id' => Location::factory(),
-            'name' => $this->faker->unique()->word() . ' Department',
-            'notes'   => 'Created by DB seeder',
+            'name' => $this->faker->unique()->word().' Department',
+            'notes' => 'Created by DB seeder',
             'tag_color' => $this->faker->hexColor(),
         ];
     }

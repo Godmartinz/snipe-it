@@ -8,5 +8,4 @@ class CompanyPolicy extends SnipePermissionsPolicy
     {
         return 'companies';
     }
-
 }

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Select the options you want for your asset report.',
+    'info' => 'Select the options you want for your asset report.',
     'deleted_user' => 'Deleted user',
     'send_reminder' => 'Senda áminningu',
     'cannot_send_reminder' => 'User has been deleted or does not have an email address so cannot receive a reminder',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'User City',
         'user_state' => 'User State',
         'user_country' => 'User Country',
-        'user_zip' => 'User Zip'
+        'user_zip' => 'User Zip',
     ],
     'open_saved_template' => 'Opna vistað sniðmát',
-    'save_template' =>  'Vista sniðmát',
+    'save_template' => 'Vista sniðmát',
     'select_a_template' => 'Veldu sniðmát',
     'template_name' => 'Heiti sniðmáts',
     'update_template' => 'Uppfæra sniðmát',

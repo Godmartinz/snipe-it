@@ -4,8 +4,8 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Models\License;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class LicensesTransformer
 {
@@ -24,11 +24,11 @@ class LicensesTransformer
         $array = [
             'id' => (int) $license->id,
             'name' => e($license->name),
-            'company' => ($license->company) ? ['id' => (int) $license->company->id, 'name'=> e($license->company->name)] : null,
-            'manufacturer' =>  ($license->manufacturer) ? [
+            'company' => ($license->company) ? ['id' => (int) $license->company->id, 'name' => e($license->company->name)] : null,
+            'manufacturer' => ($license->manufacturer) ? [
                 'id' => (int) $license->manufacturer->id,
-                'name'=> e($license->manufacturer->name),
-                'tag_color'=> ($license->manufacturer->tag_color) ? e($license->manufacturer->tag_color) : null,
+                'name' => e($license->manufacturer->name),
+                'tag_color' => ($license->manufacturer->tag_color) ? e($license->manufacturer->tag_color) : null,
             ] : null,
             'product_key' => (Gate::allows('viewKeys', License::class)) ? e($license->serial) : '------------',
             'order_number' => ($license->order_number) ? e($license->order_number) : null,
@@ -36,7 +36,7 @@ class LicensesTransformer
             'purchase_date' => Helper::getFormattedDateObject($license->purchase_date, 'date'),
             'termination_date' => Helper::getFormattedDateObject($license->termination_date, 'date'),
             'expiration_date' => Helper::getFormattedDateObject($license->expiration_date, 'date'),
-            'depreciation' => ($license->depreciation) ? ['id' => (int) $license->depreciation->id,'name'=> e($license->depreciation->name)] : null,
+            'depreciation' => ($license->depreciation) ? ['id' => (int) $license->depreciation->id, 'name' => e($license->depreciation->name)] : null,
             'purchase_cost' => Helper::formatCurrencyOutput($license->purchase_cost),
             'purchase_cost_numeric' => $license->purchase_cost,
             'notes' => Helper::parseEscapedMarkedownInline($license->notes),
@@ -44,23 +44,23 @@ class LicensesTransformer
             'free_seats_count' => (int) $license->free_seats_count - License::unReassignableCount($license),
             'remaining' => (int) $license->free_seats_count,
             'min_amt' => ($license->min_amt) ? (int) ($license->min_amt) : null,
-            'license_name' =>  ($license->license_name) ? e($license->license_name) : null,
+            'license_name' => ($license->license_name) ? e($license->license_name) : null,
             'license_email' => ($license->license_email) ? e($license->license_email) : null,
             'reassignable' => ($license->reassignable == 1) ? true : false,
             'maintained' => ($license->maintained == 1) ? true : false,
-            'supplier' =>  ($license->supplier) ? [
+            'supplier' => ($license->supplier) ? [
                 'id' => (int) $license->supplier->id,
-                'name'=> e($license->supplier->name),
-                'tag_color'=> ($license->supplier->tag_color) ? e($license->supplier->tag_color) : null,
+                'name' => e($license->supplier->name),
+                'tag_color' => ($license->supplier->tag_color) ? e($license->supplier->tag_color) : null,
             ] : null,
-            'category' =>  ($license->category) ? [
+            'category' => ($license->category) ? [
                 'id' => (int) $license->category->id,
-                'name'=> e($license->category->name),
-                'tag_color'=> ($license->category->tag_color) ? e($license->category->tag_color) : null,
+                'name' => e($license->category->name),
+                'tag_color' => ($license->category->tag_color) ? e($license->category->tag_color) : null,
             ] : null,
             'created_by' => ($license->adminuser) ? [
                 'id' => (int) $license->adminuser->id,
-                'name'=> e($license->adminuser->display_name),
+                'name' => e($license->adminuser->display_name),
             ] : null,
             'created_at' => Helper::getFormattedDateObject($license->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($license->updated_at, 'datetime'),
@@ -86,7 +86,4 @@ class LicensesTransformer
     {
         return (new DatatablesTransformer)->transformDatatables($licenses);
     }
-
-
-
 }

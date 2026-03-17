@@ -8,14 +8,14 @@ use Tests\TestCase;
 
 class UpdateGroupTest extends TestCase
 {
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('groups.edit', Group::factory()->create()->id))
             ->assertOk();
     }
 
-    public function testUserCanEditGroups()
+    public function test_user_can_edit_groups()
     {
         $group = Group::factory()->create(['name' => 'Test Group']);
         $this->assertTrue(Group::where('name', 'Test Group')->exists());

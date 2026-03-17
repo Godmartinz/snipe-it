@@ -4,14 +4,15 @@ namespace App\Helpers;
 
 class IconHelper
 {
-
-    public static function icon($type) {
+    public static function icon($type)
+    {
         switch ($type) {
             case 'checkout':
                 return 'fa-solid fa-rotate-left';
             case 'checkin':
                 return 'fa-solid fa-rotate-right';
             case 'edit':
+            case 'update':
                 return 'fas fa-pencil-alt';
             case 'clone':
                 return 'far fa-clone';
@@ -119,7 +120,7 @@ class IconHelper
             case 'dashboard':
                 return 'fas fa-tachometer-alt';
             case 'info-circle':
-                    return 'fas fa-info-circle';
+                return 'fas fa-info-circle';
             case 'caret-right':
                 return 'fa fa-caret-right';
             case 'caret-up':
@@ -198,11 +199,11 @@ class IconHelper
                 return 'fas fa-crosshairs';
             case 'oauth':
                 return 'fas fa-user-secret';
-            case 'employee_num' :
+            case 'employee_num':
                 return 'fa-regular fa-id-card';
-            case 'department' :
+            case 'department':
                 return 'fa-solid fa-building-user';
-            case 'home' :
+            case 'home':
                 return 'fa-solid fa-house';
             case 'note':
             case 'notes':
@@ -227,7 +228,7 @@ class IconHelper
                 return 'fa-regular fa-calendar-xmark';
             case 'manufacturer':
                 return 'fa-solid fa-industry';
-            case 'fieldset' :
+            case 'fieldset':
                 return 'fa-regular fa-rectangle-list';
             case 'deleted-date':
                 return 'fa-solid fa-calendar-xmark';
@@ -258,8 +259,6 @@ class IconHelper
                 return 'fa-solid fa-boxes-stacked';
             case 'min-qty':
                 return 'fa-solid fa-chart-pie';
-
-
 
         }
     }

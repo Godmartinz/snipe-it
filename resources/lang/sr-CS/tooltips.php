@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'Ova dodatna oprema se ne može izbrisati jer još uvek ima stavke, korisnike ili lokacije koje su povezane sa njom',
         'asset' => 'Ova imovina se ne može izbrisati jer još uvek ima stavke koje su povezane sa njom',
         'category' => 'Ova kategorija se ne može izbrisati jer još uvek ima stavke koje su povezane sa njom',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Razdužite sve stavke ovog korisnika i opciono ih izbrišite. Moći ćete da potvrdite ovo na narednoj stranici.'
+        'user' => 'Razdužite sve stavke ovog korisnika i opciono ih izbrišite. Moći ćete da potvrdite ovo na narednoj stranici.',
     ],
 
-);
+];

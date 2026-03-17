@@ -52653,11 +52653,12 @@ document.addEventListener('livewire:init', function () {
     }
     Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value);
   });
-  Livewire.hook('request', function (_ref) {
-    var succeed = _ref.succeed;
-    succeed(function () {
+  Livewire.interceptMessage(function (_ref) {
+    var onFinish = _ref.onFinish;
+    onFinish(function () {
+      // Runs after DOM morph completes (or on error/cancel)
       queueMicrotask(function () {
-        $('.livewire-select2').select2();
+        $(".livewire-select2").select2();
       });
     });
   });

@@ -25,7 +25,7 @@ class ManufacturerFactory extends Factory
         return [
             'created_by' => User::factory()->superuser(),
             'name' => $this->faker->unique()->company(),
-            'notes'   => 'Created by DB seeder',
+            'notes' => 'Created by DB seeder',
             'support_email' => $this->faker->safeEmail(),
             'support_phone' => $this->faker->phoneNumber(),
             'tag_color' => $this->faker->hexColor(),

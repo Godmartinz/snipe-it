@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'Questo accessorio non può essere eliminato perché ha ancora articoli, utenti o sedi associati',
         'asset' => 'Questo Bene non può essere eliminato perché ha ancora articoli associati',
         'category' => 'Questa categoria non può essere eliminata perché ha ancora articoli associati',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Esegui la restituzione di tutti gli elementi per questo utente e, facoltativamente, eliminali. Potrai confermare l\'operazione nella pagina successiva.'
+        'user' => 'Esegui la restituzione di tutti gli elementi per questo utente e, facoltativamente, eliminali. Potrai confermare l\'operazione nella pagina successiva.',
     ],
 
-);
+];

@@ -5,6 +5,7 @@
     'api_url' => null,
     'show_column_search' => false,
     'show_advanced_search' => false,
+    'show_search' => true,
     'fixed_number' => false,
     'fixed_right_number' => false,
     'sort_order' => 'asc',
@@ -26,6 +27,7 @@
     id="{{ $name }}ListingTable"
     data-show-columns-search="{{ $show_column_search }}"
     data-show-advanced-search="{{ $show_advanced_search }}"
+    data-search="{{ $show_search }}"
     data-footer-style="footerStyle"
     data-show-footer="true"
 
