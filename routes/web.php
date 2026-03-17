@@ -545,10 +545,6 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
     Route::post('custom', [ReportsController::class, 'postCustom'])
         ->name('reports.post-custom');
 
-    Route::post(
-        'export/expiring-items', [ReportsController::class, 'postExpiringItemsReport'])
-        ->name('reports.export.expiring_items');
-
 
     Route::prefix('templates')
         ->group(function () {
