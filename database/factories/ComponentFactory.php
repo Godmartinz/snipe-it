@@ -2,18 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Component;
-use App\Models\Manufacturer;
-use App\Models\Consumable;
 use App\Models\Location;
+use App\Models\Manufacturer;
+use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Supplier;
 
 class ComponentFactory extends Factory
 {
@@ -44,7 +42,7 @@ class ComponentFactory extends Factory
             'purchase_cost' => $this->faker->randomFloat(2),
             'purchase_date' => $this->faker->dateTime()->format('Y-m-d'),
             'qty' => $this->faker->numberBetween(3, 10),
-            'serial'   => $this->faker->uuid(),
+            'serial' => $this->faker->uuid(),
             'supplier_id' => Supplier::factory(),
         ];
     }
@@ -52,6 +50,7 @@ class ComponentFactory extends Factory
     public function ramCrucial4()
     {
         $manufacturer = Manufacturer::where('name', 'Crucial')->first() ?? Manufacturer::factory()->create(['name' => 'Crucial']);
+
         return $this->state(function () use ($manufacturer) {
             return [
                 'name' => 'Crucial 4GB DDR3L-1600 SODIMM',
@@ -69,6 +68,7 @@ class ComponentFactory extends Factory
     public function ramCrucial8()
     {
         $manufacturer = Manufacturer::where('name', 'Crucial')->first() ?? Manufacturer::factory()->create(['name' => 'Crucial']);
+
         return $this->state(function () use ($manufacturer) {
             return [
                 'name' => 'Crucial 8GB DDR3L-1600 SODIMM Memory for Mac',
@@ -85,6 +85,7 @@ class ComponentFactory extends Factory
     public function ssdCrucial120()
     {
         $manufacturer = Manufacturer::where('name', 'Crucial')->first() ?? Manufacturer::factory()->create(['name' => 'Crucial']);
+
         return $this->state(function () use ($manufacturer) {
             return [
                 'name' => 'Crucial BX300 120GB SATA Internal SSD',
@@ -101,6 +102,7 @@ class ComponentFactory extends Factory
     public function ssdCrucial240()
     {
         $manufacturer = Manufacturer::where('name', 'Crucial')->first() ?? Manufacturer::factory()->create(['name' => 'Crucial']);
+
         return $this->state(function () use ($manufacturer) {
             return [
                 'name' => 'Crucial BX300 240GB SATA Internal SSD',
@@ -114,7 +116,7 @@ class ComponentFactory extends Factory
         });
     }
 
-    public function checkedOutToAsset(Asset $asset = null)
+    public function checkedOutToAsset(?Asset $asset = null)
     {
         return $this->afterCreating(function (Component $component) use ($asset) {
             $component->assets()->attach($component->id, [
@@ -125,5 +127,4 @@ class ComponentFactory extends Factory
             ]);
         });
     }
-
 }

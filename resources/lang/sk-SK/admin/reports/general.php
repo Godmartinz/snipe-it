@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Vyberte možnosti pre váš report majetku.',
+    'info' => 'Vyberte možnosti pre váš report majetku.',
     'deleted_user' => 'Zmazaní používatelia',
     'send_reminder' => 'Poslať pripomienku',
     'cannot_send_reminder' => 'Používateľ bol vymazaný alebo nemá e-mailovú adresu, takže nemôže dostávať pripomienku',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'Mesto používateľa',
         'user_state' => 'Štát používateľa',
         'user_country' => 'Krajina používateľa',
-        'user_zip' => 'PSČ používateľa'
+        'user_zip' => 'PSČ používateľa',
     ],
     'open_saved_template' => 'Otvoriť uloženú šablónu',
-    'save_template' =>  'Uložiť šablónu',
+    'save_template' => 'Uložiť šablónu',
     'select_a_template' => 'Vybrať šablónu',
     'template_name' => 'Názov šablóny',
     'update_template' => 'Upraviť šablónu',

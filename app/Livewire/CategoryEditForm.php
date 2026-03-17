@@ -43,6 +43,6 @@ class CategoryEditForm extends Component
     #[Computed]
     public function eulaTextDisabled()
     {
-        return (bool)$this->useDefaultEula;
+        return (bool) $this->useDefaultEula;
     }
 }

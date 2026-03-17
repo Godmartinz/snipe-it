@@ -18,6 +18,7 @@ use Tests\TestCase;
 class BulkCheckoutEmailTest extends TestCase
 {
     private Collection $assets;
+
     private Model $assignee;
 
     protected function setUp(): void
@@ -97,7 +98,7 @@ class BulkCheckoutEmailTest extends TestCase
             ->withNoLocalOrGlobalEula()
             ->create();
 
-        $this->assets->each(fn($asset) => $asset->model->category()->associate($category)->save());
+        $this->assets->each(fn ($asset) => $asset->model->category()->associate($category)->save());
 
         $this->sendRequest();
 
@@ -115,7 +116,7 @@ class BulkCheckoutEmailTest extends TestCase
             ->hasLocalEula()
             ->create();
 
-        $this->assets->each(fn($asset) => $asset->model->category()->associate($category)->save());
+        $this->assets->each(fn ($asset) => $asset->model->category()->associate($category)->save());
 
         $this->sendRequest();
 
@@ -137,7 +138,7 @@ class BulkCheckoutEmailTest extends TestCase
             ->sendsCheckinEmail()
             ->create();
 
-        $this->assets->each(fn($asset) => $asset->model->category()->associate($category)->save());
+        $this->assets->each(fn ($asset) => $asset->model->category()->associate($category)->save());
 
         $this->sendRequest();
 
@@ -182,7 +183,7 @@ class BulkCheckoutEmailTest extends TestCase
             ->withNoLocalOrGlobalEula()
             ->create();
 
-        $this->assets->each(fn($asset) => $asset->model->category()->associate($category)->save());
+        $this->assets->each(fn ($asset) => $asset->model->category()->associate($category)->save());
 
         $this->sendRequest();
 
@@ -205,7 +206,7 @@ class BulkCheckoutEmailTest extends TestCase
             ->withNoLocalOrGlobalEula()
             ->create();
 
-        $this->assets->each(fn($asset) => $asset->model->category()->associate($category)->save());
+        $this->assets->each(fn ($asset) => $asset->model->category()->associate($category)->save());
 
         $this->sendRequest();
 
@@ -235,11 +236,11 @@ class BulkCheckoutEmailTest extends TestCase
         $this->actingAs(User::factory()->checkoutAssets()->viewAssets()->create())
             ->followingRedirects()
             ->post(route('hardware.bulkcheckout.store'), [
-                    'selected_assets' => $this->assets->pluck('id')->toArray(),
-                    'checkout_at' => now()->subWeek()->format('Y-m-d'),
-                    'expected_checkin' => now()->addWeek()->format('Y-m-d'),
-                    'note' => null,
-                ] + $assigned)
+                'selected_assets' => $this->assets->pluck('id')->toArray(),
+                'checkout_at' => now()->subWeek()->format('Y-m-d'),
+                'expected_checkin' => now()->addWeek()->format('Y-m-d'),
+                'note' => null,
+            ] + $assigned)
             ->assertOk();
     }
 

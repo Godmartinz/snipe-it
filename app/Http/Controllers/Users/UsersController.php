@@ -13,12 +13,15 @@ use App\Models\Company;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\CurrentInventory;
 use App\Notifications\WelcomeNotification;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use App\Notifications\CurrentInventory;
 
 /**
  * This controller handles all actions related to Users for
@@ -33,10 +36,13 @@ class UsersController extends Controller
      * the content for the users listing, which is generated in getDatatable().
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @see UsersController::getDatatable() method that generates the JSON response
      * @since [v1.0]
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function index()
     {
@@ -49,9 +55,12 @@ class UsersController extends Controller
      * Returns a view that displays the user creation form.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function create(Request $request)
     {
@@ -78,16 +87,18 @@ class UsersController extends Controller
      * Validate and store the new user data, or return an error.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param SaveUserRequest $request
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
     public function store(SaveUserRequest $request)
     {
         $this->authorize('create', User::class);
         $user = new User;
-        //Username, email, and password need to be handled specially because the need to respect config values on an edit.
+        // Username, email, and password need to be handled specially because the need to respect config values on an edit.
         $user->email = trim($request->input('email'));
         $user->username = trim($request->input('username'));
         $user->display_name = $request->input('display_name');
@@ -122,20 +133,32 @@ class UsersController extends Controller
         // Strip out the superuser permission if the user isn't a superadmin
         $permissions_array = $request->input('permission');
 
+        // Strip out the individual superuser permission if the API user isn't a superadmin
         if (! auth()->user()->isSuperUser()) {
-            unset($permissions_array['superuser']);
+
+            if ((is_array($permissions_array)) && (array_key_exists('superuser', $permissions_array))) {
+                unset($permissions_array['superuser']);
+            }
         }
+
+        // Strip out the individual admin permission if the API user isn't an admin
+        if (! auth()->user()->isAdmin()) {
+
+            if ((is_array($permissions_array)) && (array_key_exists('admin', $permissions_array))) {
+                unset($permissions_array['admin']);
+            }
+        }
+
         $user->permissions = json_encode($permissions_array);
 
         // we have to invoke the form request here to handle image uploads
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
 
-        if ($request->input('redirect_option') === 'back'){
+        if ($request->input('redirect_option') === 'back') {
             session()->put(['redirect_option' => 'index']);
         } else {
             session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
-
 
         if ($user->save()) {
 
@@ -144,9 +167,8 @@ class UsersController extends Controller
                 try {
                     $user->notify(new WelcomeNotification($user));
                 } catch (\Exception $e) {
-                    Log::warning('Could not send welcome notification for user: ' . $e->getMessage());
+                    Log::warning('Could not send welcome notification for user: '.$e->getMessage());
                 }
-
 
             }
 
@@ -181,17 +203,21 @@ class UsersController extends Controller
      * Returns a view that displays the edit user form
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param $permissions
-     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     *
+     * @param  $permissions
+     * @return View|RedirectResponse
+     *
      * @internal param int $id
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @throws AuthorizationException
      */
     public function edit(User $user)
     {
 
-        $this->authorize('update', User::class);
-        session()->put('back_url', url()->previous());
+        $this->authorize('update', $user);
+        session()->put('url.intended', url()->previous());
         $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
@@ -217,15 +243,17 @@ class UsersController extends Controller
      * Validate and save edited user data from edit form.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param SaveUserRequest $request
-     * @param  int $id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $id
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
     public function update(SaveUserRequest $request, User $user)
     {
-        $this->authorize('update', User::class);
+        $this->authorize('update', $user);
 
         // This is a janky hack to prevent people from changing admin demo user data on the public demo.
         // The $ids 1 and 2 are special since they are seeded as superadmins in the demo seeder.
@@ -246,12 +274,18 @@ class UsersController extends Controller
         // Figure out of this user was an admin before this edit
         $orig_permissions_array = $user->decodePermissions();
         $orig_superuser = '0';
+        $orig_admin = '0';
         if (is_array($orig_permissions_array)) {
             if (array_key_exists('superuser', $orig_permissions_array)) {
                 $orig_superuser = $orig_permissions_array['superuser'];
             }
         }
 
+        if (is_array($orig_permissions_array)) {
+            if (array_key_exists('admin', $orig_permissions_array)) {
+                $orig_admin = $orig_permissions_array['admin'];
+            }
+        }
 
         // Update the user fields
 
@@ -284,7 +318,6 @@ class UsersController extends Controller
         // Set this here so that we can overwrite it later if the user is an admin or superadmin
         $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
 
-
         // Update the location of any assets checked out to this user
         Asset::where('assigned_type', User::class)
             ->where('assigned_to', $user->id)
@@ -310,6 +343,11 @@ class UsersController extends Controller
                 $permissions_array['superuser'] = $orig_superuser;
             }
 
+            if ((! auth()->user()->isSuperUser()) && (! auth()->user()->isAdmin())) {
+                unset($permissions_array['admin']);
+                $permissions_array['admin'] = $orig_admin;
+            }
+
             $user->permissions = json_encode($permissions_array);
 
             // Only save groups if the user is a superuser
@@ -318,12 +356,10 @@ class UsersController extends Controller
             }
         }
 
-
         // Update the location of any assets checked out to this user
         Asset::where('assigned_type', User::class)
             ->where('assigned_to', $user->id)
             ->update(['location_id' => $user->location_id]);
-
 
         // Handle uploaded avatar
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
@@ -334,6 +370,7 @@ class UsersController extends Controller
             return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.update'));
         }
+
         return redirect()->back()->withInput()->withErrors($user->getErrors());
     }
 
@@ -341,10 +378,13 @@ class UsersController extends Controller
      * Delete a user
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param  int $id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $id
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
     public function destroy(DeleteUserRequest $request, $id)
     {
@@ -359,8 +399,10 @@ class UsersController extends Controller
                     return redirect()->route('users.index')->with('success', trans('admin/users/message.success.delete'));
                 }
             }
+
             return redirect()->route('users.index')->with('error', trans('admin/users/message.cannot_delete'));
         }
+
         return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found'));
 
     }
@@ -369,57 +411,62 @@ class UsersController extends Controller
      * Restore a deleted user
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param  int $id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $id
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
-    public function getRestore($id = null)
+    public function getRestore(User $user)
     {
-        if ($user = User::withTrashed()->find($id)) {
-            $this->authorize('delete', $user);
 
-            if ($user->deleted_at == '') {
-                return redirect()->back()->with('error', trans('general.not_deleted', ['item_type' => trans('general.user')]));
-            }
+        $this->authorize('delete', $user);
 
-            if ($user->restore()) {
-                $logaction = new Actionlog();
-                $logaction->item_type = User::class;
-                $logaction->item_id = $user->id;
-                $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->created_by = auth()->id();
-                $logaction->logaction('restore');
-
-                // Redirect them to the deleted page if there are more, otherwise the section index
-                $deleted_users = User::onlyTrashed()->count();
-                if ($deleted_users > 0) {
-                    return redirect()->back()->with('success', trans('admin/users/message.success.restored'));
-                }
-                return redirect()->route('users.index')->with('success', trans('admin/users/message.success.restored'));
-
-            }
-
-            // Check validation to make sure we're not restoring a user with the same username as an existing user
-            return redirect()->back()->with('error', trans('general.could_not_restore', ['item_type' => trans('general.user'), 'error' => $user->getErrors()->first()]));
+        if ($user->deleted_at == '') {
+            return redirect()->back()->with('error', trans('general.not_deleted', ['item_type' => trans('general.user')]));
         }
 
-        return redirect()->route('users.index')->with('error', trans('admin/users/message.does_not_exist'));
+        if ($user->restore()) {
+            $logaction = new Actionlog;
+            $logaction->item_type = User::class;
+            $logaction->item_id = $user->id;
+            $logaction->created_at = date('Y-m-d H:i:s');
+            $logaction->created_by = auth()->id();
+            $logaction->logaction('restore');
+
+            // Redirect them to the deleted page if there are more, otherwise the section index
+            $deleted_users = User::onlyTrashed()->count();
+            if ($deleted_users > 0) {
+                return redirect()->back()->with('success', trans('admin/users/message.success.restored'));
+            }
+
+            return redirect()->route('users.index')->with('success', trans('admin/users/message.success.restored'));
+
+        }
+
+        // Check validation to make sure we're not restoring a user with the same username as an existing user
+        return redirect()->back()->with('error', trans('general.could_not_restore', ['item_type' => trans('general.user'), 'error' => $user->getErrors()->first()]));
+
     }
 
     /**
      * Return a view with user detail
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param  int $userId
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $userId
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function show(User $user)
     {
         // Make sure the user can view users at all
-        $this->authorize('view', User::class);
+        $this->authorize('view', $user);
 
         $user = User::with([
             'consumables',
@@ -439,34 +486,33 @@ class UsersController extends Controller
         ]);
     }
 
-
     /**
      * Return a view containing a pre-populated new user form,
      * populated with some fields from an existing user.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v1.0]
-     * @param  int $id
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $id
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function getClone(Request $request, User $user)
     {
-        $this->authorize('create', User::class);
+        $this->authorize('create', $user);
 
         // We need to reverse the UI specific logic for our
         // permissions here before we update the user.
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
-
         $user_to_clone = User::with('userloc')->withTrashed()->find($user->id);
         // Make sure they can view this particular user
         $this->authorize('view', $user_to_clone);
 
-
         if ($user_to_clone) {
-
 
             $user = clone $user_to_clone;
 
@@ -496,16 +542,18 @@ class UsersController extends Controller
                 ->with('item', $user);
         }
 
-
     }
 
     /**
      * Exports users to CSV
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v3.5]
+     *
      * @return StreamedResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @throws AuthorizationException
      */
     public function getExportUserCsv()
     {
@@ -563,16 +611,13 @@ class UsersController extends Controller
                             $user_groups .= $user_group->name.', ';
                         }
 
+                        $permissionstring = '';
 
-                        $permissionstring = "";
-                        
-                        if($user->isSuperUser()) {
+                        if ($user->isSuperUser()) {
                             $permissionstring = trans('general.superuser');
-                        }
-                        elseif($user->hasAccess('admin')) {
+                        } elseif ($user->hasAccess('admin')) {
                             $permissionstring = trans('general.admin');
-                        }
-                        else {
+                        } else {
                             $permissionstring = trans('general.user');
                         }
 
@@ -619,6 +664,7 @@ class UsersController extends Controller
      * Print inventory
      *
      * @since [v1.8]
+     *
      * @author Aladin Alaily
      */
     public function printInventory($id)
@@ -627,18 +673,18 @@ class UsersController extends Controller
 
         $user = User::where('id', $id)
             ->with([
-                'assets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'assets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'assets.assignedAssets.defaultLoc',
                 'assets.assignedAssets.location',
                 'assets.assignedAssets.model.category',
                 'assets.defaultLoc',
                 'assets.location',
                 'assets.model.category',
-                'accessories.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'accessories.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'accessories.category',
                 'accessories.manufacturer',
-                'consumables.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'consumables.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'consumables.category',
                 'consumables.manufacturer',
                 'licenses.category',
@@ -661,9 +707,11 @@ class UsersController extends Controller
      * Emails user a list of assigned assets
      *
      * @author [G. Martinez] [<godmartinz@gmail.com>]
+     *
      * @since [v6.0.5]
-     * @param  \App\Http\Controllers\Users\UsersController  $id
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @param  UsersController  $id
+     * @return RedirectResponse
      */
     public function emailAssetList($id)
     {
@@ -681,6 +729,7 @@ class UsersController extends Controller
             }
 
             $user->notify((new CurrentInventory($user)));
+
             return redirect()->back()->with('success', trans('admin/users/general.user_notified'));
         }
 
@@ -692,8 +741,10 @@ class UsersController extends Controller
      * Send individual password reset email
      *
      * @author A. Gianotto
+     *
      * @since [v5.0.15]
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function sendPasswordReset($id)
     {
@@ -705,6 +756,7 @@ class UsersController extends Controller
             try {
 
                 Password::sendResetLink($credentials);
+
                 return redirect()->back()->with('success', trans('admin/users/message.password_reset_sent', ['email' => $user->email]));
 
             } catch (\Exception $e) {

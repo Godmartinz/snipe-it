@@ -18,9 +18,9 @@ trait Searchable
     /**
      * Performs a search on the model, using the provided search terms
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query  The query to start the search on
-     * @param  string                                $search
-     * @return \Illuminate\Database\Eloquent\Builder A query with added "where" clauses
+     * @param  Builder  $query  The query to start the search on
+     * @param  string  $search
+     * @return Builder A query with added "where" clauses
      */
     public function scopeTextSearch($query, $search)
     {
@@ -52,8 +52,8 @@ trait Searchable
     /**
      * Prepares the search term, splitting and cleaning it up
      *
-     * @param  string $search The search term
-     * @return array         An array of search terms
+     * @param  string  $search  The search term
+     * @return array An array of search terms
      */
     private function prepeareSearchTerms($search)
     {
@@ -63,8 +63,7 @@ trait Searchable
     /**
      * Searches the models attributes for the search terms
      *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  array                                $terms
+     * @param  Illuminate\Database\Eloquent\Builder  $query
      * @return Illuminate\Database\Eloquent\Builder
      */
     private function searchAttributes(Builder $query, array $terms)
@@ -94,6 +93,7 @@ trait Searchable
                     $query = $query->where($table.'.'.$column, 'LIKE', '%'.$term.'%');
 
                     $firstConditionAdded = true;
+
                     continue;
                 }
 
@@ -107,8 +107,7 @@ trait Searchable
     /**
      * Searches the models custom fields for the search terms
      *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  array                                $terms
+     * @param  Illuminate\Database\Eloquent\Builder  $query
      * @return Illuminate\Database\Eloquent\Builder
      */
     private function searchCustomFields(Builder $query, array $terms)
@@ -135,8 +134,7 @@ trait Searchable
     /**
      * Searches the models relations for the search terms
      *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  array                                $terms
+     * @param  Illuminate\Database\Eloquent\Builder  $query
      * @return Illuminate\Database\Eloquent\Builder
      */
     private function searchRelations(Builder $query, array $terms)
@@ -159,6 +157,7 @@ trait Searchable
                             if (! $firstConditionAdded) {
                                 $query->where($table.'.'.$column, 'LIKE', '%'.$term.'%');
                                 $firstConditionAdded = true;
+
                                 continue;
                             }
 
@@ -166,12 +165,12 @@ trait Searchable
                         }
                     }
                     // I put this here because I only want to add the concat one time in the end of the user relation search
-                    if(($relation == 'adminuser') || ($relation == 'user')) {
+                    if (($relation == 'adminuser') || ($relation == 'user')) {
                         $query->orWhereRaw(
                             $this->buildMultipleColumnSearch(
                                 [
-                                'users.first_name',
-                                'users.last_name',
+                                    'users.first_name',
+                                    'users.last_name',
                                 ]
                             ),
                             ["%{$term}%"]
@@ -189,8 +188,8 @@ trait Searchable
      *
      * This is a noop in this trait, but can be overridden in the implementing model, to allow more advanced searches
      *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  array                                $terms The search terms
+     * @param  Illuminate\Database\Eloquent\Builder  $query
+     * @param  array  $terms  The search terms
      * @return Illuminate\Database\Eloquent\Builder
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -228,8 +227,8 @@ trait Searchable
      * So "category" would get the table name for the Category model,
      * "model.manufacturer" would get the tablename for the Manufacturer model.
      *
-     * @param  string $relation
-     * @return string            The table name
+     * @param  string  $relation
+     * @return string The table name
      */
     private function getRelationTable($relation)
     {
@@ -273,29 +272,27 @@ trait Searchable
     /**
      * Builds a search string for either MySQL or sqlite by separating the provided columns with a space.
      *
-     * @param  array $columns Columns to include in search string.
-     * @return string
+     * @param  array  $columns  Columns to include in search string.
      */
     private function buildMultipleColumnSearch(array $columns): string
     {
-        $mappedColumns = collect($columns)->map(fn($column) => DB::getTablePrefix() . $column)->toArray();
+        $mappedColumns = collect($columns)->map(fn ($column) => DB::getTablePrefix().$column)->toArray();
 
-        $driver = config('database.connections.' . config('database.default') . '.driver');
+        $driver = config('database.connections.'.config('database.default').'.driver');
 
         if ($driver === 'sqlite') {
-            return implode("||' '||", $mappedColumns) . ' LIKE ?';
+            return implode("||' '||", $mappedColumns).' LIKE ?';
         }
 
         // Default to MySQL's concatenation method
-        return 'CONCAT(' . implode('," ",', $mappedColumns) . ') LIKE ?';
+        return 'CONCAT('.implode('," ",', $mappedColumns).') LIKE ?';
     }
 
     /**
      * Search a string across multiple columns separated with a space.
      *
-     * @param  Builder $query
-     * @param  array   $columns - Columns to include in search string.
-     * @param  $term
+     * @param  Builder  $query
+     * @param  array  $columns  - Columns to include in search string.
      * @return Builder
      */
     public function scopeOrWhereMultipleColumns($query, array $columns, $term)

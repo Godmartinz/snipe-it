@@ -22,6 +22,7 @@ class CheckoutAssetMail extends BaseMailable
 
     /**
      * Create a new message instance.
+     *
      * @throws \Exception
      */
     public function __construct(Asset $asset, $checkedOutTo, ?User $checkedOutBy, $acceptance, $note, bool $firstTimeSending = true)
@@ -67,7 +68,6 @@ class CheckoutAssetMail extends BaseMailable
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return Content
      */
     public function content(): Content
     {
@@ -77,14 +77,12 @@ class CheckoutAssetMail extends BaseMailable
         $fields = [];
         $name = null;
 
-        if($this->target instanceof User){
+        if ($this->target instanceof User) {
             $name = $this->target->display_name;
-        }
-        else if($this->target instanceof Asset){
-            $name  = $this->target->assignedto?->display_name;
-        }
-        else if($this->target instanceof Location){
-            $name  = $this->target->manager?->name;
+        } elseif ($this->target instanceof Asset) {
+            $name = $this->target->assignedto?->display_name;
+        } elseif ($this->target instanceof Location) {
+            $name = $this->target->manager?->name;
         }
 
         // Check if the item has custom fields associated with it
@@ -96,18 +94,18 @@ class CheckoutAssetMail extends BaseMailable
 
         return new Content(
             markdown: 'mail.markdown.checkout-asset',
-            with:  [
-                'item'          => $this->item,
-                'admin'         => $this->admin,
-                'status'        => $this->item->assetstatus?->name,
-                'note'          => $this->note,
-                'target'        => $name,
-                'fields'        => $fields,
-                'eula'          => $eula,
-                'req_accept'    => $req_accept,
-                'accept_url'    => $accept_url,
+            with: [
+                'item' => $this->item,
+                'admin' => $this->admin,
+                'status' => $this->item->assetstatus?->name,
+                'note' => $this->note,
+                'target' => $name,
+                'fields' => $fields,
+                'eula' => $eula,
+                'req_accept' => $req_accept,
+                'accept_url' => $accept_url,
                 'last_checkout' => $this->last_checkout,
-                'expected_checkin'  => $this->expected_checkin,
+                'expected_checkin' => $this->expected_checkin,
                 'introduction_line' => $this->introductionLine(),
             ],
         );
@@ -142,11 +140,11 @@ class CheckoutAssetMail extends BaseMailable
             return trans_choice('mail.new_item_checked_with_acceptance', 1);
         }
 
-        if ($this->firstTimeSending && !$this->requiresAcceptance()) {
+        if ($this->firstTimeSending && ! $this->requiresAcceptance()) {
             return trans_choice('mail.new_item_checked', 1);
         }
 
-        if (!$this->firstTimeSending && $this->requiresAcceptance()) {
+        if (! $this->firstTimeSending && $this->requiresAcceptance()) {
             return trans('mail.recent_item_checked');
         }
 

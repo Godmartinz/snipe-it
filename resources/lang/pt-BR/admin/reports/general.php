@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Selecione as opções que você quer para o seu relatório de ativos.',
+    'info' => 'Selecione as opções que você quer para o seu relatório de ativos.',
     'deleted_user' => 'Usuário excluído',
     'send_reminder' => 'Enviar lembrete',
     'cannot_send_reminder' => 'Usuário não pode receber um lembrete por ter sido excluído ou não possuir um endereço de e-mail cadastrado',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'Cidade do usuário',
         'user_state' => 'Estado do Usuário',
         'user_country' => 'País do usuário',
-        'user_zip' => 'CEP do Usuário'
+        'user_zip' => 'CEP do Usuário',
     ],
     'open_saved_template' => 'Abrir Modelo Salvo',
-    'save_template' =>  'Salvar Modelo',
+    'save_template' => 'Salvar Modelo',
     'select_a_template' => 'Selecione um Modelo',
     'template_name' => 'Nome do Modelo',
     'update_template' => 'Atualizar Template',

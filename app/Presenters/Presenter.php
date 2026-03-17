@@ -3,7 +3,6 @@
 namespace App\Presenters;
 
 use App\Models\SnipeModel;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 abstract class Presenter
 {
@@ -14,14 +13,14 @@ abstract class Presenter
 
     /**
      * Presenter constructor.
-     * @param SnipeModel $model
      */
     public function __construct(SnipeModel $model)
     {
         $this->model = $model;
     }
 
-    public function displayAddress() {
+    public function displayAddress()
+    {
         $address = '';
         if ($this->model->address) {
             $address .= e($this->model->address)."\n";
@@ -99,8 +98,6 @@ abstract class Presenter
         return '';
     }
 
-
-
     public function __get($property)
     {
         if (method_exists($this, $property)) {
@@ -114,6 +111,4 @@ abstract class Presenter
     {
         return $this->model->$method($args);
     }
-
-
 }

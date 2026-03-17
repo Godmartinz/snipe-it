@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -21,30 +21,30 @@ return array(
         'sunday' => 'Sunnuntai',
         'monday' => 'Maanantai',
         'tuesday' => 'Tiistai',
-        'wednesday' =>  'Keskiviikko',
-        'thursday' =>  'Torstai',
-        'friday' =>  'Perjantai',
-        'saturday' =>  'Lauantai',
-        ],
+        'wednesday' => 'Keskiviikko',
+        'thursday' => 'Torstai',
+        'friday' => 'Perjantai',
+        'saturday' => 'Lauantai',
+    ],
 
     'short_days' => [
         'sunday' => 'Su',
         'monday' => 'Ma',
         'tuesday' => 'Ti',
-        'wednesday' =>  'Ke',
-        'thursday' =>  'To',
-        'friday' =>  'Pe',
-        'saturday' =>  'La',
+        'wednesday' => 'Ke',
+        'thursday' => 'To',
+        'friday' => 'Pe',
+        'saturday' => 'La',
     ],
 
     'min_days' => [
         'sunday' => 'Su',
         'monday' => 'Ma',
         'tuesday' => 'Ti',
-        'wednesday' =>  'Ke',
-        'thursday' =>  'To',
-        'friday' =>  'Pe',
-        'saturday' =>  'La',
+        'wednesday' => 'Ke',
+        'thursday' => 'To',
+        'friday' => 'Pe',
+        'saturday' => 'La',
     ],
 
     'months' => [
@@ -77,4 +77,4 @@ return array(
         'december' => 'Joulu',
     ],
 
-);
+];

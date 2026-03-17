@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,29 +15,28 @@ return array(
     |---------------------------------------------------------------------------
     */
 
-    "superuser" => [
+    'superuser' => [
         'name' => 'Super User',
-        'note'       => 'กำหนดว่าผู้ใช้มีสิทธิ์เข้าถึงทุกส่วนของระบบผู้ดูแลระบบหรือไม่ การตั้งค่านี้จะแทนที่สิทธิ์ที่เฉพาะเจาะจงและจำกัดกว่าทั้งหมดในระบบ ',
+        'note' => 'กำหนดว่าผู้ใช้มีสิทธิ์เข้าถึงทุกส่วนของระบบผู้ดูแลระบบหรือไม่ การตั้งค่านี้จะแทนที่สิทธิ์ที่เฉพาะเจาะจงและจำกัดกว่าทั้งหมดในระบบ ',
     ],
     'admin' => [
         'name' => 'เข้าถึงส่วนจัดการระบบ',
-        'note'       => 'กำหนดว่าผู้ใช้รายใดสามารถเข้าถึงส่วนต่างๆ ของระบบได้เกือบทั้งหมด ยกเว้นการตั้งค่าผู้ดูแลระบบ ผู้ใช้เหล่านี้จะสามารถจัดการผู้ใช้ สถานที่ หมวดหมู่ ฯลฯ ได้ แต่จะถูกจำกัดด้วยการสนับสนุนหลายบริษัทแบบเต็มรูปแบบ หากเปิดใช้งานไว้',
+        'note' => 'กำหนดว่าผู้ใช้รายใดสามารถเข้าถึงส่วนต่างๆ ของระบบได้เกือบทั้งหมด ยกเว้นการตั้งค่าผู้ดูแลระบบ ผู้ใช้เหล่านี้จะสามารถจัดการผู้ใช้ สถานที่ หมวดหมู่ ฯลฯ ได้ แต่จะถูกจำกัดด้วยการสนับสนุนหลายบริษัทแบบเต็มรูปแบบ หากเปิดใช้งานไว้',
     ],
 
     'import' => [
         'name' => 'นำเข้าไฟล์ CSV',
-        'note'       => 'สิ่งนี้จะช่วยให้ผู้ใช้สามารถนำเข้าข้อมูลได้ แม้ว่าการเข้าถึงผู้ใช้ ทรัพย์สิน ฯลฯ จะถูกปฏิเสธในส่วนอื่นๆ ก็ตาม',
+        'note' => 'สิ่งนี้จะช่วยให้ผู้ใช้สามารถนำเข้าข้อมูลได้ แม้ว่าการเข้าถึงผู้ใช้ ทรัพย์สิน ฯลฯ จะถูกปฏิเสธในส่วนอื่นๆ ก็ตาม',
     ],
 
     'reports' => [
         'name' => 'รายงานการเข้าถึง',
-        'note'       => 'ตรวจสอบว่าผู้ใช้มีสิทธิ์เข้าถึงส่วนรายงานของแอปพลิเคชันหรือไม่',
+        'note' => 'ตรวจสอบว่าผู้ใช้มีสิทธิ์เข้าถึงส่วนรายงานของแอปพลิเคชันหรือไม่',
     ],
 
-    'assets' =>
-        [
-            'name' => 'สินทรัพย์',
-            'note' => 'อนุญาตให้เข้าถึงส่วนสินทรัพย์ของแอปพลิเคชันได้',
+    'assets' => [
+        'name' => 'สินทรัพย์',
+        'note' => 'อนุญาตให้เข้าถึงส่วนสินทรัพย์ของแอปพลิเคชันได้',
     ],
 
     'assetsview' => [
@@ -81,9 +80,9 @@ return array(
         'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
     ],
 
-    'accessories'   => [
+    'accessories' => [
         'name' => 'อุปกรณ์',
-        'note'       => 'อนุญาตให้เข้าถึงส่วนอุปกรณ์เสริมของแอปพลิเคชันได้',
+        'note' => 'อนุญาตให้เข้าถึงส่วนอุปกรณ์เสริมของแอปพลิเคชันได้',
     ],
 
     'accessoriesview' => [
@@ -110,9 +109,9 @@ return array(
         'name' => 'จัดการไฟล์อุปกรณ์เสริม',
         'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับอุปกรณ์เสริมได้',
     ],
-    'consumables'   => [
+    'consumables' => [
         'name' => 'การใช้งาน',
-        'note'       => 'อนุญาตให้เข้าถึงส่วนวัสดุสิ้นเปลืองของแอปพลิเคชันได้',
+        'note' => 'อนุญาตให้เข้าถึงส่วนวัสดุสิ้นเปลืองของแอปพลิเคชันได้',
     ],
     'consumablesview' => [
         'name' => 'ดูวัสดุสิ้นเปลือง',
@@ -134,9 +133,9 @@ return array(
         'name' => 'จัดการไฟล์วัสดุสิ้นเปลือง',
         'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับวัสดุสิ้นเปลืองได้',
     ],
-    'licenses'   => [
+    'licenses' => [
         'name' => 'ลิขสิทธิ์',
-        'note'       => 'Grants access to the Licenses section of the application.',
+        'note' => 'Grants access to the Licenses section of the application.',
     ],
     'licensesview' => [
         'name' => 'View Licenses',
@@ -153,7 +152,7 @@ return array(
     'licensescheckout' => [
         'name' => 'Assign Licenses',
         'note' => 'Allows the user to assign licenses to assets or users.',
-        ],
+    ],
     'licensescheckin' => [
         'name' => 'Unassign Licenses',
         'note' => 'Allows the user to unassign licenses from assets or users.',
@@ -166,9 +165,9 @@ return array(
         'name' => 'Manage License Keys',
         'note' => 'Allows the user to view product keys associated with licenses.',
     ],
-    'components'   => [
+    'components' => [
         'name' => 'ส่วนประกอบ',
-        'note'       => 'Grants access to the Components section of the application.',
+        'note' => 'Grants access to the Components section of the application.',
     ],
     'componentsview' => [
         'name' => 'View Components',
@@ -194,9 +193,9 @@ return array(
         'name' => 'Check In Components',
         'note' => 'Check components back into inventory that are currently checked out.',
     ],
-    'kits'   => [
+    'kits' => [
         'name' => 'Predefined Kits',
-        'note'       => 'Grants access to the Predefined Kits section of the application.',
+        'note' => 'Grants access to the Predefined Kits section of the application.',
     ],
     'kitsview' => [
         'name' => 'View Predefined Kits',
@@ -210,9 +209,9 @@ return array(
     'kitsdelete' => [
         'name' => 'Delete Predefined Kits',
     ],
-    'users'   => [
+    'users' => [
         'name' => 'ผู้ใช้',
-        'note'       => 'Grants access to the Users section of the application.',
+        'note' => 'Grants access to the Users section of the application.',
     ],
     'usersview' => [
         'name' => 'ดูผู้ใช้งาน',
@@ -226,9 +225,9 @@ return array(
     'usersdelete' => [
         'name' => 'Delete Users',
     ],
-    'models'   => [
+    'models' => [
         'name' => 'Models',
-        'note'       => 'Grants access to the Models section of the application.',
+        'note' => 'Grants access to the Models section of the application.',
     ],
     'modelsview' => [
         'name' => 'ดูโมเดล',
@@ -243,9 +242,9 @@ return array(
     'modelsdelete' => [
         'name' => 'Delete Models',
     ],
-    'categories'   => [
+    'categories' => [
         'name' => 'ประเภท',
-        'note'       => 'Grants access to the Categories section of the application.',
+        'note' => 'Grants access to the Categories section of the application.',
     ],
     'categoriesview' => [
         'name' => 'View Categories',
@@ -259,9 +258,9 @@ return array(
     'categoriesdelete' => [
         'name' => 'Delete Categories',
     ],
-    'departments'   => [
+    'departments' => [
         'name' => 'หน่วยงาน',
-        'note'       => 'Grants access to the Departments section of the application.',
+        'note' => 'Grants access to the Departments section of the application.',
     ],
     'departmentsview' => [
         'name' => 'View Departments',
@@ -275,9 +274,9 @@ return array(
     'departmentsdelete' => [
         'name' => 'Delete Departments',
     ],
-    'locations'   => [
+    'locations' => [
         'name' => 'สถานที่',
-        'note'       => 'อนุญาตให้เข้าถึงส่วนตำแหน่งที่ตั้งของแอปพลิเคชันได้',
+        'note' => 'อนุญาตให้เข้าถึงส่วนตำแหน่งที่ตั้งของแอปพลิเคชันได้',
     ],
     'locationsview' => [
         'name' => 'ดูที่ตั้ง',
@@ -291,9 +290,9 @@ return array(
     'locationsdelete' => [
         'name' => 'ลบที่ตั้ง',
     ],
-    'status-labels'   => [
+    'status-labels' => [
         'name' => 'ป้ายสถานะ',
-        'note'       => 'Grants access to the Status Labels section of the application used by Assets.',
+        'note' => 'Grants access to the Status Labels section of the application used by Assets.',
     ],
     'statuslabelsview' => [
         'name' => 'View Status Labels',
@@ -307,9 +306,9 @@ return array(
     'statuslabelsdelete' => [
         'name' => 'Delete Status Labels',
     ],
-    'custom-fields'   => [
+    'custom-fields' => [
         'name' => 'ฟิลด์ที่กำหนดเอง',
-        'note'       => 'Grants access to the Custom Fields section of the application used by Assets.',
+        'note' => 'Grants access to the Custom Fields section of the application used by Assets.',
     ],
     'customfieldsview' => [
         'name' => 'View Custom Fields',
@@ -323,9 +322,9 @@ return array(
     'customfieldsdelete' => [
         'name' => 'Delete Custom Fields',
     ],
-    'suppliers'   => [
+    'suppliers' => [
         'name' => 'ซัพพลายเออร์',
-        'note'       => 'Grants access to the Suppliers section of the application.',
+        'note' => 'Grants access to the Suppliers section of the application.',
     ],
     'suppliersview' => [
         'name' => 'View Suppliers',
@@ -339,9 +338,9 @@ return array(
     'suppliersdelete' => [
         'name' => 'Delete Suppliers',
     ],
-    'manufacturers'   => [
+    'manufacturers' => [
         'name' => 'ผู้ผลิต',
-        'note'       => 'Grants access to the Manufacturers section of the application.',
+        'note' => 'Grants access to the Manufacturers section of the application.',
     ],
     'manufacturersview' => [
         'name' => 'View Manufacturers',
@@ -355,9 +354,9 @@ return array(
     'manufacturersdelete' => [
         'name' => 'Delete Manufacturers',
     ],
-    'companies'   => [
+    'companies' => [
         'name' => 'บริษัท',
-        'note'       => 'Grants access to the Companies section of the application.',
+        'note' => 'Grants access to the Companies section of the application.',
     ],
     'companiesview' => [
         'name' => 'View Companies',
@@ -373,32 +372,32 @@ return array(
     ],
     'user-self-accounts' => [
         'name' => 'User Self Accounts',
-        'note'       => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
+        'note' => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
     ],
     'selftwo-factor' => [
         'name' => 'Manage Two-Factor Authentication',
-        'note'       => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
+        'note' => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
     ],
     'selfapi' => [
         'name' => 'Manage API Tokens',
-        'note'       => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
+        'note' => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
     ],
     'selfedit-location' => [
         'name' => 'Edit Location',
-        'note'       => 'Allows users to edit the location associated with their own user account.',
+        'note' => 'Allows users to edit the location associated with their own user account.',
     ],
     'selfcheckout-assets' => [
         'name' => 'Self Check Out Assets',
-        'note'       => 'Allows users to check out assets to themselves without admin intervention.',
+        'note' => 'Allows users to check out assets to themselves without admin intervention.',
     ],
     'selfview-purchase-cost' => [
         'name' => 'View Purchase Cost',
-        'note'       => 'Allows users to view the purchase cost of items in their account view.',
+        'note' => 'Allows users to view the purchase cost of items in their account view.',
     ],
 
     'depreciations' => [
         'name' => 'Depreciation Management',
-        'note'       => 'Allows users to manage and view asset depreciation details.',
+        'note' => 'Allows users to manage and view asset depreciation details.',
     ],
     'depreciationsview' => [
         'name' => 'View Depreciation Details',
@@ -419,6 +418,6 @@ return array(
     'grant' => 'Grant Permission for :area',
     'deny' => 'Deny Permission for :area',
     'inherit' => 'Inherit Permission for :area from permission groups',
-    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.'
+    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.',
 
-);
+];

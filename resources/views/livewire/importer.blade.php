@@ -324,11 +324,9 @@
                                                                     </div>
                                                                 </div>
                                                             @endif {{-- end of if ... $typeOfImport --}}
-
-                                                        </div><!-- /div v-show -->                                                    </td>
+                                                        </td>
                                                 </tr>
                                             @endif
-                                            </tr>
                                     @endforeach
                                 </table>
                             </div>

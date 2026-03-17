@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use \Auth;
 
 /**
  * @extends Factory<User>
@@ -52,7 +51,6 @@ class UserFactory extends Factory
             ];
         });
     }
-
 
     public function firstAdmin()
     {
@@ -362,7 +360,6 @@ class UserFactory extends Factory
         return $this->appendPermission(['customfields.view' => '1']);
     }
 
-
     public function deleteCustomFields()
     {
         return $this->appendPermission(['customfields.delete' => '1']);
@@ -407,7 +404,6 @@ class UserFactory extends Factory
     {
         return $this->appendPermission(['assets.audit' => '1']);
     }
-
 
     private function appendPermission(array $permission)
     {

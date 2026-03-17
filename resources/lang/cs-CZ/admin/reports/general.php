@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Zvolte možnosti zprávy o majetku.',
+    'info' => 'Zvolte možnosti zprávy o majetku.',
     'deleted_user' => 'Odstraněný uživatel',
     'send_reminder' => 'Poslat připomínku',
     'cannot_send_reminder' => 'Uživatel byl odstraněn nebo nemá e-mailovou adresu, takže nemůže obdržet připomenutí',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'Město uživatele',
         'user_state' => 'Stav uživatele',
         'user_country' => 'Země uživatele',
-        'user_zip' => 'PSČ uživatele'
+        'user_zip' => 'PSČ uživatele',
     ],
     'open_saved_template' => 'Otevřít uloženou šablonu',
-    'save_template' =>  'Uložit šablonu',
+    'save_template' => 'Uložit šablonu',
     'select_a_template' => 'Vybrat šablonu',
     'template_name' => 'Název šablony',
     'update_template' => 'Aktualizovat šablonu',

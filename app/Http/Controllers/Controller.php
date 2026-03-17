@@ -1,4 +1,5 @@
 <?php
+
 /*! \mainpage Snipe-IT Code Documentation
  *
  * \section intro_sec Introduction
@@ -43,7 +44,7 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DisablesDebugbar, DispatchesJobs, ValidatesRequests;
 
-    static $map_object_type = [
+    public static $map_object_type = [
         'accessories' => Accessory::class,
         'maintenances' => Maintenance::class,
         'assets' => Asset::class,
@@ -58,7 +59,7 @@ abstract class Controller extends BaseController
         'users' => User::class,
     ];
 
-    static $map_storage_path = [
+    public static $map_storage_path = [
         'accessories' => 'private_uploads/accessories/',
         'maintenances' => 'private_uploads/maintenances/',
         'assets' => 'private_uploads/assets/',
@@ -73,7 +74,7 @@ abstract class Controller extends BaseController
         'users' => 'private_uploads/users/',
     ];
 
-    static $map_file_prefix= [
+    public static $map_file_prefix = [
         'accessories' => 'accessory',
         'maintenances' => 'maintenance',
         'assets' => 'asset',

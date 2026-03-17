@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Models\Actionlog;
-use App\Models\Company;
-use App\Models\Setting;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ReportsController extends Controller
 {
@@ -16,14 +14,14 @@ class ReportsController extends Controller
      * Returns Activity Report JSON.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('activity.view');
 
         $actionlogs = Actionlog::with('item', 'user', 'adminuser', 'target', 'location');
-
 
         if ($request->filled('search')) {
             $actionlogs = $actionlogs->TextSearch(e($request->input('search')));
@@ -35,15 +33,13 @@ class ReportsController extends Controller
         }
 
         if (($request->filled('item_type')) && ($request->filled('item_id'))) {
-            $actionlogs = $actionlogs->where(function($query) use ($request)
-            {
+            $actionlogs = $actionlogs->where(function ($query) use ($request) {
                 $query->where('item_id', '=', $request->input('item_id'))
-                ->where('item_type', '=', 'App\\Models\\'.ucwords($request->input('item_type')))
-                ->orWhere(function($query) use ($request)
-                {
-                    $query->where('target_id', '=', $request->input('item_id'))
-                    ->where('target_type', '=', 'App\\Models\\'.ucwords($request->input('item_type')));
-                });
+                    ->where('item_type', '=', 'App\\Models\\'.ucwords($request->input('item_type')))
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('target_id', '=', $request->input('item_id'))
+                            ->where('target_type', '=', 'App\\Models\\'.ucwords($request->input('item_type')));
+                    });
             });
         }
 
@@ -58,11 +54,10 @@ class ReportsController extends Controller
         if ($request->filled('action_source')) {
             $actionlogs = $actionlogs->where('action_source', '=', $request->input('action_source'));
         }
-        
+
         if ($request->filled('remote_ip')) {
             $actionlogs = $actionlogs->where('remote_ip', '=', $request->input('remote_ip'));
         }
-
 
         if ($request->filled('uploads')) {
             $actionlogs = $actionlogs->whereNotNull('filename');
@@ -83,7 +78,6 @@ class ReportsController extends Controller
             'action_source',
             'action_date',
         ];
-
 
         $total = $actionlogs->count();
         // Make sure the offset and limit are actually integers and do not exceed system limits

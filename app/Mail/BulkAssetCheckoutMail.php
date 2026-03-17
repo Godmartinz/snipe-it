@@ -77,7 +77,7 @@ class BulkAssetCheckoutMail extends Mailable
     {
         $this->assets = $this->assets->map(function (Asset $asset) {
             $fields = $asset->model?->fieldset?->fields->filter(function (CustomField $field) {
-                return $field->show_in_email && !$field->field_encrypted;
+                return $field->show_in_email && ! $field->field_encrypted;
             });
 
             $asset->setRelation('fields', $fields);
@@ -97,7 +97,7 @@ class BulkAssetCheckoutMail extends Mailable
 
     private function groupAssetsByCategory(): Collection
     {
-        return $this->assets->groupBy(fn($asset) => $asset->model->category->id);
+        return $this->assets->groupBy(fn ($asset) => $asset->model->category->id);
     }
 
     private function getIntroduction(): string
@@ -111,7 +111,7 @@ class BulkAssetCheckoutMail extends Mailable
 
     private function getRequiresAcceptanceInfo(): ?string
     {
-        if (!$this->requires_acceptance) {
+        if (! $this->requires_acceptance) {
             return null;
         }
 
@@ -120,7 +120,7 @@ class BulkAssetCheckoutMail extends Mailable
 
     private function getRequiresAcceptancePrompt(): ?string
     {
-        if (!$this->requires_acceptance) {
+        if (! $this->requires_acceptance) {
             return null;
         }
 

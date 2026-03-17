@@ -83,7 +83,7 @@ class AccessoryAcceptanceTest extends TestCase
     /**
      * This can be absorbed into a bigger test
      */
-    public function testUsersNameIsIncludedInAccessoryAcceptedNotification()
+    public function test_users_name_is_included_in_accessory_accepted_notification()
     {
         Notification::fake();
 
@@ -116,7 +116,7 @@ class AccessoryAcceptanceTest extends TestCase
     /**
      * This can be absorbed into a bigger test
      */
-    public function testUsersNameIsIncludedInAccessoryDeclinedNotification()
+    public function test_users_name_is_included_in_accessory_declined_notification()
     {
         Notification::fake();
 
@@ -146,7 +146,7 @@ class AccessoryAcceptanceTest extends TestCase
         );
     }
 
-    public function testUserIsNotAbleToAcceptAnAssetAssignedToADifferentUser()
+    public function test_user_is_not_able_to_accept_an_asset_assigned_to_a_different_user()
     {
         Notification::fake();
 

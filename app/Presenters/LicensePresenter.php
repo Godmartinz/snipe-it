@@ -9,6 +9,7 @@ class LicensePresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout()
@@ -213,6 +214,7 @@ class LicensePresenter extends Presenter
             'title' => trans('table.actions'),
             'formatter' => 'licensesActionsFormatter',
             'printIgnore' => true,
+            'class' => 'hidden-print',
         ];
 
         return json_encode($layout);
@@ -220,6 +222,7 @@ class LicensePresenter extends Presenter
 
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayoutSeats()
@@ -232,7 +235,7 @@ class LicensePresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
-           ],[
+            ], [
                 'field' => 'assigned_user',
                 'searchable' => false,
                 'sortable' => false,
@@ -297,7 +300,7 @@ class LicensePresenter extends Presenter
                 'sortable' => false,
                 'visible' => false,
                 'title' => trans('general.notes'),
-                'formatter' => 'notesFormatter'
+                'formatter' => 'notesFormatter',
             ],
             [
                 'field' => 'checkincheckout',
@@ -307,6 +310,8 @@ class LicensePresenter extends Presenter
                 'title' => trans('general.checkin').'/'.trans('general.checkout'),
                 'visible' => true,
                 'formatter' => 'licenseSeatInOutFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -315,20 +320,22 @@ class LicensePresenter extends Presenter
 
     /**
      * Link to this licenses Name
+     *
      * @return string
      */
     public function nameUrl()
     {
         if (auth()->user()->can('view', ['\App\Models\License', $this])) {
-            return (string)link_to_route('licenses.show', e($this->display_name), $this->id);
+            return '<a href="'.route('licenses.show', $this->id).'">'.e($this->display_name).'</a>';
         } else {
             return e($this->display_name);
         }
-        
+
     }
 
     /**
      * Link to this licenses Name
+     *
      * @return string
      */
     public function fullName()
@@ -337,16 +344,8 @@ class LicensePresenter extends Presenter
     }
 
     /**
-     * Link to this licenses serial
-     * @return string
-     */
-    public function serialUrl()
-    {
-        return (string) link_to('/licenses/'.$this->id, mb_strimwidth($this->serial, 0, 50, '...'));
-    }
-
-    /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()

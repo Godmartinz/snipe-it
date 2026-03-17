@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'To akcesorium nie może zostać usunięte, ponieważ nadal posiada powiązane z nim środki, użytkowników lub lokalizacje',
         'asset' => 'Ten środek nie może zostać usunięty, ponieważ nadal posiada powiązane z nim elementy',
         'category' => 'Ta kategoria nie może zostać usunięta, ponieważ nadal posiada powiązane z nią pozycje',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Zaznacz wszystkie elementy dla tego użytkownika i opcjonalnie usuń je. Będziesz mógł to potwierdzić na następnej stronie.'
+        'user' => 'Zaznacz wszystkie elementy dla tego użytkownika i opcjonalnie usuń je. Będziesz mógł to potwierdzić na następnej stronie.',
     ],
 
-);
+];

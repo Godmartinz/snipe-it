@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 return [
 
     /*
@@ -68,7 +70,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => User::class,
         ],
 
         // 'users' => [
@@ -101,7 +103,7 @@ return [
             'throttle' => [
                 'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
                 'lockout_duration' => env('LOGIN_LOCKOUT_DURATION', 60),
-            ]
+            ],
 
         ],
 
@@ -112,7 +114,7 @@ return [
             'throttle' => [
                 'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
                 'lockout_duration' => env('LOGIN_LOCKOUT_DURATION', 60),
-            ]
+            ],
         ],
     ],
 
@@ -124,10 +126,8 @@ return [
     |
     */
     'password_reset' => [
-       'max_attempts_per_min' => env('PASSWORD_RESET_MAX_ATTEMPTS_PER_MIN', 50),
+        'max_attempts_per_min' => env('PASSWORD_RESET_MAX_ATTEMPTS_PER_MIN', 50),
     ],
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -140,8 +140,7 @@ return [
     |
     */
 
-    'password_timeout' =>  env('PASSWORD_CONFIRM_TIMEOUT', 10800),
-
+    'password_timeout' => env('PASSWORD_CONFIRM_TIMEOUT', 10800),
 
     /*
     |--------------------------------------------------------------------------

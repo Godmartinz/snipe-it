@@ -41,6 +41,7 @@
 
     <style>
 
+
         :root {
             color-scheme: light dark;
             --btn-theme-hover-text-color: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l - 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
@@ -153,6 +154,9 @@
             color: var(--link-hover) !important;
         }
 
+        label.form-control {
+            color: var(--color-fg) !important;
+        }
 
         .footer-links a {
             color: var(--link-color) !important;
@@ -941,14 +945,71 @@
         input[type="email"]:required,
         input[type="password"]:required,
         input[type="tel"]:required,
+        select:required,
+        input:required,
         textarea:required
         {
-            border-right: 5px solid var(--text-warning) !important;
+            border-right: 5px solid orange !important;
         }
 
         .bootstrap-table .fixed-table-container .table tbody tr.selected td {
             background-color: light-dark(hsl(from var(--main-theme-color) h s calc(l + 40)),hsl(from var(--main-theme-color) h s calc(l - 40))) !important;
         }
+
+        tr.success > td {
+            background-color: #00a65a !important;
+            color: white !important;
+        }
+
+        tr.danger > td {
+            background-color: var(--text-danger) !important;
+            color: white !important;
+        }
+
+        @media print {
+
+            body,
+            div.content-wrapper,
+            section.content,
+            .webui,
+            .main-panel,
+            .nav-tabs-custom,
+            .box,
+            .box-body,
+            .list-group,
+            .list-group-unbordered,
+            .list-group-item,
+            .row,
+            .tab-content
+            {
+                background: white !important;
+                color: black !important;
+            }
+            .fixed-table-toolbar,
+            .fixed-table-pagination,
+            #assetsToolBar,
+            .fixed-table-pagination
+            {
+                display: none !important;
+            }
+            .tab-pane.hidden-print {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            h2, h3, h4 {
+                color: black !important;
+            }
+
+            .col-sm-9,
+            .main-panel
+            {
+                float: left;
+                width: 100% !important;
+            }
+
+        }
+
     </style>
 
     {{-- Custom CSS --}}
@@ -1021,6 +1082,16 @@
                     <!-- Navbar Right Menu -->
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
+                            <li aria-hidden="true">
+
+                                    <a href="#" class="sidebar-toggle-mobile visible-xs hidden-lg hidden-md" data-toggle="push-menu"
+                                   role="button">
+                                    <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
+                                    <x-icon type="nav-toggle" />
+                                </a>
+
+                            </li>
+
                             @can('index', \App\Models\Asset::class)
                                 <li aria-hidden="true"{!! (request()->is('hardware*') ? ' class="active"' : '') !!}>
                                     <a href="{{ url('hardware') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=1" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.assets') }}">
@@ -1062,25 +1133,31 @@
                                 </li>
                             @endcan
 
+                            @can('index', \App\Models\User::class)
+                                <li aria-hidden="true"{!! (request()->is('users*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('users.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=6" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.users') }}">
+                                        <x-icon type="users" class="fa-fw" />
+                                        <span class="sr-only">{{ trans('general.users') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+
                             @can('index', \App\Models\Asset::class)
                                 <li>
-                                    <form class="navbar-form navbar-left form-horizontal" role="search"
-                                          action="{{ route('findbytag/hardware') }}" method="get">
-                                        <div class="col-xs-12 col-md-12">
-                                            <div class="col-xs-12 form-group">
-                                                <label class="sr-only" for="tagSearch">
-                                                    {{ trans('general.lookup_by_tag') }}
-                                                </label>
-                                                <input type="text" class="form-control" id="tagSearch" name="assetTag" placeholder="{{ trans('general.lookup_by_tag') }}">
-                                                <input type="hidden" name="topsearch" value="true" id="search">
-                                            </div>
-                                            <div class="col-xs-1">
-                                                <button type="submit" id="topSearchButton" class="btn btn-theme pull-right">
-                                                    <x-icon type="search" />
-                                                    <span class="sr-only">{{ trans('general.search') }}</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <form class="navbar-form navbar-left form-inline" role="search" action="{{ route('findbytag/hardware') }}" method="get">
+
+                                                <div class="input-group col-xs-12" style="border: 0 !important;">
+                                                    <label class="sr-only" for="tagSearch">
+                                                        {{ trans('general.lookup_by_tag') }}
+                                                    </label>
+                                                    <input type="text" class="form-control" id="tagSearch" name="assetTag" placeholder="{{ trans('general.lookup_by_tag') }}">
+                                                    <span class="input-group-btn">
+                                                        <button type="submit" id="topSearchButton" class="btn btn-sm btn-theme" style="padding: 7px 10px 7px 10px; "><x-icon type="search" class="fa-fw" /><div class="sr-only">{{ trans('general.search') }}</div></button>
+                                                    </span>
+                                                </div>
+
+                                        <input type="hidden" name="topsearch" value="true" id="search">
+
                                     </form>
                                 </li>
                             @endcan
@@ -1140,6 +1217,8 @@
                                                 </a>
                                             </li>
                                         @endcan
+
+
                                     </ul>
                                 </li>
                             @endcan
@@ -1169,7 +1248,7 @@
                                     <ul class="dropdown-menu">
                                         <!-- User image -->
                                         @can('self.profile')
-                                        <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('account/view-assets') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('view-assets') }}">
                                                 <x-icon type="checkmark" class="fa-fw" />
                                                 {{ trans('general.viewassets') }}
@@ -1193,7 +1272,7 @@
                                         </li>
 
                                         @endcan
-                                        <li>
+                                        <li {!! (request()->is('account/password') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('profile') }}">
                                                 <x-icon type="user" class="fa-fw" />
                                                 {{ trans('general.editprofile') }}
@@ -1202,7 +1281,7 @@
 
                                         @can('self.profile')
                                         @if (Auth::user()->ldap_import!='1')
-                                        <li>
+                                        <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('account.password.index') }}">
                                                 <x-icon type="password" class="fa-fw" />
                                                 {{ trans('general.changepassword') }}
@@ -1218,7 +1297,7 @@
                                         </li>
 
                                         @can('self.api')
-                                            <li>
+                                            <li {!! (request()->is('account/api') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('user.api') }}">
                                                     <x-icon type="api-key" class="fa-fw" />
                                                      {{ trans('general.manage_api_keys') }}
@@ -1255,11 +1334,7 @@
                         </ul>
                     </div>
                 </nav>
-                <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu"
-                   role="button">
-                    <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
-                    <x-icon type="nav-toggle" />
-                </a>
+
                 <!-- Sidebar toggle button-->
             </header>
 
@@ -1270,7 +1345,7 @@
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu" data-widget="tree" {{ \App\Helpers\Helper::determineLanguageDirection() == 'rtl' ? 'style="margin-right:12px' : '' }}>
                         @can('admin')
-                            <li {!! (\Request::route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
+                            <li {!! (\request()->route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
                                 <a href="{{ route('home') }}">
                                     <x-icon type="dashboard" class="fa-fw" />
                                     <span>{{ trans('general.dashboard') }}</span>
@@ -1285,7 +1360,7 @@
                                     <x-icon type="angle-left" class="pull-right fa-fw"/>
                                 </a>
                                 <ul class="treeview-menu">
-                                    <li>
+                                    <li {!! (!request()->query('status') && (request()->is('hardware')) ? ' class="active"' : '') !!}>
                                         <a href="{{ url('hardware') }}">
                                             <x-icon type="circle" class="text-grey fa-fw"/>
                                             {{ trans('general.list_all') }}
@@ -1308,48 +1383,48 @@
                                     @endif
 
 
-                                    <li id="deployed-sidenav-option" {!! (Request::query('status') == 'Deployed' ? ' class="active"' : '') !!}>
+                                    <li id="deployed-sidenav-option" {!! (request()->query('status') == 'Deployed' ? ' class="active"' : '') !!}>
                                         <a href="{{ url('hardware?status=Deployed') }}">
                                             <x-icon type="circle" class="text-blue fa-fw" />
                                             {{ trans('general.deployed') }}
                                             <span class="badge">{{ (isset($total_deployed_sidebar)) ? $total_deployed_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="rtd-sidenav-option"{!! (Request::query('status') == 'RTD' ? ' class="active"' : '') !!}>
+                                    <li id="rtd-sidenav-option"{!! (request()->query('status') == 'RTD' ? ' class="active"' : '') !!}>
                                         <a href="{{ url('hardware?status=RTD') }}">
                                             <x-icon type="circle" class="text-green fa-fw" />
                                             {{ trans('general.ready_to_deploy') }}
                                             <span class="badge">{{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="pending-sidenav-option"{!! (Request::query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}">
+                                    <li id="pending-sidenav-option"{!! (request()->query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}">
                                             <x-icon type="circle" class="text-orange fa-fw" />
                                             {{ trans('general.pending') }}
                                             <span class="badge">{{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="undeployable-sidenav-option"{!! (Request::query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
+                                    <li id="undeployable-sidenav-option"{!! (request()->query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
                                                 href="{{ url('hardware?status=Undeployable') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('general.undeployable') }}
                                             <span class="badge">{{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="byod-sidenav-option"{!! (Request::query('status') == 'byod' ? ' class="active"' : '') !!}><a
+                                    <li id="byod-sidenav-option"{!! (request()->query('status') == 'byod' ? ' class="active"' : '') !!}><a
                                                 href="{{ url('hardware?status=byod') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('general.byod') }}
                                             <span class="badge">{{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="archived-sidenav-option"{!! (Request::query('status') == 'Archived' ? ' class="active"' : '') !!}><a
+                                    <li id="archived-sidenav-option"{!! (request()->query('status') == 'Archived' ? ' class="active"' : '') !!}><a
                                                 href="{{ url('hardware?status=Archived') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('admin/hardware/general.archived') }}
                                             <span class="badge">{{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="requestable-sidenav-option"{!! (Request::query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
+                                    <li id="requestable-sidenav-option"{!! (request()->query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
                                                 href="{{ url('hardware?status=Requestable') }}">
                                             <x-icon type="checkmark" class="text-blue fa-fw" />
                                             {{ trans('admin/hardware/general.requestable') }}
@@ -2154,27 +2229,54 @@
                  }
              }
 
-            $(function () {
 
+
+
+            function checkInfoSidePanel() {
+                var side_panel_state = localStorage.getItem("side_panel_state");
+
+                // Open side info panel
+                if (side_panel_state == 'collapsed') {
+                    collapseInfoSidePanel();
+
+                // Collapse side info panel
+                } else {
+                    expandInfoSidePanel();
+                }
+
+            }
+
+            function toggleInfoSidePanel() {
+                var side_panel_state = localStorage.getItem("side_panel_state");
+
+                if (side_panel_state == 'expanded') {
+                    localStorage.setItem("side_panel_state", 'collapsed');
+                } else {
+                    localStorage.setItem("side_panel_state", 'expanded');
+                }
+
+                checkInfoSidePanel();
+            }
+
+            function collapseInfoSidePanel() {
+                $('.side-box').removeClass('expanded').hide();
+                $('.main-panel').removeClass('col-md-9').addClass('col-md-12');
+                $("#expand-info-panel-button").addClass('fa-square-caret-left').removeClass('fa-square-caret-right');
+            }
+
+            function expandInfoSidePanel() {
+                $('.side-box').fadeIn("fast").addClass('expanded');
+                $('.main-panel').removeClass('col-md-12').addClass('col-md-9');
+                $("#expand-info-panel-button").addClass('fa-square-caret-right').removeClass('fa-square-caret-left');
+            }
+
+
+            $(document).ready(function () {
+                checkInfoSidePanel();
 
                 // Handle the info-panel
                 $("#expand-info-panel-button").click(function () {
-
-                    $('.side-box').parent('div').parent('div').parent('div').hide();
-                    $(window).on('load', function() {
-                        $('.side-box').parent('div').parent('div').parent('div').show();
-                    });
-
-                    if($('.side-box').hasClass('expanded')) {
-                        $('.main-panel').removeClass('col-md-9').addClass('col-md-12');
-                        $('.side-box').removeClass('expanded');
-                        $("#expand-info-panel-button").addClass('fa-square-caret-left').removeClass('fa-square-caret-right');
-                    } else {
-                        $('.side-box').parent('div').parent('div').parent('div').fadeToggle("fast")
-                        $('.side-box').addClass('expanded');
-                        $('.main-panel').removeClass('col-md-12').addClass('col-md-9');
-                        $("#expand-info-panel-button").addClass('fa-square-caret-right').removeClass('fa-square-caret-left');
-                    }
+                    toggleInfoSidePanel();
                 });
 
 

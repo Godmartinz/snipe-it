@@ -240,7 +240,7 @@ class LicenseSeatUpdateTest extends TestCase
 
         $this->assertEquals($targetUser->id, $licenseSeat->assigned_to);
         $this->assertEquals('Checking out the seat to a user', $licenseSeat->notes);
-        $this->assertHasTheseActionLogs($licenseSeat->license, ['add seats', 'create', 'checkout']); //FIXME - backwards
+        $this->assertHasTheseActionLogs($licenseSeat->license, ['add seats', 'create', 'checkout']); // FIXME - backwards
     }
 
     public function test_license_seat_can_be_checked_out_to_asset_when_updating()
@@ -259,7 +259,7 @@ class LicenseSeatUpdateTest extends TestCase
         $licenseSeat->refresh();
         $this->assertEquals($targetAsset->id, $licenseSeat->asset_id);
         $this->assertEquals('Checking out the seat to an asset', $licenseSeat->notes);
-        $this->assertHasTheseActionLogs($licenseSeat->license, ['add seats', 'create', 'checkout']); //FIXME - backwards
+        $this->assertHasTheseActionLogs($licenseSeat->license, ['add seats', 'create', 'checkout']); // FIXME - backwards
     }
 
     public function test_license_seat_checked_out_to_asset_can_be_checked_in_when_updating()

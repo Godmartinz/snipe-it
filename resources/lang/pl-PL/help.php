@@ -23,13 +23,13 @@ return [
 
     'accessories' => 'Akcesoria to rzeczy, które wydajesz użytkownikom, a które nie mają numerów seryjnych (lub nie zależy Ci na śledzeniu ich niepowtarzalności). Na przykład, myszki i klawiatury komputerowe.',
 
-    'companies'     => 'Firmy mogą być używane jako proste pole identyfikacyjne lub mogą posłużyć do ograniczenia widoczności aktywów dla użytkowników itp. jeśli \'\'Wsparcie dla wielu firm" jest włączone w ustawieniach administracyjnych.',
+    'companies' => 'Firmy mogą być używane jako proste pole identyfikacyjne lub mogą posłużyć do ograniczenia widoczności aktywów dla użytkowników itp. jeśli \'\'Wsparcie dla wielu firm" jest włączone w ustawieniach administracyjnych.',
 
-    'components'    => 'Składniki są przedmioty, które są częścią aktywów np. dyski twarde, pamięci RAM, zasilacze do laptopów itp.',
+    'components' => 'Składniki są przedmioty, które są częścią aktywów np. dyski twarde, pamięci RAM, zasilacze do laptopów itp.',
 
-    'consumables'   => 'Materiały eksploatacyjne są przedmiotami jednorazowego użytku, które będą wykorzystane w miarę upływu czasu. Przykładem będzie tusz do drukarki lub papier do kopiarek.',
+    'consumables' => 'Materiały eksploatacyjne są przedmiotami jednorazowego użytku, które będą wykorzystane w miarę upływu czasu. Przykładem będzie tusz do drukarki lub papier do kopiarek.',
 
     'depreciations' => 'Możesz ustawić amortyzację środków trwałych na podstawie amortyzacji aktywów w oparciu o metodę liniową.',
-    
-    'empty_file'    => 'Importer wykryje, że ten plik jest pusty.'
+
+    'empty_file' => 'Importer wykryje, że ten plik jest pusty.',
 ];

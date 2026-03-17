@@ -28,14 +28,14 @@ class MaintenanceFactory extends Factory
             'asset_id' => Asset::factory()->laptopZenbook(),
             'supplier_id' => Supplier::factory(),
             'asset_maintenance_type' => $this->faker->randomElement(['maintenance', 'repair', 'upgrade']),
-            'name' => $this->faker->name(),
+            'name' => $this->faker->sentence(3),
             'start_date' => $this->faker->date(),
             'is_warranty' => $this->faker->boolean(),
             'notes' => $this->faker->paragraph(),
             'url' => $this->faker->url(),
             'cost' => $this->faker->randomFloat(),
             'created_by' => User::factory()->superuser(),
-            'image' => $this->faker->numberBetween(1,11).'.png',
+            'image' => $this->faker->numberBetween(1, 11).'.png',
         ];
     }
 }

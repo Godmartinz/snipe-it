@@ -18,7 +18,7 @@ class LicenseSeatFactory extends Factory
         ];
     }
 
-    public function assignedToAsset(Asset $asset = null)
+    public function assignedToAsset(?Asset $asset = null)
     {
         return $this->state(function () use ($asset) {
             return [
@@ -27,7 +27,7 @@ class LicenseSeatFactory extends Factory
         });
     }
 
-    public function assignedToUser(User $user = null)
+    public function assignedToUser(?User $user = null)
     {
         return $this->state(function () use ($user) {
             return [

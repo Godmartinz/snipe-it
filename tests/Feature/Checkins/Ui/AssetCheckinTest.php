@@ -15,14 +15,14 @@ use Tests\TestCase;
 
 class AssetCheckinTest extends TestCase
 {
-    public function testCheckingInAssetRequiresCorrectPermission()
+    public function test_checking_in_asset_requires_correct_permission()
     {
         $this->actingAs(User::factory()->create())
             ->post(route('hardware.checkin.store', [Asset::factory()->assignedToUser()->create()]))
             ->assertForbidden();
     }
 
-    public function testCannotCheckInAssetThatIsNotCheckedOut()
+    public function test_cannot_check_in_asset_that_is_not_checked_out()
     {
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->post(route('hardware.checkin.store', [Asset::factory()->create()]))
@@ -31,7 +31,7 @@ class AssetCheckinTest extends TestCase
             ->assertRedirect(route('hardware.index'));
     }
 
-    public function testCannotStoreAssetCheckinThatIsNotCheckedOut()
+    public function test_cannot_store_asset_checkin_that_is_not_checked_out()
     {
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->get(route('hardware.checkin.store', [Asset::factory()->create()]))
@@ -40,14 +40,14 @@ class AssetCheckinTest extends TestCase
             ->assertRedirect(route('hardware.index'));
     }
 
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.checkin.create', Asset::factory()->assignedToUser()->create()))
             ->assertOk();
     }
 
-    public function testAssetCanBeCheckedIn()
+    public function test_asset_can_be_checked_in()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
@@ -90,7 +90,7 @@ class AssetCheckinTest extends TestCase
         }, 1);
     }
 
-    public function testLocationIsSetToRTDLocationByDefaultUponCheckin()
+    public function test_location_is_set_to_rtd_location_by_default_upon_checkin()
     {
         $rtdLocation = Location::factory()->create();
         $asset = Asset::factory()->assignedToUser()->create([
@@ -105,7 +105,7 @@ class AssetCheckinTest extends TestCase
         $this->assertHasTheseActionLogs($asset, ['create', 'checkin from']);
     }
 
-    public function testDefaultLocationCanBeUpdatedUponCheckin()
+    public function test_default_location_can_be_updated_upon_checkin()
     {
         $location = Location::factory()->create();
         $asset = Asset::factory()->assignedToUser()->create();
@@ -113,13 +113,13 @@ class AssetCheckinTest extends TestCase
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->post(route('hardware.checkin.store', [$asset]), [
                 'location_id' => $location->id,
-                'update_default_location' => 0
+                'update_default_location' => 0,
             ]);
 
         $this->assertTrue($asset->refresh()->defaultLoc()->is($location));
     }
 
-    public function testAssetsLicenseSeatsAreClearedUponCheckin()
+    public function test_assets_license_seats_are_cleared_upon_checkin()
     {
         $asset = Asset::factory()->assignedToUser()->create();
         LicenseSeat::factory()->assignedToUser()->for($asset)->create();
@@ -132,7 +132,7 @@ class AssetCheckinTest extends TestCase
         $this->assertNull($asset->refresh()->licenseseats->first()->assigned_to);
     }
 
-    public function testLegacyLocationValuesSetToZeroAreUpdated()
+    public function test_legacy_location_values_set_to_zero_are_updated()
     {
         $asset = Asset::factory()->canBeInvalidUponCreation()->assignedToUser()->create([
             'rtd_location_id' => 0,
@@ -146,7 +146,7 @@ class AssetCheckinTest extends TestCase
         $this->assertEquals($asset->location_id, $asset->rtd_location_id);
     }
 
-    public function testPendingCheckoutAcceptancesAreClearedUponCheckin()
+    public function test_pending_checkout_acceptances_are_cleared_upon_checkin()
     {
         $asset = Asset::factory()->assignedToUser()->create();
 
@@ -158,7 +158,7 @@ class AssetCheckinTest extends TestCase
         $this->assertFalse($acceptance->exists(), 'Acceptance was not deleted');
     }
 
-    public function testCheckinTimeAndActionLogNoteCanBeSet()
+    public function test_checkin_time_and_action_log_note_can_be_set()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
@@ -167,7 +167,7 @@ class AssetCheckinTest extends TestCase
                 'hardware.checkin.store', [Asset::factory()->assignedToUser()->create()]
             ), [
                 'checkin_at' => '2023-01-02',
-                'note' => 'hello'
+                'note' => 'hello',
             ]);
 
         Event::assertDispatched(function (CheckoutableCheckedIn $event) {
@@ -175,7 +175,7 @@ class AssetCheckinTest extends TestCase
         }, 1);
     }
 
-    public function testAssetCheckinPageIsRedirectedIfModelIsInvalid()
+    public function test_asset_checkin_page_is_redirected_if_model_is_invalid()
     {
 
         $asset = Asset::factory()->assignedToUser()->create();
@@ -189,7 +189,7 @@ class AssetCheckinTest extends TestCase
             ->assertRedirect(route('hardware.show', $asset));
     }
 
-    public function testAssetCheckinPagePostIsRedirectedIfModelIsInvalid()
+    public function test_asset_checkin_page_post_is_redirected_if_model_is_invalid()
     {
         $asset = Asset::factory()->assignedToUser()->create();
         $asset->model_id = 0;
@@ -202,7 +202,7 @@ class AssetCheckinTest extends TestCase
             ->assertRedirect(route('hardware.show', $asset));
     }
 
-    public function testAssetCheckinPagePostIsRedirectedIfRedirectSelectionIsIndex()
+    public function test_asset_checkin_page_post_is_redirected_if_redirect_selection_is_index()
     {
         $asset = Asset::factory()->assignedToUser()->create();
 
@@ -215,7 +215,7 @@ class AssetCheckinTest extends TestCase
             ->assertRedirect(route('hardware.index'));
     }
 
-    public function testAssetCheckinPagePostIsRedirectedIfRedirectSelectionIsItem()
+    public function test_asset_checkin_page_post_is_redirected_if_redirect_selection_is_item()
     {
         $asset = Asset::factory()->assignedToUser()->create();
 

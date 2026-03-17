@@ -10,39 +10,64 @@ use Livewire\Component;
 
 class Importer extends Component
 {
-    public $progress = -1; //upload progress - '-1' means don't show
+    public $progress = -1; // upload progress - '-1' means don't show
+
     public $progress_message;
+
     public $progress_bar_class = 'progress-bar-warning';
 
-    public $message; //status/error message?
-    public $message_type; //success/error?
+    public $message; // status/error message?
 
-    //originally from ImporterFile
+    public $message_type; // success/error?
+
+    // originally from ImporterFile
     public $import_errors; //
+
     public $activeFileId;
+
     public $headerRow = [];
+
     public $typeOfImport;
+
     public $importTypes;
+
     public $columnOptions;
+
     public $statusType;
+
     public $statusText;
+
     public $update;
+
     public $send_welcome;
+
     public $run_backup;
+
     public $field_map; // we need a separate variable for the field-mapping, because the keys in the normal array are too complicated for Livewire to understand
 
     // Make these variables public - we set the properties in the constructor so we can localize them (versus the old static arrays)
     public $accessories_fields;
+
     public $assets_fields;
+
     public $users_fields;
+
     public $assetmodels_fields;
+
     public $suppliers_fields;
+
     public $licenses_fields;
+
     public $locations_fields;
+
     public $consumables_fields;
+
     public $components_fields;
+
     public $manufacturers_fields;
+
     public $categories_fields;
+
     public $aliases_fields;
 
     protected $rules = [
@@ -51,7 +76,7 @@ class Importer extends Component
         'files.*.filesize' => 'required|integer',
         'headerRow' => 'array',
         'typeOfImport' => 'string',
-        'field_map' => 'array'
+        'field_map' => 'array',
     ];
 
     /**
@@ -62,11 +87,12 @@ class Importer extends Component
      */
     public function generate_field_map()
     {
-        $tmp = array();
+        $tmp = [];
         if ($this->activeFile) {
             $tmp = array_combine($this->headerRow, $this->field_map);
             $tmp = array_filter($tmp);
         }
+
         return json_encode($tmp);
 
     }
@@ -112,13 +138,14 @@ class Importer extends Component
         }
         asort($results, SORT_FLAG_CASE | SORT_STRING);
 
-        if ($type == "asset") {
+        if ($type == 'asset') {
             // add Custom Fields after a horizontal line
-            $results['-'] = "———" . trans('admin/custom_fields/general.custom_fields') . "———’";
+            $results['-'] = '———'.trans('admin/custom_fields/general.custom_fields').'———’';
             foreach (CustomField::orderBy('name')->get() as $field) {
                 $results[$field->db_column_name()] = $field->name;
             }
         }
+
         return $results;
     }
 
@@ -132,10 +159,10 @@ class Importer extends Component
                 // yes, we do. Is it valid for this type of import?
                 // (e.g. the import type might have been changed...?)
                 if (array_key_exists($this->field_map[$i], $this->columnOptions[$type])) {
-                    //yes, this key *is* valid. Continue on to the next field.
+                    // yes, this key *is* valid. Continue on to the next field.
                     continue;
                 } else {
-                    //no, this key is *INVALID* for this import type. Better set it to null,
+                    // no, this key is *INVALID* for this import type. Better set it to null,
                     // and we'll hope that the $aliases_fields or something else picks it up.
                     $this->field_map[$i] = null; // fingers crossed! But it's not likely, tbh.
                 } // TODO - strictly speaking, this isn't necessary here I don't think.
@@ -144,7 +171,8 @@ class Importer extends Component
             foreach ($this->columnOptions[$type] as $v => $text) {
                 if (strcasecmp($text, $header) === 0) { // case-INSENSITIVe on purpose!
                     $this->field_map[$i] = $v;
-                    continue 2; //don't bother with the alias check, go to the next header
+
+                    continue 2; // don't bother with the alias check, go to the next header
                 }
             }
             // if you got here, we didn't find a match. Try the $aliases_fields
@@ -161,6 +189,7 @@ class Importer extends Component
 
                         if (array_key_exists($key, $this->columnOptions[$type])) {
                             $this->field_map[$i] = $key;
+
                             continue 3; // bust out of both of these loops and the surrounding one - e.g. move on to the next header
                         }
                     }
@@ -175,17 +204,17 @@ class Importer extends Component
     {
         $this->authorize('import');
         $this->importTypes = [
-            'accessory'     =>  trans('general.accessories'),
-            'asset'         =>      trans('general.assets'),
-            'assetModel'    =>      trans('general.asset_models'),
-            'component'     =>  trans('general.components'),
-            'consumable'    => trans('general.consumables'),
-            'license'       =>    trans('general.licenses'),
-            'location'      =>   trans('general.locations'),
-            'user'          =>       trans('general.users'),
-            'supplier'      =>       trans('general.suppliers'),
-            'manufacturer'  =>       trans('general.manufacturers'),
-            'category'      =>       trans('general.categories'),
+            'accessory' => trans('general.accessories'),
+            'asset' => trans('general.assets'),
+            'assetModel' => trans('general.asset_models'),
+            'component' => trans('general.components'),
+            'consumable' => trans('general.consumables'),
+            'license' => trans('general.licenses'),
+            'location' => trans('general.locations'),
+            'user' => trans('general.users'),
+            'supplier' => trans('general.suppliers'),
+            'manufacturer' => trans('general.manufacturers'),
+            'category' => trans('general.categories'),
         ];
 
         /**
@@ -391,11 +420,11 @@ class Importer extends Component
             'id' => trans('general.id'),
             'name' => trans('general.name'),
             'notes' => trans('general.notes'),
-            'support_phone' =>  trans('admin/manufacturers/table.support_phone'),
-            'support_url' =>  trans('admin/manufacturers/table.support_url'),
-            'support_email' =>  trans('admin/manufacturers/table.support_email'),
-            'warranty_lookup_url' =>  trans('admin/manufacturers/table.warranty_lookup_url'),
-            'url' =>  trans('general.url'),
+            'support_phone' => trans('admin/manufacturers/table.support_phone'),
+            'support_url' => trans('admin/manufacturers/table.support_url'),
+            'support_email' => trans('admin/manufacturers/table.support_email'),
+            'warranty_lookup_url' => trans('admin/manufacturers/table.warranty_lookup_url'),
+            'url' => trans('general.url'),
             'tag_color' => trans('general.tag_color'),
         ];
 
@@ -412,9 +441,7 @@ class Importer extends Component
             'tag_color' => trans('general.tag_color'),
         ];
 
-
-
-        $this->assetmodels_fields  = [
+        $this->assetmodels_fields = [
             'id' => trans('general.id'),
             'category' => trans('general.category'),
             'eol' => trans('general.eol'),
@@ -437,22 +464,20 @@ class Importer extends Component
          * This just makes the user's experience a little better when they're using
          * their own CSV template.
          */
-
         $this->aliases_fields = [
-            'item_name' =>
-                [
-                    'item name',
-                    'asset name',
-                    'model name',
-                    'asset model name',
-                    'accessory name',
-                    'user name',
-                    'consumable name',
-                    'component name',
-                    'name',
-                    'supplier name',
-                    'location name',
-                ],
+            'item_name' => [
+                'item name',
+                'asset name',
+                'model name',
+                'asset model name',
+                'accessory name',
+                'user name',
+                'consumable name',
+                'component name',
+                'name',
+                'supplier name',
+                'location name',
+            ],
             'item_no' => [
                 'item number',
                 'item no.',
@@ -472,180 +497,151 @@ class Importer extends Component
             'checkin_email' => [
                 'checkin email',
             ],
-            'asset_model' =>
-                [
-                    'model name',
-                    'model',
-                ],
-            'eol_date' =>
-                [
-                    'eol',
-                    'eol date',
-                    'asset eol date',
-                ],
-            'eol' =>
-                [
-                    'eol',
-                    'EOL',
-                    'eol months',
-                ],
-            'gravatar' =>
-                [
-                    'gravatar',
-                ],
-            'currency' =>
-                [
-                    '$',
-                ],
-            'jobtitle' =>
-                [
-                    'job title for user',
-                    'job title',
-                ],
-            'full_name' =>
-                [
-                    'full name',
-                    'fullname',
-                    trans('general.importer.checked_out_to_fullname')
-                ],
-            'username' =>
-                [
-                    'user name',
-                    'username',
-                    trans('general.importer.checked_out_to_username'),
-                ],
-            'display_name' =>
-                [
-                    'display name',
-                    'displayName',
-                    'display',
-                    trans('admin/users/table.display_name'),
-                ],
-            'first_name' =>
-                [
-                    'first name',
-                    trans('general.importer.checked_out_to_first_name'),
-                ],
-            'last_name' =>
-                [
-                    'last name',
-                    'lastname',
-                    trans('general.importer.checked_out_to_last_name'),
-                ],
-            'email' =>
-                [
-                    'email',
-                    'e-mail',
-                    trans('general.importer.checked_out_to_email'),
-                ],
-            'phone_number' =>
-                [
-                    'phone',
-                    'phone number',
-                    'phone num',
-                    'telephone number',
-                    'telephone',
-                    'tel.',
-                ],
-            'mobile_number' =>
-                [
-                    'mobile',
-                    'mobile number',
-                    'cell',
-                    'cellphone',
-                ],
+            'asset_model' => [
+                'model name',
+                'model',
+            ],
+            'eol_date' => [
+                'eol',
+                'eol date',
+                'asset eol date',
+            ],
+            'eol' => [
+                'eol',
+                'EOL',
+                'eol months',
+            ],
+            'gravatar' => [
+                'gravatar',
+            ],
+            'currency' => [
+                '$',
+            ],
+            'jobtitle' => [
+                'job title for user',
+                'job title',
+            ],
+            'full_name' => [
+                'full name',
+                'fullname',
+                trans('general.importer.checked_out_to_fullname'),
+            ],
+            'username' => [
+                'user name',
+                'username',
+                trans('general.importer.checked_out_to_username'),
+            ],
+            'display_name' => [
+                'display name',
+                'displayName',
+                'display',
+                trans('admin/users/table.display_name'),
+            ],
+            'first_name' => [
+                'first name',
+                trans('general.importer.checked_out_to_first_name'),
+            ],
+            'last_name' => [
+                'last name',
+                'lastname',
+                trans('general.importer.checked_out_to_last_name'),
+            ],
+            'email' => [
+                'email',
+                'e-mail',
+                trans('general.importer.checked_out_to_email'),
+            ],
+            'phone_number' => [
+                'phone',
+                'phone number',
+                'phone num',
+                'telephone number',
+                'telephone',
+                'tel.',
+            ],
+            'mobile_number' => [
+                'mobile',
+                'mobile number',
+                'cell',
+                'cellphone',
+            ],
 
-            'serial' =>
-                [
-                    'serial number',
-                    'serial no.',
-                    'serial no',
-                    'product key',
-                    'key',
-                ],
-            'require_serial' =>
-                [
-                    trans('admin/models/general.importer.require_serial'),
-                    trans('admin/models/general.importer.serial_reqiured'),
-                ],
-            'model_number' =>
-                [
-                    'model',
-                    'model no',
-                    'model no.',
-                    'model number',
-                    'model num',
-                    'model num.'
-                ],
-            'warranty_months' =>
-                [
-                    'Warranty',
-                    'Warranty Months'
-                ],
-            'qty' =>
-                [
-                    'QTY',
-                    'Quantity'
-                ],
-            'zip' =>
-                [
-                    'Postal Code',
-                    'Post Code',
-                    'Zip Code'
-                ],
-            'min_amt' =>
-                [
-                    'Min Amount',
-                    'Minimum Amount',
-                    'Min Quantity',
-                    'Minimum Quantity',
-                ],
-            'next_audit_date' =>
-                [
-                    'Next Audit',
-                ],
-            'last_checkout' =>
-                [
-                    'Last Checkout',
-                    'Last Checkout Date',
-                    'Checkout Date',
-                ],
-            'address2' =>
-                [
-                    'Address 2',
-                    'Address2',
-                ],
-            'ldap_ou' =>
-                [
-                    'LDAP OU',
-                    'OU',
-                ],
-            'parent_location' =>
-                [
-                    'Parent',
-                    'Parent Location',
-                ],
-            'manager' =>
-                [
-                    'Managed By',
-                    'Manager Name',
-                    'Manager Full Name',
-                ],
-            'manager_username' =>
-                [
-                    'Manager Username',
-                ],
-            'tag_color' =>
-                [
-                    'color',
-                    'tag color',
-                    'label color',
-                    'color code',
-                    trans('general.tag_color'),
-                ],
+            'serial' => [
+                'serial number',
+                'serial no.',
+                'serial no',
+                'product key',
+                'key',
+            ],
+            'require_serial' => [
+                trans('admin/models/general.importer.require_serial'),
+                trans('admin/models/general.importer.serial_reqiured'),
+            ],
+            'model_number' => [
+                'model',
+                'model no',
+                'model no.',
+                'model number',
+                'model num',
+                'model num.',
+            ],
+            'warranty_months' => [
+                'Warranty',
+                'Warranty Months',
+            ],
+            'qty' => [
+                'QTY',
+                'Quantity',
+            ],
+            'zip' => [
+                'Postal Code',
+                'Post Code',
+                'Zip Code',
+            ],
+            'min_amt' => [
+                'Min Amount',
+                'Minimum Amount',
+                'Min Quantity',
+                'Minimum Quantity',
+            ],
+            'next_audit_date' => [
+                'Next Audit',
+            ],
+            'last_checkout' => [
+                'Last Checkout',
+                'Last Checkout Date',
+                'Checkout Date',
+            ],
+            'address2' => [
+                'Address 2',
+                'Address2',
+            ],
+            'ldap_ou' => [
+                'LDAP OU',
+                'OU',
+            ],
+            'parent_location' => [
+                'Parent',
+                'Parent Location',
+            ],
+            'manager' => [
+                'Managed By',
+                'Manager Name',
+                'Manager Full Name',
+            ],
+            'manager_username' => [
+                'Manager Username',
+            ],
+            'tag_color' => [
+                'color',
+                'tag color',
+                'label color',
+                'color code',
+                trans('general.tag_color'),
+            ],
         ];
 
-        $this->columnOptions[''] = $this->getColumns(''); //blank mode? I don't know what this is supposed to mean
+        $this->columnOptions[''] = $this->getColumns(''); // blank mode? I don't know what this is supposed to mean
         foreach ($this->importTypes as $type => $name) {
             $this->columnOptions[$type] = $this->getColumns($type);
         }
@@ -657,9 +653,10 @@ class Importer extends Component
 
         $this->activeFileId = $id;
 
-        if (!$this->activeFile) {
+        if (! $this->activeFile) {
             $this->message = trans('admin/hardware/message.import.file_missing');
             $this->message_type = 'danger';
+
             return;
         }
 
@@ -691,21 +688,21 @@ class Importer extends Component
         // @todo: next up...handle the file being missing for other interactions...
         // for example having an import open in two tabs, deleting it, and then changing
         // the import type in the other tab. The error message below wouldn't display in that case.
-        if (!$import) {
+        if (! $import) {
             $this->message = trans('admin/hardware/message.import.file_already_deleted');
             $this->message_type = 'danger';
 
             return;
         }
 
-        if ((auth()->user()->id != $import->created_by) && (!auth()->user()->isSuperUser())) {
+        if ((auth()->user()->id != $import->created_by) && (! auth()->user()->isSuperUser())) {
             $this->message = trans('general.generic_model_not_found', ['model' => trans('general.import')]);
             $this->message_type = 'danger';
 
             return;
         }
 
-        if (Storage::delete('private_uploads/imports/' . $import->file_path)) {
+        if (Storage::delete('private_uploads/imports/'.$import->file_path)) {
             $import->delete();
             $this->message = trans('admin/hardware/message.import.file_delete_success');
             $this->message_type = 'success';

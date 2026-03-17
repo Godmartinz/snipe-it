@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Välj de alternativ du vill ha för din tillgångsrapport.',
+    'info' => 'Välj de alternativ du vill ha för din tillgångsrapport.',
     'deleted_user' => 'Raderad användare',
     'send_reminder' => 'Skicka påminnelse',
     'cannot_send_reminder' => 'User has been deleted or does not have an email address so cannot receive a reminder',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'Användarens stad',
         'user_state' => 'Användarens län',
         'user_country' => 'Användarens land',
-        'user_zip' => 'Användarens postnummer'
+        'user_zip' => 'Användarens postnummer',
     ],
     'open_saved_template' => 'Öppna sparad mall',
-    'save_template' =>  'Spara mall',
+    'save_template' => 'Spara mall',
     'select_a_template' => 'Välj mall',
     'template_name' => 'Mallnamn',
     'update_template' => 'Uppdatera mall',

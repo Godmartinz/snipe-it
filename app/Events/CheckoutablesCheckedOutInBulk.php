@@ -19,6 +19,5 @@ class CheckoutablesCheckedOutInBulk
         public string $checkout_at,
         public string $expected_checkin,
         public string $note,
-    ) {
-    }
+    ) {}
 }

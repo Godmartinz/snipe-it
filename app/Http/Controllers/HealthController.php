@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 
@@ -11,17 +12,14 @@ use Illuminate\Support\Facades\DB;
  *
  * @version   v1.0
  *
- * @return \Illuminate\Http\JsonResponse
-
+ * @return JsonResponse
  */
 class HealthController extends BaseController
 {
-
     public function __construct()
     {
         $this->middleware('health');
     }
-
 
     /**
      * Returns a fixed JSON content ({ "status": "ok"}) which indicate the app is up and running
@@ -42,23 +40,20 @@ class HealthController extends BaseController
 
         }
 
-
         if (is_writable(storage_path('logs'))) {
             $filesystem_status = 'ok';
         } else {
             $filesystem_status = 'Could not write to storage/logs';
         }
 
-        if (($filesystem_status!='ok') || ($db_status!='ok')) {
+        if (($filesystem_status != 'ok') || ($db_status != 'ok')) {
             return response()->json([
-                'status' =>
-                    [
-                        'database' => $db_status,
-                        'filesystem' => $filesystem_status,
-                    ]
+                'status' => [
+                    'database' => $db_status,
+                    'filesystem' => $filesystem_status,
+                ],
             ], 500);
         }
-
 
         return response()->json([
             'status' => 'ok',

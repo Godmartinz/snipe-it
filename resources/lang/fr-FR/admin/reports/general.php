@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Sélectionnez les options que vous souhaitez pour votre rapport d\'actifs.',
+    'info' => 'Sélectionnez les options que vous souhaitez pour votre rapport d\'actifs.',
     'deleted_user' => 'Utilisateur supprimé',
     'send_reminder' => 'Envoyer un rappel',
     'cannot_send_reminder' => 'User has been deleted or does not have an email address so cannot receive a reminder',
@@ -13,10 +13,10 @@ return [
         'user_city' => 'Ville Utilisateur',
         'user_state' => 'État Utilisateur',
         'user_country' => 'Pays Utilisateur',
-        'user_zip' => 'Code Postal Utilisateur'
+        'user_zip' => 'Code Postal Utilisateur',
     ],
     'open_saved_template' => 'Open Saved Template',
-    'save_template' =>  'Save Template',
+    'save_template' => 'Save Template',
     'select_a_template' => 'Select a Template',
     'template_name' => 'Template Name',
     'update_template' => 'Update Template',

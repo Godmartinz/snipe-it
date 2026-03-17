@@ -9,6 +9,7 @@ class HistoryPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout($serial = false)
@@ -78,14 +79,13 @@ class HistoryPresenter extends Presenter
             ],
         ];
 
-
         if ($serial) {
-            $extra =  [
+            $extra = [
                 [
-                'field' => 'item.serial',
-                'title' => trans('admin/hardware/table.serial'),
-                'visible' => false,
-            ]
+                    'field' => 'item.serial',
+                    'title' => trans('admin/hardware/table.serial'),
+                    'visible' => false,
+                ],
             ];
         }
 
@@ -130,7 +130,7 @@ class HistoryPresenter extends Presenter
                 'sortable' => true,
                 'visible' => true,
                 'title' => trans('general.notes'),
-                'formatter' => 'notesFormatter'
+                'formatter' => 'notesFormatter',
             ],
             [
                 'field' => 'signature_file',
@@ -173,7 +173,7 @@ class HistoryPresenter extends Presenter
         ];
 
         $merged = array_merge($layout_start, $extra, $layout_end);
+
         return json_encode($merged);
     }
-
 }

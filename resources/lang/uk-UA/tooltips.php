@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'Цей аксесуар неможливо видалити, оскільки до нього все ще прив\'язані одиниці, користувачі або локації.',
         'asset' => 'This asset cannot be deleted because it still has items associated with it',
         'category' => 'This category cannot be deleted because it still has items associated with it',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.'
+        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.',
     ],
 
-);
+];

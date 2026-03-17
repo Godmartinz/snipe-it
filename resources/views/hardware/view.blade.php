@@ -457,38 +457,7 @@
 
 
 
-                                    @if ($asset->assetstatus)
-
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>{{ trans('general.status') }}</strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                @if (($asset->assignedTo) && ($asset->deleted_at==''))
-                                                    <x-icon type="circle-solid" class="text-blue" />
-                                                    {{ $asset->assetstatus->name }}
-                                                    <label class="label label-default">{{ trans('general.deployed') }}</label>
-
-
-                                                    <x-icon type="long-arrow-right" />
-                                                    <x-icon type="{{ $asset->assignedType() }}" class="fa-fw" />
-                                                    {!!  $asset->assignedTo->present()->nameUrl() !!}
-                                                @else
-                                                    @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                                        <x-icon type="circle-solid" class="text-green" />
-                                                    @elseif (($asset->assetstatus) && ($asset->assetstatus->pending=='1'))
-                                                        <x-icon type="circle-solid" class="text-orange" />
-                                                    @else
-                                                        <x-icon type="x" class="text-red" />
-                                                    @endif
-                                                    <a href="{{ route('statuslabels.show', $asset->assetstatus->id) }}">
-                                                        {{ $asset->assetstatus->name }}</a>
-                                                    <label class="label label-default">{{ $asset->present()->statusMeta }}</label>
-
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endif
+                                   <x-info-element.status :infoObject="$asset" />
 
 
                                     @if ($asset->company)
@@ -553,7 +522,7 @@
                                                 {!! $asset->checkInvalidNextAuditDate() ? '<i class="fas fa-exclamation-triangle text-orange" aria-hidden="true"></i>' : '' !!}
                                                 {{ Helper::getFormattedDateObject($audit_log->created_at, 'datetime', false) }}
                                                 @if ($audit_log->user)
-                                                    ({{ link_to_route('users.show', $audit_log->user->display_name, [$audit_log->user->id]) }})
+                                                    (<a href="{{ route('users.show', $audit_log->user->id) }}">{{ $audit_log->user->display_name }}</a>)
                                                 @endif
 
                                             </div>

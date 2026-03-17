@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'Ez a tartozék nem törölhető, mert még eszközök, felhasználók vagy helyszínek vannak hozzárendelve',
         'asset' => 'Ez az eszköz nem törölhető, mert még elemek vannak hozzárendelve',
         'category' => 'Ez a kategória nem törölhető, mert még elemek vannak hozzárendelve',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Vételezze vissza a felhasználó összes elemét és opcionálisan törölje őket A következő oldalon megerősítheti ezt.'
+        'user' => 'Vételezze vissza a felhasználó összes elemét és opcionálisan törölje őket A következő oldalon megerősítheti ezt.',
     ],
 
-);
+];

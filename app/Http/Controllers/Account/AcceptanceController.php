@@ -4,36 +4,34 @@ namespace App\Http\Controllers\Account;
 
 use App\Events\CheckoutAccepted;
 use App\Events\CheckoutDeclined;
-use App\Events\ItemAccepted;
-use App\Events\ItemDeclined;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Mail\CheckoutAcceptanceResponseMail;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
-use App\Models\Contracts\Acceptable;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\AcceptanceItemAcceptedNotification;
 use App\Notifications\AcceptanceItemAcceptedToUserNotification;
 use App\Notifications\AcceptanceItemDeclinedNotification;
 use Exception;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use \Illuminate\Contracts\View\View;
-use \Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
-use App\Helpers\Helper;
 
 class AcceptanceController extends Controller
 {
     /**
      * Show a listing of pending checkout acceptances for the current user
      */
-    public function index() : View
+    public function index(): View
     {
         $acceptances = CheckoutAcceptance::forUser(auth()->user())->pending()->get();
+
         return view('account/accept.index', compact('acceptances'));
     }
 
@@ -42,10 +40,9 @@ class AcceptanceController extends Controller
      *
      * @param  int  $id
      */
-    public function create($id) : View | RedirectResponse
+    public function create($id): View|RedirectResponse
     {
         $acceptance = CheckoutAcceptance::find($id);
-
 
         if (is_null($acceptance)) {
             return redirect()->route('account.accept')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -69,20 +66,18 @@ class AcceptanceController extends Controller
     /**
      * Stores the accept/decline of the checkout acceptance
      *
-     * @param  Request $request
      * @param  int  $id
      */
-    public function store(Request $request, $id) : RedirectResponse
+    public function store(Request $request, $id): RedirectResponse
     {
 
-        if (!$acceptance = CheckoutAcceptance::find($id)) {
+        if (! $acceptance = CheckoutAcceptance::find($id)) {
             return redirect()->route('account.accept')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
-        
+
         $assigned_user = User::find($acceptance->assigned_to_id);
         $settings = Setting::getSettings();
-        $sig_filename='';
-
+        $sig_filename = '';
 
         if (! $acceptance->isPending()) {
             return redirect()->route('account.accept')->with('error', trans('admin/users/message.error.asset_already_accepted'));
@@ -121,11 +116,11 @@ class AcceptanceController extends Controller
 
             // The item was accepted, check for a signature
             if ($request->filled('signature_output')) {
-                $sig_filename = 'siglog-' . Str::uuid() . '-' . date('Y-m-d-his') . '.png';
+                $sig_filename = 'siglog-'.Str::uuid().'-'.date('Y-m-d-his').'.png';
                 $data_uri = $request->input('signature_output');
                 $encoded_image = explode(',', $data_uri);
                 $decoded_image = base64_decode($encoded_image[1]);
-                Storage::put('private_uploads/signatures/' . $sig_filename, (string)$decoded_image);
+                Storage::put('private_uploads/signatures/'.$sig_filename, (string) $decoded_image);
 
                 // No image data is present, kick them back.
                 // This mostly only applies to users on super-duper crapola browsers *cough* IE *cough*
@@ -134,12 +129,11 @@ class AcceptanceController extends Controller
             }
         }
 
-
         // Convert PDF logo to base64 for TCPDF
         // This is needed for TCPDF to properly embed the image if it's a png and the cache isn't writable
         $encoded_logo = null;
         if (($settings->acceptance_pdf_logo) && (Storage::disk('public')->exists($settings->acceptance_pdf_logo))) {
-            $encoded_logo = base64_encode(file_get_contents(public_path() . '/uploads/' . $settings->acceptance_pdf_logo));
+            $encoded_logo = base64_encode(file_get_contents(public_path().'/uploads/'.$settings->acceptance_pdf_logo));
         }
 
         // Get the data array ready for the notifications and PDF generation
@@ -158,7 +152,7 @@ class AcceptanceController extends Controller
             'email' => $assigned_user->email,
             'employee_num' => $assigned_user->employee_num,
             'site_name' => $settings->site_name,
-            'company_name' => $item->company?->name?? $settings->site_name,
+            'company_name' => $item->company?->name ?? $settings->site_name,
             'signature' => (($sig_filename && array_key_exists('1', $encoded_image))) ? $encoded_image[1] : null,
             'logo' => ($encoded_logo) ?? null,
             'date_settings' => $settings->date_display_format,
@@ -167,37 +161,36 @@ class AcceptanceController extends Controller
 
         if ($request->input('asset_acceptance') == 'accepted') {
 
-
             $pdf_filename = 'accepted-'.$acceptance->checkoutable_id.'-'.$acceptance->display_checkoutable_type.'-eula-'.date('Y-m-d-h-i-s').'.pdf';
 
             // Generate the PDF content
             $pdf_content = $acceptance->generateAcceptancePdf($data, $acceptance);
-            Storage::put('private_uploads/eula-pdfs/' .$pdf_filename, $pdf_content);
+            Storage::put('private_uploads/eula-pdfs/'.$pdf_filename, $pdf_content);
 
             // Log the acceptance
             $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'));
 
             // Send the PDF to the signing user
-            if (($request->input('send_copy') == '1') && ($assigned_user->email !='')) {
+            if (($request->input('send_copy') == '1') && ($assigned_user->email != '')) {
 
                 // Add the attachment for the signing user into the $data array
                 $data['file'] = $pdf_filename;
                 try {
                     $assigned_user->notify((new AcceptanceItemAcceptedToUserNotification($data))->locale($assigned_user->locale));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     Log::warning($e);
                 }
             }
             try {
                 $acceptance->notify((new AcceptanceItemAcceptedNotification($data))->locale(Setting::getSettings()->locale));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::warning($e);
             }
             event(new CheckoutAccepted($acceptance));
 
             $return_msg = trans('admin/users/message.accepted');
 
-        // Item was declined
+            // Item was declined
         } else {
 
             for ($i = 0; $i < ($acceptance->qty ?? 1); $i++) {
@@ -209,7 +202,6 @@ class AcceptanceController extends Controller
             event(new CheckoutDeclined($acceptance));
             $return_msg = trans('admin/users/message.declined');
         }
-
 
         // Send an email notification if one is requested
         if ($acceptance->alert_on_response_id) {
@@ -230,10 +222,8 @@ class AcceptanceController extends Controller
                 Log::warning($e);
             }
         }
+
         return redirect()->to('account/accept')->with('success', $return_msg);
 
     }
-
-
-
 }

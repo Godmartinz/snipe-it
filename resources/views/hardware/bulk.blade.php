@@ -133,6 +133,7 @@
                   aria-label="status_id"
               />
               <p class="help-block">{{ trans('general.status_compatibility') }}</p>
+                <p id="selected_status_status" style="display:none;"></p>
               {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
             </div>
           </div>
@@ -288,5 +289,40 @@
         });
       });
     });
+    function status_check() {
+        var status_id = $('select[name="status_id"]').val();
+        if (status_id != '') {
+            $(".status_spinner").css("display", "inline");
+            $.ajax({
+                url: "{{config('app.url') }}/api/v1/statuslabels/" + status_id + "/deployable",
+                headers: {
+                    "X-Requested-With": 'XMLHttpRequest',
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (data) {
+                    $(".status_spinner").css("display", "none");
+                    $("#selected_status_status").fadeIn();
+
+                    if (data == true) {
+                        $("#selected_status_status").removeClass('text-danger');
+                        $("#selected_status_status").addClass('text-success');
+                        $("#selected_status_status").html('<x-icon type="checkmark" /> {{ trans_choice('admin/hardware/form.asset_deployable', 2)}}');
+
+
+                    } else {
+                        $("#assignto_selector").hide();
+                        $("#selected_status_status").removeClass('text-success');
+                        $("#selected_status_status").addClass('text-danger');
+                        $("#selected_status_status").html("<x-icon type=\"warning\" /> {{ trans_choice('admin/hardware/form.asset_not_deployable_checkin', 2) }} ");
+
+                    }
+                }
+            });
+        }
+    }
+    $(function () {
+        $('select[name="status_id"]').on('change', status_check);
+    });
+
   </script>
 @endsection

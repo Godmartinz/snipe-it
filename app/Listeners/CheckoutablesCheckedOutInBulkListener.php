@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Mail;
 
 class CheckoutablesCheckedOutInBulkListener
 {
-
     public function subscribe($events)
     {
         $events->listen(
@@ -45,7 +44,7 @@ class CheckoutablesCheckedOutInBulkListener
 
                 Log::info('BulkAssetCheckoutMail sent to checkout target');
             } catch (Exception $e) {
-                Log::debug("Exception caught during BulkAssetCheckoutMail to target: " . $e->getMessage());
+                Log::debug('Exception caught during BulkAssetCheckoutMail to target: '.$e->getMessage());
             }
         }
 
@@ -62,14 +61,14 @@ class CheckoutablesCheckedOutInBulkListener
 
                 Log::info('BulkAssetCheckoutMail sent to admin_cc_email');
             } catch (Exception $e) {
-                Log::debug("Exception caught during BulkAssetCheckoutMail to admin_cc_email: " . $e->getMessage());
+                Log::debug('Exception caught during BulkAssetCheckoutMail to admin_cc_email: '.$e->getMessage());
             }
         }
     }
 
     private function shouldSendCheckoutEmailToUser(?User $user, Collection $assets): bool
     {
-        if (!$user?->email) {
+        if (! $user?->email) {
             return false;
         }
 
@@ -88,7 +87,7 @@ class CheckoutablesCheckedOutInBulkListener
     {
         $setting = Setting::getSettings();
 
-        if (!$setting) {
+        if (! $setting) {
             return false;
         }
 
@@ -96,7 +95,7 @@ class CheckoutablesCheckedOutInBulkListener
             return true;
         }
 
-        if (!$this->hasAssetThatRequiresAcceptance($assets)) {
+        if (! $this->hasAssetThatRequiresAcceptance($assets)) {
             return false;
         }
 
@@ -142,6 +141,7 @@ class CheckoutablesCheckedOutInBulkListener
 
         if ($target instanceof Asset) {
             $target->load('assignedTo');
+
             return $target->assignedto;
         }
 

@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Notifications\Email;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Mail\CheckinAssetMail;
 use App\Models\Accessory;
+use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\Group;
-use App\Events\CheckoutableCheckedIn;
-use App\Models\Asset;
-use App\Models\User;
 use Tests\TestCase;
 
 #[Group('notifications')]
@@ -32,8 +32,8 @@ class EmailNotificationsToUserUponCheckinTest extends TestCase
 
         $this->fireCheckInEvent($asset, $user);
 
-        Mail::assertSent(CheckinAssetMail::class, function($mail) use ($user) {
-                return $mail->hasTo($user->email);
+        Mail::assertSent(CheckinAssetMail::class, function ($mail) use ($user) {
+            return $mail->hasTo($user->email);
         });
     }
 
