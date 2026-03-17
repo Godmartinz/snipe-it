@@ -1299,19 +1299,21 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'index'
             ]
             )->name('api.activity.index');
-        });
 
-    Route::group(['prefix' => 'reports'], function () {
-        Route::get('expiring-assets', [
-            Api\ReportsController::class,
-            'expiringAssetsReport',
-        ])->name('api.expiring-assets');
+            Route::get('expiring-assets',
+            [
+                Api\ReportsController::class,
+                'expiringAssetsReport',
+            ])->name('api.expiring-assets');
 
-        Route::get('expiring-licenses', [
-            Api\ReportsController::class,
-            'expiringLicensesReport',
-        ])->name('api.expiring-licenses');
-    });// end reports api routes
+            Route::get('expiring-licenses',
+            [
+                Api\ReportsController::class,
+                'expiringLicensesReport',
+            ])->name('api.expiring-licenses');
+        });// end reports api routes
+
+
 
 
 

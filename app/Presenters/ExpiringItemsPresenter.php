@@ -74,7 +74,6 @@ class ExpiringItemsPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('admin/hardware/form.warranty_expires'),
                 'visible' => true,
-//                'formatter' => 'dateDisplayFormatter',
             ],
         ];
 

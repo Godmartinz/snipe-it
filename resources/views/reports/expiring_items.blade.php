@@ -7,9 +7,6 @@
     @parent
 @stop
 
-@section('header_right')
-@stop
-
 @section('content')
     <div class="row">
         <div class="col-md-12">

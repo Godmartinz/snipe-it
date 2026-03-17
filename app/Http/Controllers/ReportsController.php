@@ -136,7 +136,7 @@ class ReportsController extends Controller
         $assets->load(['assignedTo', 'supplier']);
 
         $licenses = License::query()
-            ->expiringLicenses($alert_interval)              // <-- this is the right call
+            ->expiringLicenses($alert_interval)
             ->with(['manufacturer', 'category'])
             ->orderBy('expiration_date', 'ASC')
             ->orderBy('termination_date', 'ASC')

@@ -20,5 +20,4 @@ return [
     'select_a_template' => 'Select a Template',
     'template_name' => 'Template Name',
     'update_template' => 'Update Template',
-    'no_expiring_items' => 'No expiring :items found.',
 ];
