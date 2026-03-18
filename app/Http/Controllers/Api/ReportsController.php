@@ -107,7 +107,7 @@ class ReportsController extends Controller
     public function expiringAssetsReport(Request $request)
     {
         $this->authorize('reports.view');
-        $days = $request->get('days', 30);
+        $days = $request->input('days', 30);
         $assets = Asset::getExpiringWarrantyOrEol($days);
 
         return response()->json(
@@ -119,7 +119,7 @@ class ReportsController extends Controller
     {
         $this->authorize('reports.view');
 
-        $days = (int) $request->get('days', 30);
+        $days = (int)$request->input('days', 30);
         $includeExpired = $request->boolean('include_expired', false);
 
         $licenses = License::query()

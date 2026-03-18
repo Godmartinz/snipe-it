@@ -18,7 +18,7 @@ class ExpiringItemsTransformer
                 'model' => $asset->model->name ?? '',
                 'model_number' => $asset->model->model_number ?? '',
                 'purchase_date' => Helper::getFormattedDateObject($asset->purchase_date, 'date'),
-                'eol_rate' => $asset->model->eol ?? '',
+                'eol_rate' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? (int)Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date, true) . ' months' : null,
                 'eol_date' => Helper::getFormattedDateObject($asset->eol_date, 'date'),
                 'warranty_expires' => $asset->warranty_expires ? $asset->warranty_expires_formatted_date .' ('.$asset->warranty_expires_diff_for_humans.')' : '',
             ];
