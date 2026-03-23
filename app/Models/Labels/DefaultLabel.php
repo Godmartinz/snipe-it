@@ -82,6 +82,41 @@ class DefaultLabel extends RectangleSheet
 
     }
 
+    public function getBarcode1DSize()
+    {
+        return self::BARCODE1D_SIZE;
+    }
+
+    public function getBarcode2DSize()
+    {
+        return self::BARCODE2D_SIZE;
+    }
+
+    public function getBarcode2DMargin()
+    {
+        return self::BARCODE2D_MARGIN;
+    }
+
+    public function getLogoSize()
+    {
+        return self::LOGO_SIZE;
+    }
+
+    public function getLogoMargin()
+    {
+        return self::LOGO_MARGIN;
+    }
+
+    public function getTextMargin()
+    {
+        return self::TEXT_MARGIN;
+    }
+
+    public function getTextSize()
+    {
+        return $this->textSize;
+    }
+
     public function getUnit()
     {
         return 'in';
@@ -200,6 +235,32 @@ class DefaultLabel extends RectangleSheet
     public function getSupportLogo()
     {
         return true;
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'text_font_size' => $this->getTextSize(),
+            'text_margin' => $this->getTextMargin(),
+            'barcode_1d_size' => $this->getBarcode1DSize(),
+            'barcode_2d_size' => $this->getBarcode2DSize(),
+            'barcode_2d_margin' => $this->getBarcode2DMargin(),
+            'logo_width' => $this->getLogoSize()[0],
+            'logo_height' => $this->getLogoSize()[1],
+            'logo_margin' => $this->getLogoMargin(),
+        ];
+    }
+
+    protected function getSupportsEditorConfig(): array
+    {
+        return [
+            'asset_tag' => $this->getSupportAssetTag(),
+            'barcode_1d' => $this->getSupport1DBarcode(),
+            'barcode_2d' => $this->getSupport2DBarcode(),
+            'fields' => $this->getSupportFields(),
+            'logo' => $this->getSupportLogo(),
+            'title' => $this->getSupportTitle(),
+        ];
     }
 
     public function preparePDF($pdf) {}
