@@ -33,7 +33,7 @@ use App\Livewire\Importer;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
-use App\Models\Labels\Sheets\Avery\_3490_A;
+use App\Models\Labels\Sheets\Avery\_5520_A;
 
 Route::group(['middleware' => 'auth'], function () {
     /*
@@ -571,7 +571,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
                 ->name('report-templates.destroy');
     });
     Route::get('/debug/label', function () {
-        $label = new _3490_A();
+        $label = new _5520_A();
 
         dd($label->toEditorConfig());
     });
