@@ -11,6 +11,7 @@ use App\Models\Labels\Label;
 use App\Models\Location;
 use App\Models\Manufacturer;
 use App\Models\Setting;
+use Illuminate\Http\Request;
 use App\Models\Supplier;
 use App\Models\User;
 use App\View\Label as LabelView;
@@ -93,5 +94,24 @@ class LabelsController extends Controller
             ->with('bulkedit', false)
             ->with('count', 0);
 
+    }
+
+    public function edit(Request $request)
+    {
+        $selectedLabel = $request->get('label');
+
+        try {
+            $label = $selectedLabel
+                ? Label::find($selectedLabel)
+                : new \App\Models\Labels\DefaultLabel();
+        } catch (\Throwable $e) {
+            $label = new \App\Models\Labels\DefaultLabel();
+            $selectedLabel = null;
+        }
+
+        return view('settings.label-edit', [
+            'config' => $label->toEditorConfig(),
+            'selectedLabel' => $selectedLabel,
+        ]);
     }
 }

@@ -220,6 +220,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
 
+    Route::get('/settings/label/edit', [LabelsController::class, 'edit'])
+        ->name('settings.label.edit');
+
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
         ->breadcrumbs(fn (Trail $trail) =>
@@ -569,12 +572,6 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             Route::delete('/{reportTemplate}', [ReportTemplatesController::class, 'destroy'])
                 ->name('report-templates.destroy');
     });
-    Route::get('/debug/label', function () {
-        $label = new \App\Models\Labels\DefaultLabel();
-
-        dd($label->toEditorConfig());
-    });
-
 
     Route::get(
         'activity', [ReportsController::class, 'getActivityReport'])
