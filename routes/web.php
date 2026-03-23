@@ -570,7 +570,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
                 ->name('report-templates.destroy');
     });
     Route::get('/debug/label', function () {
-        $label = new \App\Models\Labels\Sheets\Avery\L4736_A();
+        $label = new \App\Models\Labels\Sheets\Avery\L7163_A();
 
         dd($label->toEditorConfig());
     });
