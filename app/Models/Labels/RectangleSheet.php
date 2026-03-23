@@ -47,4 +47,21 @@ abstract class RectangleSheet extends Sheet
 
         return [$x, $y];
     }
+
+    public function toEditorConfig(): array
+    {
+        return array_merge(parent::toEditorConfig(), [
+            'grid' => $this->getGridEditorConfig(),
+        ]);
+    }
+
+    protected function getGridEditorConfig(): array
+    {
+        return [
+            'columns' => $this->getColumns(),
+            'rows' => $this->getRows(),
+            'column_spacing' => $this->getLabelColumnSpacing(),
+            'row_spacing' => $this->getLabelRowSpacing(),
+        ];
+    }
 }

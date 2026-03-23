@@ -725,4 +725,68 @@ abstract class Label
                 }
             );
     }
+
+    public function toEditorConfig(): array
+    {
+        return [
+            'name' => $this->getName(),
+            'unit' => $this->getUnit(),
+            'dimensions' => $this->getDimensionsEditorConfig(),
+            'printable_area' => $this->getPrintableAreaEditorConfig(),
+            'supports' => $this->getSupportsEditorConfig(),
+            'content' => $this->getContentEditorConfig(),
+            'meta' => $this->getMetaEditorConfig(),
+        ];
+    }
+
+    protected function getDimensionsEditorConfig(): array
+    {
+        return [
+            'width' => $this->getWidth(),
+            'height' => $this->getHeight(),
+            'margin_top' => $this->getMarginTop(),
+            'margin_right' => $this->getMarginRight(),
+            'margin_bottom' => $this->getMarginBottom(),
+            'margin_left' => $this->getMarginLeft(),
+        ];
+    }
+
+    protected function getPrintableAreaEditorConfig(): array
+    {
+        $pa = $this->getPrintableArea();
+
+        return [
+            'x1' => $pa->x1,
+            'y1' => $pa->y1,
+            'x2' => $pa->x2,
+            'y2' => $pa->y2,
+            'width' => $pa->w,
+            'height' => $pa->h,
+        ];
+    }
+
+    protected function getSupportsEditorConfig(): array
+    {
+        return [
+            'asset_tag' => $this->getSupportAssetTag(),
+            'barcode_1d' => $this->getSupport1DBarcode(),
+            'barcode_2d' => $this->getSupport2DBarcode(),
+            'fields' => $this->getSupportFields(),
+            'logo' => $this->getSupportLogo(),
+            'title' => $this->getSupportTitle(),
+        ];
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [];
+    }
+
+    protected function getMetaEditorConfig(): array
+    {
+        return [
+            'orientation' => $this->getOrientation(),
+            'rotation' => $this->getRotation(),
+        ];
+    }
 }
