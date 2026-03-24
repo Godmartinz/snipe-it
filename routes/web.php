@@ -216,12 +216,15 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('settings.index')
             ->push(trans('admin/settings/general.labels_title'), route('settings.labels.index')));
+    Route::get('/labels/customizer-preview/{labelName}', [LabelsController::class, 'customLabelPreview'])
+        ->where('labelName', '.*')
+        ->name('labels.customizer-preview');
 
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
 
-    Route::get('/settings/label/edit', [LabelsController::class, 'edit'])
-        ->name('settings.label.edit');
+    Route::get('/settings/labels/edit', [LabelsController::class, 'edit'])
+        ->name('settings.labels.edit');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
