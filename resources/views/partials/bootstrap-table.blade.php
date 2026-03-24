@@ -1834,6 +1834,21 @@
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
+    function labelActionsFormatter(value, row) {
+        if (!row.name) return '';
+
+        const baseUrl = '{{ route('settings.labels.edit') }}';
+
+        return `
+        <a href="${baseUrl}?label=${encodeURIComponent(row.name)}"
+       class="actions btn btn-sm btn-primary hidden-print"
+       data-tooltip="true"
+       title="{{ trans('general.clone') }}">
+        <i class="fa-regular fa-clone"></i>
+        <span class="sr-only">{{ trans('general.clone') }}</span>
+    </a>&nbsp;
+    `;
+    }
     function labelPerPageFormatter(value, row, index, field) {
         if (row) {
             if (!row.hasOwnProperty('sheet_info')) { return 1; }
