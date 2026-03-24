@@ -72,21 +72,11 @@
                             <div class="form-group{{ $errors->has('label2_template') ? ' has-error' : '' }}">
 
                                 <div class="col-md-12">
-                                    <table
-
-                                        data-columns="{{ \App\Presenters\LabelPresenter::dataTableLayout() }}"
-                                        data-cookie="true"
-                                        data-cookie-id-table="label2TemplateTable"
-                                        data-id-table="label2TemplateTable"
-                                        data-select-item-name="label2_template"
-                                        data-id-field="name"
-                                        data-side-pagination="server"
-                                        data-sort-name="name"
-                                        data-sort-order="asc"
-                                        data-url="{{ route('api.labels.index') }}"
-                                        id="label2TemplateTable"
-                                        class="table table-striped snipe-table"
-                                    ></table>
+                                    <x-container>
+                                        <x-box name="label-templates">
+                                            <x-table.labels/>
+                                        </x-box>
+                                    </x-container>
                                     <script>
                                         document.addEventListener('DOMContentLoaded', () => {
                                             const chosenLabel = "{{ old('label2_template', $chosenLabel ?? '') }}";
@@ -382,7 +372,8 @@
 
                     <fieldset name="label-preview">
                         <x-form.legend>
-                            {{ trans('admin/settings/general.label2_label_preview') }}: <code>{{ $setting->label2_template}}</code>
+                            {{ trans('admin/settings/general.label2_label_preview') }}: <code
+                                    id="selected-template-display">{{ $setting->label2_template }}</code>
                         </x-form.legend>
                             <div class="col-md-12" style="margin-bottom: 10px;">
                                 @include('partials.label2-preview')
@@ -648,7 +639,15 @@
 
             });
         });
+        document.addEventListener('DOMContentLoaded', () => {
+            const display = document.getElementById('selected-template-display');
 
+            $('#label2TemplateTable').on('change', 'input[name="label2_template"]', function () {
+                if (display) {
+                    display.textContent = this.value || '';
+                }
+            });
+        });
     </script>
     {{-- Can't use @script here because we're not in a livewire component so let's manually load --}}
     @livewireScripts
