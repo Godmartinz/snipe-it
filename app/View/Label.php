@@ -49,6 +49,7 @@ class Label implements View
         $settings = $this->data->get('settings');
         $assets = $this->data->get('assets');
         $offset = $this->data->get('offset');
+        $template = $this->data->get('template');
 
 
         // If disabled, pass to legacy view
@@ -60,7 +61,9 @@ class Label implements View
                 ->with('count', $this->data->get('count'));
         }
 
+        if ($template === null) {
             $template = LabelModel::find($settings->label2_template);
+        }
 
         if ($template === null) {
             return redirect()->route('settings.labels.index')->with('error', trans('admin/settings/message.labels.null_template'));
@@ -88,7 +91,6 @@ class Label implements View
         $pdf->setCreator('Snipe-IT');
         $pdf->SetSubject('Asset Labels');
         $template->preparePDF($pdf);
-
         // Get fields from settings
         $fieldDefinitions = collect(explode(';', $settings->label2_fields))
             ->filter(fn($fieldString) => !empty($fieldString))

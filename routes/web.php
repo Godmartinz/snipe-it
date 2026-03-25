@@ -59,12 +59,6 @@ Route::group(['middleware' => 'auth'], function () {
         [LabelsController::class, 'show']
     )->where('labelName', '.*')->name('labels.show');
 
-    Route::get('/test-email', function () {
-        $mailable = new \App\Mail\CheckoutComponentMail(
-
-        );
-        return $mailable->render(); // dumps HTML
-    });
     /*
     * Manufacturers
     */
@@ -216,9 +210,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('settings.index')
             ->push(trans('admin/settings/general.labels_title'), route('settings.labels.index')));
-    Route::get('/labels/customizer-preview/{labelName}', [LabelsController::class, 'customLabelPreview'])
-        ->where('labelName', '.*')
-        ->name('labels.customizer-preview');
+    Route::get('labels/customizer-preview/{labelName}', [LabelsController::class, 'customLabelPreview']
+    )->where('labelName', '.*')->name('labels.customizer-preview');
 
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');

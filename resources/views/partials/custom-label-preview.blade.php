@@ -44,76 +44,76 @@
 @push('js')
     <script>
         document.addEventListener('alpine:init', () => {
+
             Alpine.data('custom_label_preview', () => ({
+
                 _form: null,
-                _popped: null,
-                _previewURL: '',
 
-                get previewURL() {
-                    return this._previewURL;
-                },
-
-                set previewURL(url) {
-                    this._previewURL = url;
-
-                    if (this._popped && !this._popped.closed) {
-                        this._popped.location = url;
-                    }
-                },
-
-                _init() {
-                    this._form = document.getElementById('label-customizer-form');
+                _init: function () {
+                    const shell = document.querySelector('.label-customizer-shell');
+                    this._form = document.querySelector('.label-customizer-shell form');
 
                     if (!this._form) {
+                        console.log('custom_label_preview: form not found');
                         return;
                     }
 
                     this.updateURL();
 
-                    this._form.addEventListener('input', this.updateURL.bind(this));
                     this._form.addEventListener('change', this.updateURL.bind(this));
+                    this._form.addEventListener('input', this.updateURL.bind(this));
                 },
 
-                updateURL() {
+                updateURL: function () {
                     const fields = $(this._form).serializeArray();
 
-                    const templateField = fields.find(field => field.name === 'template');
-                    if (!templateField || !templateField.value) {
+                    const payload = Object.assign({}, ...fields
+                        .filter((value) => value.name !== '_token')
+                        .map((value) => ({[value.name]: value.value}))
+                    );
+
+                    const template = payload.template;
+
+                    if (!template) {
+                        console.log('custom_label_preview: missing template');
                         return;
                     }
-
-                    const payload = {};
-
-                    fields.forEach(field => {
-                        if (['_token'].includes(field.name)) {
-                            return;
-                        }
-
-                        payload[field.name] = field.value;
-                    });
-
-                    const template = templateField.value;
 
                     this.previewURL = '{{ route("labels.customizer-preview", ["labelName" => ":label"]) }}'
                         .replace(':label', template.replaceAll('\\', '/'))
                         .concat('?' + $.param(payload) + '#toolbar=0');
+
+                    console.log('custom_label_preview url:', this.previewURL);
                 },
 
-                popout() {
-                    if (!this.previewURL) {
-                        return;
+                _previewURL: '',
+                get previewURL() {
+                    return this._previewURL;
+                },
+                set previewURL(url) {
+                    this._previewURL = url;
+
+                    if (this._popped && !this._popped.closed) {
+                        this._popped.location = this.previewURL;
                     }
+                },
+
+                _popped: null,
+                popout: function () {
+                    if (!this.previewURL) return;
 
                     this._popped = window.open(this.previewURL);
                 }
+
             }));
+
         });
     </script>
 @endpush
 
-<div x-data="custom_label_preview" x-init="_init" class="clp-root">
+<div x-data="custom_label_preview()" x-init="_init()" class="clp-root">
     <div class="clp-top">
-        <button class="clp-pop-button btn btn-default" x-on:click.prevent="popout" title="Pop Out">
+        <button class="clp-pop-button btn btn-default" x-on:click.prevent="popout()" title="Pop Out">
             <i class="fa-solid fa-maximize"></i>
         </button>
     </div>

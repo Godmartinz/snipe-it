@@ -88,7 +88,7 @@ class LabelsController extends Controller
             }
         }
 
-        return (new LabelView($template->getName()))
+        return (new LabelView())
             ->with('assets', collect([$exampleAsset]))
             ->with('settings', $settings)
             ->with('template', $template)
@@ -128,6 +128,19 @@ class LabelsController extends Controller
         $template = $labelName === 'DefaultLabel'
             ? new DefaultLabel()
             : Label::find($labelName);
+
+        $editorConfig = [
+            'page' => $request->input('page', []),
+            'grid' => $request->input('grid', []),
+            'label' => $request->input('label', []),
+            'content' => $request->input('content', []),
+            'supports' => $request->input('supports', []),
+        ];
+        $template = new \App\Models\Labels\CustomLabels\PreviewLabel();
+
+        if (method_exists($template, 'applyEditorConfig')) {
+            $template->applyEditorConfig($editorConfig);
+        }
 
         $exampleAsset = new Asset;
         $exampleAsset->id = 999999;
@@ -194,18 +207,11 @@ class LabelsController extends Controller
             });
 
         $settings = Setting::getSettings();
-
-        $overrides = array_replace_recursive(
-            $request->input('page', []),
-            $request->input('grid', []),
-            $request->input('label', []),
-            $request->input('content', []),
-            $request->input('supports', [])
-        );
-
-
-        foreach ($overrides as $key => $value) {
-            $settings->{$key} = $value;
+        if (request()->has('settings')) {
+            $overrides = request()->input('settings');
+            foreach ($overrides as $key => $value) {
+                $settings->$key = $value;
+            }
         }
 
         return (new LabelView)

@@ -288,3 +288,6 @@
         </div>
     </div>
 @stop
+@push('js')
+    @livewireScripts
+@endpush
