@@ -1840,14 +1840,24 @@
         const baseUrl = '{{ route('settings.labels.edit') }}';
 
         return `
-        <a href="${baseUrl}?label=${encodeURIComponent(row.name)}"
-       class="actions btn btn-sm btn-primary hidden-print"
-       data-tooltip="true"
-       title="{{ trans('general.clone') }}">
-        <i class="fa-regular fa-clone"></i>
-        <span class="sr-only">{{ trans('general.clone') }}</span>
-    </a>&nbsp;
-    `;
+                    <a href="${baseUrl}?label=${encodeURIComponent(row.name)}"
+                       class="actions btn btn-sm btn-primary hidden-print"
+                       data-tooltip="true"
+                       title="{{ trans('general.clone') }}">
+                       <i class="fa-regular fa-clone"></i>
+                       <span class="sr-only">{{ trans('general.clone') }}</span>
+                    </a>
+                `;
+    }
+
+    function labelNameFormatter(value) {
+        if (!value) return '';
+
+        // Normalize slashes just in case
+        value = value.replace(/\//g, '\\');
+
+        // Remove "Sheets\" or "Tapes\" from the beginning
+        return value.replace(/^(Sheets|Tapes)\\/, '');
     }
     function labelPerPageFormatter(value, row, index, field) {
         if (row) {

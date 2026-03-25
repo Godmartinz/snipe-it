@@ -111,11 +111,13 @@ class LabelsController extends Controller
                 : new \App\Models\Labels\DefaultLabel();
         } catch (\Throwable $e) {
             $label = new \App\Models\Labels\DefaultLabel();
+            $selectedLabel = null;
         }
 
         return view('settings.label-edit', [
             'config' => $label->toEditorConfig(),
-            'selectedLabel' => Label::find(),
+            'selectedLabel' => $label->getName(),
+            'labels' => Label::find(),
         ]);
     }
 

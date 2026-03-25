@@ -21,6 +21,9 @@
         data-sort-order="{{ $sortOrder }}"
         data-url="{{ $route }}"
         id="{{ $tableId }}"
+        data-pagination="true"
+        data-page-size="50"
+        data-height="600"
         buttons="labelButtons"
         class="table table-striped snipe-table"
 ></table>

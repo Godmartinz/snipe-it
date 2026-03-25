@@ -731,13 +731,13 @@ abstract class Label
         return [
             'name' => $this->getName(),
             'unit' => $this->getUnit(),
-            'dimensions' => $this->getDimensionsEditorConfig(),
             'printable_area' => $this->getPrintableAreaEditorConfig(),
             'supports' => $this->getSupportsEditorConfig(),
             'content' => $this->getContentEditorConfig(),
             'meta' => $this->getMetaEditorConfig(),
         ];
     }
+
 
     protected function getDimensionsEditorConfig(): array
     {

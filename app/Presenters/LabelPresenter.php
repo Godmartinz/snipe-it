@@ -26,6 +26,7 @@ class LabelPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.name'),
                 'visible' => true,
+                'formatter' => 'labelNameFormatter',
             ], [
                 'field' => 'size',
                 'searchable' => false,
