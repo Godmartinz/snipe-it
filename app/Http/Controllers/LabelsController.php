@@ -125,7 +125,7 @@ class LabelsController extends Controller
     {
         $labelName = str_replace('/', '\\', $labelName);
 
-        $template = $labelName === 'DefaultLabel'
+        $baseTemplate = $labelName === 'DefaultLabel'
             ? new DefaultLabel()
             : Label::find($labelName);
 
@@ -136,7 +136,12 @@ class LabelsController extends Controller
             'content' => $request->input('content', []),
             'supports' => $request->input('supports', []),
         ];
+
         $template = new \App\Models\Labels\CustomLabels\PreviewLabel();
+
+        if (method_exists($template, 'seedFromTemplate')) {
+            $template->seedFromTemplate($baseTemplate);
+        }
 
         if (method_exists($template, 'applyEditorConfig')) {
             $template->applyEditorConfig($editorConfig);

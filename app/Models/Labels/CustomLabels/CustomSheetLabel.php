@@ -42,6 +42,15 @@ abstract class CustomSheetLabel extends CustomLabel
     protected float $barcodeMargin = 2.0;
     protected float $logoMaxWidth = 12.0;
     protected float $logoMargin = 2.0;
+    protected float $tagSize = 6.0;
+    protected float $titleSize = 8.0;
+    protected float $labelSize = 6.0;
+    protected float $fieldSize = 7.0;
+
+// Spacing / margins between elements (vertical spacing mostly)
+    protected float $titleMargin = 2.0;
+    protected float $labelMargin = 1.5;
+    protected float $fieldMargin = 2.0;
 
     public function getUnit()
     {
@@ -183,15 +192,130 @@ abstract class CustomSheetLabel extends CustomLabel
         return $this->logoMargin;
     }
 
+    public function getTagSize(): float
+    {
+        return $this->tagSize;
+    }
+
+    public function getTitleSize(): float
+    {
+        return $this->titleSize;
+    }
+
+    public function getLabelSize(): float
+    {
+        return $this->labelSize;
+    }
+
+    public function getFieldSize(): float
+    {
+        return $this->fieldSize;
+    }
+
+    public function getTitleMargin(): float
+    {
+        return $this->titleMargin;
+    }
+
+    public function getLabelMargin(): float
+    {
+        return $this->labelMargin;
+    }
+
+    public function getFieldMargin(): float
+    {
+        return $this->fieldMargin;
+    }
     public function getLabelBorder()
     {
         return 0;
     }
 
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false, 0);
+    }
+
+    public function seedFromTemplate($template): static
+    {
+        $this->unit = $template->getUnit();
+
+        $this->pageWidth = $template->getPageWidth();
+        $this->pageHeight = $template->getPageHeight();
+
+        $this->pageMarginTop = $template->getPageMarginTop();
+        $this->pageMarginRight = $template->getPageMarginRight();
+        $this->pageMarginBottom = $template->getPageMarginBottom();
+        $this->pageMarginLeft = $template->getPageMarginLeft();
+
+        $this->rows = $template->getRows();
+        $this->columns = $template->getColumns();
+
+        $this->labelWidth = $template->getLabelWidth();
+        $this->labelHeight = $template->getLabelHeight();
+
+        $this->labelRowSpacing = $template->getLabelRowSpacing();
+        $this->labelColumnSpacing = $template->getLabelColumnSpacing();
+
+        $this->labelMarginTop = $template->getLabelMarginTop();
+        $this->labelMarginRight = $template->getLabelMarginRight();
+        $this->labelMarginBottom = $template->getLabelMarginBottom();
+        $this->labelMarginLeft = $template->getLabelMarginLeft();
+
+        $this->supportAssetTag = $template->getSupportAssetTag();
+        $this->support1DBarcode = $template->getSupport1DBarcode();
+        $this->support2DBarcode = $template->getSupport2DBarcode();
+        $this->supportFields = $template->getSupportFields();
+        $this->supportLogo = $template->getSupportLogo();
+        $this->supportTitle = $template->getSupportTitle();
+
+        if (method_exists($template, 'getBarcodeSize')) {
+            $this->barcodeSize = $template->getBarcodeSize();
+        }
+
+        if (method_exists($template, 'getBarcodeMargin')) {
+            $this->barcodeMargin = $template->getBarcodeMargin();
+        }
+
+        if (method_exists($template, 'getLogoMaxWidth')) {
+            $this->logoMaxWidth = $template->getLogoMaxWidth();
+        }
+
+        if (method_exists($template, 'getLogoMargin')) {
+            $this->logoMargin = $template->getLogoMargin();
+        }
+
+        if (method_exists($template, 'getTagSize')) {
+            $this->tagSize = $template->getTagSize();
+        }
+
+        if (method_exists($template, 'getTitleSize')) {
+            $this->titleSize = $template->getTitleSize();
+        }
+
+        if (method_exists($template, 'getTitleMargin')) {
+            $this->titleMargin = $template->getTitleMargin();
+        }
+
+        if (method_exists($template, 'getLabelSize')) {
+            $this->labelSize = $template->getLabelSize();
+        }
+
+        if (method_exists($template, 'getLabelMargin')) {
+            $this->labelMargin = $template->getLabelMargin();
+        }
+
+        if (method_exists($template, 'getFieldSize')) {
+            $this->fieldSize = $template->getFieldSize();
+        }
+
+        if (method_exists($template, 'getFieldMargin')) {
+            $this->fieldMargin = $template->getFieldMargin();
+        }
+
+        return $this;
     }
 
     public function applyEditorConfig(array $config): static
@@ -243,6 +367,15 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
         $this->logoMaxWidth = isset($content['logo_max_width']) ? (float)$content['logo_max_width'] : $this->logoMaxWidth;
         $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
+
+        $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
+        $this->titleSize = isset($content['title_font_size']) ? (float)$content['title_font_size'] : $this->titleSize;
+        $this->labelSize = isset($content['field_label_font_size']) ? (float)$content['field_label_font_size'] : $this->labelSize;
+        $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
+
+        $this->titleMargin = isset($content['title_margin']) ? (float)$content['title_margin'] : $this->titleMargin;
+        $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
+        $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
     }
 
     public function write($pdf, $record)
@@ -318,15 +451,15 @@ abstract class CustomSheetLabel extends CustomLabel
                 $currentY,
                 'freesans',
                 '',
-                8,
-                'C',
+                $this->getTitleSize(),
+                'L',
                 $usableWidth,
                 8,
                 true,
                 0
             );
 
-            $currentY += 10;
+            $currentY += $this->getTitleSize() + $this->getTitleMargin();
         }
 
         if ($record->has('fields') && $this->getSupportFields()) {
@@ -338,15 +471,15 @@ abstract class CustomSheetLabel extends CustomLabel
                     $currentY,
                     'freesans',
                     '',
-                    6,
+                    $this->getLabelSize(),
                     'L',
                     $usableWidth,
-                    6,
+                    $this->getLabelSize(),
                     true,
                     0
                 );
 
-                $currentY += 7;
+                $currentY += $this->getLabelSize() + $this->getLabelMargin();
 
                 static::writeText(
                     $pdf,
@@ -355,16 +488,34 @@ abstract class CustomSheetLabel extends CustomLabel
                     $currentY,
                     'freemono',
                     'B',
-                    7,
+                    $this->getFieldSize(),
                     'L',
                     $usableWidth,
-                    7,
+                    $this->getFieldSize(),
                     true,
                     0
                 );
 
-                $currentY += 9;
+                $currentY += $this->getFieldSize() + $this->getFieldMargin();
             }
+        }
+
+        if ($record->has('tag') && $this->getSupportAssetTag()) {
+            static::writeText(
+                $pdf,
+                $record->get('tag'),
+                $currentX,
+                $pa->y2 - $this->getBarcodeSize() - $this->getBarcodeMargin() - $this->getTagSize(),
+                'freemono',
+                'B',
+                $this->getTagSize(),
+                'R',
+                $usableWidth,
+                $this->getTagSize(),
+                true,
+                0,
+                0.3
+            );
         }
     }
 }
