@@ -37,6 +37,12 @@ abstract class CustomSheetLabel extends CustomLabel
     protected bool $supportLogo = false;
     protected bool $supportAssetTag = true;
 
+    protected float $barcodeSize = 12.0;
+    protected float $barcode2DSize = 12.0;
+    protected float $barcodeMargin = 2.0;
+    protected float $logoMaxWidth = 12.0;
+    protected float $logoMargin = 2.0;
+
     public function getUnit()
     {
         return $this->unit;
@@ -152,6 +158,31 @@ abstract class CustomSheetLabel extends CustomLabel
         return $this->supportAssetTag;
     }
 
+    public function getBarcodeSize(): float
+    {
+        return $this->barcodeSize;
+    }
+
+    public function get2DBarcodeSize(): float
+    {
+        return $this->barcode2DSize;
+    }
+
+    public function getBarcodeMargin(): float
+    {
+        return $this->barcodeMargin;
+    }
+
+    public function getLogoMaxWidth(): float
+    {
+        return $this->logoMaxWidth;
+    }
+
+    public function getLogoMargin(): float
+    {
+        return $this->logoMargin;
+    }
+
     public function getLabelBorder()
     {
         return 0;
@@ -165,6 +196,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     public function applyEditorConfig(array $config): static
     {
+        $this->editorConfig = $config;
         $this->hydrateFromEditorConfig($config);
 
         return $this;
@@ -176,6 +208,7 @@ abstract class CustomSheetLabel extends CustomLabel
         $grid = $config['grid'] ?? [];
         $label = $config['label'] ?? [];
         $supports = $config['supports'] ?? [];
+        $content = $config['content'] ?? [];
 
         $this->pageWidth = isset($page['width']) ? (float)$page['width'] : $this->pageWidth;
         $this->pageHeight = isset($page['height']) ? (float)$page['height'] : $this->pageHeight;
@@ -193,17 +226,23 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->labelWidth = isset($label['width']) ? (float)$label['width'] : $this->labelWidth;
         $this->labelHeight = isset($label['height']) ? (float)$label['height'] : $this->labelHeight;
 
-        $this->labelMarginTop = isset($label['margin_top']) ? (float)$label['margin_top'] : $this->labelMarginTop;
-        $this->labelMarginRight = isset($label['margin_right']) ? (float)$label['margin_right'] : $this->labelMarginRight;
-        $this->labelMarginBottom = isset($label['margin_bottom']) ? (float)$label['margin_bottom'] : $this->labelMarginBottom;
-        $this->labelMarginLeft = isset($label['margin_left']) ? (float)$label['margin_left'] : $this->labelMarginLeft;
+        $this->labelMarginTop = isset($label['padding_top']) ? (float)$label['padding_top'] : $this->labelMarginTop;
+        $this->labelMarginRight = isset($label['padding_right']) ? (float)$label['padding_right'] : $this->labelMarginRight;
+        $this->labelMarginBottom = isset($label['padding_bottom']) ? (float)$label['padding_bottom'] : $this->labelMarginBottom;
+        $this->labelMarginLeft = isset($label['padding_left']) ? (float)$label['padding_left'] : $this->labelMarginLeft;
 
         $this->supportTitle = isset($supports['title']) ? (bool)$supports['title'] : $this->supportTitle;
-        $this->supportFields = isset($supports['fields']) ? (bool)$supports['fields'] : $this->supportFields;
-        $this->support1DBarcode = isset($supports['barcode1d']) ? (bool)$supports['barcode1d'] : $this->support1DBarcode;
-        $this->support2DBarcode = isset($supports['barcode2d']) ? (bool)$supports['barcode2d'] : $this->support2DBarcode;
+        $this->supportFields = isset($supports['fields']) ? (int)$supports['fields'] : $this->supportFields;
+        $this->support1DBarcode = isset($supports['barcode_1d']) ? (bool)$supports['barcode_1d'] : $this->support1DBarcode;
+        $this->support2DBarcode = isset($supports['barcode_2d']) ? (bool)$supports['barcode_2d'] : $this->support2DBarcode;
         $this->supportLogo = isset($supports['logo']) ? (bool)$supports['logo'] : $this->supportLogo;
         $this->supportAssetTag = isset($supports['asset_tag']) ? (bool)$supports['asset_tag'] : $this->supportAssetTag;
+
+        $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
+        $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
+        $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
+        $this->logoMaxWidth = isset($content['logo_max_width']) ? (float)$content['logo_max_width'] : $this->logoMaxWidth;
+        $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
     }
 
     public function write($pdf, $record)
@@ -213,6 +252,63 @@ abstract class CustomSheetLabel extends CustomLabel
         $currentX = $pa->x1;
         $currentY = $pa->y1;
         $usableWidth = $pa->w;
+        $usableHeight = $pa->h;
+
+        if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
+            $barcodeSize = $this->getBarcodeSize();
+            $barcodeMargin = $this->getBarcodeMargin();
+
+            static::write1DBarcode(
+                $pdf,
+                $record->get('barcode1d')->content,
+                $record->get('barcode1d')->type,
+                $pa->x1,
+                $pa->y2 - $barcodeSize,
+                $usableWidth,
+                $barcodeSize
+            );
+
+            $usableHeight -= $barcodeSize + $barcodeMargin;
+        }
+        if ($record->has('logo') && $this->getSupportLogo()) {
+            $logoMaxWidth = $this->getLogoMaxWidth();
+            $logoMargin = $this->getLogoMargin();
+
+            $logoSize = static::writeImage(
+                $pdf,
+                $record->get('logo'),
+                $pa->x1,
+                $pa->y1,
+                $logoMaxWidth,
+                $usableHeight,
+                'L',
+                'T',
+                300,
+                true,
+                false,
+                0
+            );
+
+            $currentX += $logoSize[0] + $logoMargin;
+            $usableWidth -= $logoSize[0] + $logoMargin;
+        }
+        if ($record->has('barcode2d') && $this->getSupport2DBarcode()) {
+            $barcodeSize = $this->get2DBarcodeSize();
+            $barcodeMargin = $this->getBarcodeMargin();
+
+            static::write2DBarcode(
+                $pdf,
+                $record->get('barcode2d')->content,
+                $record->get('barcode2d')->type,
+                $currentX,
+                $currentY,
+                $barcodeSize,
+                $barcodeSize
+            );
+
+            $currentX += $barcodeSize + $barcodeMargin;
+            $usableWidth -= $barcodeSize + $barcodeMargin;
+        }
 
         if ($record->has('title') && $this->getSupportTitle()) {
             static::writeText(

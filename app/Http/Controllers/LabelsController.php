@@ -207,10 +207,20 @@ class LabelsController extends Controller
             });
 
         $settings = Setting::getSettings();
-        if (request()->has('settings')) {
-            $overrides = request()->input('settings');
-            foreach ($overrides as $key => $value) {
-                $settings->$key = $value;
+        $settingOverrides = [
+            'label2_title',
+            'label2_asset_logo',
+            'label2_fields',
+            'label2_1d_type',
+            'label2_2d_type',
+            'label2_2d_target',
+            'label2_2d_prefix',
+            'label2_empty_row_count',
+        ];
+
+        foreach ($settingOverrides as $key) {
+            if ($request->has($key)) {
+                $settings->{$key} = $request->input($key);
             }
         }
 
