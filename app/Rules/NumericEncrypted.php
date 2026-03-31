@@ -27,7 +27,7 @@ class NumericEncrypted implements ValidationRule
                 $fail(trans('validation.numeric', ['attribute' => $attributeName]));
             }
         } catch (\Exception $e) {
-            report($e->getMessage());
+            report($e);
             $fail(trans('general.something_went_wrong'));
         }
     }

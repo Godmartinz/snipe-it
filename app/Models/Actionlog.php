@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\ActionType;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\Searchable;
+use App\Presenters\ActionlogPresenter;
 use App\Presenters\Presentable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use App\Enums\ActionType;
 
 /**
  * Model for the Actionlog (the table that keeps a historical log of
@@ -24,14 +26,18 @@ class Actionlog extends SnipeModel
 
     // This is to manually set the source (via setActionSource()) for determineActionSource()
     protected ?string $source = null;
+
     protected $with = ['adminuser'];
 
-    protected $presenter = \App\Presenters\ActionlogPresenter::class;
-    use SoftDeletes;
+    protected $presenter = ActionlogPresenter::class;
+
     use Presentable;
+    use SoftDeletes;
 
     protected $table = 'action_logs';
+
     public $timestamps = true;
+
     protected $fillable = [
         'created_at',
         'item_type',
@@ -41,7 +47,7 @@ class Actionlog extends SnipeModel
         'note',
         'target_id',
         'target_type',
-        'stored_eula'
+        'stored_eula',
     ];
 
     use Searchable;
@@ -71,38 +77,40 @@ class Actionlog extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [
-        'company'     => ['name'],
-        'adminuser'   => ['first_name','last_name','username', 'email', 'employee_num'],
-        'user'        => ['first_name','last_name','username', 'email', 'employee_num'],
-        'assets'      => ['asset_tag','name', 'serial', 'order_number', 'notes', 'purchase_date'],
-        'assets.model'              => ['name', 'model_number', 'eol', 'notes'],
-        'assets.model.category'     => ['name', 'notes'],
-        'assets.location'           => ['name'],
-        'assets.defaultLoc'         => ['name'],
+        'company' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
+        'user' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
+        'assets' => ['asset_tag', 'name', 'serial', 'order_number', 'notes', 'purchase_date'],
+        'assets.model' => ['name', 'model_number', 'eol', 'notes'],
+        'assets.model.category' => ['name', 'notes'],
+        'assets.location' => ['name'],
+        'assets.defaultLoc' => ['name'],
         'assets.model.manufacturer' => ['name', 'notes'],
-        'licenses'    => ['name', 'serial', 'notes', 'order_number', 'license_email', 'license_name', 'purchase_order', 'purchase_date'],
-        'licenses.category'     => ['name', 'notes'],
-        'licenses.supplier'     => ['name'],
-        'consumables'    => ['name', 'notes', 'order_number', 'model_number', 'item_no', 'purchase_date'],
-        'consumables.category'     => ['name', 'notes'],
-        'consumables.location'     => ['name', 'notes'],
-        'consumables.supplier'     => ['name', 'notes'],
-        'components'     => ['name', 'notes', 'purchase_date'],
-        'components.category'     => ['name', 'notes'],
-        'components.location'     => ['name', 'notes'],
-        'components.supplier'     => ['name', 'notes'],
-        'accessories'     => ['name', 'purchase_date'],
-        'accessories.category'     => ['name'],
-        'accessories.location'     => ['name', 'notes'],
-        'accessories.supplier'     => ['name', 'notes'],
+        'licenses' => ['name', 'serial', 'notes', 'order_number', 'license_email', 'license_name', 'purchase_order', 'purchase_date'],
+        'licenses.category' => ['name', 'notes'],
+        'licenses.supplier' => ['name'],
+        'consumables' => ['name', 'notes', 'order_number', 'model_number', 'item_no', 'purchase_date'],
+        'consumables.category' => ['name', 'notes'],
+        'consumables.location' => ['name', 'notes'],
+        'consumables.supplier' => ['name', 'notes'],
+        'components' => ['name', 'notes', 'purchase_date'],
+        'components.category' => ['name', 'notes'],
+        'components.location' => ['name', 'notes'],
+        'components.supplier' => ['name', 'notes'],
+        'accessories' => ['name', 'purchase_date'],
+        'accessories.category' => ['name'],
+        'accessories.location' => ['name', 'notes'],
+        'accessories.supplier' => ['name', 'notes'],
     ];
 
     /**
      * Override from Builder to automatically add the company
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public static function boot()
     {
@@ -128,13 +136,14 @@ class Actionlog extends SnipeModel
         );
     }
 
-
     /**
      * Establishes the actionlog -> item relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function item()
     {
@@ -145,81 +154,94 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> company relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function company()
     {
-        return $this->hasMany(\App\Models\Company::class, 'id', 'company_id');
+        return $this->hasMany(Company::class, 'id', 'company_id');
     }
-
 
     /**
      * Establishes the actionlog -> asset relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function assets()
     {
-        return $this->hasMany(\App\Models\Asset::class, 'id', 'item_id');
+        return $this->hasMany(Asset::class, 'id', 'item_id');
     }
 
     /**
      * Establishes the actionlog -> license relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function licenses()
     {
-        return $this->hasMany(\App\Models\License::class, 'id', 'item_id');
+        return $this->hasMany(License::class, 'id', 'item_id');
     }
 
     /**
      * Establishes the actionlog -> consumable relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function consumables()
     {
-        return $this->hasMany(\App\Models\Consumable::class, 'id', 'item_id');
+        return $this->hasMany(Consumable::class, 'id', 'item_id');
     }
 
     /**
      * Establishes the actionlog -> consumable relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function accessories()
     {
-        return $this->hasMany(\App\Models\Accessory::class, 'id', 'item_id');
+        return $this->hasMany(Accessory::class, 'id', 'item_id');
     }
 
     /**
      * Establishes the actionlog -> components relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function components()
     {
-        return $this->hasMany(\App\Models\Component::class, 'id', 'item_id');
+        return $this->hasMany(Component::class, 'id', 'item_id');
     }
 
     /**
      * Establishes the actionlog -> item type relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function itemType()
     {
@@ -234,8 +256,10 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> target type relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function targetType()
     {
@@ -246,14 +270,14 @@ class Actionlog extends SnipeModel
         return camel_case(class_basename($this->target_type));
     }
 
-
-
     /**
      * Establishes the actionlog -> userlog relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function userlog()
     {
@@ -264,8 +288,10 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> admin user relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function adminuser()
     {
@@ -277,8 +303,10 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> user relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function user()
     {
@@ -290,8 +318,10 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> target relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function target()
     {
@@ -302,20 +332,23 @@ class Actionlog extends SnipeModel
      * Establishes the actionlog -> location relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @return Relation
      */
     public function location()
     {
-        return $this->belongsTo(\App\Models\Location::class, 'location_id')->withTrashed();
+        return $this->belongsTo(Location::class, 'location_id')->withTrashed();
     }
-
 
     /**
      * Check if the file exists, and if it does, force a download
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
+     *
      * @return string | false
      */
     public function get_src($type = 'assets', $fieldname = 'filename')
@@ -333,7 +366,9 @@ class Actionlog extends SnipeModel
      * Saves the log record with the action type
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v3.0]
+     *
      * @return bool
      */
     public function logaction(string|ActionType $actiontype)
@@ -342,7 +377,7 @@ class Actionlog extends SnipeModel
             $actiontype = ActionType::from($actiontype);
         }
         $this->action_type = $actiontype->value;
-        $this->remote_ip =  request()->ip();
+        $this->remote_ip = request()->ip();
         $this->user_agent = request()->header('User-Agent');
         $this->action_source = $this->determineActionSource();
 
@@ -357,7 +392,9 @@ class Actionlog extends SnipeModel
      * Calculate the number of days until the next audit
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since  [v4.0]
+     *
      * @return int
      */
     public function daysUntilNextAudit($monthInterval = 12, $asset = null)
@@ -385,53 +422,39 @@ class Actionlog extends SnipeModel
     /**
      * Calculate the date of the next audit
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @return Datetime | string
+     *
      * @since  [v4.0]
-     * @return \Datetime
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function calcNextAuditDate($monthInterval = 12, $asset = null)
     {
         $last_audit_date = Carbon::parse($this->created_at);
         // If there is an asset-specific next date already given,
         if (($asset) && ($asset->next_audit_date)) {
-            return \Carbon::parse($asset->next_audit_date);
+            return Carbon::parse($asset->next_audit_date);
         }
 
-        return  \Carbon::parse($last_audit_date)->addMonths($monthInterval)->toDateString();
-    }
-
-    /**
-     * Gets action logs in chronological order, excluding uploads
-     *
-     * @author Vincent Sposato <vincent.sposato@gmail.com>
-     * @since  v1.0
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getListingOfActionLogsChronologicalOrder()
-    {
-        return $this->all()
-            ->where('action_type', '!=', 'uploaded')
-            ->orderBy('item_id', 'asc')
-            ->orderBy('created_at', 'asc')
-            ->get();
+        return Carbon::parse($last_audit_date)->addMonths($monthInterval)->toDateString();
     }
 
     /**
      * Determines what the type of request is so we can log it to the action_log
      *
      * @author A. Gianotto <snipe@snipe.net>
+     *
      * @since  v6.3.0
-     * @return string
      */
     public function determineActionSource(): string
     {
         // This is a manually set source
-        if($this->source) {
+        if ($this->source) {
             return $this->source;
         }
 
         // This is an API call
-        if (((request()->header('content-type') && (request()->header('accept'))=='application/json'))
+        if (((request()->header('content-type') && (request()->header('accept')) == 'application/json'))
             && (starts_with(request()->header('authorization'), 'Bearer '))
         ) {
             return 'api';
@@ -447,11 +470,12 @@ class Actionlog extends SnipeModel
 
     }
 
-
     /**
      * @author  Godfrey Martinez
+     *
      * @since [v8.0.4]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logUploadDelete($object, $filename)
     {
@@ -469,8 +493,6 @@ class Actionlog extends SnipeModel
 
     public function uploads_file_url()
     {
-
-
 
         if (($this->action_type == 'accepted') || ($this->action_type == 'declined')) {
             return route('log.storedeula.download', ['filename' => $this->filename]);
@@ -501,36 +523,39 @@ class Actionlog extends SnipeModel
             return 'private_uploads/eula-pdfs/'.$this->filename;
         }
 
-        if ($this->action_type == 'audit')  {
+        if ($this->action_type == 'audit') {
             return 'private_uploads/audits/'.$this->filename;
         }
 
         switch ($this->item_type) {
-        case Accessory::class:
-            return 'private_uploads/accessories/'.$this->filename;
-        case Asset::class:
-            return 'private_uploads/assets/'.$this->filename;
-        case AssetModel::class:
-            return 'private_uploads/models/'.$this->filename;
-        case Consumable::class:
-            return 'private_uploads/consumables/'.$this->filename;
-        case Component::class:
-            return 'private_uploads/components/'.$this->filename;
-        case License::class:
-            return 'private_uploads/licenses/'.$this->filename;
-        case Location::class:
-            return 'private_uploads/locations/'.$this->filename;
-        case Maintenance::class:
-             return 'private_uploads/maintenances/'.$this->filename;
-        case Supplier::class:
-            return 'private_uploads/suppliers/'.$this->filename;
-        case User::class:
-            return 'private_uploads/users/'.$this->filename;
-        default:
-            return null;
+            case Accessory::class:
+                return 'private_uploads/accessories/'.$this->filename;
+            case Asset::class:
+                return 'private_uploads/assets/'.$this->filename;
+            case AssetModel::class:
+                return 'private_uploads/models/'.$this->filename;
+            case Company::class:
+                return 'private_uploads/companies/'.$this->filename;
+            case Consumable::class:
+                return 'private_uploads/consumables/'.$this->filename;
+            case Department::class:
+                return 'private_uploads/departments/'.$this->filename;
+            case Component::class:
+                return 'private_uploads/components/'.$this->filename;
+            case License::class:
+                return 'private_uploads/licenses/'.$this->filename;
+            case Location::class:
+                return 'private_uploads/locations/'.$this->filename;
+            case Maintenance::class:
+                return 'private_uploads/maintenances/'.$this->filename;
+            case Supplier::class:
+                return 'private_uploads/suppliers/'.$this->filename;
+            case User::class:
+                return 'private_uploads/users/'.$this->filename;
+            default:
+                return null;
         }
     }
-
 
     // Manually sets $this->source for determineActionSource()
     public function setActionSource($source = null): void

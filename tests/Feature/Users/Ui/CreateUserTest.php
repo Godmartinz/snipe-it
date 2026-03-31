@@ -9,15 +9,14 @@ use Tests\TestCase;
 
 class CreateUserTest extends TestCase
 {
-
-    public function testPermissionRequiredToCreateUser()
+    public function test_permission_required_to_create_user()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('users.create'))
             ->assertForbidden();
     }
 
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->createUsers()->create())
             ->get(route('users.create'))
@@ -25,7 +24,7 @@ class CreateUserTest extends TestCase
 
     }
 
-    public function testCanCreateUser()
+    public function test_can_create_user()
     {
         Notification::fake();
 
@@ -59,7 +58,7 @@ class CreateUserTest extends TestCase
 
     }
 
-    public function testCanCreateAndNotifyUser()
+    public function test_can_create_and_notify_user()
     {
 
         Notification::fake();

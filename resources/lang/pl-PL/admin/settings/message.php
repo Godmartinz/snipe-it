@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'Wystąpił błąd podczas aktualizacji. ',
-        'success'               => 'Ustawienia zaktualizowane pomyślnie.',
+        'error' => 'Wystąpił błąd podczas aktualizacji. ',
+        'success' => 'Ustawienia zaktualizowane pomyślnie.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Czy na pewno chcesz usunąć kopie zapasową? Nie można cofnąć tej akcji. ',
-        'file_deleted'          => 'Kopia zapasowa usunięta pomyślnie. ',
-        'generated'             => 'Nowa kopia zapasowa utworzona pomyślnie.',
-        'file_not_found'        => 'Nie odnaleziono kopii zapasowej na serwerze.',
-        'restore_warning'       => 'Tak, przywróć. Mam świadomość, że spowoduje to nadpisanie istniejących danych w bazie danych. Spowoduje to również wylogowanie wszystkich istniejących użytkowników (w tym Ciebie).',
-        'restore_confirm'       => 'Czy na pewno chcesz przywrócić bazę danych z :filename?'
+        'delete_confirm' => 'Czy na pewno chcesz usunąć kopie zapasową? Nie można cofnąć tej akcji. ',
+        'file_deleted' => 'Kopia zapasowa usunięta pomyślnie. ',
+        'generated' => 'Nowa kopia zapasowa utworzona pomyślnie.',
+        'file_not_found' => 'Nie odnaleziono kopii zapasowej na serwerze.',
+        'restore_warning' => 'Tak, przywróć. Mam świadomość, że spowoduje to nadpisanie istniejących danych w bazie danych. Spowoduje to również wylogowanie wszystkich istniejących użytkowników (w tym Ciebie).',
+        'restore_confirm' => 'Czy na pewno chcesz przywrócić bazę danych z :filename?',
     ],
     'restore' => [
-        'success'               => 'Kopia zapasowa została przywrócona. Zaloguj się ponownie.'
+        'success' => 'Kopia zapasowa została przywrócona. Zaloguj się ponownie.',
     ],
     'purge' => [
-        'error'     => 'Wystąpił błąd podczas czyszczenia. ',
-        'validation_failed'     => 'Potwierdzenie czyszczenia jest niepoprawne. Wpisz słowo "DELETE" w polu potwierdzenia.',
-        'success'               => 'Pomyślnie wyczyszczono rekordy usunięte.',
+        'error' => 'Wystąpił błąd podczas czyszczenia. ',
+        'validation_failed' => 'Potwierdzenie czyszczenia jest niepoprawne. Wpisz słowo "DELETE" w polu potwierdzenia.',
+        'success' => 'Pomyślnie wyczyszczono rekordy usunięte.',
     ],
     'mail' => [
         'sending' => 'Wysyłanie testowej wiadomości e-mail...',
         'success' => 'Wiadomość wysłana!',
         'error' => 'Wiadomość nie może zostać wysłana.',
-        'additional' => 'Nie podano dodatkowego komunikatu o błędzie. Sprawdź ustawienia poczty i logu aplikacji.'
+        'additional' => 'Nie podano dodatkowego komunikatu o błędzie. Sprawdź ustawienia poczty i logu aplikacji.',
     ],
     'ldap' => [
         'testing' => 'Testowanie połączenia LDAP, powiązania i zapytania ...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Coś poszło nie tak :(',
         'sync_success' => 'Przykładowe 10 użytkowników zwrócona z serwera LDAP na podstawie Twoich ustawień:',
         'testing_authentication' => 'Testowanie uwierzytelniania LDAP...',
-        'authentication_success' => 'Użytkownik uwierzytelniony z LDAP pomyślnie!'
+        'authentication_success' => 'Użytkownik uwierzytelniony z LDAP pomyślnie!',
     ],
     'labels' => [
         'null_template' => 'Nie znaleziono szablonu etykiety. Proszę wybrać szablon.',
-        ],
+    ],
     'webhook' => [
         'sending' => 'Wysyłanie wiadomości testowej :app...',
         'success' => 'Twoja integracja :webhook_name działa!',

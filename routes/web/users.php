@@ -52,20 +52,12 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('users.clone.store')->withTrashed();
 
     Route::post(
-        '{userId}/restore',
+        '{user}/restore',
         [
             Users\UsersController::class, 
             'getRestore'
         ]
-    )->name('users.restore.store');
-
-    Route::get(
-        '{userId}/unsuspend',
-        [
-            Users\UsersController::class, 
-            'getUnsuspend'
-        ]
-    )->name('unsuspend/user');
+    )->name('users.restore.store')->withTrashed();
 
     Route::post(
         '{userId}/password',

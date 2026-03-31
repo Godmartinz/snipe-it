@@ -35,7 +35,7 @@ class PurgeEulaPDFs extends Command
 
         $before = $this->option('older-than-days');
 
-        if (($before=='') || (!is_numeric($before))) {
+        if (($before == '') || (! is_numeric($before))) {
             return $this->error('ERROR: You must pass a valid number for --older-than-days (example: snipeit:purge-eula-pdfs --older-than-days=365.)');
         }
 
@@ -43,35 +43,32 @@ class PurgeEulaPDFs extends Command
         $signature_path = 'private_uploads/signatures/';
         $eula_path = 'private_uploads/eula-pdfs/';
 
-        if (!Storage::exists($eula_path)) {
+        if (! Storage::exists($eula_path)) {
             $this->fail('The storage directory "'.$eula_path.'" does not exist. No EULA files will be deleted.');
         }
 
-        if (!Storage::exists($signature_path)) {
+        if (! Storage::exists($signature_path)) {
             $this->fail('The storage directory "'.$signature_path.'" does not exist. No signature files will be deleted.');
         }
-
 
         if ($this->option('dryrun')) {
             $this->info('This script is being run with the --dryrun option. No files or records will be deleted.');
 
         }
-        $acceptances = CheckoutAcceptance::HasFiles()->where('updated_at','<', $interval_date)->with('assignedTo')->get();
+        $acceptances = CheckoutAcceptance::HasFiles()->where('updated_at', '<', $interval_date)->with('assignedTo')->get();
 
-        if (!$this->option('force')) {
+        if (! $this->option('force')) {
             if ($this->confirm("\n****************************************************\nTHIS WILL DELETE ALL OF THE SIGNATURES AND EULA PDF FILES SINCE $interval_date. \nThere is NO undo! \n****************************************************\n\nDo you wish to continue? No backsies! [y|N]")) {
             }
         }
-
-
 
         if ($acceptances->count() == 0) {
             return $this->warn('There are no item acceptances with signatures or EULA PDFs from before '.$interval_date);
         }
 
-        $this->info(number_format($acceptances->count()) . ' EULA PDFs from before '.$interval_date.' will be purged');
+        $this->info(number_format($acceptances->count()).' EULA PDFs from before '.$interval_date.' will be purged');
 
-        if (!$this->option('with-output')) {
+        if (! $this->option('with-output')) {
             $this->info('Run this command with the --with-output option to see the full list in the console.');
         } else {
             $this->table(
@@ -86,7 +83,7 @@ class PurgeEulaPDFs extends Command
                     trans('general.filename'),
 
                 ],
-                $acceptances->map(fn($acceptance) => [
+                $acceptances->map(fn ($acceptance) => [
                     trans('general.user') => $acceptance->assignedTo->display_name,
                     trans('general.type') => $acceptance->display_checkoutable_type,
                     trans('general.item') => $acceptance->checkoutable_type::find($acceptance->checkoutable_id)->display_name,
@@ -99,31 +96,28 @@ class PurgeEulaPDFs extends Command
             );
         }
 
-
-
         foreach ($acceptances as $acceptance) {
 
             $signature_file = $signature_path.$acceptance->signature_filename;
             $eula_file = $eula_path.$acceptance->stored_eula_file;
 
             if (Storage::exists($signature_file)) {
-                if (!$this->option('dryrun')) {
+                if (! $this->option('dryrun')) {
                     Storage::delete($signature_file);
                 }
             } else {
-                $this->error('The file "'. $signature_file.'" does not exist.');
+                $this->error('The file "'.$signature_file.'" does not exist.');
             }
 
-
             if (Storage::exists($eula_file)) {
-                if (!$this->option('dryrun')) {
+                if (! $this->option('dryrun')) {
                     Storage::delete($eula_file);
                 }
             } else {
                 $this->error('The file "'.$eula_file.'" does not exist.');
             }
 
-            if (!$this->option('dryrun')) {
+            if (! $this->option('dryrun')) {
                 $acceptance->delete();
             }
         }

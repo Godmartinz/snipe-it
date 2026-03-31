@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,29 +15,28 @@ return array(
     |---------------------------------------------------------------------------
     */
 
-    "superuser" => [
+    'superuser' => [
         'name' => 'Super User',
-        'note'       => 'Determina se l\'utente ha accesso completo a tutti gli aspetti dell\'amministrazione. Questa impostazione sostituisce TUTTE le autorizzazioni più specifiche e restrittive nel sistema ',
+        'note' => 'Determina se l\'utente ha accesso completo a tutti gli aspetti dell\'amministrazione. Questa impostazione sostituisce TUTTE le autorizzazioni più specifiche e restrittive nel sistema ',
     ],
     'admin' => [
         'name' => 'Accesso Amministratore',
-        'note'       => 'Determina se l\'utente ha accesso alla maggior parte degli aspetti del sistema, TRANNE le Impostazioni di Amministrazione di Sistema. Questi utenti potranno gestire utenti, sedi, categorie, ecc., ma SONO vincolati dal Supporto Completo per Più Aziende, se abilitato.',
+        'note' => 'Determina se l\'utente ha accesso alla maggior parte degli aspetti del sistema, TRANNE le Impostazioni di Amministrazione di Sistema. Questi utenti potranno gestire utenti, sedi, categorie, ecc., ma SONO vincolati dal Supporto Completo per Più Aziende, se abilitato.',
     ],
 
     'import' => [
         'name' => 'Importazione CSV',
-        'note'       => 'Questo consentirà agli utenti di importare anche se l\'accesso a utenti, asset, ecc è negato altrove.',
+        'note' => 'Questo consentirà agli utenti di importare anche se l\'accesso a utenti, asset, ecc è negato altrove.',
     ],
 
     'reports' => [
         'name' => 'Rapporti di accesso',
-        'note'       => 'Determina se l\'utente ha accesso alla sezione Report dell\'applicazione.',
+        'note' => 'Determina se l\'utente ha accesso alla sezione Report dell\'applicazione.',
     ],
 
-    'assets' =>
-        [
-            'name' => 'Beni',
-            'note' => 'Concede l\'accesso alla sezione Assets dell\'applicazione.',
+    'assets' => [
+        'name' => 'Beni',
+        'note' => 'Concede l\'accesso alla sezione Assets dell\'applicazione.',
     ],
 
     'assetsview' => [
@@ -81,9 +80,9 @@ return array(
         'note' => 'Consente all\'utente di visualizzare e modificare i campi personalizzati crittografati negli asset.',
     ],
 
-    'accessories'   => [
+    'accessories' => [
         'name' => 'Accessori',
-        'note'       => 'Consente l\'accesso alla sezione Accessori dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Accessori dell\'applicazione.',
     ],
 
     'accessoriesview' => [
@@ -110,9 +109,9 @@ return array(
         'name' => 'Gestisce File Accessori',
         'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati agli accessori.',
     ],
-    'consumables'   => [
+    'consumables' => [
         'name' => 'Consumabili',
-        'note'       => 'Concede l\'accesso alla sezione Consumabili dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Consumabili dell\'applicazione.',
     ],
     'consumablesview' => [
         'name' => 'Visualizza Consumabili',
@@ -134,9 +133,9 @@ return array(
         'name' => 'Gestisci file consumabili',
         'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati ai materiali di consumo.',
     ],
-    'licenses'   => [
+    'licenses' => [
         'name' => 'Licenze',
-        'note'       => 'Concede l\'accesso alla sezione Licenze dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Licenze dell\'applicazione.',
     ],
     'licensesview' => [
         'name' => 'Visualizza Licenze',
@@ -153,7 +152,7 @@ return array(
     'licensescheckout' => [
         'name' => 'Assegna Licenze',
         'note' => 'Consente all\'utente di assegnare licenze ad asset o utenti.',
-        ],
+    ],
     'licensescheckin' => [
         'name' => 'Annulla assegnazione licenze',
         'note' => 'Consente all\'utente di annullare l\'assegnazione di licenze da asset o utenti.',
@@ -166,9 +165,9 @@ return array(
         'name' => 'Gestisci Chiavi Licenza',
         'note' => 'Consente all\'utente di visualizzare le chiavi del prodotto associate alle licenze.',
     ],
-    'components'   => [
+    'components' => [
         'name' => 'Componenti',
-        'note'       => 'Consente l\'accesso alla sezione Componenti dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Componenti dell\'applicazione.',
     ],
     'componentsview' => [
         'name' => 'Visualizza Componenti',
@@ -194,9 +193,9 @@ return array(
         'name' => 'Check In Componenti',
         'note' => 'Controlla i componenti di nuovo nell\'inventario che sono attualmente controllati.',
     ],
-    'kits'   => [
+    'kits' => [
         'name' => 'Kit Predefiniti',
-        'note'       => 'Consente l\'accesso alla sezione Kit Predefiniti dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Kit Predefiniti dell\'applicazione.',
     ],
     'kitsview' => [
         'name' => 'Visualizza Kit Predefiniti',
@@ -210,9 +209,9 @@ return array(
     'kitsdelete' => [
         'name' => 'Elimina Kit Predefiniti',
     ],
-    'users'   => [
+    'users' => [
         'name' => 'Utenti',
-        'note'       => 'Consente l\'accesso alla sezione Utenti dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Utenti dell\'applicazione.',
     ],
     'usersview' => [
         'name' => 'Visualizza utenti',
@@ -226,9 +225,9 @@ return array(
     'usersdelete' => [
         'name' => 'Elimina Utenti',
     ],
-    'models'   => [
+    'models' => [
         'name' => 'Modelli',
-        'note'       => 'Consente l\'accesso alla sezione Modelli dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Modelli dell\'applicazione.',
     ],
     'modelsview' => [
         'name' => 'Visualizza i modelli',
@@ -243,9 +242,9 @@ return array(
     'modelsdelete' => [
         'name' => 'Elimina Modelli',
     ],
-    'categories'   => [
+    'categories' => [
         'name' => 'Categorie',
-        'note'       => 'Concede l\'accesso alla sezione Categorie dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Categorie dell\'applicazione.',
     ],
     'categoriesview' => [
         'name' => 'Visualizza Categorie',
@@ -259,9 +258,9 @@ return array(
     'categoriesdelete' => [
         'name' => 'Elimina Categorie',
     ],
-    'departments'   => [
+    'departments' => [
         'name' => 'Reparti',
-        'note'       => 'Concede l\'accesso alla sezione Dipartimenti dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Dipartimenti dell\'applicazione.',
     ],
     'departmentsview' => [
         'name' => 'Visualizza Dipartimenti',
@@ -275,9 +274,9 @@ return array(
     'departmentsdelete' => [
         'name' => 'Elimina Dipartimenti',
     ],
-    'locations'   => [
+    'locations' => [
         'name' => 'Sedi',
-        'note'       => 'Concede l\'accesso alla sezione Posizioni dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Posizioni dell\'applicazione.',
     ],
     'locationsview' => [
         'name' => 'Visualizza Posizioni',
@@ -291,9 +290,9 @@ return array(
     'locationsdelete' => [
         'name' => 'Elimina Posizioni',
     ],
-    'status-labels'   => [
+    'status-labels' => [
         'name' => 'Etichette di Stato',
-        'note'       => 'Concede l\'accesso alla sezione Etichette di stato dell\'applicazione utilizzata da Assets.',
+        'note' => 'Concede l\'accesso alla sezione Etichette di stato dell\'applicazione utilizzata da Assets.',
     ],
     'statuslabelsview' => [
         'name' => 'Visualizza Etichette Di Stato',
@@ -307,9 +306,9 @@ return array(
     'statuslabelsdelete' => [
         'name' => 'Elimina Etichette Di Stato',
     ],
-    'custom-fields'   => [
+    'custom-fields' => [
         'name' => 'Campi Personalizzati',
-        'note'       => 'Consente l\'accesso alla sezione Campi Personalizzati dell\'applicazione utilizzata da Assets.',
+        'note' => 'Consente l\'accesso alla sezione Campi Personalizzati dell\'applicazione utilizzata da Assets.',
     ],
     'customfieldsview' => [
         'name' => 'Visualizza Campi Personalizzati',
@@ -323,9 +322,9 @@ return array(
     'customfieldsdelete' => [
         'name' => 'Elimina Campi Personalizzati',
     ],
-    'suppliers'   => [
+    'suppliers' => [
         'name' => 'Fornitori',
-        'note'       => 'Consente l\'accesso alla sezione Fornitori dell\'applicazione.',
+        'note' => 'Consente l\'accesso alla sezione Fornitori dell\'applicazione.',
     ],
     'suppliersview' => [
         'name' => 'Visualizza Fornitori',
@@ -339,9 +338,9 @@ return array(
     'suppliersdelete' => [
         'name' => 'Elimina Fornitori',
     ],
-    'manufacturers'   => [
+    'manufacturers' => [
         'name' => 'Produttori',
-        'note'       => 'Concede l\'accesso alla sezione Produttori dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Produttori dell\'applicazione.',
     ],
     'manufacturersview' => [
         'name' => 'Visualizza Produttori',
@@ -355,9 +354,9 @@ return array(
     'manufacturersdelete' => [
         'name' => 'Elimina Produttori',
     ],
-    'companies'   => [
+    'companies' => [
         'name' => 'Aziende',
-        'note'       => 'Concede l\'accesso alla sezione Aziende dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Aziende dell\'applicazione.',
     ],
     'companiesview' => [
         'name' => 'Visualizza Aziende',
@@ -373,32 +372,32 @@ return array(
     ],
     'user-self-accounts' => [
         'name' => 'Account utente personali',
-        'note'       => 'Permette agli utenti non-admin di gestire alcuni aspetti dei propri account utente.',
+        'note' => 'Permette agli utenti non-admin di gestire alcuni aspetti dei propri account utente.',
     ],
     'selftwo-factor' => [
         'name' => 'Gestisci Autenticazione A Due Fattori',
-        'note'       => 'Consente agli utenti di abilitare, disabilitare e gestire l\'autenticazione a due fattori per i propri account.',
+        'note' => 'Consente agli utenti di abilitare, disabilitare e gestire l\'autenticazione a due fattori per i propri account.',
     ],
     'selfapi' => [
         'name' => 'Gestisci i token API',
-        'note'       => 'Consente agli utenti di creare, visualizzare e revocare i propri token API. I token utente avranno gli stessi permessi dell\'utente che li ha creati.',
+        'note' => 'Consente agli utenti di creare, visualizzare e revocare i propri token API. I token utente avranno gli stessi permessi dell\'utente che li ha creati.',
     ],
     'selfedit-location' => [
         'name' => 'Modifica Posizione',
-        'note'       => 'Consente agli utenti di modificare la posizione associata al proprio account utente.',
+        'note' => 'Consente agli utenti di modificare la posizione associata al proprio account utente.',
     ],
     'selfcheckout-assets' => [
         'name' => 'Asset per il self-check-out',
-        'note'       => 'Consente agli utenti di controllare gli asset a se stessi senza intervento amministratore.',
+        'note' => 'Consente agli utenti di controllare gli asset a se stessi senza intervento amministratore.',
     ],
     'selfview-purchase-cost' => [
         'name' => 'Visualizza Costo Acquisto',
-        'note'       => 'Consente agli utenti di visualizzare il costo di acquisto degli articoli nella vista del proprio account.',
+        'note' => 'Consente agli utenti di visualizzare il costo di acquisto degli articoli nella vista del proprio account.',
     ],
 
     'depreciations' => [
         'name' => 'Gestione degli ammortamenti',
-        'note'       => 'Consente agli utenti di gestire e visualizzare i dettagli dell\'ammortamento degli asset.',
+        'note' => 'Consente agli utenti di gestire e visualizzare i dettagli dell\'ammortamento degli asset.',
     ],
     'depreciationsview' => [
         'name' => 'Visualizza Dettagli Di Ammortamento',
@@ -419,6 +418,6 @@ return array(
     'grant' => 'Concedi il permesso per :area',
     'deny' => 'Nega il permesso per :area',
     'inherit' => 'Eredita il permesso per :area da gruppi di permessi',
-    'use_groups' => 'Si consiglia vivamente di utilizzare i gruppi di permessi invece di assegnare i permessi individuali per una gestione più semplice.'
+    'use_groups' => 'Si consiglia vivamente di utilizzare i gruppi di permessi invece di assegnare i permessi individuali per una gestione più semplice.',
 
-);
+];

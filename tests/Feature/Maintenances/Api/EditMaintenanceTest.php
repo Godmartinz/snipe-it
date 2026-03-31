@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Maintenances\Api;
 
-use App\Models\Asset;
 use App\Models\Maintenance;
 use App\Models\Supplier;
 use App\Models\User;
@@ -12,15 +11,14 @@ use Tests\TestCase;
 
 class EditMaintenanceTest extends TestCase
 {
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('maintenances.update', Maintenance::factory()->create()->id))
             ->assertOk();
     }
 
-
-    public function testCanEditMaintenance()
+    public function test_can_edit_maintenance()
     {
         Storage::fake('public');
         $actor = User::factory()->superuser()->create();
@@ -29,7 +27,7 @@ class EditMaintenanceTest extends TestCase
 
         $response = $this->actingAs($actor)
             ->followingRedirects()
-            ->patch(route('maintenances.update',  $maintenance), [
+            ->patch(route('maintenances.update', $maintenance), [
                 'name' => 'Test Maintenance',
                 'supplier_id' => $supplier->id,
                 'asset_maintenance_type' => 'Maintenance',
@@ -47,7 +45,6 @@ class EditMaintenanceTest extends TestCase
         $maintenance->refresh();
         // Assert file was stored...
         Storage::disk('public')->assertExists(app('maintenances_path').$maintenance->image);
-
 
         $this->assertDatabaseHas('maintenances', [
             'supplier_id' => $supplier->id,

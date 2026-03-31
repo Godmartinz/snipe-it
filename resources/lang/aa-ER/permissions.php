@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,29 +15,28 @@ return array(
     |---------------------------------------------------------------------------
     */
 
-    "superuser" => [
+    'superuser' => [
         'name' => 'crwdns13912:0crwdne13912:0',
-        'note'       => 'crwdns13914:0crwdne13914:0',
+        'note' => 'crwdns13914:0crwdne13914:0',
     ],
     'admin' => [
         'name' => 'crwdns13916:0crwdne13916:0',
-        'note'       => 'crwdns13918:0crwdne13918:0',
+        'note' => 'crwdns13918:0crwdne13918:0',
     ],
 
     'import' => [
         'name' => 'crwdns13920:0crwdne13920:0',
-        'note'       => 'crwdns13922:0crwdne13922:0',
+        'note' => 'crwdns13922:0crwdne13922:0',
     ],
 
     'reports' => [
         'name' => 'crwdns13924:0crwdne13924:0',
-        'note'       => 'crwdns13926:0crwdne13926:0',
+        'note' => 'crwdns13926:0crwdne13926:0',
     ],
 
-    'assets' =>
-        [
-            'name' => 'crwdns13928:0crwdne13928:0',
-            'note' => 'crwdns13930:0crwdne13930:0',
+    'assets' => [
+        'name' => 'crwdns13928:0crwdne13928:0',
+        'note' => 'crwdns13930:0crwdne13930:0',
     ],
 
     'assetsview' => [
@@ -81,9 +80,9 @@ return array(
         'note' => 'crwdns13958:0crwdne13958:0',
     ],
 
-    'accessories'   => [
+    'accessories' => [
         'name' => 'crwdns13960:0crwdne13960:0',
-        'note'       => 'crwdns13962:0crwdne13962:0',
+        'note' => 'crwdns13962:0crwdne13962:0',
     ],
 
     'accessoriesview' => [
@@ -110,9 +109,9 @@ return array(
         'name' => 'crwdns13980:0crwdne13980:0',
         'note' => 'crwdns13982:0crwdne13982:0',
     ],
-    'consumables'   => [
+    'consumables' => [
         'name' => 'crwdns13984:0crwdne13984:0',
-        'note'       => 'crwdns13986:0crwdne13986:0',
+        'note' => 'crwdns13986:0crwdne13986:0',
     ],
     'consumablesview' => [
         'name' => 'crwdns13988:0crwdne13988:0',
@@ -134,9 +133,9 @@ return array(
         'name' => 'crwdns14000:0crwdne14000:0',
         'note' => 'crwdns14002:0crwdne14002:0',
     ],
-    'licenses'   => [
+    'licenses' => [
         'name' => 'crwdns14004:0crwdne14004:0',
-        'note'       => 'crwdns14006:0crwdne14006:0',
+        'note' => 'crwdns14006:0crwdne14006:0',
     ],
     'licensesview' => [
         'name' => 'crwdns14008:0crwdne14008:0',
@@ -153,7 +152,7 @@ return array(
     'licensescheckout' => [
         'name' => 'crwdns14016:0crwdne14016:0',
         'note' => 'crwdns14018:0crwdne14018:0',
-        ],
+    ],
     'licensescheckin' => [
         'name' => 'crwdns14020:0crwdne14020:0',
         'note' => 'crwdns14022:0crwdne14022:0',
@@ -166,9 +165,9 @@ return array(
         'name' => 'crwdns14028:0crwdne14028:0',
         'note' => 'crwdns14030:0crwdne14030:0',
     ],
-    'components'   => [
+    'components' => [
         'name' => 'crwdns14032:0crwdne14032:0',
-        'note'       => 'crwdns14034:0crwdne14034:0',
+        'note' => 'crwdns14034:0crwdne14034:0',
     ],
     'componentsview' => [
         'name' => 'crwdns14036:0crwdne14036:0',
@@ -194,9 +193,9 @@ return array(
         'name' => 'crwdns14052:0crwdne14052:0',
         'note' => 'crwdns14054:0crwdne14054:0',
     ],
-    'kits'   => [
+    'kits' => [
         'name' => 'crwdns14056:0crwdne14056:0',
-        'note'       => 'crwdns14058:0crwdne14058:0',
+        'note' => 'crwdns14058:0crwdne14058:0',
     ],
     'kitsview' => [
         'name' => 'crwdns14060:0crwdne14060:0',
@@ -210,9 +209,9 @@ return array(
     'kitsdelete' => [
         'name' => 'crwdns14066:0crwdne14066:0',
     ],
-    'users'   => [
+    'users' => [
         'name' => 'crwdns14068:0crwdne14068:0',
-        'note'       => 'crwdns14070:0crwdne14070:0',
+        'note' => 'crwdns14070:0crwdne14070:0',
     ],
     'usersview' => [
         'name' => 'crwdns14072:0crwdne14072:0',
@@ -226,9 +225,9 @@ return array(
     'usersdelete' => [
         'name' => 'crwdns14078:0crwdne14078:0',
     ],
-    'models'   => [
+    'models' => [
         'name' => 'crwdns14080:0crwdne14080:0',
-        'note'       => 'crwdns14082:0crwdne14082:0',
+        'note' => 'crwdns14082:0crwdne14082:0',
     ],
     'modelsview' => [
         'name' => 'crwdns14084:0crwdne14084:0',
@@ -243,9 +242,9 @@ return array(
     'modelsdelete' => [
         'name' => 'crwdns14090:0crwdne14090:0',
     ],
-    'categories'   => [
+    'categories' => [
         'name' => 'crwdns14092:0crwdne14092:0',
-        'note'       => 'crwdns14094:0crwdne14094:0',
+        'note' => 'crwdns14094:0crwdne14094:0',
     ],
     'categoriesview' => [
         'name' => 'crwdns14096:0crwdne14096:0',
@@ -259,9 +258,9 @@ return array(
     'categoriesdelete' => [
         'name' => 'crwdns14102:0crwdne14102:0',
     ],
-    'departments'   => [
+    'departments' => [
         'name' => 'crwdns14104:0crwdne14104:0',
-        'note'       => 'crwdns14106:0crwdne14106:0',
+        'note' => 'crwdns14106:0crwdne14106:0',
     ],
     'departmentsview' => [
         'name' => 'crwdns14108:0crwdne14108:0',
@@ -275,9 +274,9 @@ return array(
     'departmentsdelete' => [
         'name' => 'crwdns14114:0crwdne14114:0',
     ],
-    'locations'   => [
+    'locations' => [
         'name' => 'crwdns14116:0crwdne14116:0',
-        'note'       => 'crwdns14118:0crwdne14118:0',
+        'note' => 'crwdns14118:0crwdne14118:0',
     ],
     'locationsview' => [
         'name' => 'crwdns14120:0crwdne14120:0',
@@ -291,9 +290,9 @@ return array(
     'locationsdelete' => [
         'name' => 'crwdns14126:0crwdne14126:0',
     ],
-    'status-labels'   => [
+    'status-labels' => [
         'name' => 'crwdns14128:0crwdne14128:0',
-        'note'       => 'crwdns14130:0crwdne14130:0',
+        'note' => 'crwdns14130:0crwdne14130:0',
     ],
     'statuslabelsview' => [
         'name' => 'crwdns14132:0crwdne14132:0',
@@ -307,9 +306,9 @@ return array(
     'statuslabelsdelete' => [
         'name' => 'crwdns14138:0crwdne14138:0',
     ],
-    'custom-fields'   => [
+    'custom-fields' => [
         'name' => 'crwdns14140:0crwdne14140:0',
-        'note'       => 'crwdns14142:0crwdne14142:0',
+        'note' => 'crwdns14142:0crwdne14142:0',
     ],
     'customfieldsview' => [
         'name' => 'crwdns14144:0crwdne14144:0',
@@ -323,9 +322,9 @@ return array(
     'customfieldsdelete' => [
         'name' => 'crwdns14150:0crwdne14150:0',
     ],
-    'suppliers'   => [
+    'suppliers' => [
         'name' => 'crwdns14152:0crwdne14152:0',
-        'note'       => 'crwdns14154:0crwdne14154:0',
+        'note' => 'crwdns14154:0crwdne14154:0',
     ],
     'suppliersview' => [
         'name' => 'crwdns14156:0crwdne14156:0',
@@ -339,9 +338,9 @@ return array(
     'suppliersdelete' => [
         'name' => 'crwdns14162:0crwdne14162:0',
     ],
-    'manufacturers'   => [
+    'manufacturers' => [
         'name' => 'crwdns14164:0crwdne14164:0',
-        'note'       => 'crwdns14166:0crwdne14166:0',
+        'note' => 'crwdns14166:0crwdne14166:0',
     ],
     'manufacturersview' => [
         'name' => 'crwdns14168:0crwdne14168:0',
@@ -355,9 +354,9 @@ return array(
     'manufacturersdelete' => [
         'name' => 'crwdns14174:0crwdne14174:0',
     ],
-    'companies'   => [
+    'companies' => [
         'name' => 'crwdns14176:0crwdne14176:0',
-        'note'       => 'crwdns14178:0crwdne14178:0',
+        'note' => 'crwdns14178:0crwdne14178:0',
     ],
     'companiesview' => [
         'name' => 'crwdns14180:0crwdne14180:0',
@@ -373,32 +372,32 @@ return array(
     ],
     'user-self-accounts' => [
         'name' => 'crwdns14188:0crwdne14188:0',
-        'note'       => 'crwdns14190:0crwdne14190:0',
+        'note' => 'crwdns14190:0crwdne14190:0',
     ],
     'selftwo-factor' => [
         'name' => 'crwdns14192:0crwdne14192:0',
-        'note'       => 'crwdns14194:0crwdne14194:0',
+        'note' => 'crwdns14194:0crwdne14194:0',
     ],
     'selfapi' => [
         'name' => 'crwdns14196:0crwdne14196:0',
-        'note'       => 'crwdns14198:0crwdne14198:0',
+        'note' => 'crwdns14198:0crwdne14198:0',
     ],
     'selfedit-location' => [
         'name' => 'crwdns14200:0crwdne14200:0',
-        'note'       => 'crwdns14202:0crwdne14202:0',
+        'note' => 'crwdns14202:0crwdne14202:0',
     ],
     'selfcheckout-assets' => [
         'name' => 'crwdns14204:0crwdne14204:0',
-        'note'       => 'crwdns14206:0crwdne14206:0',
+        'note' => 'crwdns14206:0crwdne14206:0',
     ],
     'selfview-purchase-cost' => [
         'name' => 'crwdns14208:0crwdne14208:0',
-        'note'       => 'crwdns14210:0crwdne14210:0',
+        'note' => 'crwdns14210:0crwdne14210:0',
     ],
 
     'depreciations' => [
         'name' => 'crwdns14212:0crwdne14212:0',
-        'note'       => 'crwdns14214:0crwdne14214:0',
+        'note' => 'crwdns14214:0crwdne14214:0',
     ],
     'depreciationsview' => [
         'name' => 'crwdns14216:0crwdne14216:0',
@@ -419,6 +418,6 @@ return array(
     'grant' => 'crwdns14230:0crwdne14230:0',
     'deny' => 'crwdns14232:0crwdne14232:0',
     'inherit' => 'crwdns14234:0crwdne14234:0',
-    'use_groups' => 'crwdns14236:0crwdne14236:0'
+    'use_groups' => 'crwdns14236:0crwdne14236:0',
 
-);
+];

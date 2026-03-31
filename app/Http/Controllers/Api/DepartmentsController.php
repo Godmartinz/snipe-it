@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
+use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Transformers\DepartmentsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Department;
-use Illuminate\Http\Request;
-use App\Http\Requests\ImageUploadRequest;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DepartmentsController extends Controller
 {
@@ -19,9 +20,10 @@ class DepartmentsController extends Controller
      * Display a listing of the resource.
      *
      * @author [Godfrey Martinez] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Department::class);
         $allowed_columns = ['id', 'name', 'image', 'users_count', 'notes', 'tag_color'];
@@ -39,11 +41,12 @@ class DepartmentsController extends Controller
                 'departments.updated_at',
                 'departments.image',
                 'departments.tag_color',
-                'departments.notes'
+                'departments.notes',
             ])->with('location')->with('manager')->with('company')->withCount('users as users_count');
 
-        if ($request->filled('search')) {
-            $departments = $departments->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $departments->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {
@@ -90,6 +93,7 @@ class DepartmentsController extends Controller
 
         $total = $departments->count();
         $departments = $departments->skip($offset)->take($limit)->get();
+
         return (new DepartmentsTransformer)->transformDepartments($departments, $total);
 
     }
@@ -98,8 +102,10 @@ class DepartmentsController extends Controller
      * Store a newly created resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \App\Http\Requests\ImageUploadRequest  $request
+     *
+     * @param  ImageUploadRequest  $request
      */
     public function store(StoreDepartmentRequest $request): JsonResponse
     {
@@ -113,6 +119,7 @@ class DepartmentsController extends Controller
         if ($department->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new DepartmentsTransformer)->transformDepartment($department), trans('admin/departments/message.create.success')));
         }
+
         return response()->json(Helper::formatStandardApiResponse('error', null, $department->getErrors()));
 
     }
@@ -121,13 +128,16 @@ class DepartmentsController extends Controller
      * Display the specified resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function show($id) : array
+    public function show($id): array
     {
         $this->authorize('view', Department::class);
         $department = Department::withCount('users as users_count')->findOrFail($id);
+
         return (new DepartmentsTransformer)->transformDepartment($department);
     }
 
@@ -135,11 +145,12 @@ class DepartmentsController extends Controller
      * Update the specified resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v5.0]
-     * @param  \App\Http\Requests\ImageUploadRequest  $request
+     *
      * @param  int  $id
      */
-    public function update(ImageUploadRequest $request, $id) : JsonResponse
+    public function update(ImageUploadRequest $request, $id): JsonResponse
     {
         $this->authorize('update', Department::class);
         $department = Department::findOrFail($id);
@@ -153,15 +164,16 @@ class DepartmentsController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $department->getErrors()));
     }
 
-
     /**
      * Validates and deletes selected department.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $locationId
+     *
+     * @param  int  $locationId
+     *
      * @since [v4.0]
      */
-    public function destroy($id) : JsonResponse
+    public function destroy($id): JsonResponse
     {
         $department = Department::findOrFail($id);
 
@@ -172,6 +184,7 @@ class DepartmentsController extends Controller
         }
 
         $department->delete();
+
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/departments/message.delete.success')));
 
     }
@@ -180,10 +193,11 @@ class DepartmentsController extends Controller
      * Gets a paginated collection for the select2 menus
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0.16]
-     * @see \App\Http\Transformers\SelectlistTransformer
+     * @see SelectlistTransformer
      */
-    public function selectlist(Request $request) : array
+    public function selectlist(Request $request): array
     {
 
         $this->authorize('view.selectlists');

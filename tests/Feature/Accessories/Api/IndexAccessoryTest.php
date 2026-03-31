@@ -3,22 +3,24 @@
 namespace Tests\Feature\Accessories\Api;
 
 use App\Models\Accessory;
+use App\Models\AccessoryCheckout;
 use App\Models\Company;
 use App\Models\User;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
 
 class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAsForApi(User::factory()->create())
             ->getJson(route('api.accessories.index'))
             ->assertForbidden();
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
@@ -54,7 +56,7 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
             ->assertResponseContainsInRows($accessoryC);
     }
 
-    public function testCanGetAccessories()
+    public function test_can_get_accessories()
     {
         $user = User::factory()->viewAccessories()->create();
 
@@ -66,5 +68,32 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
             ->assertOk()
             ->assertResponseContainsInRows($accessoryA)
             ->assertResponseContainsInRows($accessoryB);
+    }
+
+    public function test_can_filter_accessories_by_searchable_count_alias()
+    {
+        $this->markIncompleteIfSqlite('This test is not compatible with SQLite');
+        $user = User::factory()->viewAccessories()->create();
+
+        $targetAccessory = Accessory::factory()->create(['name' => 'Accessory With Two Checkouts']);
+        $otherAccessory = Accessory::factory()->create(['name' => 'Accessory With One Checkout']);
+
+        AccessoryCheckout::factory()->count(2)->create(['accessory_id' => $targetAccessory->id]);
+        AccessoryCheckout::factory()->create(['accessory_id' => $otherAccessory->id]);
+
+        $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', [
+                'filter' => json_encode(['checkouts_count' => 2]),
+                'sort' => 'id',
+                'order' => 'asc',
+                'offset' => '0',
+                'limit' => '20',
+            ]))
+            ->assertOk()
+            ->assertJsonStructure([
+                'total',
+                'rows',
+            ])
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->where('rows.0.name', 'Accessory With Two Checkouts')->etc());
     }
 }

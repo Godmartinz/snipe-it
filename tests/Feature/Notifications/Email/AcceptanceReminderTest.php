@@ -24,6 +24,7 @@ use Tests\TestCase;
 class AcceptanceReminderTest extends TestCase
 {
     private User $admin;
+
     private User $assignee;
 
     protected function setUp(): void
@@ -36,7 +37,7 @@ class AcceptanceReminderTest extends TestCase
         $this->assignee = User::factory()->create();
     }
 
-    public function testMustHavePermissionToSendReminder()
+    public function test_must_have_permission_to_send_reminder()
     {
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
         $userWithoutPermission = User::factory()->create();
@@ -50,7 +51,7 @@ class AcceptanceReminderTest extends TestCase
         Mail::assertNotSent(CheckoutAssetMail::class);
     }
 
-    public function testReminderNotSentIfAcceptanceDoesNotExist()
+    public function test_reminder_not_sent_if_acceptance_does_not_exist()
     {
         $this->actingAs($this->admin)
             ->post(route('reports/unaccepted_assets_sent_reminder', [
@@ -60,7 +61,7 @@ class AcceptanceReminderTest extends TestCase
         Mail::assertNotSent(CheckoutAssetMail::class);
     }
 
-    public function testReminderNotSentIfAcceptanceAlreadyAccepted()
+    public function test_reminder_not_sent_if_acceptance_already_accepted()
     {
         $checkoutAcceptanceAlreadyAccepted = CheckoutAcceptance::factory()->accepted()->create();
 
@@ -80,7 +81,7 @@ class AcceptanceReminderTest extends TestCase
                     ->pending()
                     ->forAssignedTo(['email' => null])
                     ->create();
-            }
+            },
         ];
 
         yield 'User with empty string email address' => [
@@ -89,12 +90,12 @@ class AcceptanceReminderTest extends TestCase
                     ->pending()
                     ->forAssignedTo(['email' => ''])
                     ->create();
-            }
+            },
         ];
     }
 
     #[DataProvider('checkoutAcceptancesToUsersWithoutEmailAddresses')]
-    public function testUserWithoutEmailAddressHandledGracefully($callback)
+    public function test_user_without_email_address_handled_gracefully($callback)
     {
         $checkoutAcceptance = $callback();
 
@@ -108,7 +109,7 @@ class AcceptanceReminderTest extends TestCase
         Mail::assertNotSent(CheckoutAssetMail::class);
     }
 
-    public function testReminderIsSentToUserForAccessory()
+    public function test_reminder_is_sent_to_user_for_accessory()
     {
         $accessory = Accessory::factory()->requiringAcceptance()->create();
 
@@ -143,7 +144,7 @@ class AcceptanceReminderTest extends TestCase
         });
     }
 
-    public function testReminderIsSentToUserForAsset()
+    public function test_reminder_is_sent_to_user_for_asset()
     {
         $asset = Asset::factory()->requiresAcceptance()->create();
 
@@ -172,7 +173,7 @@ class AcceptanceReminderTest extends TestCase
         });
     }
 
-    public function testReminderIsSentToUserForConsumable()
+    public function test_reminder_is_sent_to_user_for_consumable()
     {
         $consumable = Consumable::factory()->requiringAcceptance()->create();
 
@@ -201,7 +202,7 @@ class AcceptanceReminderTest extends TestCase
         });
     }
 
-    public function testReminderIsSentToUserForLicenseSeat()
+    public function test_reminder_is_sent_to_user_for_license_seat()
     {
         $licenseSeat = LicenseSeat::factory()->requiringAcceptance()->create();
 

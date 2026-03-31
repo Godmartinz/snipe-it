@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -59,15 +60,15 @@ class CheckoutConsumableMail extends BaseMailable
 
         return new Content(
             markdown: 'mail.markdown.checkout-consumable',
-            with:   [
-                'item'          => $this->item,
-                'admin'         => $this->admin,
-                'note'          => $this->note,
-                'target'        => $this->target,
-                'eula'          => $eula,
-                'req_accept'    => $req_accept,
-                'accept_url'    => $accept_url,
-                'qty'           => $this->qty,
+            with: [
+                'item' => $this->item,
+                'admin' => $this->admin,
+                'note' => $this->note,
+                'target' => $this->target,
+                'eula' => $eula,
+                'req_accept' => $req_accept,
+                'accept_url' => $accept_url,
+                'qty' => $this->qty,
                 'introduction_line' => $this->introductionLine(),
             ]
         );
@@ -76,7 +77,7 @@ class CheckoutConsumableMail extends BaseMailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {
@@ -98,11 +99,11 @@ class CheckoutConsumableMail extends BaseMailable
             return trans_choice('mail.new_item_checked_with_acceptance', $this->qty);
         }
 
-        if ($this->firstTimeSending && !$this->requiresAcceptance()) {
+        if ($this->firstTimeSending && ! $this->requiresAcceptance()) {
             return trans_choice('mail.new_item_checked', $this->qty);
         }
 
-        if (!$this->firstTimeSending && $this->requiresAcceptance()) {
+        if (! $this->firstTimeSending && $this->requiresAcceptance()) {
             return trans('mail.recent_item_checked');
         }
 

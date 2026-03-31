@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class CreateUserTest extends TestCase
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAsForApi(User::factory()->create())
             ->postJson(route('api.users.store'), [
@@ -24,7 +24,7 @@ class CreateUserTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testCompanyIdNeedsToBeInteger()
+    public function test_company_id_needs_to_be_integer()
     {
         $company = Company::factory()->create();
 
@@ -42,7 +42,7 @@ class CreateUserTest extends TestCase
             });
     }
 
-    public function testDepartmentIdNeedsToBeInteger()
+    public function test_department_id_needs_to_be_integer()
     {
         $department = Department::factory()->create();
 
@@ -60,7 +60,7 @@ class CreateUserTest extends TestCase
             });
     }
 
-    public function testCanCreateUser()
+    public function test_can_create_user()
     {
         Notification::fake();
 
@@ -91,7 +91,7 @@ class CreateUserTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function testCanCreateAndNotifyUser()
+    public function test_can_create_and_notify_user()
     {
         Notification::fake();
 

@@ -604,13 +604,15 @@ document.addEventListener('livewire:init', () => {
         Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
     });
 
-    Livewire.hook('request', ({succeed}) => {
-        succeed(() => {
-            queueMicrotask(() => {
-                $('.livewire-select2').select2();
-            });
+  Livewire.interceptMessage(({ onFinish }) => {
+    onFinish(() => {
+      // Runs after DOM morph completes (or on error/cancel)
+        queueMicrotask(() => {
+          $(".livewire-select2").select2();
         });
-    });
+      });
+    }
+  );
 });
 
 

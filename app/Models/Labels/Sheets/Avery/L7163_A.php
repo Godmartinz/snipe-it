@@ -2,70 +2,82 @@
 
 namespace App\Models\Labels\Sheets\Avery;
 
-
 use App\Helpers\Helper;
 
 class L7163_A extends L7163
 {
-    private const BARCODE_MARGIN =   1.80;
-    private const TAG_SIZE       =   4.80;
-    private const TITLE_SIZE     =   5.00;
-    private const TITLE_MARGIN   =   .75;
-    private const LABEL_SIZE     =   3.35;
-    private const LABEL_MARGIN   = - 0.30;
-    private const FIELD_SIZE     =   4.80;
-    private const FIELD_MARGIN   =   0.20;
+    private const BARCODE_MARGIN = 1.80;
+
+    private const TAG_SIZE = 4.80;
+
+    private const TITLE_SIZE = 5.00;
+
+    private const TITLE_MARGIN = .75;
+
+    private const LABEL_SIZE = 3.35;
+
+    private const LABEL_MARGIN = -0.30;
+
+    private const FIELD_SIZE = 4.80;
+
+    private const FIELD_MARGIN = 0.20;
 
     public function getUnit()
     {
-        return 'mm'; 
+        return 'mm';
     }
 
     public function getLabelMarginTop()
     {
-        return 1.0; 
+        return 1.0;
     }
+
     public function getLabelMarginBottom()
     {
-        return 1.0; 
+        return 1.0;
     }
+
     public function getLabelMarginLeft()
     {
-        return 1.0; 
+        return 1.0;
     }
+
     public function getLabelMarginRight()
     {
-        return 1.0; 
+        return 1.0;
     }
 
     public function getSupportAssetTag()
     {
-        return true; 
-    }
-    public function getSupport1DBarcode()
-    {
-        return false; 
-    }
-    public function getSupport2DBarcode()
-    {
-        return true; 
-    }
-    public function getSupportFields()
-    {
-        return 4; 
-    }
-    public function getSupportLogo()
-    {
-        return false; 
-    }
-    public function getSupportTitle()
-    {
-        return true; 
+        return true;
     }
 
-    public function preparePDF($pdf)
+    public function getSupport1DBarcode()
     {
+        return false;
     }
+
+    public function getSupport2DBarcode()
+    {
+        return true;
+    }
+
+    public function getSupportFields()
+    {
+        return 4;
+    }
+
+    public function getSupportLogo()
+    {
+        return false;
+    }
+
+    public function getSupportTitle()
+    {
+        return true;
+    }
+
+    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {
@@ -77,7 +89,7 @@ class L7163_A extends L7163
         $currentY = $pa->y1;
 
         $barcodeSize = $pa->h - self::TAG_SIZE;
-        
+
         if ($record->has('barcode2d')) {
             static::writeText(
                 $pdf, $record->get('tag'),
@@ -133,10 +145,10 @@ class L7163_A extends L7163
 
         foreach ($fields as $field) {
             $rawLabel = $field['label'] ?? null;
-            $value    = (string)($field['value'] ?? '');
+            $value = (string) ($field['value'] ?? '');
 
             // No label: value takes the whole row
-            if (!is_string($rawLabel) || trim($rawLabel) === '') {
+            if (! is_string($rawLabel) || trim($rawLabel) === '') {
                 static::writeText(
                     $pdf, $value,
                     $currentX, $currentY,
@@ -145,10 +157,11 @@ class L7163_A extends L7163
                 );
 
                 $currentY += $field_layout['rowAdvance'];
+
                 continue;
             }
 
-            $labelText = rtrim($field['label'], ':') . ':';
+            $labelText = rtrim($field['label'], ':').':';
 
             static::writeText(
                 $pdf, $labelText,
@@ -163,10 +176,7 @@ class L7163_A extends L7163
                 'freemono', 'B', $field_layout['fieldSize'], 'L',
                 $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
             );
-            $currentY += $field_layout['rowAdvance'];;
+            $currentY += $field_layout['rowAdvance'];
         }
     }
 }
-
-
-?>

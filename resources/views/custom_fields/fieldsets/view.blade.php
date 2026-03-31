@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="col-md-2">
-                        <button class="btn btn-success">{{ trans('general.update') }}</button>
+                        <button class="btn btn-success">{{ (isset($custom_fieldset->id)) ? trans('general.update') :  trans('general.create')  }}</button>
                     </div>
                 </div>
             </x-form>

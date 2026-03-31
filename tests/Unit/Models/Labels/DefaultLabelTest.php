@@ -19,7 +19,7 @@ class DefaultLabelTest extends TestCase
         ]);
 
         // simply ensuring constructor didn't throw exception...
-        $this->assertInstanceOf(DefaultLabel::class, new DefaultLabel());
+        $this->assertInstanceOf(DefaultLabel::class, new DefaultLabel);
     }
 
     /**
@@ -33,6 +33,6 @@ class DefaultLabelTest extends TestCase
         ]);
 
         // simply ensuring constructor didn't throw exception...
-        $this->assertInstanceOf(DefaultLabel::class, new DefaultLabel());
+        $this->assertInstanceOf(DefaultLabel::class, new DefaultLabel);
     }
 }
