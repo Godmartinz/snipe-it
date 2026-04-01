@@ -214,7 +214,7 @@
 <!-- recent activity -->
 <div class="row">
   <div class="col-md-8">
-    <div class="box box-default">
+      <div class="box box-default physics-box">
       <div class="box-header with-border">
         <h2 class="box-title">{{ trans('general.recent_activity') }}</h2>
         <div class="box-tools pull-right">
@@ -262,7 +262,7 @@
     </div><!-- /.box -->
   </div>
   <div class="col-md-4">
-        <div class="box box-default">
+      <div class="box box-default physics-box">
             <div class="box-header with-border">
                 <h2 class="box-title">
                     {{ (\App\Models\Setting::getSettings()->dash_chart_type == 'name') ? trans('general.assets_by_status') : trans('general.assets_by_status_type') }}
@@ -292,8 +292,8 @@
     <div class="col-md-6">
 
 		@if ((($snipeSettings->scope_locations_fmcs!='1') && ($snipeSettings->full_multiple_companies_support=='1')))
-			 <!-- Companies -->	
-			<div class="box box-default">
+			 <!-- Companies -->
+            <div class="box box-default physics-box">
 				<div class="box-header with-border">
 					<h2 class="box-title">{{ trans('general.companies') }}</h2>
 					<div class="box-tools pull-right">
@@ -362,7 +362,7 @@
 		
 		@else
 			 <!-- Locations -->
-			 <div class="box box-default">
+            <div class="box box-default physics-box">
 				<div class="box-header with-border">
 					<h2 class="box-title">{{ trans('general.locations') }}</h2>
 					<div class="box-tools pull-right">
@@ -426,7 +426,7 @@
     <div class="col-md-6">
 
         <!-- Categories -->
-        <div class="box box-default">
+        <div class="box box-default physics-box">
             <div class="box-header with-border">
                 <h2 class="box-title">{{ trans('general.asset') }} {{ trans('general.categories') }}</h2>
                 <div class="box-tools pull-right">
