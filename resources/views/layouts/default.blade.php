@@ -298,18 +298,31 @@
 
 
 
-        input[type="*"]:disabled,
-        input[type=checkbox]:disabled,
-        input[type=radio]:disabled,
         input[readonly],
+        textarea[readonly],
         .select2-container--default.select2-container--disabled .select2-selection--single,
+        .select2-container--default.select2-container--disabled .select2-selection--multiple,
         .select2-container--default.select2-container--disabled .select2-selection__rendered,
-        textarea[readonly]
-        {
+        .select2-container--default.select2-container--disabled .select2-search__field,
+        .select2-container--default.select2-container--disabled .select2-search--inline .select2-search__field,
+        .select2-container--default.select2-container--disabled .select2-selection--multiple .select2-selection__rendered,
+        .select2-container--default.select2-container--disabled .select2-selection--multiple .select2-search--inline {
             background-color: light-dark(rgb(234, 232, 232), rgb(117, 116, 117)) !important;
+            color: var(--color-fg) !important;
+            border-color: var(--input-border-color) !important;
+            box-shadow: none !important;
             cursor: not-allowed !important;
+            opacity: 1 !important;
         }
 
+        .select2-container--default.select2-container--disabled .select2-search__field::placeholder {
+            color: var(--text-help) !important;
+            opacity: 1 !important;
+        }
+
+        .select2-container--default.select2-container--disabled .select2-search__field {
+            -webkit-text-fill-color: var(--text-help) !important;
+        }
 
 
         input[type="search"].search-highlight {
