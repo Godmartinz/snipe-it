@@ -6,14 +6,13 @@ use App\Models\LicenseSeat;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class CheckinLicenseMail extends Mailable
+class CheckinLicenseMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
@@ -49,12 +48,12 @@ class CheckinLicenseMail extends Mailable
     {
         return new Content(
             markdown: 'mail.markdown.checkin-license',
-            with:   [
-                'license_seat'  => $this->item,
-                'license'       => $this->item->license,
-                'admin'         => $this->admin,
-                'note'          => $this->note,
-                'target'        => $this->target,
+            with: [
+                'license_seat' => $this->item,
+                'license' => $this->item->license,
+                'admin' => $this->admin,
+                'note' => $this->note,
+                'target' => $this->target,
             ]
         );
     }
@@ -62,7 +61,7 @@ class CheckinLicenseMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

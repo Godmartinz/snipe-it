@@ -1,11 +1,11 @@
 <?php
 
-return array(
+return [
 
-    'actions'	 	        => 'Dejanja',
-    'action' 		        => 'Dejanje',
-    'by'      		        => 'Od',
-    'item' 			        => 'Element',
-    'no_matching_records'   => 'No matching records found',
+    'actions' => 'Dejanja',
+    'action' => 'Dejanje',
+    'by' => 'Od',
+    'item' => 'Element',
+    'no_matching_records' => 'Ne najdem ujemajočih se zapisov',
 
-);
+];

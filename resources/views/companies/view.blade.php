@@ -6,225 +6,93 @@
     @parent
 @stop
 
+@section('header_right')
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
+
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-tabs>
+                <x-slot:tabnav>
+                    <x-tabs.user-tab count="{{ $company->users->count() }}"/>
+                    <x-tabs.asset-tab count="{{ $company->assets()->AssetsForShow()->count() }}"/>
+                    <x-tabs.license-tab count="{{ $company->licenses->count() }}"/>
+                    <x-tabs.accessory-tab count="{{ $company->accessories->count() }}"/>
+                    <x-tabs.consumable-tab count="{{ $company->consumables->count() }}"/>
+                    <x-tabs.component-tab count="{{ $company->components->count() }}"/>
+                    <x-tabs.files-tab :item="$company" count="{{ $company->uploads()->count() }}"/>
+                    <x-tabs.upload-tab :item="$company"/>
+                </x-slot:tabnav>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
+                <x-slot:tabpanes>
+                    <!-- start users tab pane -->
+                    <x-tabs.pane name="users">
+                        <x-table.users name="users" :route="route('api.users.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end users tab pane -->
 
+                    <!-- start assets tab pane -->
+                    <x-tabs.pane name="assets">
+                        <x-table.assets name="assets" :route="route('api.assets.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end assets tab pane -->
 
-                    <li class="active">
-                        <a href="#asset_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="fas fa-barcode" aria-hidden="true"></i>
-                            </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.assets') }}
-                                {!! ($company->assets()->AssetsForShow()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($company->assets()->AssetsForShow()->count()).'</badge>' : '' !!}
+                    <!-- start licenses tab pane -->
+                    <x-tabs.pane name="licenses">
+                        <x-table.licenses name="licenses" :route="route('api.licenses.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end licenses tab pane -->
 
-                            </span>
-                        </a>
-                    </li>
+                    <!-- start accessory tab pane -->
+                    <x-tabs.pane name="accessories">
+                        <x-table.accessories name="accessories" :route="route('api.accessories.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end accessory tab pane -->
 
-                    <li>
-                        <a href="#licenses_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-save"></i>
-                            </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.licenses') }}
-                                {!! ($company->licenses->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($company->licenses->count()).'</badge>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                    <!-- start consumables tab pane -->
+                    <x-tabs.pane name="consumables">
+                        <x-table.consumables name="consumables" :route="route('api.consumables.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end components tab pane -->
 
-                    <li>
-                        <a href="#accessories_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-keyboard"></i>
-                            </span> <span class="hidden-xs hidden-sm">{{ trans('general.accessories') }}
-                                {!! ($company->accessories->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($company->accessories->count()).'</badge>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                    <!-- start components tab pane -->
+                    <x-tabs.pane name="components">
+                        <x-table.components name="components" :route="route('api.components.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
 
-                    <li>
-                        <a href="#consumables_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="fas fa-tint"></i></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.consumables') }}
-                                {!! ($company->consumables->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($company->consumables->count()).'</badge>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                    <!-- start files tab pane -->
+                    <x-tabs.pane name="files">
+                        <x-table.files object_type="companies" :object="$company"/>
+                    </x-tabs.pane>
+                    <!-- end files tab pane -->
 
-                    <li>
-                        <a href="#components_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-hdd"></i></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                                {!! (($company->components) && ($company->components->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($company->components->count()).'</badge>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                </x-slot:tabpanes>
 
-                    <li>
-                        <a href="#users_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <x-icon type="users" /></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.people') }}
-                                {!! (($company->users) && ($company->users->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($company->users->count()).'</badge>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+            </x-tabs>
 
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$company" img_path="{{ app('companies_upload_url') }}">
 
+                    <x-slot:buttons>
+                        <x-button.edit :item="$company" :route="route('companies.edit', $company->id)" />
+                        <x-button.delete :item="$company" />
+                    </x-slot:buttons>
 
-                </ul>
+                </x-info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
 
-                <div class="tab-content">
+@endsection
 
-                    <div class="tab-pane fade in active" id="asset_tab">
-                        <!-- checked out assets table -->
-                        <div class="table table-responsive">
-                            @include('partials.asset-bulk-actions')
-
-                            <table
-                                    data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="assetsListingTable"
-                                    data-id-table="assetsListingTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    data-toolbar="#assetsBulkEditToolbar"
-                                    data-bulk-button-id="#bulkAssetEditButton"
-                                    data-bulk-form-id="#assetsBulkForm"
-                                    id="assetsListingTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.assets.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-                        </div>
-                    </div><!-- /asset_tab -->
-
-                    <div class="tab-pane" id="licenses_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="licensesTable"
-                                    data-id-table="licensesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="licensesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.licenses.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-licenses-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /licenses-tab -->
-
-                    <div class="tab-pane" id="accessories_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\AccessoryPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="accessoriesTable"
-                                    data-id-table="accessoriesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="accessoriesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.accessories.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-accessories-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /accessories-tab -->
-
-                    <div class="tab-pane" id="consumables_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="consumablesTable"
-                                    data-id-table="consumablesTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="consumablesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.consumables.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-consumables-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                            </table>
-
-                        </div>
-                    </div><!-- /consumables-tab -->
-
-                    <div class="tab-pane" id="components_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="componentsTable"
-                                    data-id-table="componentsTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="componentsTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.components.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-
-                            </table>
-                        </div>
-                    </div><!-- /consumables-tab -->
-
-                    <div class="tab-pane" id="users_tab">
-                        <div class="table-responsive">
-
-                            <table
-                                    data-columns="{{ \App\Presenters\UserPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="usersTable"
-                                    data-id-table="usersTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="usersTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.users.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-users-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-
-                            </table>
-                        </div>
-                    </div><!-- /consumables-tab -->
-
-
-
-
-                </div><!-- /.tab-content -->
-            </div><!-- nav-tabs-custom -->
-        </div>
-    </div>
-
-@stop
 @section('moar_scripts')
+    @can('files', $company)
+        @include ('modals.upload-file', ['item_type' => 'companies', 'item_id' => $company->id])
+    @endcan
     @include ('partials.bootstrap-table')
-
-@stop
+@endsection
 

@@ -9,11 +9,19 @@ class CategoryPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout()
     {
         $layout = [
+            [
+                'field' => 'checkbox',
+                'checkbox' => true,
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
             [
                 'field' => 'id',
                 'searchable' => false,
@@ -71,12 +79,20 @@ class CategoryPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'trueFalseFormatter',
             ], [
-                "field" => "use_default_eula",
-                "searchable" => false,
-                "sortable" => true,
-                "title" => trans('admin/categories/general.use_default_eula_column'),
+                'field' => 'use_default_eula',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('admin/categories/general.use_default_eula_column'),
                 'visible' => true,
-                "formatter" => 'trueFalseFormatter',
+                'formatter' => 'trueFalseFormatter',
+            ], [
+                'field' => 'tag_color',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.tag_color'),
+                'visible' => false,
+                'formatter' => 'colorTagFormatter',
             ], [
                 'field' => 'notes',
                 'searchable' => true,
@@ -100,7 +116,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.updated_at'),
@@ -112,8 +128,9 @@ class CategoryPresenter extends Presenter
                 'sortable' => false,
                 'switchable' => false,
                 'title' => trans('table.actions'),
-		        'formatter' => 'categoriesActionsFormatter',
+                'formatter' => 'categoriesActionsFormatter',
                 'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -122,19 +139,41 @@ class CategoryPresenter extends Presenter
 
     /**
      * Link to this categories name
+     *
      * @return string
      */
     public function nameUrl()
     {
-        return (string) link_to_route('categories.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Category', $this])) {
+            return '<a href="'.route('categories.show', $this->id).'">'.e($this->display_name).'</a>';
+        } else {
+            return e($this->display_name);
+        }
     }
 
     /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()
     {
         return route('categories.show', $this->id);
+    }
+
+    public function formattedNameLink()
+    {
+
+        // We use soft-deletes for categories, but we don't give you a way to restore them right now. This would be the method we'd use when that happens
+        //        if (auth()->user()->can('view', ['\App\Models\Category', $this])) {
+        //            return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('models.show', e($this->id)).'" class="'. (($this->deleted_at!='') ? 'deleted' : '').'">'.e($this->display_name).'</a>';
+        //        }
+
+        if ((auth()->user()->can('view', ['\App\Models\Category', $this])) && ($this->deleted_at == '')) {
+            return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('categories.show', e($this->id)).'">'.e($this->name).'</a>';
+        }
+
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<span class="'.(($this->deleted_at != '') ? 'deleted' : '').'">'.e($this->display_name).'</span>';
+
     }
 }

@@ -3,7 +3,7 @@
 return [
     'about_templates' => 'Apie išsaugotus šablonus',
     'saving_templates_description' => 'Atlikite nustatymus, tada aukščiau esančiame laukelyje įveskite šablono pavadinimą ir spustelėkite mygtuką „Išsaugoti šabloną“. Norėdami pasirinkti anksčiau išsaugotą šabloną, naudokite išskleidžiamąjį meniu.',
-    'create'  => [
+    'create' => [
         'success' => 'Šablonas išsaugotas sėkmingai',
     ],
     'update' => [

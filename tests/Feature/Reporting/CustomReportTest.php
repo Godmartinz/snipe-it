@@ -48,14 +48,14 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
         );
     }
 
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('reports/custom'))
             ->assertForbidden();
     }
 
-    public function testCanLoadCustomReportPage()
+    public function test_can_load_custom_report_page()
     {
         $this->actingAs(User::factory()->canViewReports()->create())
             ->get(route('reports/custom'))
@@ -64,11 +64,11 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
                 'template' => function (ReportTemplate $template) {
                     // the view should have an empty report by default
                     return $template->exists() === false;
-                }
+                },
             ]);
     }
 
-    public function testSavedTemplatesOnPageAreScopedToTheUser()
+    public function test_saved_templates_on_page_are_scoped_to_the_user()
     {
         // Given there is a saved template for one user
         ReportTemplate::factory()->create(['name' => 'Report A']);
@@ -84,12 +84,11 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
             ->assertViewHas([
                 'report_templates' => function (Collection $reports) {
                     return $reports->pluck('name')->doesntContain('Report A');
-                }
+                },
             ]);
     }
 
-
-    public function testCustomAssetReport()
+    public function test_custom_asset_report()
     {
         Asset::factory()->create(['name' => 'Asset A']);
         Asset::factory()->create(['name' => 'Asset B']);
@@ -100,12 +99,12 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
                 'asset_tag' => '1',
                 'serial' => '1',
             ])->assertOk()
-            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertHeader('content-type', 'text/csv; charset=utf-8')
             ->assertSeeTextInStreamedResponse('Asset A')
             ->assertSeeTextInStreamedResponse('Asset B');
     }
 
-    public function testCustomAssetReportAdheresToCompanyScoping()
+    public function test_custom_asset_report_adheres_to_company_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
@@ -151,7 +150,7 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
             ->assertSeeTextInStreamedResponse('Asset B');
     }
 
-    public function testCanLimitAssetsByLastCheckIn()
+    public function test_can_limit_assets_by_last_check_in()
     {
         Asset::factory()->create(['name' => 'Asset A', 'last_checkin' => '2023-08-01']);
         Asset::factory()->create(['name' => 'Asset B', 'last_checkin' => '2023-08-02']);
@@ -168,7 +167,7 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
                 'checkin_date_start' => '2023-08-02',
                 'checkin_date_end' => '2023-08-04',
             ])->assertOk()
-            ->assertHeader('content-type', 'text/csv; charset=UTF-8')
+            ->assertHeader('content-type', 'text/csv; charset=utf-8')
             ->assertDontSeeTextInStreamedResponse('Asset A')
             ->assertSeeTextInStreamedResponse('Asset B')
             ->assertSeeTextInStreamedResponse('Asset C')

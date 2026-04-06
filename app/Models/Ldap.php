@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Setting;
-use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 /***********************************************
  * TODOS:
@@ -27,11 +25,42 @@ use Illuminate\Support\Facades\Crypt;
 
 class Ldap extends Model
 {
+    public static function ignoreCertificates(bool $ignore_cert = true)
+    {
+        if (defined('LDAP_OPT_X_TLS_REQUIRE_CERT') && defined('LDAP_OPT_X_TLS_NEVER')) {
+            // TODO - we are currently, as a 'safety', doing *both* the following 'new-style' ldap_set_option calls,
+            // as well as "falling-through" to the 'old-style' putenv() calls.
+            //
+            // I *suspect* we can eventually remove the putenv() calls, but I'm just a little nervous about that.
+            // According to the PHP docs, the LDAP_OPT_X_TLS_REQUIRE_CERT constant has been available since PHP 7.0.
+            // We're currently using PHP versions way, way later than that (v8.2-v8.4 as of this writing). So it's
+            // unlikely that these constants wouldn't be defined - unless you didn't have LDAP support in the first
+            // place. But if that were to happen, I would hope we would've detected that long, long ago, rather than at
+            // this point.
+            if ($ignore_cert) {
+                if (ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER)) {
+                    // return true;
+                }
+            } else {
+                if (ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_DEMAND)) {
+                    // return true;
+                }
+            }
+        }
+        if ($ignore_cert) {
+            return putenv('LDAPTLS_REQCERT=never');
+        } else {
+            return putenv('LDAPTLS_REQCERT');
+        }
+    }
+
     /**
      * Makes a connection to LDAP using the settings in Admin > Settings.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
+     *
+     * @since  [v3.0]
+     *
      * @return connection
      */
     public static function connectToLdap()
@@ -43,13 +72,17 @@ class Ldap extends Model
 
         // If we are ignoring the SSL cert we need to setup the environment variable
         // before we create the connection
-        if ($ldap_server_cert_ignore == '1') {
-            putenv('LDAPTLS_REQCERT=never');
-        }
+        self::ignoreCertificates((bool) $ldap_server_cert_ignore);
 
         // If the user specifies where CA Certs are, make sure to use them
         if (env('LDAPTLS_CACERT')) {
             putenv('LDAPTLS_CACERT='.env('LDAPTLS_CACERT'));
+        }
+        // You _were_ allowed to do this *after* the ldap_connect() in some versions of PHP, but it's not how they want
+        // you to anymore, and it seems to not work at all in later PHP versions.
+        if (Setting::getSettings()->ldap_client_tls_cert && Setting::getSettings()->ldap_client_tls_key) {
+            ldap_set_option(null, LDAP_OPT_X_TLS_CERTFILE, Setting::get_client_side_cert_path());
+            ldap_set_option(null, LDAP_OPT_X_TLS_KEYFILE, Setting::get_client_side_key_path());
         }
 
         $connection = @ldap_connect($ldap_host);
@@ -63,31 +96,98 @@ class Ldap extends Model
         ldap_set_option($connection, LDAP_OPT_PROTOCOL_VERSION, $ldap_version);
         ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 20);
 
-        if (Setting::getSettings()->ldap_client_tls_cert && Setting::getSettings()->ldap_client_tls_key) {
-            ldap_set_option(null, LDAP_OPT_X_TLS_CERTFILE, Setting::get_client_side_cert_path());
-            ldap_set_option(null, LDAP_OPT_X_TLS_KEYFILE, Setting::get_client_side_key_path());
-        }
-
-        if ($ldap_use_tls=='1') {
+        if ($ldap_use_tls == '1') {
             ldap_start_tls($connection);
         }
-
 
         return $connection;
     }
 
+    /**
+     * Finds user via Admin search *first*, and _then_ try to bind as that user, returning the user attributes on success,
+     * or false on failure. This enables login when the DN is harder to programmatically 'guess' due to having users in
+     * various different OU's or other LDAP entities.
+     */
+    public static function findAndBindMultiOU(string $baseDn, string $filterQuery, string $password, int $slow_failure = 3): array|false
+    {
+        /**
+         *  If you *don't* set the slow_failure variable, do note that we might permit timing attacks in here - if
+         *  your find results come back 'slow' when a user *does* exist, but fast if they *don't* exist, then you
+         *  can use this to enumerate users.
+         *
+         *  Even if that's *not* true, we still might have an issue: if we don't find the user, then we don't even _try_
+         *  to bind as them. Again, that could permit a timing attack.
+         *
+         *  Instead of checking every little thing, we just wrap everything in a try/catch in order to unify the
+         *  'slow_failure' treatment. All failures are re-raised as exceptions so that all failures exit from the
+         *  same place.
+         */
+        $connection = null;
+        $admin_conn = null;
+        try {
+            /**
+             * First we get an 'admin' connection, which will need search permissions. That was already a requirement
+             * here, so that's not a big lift. But it _is_ possible to configure LDAP to only login, and *not* to be
+             * able to import lists of users. In that case, this function *will not work* - and you should use the
+             * legacy 'findAndBindUserLdap' method, below. Otherwise, it looks like this would attempt an anonymous
+             * bind - which you might want, but you probably don't.
+             *
+             **/
+            $admin_conn = self::connectToLdap();
+            self::bindAdminToLdap($admin_conn);
+            $results = ldap_search($admin_conn, $baseDn, $filterQuery);
+            $entry_count = ldap_count_entries($admin_conn, $results);
+            if ($entry_count != 1) {
+                throw new Exception('Wrong number of entries found: '.$entry_count);
+            }
+            $entry = ldap_first_entry($admin_conn, $results);
+            $user = ldap_get_attributes($admin_conn, $entry);
+            $userDn = ldap_get_dn($admin_conn, $entry);
+            if (! $userDn) {
+                throw new Exception('No user DN found');
+            }
+            \Log::debug("FOUND DN IS: $userDn");
+            // The temptation now is to do ldap_unbind on the $admin_conn, but that gets handled in the 'finally' below.
+            // I don't know if that means a separate 'connection' is maintained to the LDAP server or not, and would
+            // definitely prefer to not do that if we can avoid it. But I don't know enough about the LDAP protocol to
+            // be certain that that happens.
+
+            // now we try to log in (bind) as that found user
+            $connection = self::connectToLdap();
+            $bind_results = ldap_bind($connection, $userDn, $password);
+            if (! $bind_results) {
+                throw new Exception('Unable to bind as user');
+            }
+
+            return array_change_key_case($user);
+        } catch (Exception $e) {
+            \Log::debug('Exception on fast find-and-bind: '.$e->getMessage());
+            if ($slow_failure) {
+                sleep($slow_failure);
+            }
+
+            return false; // TODO - make this null instead for a slightly nicer type signature
+        } finally {
+            if ($admin_conn) {
+                ldap_unbind($admin_conn);
+            }
+            if ($connection) {
+                ldap_unbind($connection);
+            }
+        }
+    }
 
     /**
      * Binds/authenticates the user to LDAP, and returns their attributes.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
-     * @param $username
-     * @param $password
-     * @param bool|false $user
+     *
+     * @since  [v3.0]
+     *
+     * @param  bool|false  $user
      * @return bool true    if the username and/or password provided are valid
      *              false   if the username and/or password provided are invalid
-     *         array of ldap_attributes if $user is true
+     *              array of ldap_attributes if $user is true
      */
     public static function findAndBindUserLdap($username, $password)
     {
@@ -95,7 +195,7 @@ class Ldap extends Model
         $connection = self::connectToLdap();
         $ldap_username_field = $settings->ldap_username_field;
         $baseDn = $settings->ldap_basedn;
-        $userDn = $ldap_username_field.'='.$username.','.$settings->ldap_basedn;
+        $userDn = $ldap_username_field.'='.ldap_escape($username, '', LDAP_ESCAPE_DN).','.$settings->ldap_basedn;
 
         if ($settings->is_ad == '1') {
             // Check if they are using the userprincipalname for the username field.
@@ -113,31 +213,35 @@ class Ldap extends Model
             }
         }
 
-        $filterQuery = $settings->ldap_auth_filter_query.$username;
-        $filter = Setting::getSettings()->ldap_filter; //FIXME - this *does* respect the ldap filter, but I believe that AdLdap2 did *not*.
+        $filterQuery = $settings->ldap_auth_filter_query.ldap_escape($username, '', LDAP_ESCAPE_FILTER);
+        $filter = Setting::getSettings()->ldap_filter; // FIXME - this *does* respect the ldap filter, but I believe that AdLdap2 did *not*.
         $filterQuery = "({$filter}({$filterQuery}))";
 
         Log::debug('Filter query: '.$filterQuery);
 
-        if (! $ldapbind = @ldap_bind($connection, $userDn, $password)) {
-            Log::debug("Status of binding user: $userDn to directory: (directly!) ".($ldapbind ? "success" : "FAILURE"));
-            if (! $ldapbind = self::bindAdminToLdap($connection)) {
-                /*
-                 * TODO PLEASE:
-                 *
-                 * this isn't very clear, so it's important to note: the $ldapbind value is never correctly returned - we never 'return true' from self::bindAdminToLdap() (the function
-                 * just "falls off the end" without ever explictly returning 'true')
-                 *
-                 * but it *does* have an interesting side-effect of checking for the LDAP password being incorrectly encrypted with the wrong APP_KEY, so I'm leaving it in for now.
-                 *
-                 * If it *did* correctly return 'true' on a succesful bind, it would _probably_ allow users to log in with an incorrect password. Which would be horrible!
-                 *
-                 * Let's definitely fix this at the next refactor!!!!
-                 *
-                 */
-                Log::debug("Status of binding Admin user: $userDn to directory instead: ".($ldapbind ? "success" : "FAILURE"));
-                return false;
+        // only try this if we have an Admin username set; otherwise use the 'legacy' method
+        if (($settings->ldap_uname) && ($baseDn)) {
+            // in the fallowing call, we pick a slow-failure of 0 because we might need to fall through to 'legacy'
+            $fast_bind = self::findAndBindMultiOU($baseDn, $filterQuery, $password, 0);
+            if ($fast_bind) {
+                \Log::debug('Fast bind worked');
+
+                return $fast_bind;
             }
+            \Log::debug('Fast bind failed; falling through to legacy bind');
+        }
+
+        if (! $ldapbind = @ldap_bind($connection, $userDn, $password)) {
+            Log::debug("Status of binding user: $userDn to directory: (directly!) ".($ldapbind ? 'success' : 'FAILURE'));
+            // replicate the old bad-decryption-key detection behavior here
+            try {
+                Crypt::decrypt(Setting::getSettings()->ldap_pword);
+            } catch (Exception $e) {
+                throw new Exception('Your app key has changed! Could not decrypt LDAP password using your current app key, so LDAP authentication has been disabled. Login with a local account, update the LDAP password and re-enable it in Admin > Settings.');
+            }
+
+            // regardless of anything else; stuff isn't working. Return false.
+            return false;
         }
 
         if (! $results = ldap_search($connection, $baseDn, $filterQuery)) {
@@ -160,8 +264,10 @@ class Ldap extends Model
      * Here we also return a better error if the app key is donked.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
-     * @param bool|false $user
+     *
+     * @since  [v3.0]
+     *
+     * @param  bool|false  $user
      * @return bool true    if the username and/or password provided are valid
      *              false   if the username and/or password provided are invalid
      */
@@ -169,42 +275,43 @@ class Ldap extends Model
     {
         $ldap_username = Setting::getSettings()->ldap_uname;
 
-		if ( $ldap_username ) {
-			// Lets return some nicer messages for users who donked their app key, and disable LDAP
-			try {
-				$ldap_pass = Crypt::decrypt(Setting::getSettings()->ldap_pword);
-			} catch (Exception $e) {
-				throw new Exception('Your app key has changed! Could not decrypt LDAP password using your current app key, so LDAP authentication has been disabled. Login with a local account, update the LDAP password and re-enable it in Admin > Settings.');
-			}
+        if ($ldap_username) {
+            // Lets return some nicer messages for users who donked their app key, and disable LDAP
+            try {
+                $ldap_pass = Crypt::decrypt(Setting::getSettings()->ldap_pword);
+            } catch (Exception $e) {
+                throw new Exception('Your app key has changed! Could not decrypt LDAP password using your current app key, so LDAP authentication has been disabled. Login with a local account, update the LDAP password and re-enable it in Admin > Settings.');
+            }
 
-			if (! $ldapbind = @ldap_bind($connection, $ldap_username, $ldap_pass)) {
-				throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
-			}
-			// TODO - this just "falls off the end" but the function states that it should return true or false
-			// unfortunately, one of the use cases for this function is wrong and *needs* for that failure mode to fire
-			// so I don't want to fix this right now.
-			// this method MODIFIES STATE on the passed-in $connection and just returns true or false (or, in this case, undefined)
-			// at the next refactor, this should be appropriately modified to be more consistent.
-		} else {
-			// LDAP should also work with anonymous bind (no dn, no password available)
-			if (! $ldapbind = @ldap_bind($connection )) {
-				throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
-			}
-		}
-	}
+            if (! $ldapbind = @ldap_bind($connection, $ldap_username, $ldap_pass)) {
+                throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
+            }
+            // TODO - this just "falls off the end" but the function states that it should return true or false
+            // unfortunately, one of the use cases for this function is wrong and *needs* for that failure mode to fire
+            // so I don't want to fix this right now.
+            // this method MODIFIES STATE on the passed-in $connection and just returns true or false (or, in this case, undefined)
+            // at the next refactor, this should be appropriately modified to be more consistent.
+        } else {
+            // LDAP should also work with anonymous bind (no dn, no password available)
+            if (! $ldapbind = @ldap_bind($connection)) {
+                throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
+            }
+        }
+    }
 
     /**
      * Parse and map LDAP attributes based on settings
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
      *
-     * @param $ldapatttibutes
+     * @since  [v3.0]
+     *
+     * @param  $ldapatttibutes
      * @return array|bool
      */
     public static function parseAndMapLdapAttributes($ldapattributes)
     {
-        //Get LDAP attribute config
+        // Get LDAP attribute config
         $ldap_result_username = Setting::getSettings()->ldap_username_field;
         $ldap_result_emp_num = Setting::getSettings()->ldap_emp_num;
         $ldap_result_last_name = Setting::getSettings()->ldap_lname_field;
@@ -238,8 +345,9 @@ class Ldap extends Model
      * Create user from LDAP attributes
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
-     * @param $ldapatttibutes
+     *
+     * @since  [v3.0]
+     *
      * @return User | bool
      */
     public static function createUserFromLdap($ldapatttibutes, $password)
@@ -279,11 +387,9 @@ class Ldap extends Model
      * Searches LDAP
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
-     * @param $base_dn
-     * @param $count
-     * @param $filter
-     * @param $attributes
+     *
+     * @since  [v3.0]
+     *
      * @return array|bool
      */
     public static function findLdapUsers($base_dn = null, $count = -1, $filter = null, $attributes = [])
@@ -294,7 +400,7 @@ class Ldap extends Model
         if (is_null($base_dn)) {
             $base_dn = Setting::getSettings()->ldap_basedn;
         }
-        if($filter === null) {
+        if ($filter === null) {
             $filter = Setting::getSettings()->ldap_filter;
         }
 
@@ -317,11 +423,11 @@ class Ldap extends Model
             // which helped me wrap my head around paged results!
             // if a $count is set and it's smaller than $page_size then use that as the page size
             $ldap_controls = [];
-            //if($count == -1) { //count is -1 means we have to employ paging to query the entire directory
-                $ldap_controls = [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'iscritical' => false, 'value' => ['size'=> $count == -1||$count>$page_size ? $page_size : $count, 'cookie' => $cookie]]];
-            //}
+            // if($count == -1) { //count is -1 means we have to employ paging to query the entire directory
+            $ldap_controls = [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'iscritical' => false, 'value' => ['size' => $count == -1 || $count > $page_size ? $page_size : $count, 'cookie' => $cookie]]];
+            // }
             $search_results = ldap_search($ldapconn, $base_dn, $filter, $attributes, 0, /* $page_size */ -1, -1, LDAP_DEREF_NEVER, $ldap_controls); // TODO - I hate the @, and I hate that we get a full page even if we ask for 10 records. Can we use an ldap_control?
-            Log::debug("LDAP search executed successfully.");
+            Log::debug('LDAP search executed successfully.');
             if (! $search_results) {
                 return redirect()->route('users.index')->with('error', trans('admin/users/message.error.ldap_could_not_search').ldap_error($ldapconn)); // TODO this is never called in any routed context - only from the Artisan command. So this redirect will never work.
             }
@@ -331,11 +437,11 @@ class Ldap extends Model
             $errmsg = null;
             $referrals = null;
             $controls = [];
-            ldap_parse_result($ldapconn, $search_results, $errcode , $matcheddn , $errmsg , $referrals, $controls);
+            ldap_parse_result($ldapconn, $search_results, $errcode, $matcheddn, $errmsg, $referrals, $controls);
             if (isset($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'])) {
                 // You need to pass the cookie from the last call to the next one
                 $cookie = $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
-                Log::debug("okay, at least one more page to go!!!");
+                Log::debug('okay, at least one more page to go!!!');
             } else {
                 Log::debug("okay, we're out of pages - no cookie (or empty cookie) was passed");
                 $cookie = '';

@@ -2,11 +2,12 @@
 
 namespace App\Notifications;
 
-use App\Models\Settings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Symfony\Component\Mime\Email;
 
+#[AllowDynamicProperties]
 class MailTest extends Notification
 {
     use Queueable;
@@ -34,12 +35,17 @@ class MailTest extends Notification
     /**
      * Get the mail representation of the notification.
      *
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail()
     {
         return (new MailMessage)
-        ->subject(trans('mail.test_email'))
-        ->markdown('notifications.Test');
+            ->subject('👋 '.trans('mail.test_email'))
+            ->markdown('notifications.Test')
+            ->withSymfonyMessage(function (Email $message) {
+                $message->getHeaders()->addTextHeader(
+                    'X-System-Sender', 'Snipe-IT'
+                );
+            });
     }
 }

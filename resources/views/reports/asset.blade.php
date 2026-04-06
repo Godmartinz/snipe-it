@@ -14,22 +14,28 @@
 {{-- Page content --}}
 @section('content')
 
+@php
+    $requestStatus = request()->input('status');
+    $requestOrderNumber = request()->input('order_number');
+    $requestStatusId = request()->input('status_id');
+@endphp
+
 <div class="row">
     <div class="col-md-12">
         <div class="box box-default">
             <div class="box-body">
-                <div class="table-responsive">
 
                     <table
                     name="assetsReport"
                     class="table table-striped snipe-table"
+                    data-advanced-search="false"
                     id="table"
-                    data-url="{{route('api.assets.index', array(''=>e(Request::get('status')),'order_number'=>e(Request::get('order_number')), 'status_id'=>e(Request::get('status_id')), 'report'=>'true'))}}"
+                    data-url="{{route('api.assets.index', array(''=>e($requestStatus),'order_number'=>e($requestOrderNumber), 'status_id'=>e($requestStatusId), 'report'=>'true'))}}"
                     data-cookie="true"
-                    data-cookie-id-table="{{ e(Request::get('status')) }}assetTable-{{ config('version.hash_version') }}">
+                    data-cookie-id-table="{{ e($requestStatus) }}assetTable-{{ config('version.hash_version') }}">
                         <thead>
                             <tr>
-                                @if (Request::get('status')!='Deleted')
+                                @if ($requestStatus!='Deleted')
                                 <th data-class="hidden-xs" data-switchable="false" data-searchable="false" data-sortable="false" data-field="checkbox"><div class="text-center"><input type="checkbox" id="checkAll" style="padding-left: 0px;"></div></th>
                                 @endif
                                 <th data-sortable="true" data-field="id" data-visible="false">{{ trans('general.id') }}</th>
@@ -69,7 +75,6 @@
                             </tr>
                         </thead>
                     </table>
-                </div> <!-- .table-responsive -->
             </div>
         </div>
     </div>

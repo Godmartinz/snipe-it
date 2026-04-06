@@ -15,7 +15,7 @@ return [
 
     'more_info_title' => 'Več informacij',
 
-    'audit_help' => 'Checking this box will edit the asset record to reflect this new location. Leaving it unchecked will simply note the location in the audit log.<br><br>Note that if this asset is checked out, it will not change the location of the person, asset or location it is checked out to.',
+    'audit_help' => 'Če potrdite to polje, boste uredili zapis sredstva tako, da bo odražal to novo lokacijo. Če polje ne potrdite, bo lokacija preprosto zabeležena v dnevniku nadzora.<br><br>Upoštevajte, da če je to sredstvo rezervirano, se lokacija osebe, sredstva ali lokacije, na katero je rezervirano, ne bo spremenila.',
 
     'assets' => 'Sredstva so stvari, ki so sledene po serijski številki ali oznaki sredstva. Ponavadi so stvari z višjo vrednostjo, pri katerih je opredelitev določenega predmeta pomembna.',
 
@@ -23,13 +23,13 @@ return [
 
     'accessories' => 'Dodatki so vse stvari, ki se izdajajo uporabnikom, vendar niso vodeni kot osnovna sredstva (oziroma nimajo serijskih številk). Na primer, računalniške miške ali tipkovnice.',
 
-    'companies'     => 'Podjetja je mogoče uporabiti kot polje za preprosto identifikacijo ali se jih lahko uporabi za omejitev prepoznavnosti sredstev, uporabnikov itd., če je v vaših skrbniških nastavitvah omogočena popolna podpora podjetja.',
+    'companies' => 'Podjetja je mogoče uporabiti kot polje za preprosto identifikacijo ali se jih lahko uporabi za omejitev prepoznavnosti sredstev, uporabnikov itd., če je v vaših skrbniških nastavitvah omogočena popolna podpora podjetja.',
 
-    'components'    => 'Komponente so stvari, ki so del sredstva. Na primer trdi disk, RAM, ipd.',
+    'components' => 'Komponente so stvari, ki so del sredstva. Na primer trdi disk, RAM, ipd.',
 
-    'consumables'   => 'Potrošni materiali so na primer karrtuše ali kopirni papir.',
+    'consumables' => 'Potrošni materiali so na primer karrtuše ali kopirni papir.',
 
     'depreciations' => 'Za amortizacijo sredstev lahko določite amortizacijo sredstev, ki temelji na enakomerni amortizaciji.',
-    
-    'empty_file'    => 'The importer detects that this file is empty.'
+
+    'empty_file' => 'Uvoznik zazna, da je ta datoteka prazna.',
 ];

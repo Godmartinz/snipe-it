@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Components;
 
 use App\Events\CheckoutableCheckedOut;
-use App\Events\ComponentCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Component;
 use App\Models\Setting;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 
 class ComponentCheckoutController extends Controller
@@ -20,11 +20,14 @@ class ComponentCheckoutController extends Controller
      * Returns a view that allows the checkout of a component to an asset.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @see ComponentCheckoutController::store() method that stores the data.
      * @since [v3.0]
-     * @param int $id
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $id
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function create($id)
     {
@@ -37,7 +40,7 @@ class ComponentCheckoutController extends Controller
             if ($component->category) {
 
                 // Make sure there is at least one available to checkout
-                if ($component->numRemaining() <= 0){
+                if ($component->numRemaining() <= 0) {
                     return redirect()->route('components.index')
                         ->with('error', trans('admin/components/message.checkout.unavailable'));
                 }
@@ -60,17 +63,19 @@ class ComponentCheckoutController extends Controller
      * Validate and store checkout data.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @see ComponentCheckoutController::create() method that returns the form.
      * @since [v3.0]
-     * @param Request $request
-     * @param int $componentId
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @param  int  $componentId
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
     public function store(Request $request, $componentId)
     {
         // Check if the component exists
-        if (!$component = Component::find($componentId)) {
+        if (! $component = Component::find($componentId)) {
             // Redirect to the component management page with error
             return redirect()->route('components.index')->with('error', trans('admin/components/message.not_found'));
         }
@@ -80,13 +85,13 @@ class ComponentCheckoutController extends Controller
         $max_to_checkout = $component->numRemaining();
 
         // Make sure there are at least the requested number of components available to checkout
-        if ($max_to_checkout < $request->get('assigned_qty')) {
-            return redirect()->back()->withInput()->with('error', trans('admin/components/message.checkout.unavailable', ['remaining' => $max_to_checkout, 'requested' => $request->get('assigned_qty')]));
+        if ($max_to_checkout < $request->input('assigned_qty')) {
+            return redirect()->back()->withInput()->with('error', trans('admin/components/message.checkout.unavailable', ['remaining' => $max_to_checkout, 'requested' => $request->input('assigned_qty')]));
         }
 
         $validator = Validator::make($request->all(), [
-            'asset_id'          => 'required|exists:assets,id',
-            'assigned_qty'      => "required|numeric|min:1|digits_between:1,$max_to_checkout",
+            'asset_id' => 'required|exists:assets,id',
+            'assigned_qty' => "required|numeric|min:1|digits_between:1,$max_to_checkout",
         ]);
 
         if ($validator->fails()) {
@@ -102,24 +107,34 @@ class ComponentCheckoutController extends Controller
             return redirect()->route('components.checkout.show', $componentId)->with('error', trans('general.error_user_company'));
         }
 
+        $component->checkout_qty = $request->input('assigned_qty');
+
         // Update the component data
         $component->asset_id = $request->input('asset_id');
         $component->assets()->attach($component->id, [
             'component_id' => $component->id,
             'created_by' => auth()->user()->id,
             'created_at' => date('Y-m-d H:i:s'),
-            'assigned_qty' => $request->input('assigned_qty'),
+            'assigned_qty' => $component->checkout_qty,
             'asset_id' => $request->input('asset_id'),
             'note' => $request->input('note'),
         ]);
 
-        event(new CheckoutableCheckedOut($component, $asset, auth()->user(), $request->input('note')));
+        event(new CheckoutableCheckedOut(
+            $component,
+            $asset,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $component->checkout_qty,
+        ));
 
         $request->request->add(['checkout_to_type' => 'asset']);
         $request->request->add(['assigned_asset' => $asset->id]);
 
-        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
-        return redirect()->to(Helper::getRedirectOption($request, $component->id, 'Components'))->with('success', trans('admin/components/message.checkout.success'));
+        return Helper::getRedirectOption($request, $component->id, 'Components')
+            ->with('success', trans('admin/components/message.checkout.success'));
     }
 }

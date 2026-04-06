@@ -8,6 +8,8 @@ use App\Models\Asset;
 use App\Models\PredefinedKit;
 use App\Models\User;
 use App\Services\PredefinedKitCheckoutService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -20,6 +22,7 @@ use Illuminate\Support\Arr;
 class CheckoutKitController extends Controller
 {
     public $kitService;
+
     use CheckInOutRequest;
 
     public function __construct(PredefinedKitCheckoutService $kitService)
@@ -31,11 +34,13 @@ class CheckoutKitController extends Controller
      * Show Bulk Checkout Page
      *
      * @author [D. Minaev.] [<dmitriy.minaev.v@gmail.com>]
-     * @return \Illuminate\Contracts\View\View View to checkout
+     *
+     * @return View View to checkout
      */
     public function showCheckout(PredefinedKit $kit)
     {
         $this->authorize('checkout', Asset::class);
+
         return view('kits/checkout')->with('kit', $kit);
     }
 
@@ -43,16 +48,17 @@ class CheckoutKitController extends Controller
      * Validate and process the new Predefined Kit data.
      *
      * @author [D. Minaev.] [<dmitriy.minaev.v@gmail.com>]
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function store(Request $request, $kit_id)
     {
-        $user_id = e($request->get('user_id'));
+        $user_id = e($request->input('user_id'));
         if (is_null($user = User::find($user_id))) {
             return redirect()->back()->with('error', trans('admin/users/message.user_not_found'));
         }
 
-        $kit = new PredefinedKit();
+        $kit = new PredefinedKit;
         $kit->id = $kit_id;
 
         $checkout_result = $this->kitService->checkout($request, $kit, $user);

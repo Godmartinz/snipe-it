@@ -3,67 +3,29 @@
     'updateText' => trans('admin/groups/titles.update'),
     'item' => $group,
     'formAction' => ($group !== null && $group->id !== null) ? route('groups.update', ['group' => $group->id]) : route('groups.store'),
-
+    'topSubmit' => 'true',
 ])
 @section('content')
 
-    <style>
-        .form-horizontal .control-label {
-            padding-top: 0px;
-        }
 
-        input[type='text'][disabled], input[disabled], textarea[disabled], input[readonly], textarea[readonly], .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
-            background-color: white;
-            color: #555555;
-            cursor:text;
-        }
-        table.permissions {
-            display:flex;
-            flex-direction: column;
-        }
-
-        .permissions.table > thead, .permissions.table > tbody {
-            margin: 15px;
-            margin-top: 0px;
-        }
-        .permissions.table > tbody {
-            border: 1px solid;
-        }
-        .header-row {
-            border-bottom: 1px solid #ccc;
-        }
-        .permissions-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .table > tbody > tr > td.permissions-item {
-            padding: 1px;
-            padding-left: 8px;
-        }
-
-        .header-name {
-            cursor: pointer;
-        }
-
-    </style>
 
 @parent
 @stop
 
 @section('inputFields')
+
 <!-- Name -->
 <div class="form-group {{ $errors->has('name') ? ' has-error' : '' }}">
-    <label for="name" class="col-md-2 control-label">{{ trans('admin/groups/titles.group_name') }}</label>
-    <div class="col-md-9 required">
+    <label for="name" class="col-md-3 control-label">{{ trans('admin/groups/titles.group_name') }}</label>
+    <div class="col-md-8 required">
         <input class="form-control" type="text" name="name" id="name" value="{{ old('name', $group->name) }}" required />
         {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
 </div>
 
 <div class="form-group{!! $errors->has('notes') ? ' has-error' : '' !!}">
-    <label for="notes" class="col-md-2 control-label">{{ trans('general.notes') }}</label>
-    <div class="col-md-9">
+    <label for="notes" class="col-md-3 control-label">{{ trans('general.notes') }}</label>
+    <div class="col-md-8">
         <x-input.textarea
                 name="notes"
                 id="notes"
@@ -77,163 +39,74 @@
     </div>
 </div>
 
+
+<fieldset>
+    <x-form.legend icon="warning" help_text="{{ (isset($all_users_count) && ($all_users_count < config('app.max_unpaginated_records'))) ? trans('general.add_users_to_group_help') : trans('admin/settings/general.too_many_users_to_show', ['count'=> $all_users_count, 'max' => config('app.max_unpaginated_records')]) }}">
+       {{ trans('general.add_users_to_group') }}
+    </x-form.legend>
+
+<!-- this is a temp fix for the select2 not working inside modals -->
+
+
+
+    <div class="form-group">
+        <div class="col-md-12">
+
+        @if(($all_users_count ) && ($all_users_count < config('app.max_unpaginated_records')))
+
+        <!-- This hidden input will store the selected user IDs as a comma-separated string to avoid max_input_vars and max_multipart_body_parts php.ini issues -->
+        <input type="hidden" name="users_to_sync" id="hidden_ids_box" class="form-control" value="{{ $associated_users->pluck('id')->implode(',') }}"/>
+
+        <div class="addremove-multiselect">
+                <div class="col-lg-5 col-sm-5 col-xs-12">
+                    <h4>{{ trans('general.available_users') }}</h4>
+                    <select id="available-select" class="multiselect available form-control" size="8" multiple="multiple">
+                        @foreach($unselected_users as $unselected_user)
+                            <option value="{{ $unselected_user->id }}" role="option">
+                                {{ $unselected_user->present()->fullName }} ({{ $unselected_user->username }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="help-block text-right">
+                        <x-icon type="users" />
+                        <span id="count_unselected_box">{{ count($unselected_users) }}</span>
+                    </p>
+                </div>
+
+                <div class="multiselect-controls col-lg-2 col-sm-2 col-xs-12">
+                    <br><br>
+                    <button type="button" id="rightall" class="rightall btn btn-sm btn-block btn-default" data-tooltip="true" title="{{ trans('general.add_all_users_to_group') }}"><i class="fa-solid fa-angles-right"></i></button>
+                    <button type="button" id="right" class="right btn btn-sm btn-block btn-default" data-tooltip="true" title="{{ trans('general.add_selected_users_to_group') }}"><i class="fa-solid fa-angle-right"></i></button>
+                    <button type="button" id="left" class="left btn btn-block  btn-sm btn-default" data-tooltip="true" title="{{ trans('general.remove_selected_users_from_group') }}"><i class="fa-solid fa-angle-left"></i></button>
+                    <button type="button" id="leftall" class="leftall btn  btn-sm btn-block btn-default" data-tooltip="true" title="{{ trans('general.remove_all_users_from_group') }}"><i class="fa-solid fa-angles-left"></i></button>
+                </div>
+
+                <div class="col-lg-5 col-sm-5 col-xs-12">
+                    <h4>{{ trans('general.users_to_add_to_group') }}</h4>
+                    <select id="selected-select" class="multiselect selected form-control" size="8" multiple="multiple">
+                        @foreach($associated_users as $associated_user)
+                            <option value="{{ $associated_user->id }}" aria-selected="true" selected="selected" role="option">
+                                {{ $associated_user->present()->fullName }} ({{ $associated_user->username }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="help-block text-right">
+                        <x-icon type="users" />
+                        <span id="count_selected_box"> {{ count($associated_users) }}</span>
+                    </p>
+
+                </div>
+
+        </div>
+
+    </div>
+</div>
+</fieldset>
+@endif
+
+
 <div class="col-md-12">
-
-    <table class="table table-striped permissions">
-        <thead>
-        <tr class="permissions-row">
-            <th class="col-md-5">{{ trans('admin/groups/titles.permission')}}</th>
-            <th class="col-md-1">{{ trans('admin/groups/titles.grant')}}</th>
-            <th class="col-md-1">{{ trans('admin/groups/titles.deny')}}</th>
-        </tr>
-        </thead>
-        @foreach ($permissions as $area => $area_permission)
-            <!-- handle superadmin and reports, and anything else with only one option -->
-            <?php $localPermission = $area_permission[0]; ?>
-            @if (count($area_permission) == 1)
-            <tbody class="permissions-group">
-                <tr class="header-row permissions-row">
-                    <td class="col-md-5 tooltip-base permissions-item"
-                        data-tooltip="true"
-                        data-placement="right"
-                        title="{{ $localPermission['note'] }}">
-                            @unless (empty($localPermission['label']))
-                                <h2>{{ $area . ': ' . $localPermission['label'] }}</h2>
-                            @else
-                                <h2>{{ $area }}</h2>
-                            @endunless
-                    </td>
-                    <td class="col-md-1 permissions-item">
-                        <label for="{{ 'permission['.$localPermission['permission'].']' }}" style="form-control"><span class="sr-only">{{ trans('admin/groups/titles.allow')}} {{ 'permission['.$localPermission['permission'].']' }}</span></label>
-                        <input
-                            value="1"
-                            aria-label="permission[{{ $localPermission['permission'] }}]"
-                            @checked(array_key_exists($localPermission['permission'], $groupPermissions) && $groupPermissions[$localPermission['permission']] == '1')
-                            name="permission[{{ $localPermission['permission'] }}]"
-                            type="radio"
-                        >
-                    </td>
-                    <td class="col-md-1 permissions-item">
-                        <label for="{{ 'permission['.$localPermission['permission'].']' }}"><span class="sr-only">{{ trans('admin/groups/titles.deny')}} {{ 'permission['.$localPermission['permission'].']' }}</span></label>
-                        <input
-                            value="0"
-                            aria-label="permission[{{ $localPermission['permission'] }}]"
-                            @checked(array_key_exists($localPermission['permission'], $groupPermissions) && $groupPermissions[$localPermission['permission']] == '0')
-                            name="permission[{{ $localPermission['permission'] }}]"
-                            type="radio"
-                        >
-                    </td>
-                </tr>
-            </tbody>
-            @else
-            <tbody class="permission-group">
-                <tr class="header-row permissions-row">
-                    <td class="col-md-5 tooltip-base permissions-item header-name"
-                        data-tooltip="true"
-                        data-placement="right"
-                        title="{{ $localPermission['note'] }}">
-                        <h2>{{ $area }}</h2>
-
-
-                    </td>
-                    <td class="col-md-1 permissions-item" style="vertical-align: bottom">
-                        <label for="{{ $area }}"><span class="sr-only">{{ trans('admin/groups/titles.allow')}} {{ $area }}</span></label>
-                        <input
-                            value="1"
-                            data-checker-group="{{ str_slug($area) }}"
-                            aria-label="{{ $area }}"
-                            name="{{ $area }}"
-                            type="radio"
-                        >
-                    </td>
-                    <td class="col-md-1 permissions-item">
-                        <label for="{{ $area }}"><span class="sr-only">{{ trans('admin/groups/titles.deny')}} {{ $area }}</span></label>
-                        <input
-                            value="0"
-                            data-checker-group="{{ str_slug($area) }}"
-                            aria-label="{{ $area }}"
-                            name="{{ $area }}"
-                            type="radio"
-                        >
-                    </td>
-                </tr>
-
-                @foreach ($area_permission as $index => $this_permission)
-                    @if ($this_permission['display'])
-                    <tr class="permissions-row">
-                        <td
-                                class="col-md-5 tooltip-base permissions-item"
-                                data-tooltip="true"
-                                data-placement="right"
-                                title="{{ $this_permission['note'] }}">
-                                {{ $this_permission['label'] }}
-                        </td>
-                        <td class="col-md-1 permissions-item">
-                            <label for="{{ 'permission['.$this_permission['permission'].']' }}"><span class="sr-only">{{ trans('admin/groups/titles.allow')}} {{ 'permission['.$this_permission['permission'].']' }}</span></label>
-                            <input
-                                class="radiochecker-{{ str_slug($area) }}"
-                                aria-label="permission[{{ $this_permission['permission'] }}]"
-                                @checked(array_key_exists($this_permission['permission'], $groupPermissions) && $groupPermissions[$this_permission['permission']] == '1')
-                                name="permission[{{ $this_permission['permission'] }}]"
-                                type="radio"
-                                value="1"
-                            >
-                        </td>
-                        <td class="col-md-1 permissions-item">
-                            <label for="{{ 'permission['.$this_permission['permission'].']' }}"><span class="sr-only">{{ trans('admin/groups/titles.deny')}} {{ 'permission['.$this_permission['permission'].']' }}</span></label>
-                            <input
-                                class="radiochecker-{{ str_slug($area) }}"
-                                aria-label="permission[{{ $this_permission['permission'] }}]"
-                                @checked(array_key_exists($this_permission['permission'], $groupPermissions) && $groupPermissions[$this_permission['permission']] == '0')
-                                name="permission[{{ $this_permission['permission'] }}]"
-                                type="radio"
-                                value="0"
-                            >
-                        </td>
-
-                    </tr>
-
-                    @endif
-                @endforeach
-
-            @endif
-        </tbody>
-        @endforeach
-    </table>
-
+    @include ('partials.forms.edit.permissions-base', ['use_inherit' => false])
 </div>
 @stop
-@section('moar_scripts')
 
-    <script nonce="{{ csrf_token() }}">
-
-        $(document).ready(function(){
-
-            $('.tooltip-base').tooltip({container: 'body'});
-            $(".superuser").change(function() {
-                var perms = $(this).val();
-                if (perms =='1') {
-                    $("#nonadmin").hide();
-                } else {
-                    $("#nonadmin").show();
-                }
-            });
-
-            // Check/Uncheck all radio buttons in the group
-            $('tr.header-row input:radio').change(function() {
-                value = $(this).attr('value');
-                area = $(this).data('checker-group');
-                $('.radiochecker-'+area+'[value='+value+']').prop('checked', true);
-            });
-
-
-            $('.header-name').click(function() {
-                $(this).parent().nextUntil('tr.header-row').slideToggle(500);
-            });
-
-
-        });
-
-
-    </script>
-@stop

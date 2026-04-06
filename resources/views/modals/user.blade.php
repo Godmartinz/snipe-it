@@ -59,9 +59,14 @@
                             <div class="col-md-3 col-xs-12">
                                 <label class="control-label" for="modal-password">{{ trans('admin/users/table.password') }}:</label>
                             </div>
-                            <div class="col-md-8 col-xs-12 " style="margin-bottom:5px;">
+                            <div class="col-md-7 col-xs-12">
                                 <input type='password' name="password" id='modal-password' class="form-control" required>
-                                <a href="#" class="left" id="modal-genPassword">Generate</a>
+                                <div id="modal-generated-password"></div>
+                            </div>
+                            <div class="col-md-1">
+                                <a href="#" class="btn btn-default btn-sm" id="modal-genPassword" data-tooltip="true" title="{{ trans('admin/users/general.generate_password') }}">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </a>
                                 <div id="modal-generated-password"></div>
                             </div>
                         </div>
@@ -72,11 +77,22 @@
                             <div class="col-md-3 col-xs-12 ">
                                 <label class="control-label" for="modal-password_confirmation">{{ trans('admin/users/table.password_confirm') }}:</label>
                             </div>
-                            <div class="col-md-8 col-xs-12">
+                            <div class="col-md-7 col-xs-12">
                                 <input class="form-control" type='password' name="password_confirmation" id='modal-password_confirmation' required>
-
                             </div>
                          </div>
+                    </div>
+
+                    <div class="dynamic-form-row">
+                        <div class="form-group">
+                            <div class="col-md-3 col-xs-12 ">
+                                <label class="control-label" for="modal-display_name">{{ trans('admin/users/table.display_name') }}:</label>
+                            </div>
+                            <div class="col-md-8 col-xs-12">
+                                <input class="form-control" type='text' name="display_name" id='modal-display_name' required>
+
+                            </div>
+                        </div>
                     </div>
 
 					<!-- Checkbox for activation new user, by default set for activated -->

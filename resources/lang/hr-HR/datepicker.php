@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -13,36 +13,38 @@ return array(
     |
     */
 
+    'week_start_select' => 'Select Day of Week',
+    'week_start' => 'Day the Week Starts On',
     'today' => 'Today',
-    'clear' => 'Clear',
+    'clear' => 'Očisti',
     'days' => [
         'sunday' => 'Sunday',
         'monday' => 'Monday',
         'tuesday' => 'Tuesday',
-        'wednesday' =>  'Wednesday',
-        'thursday' =>  'Thursday',
-        'friday' =>  'Friday',
-        'saturday' =>  'Saturday',
-        ],
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+    ],
 
     'short_days' => [
         'sunday' => 'Sun',
         'monday' => 'Mon',
         'tuesday' => 'Tue',
-        'wednesday' =>  'Wed',
-        'thursday' =>  'Thu',
-        'friday' =>  'Fri',
-        'saturday' =>  'Sat',
+        'wednesday' => 'Wed',
+        'thursday' => 'Thu',
+        'friday' => 'Fri',
+        'saturday' => 'Sat',
     ],
 
     'min_days' => [
         'sunday' => 'Su',
         'monday' => 'Mo',
         'tuesday' => 'Tu',
-        'wednesday' =>  'We',
-        'thursday' =>  'Th',
-        'friday' =>  'Fr',
-        'saturday' =>  'Sa',
+        'wednesday' => 'We',
+        'thursday' => 'Th',
+        'friday' => 'Fr',
+        'saturday' => 'Sa',
     ],
 
     'months' => [
@@ -75,4 +77,4 @@ return array(
         'december' => 'Dec',
     ],
 
-);
+];

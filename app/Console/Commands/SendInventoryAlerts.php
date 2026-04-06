@@ -52,12 +52,14 @@ class SendInventoryAlerts extends Command
                     return new AlertRecipient($item);
                 });
 
-                \Notification::send($recipients, new InventoryAlert($items, $settings->alert_threshold));
+                Notification::send($recipients, new InventoryAlert($items, $settings->alert_threshold));
+            } else {
+                $this->info('No low inventory items found. No mail sent.');
             }
         } else {
             if ($settings->alert_email == '') {
                 $this->error('Could not send email. No alert email configured in settings');
-            } elseif (1 != $settings->alerts_enabled) {
+            } elseif ($settings->alerts_enabled != 1) {
                 $this->info('Alerts are disabled in the settings. No mail will be sent');
             }
         }

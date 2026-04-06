@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Client;
 use Laravel\Passport\ClientRepository;
@@ -12,9 +11,13 @@ use Livewire\Component;
 class OauthClients extends Component
 {
     public $name;
+
     public $redirect;
+
     public $editClientId;
+
     public $editName;
+
     public $editRedirect;
 
     public $authorizationError;
@@ -50,7 +53,7 @@ class OauthClients extends Component
         if ($clientId->user_id == auth()->id()) {
             app(ClientRepository::class)->delete($clientId);
         } else {
-            Log::warning('User ' . auth()->id() . ' attempted to delete client ' . $clientId->id . ' which belongs to user ' . $clientId->created_by);
+            Log::warning('User '.auth()->id().' attempted to delete client '.$clientId->id.' which belongs to user '.$clientId->created_by);
             $this->authorizationError = 'You are not authorized to delete this client.';
         }
     }
@@ -61,7 +64,7 @@ class OauthClients extends Component
         if ($token->created_by == auth()->id()) {
             app(TokenRepository::class)->revokeAccessToken($tokenId);
         } else {
-            Log::warning('User ' . auth()->id() . ' attempted to delete token ' . $tokenId . ' which belongs to user ' . $token->created_by);
+            Log::warning('User '.auth()->id().' attempted to delete token '.$tokenId.' which belongs to user '.$token->created_by);
             $this->authorizationError = 'You are not authorized to delete this token.';
         }
     }
@@ -84,12 +87,12 @@ class OauthClients extends Component
         ]);
 
         $client = app(ClientRepository::class)->find($editClientId->id);
-        if ($client->created_by == auth()->id()) {
+        if ($client->user_id == auth()->id()) {
             $client->name = $this->editName;
             $client->redirect = $this->editRedirect;
             $client->save();
         } else {
-            Log::warning('User ' . auth()->id() . ' attempted to edit client ' . $editClientId->id . ' which belongs to user ' . $client->created_by);
+            Log::warning('User '.auth()->id().' attempted to edit client '.$editClientId->id.' which belongs to user '.$client->created_by);
             $this->authorizationError = 'You are not authorized to edit this client.';
         }
 

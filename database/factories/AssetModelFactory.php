@@ -3,13 +3,13 @@
 namespace Database\Factories;
 
 use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
 use App\Models\Depreciation;
 use App\Models\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Category;
 
 class AssetModelFactory extends Factory
 {
@@ -28,11 +28,12 @@ class AssetModelFactory extends Factory
     public function definition()
     {
         return [
-            'created_by' => User::factory()->superuser(),
-            'name' => $this->faker->catchPhrase(),
             'category_id' => Category::factory(),
+            'created_by' => User::factory()->superuser(),
             'model_number' => $this->faker->creditCardNumber(),
+            'name' => $this->faker->catchPhrase(),
             'notes' => 'Created by demo seeder',
+            'require_serial' => 0,
 
         ];
     }
@@ -200,7 +201,7 @@ class AssetModelFactory extends Factory
         return $this->state(function () {
             return [
                 'name' => 'iMac Pro',
-                'category_id' => function (){
+                'category_id' => function () {
                     return Category::where('name', 'Desktops')->first() ?? Category::factory()->assetDesktopCategory();
                 },
                 'manufacturer_id' => function () {
@@ -246,7 +247,7 @@ class AssetModelFactory extends Factory
         return $this->state(function () {
             return [
                 'name' => 'OptiPlex',
-                'category_id' => function (){
+                'category_id' => function () {
                     return Category::where('name', 'Desktops')->first() ?? Category::factory()->assetDesktopCategory();
                 },
                 'manufacturer_id' => function () {
@@ -431,7 +432,7 @@ class AssetModelFactory extends Factory
         });
     }
 
-    public function hasEncryptedCustomField(CustomField $field = null)
+    public function hasEncryptedCustomField(?CustomField $field = null)
     {
         return $this->state(function () use ($field) {
             return [
@@ -440,7 +441,7 @@ class AssetModelFactory extends Factory
         });
     }
 
-    public function hasMultipleCustomFields(array $fields = null)
+    public function hasMultipleCustomFields(?array $fields = null)
     {
         return $this->state(function () use ($fields) {
             return [

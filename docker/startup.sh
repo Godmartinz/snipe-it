@@ -69,7 +69,7 @@ for dir in \
   'data/private_uploads/consumables' \
   'data/private_uploads/eula-pdfs' \
   'data/private_uploads/imports' \
-  'data/private_uploads/assetmodels' \
+  'data/private_uploads/models' \
   'data/private_uploads/users' \
   'data/private_uploads/licenses' \
   'data/private_uploads/signatures' \
@@ -83,6 +83,7 @@ for dir in \
   'data/uploads/consumables' \
   'data/uploads/departments' \
   'data/uploads/locations' \
+  'data/uploads/maintenances' \
   'data/uploads/manufacturers' \
   'data/uploads/models' \
   'data/uploads/suppliers' \

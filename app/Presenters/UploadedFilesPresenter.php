@@ -5,7 +5,7 @@ namespace App\Presenters;
 /**
  * Class AccessoryPresenter
  */
-class UploadsPresenter extends Presenter
+class UploadedFilesPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
@@ -18,7 +18,7 @@ class UploadsPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.id'),
@@ -30,6 +30,7 @@ class UploadsPresenter extends Presenter
                 'sortable' => false,
                 'switchable' => false,
                 'title' => trans('general.type'),
+                'visible' => true,
                 'formatter' => 'iconFormatter',
             ],
             [
@@ -38,16 +39,17 @@ class UploadsPresenter extends Presenter
                 'sortable' => false,
                 'switchable' => true,
                 'title' => trans('general.image'),
-                'formatter' => 'inlineImageFormatter',
+                'visible' => true,
+                'formatter' => 'filePreviewFormatter',
             ],
             [
                 'field' => 'filename',
-                'searchable' => false,
-                'sortable' => false,
+                'searchable' => true,
+                'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.file_name'),
                 'visible' => true,
-                'formatter' => 'fileUploadNameFormatter',
+                'formatter' => 'fileNameFormatter',
             ],
             [
                 'field' => 'download',
@@ -56,7 +58,9 @@ class UploadsPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.download'),
                 'visible' => true,
-                'formatter' => 'downloadOrOpenInNewWindowFormatter',
+                'formatter' => 'fileDownloadButtonsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
             [
                 'field' => 'note',
@@ -68,10 +72,10 @@ class UploadsPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
-                'visible' => false,
+                'visible' => true,
                 'formatter' => 'usersLinkObjFormatter',
             ],
             [
@@ -80,7 +84,7 @@ class UploadsPresenter extends Presenter
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.created_at'),
-                'visible' => false,
+                'visible' => true,
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'available_actions',
@@ -88,11 +92,13 @@ class UploadsPresenter extends Presenter
                 'sortable' => false,
                 'switchable' => false,
                 'title' => trans('table.actions'),
+                'visible' => true,
                 'formatter' => 'deleteUploadFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
         return json_encode($layout);
     }
-
 }

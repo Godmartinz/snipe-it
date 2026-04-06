@@ -2,38 +2,89 @@
 
 namespace App\Models\Labels\Sheets\Avery;
 
-
 class L7162_B extends L7162
 {
-    private const BARCODE_SIZE   =   6.00;
-    private const BARCODE_MARGIN =   1.40;
-    private const TAG_SIZE       =   3.20;
-    private const LOGO_MAX_WIDTH =  25.00;
-    private const LOGO_MARGIN    =   2.20;
-    private const TITLE_SIZE     =   4.20;
-    private const TITLE_MARGIN   =   1.20;
-    private const LABEL_SIZE     =   2.20;
-    private const LABEL_MARGIN   = - 0.50;
-    private const FIELD_SIZE     =   4.20;
-    private const FIELD_MARGIN   =   0.30;
+    private const BARCODE_SIZE = 6.00;
 
-    public function getUnit() { return 'mm'; }
+    private const BARCODE_MARGIN = 1.40;
 
-    public function getLabelMarginTop()    { return 1.0; }
-    public function getLabelMarginBottom() { return 0; }
-    public function getLabelMarginLeft()   { return 1.0; }
-    public function getLabelMarginRight()  { return 1.0; }
+    private const TAG_SIZE = 3.20;
 
-    public function getSupportAssetTag()  { return true; }
-    public function getSupport1DBarcode() { return true; }
-    public function getSupport2DBarcode() { return false; }
-    public function getSupportFields()    { return 3; }
-    public function getSupportLogo()      { return true; }
-    public function getSupportTitle()     { return true; }
+    private const LOGO_MAX_WIDTH = 25.00;
+
+    private const LOGO_MARGIN = 2.20;
+
+    private const TITLE_SIZE = 4.20;
+
+    private const TITLE_MARGIN = 1.20;
+
+    private const LABEL_SIZE = 2.20;
+
+    private const LABEL_MARGIN = -0.50;
+
+    private const FIELD_SIZE = 4.20;
+
+    private const FIELD_MARGIN = 0.30;
+
+    public function getUnit()
+    {
+        return 'mm';
+    }
+
+    public function getLabelMarginTop()
+    {
+        return 1.0;
+    }
+
+    public function getLabelMarginBottom()
+    {
+        return 0;
+    }
+
+    public function getLabelMarginLeft()
+    {
+        return 1.0;
+    }
+
+    public function getLabelMarginRight()
+    {
+        return 1.0;
+    }
+
+    public function getSupportAssetTag()
+    {
+        return true;
+    }
+
+    public function getSupport1DBarcode()
+    {
+        return true;
+    }
+
+    public function getSupport2DBarcode()
+    {
+        return false;
+    }
+
+    public function getSupportFields()
+    {
+        return 3;
+    }
+
+    public function getSupportLogo()
+    {
+        return true;
+    }
+
+    public function getSupportTitle()
+    {
+        return true;
+    }
 
     public function preparePDF($pdf) {}
 
-    public function write($pdf, $record) {
+    public function write($pdf, $record)
+    {
         $pa = $this->getLabelPrintableArea();
 
         $usableWidth = $pa->w;
@@ -44,7 +95,7 @@ class L7162_B extends L7162
         if ($record->has('barcode1d')) {
             static::write1DBarcode(
                 $pdf, $record->get('barcode1d')->content, $record->get('barcode1d')->type,
-                $pa->x1, $pa->y2 - self::BARCODE_SIZE, 
+                $pa->x1, $pa->y2 - self::BARCODE_SIZE,
                 $usableWidth, self::BARCODE_SIZE
             );
             $usableHeight -= self::BARCODE_SIZE + self::BARCODE_MARGIN;
@@ -98,6 +149,3 @@ class L7162_B extends L7162
 
     }
 }
-
-
-?>

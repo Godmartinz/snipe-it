@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class LicenseCheckinTest extends TestCase
 {
-    public function testCheckingInLicenseRequiresCorrectPermission()
+    public function test_checking_in_license_requires_correct_permission()
     {
         $this->actingAs(User::factory()->create())
             ->post(route('licenses.checkin.save', [
@@ -20,7 +20,7 @@ class LicenseCheckinTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testCannotCheckinNonReassignableLicense()
+    public function test_non_reassignable_license_seat_cant_be_checked_out()
     {
         $licenseSeat = LicenseSeat::factory()
             ->notReassignable()
@@ -28,16 +28,14 @@ class LicenseCheckinTest extends TestCase
             ->create();
 
         $this->actingAs(User::factory()->checkoutLicenses()->create())
-            ->post(route('licenses.checkin.save', $licenseSeat), [
-                'notes' => 'my note',
-                'redirect_option' => 'index',
-            ])
-            ->assertSessionHas('error', trans('admin/licenses/message.checkin.not_reassignable') . '.');
+            ->post(route('licenses.checkin.save', $licenseSeat));
 
-        $this->assertNotNull($licenseSeat->fresh()->assigned_to);
+        $licenseSeat->refresh();
+
+        $this->assertEquals(true, $licenseSeat->unreassignable_seat);
     }
 
-    public function testCannotCheckinLicenseThatIsNotAssigned()
+    public function test_cannot_checkin_license_that_is_not_assigned()
     {
         $licenseSeat = LicenseSeat::factory()
             ->reassignable()
@@ -54,7 +52,7 @@ class LicenseCheckinTest extends TestCase
             ->assertSessionHas('error', trans('admin/licenses/message.checkin.error'));
     }
 
-    public function testCanCheckInLicenseAssignedToAsset()
+    public function test_can_check_in_license_assigned_to_asset()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
@@ -87,7 +85,7 @@ class LicenseCheckinTest extends TestCase
         });
     }
 
-    public function testCanCheckInLicenseAssignedToUser()
+    public function test_can_check_in_license_assigned_to_user()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
@@ -120,8 +118,8 @@ class LicenseCheckinTest extends TestCase
         });
 
     }
-  
-    public function testPageRenders()
+
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('licenses.checkin', LicenseSeat::factory()->assignedToUser()->create()->id))

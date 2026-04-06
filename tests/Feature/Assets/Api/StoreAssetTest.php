@@ -11,20 +11,21 @@ use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StoreAssetTest extends TestCase
 {
-    public function testRequiresPermissionToCreateAsset()
+    public function test_requires_permission_to_create_asset()
     {
         $this->actingAsForApi(User::factory()->create())
             ->postJson(route('api.assets.store'))
             ->assertForbidden();
     }
 
-    public function testAllAssetAttributesAreStored()
+    public function test_all_asset_attributes_are_stored()
     {
         $company = Company::factory()->create();
         $location = Location::factory()->create();
@@ -79,12 +80,14 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('1', $asset->requestable);
         $this->assertTrue($asset->defaultLoc->is($rtdLocation));
         $this->assertEquals('1234567890', $asset->serial);
-        $this->assertTrue($asset->assetstatus->is($status));
+        $this->assertTrue($asset->status->is($status));
         $this->assertTrue($asset->supplier->is($supplier));
         $this->assertEquals(10, $asset->warranty_months);
+
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
-    public function testSetsLastAuditDateToMidnightOfProvidedDate()
+    public function test_sets_last_audit_date_to_midnight_of_provided_date()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -100,7 +103,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('2023-09-03 00:00:00', $asset->last_audit_date);
     }
 
-    public function testLastAuditDateCanBeNull()
+    public function test_last_audit_date_can_be_null()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -116,7 +119,7 @@ class StoreAssetTest extends TestCase
         $this->assertNull($asset->last_audit_date);
     }
 
-    public function testNonDateUsedForLastAuditDateReturnsValidationError()
+    public function test_non_date_used_for_last_audit_date_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -131,7 +134,7 @@ class StoreAssetTest extends TestCase
         $this->assertNotNull($response->json('messages.last_audit_date'));
     }
 
-    public function testSaveWithArchivedStatusAndUserReturnsValidationError()
+    public function test_save_with_archived_status_and_user_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -146,7 +149,7 @@ class StoreAssetTest extends TestCase
         $this->assertNotNull($response->json('messages.status_id'));
     }
 
-    public function testSaveWithPendingStatusAndUserReturnsValidationError()
+    public function test_save_with_pending_status_and_user_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -157,13 +160,13 @@ class StoreAssetTest extends TestCase
             ])
             ->assertOk()
             ->assertJson([
-                'messages' =>  ['status_id' => [trans('admin/hardware/form.asset_not_deployable')]]
+                'messages' => ['status_id' => [trans('admin/hardware/form.asset_not_deployable')]],
             ]);
 
         $this->assertNotNull($response->json('messages.status_id'));
     }
 
-    public function testSaveWithAssignedToChecksOut()
+    public function test_save_with_assigned_to_checks_out()
     {
         $user = User::factory()->create();
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
@@ -180,16 +183,17 @@ class StoreAssetTest extends TestCase
         $asset = Asset::find($response->json()['payload']['id']);
         $this->assertEquals($user->id, $asset->assigned_to);
         $this->assertEquals('Asset created successfully. :)', $response->json('messages'));
+
+        $this->assertHasTheseActionLogs($asset, ['create'/* , 'checkout' */]); // TODO - this _should_ be the two actions
     }
 
-
-    public function testSaveWithNoAssignedTypeReturnsValidationError()
+    public function test_save_with_no_assigned_type_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
                 'asset_tag' => '1235',
                 'assigned_to' => '1',
-//                'assigned_type' => User::class, //deliberately omit assigned_type
+                //                'assigned_type' => User::class, //deliberately omit assigned_type
                 'model_id' => AssetModel::factory()->create()->id,
                 'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
             ])
@@ -198,37 +202,37 @@ class StoreAssetTest extends TestCase
         $this->assertNotNull($response->json('messages.assigned_type'));
     }
 
-    public function testSaveWithBadAssignedTypeReturnsValidationError()
+    public function test_save_with_bad_assigned_type_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
-                'asset_tag'     => '1235',
-                'assigned_to'   => '1',
-                'assigned_type' => 'nonsense_string', //deliberately bad assigned_type
-                'model_id'      => AssetModel::factory()->create()->id,
-                'status_id'     => Statuslabel::factory()->readyToDeploy()->create()->id,
+                'asset_tag' => '1235',
+                'assigned_to' => '1',
+                'assigned_type' => 'nonsense_string', // deliberately bad assigned_type
+                'model_id' => AssetModel::factory()->create()->id,
+                'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
             ])
             ->assertOk()
             ->assertStatusMessageIs('error');
         $this->assertNotNull($response->json('messages.assigned_type'));
     }
 
-    public function testSaveWithAssignedTypeAndNoAssignedToReturnsValidationError()
+    public function test_save_with_assigned_type_and_no_assigned_to_returns_validation_error()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
-                'asset_tag'     => '1235',
-                //'assigned_to'   => '1', //deliberately omit assigned_to
+                'asset_tag' => '1235',
+                // 'assigned_to'   => '1', //deliberately omit assigned_to
                 'assigned_type' => User::class,
-                'model_id'      => AssetModel::factory()->create()->id,
-                'status_id'     => Statuslabel::factory()->readyToDeploy()->create()->id,
+                'model_id' => AssetModel::factory()->create()->id,
+                'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
             ])
             ->assertOk()
             ->assertStatusMessageIs('error');
         $this->assertNotNull($response->json('messages.assigned_to'));
     }
 
-    public function testSaveWithPendingStatusWithoutUserIsSuccessful()
+    public function test_save_with_pending_status_without_user_is_successful()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -240,8 +244,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('success');
     }
 
-
-    public function testArchivedDepreciateAndPhysicalCanBeNull()
+    public function test_archived_depreciate_and_physical_can_be_null()
     {
         $model = AssetModel::factory()->ipadModel()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -254,7 +257,7 @@ class StoreAssetTest extends TestCase
                 'status_id' => $status->id,
                 'archive' => null,
                 'depreciate' => null,
-                'physical' => null
+                'physical' => null,
             ])
             ->assertOk()
             ->assertStatusMessageIs('success')
@@ -266,7 +269,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals(0, $asset->depreciate);
     }
 
-    public function testArchivedDepreciateAndPhysicalCanBeEmpty()
+    public function test_archived_depreciate_and_physical_can_be_empty()
     {
         $model = AssetModel::factory()->ipadModel()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -279,7 +282,7 @@ class StoreAssetTest extends TestCase
                 'status_id' => $status->id,
                 'archive' => '',
                 'depreciate' => '',
-                'physical' => ''
+                'physical' => '',
             ])
             ->assertOk()
             ->assertStatusMessageIs('success')
@@ -291,7 +294,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals(0, $asset->depreciate);
     }
 
-    public function testAssetEolDateIsCalculatedIfPurchaseDateSet()
+    public function test_asset_eol_date_is_calculated_if_purchase_date_set()
     {
         $model = AssetModel::factory()->mbp13Model()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -312,7 +315,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('2024-01-01', $asset->asset_eol_date);
     }
 
-    public function testAssetEolDateIsNotCalculatedIfPurchaseDateNotSet()
+    public function test_asset_eol_date_is_not_calculated_if_purchase_date_not_set()
     {
         $model = AssetModel::factory()->mbp13Model()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -332,7 +335,7 @@ class StoreAssetTest extends TestCase
         $this->assertNull($asset->asset_eol_date);
     }
 
-    public function testAssetEolExplicitIsSetIfAssetEolDateIsExplicitlySet()
+    public function test_asset_eol_explicit_is_set_if_asset_eol_date_is_explicitly_set()
     {
         $model = AssetModel::factory()->mbp13Model()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -354,7 +357,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->eol_explicit);
     }
 
-    public function testAssetGetsAssetTagWithAutoIncrement()
+    public function test_asset_gets_asset_tag_with_auto_increment()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -374,7 +377,7 @@ class StoreAssetTest extends TestCase
         $this->assertNotNull($asset->asset_tag);
     }
 
-    public function testAssetCreationFailsWithNoAssetTagOrAutoIncrement()
+    public function test_asset_creation_fails_with_no_asset_tag_or_auto_increment()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -390,7 +393,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('error');
     }
 
-    public function testStoresPeriodAsDecimalSeparatorForPurchaseCost()
+    public function test_stores_period_as_decimal_separator_for_purchase_cost()
     {
         $this->settings->set([
             'default_currency' => 'USD',
@@ -412,7 +415,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals(12.34, $asset->purchase_cost);
     }
 
-    public function testStoresPeriodAsCommaSeparatorForPurchaseCost()
+    public function test_stores_period_as_comma_separator_for_purchase_cost()
     {
         $this->settings->set([
             'default_currency' => 'EUR',
@@ -434,7 +437,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals(12.34, $asset->purchase_cost);
     }
 
-    public function testUniqueSerialNumbersIsEnforcedWhenEnabled()
+    public function test_unique_serial_numbers_is_enforced_when_enabled()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -462,7 +465,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('error');
     }
 
-    public function testUniqueSerialNumbersIsNotEnforcedWhenDisabled()
+    public function test_unique_serial_numbers_is_not_enforced_when_disabled()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -490,7 +493,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('success');
     }
 
-    public function testAssetTagsMustBeUniqueWhenUndeleted()
+    public function test_asset_tags_must_be_unique_when_undeleted()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -517,7 +520,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('error');
     }
 
-    public function testAssetTagsCanBeDuplicatedIfDeleted()
+    public function test_asset_tags_can_be_duplicated_if_deleted()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -535,7 +538,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('success')
             ->json();
 
-       Asset::find($response['payload']['id'])->delete();
+        Asset::find($response['payload']['id'])->delete();
 
         $this->actingAsForApi(User::factory()->superuser()->create())
             ->postJson(route('api.assets.store'), [
@@ -547,7 +550,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('success');
     }
 
-    public function testAnAssetCanBeCheckedOutToUserOnStore()
+    public function test_an_asset_can_be_checked_out_to_user_on_store()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -571,6 +574,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->adminuser->is($user));
         $this->assertTrue($asset->checkedOutToUser());
         $this->assertTrue($asset->assignedTo->is($userAssigned));
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
     public static function checkoutTargets()
@@ -614,7 +618,7 @@ class StoreAssetTest extends TestCase
 
     /** @link https://app.shortcut.com/grokability/story/29181 */
     #[DataProvider('checkoutTargets')]
-    public function testAssignedFieldValidationCannotBeArray($data)
+    public function test_assigned_field_validation_cannot_be_array($data)
     {
         ['key' => $key, 'value' => $value] = $data();
 
@@ -631,7 +635,7 @@ class StoreAssetTest extends TestCase
             });
     }
 
-    public function testAnAssetCanBeCheckedOutToLocationOnStore()
+    public function test_an_asset_can_be_checked_out_to_location_on_store()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -655,9 +659,10 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->adminuser->is($user));
         $this->assertTrue($asset->checkedOutToLocation());
         $this->assertTrue($asset->location->is($location));
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
-    public function testAnAssetCanBeCheckedOutToAssetOnStore()
+    public function test_an_asset_can_be_checked_out_to_asset_on_store()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -682,12 +687,13 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($apiAsset->checkedOutToAsset());
         // I think this makes sense, but open to a sanity check
         $this->assertTrue($asset->assignedAssets()->find($response['payload']['id'])->is($apiAsset));
+        $this->assertHasTheseActionLogs($asset, ['create'/* , 'checkout' */]); // TODO - should be the two events
     }
 
     /**
      * @link https://app.shortcut.com/grokability/story/24475
      */
-    public function testCompanyIdNeedsToBeInteger()
+    public function test_company_id_needs_to_be_integer()
     {
         $this->actingAsForApi(User::factory()->createAssets()->create())
             ->postJson(route('api.assets.store'), [
@@ -699,7 +705,23 @@ class StoreAssetTest extends TestCase
             });
     }
 
-    public function testEncryptedCustomFieldCanBeStored()
+    public function test_serial_validation()
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.assets.store'), [
+                'asset_tag' => '1234',
+                'model_id' => AssetModel::factory()->create()->id,
+                'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
+                'serial' => [
+                    // this should not be an array
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesContains('serial');
+    }
+
+    public function test_encrypted_custom_field_can_be_stored()
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
 
@@ -723,7 +745,64 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('This is encrypted field', Crypt::decrypt($asset->{$field->db_column_name()}));
     }
 
-    public function testPermissionNeededToStoreEncryptedField()
+    public function test_encrypted_custom_field_validation_passes()
+    {
+        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
+
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+        $alphaField = CustomField::factory()->encrypt()->alpha()->create();
+        $numericField = CustomField::factory()->encrypt()->numeric()->create();
+        $emailField = CustomField::factory()->encrypt()->email()->create();
+        $fields = [$alphaField, $numericField, $emailField];
+        $superuser = User::factory()->superuser()->create();
+        $assetData = Asset::factory()->hasMultipleCustomFields($fields)->make();
+
+        $response = $this->actingAsForApi($superuser)
+            ->postJson(route('api.assets.store'), [
+                $alphaField->db_column_name() => 'Thisisencryptedfield',
+                $numericField->db_column_name() => '1234567890',
+                $emailField->db_column_name() => 'poop@poop.com',
+                'model_id' => $assetData->model->id,
+                'status_id' => $status->id,
+                'asset_tag' => '1234',
+            ])
+            ->assertStatusMessageIs('success')
+            ->assertOk()
+            ->json();
+
+        $asset = Asset::findOrFail($response['payload']['id']);
+        $this->assertEquals('Thisisencryptedfield', Crypt::decrypt($asset->{$alphaField->db_column_name()}));
+        $this->assertEquals('1234567890', Crypt::decrypt($asset->{$numericField->db_column_name()}));
+        $this->assertEquals('poop@poop.com', Crypt::decrypt($asset->{$emailField->db_column_name()}));
+    }
+
+    public function test_encrypted_custom_field_validation_fails()
+    {
+        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
+
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+        $alphaField = CustomField::factory()->encrypt()->alpha()->create();
+        $numericField = CustomField::factory()->encrypt()->numeric()->create();
+        $emailField = CustomField::factory()->encrypt()->email()->create();
+        $fields = [$alphaField, $numericField, $emailField];
+        $superuser = User::factory()->superuser()->create();
+        $assetData = Asset::factory()->hasMultipleCustomFields($fields)->make();
+        $cleaned_name = trim(preg_replace('/_+|snipeit|\d+/', ' ', $alphaField->db_column_name()));
+
+        $response = $this->actingAsForApi($superuser)
+            ->postJson(route('api.assets.store'), [
+                $alphaField->db_column_name() => 'Thisisencryptedfield123',
+                'model_id' => $assetData->model->id,
+                'status_id' => $status->id,
+                'asset_tag' => '1234',
+            ])
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages.'.$alphaField->db_column_name(), [trans('validation.alpha', ['attribute' => $cleaned_name])])
+            ->assertOk()
+            ->json();
+    }
+
+    public function test_permission_needed_to_store_encrypted_field()
     {
         // @todo:
         $this->markTestIncomplete();
@@ -748,5 +827,29 @@ class StoreAssetTest extends TestCase
 
         $asset = Asset::findOrFail($response['payload']['id']);
         $this->assertEquals('This is encrypted field', Crypt::decrypt($asset->{$field->db_column_name()}));
+    }
+
+    public function test_base64_asset_images()
+    {
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+        $model = AssetModel::factory()->create();
+        $superuser = User::factory()->superuser()->create();
+
+        $response = $this->actingAsForApi($superuser)
+            ->postJson(route('api.assets.store'), [
+                'model_id' => $model->id,
+                'status_id' => $status->id,
+                'asset_tag' => '1234',
+                'image' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAEsAQMAAADXeXeBAAAABlBMVEX+AAD///+KQee0AAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH5QQbCAoNcoiTQAAAACZJREFUaN7twTEBAAAAwqD1T20JT6AAAAAAAAAAAAAAAAAAAICnATvEAAEnf54JAAAAAElFTkSuQmCC',
+            ])
+            ->assertStatusMessageIs('success')
+            ->assertOk()
+            ->json();
+
+        $asset = Asset::findOrFail($response['payload']['id']);
+        $this->assertEquals($asset->asset_tag, '1234');
+        $image_data = Storage::disk('public')->get(app('assets_upload_path').e($asset->image));
+        // $this->assertEquals('3d67fb99a0b6926e350f7b71397525d7a6b936c1', sha1($image_data)); //this doesn't work because the image gets resized - use the resized hash instead
+        $this->assertEquals('db2e13ba04318c99058ca429d67777322f48566b', sha1($image_data));
     }
 }

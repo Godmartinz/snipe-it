@@ -22,6 +22,7 @@
                             id="auditReport"
                             data-url="{{ route('api.activity.index', ['action_type' => 'audit']) }}"
                             class="table table-striped snipe-table"
+                            data-advanced-search="false"
                             data-export-options='{
                         "fileName": "activity-report-{{ date('Y-m-d') }}",
                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
@@ -29,7 +30,7 @@
 
                         <thead>
                         <tr>
-                            <th class="col-sm-1" data-field="file" data-visible="false" data-formatter="auditImageFormatter">{{ trans('admin/hardware/table.image') }}</th>
+                            <th class="col-sm-1" data-field="file" data-visible="false" data-formatter="auditImageFormatter">{{ trans('general.image') }}</th>
                             <th class="col-sm-2" data-field="created_by" data-sortable="true" data-searchable="true" data-formatter="usersLinkObjFormatter">{{ trans('general.created_by') }}</th>
                             <th class="col-sm-2" data-field="item" data-sortable="true" data-searchable="true" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
                             <th class="col-sm-1" data-field="location" data-sortable="true" data-searchable="true" data-formatter="locationsLinkObjFormatter">{{ trans('general.location') }}</th>

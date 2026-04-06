@@ -20,14 +20,14 @@
                 @if (($options) && (count($options) > 0))
                 <select class="redirect-options form-control select2" data-minimum-results-for-search="Infinity" name="redirect_option" style="min-width: 250px"{{ ($disabled_select ? ' disabled' : '') }}>
                     @foreach ($options as $key => $value)
-                        <option value="{{ $key }}"{{ Session::get('redirect_option') == $key ? ' selected' : ''}}>
+                        <option value="{{ $key }}"{{ session('redirect_option') == $key ? ' selected' : ''}}>
                             {{ $value }}
                         </option>
                     @endforeach
                 </select>
                 @endif
 
-                <button type="submit" id="{{ $id }}" class="btn btn-primary pull-right{{ ($disabled_select ? ' disabled' : '') }}" style="margin-left:5px; border-radius: 3px;"{!! ($disabled_select ? ' data-tooltip="true" title="'.trans('admin/hardware/general.edit').'" disabled' : '') !!}>
+                <button type="submit" id="{{ $id }}" class="btn btn-success pull-right{{ ($disabled_select ? ' disabled' : '') }}" style="margin-left:5px; border-radius: 3px;"{!! ($disabled_select ? ' data-tooltip="true" title="'.trans('admin/hardware/general.edit').'" disabled' : '') !!}>
                     <x-icon type="checkmark" />
                     {{ $button_label }}
                 </button>

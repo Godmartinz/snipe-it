@@ -1,11 +1,14 @@
 @component('mail::message')
 # {{ trans('mail.hello') }},
 
-{{ $intro_text }}.
+{{ $intro_text }}
 
 @component('mail::table')
 |        |          |
 | ------------- | ------------- |
+@if (isset($item_name))
+| **{{ trans('general.item_name') }}** | {{ $item_name }} |
+@endif
 | **{{ trans('mail.user') }}** | {{ $assigned_to }} |
 @if (isset($user->location))
 | **{{ trans('general.location') }}** | {{ $user->location->name }} |
@@ -29,13 +32,16 @@
 | **{{ trans('general.category') }}** | {{ $item->model->category->name }} |
 @endif
 @if ((isset($item_model)) && ($item_model!=''))
-| **{{ trans('mail.asset_name') }}** | {{ $item_model }} |
+| **{{ trans('general.model_name') }}** | {{ $item_model }} |
 @endif
 @if (isset($item->model))
 | **{{ trans('general.asset_model') }}** | {{ $item->model->name }} |
 @endif
 @if (isset($item_serial))
 | **{{ trans('mail.serial') }}** | {{ $item_serial }} |
+@endif
+@if (isset($qty))
+| **{{ trans('general.qty') }}** | {{ $qty }} |
 @endif
 @endcomponent
 

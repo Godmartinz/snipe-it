@@ -3,10 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Setting;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Rules\UserCannotSwitchCompaniesIfItemsAssigned;
+use Illuminate\Foundation\Http\FormRequest;
 
 class SaveUserRequest extends FormRequest
 {
@@ -34,8 +32,8 @@ class SaveUserRequest extends FormRequest
     {
         $rules = [
             'department_id' => 'nullable|integer|exists:departments,id',
-            'manager_id' => 'nullable|exists:users,id',
-            'company_id' => ['nullable', 'integer', 'exists:companies,id']
+            'manager_id' => 'nullable|integer|exists:users,id',
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
         ];
 
         switch ($this->method()) {
@@ -44,23 +42,23 @@ class SaveUserRequest extends FormRequest
             case 'POST':
                 $rules['first_name'] = 'required|string|min:1';
                 $rules['username'] = 'required_unless:ldap_import,1|string|min:1';
-                if ($this->request->get('ldap_import') == false) {
+                if ($this->input('ldap_import') == false) {
                     $rules['password'] = Setting::passwordComplexityRulesSaving('store').'|confirmed';
                 }
                 break;
 
-            // Save all fields
+                // Save all fields
             case 'PUT':
                 $rules['first_name'] = 'required|string|min:1';
                 $rules['username'] = 'required_unless:ldap_import,1|string|min:1';
                 $rules['password'] = Setting::passwordComplexityRulesSaving('update').'|confirmed';
-                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned()];
+                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned];
                 break;
 
-            // Save only what's passed
+                // Save only what's passed
             case 'PATCH':
                 $rules['password'] = Setting::passwordComplexityRulesSaving('update');
-                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned()];
+                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned];
                 break;
 
             default:

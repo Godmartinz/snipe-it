@@ -18,17 +18,15 @@
 
 {{-- Page content --}}
 @section('content')
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-default">
-            <div class="box-body">
+    <x-container>
+        <x-box>
 
                 <table
-                        data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout($serial = true) }}"
+                    data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                         data-cookie-id-table="activityReport"
                         data-id-table="activityReport"
                         data-side-pagination="server"
+                        data-advanced-search="false"
                         data-sort-order="desc"
                         data-sort-name="created_at"
                         id="activityReport"
@@ -39,10 +37,8 @@
                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                         }'>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
+        </x-box>
+    </x-container>
 @stop
 
 

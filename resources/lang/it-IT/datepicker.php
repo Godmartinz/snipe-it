@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -13,36 +13,38 @@ return array(
     |
     */
 
+    'week_start_select' => 'Seleziona il giorno della settimana',
+    'week_start' => 'Giorno di inizio della settimana',
     'today' => 'Oggi',
     'clear' => 'Svuota',
     'days' => [
         'sunday' => 'Domenica',
         'monday' => 'Lunedì',
         'tuesday' => 'Martedì',
-        'wednesday' =>  'Mercoledì',
-        'thursday' =>  'Giovedì',
-        'friday' =>  'Venerdì',
-        'saturday' =>  'Sabato',
-        ],
+        'wednesday' => 'Mercoledì',
+        'thursday' => 'Giovedì',
+        'friday' => 'Venerdì',
+        'saturday' => 'Sabato',
+    ],
 
     'short_days' => [
         'sunday' => 'Dom',
         'monday' => 'Lun',
         'tuesday' => 'Mar',
-        'wednesday' =>  'Mer',
-        'thursday' =>  'Gio',
-        'friday' =>  'Ven',
-        'saturday' =>  'Sab',
+        'wednesday' => 'Mer',
+        'thursday' => 'Gio',
+        'friday' => 'Ven',
+        'saturday' => 'Sab',
     ],
 
     'min_days' => [
         'sunday' => 'Do',
         'monday' => 'Lu',
         'tuesday' => 'Ma',
-        'wednesday' =>  'Me',
-        'thursday' =>  'Gi',
-        'friday' =>  'Ve',
-        'saturday' =>  'Sa',
+        'wednesday' => 'Me',
+        'thursday' => 'Gi',
+        'friday' => 'Ve',
+        'saturday' => 'Sa',
     ],
 
     'months' => [
@@ -75,4 +77,4 @@ return array(
         'december' => 'Dic',
     ],
 
-);
+];

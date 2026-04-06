@@ -1,17 +1,32 @@
 @component('mail::message')
 {{ trans_choice('mail.assets_warrantee_alert', $assets->count(), ['count'=>$assets->count(), 'threshold' => $threshold]) }}
-@component('mail::table')
 
-<table width="100%">
-<tr><td>&nbsp;</td><td>{{ trans('mail.name') }}</td><td>{{ trans('mail.Days') }}</td><td>{{ trans('mail.expires') }}</td><td>{{ trans('mail.supplier') }}</td><td>{{ trans('mail.assigned_to') }}</td></tr>
+<x-mail::table>
+|        |        |          |
+| ------------- | ------------- | ------------- |
 @foreach ($assets as $asset)
-@php
-$expires = Helper::getFormattedDateObject($asset->present()->warranty_expires, 'date');
-$diff = round(abs(strtotime($asset->present()->warranty_expires) - strtotime(date('Y-m-d')))/86400);
-$icon = ($diff <= ($threshold / 2)) ? '🚨' : (($diff <= $threshold) ? '⚠️' : ' ');
-@endphp
-<tr><td>{{ $icon }} </td><td> <a href="{{ route('hardware.show', $asset->id) }}">{{ $asset->present()->name }}</a> </td><td> {{ $diff }} {{ trans('mail.Days') }} </td><td> {{ !is_null($expires) ? $expires['formatted'] : '' }} </td><td> {{ ($asset->supplier ? e($asset->supplier->name) : '') }} </td><td> {{ ($asset->assignedTo ? e($asset->assignedTo->present()->name()) : '') }} </td></tr>
+| {{ ($asset->eol_diff_in_days <= ($threshold / 2)) ? '🚨' : (($asset->eol_diff_in_days <= $threshold) ? '⚠️' : 'ℹ️ ') }} **{{ trans('mail.name') }}** | <a href="{{ route('hardware.show', $asset->id) }}">{{ $asset->display_name }}</a> |
+@if ($asset->serial)
+| **{{ trans('general.serial_number') }}** | {{ $asset->serial }} |
+@endif
+@if ($asset->purchase_date)
+| **{{ trans('general.purchase_date') }}** | {{ $asset->purchase_date_formatted }} |
+@endif
+@if ($asset->warranty_expires)
+| **{{ trans('mail.expires') }}** | {{ $asset->warranty_expires_formatted_date }} ({{ $asset->warranty_expires_diff_for_humans }}) |
+@endif
+@if ($asset->eol_date && $asset->eol_diff_for_humans)
+| **{{ trans('mail.eol') }}** | {{ $asset->eol_formatted_date }} ({{ $asset->eol_diff_for_humans }}) |
+@endif
+@if ($asset->supplier)
+| **{{ trans('mail.supplier') }}** | {{ ($asset->supplier ? e($asset->supplier->name) : '') }} |
+@endif
+@if ($asset->assigned)
+| **{{ trans('mail.assigned_to') }}** | {{ e($asset->assigned->present()->display_name) }} |
+@endif
+| <hr> | <hr> |
 @endforeach
-</table>
+</x-mail::table>
+
 @endcomponent
-@endcomponent
+

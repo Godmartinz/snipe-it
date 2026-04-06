@@ -343,86 +343,109 @@
         <h2 class="box-title">{{ trans('admin/settings/general.system') }}</h2>
       </div>
       <div class="box-body">
-        <div class="col-md-12" style="margin-right:4px;">
-        <div class="row row-new-striped" style="line-height: 23px;">
+        <div class="row-new-striped">
 
           <!-- row -->
           <div class="row">
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.snipe_version') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ config('version.app_version') }}  build {{ config('version.build_version') }} ({{ config('version.hash_version') }})
             </div>
 
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.license') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
-              <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" rel="noopener">AGPL3</a>
+            <div class="col-md-4">
+                AGPL3
+                <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank" data-tooltip="true" title="{{ trans('general.documentation') }}"><x-icon type="external-link" /></a>
            </div>
           </div>
           <!-- / row -->
 
+
           <!-- row -->
           <div class="row">
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.php') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ phpversion() }}
             </div>
 
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.laravel') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ $snipeSettings->lar_ver() }}
             </div>
           </div>
 
           <!-- row -->
           <div class="row">
-              <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+              <div class="col-md-2">
                 <strong>{{ trans('admin/settings/general.timezone') }}:</strong>
               </div>
-              <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+              <div class="col-md-4">
                 {{ config('app.timezone') }}
               </div>
 
-              <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+              <div class="col-md-2">
                 <strong>{{ trans('admin/settings/general.database_driver') }}:</strong>
               </div>
-              <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+              <div class="col-md-4">
                 {{ config('database.default') }}
               </div>
           </div>
 
           <!-- row -->
           <div class="row">
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.mail_from') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ config('mail.from.name') }}
               <code>&lt;{{ config('mail.from.address') }}&gt;</code>
             </div>
 
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.mail_reply_to') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ config('mail.reply_to.name') }}
               <code>&lt;{{ config('mail.reply_to.address') }}&gt;</code>
             </div>
           </div>
 
+            <!-- row -->
+            <div class="row">
+                <div class="col-md-2">
+                    <strong>{{ trans('admin/settings/general.api_url') }}:</strong>
+                </div>
+                <div class="col-md-4">
+                    <code>{{ url('/api/v1') }}{!! trans('account/general.api_base_url_endpoint') !!}</code>
+                    <a href="https://snipe-it.readme.io/reference/api-overview" target="_blank" data-tooltip="true" title="{{ trans('general.documentation') }}"><x-icon type="external-link" /></a>
+
+                </div>
+
+                <div class="col-md-2">
+                    <strong>{{ trans('admin/settings/general.scim_url') }}:</strong>
+                </div>
+                <div class="col-md-4">
+                    <code>{{ config('app.url') }}/scim/v2/</code>
+                    <a href="https://snipe-it.readme.io/docs/scim" target="_blank" data-tooltip="true" title="{{ trans('general.documentation') }}"><x-icon type="external-link" /></a>
+
+                </div>
+            </div>
+            <!-- / row -->
+
           <!-- row -->
           <div class="row">
-            <div class="col-md-2" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-2">
               <strong>{{ trans('admin/settings/general.bs_table_storage') }}:</strong>
             </div>
-            <div class="col-md-4" style="padding-top: 3px; padding-bottom: 3px;">
+            <div class="col-md-4">
               {{ config('session.bs_table_storage') }}
             </div>
             <div class="col-md-2">
@@ -434,7 +457,7 @@
         </div>
           </div>
           <!--/ row -->
-        </div>
+
       </div> <!-- /box-body-->
     </div> <!--/box-default-->
 

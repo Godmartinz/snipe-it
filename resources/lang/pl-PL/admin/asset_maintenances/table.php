@@ -1,8 +1,8 @@
 <?php
 
-    return [
-        'title'         => 'Utrzymywanie aktywów',
-        'asset_name'    => 'Nazwa Aktywu',
-        'is_warranty'   => 'Gwarancja',
-        'dl_csv'        => 'Pobierz CSV',
-    ];
+return [
+    'title' => 'Serwis środka',
+    'asset_name' => 'Nazwa  środka',
+    'is_warranty' => 'Gwarancja',
+    'dl_csv' => 'Pobierz CSV',
+];

@@ -16,8 +16,11 @@ use Tests\TestCase;
 class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 {
     private Asset $asset;
+
     private AssetModel $assetModel;
+
     private Category $category;
+
     private User $user;
 
     protected function setUp(): void
@@ -51,8 +54,12 @@ class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 
         $this->fireCheckInEvent($this->asset, $this->user);
 
+        Mail::assertSentCount(2);
         Mail::assertSent(CheckinAssetMail::class, function ($mail) {
-            return $mail->hasTo($this->user->email) && $mail->hasCc('cc@example.com');
+            return $mail->hasTo($this->user->email);
+        });
+        Mail::assertSent(CheckinAssetMail::class, function ($mail) {
+            return $mail->hasCc('cc@example.com');
         });
     }
 

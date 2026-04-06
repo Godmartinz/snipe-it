@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
+use App\Helpers\Helper;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use TCPDF;
 
 class CheckoutAcceptance extends Model
 {
-    use HasFactory, SoftDeletes, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $casts = [
         'accepted_at' => 'datetime',
@@ -33,10 +38,47 @@ class CheckoutAcceptance extends Model
         return array_filter($recipients);
     }
 
+    public function getCheckoutableItemTypeAttribute(): string
+    {
+        $type = $this->checkoutable_type;
+
+        return match ($type) {
+            Asset::class => trans('general.asset'),
+            LicenseSeat::class => trans('general.license'),
+            Accessory::class => trans('general.accessory'),
+            Component::class => trans('general.component'),
+            Consumable::class => trans('general.consumable'),
+            default => class_basename($type),
+        };
+    }
+
+    /**
+     * Accessor for the checkoutable item's category name.
+     */
+    protected function checkoutableCategoryName(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $item = $this->checkoutable;
+
+                if ($item instanceof Asset) {
+
+                    return $item->model?->category?->name;
+                }
+                if ($item instanceof LicenseSeat) {
+
+                    return $item->license?->category?->name;
+                }
+
+                return $item->category?->name;
+            },
+        );
+    }
+
     /**
      * The resource that was is out
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     * @return MorphTo
      */
     public function checkoutable()
     {
@@ -46,7 +88,7 @@ class CheckoutAcceptance extends Model
     /**
      * The user that the checkoutable was checked out to
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function assignedTo()
     {
@@ -66,7 +108,6 @@ class CheckoutAcceptance extends Model
     /**
      * Was the checkoutable checked out to this user?
      *
-     * @param  User    $user
      * @return bool
      */
     public function isCheckedOutTo(User $user)
@@ -79,7 +120,7 @@ class CheckoutAcceptance extends Model
      * Do not add stuff here that doesn't have a corresponding column in the
      * checkout_acceptances table or you'll get an error.
      *
-     * @param  string $signature_filename
+     * @param  string  $signature_filename
      */
     public function accept($signature_filename, $eula = null, $filename = null, $note = null)
     {
@@ -99,7 +140,7 @@ class CheckoutAcceptance extends Model
     /**
      * Decline the checkout acceptance
      *
-     * @param  string $signature_filename
+     * @param  string  $signature_filename
      */
     public function decline($signature_filename, $note = null)
     {
@@ -116,9 +157,8 @@ class CheckoutAcceptance extends Model
 
     /**
      * Filter checkout acceptences by the user
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  User    $user
-     * @return \Illuminate\Database\Eloquent\Builder
+     *
+     * @return Builder
      */
     public function scopeForUser(Builder $query, User $user)
     {
@@ -127,11 +167,125 @@ class CheckoutAcceptance extends Model
 
     /**
      * Filter to only get pending acceptances
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     *
+     * @return Builder
      */
     public function scopePending(Builder $query)
     {
         return $query->whereNull('accepted_at')->whereNull('declined_at');
+    }
+
+    public function scopeDeclined(Builder $query)
+    {
+        return $query->whereNull('accepted_at')->whereNotNull('declined_at');
+    }
+
+    protected function displayCheckoutableType(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => strtolower(str_replace('App\Models\\', '', $this->checkoutable_type)),
+        );
+    }
+
+    protected function scopeHasFiles(Builder $query)
+    {
+        return $query->whereNotNull('signature_filename')->orWhereNotNull('stored_eula_file');
+    }
+
+    public function generateAcceptancePdf($data, $pdf_filename)
+    {
+
+        // set some language dependent data:
+        $lg = [];
+        $lg['a_meta_charset'] = 'UTF-8';
+        $lg['w_page'] = 'page';
+
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $pdf->setRTL(false);
+        $pdf->setLanguageArray($lg);
+        $pdf->SetFontSubsetting(true);
+        $pdf->SetCreator('Snipe-IT Asset Management System');
+        $pdf->SetAuthor($data['assigned_to']);
+        $pdf->SetTitle('Asset Acceptance: '.$data['item_tag']);
+        $pdf->SetSubject('Asset Acceptance: '.$data['item_tag']);
+        $pdf->SetKeywords('Snipe-IT, assets, acceptance, eula, tos');
+        $pdf->SetFont('dejavusans', '', 8, '', true);
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+
+        $pdf->AddPage();
+        if ($data['logo'] != null) {
+            $pdf->writeHTML('<img src="@'.$data['logo'].'">', true, 0, true, 0, '');
+        } else {
+            $pdf->writeHTML('<h3>'.$data['site_name'].'</h3><br /><br />', true, 0, true, 0, 'C');
+        }
+
+        $pdf->Ln();
+
+        // Check for CJK in the translation string for date. (This is a good proxy for the rest of the document)
+        Helper::hasRtl(trans('general.date')) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+        Helper::isCjk(trans('general.date')) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+
+        $pdf->writeHTML(trans('general.date').': '.Helper::getFormattedDateObject(now(), 'datetime', false), true, 0, true, 0, '');
+
+        if ($data['company_name'] != null) {
+            $pdf->writeHTML(trans('general.company').': '.e($data['company_name']), true, 0, true, 0, '');
+        }
+        if ($data['item_tag'] != null) {
+            $pdf->writeHTML(trans('general.asset_tag').': '.e($data['item_tag']), true, 0, true, 0, '');
+        }
+        if ($data['item_name'] != null) {
+            $pdf->writeHTML(trans('general.name').': '.e($data['item_name']), true, 0, true, 0, '');
+        }
+        if ($data['item_model'] != null) {
+            $pdf->writeHTML(trans('general.asset_model').': '.e($data['item_model']), true, 0, true, 0, '');
+        }
+        if ($data['item_serial'] != null) {
+            $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
+        }
+        if (($data['qty'] != null) && ($data['qty'] > 1)) {
+            $pdf->writeHTML(trans('general.qty').': '.e($data['qty']), true, 0, true, 0, '');
+        }
+        $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.$data['employee_num'].')' : ''), true, 0, true, 0, '');
+        if ($data['email'] != null) {
+            $pdf->writeHTML(trans('general.email').': '.e($data['email']), true, 0, true, 0, '');
+        }
+        $pdf->Ln();
+        $pdf->writeHTML('<hr>', true, 0, true, 0, '');
+
+        // Break the EULA into lines based on newlines, and check each line for RTL or CJK characters
+        $eula_lines = preg_split("/\r\n|\n|\r/", $data['eula']);
+
+        foreach ($eula_lines as $eula_line) {
+            Helper::hasRtl($eula_line) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+            Helper::isCjk($eula_line) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+            $pdf->writeHTML(Helper::parseEscapedMarkedown($eula_line), true, 0, true, 0, '');
+        }
+        $pdf->Ln();
+        $pdf->Ln();
+        $pdf->setRTL(false);
+        $pdf->Ln();
+
+        if ($data['signature'] != null) {
+            $pdf->writeHTML('<img src="@'.$data['signature'].'">', true, 0, true, 0, '');
+            $pdf->writeHTML('<hr>', true, 0, true, 0, '');
+            $pdf->writeHTML(e($data['assigned_to']), true, 0, true, 0, 'C');
+            $pdf->Ln();
+        }
+
+        Helper::hasRtl(trans('general.notes')) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+        Helper::isCjk(trans('general.notes')) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+
+        if ($data['note'] != null) {
+            Helper::isCjk(trans('general.notes')) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+            $pdf->writeHTML(trans('general.notes').': '.e($data['note']), true, 0, true, 0, '');
+            $pdf->Ln();
+        }
+
+        $pdf->writeHTML(trans('general.assigned_date').': '.e($data['check_out_date']), true, 0, true, 0, '');
+        $pdf->writeHTML(trans('general.accepted_date').': '.e($data['accepted_date']), true, 0, true, 0, '');
+
+        return $pdf->Output($pdf_filename, 'S');
+
     }
 }

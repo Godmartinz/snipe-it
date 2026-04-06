@@ -62,6 +62,7 @@ if ($argc > 1){
                 break;
             case '--no-interactive':
                 $no_interactive = true;
+                putenv("COMPOSER_NO_INTERACTION=1"); //put composer in non-interactive mode aswell
                 break;
             default: // for legacy support from before we started using --branch
                 $branch = $argv[$arg];
@@ -78,6 +79,7 @@ echo "This script will attempt to: \n\n";
 echo "- validate some very basic .env file settings \n";
 echo "- check your PHP version and extension requirements \n";
 echo "- check directory permissions \n";
+echo "- change your 'git remote' to the new Snipe-IT GitHub URL \n";
 echo "- do a git pull to bring you to the latest version \n";
 echo "- run composer install to get your vendors up to date \n";
 echo "- run a backup \n";
@@ -436,6 +438,30 @@ $git_version = shell_exec('git --version');
 
 if ((strpos('git version', $git_version)) === false) {
     echo "Git is installed. \n";
+
+    // check remotes for legacy snipe/snipe-it URL
+    $remote = shell_exec('git remote -v');
+    foreach (explode("\n", $remote) as $line) {
+        $remote_bits = explode("\t", $line, 2);
+        if (count($remote_bits) != 2) {
+            continue;
+        }
+        @list($url, $purpose) = explode(" ", $remote_bits[1]);
+        if (in_array($url, ['git@github.com:snipe/snipe-it.git', 'https://github.com/snipe/snipe-it.git'])) {
+            // SSH or HTTPS remotes
+            $new_url = preg_replace("|snipe/snipe-it|", "grokability/snipe-it", $url);
+            echo $success_icon . " Resetting remote " . $remote_bits[0] . " at $url to $new_url for purpose: $purpose\n";
+            $push = '';
+            if ($purpose == '(push)') {
+                $push = '--push ';
+            }
+            $cmd = "git remote set-url $push" . $remote_bits[0] . " " . $new_url;
+            $remote_reset = shell_exec($cmd);
+            if ($remote_reset) {
+                echo '-- ' . $remote_reset . "\n";
+            }
+        }
+    }
     $git_fetch = shell_exec('git fetch');
     $git_checkout = shell_exec('git checkout '.$branch);
     $git_stash = shell_exec('git stash');
@@ -443,7 +469,8 @@ if ((strpos('git version', $git_version)) === false) {
     echo $git_fetch;
     echo '-- '.$git_stash;
     echo '-- '.$git_checkout;
-    echo '-- '.$git_pull."\n";
+    echo '-- '.$git_pull;
+    echo "\n";
 } else {
     echo "Git is NOT installed. You can still use this upgrade script to run common \n";
     echo "migration commands, but you will have to manually download the updated files. \n\n";
@@ -539,7 +566,7 @@ echo "--------------------------------------------------------\e[39m\n\n";
 exec('php artisan down',  $down_results, $return_code);
 echo '-- ' . implode("\n", $down_results) . "\n";
 if ($return_code > 0) {
-    die("Something went wrong with downing your site. This can't be good. Please investigate the error. Aborting!\n\n");
+    die("Something went wrong with downing your site. This can't be good. Please investigate the error and be sure to check https://snipe-it.readme.io/docs/common-issues and https://snipe-it.readme.io/docs/installation-issues for solutions to common upgrading issues. Aborting!\n\n");
 }
 unset($return_code);
 

@@ -14,8 +14,7 @@ use Tests\TestCase;
 
 class EditAssetTest extends TestCase
 {
-
-    public function testPermissionRequiredToViewAsset()
+    public function test_permission_required_to_view_edit_asset_page()
     {
         $asset = Asset::factory()->create();
         $this->actingAs(User::factory()->create())
@@ -23,7 +22,7 @@ class EditAssetTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testPageCanBeAccessed(): void
+    public function test_page_can_be_accessed(): void
     {
         $asset = Asset::factory()->create();
         $user = User::factory()->editAssets()->create();
@@ -31,7 +30,7 @@ class EditAssetTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testAssetEditPostIsRedirectedIfRedirectSelectionIsIndex()
+    public function test_asset_edit_post_is_redirected_if_redirect_selection_is_index()
     {
         $asset = Asset::factory()->assignedToUser()->create();
 
@@ -49,7 +48,8 @@ class EditAssetTest extends TestCase
             ->assertRedirect(route('hardware.index'));
         $this->assertDatabaseHas('assets', ['asset_tag' => 'New Asset Tag']);
     }
-    public function testAssetEditPostIsRedirectedIfRedirectSelectionIsItem()
+
+    public function test_asset_edit_post_is_redirected_if_redirect_selection_is_item()
     {
         $asset = Asset::factory()->create();
 
@@ -68,14 +68,17 @@ class EditAssetTest extends TestCase
         $this->assertDatabaseHas('assets', ['asset_tag' => 'New Asset Tag']);
     }
 
-    public function testNewCheckinIsLoggedIfStatusChangedToUndeployable()
+    public function test_new_checkin_is_logged_if_status_changed_to_undeployable()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
         $user = User::factory()->create();
-        $deployable_status = Statuslabel::factory()->rtd()->create();
-        $achived_status = Statuslabel::factory()->archived()->create();
-        $asset = Asset::factory()->assignedToUser($user)->create(['status_id' => $deployable_status->id]);
+        $deployable_status = StatusLabel::factory()->rtd()->create();
+        $achived_status = StatusLabel::factory()->archived()->create();
+        $asset = Asset::factory()->assignedToUser($user)->create([
+            'status_id' => $deployable_status->id,
+            'last_checkin' => null,
+        ]);
         $this->assertTrue($asset->assignedTo->is($user));
 
         $currentTimestamp = now();
@@ -83,32 +86,33 @@ class EditAssetTest extends TestCase
         $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
             ->from(route('hardware.edit', $asset))
             ->put(route('hardware.update', $asset), [
-                    'status_id' => $achived_status->id,
-                    'model_id' => $asset->model_id,
-                    'asset_tags' => $asset->asset_tag,
-                ],
+                'status_id' => $achived_status->id,
+                'model_id' => $asset->model_id,
+                'asset_tags' => $asset->asset_tag,
+            ],
             )
             ->assertStatus(302);
-            //->assertRedirect(route('hardware.show', ['hardware' => $asset->id]));;
+        // ->assertRedirect(route('hardware.show', ['hardware' => $asset->id]));;
 
         // $asset->refresh();
         $asset = Asset::find($asset->id);
         $this->assertNull($asset->assigned_to);
         $this->assertNull($asset->assigned_type);
         $this->assertEquals($achived_status->id, $asset->status_id);
+        $this->assertNotNull($asset->last_checkin);
 
         Event::assertDispatched(function (CheckoutableCheckedIn $event) use ($currentTimestamp) {
             return (int) Carbon::parse($event->action_date)->diffInSeconds($currentTimestamp, true) < 2;
         }, 1);
     }
 
-    public function testCurrentLocationIsNotUpdatedOnEdit()
+    public function test_current_location_is_not_updated_on_edit()
     {
         $defaultLocation = Location::factory()->create();
         $currentLocation = Location::factory()->create();
         $asset = Asset::factory()->create([
             'location_id' => $currentLocation->id,
-            'rtd_location_id' => $defaultLocation->id
+            'rtd_location_id' => $defaultLocation->id,
         ]);
 
         $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
@@ -125,4 +129,31 @@ class EditAssetTest extends TestCase
         $this->assertEquals($currentLocation->id, $asset->location_id);
     }
 
+    public function test_handles_model_being_deleted()
+    {
+        $this->withoutExceptionHandling();
+
+        $newStatus = StatusLabel::factory()->create();
+
+        $asset = Asset::factory()->create();
+
+        $asset->model()->forceDelete();
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->from(route('hardware.edit', $asset))
+            ->put(route('hardware.update', $asset), [
+                'redirect_option' => 'index',
+                'purchase_date' => '2025-08-30',
+                'name' => 'New name',
+                'asset_tags' => 'New Asset Tag',
+                'status_id' => $newStatus->id,
+                // triggers potential issue in AssetObserver's saving method
+                'model_id' => AssetModel::factory()->create()->id,
+            ]);
+
+        $this->assertDatabaseHas('assets', [
+            'id' => $asset->id,
+            'status_id' => $newStatus->id,
+        ]);
+    }
 }

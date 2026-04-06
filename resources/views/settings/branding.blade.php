@@ -45,35 +45,93 @@
                         <x-icon type="branding"/>
                          {{ trans('admin/settings/general.brand') }}
                     </h2>
+
+                        <button type="submit" class="btn btn-primary pull-right">
+                            <x-icon type="checkmark" /> {{ trans('general.save') }}
+                        </button>
+
                 </div>
                 <div class="box-body">
 
-
                     <div class="col-md-12">
 
-                        <fieldset name="logo-preferences" class="bottom-padded">
-                            <legend class="highlight">
-                                {{ trans('admin/settings/general.legends.logos') }}
-                            </legend>
 
                             <!-- Site name -->
-                            <div class="form-group {{ $errors->has('site_name') ? 'error' : '' }}">
-
-                                <div class="col-md-3">
-                                    <label for="site_name">{{ trans('admin/settings/general.site_name') }}</label>
-                                </div>
-                                <div class="col-md-7 required">
+                            <div class="form-group{{ $errors->has('site_name') ? ' error' : '' }}">
+                                <label for="site_name" class="col-md-3 control-label">{{ trans('admin/settings/general.site_name') }}</label>
+                                <div class="col-md-8 required">
                                     @if (config('app.lock_passwords')===true)
-                                        <input class="form-control" disabled="disabled" placeholder="Snipe-IT Asset Management" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
+                                        <input maxlength="191" class="form-control" disabled="disabled" placeholder="Snipe-IT Asset Management" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
                                         <p class="text-warning">
                                             <x-icon type="locked" />
                                             {{ trans('general.feature_disabled') }}</p>
                                     @else
-                                        <input class="form-control" placeholder="Snipe-IT Asset Management" required="required" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
+                                        <input maxlength="191" class="form-control" placeholder="Snipe-IT Asset Management" required="required" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
                                     @endif
                                     {!! $errors->first('site_name', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                 </div>
                             </div>
+
+                        <fieldset name="color-preferences">
+                            <x-form.legend help_text="{!! trans('admin/settings/general.color_settings_help') !!}">
+                                {{ trans('admin/settings/general.color_preferences') }}
+                            </x-form.legend>
+
+                            <!-- Header color -->
+                            <div class="form-group {{ $errors->has('header_color') ? 'error' : '' }}">
+                                <label for="header_color" class="col-md-3 control-label">{{ trans('admin/settings/general.header_color') }}</label>
+                                <div class="col-md-9">
+                                    <x-input.colorpicker :item="$setting" placeholder="#3c8dbc" div_id="header-color" id="header_color" :value="old('header_color', ($setting->header_color ?? '#3c8dbc'))" name="header_color" />
+                                    <p class="help-block">{{ trans('admin/settings/general.header_color_help') }}</p>
+                                    {!! $errors->first('header_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                </div>
+                            </div>
+
+                        <!-- Nav Link color -->
+                        <div class="form-group {{ $errors->has('nav_link_color') ? 'error' : '' }}">
+                            <label for="nav_link_color" class="col-md-3 control-label">{{ trans('admin/settings/general.nav_link_color') }}</label>
+                            <div class="col-md-9">
+                                <x-input.colorpicker :item="$setting" placeholder="#ffffff" div_id="nav-link-color" id="nav_link_color" :value="old('nav_link_color', ($setting->nav_link_color ?? '#ffffff'))" name="nav_link_color" />
+                                {!! $errors->first('nav_link_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                <p class="help-block">{{ trans('admin/settings/general.nav_link_color_help') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Light Link color -->
+                        <div class="form-group {{ $errors->has('link_light_color') ? 'error' : '' }}">
+                            <label for="link_light_color" class="col-md-3 control-label">{{ trans('admin/settings/general.link_light_color') }}</label>
+                            <div class="col-md-9">
+                                <x-input.colorpicker :item="$setting" id="link_light_color" placeholder="#296282" :value="old('link_light_color', ($setting->link_light_color ?? '#296282'))" name="link_light_color" />
+                                {!! $errors->first('link_light_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                <p class="help-block">{{ trans('admin/settings/general.link_light_color_help') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Dark Link color -->
+                        <div class="form-group {{ $errors->has('link_dark_color') ? 'error' : '' }}">
+                            <label for="link_dark_color" class="col-md-3 control-label">{{ trans('admin/settings/general.link_dark_color') }}</label>
+                            <div class="col-md-9">
+                                <x-input.colorpicker :item="$setting" id="link_dark_color" placeholder="#5fa4cc" :value="old('link_dark_color', ($setting->link_dark_color ?? '#5fa4cc'))" name="link_dark_color" />
+                                {!! $errors->first('link_dark_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                <p class="help-block">{{ trans('admin/settings/general.link_dark_color_help') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <p class="form-control-static" style="padding-top: 7px;">
+                                    <a data-theme-toggle-clear class="btn btn-theme" onClick(return false;);>
+                                        {{ trans('admin/settings/general.color_reset') }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        </fieldset>
+
+                        <fieldset name="logo-preferences">
+                            <x-form.legend>
+                                {{ trans('admin/settings/general.legends.logos') }}
+                            </x-form.legend>
 
                             @php
                                 $optionTypes = trans('admin/settings/general.logo_option_types');
@@ -81,9 +139,9 @@
 
                             <!-- Branding -->
                             <div class="form-group {{ $errors->has('brand') ? 'error' : '' }}">
-                                <div class="col-md-3">
-                                    <label for="brand">{{ trans('admin/settings/general.web_brand') }}</label>
-                                </div>
+
+                                <label for="brand" class="col-md-3 control-label">{{ trans('admin/settings/general.web_brand') }}</label>
+
                                 <div class="col-md-9">
                                     <x-input.select
                                         name="brand"
@@ -101,12 +159,15 @@
                                 </div>
                             </div>
 
+
+
                             <!-- Logo -->
                         @include('partials/forms/edit/uploadLogo', [
                             "logoVariable" => "logo",
                             "logoId" => "uploadLogo",
                             "logoLabel" => trans('admin/settings/general.logo_labels.logo'),
                             "logoClearVariable" => "clear_logo",
+                            "previewClass" => "header-preview",
                             "helpBlock" => trans('general.logo_size') . trans('general.image_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]),
                         ])
 
@@ -161,7 +222,6 @@
                             @if (($setting->default_avatar == '') || (($setting->default_avatar == 'default.png') && (Storage::disk('public')->missing('default.png'))))
                             <!-- Restore Default Avatar -->
                             <div class="form-group">
-
                                 <div class="col-md-9 col-md-offset-3">
                                     <label class="form-control">
                                         <input type="checkbox" name="restore_default_avatar" value="1" @checked(old('restore_default_avatar', $setting->restore_default_avatar)) />
@@ -175,8 +235,8 @@
                             @endif
 
                             <!-- Load gravatar -->
-                            <div class="form-group {{ $errors->has('load_remote') ? 'error' : '' }}">
-                                <div class="col-md-3">
+                            <div class="form-group{{ $errors->has('load_remote') ? ' error' : '' }}">
+                                <div class="col-md-3 control-label">
                                     <strong>{{ trans('admin/settings/general.load_remote') }}</strong>
                                 </div>
                                 <div class="col-md-9">
@@ -196,7 +256,7 @@
 
                             <!-- Include logo in print assets -->
                             <div class="form-group">
-                                <div class="col-md-3">
+                                <div class="col-md-3 control-label">
                                     <strong>{{ trans('admin/settings/general.logo_print_assets') }}</strong>
                                 </div>
                                 <div class="col-md-9">
@@ -211,7 +271,7 @@
 
                             <!-- show urls in emails-->
                             <div class="form-group">
-                                <div class="col-md-3">
+                                <div class="col-md-3 control-label">
                                     <strong>{{ trans('admin/settings/general.show_url_in_emails') }}</strong>
                                 </div>
                                 <div class="col-md-9">
@@ -225,43 +285,15 @@
                         </fieldset>
                         <!-- colors and skins -->
 
-                        <fieldset name="color-preferences" class="bottom-padded">
-                            <legend class="highlight">
-                                {{ trans('admin/settings/general.legends.colors') }}
-                            </legend>
-
-                            <!-- Header color -->
-                            <div class="form-group {{ $errors->has('header_color') ? 'error' : '' }}">
-                                <div class="col-md-3">
-                                    <label for="header_color">{{ trans('admin/settings/general.header_color') }}</label>
-                                </div>
-                                <div class="col-md-5 col-xs-5 col-sm-3 col-md-4 col-lg-3 col-xl-3">
-                                    <div class="input-group header-color">
-                                        <input class="form-control" placeholder="#FF0000" aria-label="header_color" name="header_color" type="text" id="header_color" value="{{ old('header_color', ($setting->header_color ?? '#3c8dbc')) }}">
-                                        <div class="input-group-addon">
-                                            <i class="fa-solid fa-square" style="color: {{ old('header_color', ($setting->header_color ?? '#3c8dbc')) }}"></i>
-                                        </div>
-                                    </div><!-- /.input group -->
-                                    {!! $errors->first('header_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
-                                </div>
-                            </div>
-
-                            <!-- Skin -->
-                            <div class="form-group {{ $errors->has('skin') ? 'error' : '' }}">
-                                <div class="col-md-3">
-                                    <label for="skin">{{ trans('general.skin') }}</label>
-                                </div>
-                                <div class="col-md-9">
-                                    <x-input.skin name="skin" :selected="old('skin', $setting->skin)" />
-                                    {!! $errors->first('skin', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
-                                </div>
-                            </div>
-
+                        <fieldset name="css-preferences">
+                            <x-form.legend>
+                                {{ trans('admin/settings/general.custom_css') }}
+                            </x-form.legend>
                             <!-- Custom css -->
                             <div class="form-group {{ $errors->has('custom_css') ? 'error' : '' }}">
-                                <div class="col-md-3">
-                                    <label for="custom_css">{{ trans('admin/settings/general.custom_css') }}</label>
-                                </div>
+
+                                <label for="custom_css" class="col-md-3 control-label">{{ trans('admin/settings/general.custom_css') }}</label>
+
                                 <div class="col-md-9">
                                     @if (config('app.lock_passwords')===true)
                                         <x-input.textarea
@@ -286,33 +318,22 @@
                                 </div>
                             </div>
 
-                            <!-- Allow User Skin -->
-                            <div class="form-group">
-                                <div class="col-md-9 col-md-offset-3">
-                                    <label class="form-control">
-                                        <input type="checkbox" name="allow_user_skin" value="1" @checked(old('allow_user_skin', $setting->allow_user_skin))/>
-                                        {{ trans('admin/settings/general.allow_user_skin') }}
-                                    </label>
-                                    <p class="help-block">{{ trans('admin/settings/general.allow_user_skin_help_text') }}</p>
-                                </div>
-                            </div>
-
                         </fieldset>
 
 
                             <!-- colors and skins -->
 
-                            <fieldset name="footer-preferences" class="bottom-padded">
-                                <legend class="highlight">
+                            <fieldset name="footer-preferences">
+                                <x-form.legend>
                                     {{ trans('admin/settings/general.legends.footer') }}
-                                </legend>
+                                </x-form.legend>
 
                                 <!-- Support Footer -->
                                 <div class="form-group {{ $errors->has('support_footer') ? 'error' : '' }}">
-                                    <div class="col-md-3">
-                                        <label for="support_footer">{{ trans('admin/settings/general.support_footer') }}</label>
-                                    </div>
-                                    <div class="col-md-9">
+
+                                    <label for="support_footer" class="col-md-3 control-label">{{ trans('admin/settings/general.support_footer') }}</label>
+
+                                    <div class="col-md-8">
                                         @if (config('app.lock_passwords')===true)
                                             <x-input.select
                                                 name="support_footer"
@@ -343,9 +364,9 @@
 
                                 <!-- Version Footer -->
                                 <div class="form-group {{ $errors->has('version_footer') ? 'error' : '' }}">
-                                    <div class="col-md-3">
-                                        <label for="version_footer">{{ trans('admin/settings/general.version_footer') }}</label>
-                                    </div>
+
+                                    <label for="version_footer" class="col-md-3 control-label">{{ trans('admin/settings/general.version_footer') }}</label>
+
                                     <div class="col-md-9">
                                         @if (config('app.lock_passwords')===true)
                                             <x-input.select
@@ -376,9 +397,9 @@
 
                                 <!-- Additional footer -->
                                 <div class="form-group {{ $errors->has('footer_text') ? 'error' : '' }}">
-                                    <div class="col-md-3">
-                                        <label for="footer_text">{{ trans('admin/settings/general.footer_text') }}</label>
-                                    </div>
+
+                                    <label for="footer_text" class="col-md-3 control-label">{{ trans('admin/settings/general.footer_text') }}</label>
+
                                     <div class="col-md-9">
                                         @if (config('app.lock_passwords')===true)
                                             <x-input.textarea
@@ -429,14 +450,53 @@
 
 @section('moar_scripts')
     <!-- bootstrap color picker -->
+
     <script nonce="{{ csrf_token() }}">
-        //color picker with addon
-        $(".header-color").colorpicker();
-        // toggle the disabled state of asset id prefix
-        $('#auto_increment_assets').on('ifChecked', function(){
-            $('#auto_increment_prefix').prop('disabled', false).focus();
-        }).on('ifUnchecked', function(){
-            $('#auto_increment_prefix').prop('disabled', true);
+
+        // This takes the color from the color picker to show a live preview
+        $(function() {
+
+            $('#header-color').colorpicker().on('changeColor', function(e) {
+                var color = e.color.toString('rgba');
+                $('.main-header .navbar, .header-preview, .left-navblock, .navbar-custom-menu > .navbar-nav, .navbar-custom-menu > .navbar-nav > li > .navbar-form, .navbar-nav > li > a:link, .navbar-nav > li > a').css('background-color', color);
+                $('.btn-theme').css('background-color', color);
+            });
+
+            $('#nav-link-color').colorpicker().on('changeColor', function(e) {
+                var color = e.color.toString('rgba');
+                var header_color = $('#header_color').val();
+
+                // $('.navbar-nav > li > a').css('background-color', header_color);
+                $('.navbar-nav > li > a:link').attr('style','color: '+ color +' !important').css('background-color', header_color);
+                $('.btn-theme').attr('style','color: '+ color +' !important').css('background-color', header_color);
+
+            });
+
+            /**
+             * 5. Add an event listener to toggle the reset
+             */
+            clearButton.addEventListener("click", (event) => {
+
+                var header_color = '#3c8dbc';
+                var nav_link_color = '#ffffff';
+                var link_light_color = '#296282';
+                var link_dark_color = '#5fa4cc';
+
+                $('#header_color').val(header_color);
+                $('#nav_link_color').val(nav_link_color);
+                $('#link_light_color').val(link_light_color);
+                $('#link_dark_color').val(link_dark_color);
+
+                $('.main-header .navbar, .header-preview, .left-navblock, .navbar-custom-menu > .navbar-nav, .navbar-custom-menu > .navbar-nav > li > .navbar-form, .navbar-nav > li > a:link, .navbar-nav > li > a').css('background-color', header_color);
+                $('.btn-theme').css('background-color', header_color);
+
+                $('.navbar-nav > li > a:link').attr('style','color: '+ nav_link_color +' !important').css('background-color', header_color);
+                $('.btn-theme').attr('style','color: '+ nav_link_color +' !important').css('background-color', header_color);
+
+                return false;
+            });
+
         });
+
     </script>
 @stop

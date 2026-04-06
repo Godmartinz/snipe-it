@@ -5,6 +5,7 @@
     'formAction' => ($item->id) ? route('licenses.update', ['license' => $item->id]) : route('licenses.store'),
      'index_route' => 'licenses.index',
     'options' => [
+                'back' => trans('admin/hardware/form.redirect_to_type',['type' => trans('general.previous_page')]),
                 'index' => trans('admin/hardware/form.redirect_to_all', ['type' => 'licenses']),
                 'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.license')]),
                ]
@@ -22,7 +23,7 @@
     <label for="seats" class="col-md-3 control-label">{{ trans('admin/licenses/form.seats') }}</label>
     <div class="col-md-7 col-sm-12">
         <div class="col-md-12" style="padding-left:0px">
-            <input class="form-control" type="text" name="seats" id="seats" value="{{ old('seats', $item->seats) }}" minlength="1" required style="width: 97px;">
+            <input class="form-control" type="number" min="0" name="seats" id="seats" value="{{ old('seats', $item->seats) }}" minlength="1" required style="width: 97px;">
         </div>
     </div>
     {!! $errors->first('seats', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
@@ -85,7 +86,7 @@
     <label for="expiration_date" class="col-md-3 control-label">{{ trans('admin/licenses/form.expiration') }}</label>
 
     <div class="input-group col-md-4">
-        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true" data-date-clear-btn="true">
+        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-date-today-btn="true" data-date-today-highlight="true" data-autoclose="true" data-date-clear-btn="true">
             <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="expiration_date" id="expiration_date" value="{{ old('expiration_date', ($item->expiration_date) ? $item->expiration_date->format('Y-m-d') : '') }}" maxlength="10">
             <span class="input-group-addon"><x-icon type="calendar" /></span>
         </div>
@@ -99,7 +100,7 @@
     <label for="termination_date" class="col-md-3 control-label">{{ trans('admin/licenses/form.termination_date') }}</label>
 
     <div class="input-group col-md-4">
-        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
+        <div class="input-group date" data-provide="datepicker" data-date-today-btn="true" data-date-today-highlight="true" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
             <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="termination_date" id="termination_date" value="{{ old('termination_date', ($item->termination_date) ? $item->termination_date->format('Y-m-d') : '') }}" maxlength="10">
             <span class="input-group-addon"><x-icon type="calendar" /></span>
         </div>
@@ -111,7 +112,7 @@
 <!-- Purchase Order -->
 <div class="form-group {{ $errors->has('purchase_order') ? ' has-error' : '' }}">
     <label for="purchase_order" class="col-md-3 control-label">{{ trans('admin/licenses/form.purchase_order') }}</label>
-    <div class="col-md-3">
+    <div class="col-md-3 text-right">
         <input class="form-control" type="text" name="purchase_order" id="purchase_order" value="{{ old('purchase_order', $item->purchase_order) }}" maxlength="191" />
         {!! $errors->first('purchase_order', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>

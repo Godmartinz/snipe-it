@@ -1,23 +1,9 @@
 <?php
 
 use App\Http\Controllers\LocationsController;
-use App\Http\Controllers\LocationsFilesController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
-
-    Route::post('{location}/upload',
-        [LocationsFilesController::class, 'store']
-    )->name('upload/locations')->withTrashed();
-
-    Route::get('{location}/showfile/{fileId}/{download?}',
-        [LocationsFilesController::class, 'show']
-    )->name('show/locationsfile')->withTrashed();
-
-    Route::delete('{location}/showfile/{fileId}/delete',
-        [LocationsFilesController::class, 'destroy']
-    )->name('delete/locationsfile')->withTrashed();
-
 
     Route::post(
     'bulkdelete',
@@ -32,8 +18,7 @@ Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
     Route::post(
     '{location}/restore',
     [LocationsController::class, 'postRestore']
-    )->name('locations.restore');
-
+    )->name('locations.restore')->withTrashed();
 
     Route::get('{locationId}/clone',
     [LocationsController::class, 'getClone']

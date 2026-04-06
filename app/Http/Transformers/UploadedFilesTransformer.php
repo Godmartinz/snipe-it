@@ -21,7 +21,6 @@ class UploadedFilesTransformer
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-
     public function transformFile(Actionlog $file)
     {
         $snipeModel = $file->item_type;
@@ -32,19 +31,20 @@ class UploadedFilesTransformer
             'name' => e($file->filename),
             'item' => ($file->item_type) ? [
                 'id' => (int) $file->item_id,
-                'type' => strtolower(class_basename($file->item_type)),
+                'type' => str_plural(strtolower(class_basename($file->item_type))),
             ] : null,
             'filename' => e($file->filename),
             'filetype' => StorageHelper::getFiletype($file->uploads_file_path()),
+            'mediatype' => StorageHelper::getMediaType($file->uploads_file_path()),
             'url' => $file->uploads_file_url(),
-            'note' =>  ($file->note) ? e($file->note) : null,
+            'note' => ($file->note) ? e($file->note) : null,
             'created_by' => ($file->adminuser) ? [
                 'id' => (int) $file->adminuser->id,
-                'name'=> e($file->adminuser->present()->fullName),
+                'name' => e($file->adminuser->display_name),
             ] : null,
             'created_at' => Helper::getFormattedDateObject($file->created_at, 'datetime'),
             'deleted_at' => Helper::getFormattedDateObject($file->deleted_at, 'datetime'),
-            'inline' => StorageHelper::allowSafeInline($file->uploads_file_path()),
+            'inlineable' => StorageHelper::allowSafeInline($file->uploads_file_path()) ?? false,
             'exists_on_disk' => (Storage::exists($file->uploads_file_path()) ? true : false),
         ];
 
@@ -53,8 +53,7 @@ class UploadedFilesTransformer
         ];
 
         $array += $permissions_array;
+
         return $array;
     }
-
-
 }

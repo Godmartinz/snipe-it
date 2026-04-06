@@ -3,24 +3,24 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SendUpcomingAuditMail extends Mailable
+class SendUpcomingAuditMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($params, $threshold)
+    public function __construct($params, $threshold, $total)
     {
         $this->assets = $params;
         $this->threshold = $threshold;
+        $this->total = $total;
     }
 
     /**
@@ -32,7 +32,7 @@ class SendUpcomingAuditMail extends Mailable
 
         return new Envelope(
             from: $from,
-            subject: trans_choice('mail.upcoming-audits', $this->assets->count(), ['count' => $this->assets->count(), 'threshold' => $this->threshold]),
+            subject: trans_choice('mail.upcoming-audits', $this->total, ['count' => $this->total, 'threshold' => $this->threshold]),
         );
     }
 
@@ -42,13 +42,13 @@ class SendUpcomingAuditMail extends Mailable
     public function content(): Content
     {
 
-
         return new Content(
 
             markdown: 'notifications.markdown.upcoming-audits',
-            with:  [
-                'assets'  => $this->assets,
-                'threshold'  => $this->threshold,
+            with: [
+                'assets' => $this->assets,
+                'threshold' => $this->threshold,
+                'total' => $this->total,
             ],
         );
     }
@@ -56,7 +56,7 @@ class SendUpcomingAuditMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

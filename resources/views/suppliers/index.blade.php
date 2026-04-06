@@ -8,36 +8,34 @@
 
 {{-- Page content --}}
 @section('content')
+    <x-container>
+        <x-box>
+
+            <x-slot:bulkactions>
+                <x-table.bulk-actions
+                        name='supplier'
+                        action_route="{{route('suppliers.bulk.delete')}}"
+                        model_name="supplier"
+                >
+                    @can('delete', App\Models\Supplier::class)
+                        <option>{{ trans('general.delete') }}</option>
+                    @endcan
+                </x-table.bulk-actions>
+            </x-slot:bulkactions>
 
 
-@section('header_right')
-  @can('create', \App\Models\Supplier::class)
-    <a href="{{ route('suppliers.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-  @endcan
-@stop
+            <x-table
+                name="supplier"
+                buttons="supplierButtons"
+                fixed_right_number="1"
+                fixed_number="1"
+                api_url="{{ route('api.suppliers.index') }}"
+                :presenter="\App\Presenters\SupplierPresenter::dataTableLayout()"
+                export_filename="export-suppliers-{{ date('Y-m-d') }}"
+            />
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-      <div class="box-body">
-        <table
-            data-columns="{{ \App\Presenters\SupplierPresenter::dataTableLayout() }}"
-            data-cookie-id-table="suppliersTable"
-            data-id-table="suppliersTable"
-            data-side-pagination="server"
-            data-sort-order="asc"
-            id="suppliersTable"
-            class="table table-striped snipe-table"
-            data-url="{{ route('api.suppliers.index') }}"
-            data-export-options='{
-            "fileName": "export-suppliers-{{ date('Y-m-d') }}",
-            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-            }'>
-      </table>
-    </div>
-  </div>
-  </div>
-</div>
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

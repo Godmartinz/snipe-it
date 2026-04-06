@@ -9,7 +9,13 @@
 
 @section('inputFields')
 
-@include ('partials.forms.edit.name', ['translated_name' => trans('admin/categories/general.name')])
+    <!-- Name -->
+    <x-form.row
+            :label="trans('general.name')"
+            :$item
+            name="name"
+    />
+
 
 <!-- Type -->
 <div class="form-group {{ $errors->has('category_type') ? ' has-error' : '' }}">
@@ -57,11 +63,6 @@
 </div>
 
 
-@stop
-
-@section('content')
-@parent
-
 
 @if ($snipeSettings->default_eula_text!='')
 <!-- Modal -->
@@ -83,6 +84,21 @@
 </div>
 @endif
 
+    <fieldset name="color-preferences">
+        <x-form.legend help_text="{{ trans('general.tag_color_help') }}">
+            {{ trans('general.tag_color') }}
+        </x-form.legend>
+        <!--  color -->
+        <div class="form-group {{ $errors->has('tag_color') ? 'error' : '' }}">
+            <label for="tag_color" class="col-md-3 control-label">
+                {{ trans('general.tag_color') }}
+            </label>
+            <div class="col-md-9">
+                <x-input.colorpicker :item="$item" id="color" :value="old('color', ($item->color ?? '#f4f4f4'))" name="tag_color" id="tag_color" />
+                {!! $errors->first('tag_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+            </div>
+        </div>
+    </fieldset>
 
 
 @stop

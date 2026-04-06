@@ -3,14 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class UnacceptedAssetReminderMail extends Mailable
+class UnacceptedAssetReminderMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
@@ -48,10 +47,10 @@ class UnacceptedAssetReminderMail extends Mailable
         return new Content(
             markdown: 'notifications.markdown.asset-reminder',
             with: [
-                'count'        => $this->count,
-                'assigned_to'  => $this->target?->present()->fullName,
-                'link'         => route('account.accept'),
-                'accept_url'   => $accept_url,
+                'count' => $this->count,
+                'assigned_to' => $this->target?->present()->fullName,
+                'link' => route('account.accept'),
+                'accept_url' => $accept_url,
             ]
         );
     }
@@ -59,7 +58,7 @@ class UnacceptedAssetReminderMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

@@ -63,8 +63,10 @@ $config = [
             'region' => env('PUBLIC_AWS_DEFAULT_REGION'),
             'bucket' => env('PUBLIC_AWS_BUCKET'),
             'url' => env('PUBLIC_AWS_URL'),
-            'root'   => env('PUBLIC_AWS_BUCKET_ROOT'),
-            'visibility' => 'public'
+            'endpoint' => env('PUBLIC_AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('PUBLIC_AWS_PATH_STYLE'),
+            'root' => env('PUBLIC_AWS_BUCKET_ROOT'),
+            'visibility' => 'public',
         ],
 
         's3_private' => [
@@ -78,18 +80,20 @@ $config = [
             'region' => env('PRIVATE_AWS_DEFAULT_REGION'),
             'bucket' => env('PRIVATE_AWS_BUCKET'),
             'url' => env('PRIVATE_AWS_URL'),
-            'root'   => env('PRIVATE_AWS_BUCKET_ROOT'),
-            'visibility' => 'private'
+            'endpoint' => env('PRIVATE_AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('PRIVATE_AWS_PATH_STYLE'),
+            'root' => env('PRIVATE_AWS_BUCKET_ROOT'),
+            'visibility' => 'private',
         ],
 
         'rackspace' => [
-            'driver'    => 'rackspace',
-            'username'  => env('RACKSPACE_USERNAME'),
-            'key'       => env('RACKSPACE_KEY'),
+            'driver' => 'rackspace',
+            'username' => env('RACKSPACE_USERNAME'),
+            'key' => env('RACKSPACE_KEY'),
             'container' => env('RACKSPACE_CONTAINER'),
-            'endpoint'  => 'https://identity.api.rackspacecloud.com/v2.0/',
-            'region'    => env('RACKSPACE_REGION'),
-            'url_type'  => env('RACKSPACE_URL_TYPE'),
+            'endpoint' => 'https://identity.api.rackspacecloud.com/v2.0/',
+            'region' => env('RACKSPACE_REGION'),
+            'url_type' => env('RACKSPACE_URL_TYPE'),
         ],
 
         'backup' => [
@@ -103,6 +107,75 @@ $config = [
 
 // copy the selected PUBLIC_FILESYSTEM_DISK's configuration to the 'public' key for easy use
 // (by default, the PUBLIC_FILESYSTEM DISK is 'local_public', in the public/uploads directory)
-$config['disks']['public'] = $config['disks'][env('PUBLIC_FILESYSTEM_DISK','local_public')];
+$config['disks']['public'] = $config['disks'][env('PUBLIC_FILESYSTEM_DISK', 'local_public')];
+
+// When PUBLIC_S3_PROXY is enabled, all "public" uploads are served through the application
+// instead of being accessed directly from S3. This allows using a single private S3 bucket
+// for all storage, with the app proxying requests for public files (images, logos, avatars).
+if (env('PUBLIC_S3_PROXY', false)) {
+    $config['disks']['public']['visibility'] = 'private';
+    $config['disks']['public']['url'] = env('APP_URL').'/storage-proxy';
+}
+
+// This is used to determine which files to accept, and also to populate the language strings for the upload-file blade
+$config['allowed_upload_extensions_array'] = [
+    'avif',
+    'doc',
+    'doc',
+    'docx',
+    'docx',
+    'gif',
+    'ico',
+    'jpeg',
+    'jpg',
+    'json',
+    'key',
+    'lic',
+    'mov',
+    'mp3',
+    'mp4',
+    'odp',
+    'ods',
+    'odt',
+    'ogg',
+    'pdf',
+    'png',
+    'rar',
+    'rtf',
+    'svg',
+    'txt',
+    'wav',
+    'webm',
+    'webp',
+    'xls',
+    'xlsx',
+    'xml',
+    'zip',
+];
+
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
+$config['allowed_upload_mimetypes_array'] = [
+    'application/json',
+    'application/msword',
+    'application/pdf',
+    'application/vnd.ms-excel',
+    'application/vnd.oasis.opendocument.presentation',
+    'application/vnd.oasis.opendocument.spreadsheet',
+    'application/vnd.oasis.opendocument.text',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/x-rar-compressed',
+    'application/zip',
+    'audio/*',
+    'image/*',
+    'text/plain',
+    'text/rtf',
+    'text/xml',
+    'video/*',
+];
+
+$config['allowed_upload_mimetypes'] = implode(',', $config['allowed_upload_mimetypes_array']);
+$config['allowed_upload_extensions_for_validator'] = implode(',', $config['allowed_upload_extensions_array']);
+$config['allowed_upload_extensions'] = '.'.implode(', .', $config['allowed_upload_extensions_array']);
 
 return $config;

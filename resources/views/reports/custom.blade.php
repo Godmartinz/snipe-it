@@ -55,29 +55,33 @@
                 @endif
 
                 @if (request()->routeIs('report-templates.edit'))
-                    <div class="row">
-                        <div class="col-md-7 col-md-offset-4">
-                            <div class="{{ $errors->has('name') ? ' has-error' : '' }}">
-                                <label
-                                    for="name"
-                                    class="col-md-4 control-label"
-                                >
-                                    {{ trans('admin/reports/general.template_name') }}
-                                </label>
-                                <div class="col-md-8">
-                                    <input
-                                        class="form-control"
-                                        placeholder=""
-                                        name="name"
-                                        type="text"
-                                        id="name"
-                                        value="{{ $template->name }}"
-                                        required
-                                    >
-                                </div>
-                                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                            </div>
+                    <div class="form-group {{ $errors->has('name') ? ' has-error' : '' }}">
+                        <label
+                            for="name"
+                            class="col-md-2 control-label"
+                        >
+                            {{ trans('admin/reports/general.template_name') }}
+                        </label>
+                        <div class="col-md-5">
+                            <input
+                                class="form-control"
+                                placeholder=""
+                                name="name"
+                                type="text"
+                                id="name"
+                                value="{{ $template->name }}"
+                                required
+                            >
+                            {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                         </div>
+                        @if ($template->created_by == auth()->id())
+                            <div class="col-md-3">
+                                <label class="form-control">
+                                    <input type="checkbox" name="is_shared" value="1" @checked($template->is_shared) />
+                                    {{ trans('admin/reports/general.share_template') }}
+                                </label>
+                            </div>
+                        @endif
                     </div>
                 @endif
 
@@ -252,10 +256,21 @@
                 {{ trans('admin/licenses/table.assigned_to') }}
               </label>
 
+
               <label class="form-control">
                   <input type="checkbox" name="username" value="1" @checked($template->checkmarkValue('username')) />
                 {{ trans('admin/users/table.username') }}
               </label>
+
+            <label class="form-control">
+                <input type="checkbox" name="user_company" value="1" @checked($template->checkmarkValue('user_company')) />
+                {{ trans('admin/reports/general.custom_export.user_company') }}
+            </label>
+
+            <label class="form-control">
+                <input type="checkbox" name="email" value="1" @checked($template->checkmarkValue('email')) />
+                {{ trans('admin/users/table.email') }}
+            </label>
 
               <label class="form-control">
                   <input type="checkbox" name="employee_num" value="1" @checked($template->checkmarkValue('employee_num')) />
@@ -276,8 +291,6 @@
                   <input type="checkbox" name="title" value="1" @checked($template->checkmarkValue('title')) />
                 {{ trans('admin/users/table.title') }}
               </label>
-
-                <!-- new -->
 
               <label class="form-control">
                   <input type="checkbox" name="phone" value="1" @checked($template->checkmarkValue('phone')) />
@@ -308,6 +321,11 @@
                   <input type="checkbox" name="user_zip" value="1" @checked($template->checkmarkValue('user_zip')) />
                   {{ trans('general.zip') }}
               </label>
+
+            <label class="form-control">
+                <input type="checkbox" name="target_notes" value="1" @checked($template->checkmarkValue('target_notes')) />
+                {{ trans('admin/reports/general.custom_export.target_notes') }}
+            </label>
 
 
 
@@ -412,9 +430,10 @@
             <div class="form-group purchase-range{{ ($errors->has('purchase_start') || $errors->has('purchase_end')) ? ' has-error' : '' }}">
               <label for="purchase_start" class="col-md-3 control-label">{{ trans('general.purchase_date') }}</label>
               <div class="input-daterange input-group col-md-7" id="purchase-range-datepicker">
-                  <input type="text" class="form-control" name="purchase_start" aria-label="purchase_start" value="{{ $template->textValue('purchase_start', old('purchase_start')) }}">
-                  <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                  <input type="text" class="form-control" name="purchase_end" aria-label="purchase_end" value="{{ $template->textValue('purchase_end', old('purchase_end')) }}">
+
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="purchase_start" aria-label="purchase_start" value="{{ $template->textValue('purchase_start', old('purchase_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="purchase_end" aria-label="purchase_end" value="{{ $template->textValue('purchase_end', old('purchase_end')) }}">
               </div>
 
                 @if ($errors->has('purchase_start') || $errors->has('purchase_end'))
@@ -426,13 +445,31 @@
 
             </div>
 
-            <!-- Created Date -->
+          <!-- Purchase Cost -->
+            <div class="form-group purchase-range{{ ($errors->has('purchase_cost_start') || $errors->has('purchase_cost_end')) ? ' has-error' : '' }}">
+              <label for="purchase_cost_start" class="col-md-3 control-label">{{ trans('admin/hardware/form.cost') }}</label>
+              <div class="input-group col-md-7">
+                  <input type="number" min="0" step="0.01" class="form-control" name="purchase_cost_start" aria-label="purchase_cost_start" value="{{ $template->textValue('purchase_cost_start', old('purchase_cost_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="number" min="0" step="0.01" class="form-control" name="purchase_cost_end" aria-label="purchase_cost_end" value="{{ $template->textValue('purchase_cost_end', old('purchase_cost_end')) }}">
+              </div>
+
+              @if ($errors->has('purchase_cost_start') || $errors->has('purchase_cost_end'))
+                  <div class="col-md-9 col-lg-offset-3">
+                      {!! $errors->first('purchase_cost_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                      {!! $errors->first('purchase_cost_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                  </div>
+              @endif
+
+            </div>
+
+          <!-- Created Date -->
             <div class="form-group created-range{{ ($errors->has('created_start') || $errors->has('created_end')) ? ' has-error' : '' }}">
               <label for="created_start" class="col-md-3 control-label">{{ trans('general.created_at') }} </label>
               <div class="input-daterange input-group col-md-7" id="created-range-datepicker">
-                  <input type="text" class="form-control" name="created_start" aria-label="created_start" value="{{ $template->textValue('created_start', old('created_start')) }}">
-                  <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                  <input type="text" class="form-control" name="created_end" aria-label="created_end" value="{{ $template->textValue('created_end', old('created_end')) }}">
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="created_start" aria-label="created_start" value="{{ $template->textValue('created_start', old('created_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="created_end" aria-label="created_end" value="{{ $template->textValue('created_end', old('created_end')) }}">
               </div>
 
                 @if ($errors->has('created_start') || $errors->has('created_end'))
@@ -447,9 +484,9 @@
           <div class="form-group checkout-range{{ ($errors->has('checkout_date_start') || $errors->has('checkout_date_end')) ? ' has-error' : '' }}">
               <label for="checkout_date" class="col-md-3 control-label">{{ trans('general.checkout') }} </label>
               <div class="input-daterange input-group col-md-7" id="checkout-range-datepicker">
-                  <input type="text" class="form-control" name="checkout_date_start" aria-label="checkout_date_start" value="{{ $template->textValue('checkout_date_start', old('checkout_date_start')) }}">
-                  <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                  <input type="text" class="form-control" name="checkout_date_end" aria-label="checkout_date_end" value="{{ $template->textValue('checkout_date_end', old('checkout_date_end')) }}">
+                  <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="checkout_date_start" aria-label="checkout_date_start" value="{{ $template->textValue('checkout_date_start', old('checkout_date_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="checkout_date_end" aria-label="checkout_date_end" value="{{ $template->textValue('checkout_date_end', old('checkout_date_end')) }}">
               </div>
 
               @if ($errors->has('checkout_date_start') || $errors->has('checkout_date_end'))
@@ -465,9 +502,9 @@
           <div class="form-group checkin-range{{ ($errors->has('checkin_date_start') || $errors->has('checkin_date_end')) ? ' has-error' : '' }}">
               <label for="checkin_date" class="col-md-3 control-label">{{ trans('admin/hardware/table.last_checkin_date') }}</label>
               <div class="input-daterange input-group col-md-7" id="checkin-range-datepicker">
-                  <input type="text" class="form-control" name="checkin_date_start" aria-label="checkin_date_start" value="{{ $template->textValue('checkin_date_start', old('checkin_date_start')) }}">
-                  <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                  <input type="text" class="form-control" name="checkin_date_end" aria-label="checkin_date_end" value="{{ $template->textValue('checkin_date_end', old('checkin_date_end')) }}">
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="checkin_date_start" aria-label="checkin_date_start" value="{{ $template->textValue('checkin_date_start', old('checkin_date_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="checkin_date_end" aria-label="checkin_date_end" value="{{ $template->textValue('checkin_date_end', old('checkin_date_end')) }}">
               </div>
 
               @if ($errors->has('checkin_date_start') || $errors->has('checkin_date_end'))
@@ -482,9 +519,9 @@
             <div class="form-group expected_checkin-range{{ ($errors->has('expected_checkin_start') || $errors->has('expected_checkin_end')) ? ' has-error' : '' }}">
               <label for="expected_checkin_start" class="col-md-3 control-label">{{ trans('admin/hardware/form.expected_checkin') }}</label>
               <div class="input-daterange input-group col-md-7" id="expected_checkin-range-datepicker">
-                  <input type="text" class="form-control" name="expected_checkin_start" aria-label="expected_checkin_start" value="{{ $template->textValue('expected_checkin_start', old('expected_checkin_start')) }}">
-                  <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                  <input type="text" class="form-control" name="expected_checkin_end" aria-label="expected_checkin_end" value="{{ $template->textValue('expected_checkin_end', old('expected_checkin_end')) }}">
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="expected_checkin_start" aria-label="expected_checkin_start" value="{{ $template->textValue('expected_checkin_start', old('expected_checkin_start')) }}">
+                  <span class="input-group-addon"> - </span>
+                  <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="expected_checkin_end" aria-label="expected_checkin_end" value="{{ $template->textValue('expected_checkin_end', old('expected_checkin_end')) }}">
               </div>
 
                 @if ($errors->has('expected_checkin_start') || $errors->has('expected_checkin_end'))
@@ -500,9 +537,9 @@
               <div class="form-group asset_eol_date-range {{ ($errors->has('asset_eol_date_start') || $errors->has('asset_eol_date_end')) ? ' has-error' : '' }}">
                   <label for="asset_eol_date" class="col-md-3 control-label">{{ trans('admin/hardware/form.eol_date') }}</label>
                   <div class="input-daterange input-group col-md-7" id="asset_eol_date-range-datepicker">
-                      <input type="text" class="form-control" name="asset_eol_date_start" aria-label="asset_eol_date_start" value="{{ $template->textValue('asset_eol_date_start', old('asset_eol_date_start')) }}">
-                      <span class="input-group-addon">to</span>
-                      <input type="text" class="form-control" name="asset_eol_date_end" aria-label="asset_eol_date_end" value="{{ $template->textValue('asset_eol_date_end', old('asset_eol_date_end')) }}">
+                      <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="asset_eol_date_start" aria-label="asset_eol_date_start" value="{{ $template->textValue('asset_eol_date_start', old('asset_eol_date_start')) }}">
+                      <span class="input-group-addon"> - </span>
+                      <input type="text" placeholder="{{ trans('general.select_date') }}" class="form-control" name="asset_eol_date_end" aria-label="asset_eol_date_end" value="{{ $template->textValue('asset_eol_date_end', old('asset_eol_date_end')) }}">
                   </div>
 
                   @if ($errors->has('asset_eol_date_start') || $errors->has('asset_eol_date_end'))
@@ -517,9 +554,9 @@
               <div class="form-group last_audit-range{{ ($errors->has('last_audit_start') || $errors->has('last_audit_end')) ? ' has-error' : '' }}">
                   <label for="last_audit_start" class="col-md-3 control-label">{{ trans('general.last_audit') }}</label>
                   <div class="input-daterange input-group col-md-7" id="last_audit-range-datepicker">
-                      <input type="text" class="form-control" name="last_audit_start" aria-label="last_audit_start" value="{{ $template->textValue('last_audit_start', old('last_audit_start')) }}">
-                      <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                      <input type="text" class="form-control" name="last_audit_end" aria-label="last_audit_end" value="{{ $template->textValue('last_audit_end', old('last_audit_end')) }}">
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="last_audit_start" aria-label="last_audit_start" value="{{ $template->textValue('last_audit_start', old('last_audit_start')) }}">
+                      <span class="input-group-addon"> - </span>
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="last_audit_end" aria-label="last_audit_end" value="{{ $template->textValue('last_audit_end', old('last_audit_end')) }}">
                   </div>
 
                   @if ($errors->has('last_audit_start') || $errors->has('last_audit_end'))
@@ -534,9 +571,9 @@
               <div class="form-group next_audit-range{{ ($errors->has('next_audit_start') || $errors->has('next_audit_end')) ? ' has-error' : '' }}">
                   <label for="next_audit_start" class="col-md-3 control-label">{{ trans('general.next_audit_date') }}</label>
                   <div class="input-daterange input-group col-md-7" id="next_audit-range-datepicker">
-                      <input type="text" class="form-control" name="next_audit_start" aria-label="next_audit_start" value="{{ $template->textValue('next_audit_start', old('next_audit_start')) }}">
-                      <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                      <input type="text" class="form-control" name="next_audit_end" aria-label="next_audit_end" value="{{ $template->textValue('next_audit_end', old('next_audit_end')) }}">
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="next_audit_start" aria-label="next_audit_start" value="{{ $template->textValue('next_audit_start', old('next_audit_start')) }}">
+                      <span class="input-group-addon"> - </span>
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="next_audit_end" aria-label="next_audit_end" value="{{ $template->textValue('next_audit_end', old('next_audit_end')) }}">
                   </div>
 
                   @if ($errors->has('next_audit_start') || $errors->has('next_audit_end'))
@@ -551,9 +588,9 @@
               <div class="form-group last_updated-range{{ ($errors->has('last_updated_start') || $errors->has('last_updated_end')) ? ' has-error' : '' }}">
                   <label for="last_updated_start" class="col-md-3 control-label">{{ trans('general.updated_at') }}</label>
                   <div class="input-daterange input-group col-md-7" id="last_updated-range-datepicker">
-                      <input type="text" class="form-control" name="last_updated_start" aria-label="last_updated_start" value="{{ $template->textValue('last_updated_start', old('last_updated_start')) }}">
-                      <span class="input-group-addon">{{ strtolower(trans('general.to')) }}</span>
-                      <input type="text" class="form-control" name="last_updated_end" aria-label="last_updated_end" value="{{ $template->textValue('last_updated_end', old('last_updated_end')) }}">
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="last_updated_start" aria-label="last_updated_start" value="{{ $template->textValue('last_updated_start', old('last_updated_start')) }}">
+                      <span class="input-group-addon"> - </span>
+                      <input type="text" placeholder="{{ trans('general.select_date') }}"  class="form-control" name="last_updated_end" aria-label="last_updated_end" value="{{ $template->textValue('last_updated_end', old('last_updated_end')) }}">
                   </div>
 
                   @if ($errors->has('last_updated_start') || $errors->has('last_updated_end'))
@@ -562,7 +599,21 @@
                           {!! $errors->first('last_updated_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                       </div>
                   @endif
+              </div>
 
+              <!-- Last Updated before -->
+              <div class="form-group">
+                  <label for="last_updated_before" class="col-md-3 control-label">{{ trans('general.updated_before') }}</label>
+                        <div class="input-group col-md-2">
+                             <input class="form-control input-group" type="number" min="0" name="last_updated_before" value="{{ $template->textValue('last_updated_before', old('last_updated_before')) }}" aria-label="last_updated_before">
+                            {{ trans('general.days_ago') }}
+                        </div>
+
+                  @if ($errors->has('last_updated_before'))
+                      <div class="col-md-9 col-lg-offset-3">
+                          {!! $errors->first('last_updated_before', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                      </div>
+                  @endif
               </div>
 
             <div class="col-md-9 col-md-offset-3">
@@ -617,9 +668,9 @@
 
         </div> <!-- /.box-body-->
             <div class="box-footer text-right">
-                @if (request()->routeIs('report-templates.edit'))
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check icon-white" aria-hidden="true"></i>
+                @if(request()->routeIs('report-templates.edit'))
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-download icon-white" aria-hidden="true"></i>
                         {{ trans('general.save') }}
                     </button>
                 @else
@@ -658,36 +709,45 @@
 
             <div class="row">
                 <div class="col-md-12">
-                @if (request()->routeIs('report-templates.show'))
-                        <a
+
+                    <div style="margin-bottom: 5px;">
+                        @if($template->name)
+                            @if($template->created_by == auth()->id())
+                                <span class="text-center">{!!  ($template->is_shared ? '<i class="fa fa-users"></i>'." ".(trans('admin/reports/general.template_shared_with_others')) : '<i class="fa fa-user"></i>'." ".(trans('admin/reports/general.template_not_shared')) )!!}</span>
+                            @else
+                                <span class="text-center">{!!  ($template->is_shared ? '<i class="fa fa-users"></i>'." ".(trans('admin/reports/general.template_shared')) : '<i class="fa fa-user"></i>'." ".(trans('admin/reports/general.template_not_shared')) )!!}</span>
+                            @endif
+                        @endif
+                    </div>
+
+
+                    @if($template->created_by == auth()->id())
+                        @if (request()->routeIs('report-templates.show'))
+                            <a
                                 href="{{ route('report-templates.edit', $template) }}"
                                 class="btn btn-sm btn-warning btn-social btn-block"
                                 data-tooltip="true"
                                 title="{{ trans('admin/reports/general.update_template') }}"
                                 style="margin-bottom: 5px;"
-                        >
-                            <x-icon type="edit" />
-                            {{ trans('general.update') }}
-                        </a>
-
-                    <span data-tooltip="true" title="{{ trans('general.delete') }}">
-                        <a href="#"
-                                class="btn btn-sm btn-danger btn-social btn-block"
+                            >
+                                <x-icon type="edit" />
+                                {{ trans('general.update') }}
+                            </a>
+                        <span data-tooltip="true" title="{{ trans('general.delete') }}">
+                            <a href="#"
+                                class="btn btn-sm btn-danger btn-social btn-block delete-asset"
                                 data-toggle="modal"
                                 data-title="{{ trans('general.delete') }}"
                                 data-content="{{ trans('general.delete_confirm', ['item' => $template->name]) }}"
                                 data-target="#dataConfirmModal"
                                 type="button"
-                        >
-
+                            >
                                 <x-icon type="delete" />
                                 {{ trans('general.delete') }}
-
-                        </a>
-                    </span>
-
-
-                @endif
+                            </a>
+                        </span>
+                       @endif
+                    @endif
                 </div>
             </div>
         @endif
@@ -823,12 +883,6 @@
           .on('select2:select', function (event) {
               window.location.href = event.params.data.element.dataset.route;
           });
-
-      $('#dataConfirmModal').on('show.bs.modal', function (event) {
-          var content = $(event.relatedTarget).data('content');
-          var title = $(event.relatedTarget).data('title');
-          $(this).find(".modal-body").text(content);
-          $(this).find(".modal-header").text(title);
-      });
+      
   </script>
 @stop

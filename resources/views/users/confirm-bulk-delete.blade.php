@@ -1,7 +1,7 @@
 @extends('layouts/default')
 {{-- Page title --}}
 @section('title')
-{!! trans('general.bulk_checkin_delete') !!}
+{{ trans('general.bulk_checkin_delete') }}
 @parent
 @stop
 
@@ -33,8 +33,32 @@
 
           <div class="col-md-12">
             <div class="table-responsive">
-              <table class="display table table-hover">
+              <table class="display table table-striped">
                 <thead>
+                <tr>
+                    <td colspan="8">
+                        <x-input.select
+                                name="status_id"
+                                id="status_id"
+                                :options="$statuslabel_list"
+                                :selected="old('status_id')"
+                                required
+                                style="width:350px"
+                                aria-label="status_id"
+                        />
+                        <label>
+                            {{ trans('admin/users/general.update_user_assets_status') }}
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="8">
+                        <label class="form-control">
+                            <input type="checkbox" name="delete_user" value="1">
+                            <span class="text-warning"><i class="fa fa-warning"></i> <strong>{{ trans('general.optional') }}:  {{ trans('general.bulk_soft_delete') }}</strong></span>
+                        </label>
+                    </td>
+                </tr>
                   <tr>
                     <th class="col-md-1">
                       <!-- <input type="checkbox" id="checkAll"> -->
@@ -65,7 +89,7 @@
                 </thead>
                 <tbody>
                   @foreach ($users as $user)
-                  <tr {!! ($user->isSuperUser() ? ' class="danger"':'') !!}>
+                  <tr>
                     <td>
                       @if (Auth::id()!=$user->id)
                       <input type="checkbox" name="ids[]" value="{{ $user->id }}"  checked="checked">
@@ -75,10 +99,29 @@
                     </td>
 
                     <td>
-                      <span {!! (Auth::user()->id==$user->id ? ' style="text-decoration: line-through"' : '') !!}>
-                        {{ $user->present()->fullName() }} ({{ $user->username }})
-                      </span>
-                      {{ (Auth::id()==$user->id ? ' (cannot delete yourself)' : '') }}
+
+                        @if (auth()->user()->id == $user->id)
+                            
+                            <span {!! (Auth::user()->id==$user->id ? ' style="text-decoration: line-through" class="text-danger"' : '') !!}>
+                                {{ $user->display_name }} ({{ $user->username }})
+                            </span>
+                        @elseif ($user->isSuperUser())
+                            <span class="text-danger">
+                                <i class="fas fa-crown text-danger"></i> {{ $user->display_name }} ({{ $user->username }})
+                            </span>
+                        @elseif ($user->isAdmin())
+                            <span class="text-warning">
+                                <i class="fas fa-crown text-warning"></i> {{ $user->display_name }} ({{ $user->username }})
+                            </span>
+                        @else
+                            {{ $user->display_name }} ({{ $user->username }})
+                        @endif
+
+
+                        @if (auth()->user()->id == $user->id)
+                            <i class="fas fa-x text-danger"></i> {{ trans('tooltips.disabled_assoc.user_self') }}
+                        @endif
+
                     </td>
                     <td>
                       @foreach ($user->groups as $group)
@@ -105,31 +148,7 @@
                   </tr>
                   @endforeach
                 </tbody>
-                <tfoot>
 
-                  <tr>
-                    <td colspan="8">
-                      <x-input.select
-                          name="status_id"
-                          id="status_id"
-                          :options="$statuslabel_list"
-                          :selected="old('status_id')"
-                          required
-                          style="width:250px"
-                          aria-label="status_id"
-                      />
-                      <label>{{ trans('admin/users/general.update_user_assets_status') }}</label>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="8" class="col-md-12 alert-danger">
-                      <label class="form-control">
-                        <input type="checkbox" name="delete_user" value="1">
-                        <span><i class="fa fa-warning fa-2x"></i> {{ trans('general.bulk_soft_delete') }}</span>
-                      </label>
-                    </td>
-                  </tr>
-                </tfoot>
               </table>
             </div> <!--/table-responsive-->
           </div><!--/col-md-12-->

@@ -13,7 +13,7 @@
 @if (isset($qty))
 | **{{ trans('general.qty') }}** | {{ $qty }}
 @endif
-| **{{ trans('mail.user') }}** | [{{ $requested_by->present()->fullName() }}]({{ route('users.show', $requested_by->id) }}) |
+| **{{ trans('mail.user') }}** | [{{ $requested_by->display_name }}]({{ route('users.show', $requested_by->id) }}) |
 | **{{ trans('general.requested') }}** | {{ $requested_date }} |
 @if ((isset($item->asset_tag)) && ($item->asset_tag!=''))
 | **{{ trans('mail.asset_tag') }}** | {{ $item->asset_tag }} |
@@ -24,8 +24,8 @@
 @if ((isset($item->name)) && ($item->name!=''))
 | **{{ trans('mail.asset_name') }}** | {{ $item->name }} |
 @endif
-@if (isset($item->assetstatus))
-| **{{ trans('general.status') }}** | {{ $item->assetstatus->name }}
+@if (isset($item->status))
+    | **{{ trans('general.status') }}** | {{ $item->status->name }}
 @endif
 @if ($item->assignedTo)
 | **{{ trans('general.checked_out_to') }}** | {!! $item->assignedTo->present()->nameUrl() !!} ({{ $item->present()->statusMeta }})

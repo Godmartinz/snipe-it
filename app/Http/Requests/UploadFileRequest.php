@@ -2,15 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Traits\ConvertsBase64ToFiles;
 use enshrined\svgSanitize\Sanitizer;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use \App\Helpers\Helper;
+use Illuminate\Support\Facades\Storage;
 
 class UploadFileRequest extends Request
 {
     use ConvertsBase64ToFiles;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,7 +32,7 @@ class UploadFileRequest extends Request
         $max_file_size = Helper::file_upload_max_size();
 
         return [
-            'file.*' => 'required|mimes:png,gif,jpg,svg,jpeg,doc,docx,pdf,txt,zip,rar,xls,xlsx,lic,xml,rtf,json,webp,avif|max:'.$max_file_size,
+            'file.*' => 'required|mimes:'.config('filesystems.allowed_upload_extensions_for_validator').'|max:'.$max_file_size,
         ];
     }
 
@@ -63,26 +64,35 @@ class UploadFileRequest extends Request
 
     public function handleSVG($file)
     {
-        $sanitizer = new Sanitizer();
+        $sanitizer = new Sanitizer;
         $dirtySVG = file_get_contents($file->getRealPath());
+
         return $sanitizer->sanitize($dirtySVG);
     }
-
 
     /**
      * Get the validation error messages that apply to the request, but
      * replace the attribute name with the name of the file that was attempted and failed
      * to make it clearer to the user which file is the bad one.
-     *
-     * @return array
      */
     public function attributes(): array
     {
         $attributes = [];
 
-        if ($this->file) {
+        if (($this->file) && (is_array($this->file))) {
+
             for ($i = 0; $i < count($this->file); $i++) {
-                $attributes['file.'.$i] = $this->file[$i]->getClientOriginalName();
+
+                try {
+
+                    if ($this->file[$i]) {
+                        $attributes['file.'.$i] = $this->file[$i]->getClientOriginalName();
+                    }
+
+                } catch (\Exception $e) {
+                    $attributes['file.'.$i] = 'Invalid file';
+                }
+
             }
         }
 

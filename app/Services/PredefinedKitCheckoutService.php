@@ -45,18 +45,18 @@ class PredefinedKitCheckoutService
             }
 
             $checkout_at = date('Y-m-d H:i:s');
-            if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
-                $checkout_at = $request->get('checkout_at');
+            if (($request->filled('checkout_at')) && ($request->input('checkout_at') != date('Y-m-d'))) {
+                $checkout_at = $request->input('checkout_at');
             }
 
             $expected_checkin = '';
             if ($request->filled('expected_checkin')) {
-                $expected_checkin = $request->get('expected_checkin');
+                $expected_checkin = $request->input('expected_checkin');
             }
 
             $admin = auth()->user();
 
-            $note = e($request->get('note'));
+            $note = e($request->input('note'));
 
             $errors = $this->saveToDb($user, $admin, $checkout_at, $expected_checkin, $errors, $assets_to_add, $license_seats_to_add, $consumables_to_add, $accessories_to_add, $note);
 
