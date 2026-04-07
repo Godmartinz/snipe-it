@@ -11,6 +11,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\License;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class ReportsController extends Controller
