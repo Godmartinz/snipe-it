@@ -1160,6 +1160,7 @@
                 // Do not show the delete button on things that are already deleted
                 if ((row.available_actions) && (row.available_actions.restore != true)) {
                     var message = "{{trans('general.cannot_be_deleted')}}";
+                    //or when there are other assets assigned to the asset
                     if(row.child_asset_count > 0){
                         message = "{{trans('general.cannot_delete_parent_asset')}}";
                     }
