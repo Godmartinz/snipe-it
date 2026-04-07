@@ -78,7 +78,6 @@ return [
         'confirm'   	=> 'Are you sure you wish to delete this asset?',
         'error'   		=> 'There was an issue deleting the asset. Please try again.',
         'bulk_blocked' => 'Some assets cannot be deleted because they are either currently checked out or have other assets assigned to them. Please review the following assets and resolve their assignments before attempting deletion:',
-        'assigned_to_error' => 'Asset Tag: :asset_tag is currently checked out. Check in this device before deletion of this asset.|[2,*]Asset Tags: :asset_tag are currently checked out. Check in these devices before deletion of these assets.',
         'nothing_updated'   => 'No assets were selected, so nothing was deleted.',
         'success' 		=> 'The asset was deleted successfully.',
     ],
