@@ -109,21 +109,10 @@
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
         <strong>{{ trans('general.error') }}: </strong>
-        {{ $message }}
+        <span style="white-space: pre-line;">{{ $message }}</span>
     </div>
 </div>
 @endif
-@if ($message = session()->get('error-unescaped'))
-    <div class="col-md-12">
-        <div class="alert alert-error fade in">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
-            <strong>{{ trans('general.notification_error') }}: </strong>
-            {!!  $message !!}
-        </div>
-    </div>
-@endif
-
 
 @if ($messages = session()->get('error_messages'))
 @foreach ($messages as $message)        

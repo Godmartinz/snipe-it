@@ -603,31 +603,20 @@ class BulkAssetsController extends Controller
             ->whereNotNull('assigned_to')
             ->get();
 
-        $errorMessages = [];
+        $problemAssets = $parentAssets
+            ->merge($assignedAssets)
+            ->unique('id');
 
-        if ($assignedAssets->isNotEmpty()) {
-            $assignedTags = $assignedAssets->pluck('asset_tag')->implode(', ');
-            $errorMessages[] = trans_choice(
-                'admin/hardware/message.delete.assigned_to_error',
-                $assignedAssets->count(),
-                ['asset_tag' => e($assignedTags)]
-            );
-        }
+        if ($problemAssets->isNotEmpty()) {
 
-        if ($parentAssets->isNotEmpty()) {
-            $parentTags = $parentAssets->pluck('asset_tag')->implode(', ');
-            $errorMessages[] = trans_choice(
-                'admin/hardware/message.delete.parent_assigned_error',
-                $parentAssets->count(),
-                ['asset_tag' => e($parentTags)]
-            );
-        }
+            $assetList = $problemAssets
+                ->pluck('asset_tag')
+                ->map(fn($tag) => '- ' . e($tag))
+                ->implode("\n");
 
-        if (!empty($errorMessages)) {
-            // Combine both messages
-            $combinedErrorMessage = implode('<br>', $errorMessages);
+            $message = trans('admin/hardware/message.delete.bulk_blocked') . "\n\n" . $assetList;
 
-            return redirect($bulk_back_url)->with('error', $combinedErrorMessage);
+            return redirect($bulk_back_url)->with('error', $message);
         }
 
         foreach (Asset::wherein('id', $assetIds)->get() as $asset) {
