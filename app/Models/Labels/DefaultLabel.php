@@ -10,51 +10,59 @@ class DefaultLabel extends RectangleSheet
     private const BARCODE1D_SIZE = 0.15;
 
     private const BARCODE2D_SIZE = 0.76;
+
     private const BARCODE2D_MARGIN = 0.075;
 
     private const LOGO_SIZE = [0.75, 0.50];
+
     private const LOGO_MARGIN = 0.05;
 
     private const TEXT_MARGIN = 0.04;
 
-
     private float $textSize;
 
     private float $labelWidth;
+
     private float $labelHeight;
 
     private float $labelSpacingH;
+
     private float $labelSpacingV;
 
     private float $pageMarginTop;
+
     private float $pageMarginBottom;
+
     private float $pageMarginLeft;
+
     private float $pageMarginRight;
 
     private float $pageWidth;
+
     private float $pageHeight;
 
     private int $columns;
+
     private int $rows;
 
-
-    public function __construct() {
+    public function __construct()
+    {
         $settings = Setting::getSettings();
 
         $this->textSize = Helper::convertUnit($settings->labels_fontsize, 'pt', 'in');
 
-        $this->labelWidth  = $settings->labels_width;
-        $this->labelHeight = $settings->labels_height;
+        $this->labelWidth = $this->setLabelWidth($settings);
+        $this->labelHeight = $this->setLabelHeight($settings);
 
         $this->labelSpacingH = $settings->labels_display_sgutter;
         $this->labelSpacingV = $settings->labels_display_bgutter;
 
-        $this->pageMarginTop    = $settings->labels_pmargin_top;
+        $this->pageMarginTop = $settings->labels_pmargin_top;
         $this->pageMarginBottom = $settings->labels_pmargin_bottom;
-        $this->pageMarginLeft   = $settings->labels_pmargin_left;
-        $this->pageMarginRight  = $settings->labels_pmargin_right;
+        $this->pageMarginLeft = $settings->labels_pmargin_left;
+        $this->pageMarginRight = $settings->labels_pmargin_right;
 
-        $this->pageWidth  = $settings->labels_pagewidth;
+        $this->pageWidth = $settings->labels_pagewidth;
         $this->pageHeight = $settings->labels_pageheight;
 
         $usableWidth = $this->pageWidth - $this->pageMarginLeft - $this->pageMarginRight;
@@ -74,41 +82,130 @@ class DefaultLabel extends RectangleSheet
 
     }
 
-    public function getUnit()   { return 'in'; }
+    public function getUnit()
+    {
+        return 'in';
+    }
 
-    public function getPageWidth()  { return $this->pageWidth; }
-    public function getPageHeight() { return $this->pageHeight; }
+    public function getPageWidth()
+    {
+        return $this->pageWidth;
+    }
 
-    public function getPageMarginTop()    { return $this->pageMarginTop; }
-    public function getPageMarginBottom() { return $this->pageMarginBottom; }
-    public function getPageMarginLeft()   { return $this->pageMarginLeft; }
-    public function getPageMarginRight()  { return $this->pageMarginRight; }
+    public function getPageHeight()
+    {
+        return $this->pageHeight;
+    }
 
-    public function getColumns() { return $this->columns; }
-    public function getRows()    { return $this->rows; }
-    public function getLabelBorder() { return 0; }
+    public function getPageMarginTop()
+    {
+        return $this->pageMarginTop;
+    }
 
-    public function getLabelWidth()  { return $this->labelWidth; }
-    public function getLabelHeight() { return $this->labelHeight; }
+    public function getPageMarginBottom()
+    {
+        return $this->pageMarginBottom;
+    }
 
-    public function getLabelMarginTop()    { return 0; }
-    public function getLabelMarginBottom() { return 0; }
-    public function getLabelMarginLeft()   { return 0; }
-    public function getLabelMarginRight()  { return 0; }
+    public function getPageMarginLeft()
+    {
+        return $this->pageMarginLeft;
+    }
 
-    public function getLabelColumnSpacing() { return $this->labelSpacingH; }
-    public function getLabelRowSpacing()    { return $this->labelSpacingV; }
+    public function getPageMarginRight()
+    {
+        return $this->pageMarginRight;
+    }
 
-    public function getSupportAssetTag()  { return false; }
-    public function getSupport1DBarcode() { return true; }
-    public function getSupport2DBarcode() { return true; }
-    public function getSupportFields()    { return 4; }
-    public function getSupportTitle()     { return true; }
-    public function getSupportLogo()      { return true; }
+    public function getColumns()
+    {
+        return $this->columns;
+    }
+
+    public function getRows()
+    {
+        return $this->rows;
+    }
+
+    public function getLabelBorder()
+    {
+        return 0;
+    }
+
+    public function getLabelWidth()
+    {
+        return $this->labelWidth;
+    }
+
+    public function getLabelHeight()
+    {
+        return $this->labelHeight;
+    }
+
+    public function getLabelMarginTop()
+    {
+        return 0;
+    }
+
+    public function getLabelMarginBottom()
+    {
+        return 0;
+    }
+
+    public function getLabelMarginLeft()
+    {
+        return 0;
+    }
+
+    public function getLabelMarginRight()
+    {
+        return 0;
+    }
+
+    public function getLabelColumnSpacing()
+    {
+        return $this->labelSpacingH;
+    }
+
+    public function getLabelRowSpacing()
+    {
+        return $this->labelSpacingV;
+    }
+
+    public function getSupportAssetTag()
+    {
+        return false;
+    }
+
+    public function getSupport1DBarcode()
+    {
+        return true;
+    }
+
+    public function getSupport2DBarcode()
+    {
+        return true;
+    }
+
+    public function getSupportFields()
+    {
+        return 4;
+    }
+
+    public function getSupportTitle()
+    {
+        return true;
+    }
+
+    public function getSupportLogo()
+    {
+        return true;
+    }
 
     public function preparePDF($pdf) {}
 
-    public function write($pdf, $record) {
+    public function write($pdf, $record)
+    {
 
         $asset = $record->get('asset');
         $settings = Setting::getSettings();
@@ -153,7 +250,7 @@ class DefaultLabel extends RectangleSheet
             static::writeText(
                 $pdf, $record->get('title'),
                 $textX1, 0,
-                'freesans', 'b', $this->textSize, 'L',
+                Helper::isCjk($record->get('title')) ? 'cid0cs' : 'freesans', 'b', $this->textSize, 'L',
                 $textW, $this->textSize,
                 true, 0
             );
@@ -168,9 +265,9 @@ class DefaultLabel extends RectangleSheet
 
                 // Actually write the selected fields and their matching values
                 static::writeText(
-                    $pdf, (($field['label']) ? $field['label'].' ' : '') . $field['value'],
+                    $pdf, (($field['label']) ? $field['label'].' ' : '').$field['value'],
                     $textX1, $textY,
-                    'freesans', '', $this->textSize, 'L',
+                    Helper::isCjk($field['label']) ? 'cid0cs' : 'freesans', '', $this->textSize, 'L',
                     $textW, $this->textSize,
                     true, 0
                 );
@@ -181,6 +278,25 @@ class DefaultLabel extends RectangleSheet
         }
     }
 
-}
+    private function setLabelWidth(Setting $settings)
+    {
+        $labelWidth = $settings->labels_width;
 
-?>
+        if ($labelWidth == 0) {
+            $labelWidth = 0.1;
+        }
+
+        return $labelWidth;
+    }
+
+    private function setLabelHeight(?Setting $settings)
+    {
+        $labelHeight = $settings->labels_height;
+
+        if ($labelHeight == 0) {
+            $labelHeight = 0.1;
+        }
+
+        return $labelHeight;
+    }
+}

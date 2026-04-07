@@ -5,45 +5,31 @@
     @parent
 @stop
 
+@section('header_right')
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
+
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-box name="assets">
+                <x-table.assets name="assets" :table_header="trans('general.assets')" :route="route('api.assets.index', ['status_id' => $statuslabel->id])"/>
+            </x-box>
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$statuslabel">
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box">
-                <div class="box-body">
-                    @include('partials.asset-bulk-actions')
+                    <x-slot:buttons>
+                        <x-button.edit :item="$statuslabel" :route="route('statuslabels.edit', $statuslabel->id)" />
+                        <x-button.delete :item="$statuslabel" />
+                    </x-slot:buttons>
 
-                                <table
-                                        data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                        data-cookie-id-table="assetsListingTable"
-                                        data-pagination="true"
-                                        data-id-table="assetsListingTable"
-                                        data-search="true"
-                                        data-side-pagination="server"
-                                        data-show-columns="true"
-                                        data-show-fullscreen="true"
-                                        data-show-export="true"
-                                        data-show-refresh="true"
-                                        data-sort-order="asc"
-                                        data-toolbar="#assetsBulkEditToolbar"
-                                        data-bulk-button-id="#bulkAssetEditButton"
-                                        data-bulk-form-id="#assetsBulkForm"
-                                        data-click-to-select="true"
-                                        id="assetsListingTable"
-                                        class="table table-striped snipe-table"
-                                        data-url="{{route('api.assets.index', ['status_id' => $statuslabel->id]) }}"
-                                        data-export-options='{
-                              "fileName": "export-assets-{{ str_slug($statuslabel->name) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                                </table>
-                        </div><!-- /.col -->
-                    </div><!-- /.row -->
-                </div><!-- ./box-body -->
-            </div><!-- /.box -->
-        </div>
-    </div>
+                </x-info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
 @stop
 
 @section('moar_scripts')

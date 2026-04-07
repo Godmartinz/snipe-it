@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ComponentIndexTest extends TestCase
 {
-    public function testComponentIndexAdheresToCompanyScoping()
+    public function test_component_index_adheres_to_company_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 

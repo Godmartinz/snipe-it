@@ -12,6 +12,39 @@
                 <div class="dynamic-form-row">
                    @include('partials.forms.edit.name', [ 'item' => new \App\Models\Supplier(), 'translated_name' => trans('admin/suppliers/table.name')])
                 </div>
+                <div class="dynamic-form-row">
+                    <div class="form-group {{ $errors->has('contact') ? ' has-error' : '' }}">
+                        <label for="contact" class="col-md-3 control-label">{{ trans('admin/suppliers/table.contact') }}</label>
+                        <div class="col-md-7">
+                            <input class="form-control" name="contact" type="text" id="contact" value="{{ old('contact') }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="dynamic-form-row">
+                    <div class="form-group {{ $errors->has('url') ? ' has-error' : '' }}">
+                        <label for="contact" class="col-md-3 control-label">{{ trans('general.url') }}</label>
+                        <div class="col-md-7">
+                            <input class="form-control" name="url" type="text" id="url" value="{{ old('url') }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="dynamic-form-row">
+                    @include('partials.forms.edit.phone', [ 'item' => new \App\Models\Supplier(), 'translated_name' => trans('admin/suppliers/table.phone')])
+                </div>
+                <div class="dynamic-form-row">
+                    @include('partials.forms.edit.fax', [ 'item' => new \App\Models\Supplier(), 'translated_name' => trans('admin/suppliers/table.fax')])
+                </div>
+                <div class="dynamic-form-row">
+                    @include('partials.forms.edit.email', [ 'item' => new \App\Models\Supplier(), 'translated_name' => trans('admin/suppliers/table.email')])
+                </div>
+
+
+                <div class="dynamic-form-row">
+                    @include ('partials.forms.edit.notes')
+                </div>
+
+
+
             </form>
         </div>
         <div class="dynamic-form-row">

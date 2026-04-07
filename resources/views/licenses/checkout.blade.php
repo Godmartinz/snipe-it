@@ -26,47 +26,60 @@
                 <div class="box-body">
 
 
-                    <!-- Asset name -->
+                    <!-- License name -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label">{{ trans('admin/hardware/form.name') }}</label>
                         <div class="col-md-9">
                             <p class="form-control-static">{{ $license->name }}</p>
                         </div>
                     </div>
-                    <!-- Category -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">{{ trans('general.category') }}</label>
-                        <div class="col-md-9">
-                            <p class="form-control-static">{{ $license->category->name }}</p>
+
+                    @if ($license->company)
+                        <!-- company name -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{ trans('general.company') }}</label>
+                            <div class="col-md-6">
+                                <p class="form-control-static">{!! $license->company->present()->formattedNameLink  !!}</p>
+                            </div>
                         </div>
-                    </div>
+                    @endif
+
+
+                    @if ($license->category)
+                        <!-- category name -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{ trans('general.category') }}</label>
+                            <div class="col-md-6">
+                                <p class="form-control-static">{!! $license->category->present()->formattedNameLink  !!}</p>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Serial -->
+                    @can('viewKeys', $license)
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">{{ trans('admin/licenses/form.license_key') }}</label>
+                        <label class="col-sm-3 control-label">{{ trans('admin/licenses/form.license_key') }}
+
+                        </label>
                         <div class="col-md-9">
-                            <p class="form-control-static" style="word-wrap: break-word;">
-                                @can('viewKeys', $license)
-                                    {{ $license->serial }}
-                                @else
-                                    ------------
-                                @endcan
+                            <p class="form-control-static">
+                                <x-copy-to-clipboard copy_what="license_key">
+                                    <code>{!! nl2br(e($license->serial)) !!}</code>
+                                </x-copy-to-clipboard>
                             </p>
                         </div>
                     </div>
+                    @endcan
 
-                    @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true'])
-
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_to'])
-
-                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('admin/licenses/form.asset'), 'fieldname' => 'asset_id', 'style' => 'display:none;'])
-
+                    @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'false'])
+                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_to', 'style' => (session('checkout_to_type') ?: 'user') == 'user' ? '' : 'display: none;'])
+                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id', 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
 
                     <!-- Note -->
                     <div class="form-group {{ $errors->has('notes') ? 'error' : '' }}">
-                        <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
+                        <label for="note" class="col-md-3 control-label">{{ trans('general.checkout_note') }}</label>
                         <div class="col-md-8">
-                            <textarea class="col-md-6 form-control" id="notes" name="notes" style="width: 100%">{{ old('note') }}</textarea>
+                            <textarea class="col-md-6 form-control" id="notes" name="notes" rows="5">{{ old('note') }}</textarea>
                             {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                         </div>
                     </div>
@@ -117,6 +130,21 @@
             </div> <!-- /.box-->
         </form>
     </div> <!-- /.col-md-7-->
+    <!-- right column -->
+    <div class="col-md-5" id="current_license_box" style="display:none;">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h2 class="box-title">{{ trans('admin/users/general.current_items', ['item' => trans('general.licenses')]) }}</h2>
+            </div>
+            <div class="box-body">
+                <div id="current_license_content">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 @stop
+
+@section('moar_scripts')
+    @include('partials.licenses-assigned')
+@endsection

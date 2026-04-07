@@ -5,6 +5,9 @@ use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BulkCategoriesController;
+use App\Http\Controllers\BulkManufacturersController;
+use App\Http\Controllers\BulkSuppliersController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\DashboardController;
@@ -13,18 +16,21 @@ use App\Http\Controllers\DepreciationsController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LabelsController;
-use App\Http\Controllers\LocationsController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StatuslabelsController;
+use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\SuppliersController;
+use App\Http\Controllers\UploadedFilesController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Livewire\Importer;
+use App\Mail\CheckoutComponentMail;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
@@ -43,7 +49,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('categories', CategoriesController::class, [
         'parameters' => ['category' => 'category_id'],
     ]);
-  
+
+    Route::post('categories/bulk/delete', [BulkCategoriesController::class, 'destroy'])->name('categories.bulk.delete');
+
     /*
     * Labels
     */
@@ -52,62 +60,31 @@ Route::group(['middleware' => 'auth'], function () {
         [LabelsController::class, 'show']
     )->where('labelName', '.*')->name('labels.show');
 
-    /*
-     * Locations
-     */
-    Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
+    Route::get('/test-email', function () {
+        $mailable = new CheckoutComponentMail;
 
-        Route::post(
-            'bulkdelete',
-            [LocationsController::class, 'postBulkDelete']
-        )->name('locations.bulkdelete.show');
-
-        Route::post(
-            'bulkedit',
-            [LocationsController::class, 'postBulkDeleteStore']
-        )->name('locations.bulkdelete.store');
-
-        Route::post(
-            '{location}/restore',
-            [LocationsController::class, 'postRestore']
-        )->name('locations.restore');
-
-
-        Route::get('{locationId}/clone',
-            [LocationsController::class, 'getClone']
-        )->name('clone/location');
-
-        Route::get(
-            '{locationId}/printassigned',
-            [LocationsController::class, 'print_assigned']
-        )->name('locations.print_assigned');
-
-        Route::get(
-            '{locationId}/printallassigned',
-            [LocationsController::class, 'print_all_assigned']
-        )->name('locations.print_all_assigned');
-
+        return $mailable->render(); // dumps HTML
     });
-
-    Route::resource('locations', LocationsController::class, [
-        'parameters' => ['location' => 'location_id'],
-    ]);
-
-
     /*
     * Manufacturers
     */
 
     Route::group(['prefix' => 'manufacturers', 'middleware' => ['auth']], function () {
-        Route::post('{manufacturers_id}/restore', [ManufacturersController::class, 'restore'] )->name('restore/manufacturer');
+        Route::post('{manufacturers_id}/restore', [ManufacturersController::class, 'restore'])->name('restore/manufacturer');
+        Route::post('seed', [ManufacturersController::class, 'seed'])->name('manufacturers.seed');
+
     });
 
     Route::resource('manufacturers', ManufacturersController::class);
+
+    Route::post('manufacturers/bulk/delete', [BulkManufacturersController::class, 'destroy'])->name('manufacturers.bulk.delete');
 
     /*
     * Suppliers
     */
     Route::resource('suppliers', SuppliersController::class);
+
+    Route::post('suppliers/bulk/delete', [BulkSuppliersController::class, 'destroy'])->name('suppliers.bulk.delete');
 
     /*
     * Depreciations
@@ -136,7 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
 */
 
 Route::group(['middleware' => 'auth', 'prefix' => 'modals'], function () {
-    Route::get('{type}/{itemId?}', [ModalController::class, 'show'] )->name('modal.show');
+    Route::get('{type}/{itemId?}', [ModalController::class, 'show'])->name('modal.show');
 });
 
 /*
@@ -172,8 +149,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('settings', [SettingsController::class, 'getSettings'])
         ->name('settings.general.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.general_title'), route('settings.general.index')));
 
     Route::post('settings', [SettingsController::class, 'postSettings'])
@@ -181,8 +157,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('branding', [SettingsController::class, 'getBranding'])
         ->name('settings.branding.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.branding_title'), route('settings.branding.index')));
 
     Route::post('branding', [SettingsController::class, 'postBranding'])
@@ -190,8 +165,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('security', [SettingsController::class, 'getSecurity'])
         ->name('settings.security.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.security_title'), route('settings.security.index')));
 
     Route::post('security', [SettingsController::class, 'postSecurity'])
@@ -199,8 +173,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('localization', [SettingsController::class, 'getLocalization'])
         ->name('settings.localization.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.localization_title'), route('settings.localization.index')));
 
     Route::post('localization', [SettingsController::class, 'postLocalization'])
@@ -208,8 +181,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('notifications', [SettingsController::class, 'getAlerts'])
         ->name('settings.alerts.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.alert_title'), route('settings.alerts.index')));
 
     Route::post('notifications', [SettingsController::class, 'postAlerts'])
@@ -217,8 +189,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('slack', [SettingsController::class, 'getSlack'])
         ->name('settings.slack.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.webhook_title'), route('settings.slack.index')));
 
     Route::post('slack', [SettingsController::class, 'postSlack'])
@@ -226,8 +197,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('asset_tags', [SettingsController::class, 'getAssetTags'])
         ->name('settings.asset_tags.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.asset_tag_title'), route('settings.asset_tags.index')));
 
     Route::post('asset_tags', [SettingsController::class, 'postAssetTags'])
@@ -235,8 +205,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('labels', [SettingsController::class, 'getLabels'])
         ->name('settings.labels.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.labels_title'), route('settings.labels.index')));
 
     Route::post('labels', [SettingsController::class, 'postLabels'])
@@ -244,8 +213,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.ldap_ad'), route('settings.ldap.index')));
 
     Route::post('ldap', [SettingsController::class, 'postLdapSettings'])
@@ -253,20 +221,17 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('phpinfo', [SettingsController::class, 'getPhpInfo'])
         ->name('settings.phpinfo.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.php_info'), route('settings.phpinfo.index')));
 
     Route::get('oauth', [SettingsController::class, 'api'])
         ->name('settings.oauth.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.oauth'), route('settings.oauth.index')));
 
     Route::get('google', [SettingsController::class, 'getGoogleLoginSettings'])
         ->name('settings.google.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.google_login'), route('settings.google.index')));
 
     Route::post('google', [SettingsController::class, 'postGoogleLoginSettings'])
@@ -274,8 +239,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('purge', [SettingsController::class, 'getPurge'])
         ->name('settings.purge.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.purge'), route('settings.purge.index')));
 
     Route::post('purge', [SettingsController::class, 'postPurge'])
@@ -283,23 +247,17 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('login-attempts', [SettingsController::class, 'getLoginAttempts'])
         ->name('settings.logins.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.login'), route('settings.logins.index')));
-
 
     // SAML
     Route::get('/saml', [SettingsController::class, 'getSamlSettings'])
         ->name('settings.saml.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.saml_title'), route('settings.saml.index')));
 
     Route::post('/saml', [SettingsController::class, 'postSamlSettings'])
         ->name('settings.saml.save');
-
-
-
 
     // Backups
     Route::group(['prefix' => 'backups', 'middleware' => 'auth'], function () {
@@ -309,15 +267,15 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         Route::delete('delete/{filename}',
             [SettingsController::class, 'deleteFile'])->name('settings.backups.destroy');
 
-        Route::post('/', 
+        Route::post('/',
             [SettingsController::class, 'postBackups']
         )->name('settings.backups.create');
 
-        Route::post('/restore/{filename}', 
+        Route::post('/restore/{filename}',
             [SettingsController::class, 'postRestore']
         )->name('settings.backups.restore');
 
-        Route::post('/upload', 
+        Route::post('/upload',
             [SettingsController::class, 'postUploadBackup']
         )->name('settings.backups.upload');
 
@@ -328,13 +286,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
         Route::get('/', [SettingsController::class, 'getBackups'])
             ->name('settings.backups.index')
-            ->breadcrumbs(fn (Trail $trail) =>
-            $trail->parent('settings.index')
+            ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
                 ->push(trans('admin/settings/general.backups'), route('settings.backups.index')));
     });
 
     Route::resource('groups', GroupsController::class);
-
 
     /**
      * This breadcrumb is repeated for groups in the BreadcrumbServiceProvider, since groups uses resource routes
@@ -342,8 +298,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
      */
     Route::get('/', [SettingsController::class, 'index'])
         ->name('settings.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.admin'), route('settings.index')));
 });
 
@@ -356,12 +311,22 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 |
 */
 
-Route::get('/import', Importer::class)
-    ->middleware('auth')
-    ->name('imports.index')
-    ->breadcrumbs(fn (Trail $trail) =>
-    $trail->parent('home')
-        ->push(trans('general.import'), route('imports.index')));
+Route::group(['prefix' => 'import', 'middleware' => ['auth']], function () {
+
+    Route::get('download/{import}',
+        [
+            UploadedFilesController::class,
+            'downloadImport',
+        ]
+    )->name('imports.download');
+
+    Route::livewire('/', Importer::class)
+        ->middleware('auth')
+        ->name('imports.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.import'), route('imports.index')));
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -376,8 +341,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     // Profile
     Route::get('profile', [ProfileController::class, 'getIndex'])
         ->name('profile')
-        ->breadcrumbs(fn (Trail $trail) =>
-                $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.editprofile'), route('profile')));
 
     Route::post('profile', [ProfileController::class, 'postIndex'])
@@ -388,8 +352,8 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
 
     Route::get('password', [ProfileController::class, 'password'])
         ->name('account.password.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.changepassword'), route('account.password.index')));
 
     Route::post('password', [ProfileController::class, 'passwordSave'])
@@ -397,40 +361,47 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
 
     Route::get('api', [ProfileController::class, 'api'])
         ->name('user.api')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.manage_api_keys'), route('user.api')));
 
     // View Assets
     Route::get('view-assets', [ViewAssetsController::class, 'getIndex'])
         ->name('view-assets')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.viewassets'), route('view-assets')));
 
     Route::get('requested', [ViewAssetsController::class, 'getRequestedAssets'])
         ->name('account.requested')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.requested_assets_menu'), route('account.requested')));
 
-    // Profile
     Route::get(
         'requestable-assets', [ViewAssetsController::class, 'getRequestableIndex'])
         ->name('requestable-assets')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.requestable_items'), route('requestable-assets')));
 
-    Route::post(
-        'request-asset/{assetId}',
-        [ViewAssetsController::class, 'getRequestAsset']
-    )->name('account/request-asset');
+    Route::post('request-asset/{asset}', [ViewAssetsController::class, 'store'])
+        ->name('account.request-asset');
 
-    Route::post(
-        'request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}',
-        [ViewAssetsController::class, 'getRequestItem']
-    )->name('account/request-item');
+    Route::post('request-asset/{asset}/cancel', [ViewAssetsController::class, 'destroy'])
+        ->name('account.request-asset.cancel');
+
+    Route::post('request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}', [ViewAssetsController::class, 'getRequestItem'])
+        ->name('account/request-item');
+
+    Route::get(
+        'display-sig/{filename}',
+        [ProfileController::class, 'displaySig']
+    )->name('profile.signature.view');
+
+    Route::get(
+        'stored-eula-file/{filename}',
+        [ProfileController::class, 'getStoredEula']
+    )->name('profile.storedeula.download');
 
     // Account Dashboard
     Route::get('/', [ViewAssetsController::class, 'getIndex'])
@@ -438,14 +409,14 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
 
     Route::get('accept', [Account\AcceptanceController::class, 'index'])
         ->name('account.accept')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.accept_assets_menu'), route('account.accept')));
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
+            ->push(trans('general.accept_items'), route('account.accept')));
 
     Route::get('accept/{id}', [Account\AcceptanceController::class, 'create'])
         ->name('account.accept.item')
-        ->breadcrumbs(fn (Trail $trail, $id) =>
-        $trail->parent('account.accept')
+        ->breadcrumbs(fn (Trail $trail, $id) => $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.accept_item'), route('account.accept.item', $id)));
 
     Route::post('accept/{id}', [Account\AcceptanceController::class, 'store'])
@@ -455,7 +426,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         'print',
         [
             ProfileController::class,
-            'printInventory'
+            'printInventory',
         ]
     )->name('profile.print');
 
@@ -463,7 +434,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         'email',
         [
             ProfileController::class,
-            'emailAssetList'
+            'emailAssetList',
         ]
     )->name('profile.email_assets');
 
@@ -477,44 +448,37 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     Route::get('audit', [ReportsController::class, 'audit'])
         ->name('reports.audit')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.audit_report'), route('reports.audit')));
 
     Route::get(
         'depreciation', [ReportsController::class, 'getDeprecationReport'])
         ->name('reports/depreciation')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.depreciation_report'), route('reports/depreciation')));
-
 
     // Is this still used??
     Route::get(
         'export/depreciation', [ReportsController::class, 'exportDeprecationReport'])
         ->name('reports/export/depreciation')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.depreciation_report'), route('reports.audit')));
 
     Route::get(
-        'asset_maintenances', [ReportsController::class, 'getAssetMaintenancesReport'])
-        ->name('reports/asset_maintenances')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.asset_maintenance_report'), route('reports/asset_maintenances')));
+        'maintenances', [ReportsController::class, 'getMaintenancesReport'])
+        ->name('ui.reports.maintenances')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.asset_maintenance_report'), route('ui.reports.maintenances')));
 
     // Is this still used?
-    Route::get('export/asset_maintenances', [ReportsController::class, 'exportAssetMaintenancesReport'])
-        ->name('reports/export/asset_maintenances')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.asset_maintenance_report'), route('reports/export/asset_maintenances')));
+    Route::get('export/maintenances', [ReportsController::class, 'exportMaintenancesReport'])
+        ->name('reports/export/maintenances')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.asset_maintenance_report'), route('reports/export/maintenances')));
 
     Route::get('licenses', [ReportsController::class, 'getLicenseReport'])
         ->name('reports/licenses')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.license_report'), route('reports/licenses')));
 
     Route::get('export/licenses', [ReportsController::class, 'exportLicenseReport'])
@@ -528,12 +492,11 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     Route::get('custom', [ReportsController::class, 'getCustomReport'])
         ->name('reports/custom')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.custom_report'), route('reports/custom')));
 
-    Route::post('custom', [ReportsController::class, 'postCustom']);
-
+    Route::post('custom', [ReportsController::class, 'postCustom'])
+        ->name('reports.post-custom');
 
     Route::prefix('templates')
         ->group(function () {
@@ -544,33 +507,27 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             // The breadcrumb on this is a little odd for now since we don't have a template index
             Route::get('/{reportTemplate}', [ReportTemplatesController::class, 'show'])
                 ->name('report-templates.show')
-                ->breadcrumbs(fn (Trail $trail, ReportTemplate $reportTemplate) =>
-                $trail->parent('reports/custom')
+                ->breadcrumbs(fn (Trail $trail, ReportTemplate $reportTemplate) => $trail->parent('reports/custom')
                     ->push($reportTemplate->name, null)
                     ->push(trans('general.customize_report'), ''));
 
             Route::get('/{reportTemplate}/edit', [ReportTemplatesController::class, 'edit'])
                 ->name('report-templates.edit')
-                ->breadcrumbs(fn (Trail $trail, ReportTemplate $reportTemplate) =>
-                $trail->parent('reports/custom')
+                ->breadcrumbs(fn (Trail $trail, ReportTemplate $reportTemplate) => $trail->parent('reports/custom')
                     ->push($reportTemplate->name, route('report-templates.show', $reportTemplate))
                     ->push(trans('general.customize_report'), ''));
-
 
             Route::post('/{reportTemplate}', [ReportTemplatesController::class, 'update'])
                 ->name('report-templates.update');
 
             Route::delete('/{reportTemplate}', [ReportTemplatesController::class, 'destroy'])
                 ->name('report-templates.destroy');
-    });
-
-
+        });
 
     Route::get(
         'activity', [ReportsController::class, 'getActivityReport'])
         ->name('reports.activity')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.activity_report'), route('reports.activity')));
 
     Route::post('activity', [ReportsController::class, 'postActivityReport'])
@@ -578,8 +535,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     Route::get('unaccepted_assets/{deleted?}', [ReportsController::class, 'getAssetAcceptanceReport'])
         ->name('reports/unaccepted_assets')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
             ->push(trans('general.unaccepted_asset_report'), route('reports/unaccepted_assets')));
 
     Route::post('unaccepted_assets/sent_reminder', [ReportsController::class, 'sentAssetAcceptanceReminder'])
@@ -594,12 +550,10 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
 });
 
-
 Route::get(
     'auth/signin',
     [LoginController::class, 'legacyAuthRedirect']
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -612,23 +566,22 @@ Route::get(
 Route::group(['prefix' => 'setup', 'middleware' => 'web'], function () {
     Route::get(
         'user',
-        [SettingsController::class, 'getSetupUser']
+        [SetupController::class, 'getSetupUser']
     )->name('setup.user');
 
     Route::post(
         'user',
-        [SettingsController::class, 'postSaveFirstAdmin']
+        [SetupController::class, 'postSaveFirstAdmin']
     )->name('setup.user.save');
 
-
-    Route::get(
+    Route::post(
         'migrate',
-        [SettingsController::class, 'getSetupMigrate']
+        [SetupController::class, 'SetupMigrate']
     )->name('setup.migrate');
 
     Route::get(
         'done',
-        [SettingsController::class, 'getSetupDone']
+        [SetupController::class, 'getSetupDone']
     )->name('setup.done');
 
     Route::get(
@@ -638,20 +591,16 @@ Route::group(['prefix' => 'setup', 'middleware' => 'web'], function () {
 
     Route::get(
         '/',
-        [SettingsController::class, 'getSetupIndex']
+        [SetupController::class, 'getSetupIndex']
     )->name('setup');
 });
-
-
-
-
 
 Route::group(['middleware' => 'web'], function () {
 
     Route::get(
         'login',
         [LoginController::class, 'showLoginForm']
-    )->name("login");
+    )->name('login');
 
     Route::post(
         'login',
@@ -683,7 +632,6 @@ Route::group(['middleware' => 'web'], function () {
         [ForgotPasswordController::class, 'showLinkRequestForm']
     )->name('password.request')->middleware('throttle:forgotten_password');
 
-
     Route::post(
         'password/reset',
         [ResetPasswordController::class, 'reset']
@@ -694,17 +642,14 @@ Route::group(['middleware' => 'web'], function () {
         [ResetPasswordController::class, 'showResetForm']
     )->name('password.reset');
 
-
     Route::post(
         'password/email',
         [ForgotPasswordController::class, 'sendResetLinkEmail']
     )->name('password.email')->middleware('throttle:forgotten_password');
 
-
-     // Socialite Google login
+    // Socialite Google login
     Route::get('google', 'App\Http\Controllers\GoogleAuthController@redirectToGoogle')->name('google.redirect');
     Route::get('google/callback', 'App\Http\Controllers\GoogleAuthController@handleGoogleCallback')->name('google.callback');
-
 
     // need to keep GET /logout for SAML SLO
     Route::get(
@@ -716,8 +661,52 @@ Route::group(['middleware' => 'web'], function () {
         'logout',
         [LoginController::class, 'logout']
     )->name('logout.post');
+
+    /**
+     * Uploaded files API routes
+     */
+
+    // Get a file
+    Route::get('{object_type}/{id}/files/{file_id}',
+        [
+            UploadedFilesController::class,
+            'show',
+        ]
+    )->name('ui.files.show')
+        ->where(['object_type' => 'assets|audits|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components|companies|departments']);
+
+    // Upload files(s)
+    Route::post('{object_type}/{id}/files',
+        [
+            UploadedFilesController::class,
+            'store',
+        ]
+    )->name('ui.files.store')
+        ->where(['object_type' => 'assets|audits|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components|companies|departments']);
+
+    // Delete files(s)
+    Route::delete('{object_type}/{id}/files/{file_id}/delete',
+        [
+            UploadedFilesController::class,
+            'destroy',
+        ]
+    )->name('ui.files.destroy')
+        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components|companies|departments']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Storage Proxy Route
+|--------------------------------------------------------------------------
+|
+| When PUBLIC_S3_PROXY=true, public uploads (images, logos, avatars) are
+| served through the application instead of directly from S3. This allows
+| using a fully private S3 bucket for all storage.
+|
+*/
+Route::get('storage-proxy/{path}', [StorageProxyController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage-proxy');
 
 /**
  * Health check route - skip middleware
@@ -727,11 +716,9 @@ Route::withoutMiddleware(['web'])->get(
     [HealthController::class, 'get']
 )->name('health');
 
-
 Route::middleware(['auth'])->get(
     '/',
     [DashboardController::class, 'index']
 )->name('home')
-    ->breadcrumbs(fn (Trail $trail) =>
-    $trail->push('Home', route('home'))
+    ->breadcrumbs(fn (Trail $trail) => $trail->push('Home', route('home'))
     );

@@ -1,10 +1,41 @@
+var jQuery = require('jquery');
+window.jQuery = jQuery
+window.$ = jQuery
 
+// window._ = require('lodash'); //the only place I saw this used was vue.js, and we don't use that anymore
 
-// var jQuery = require('jquery');
-// window.jQuery = jQuery
-// window.$ = jQuery
+/****************************************
+ Much of what you'll see below is just plain require()'ed, this is because
+ it is mostly jQuery stuff, which attaches itself to the $() function/object
+ So we don't have to assign it to anything, it will just automagically attach
+ itself
+ *****************************************/
 
-require('./bootstrap');
+require("jquery-ui/dist/jquery-ui")
+jQuery.fn.uitooltip = jQuery.fn.tooltip;
+require('bootstrap-less');
+require('select2');
+require('admin-lte');
+require('tether');
+require('jquery-slimscroll');
+require('jquery.iframe-transport'); //probably not needed anymore, if I'm honest
+require('blueimp-file-upload')
+require('bootstrap-colorpicker')
+require('bootstrap-datepicker')
+require('ekko-lightbox') //TODO - this doesn't seem jquery-ish, we might need to do something weird here
+                         // it *does* require Bootstrap, which requires jquery, so maybe that's OK
+                         // it seems to work...
+require('./extensions/pGenerator.jquery'); //WEIRD, but works
+//require('chart.js') // Weirdly, this seems to "just work." Without this line, the dashboard blows up
+// but it's *HUGE* - and we only use it one place. So we're taking it out of the bundle
+window.SignaturePad = require('./signature_pad'); //ALSO WEIRD - but works
+require('jquery-validation')
+window.List = require('list.js')
+window.ClipboardJS = require('clipboard')
+// TODO - find everything using moment.js and kill it or upgrade it? It's huge
+// - adminLTE (UGH)
+// - bootstrap-daterangepicker
+// - fullcalendar (what's that? it's used by AdminLTE)
 
 /**
  * Module containing core application logic.
@@ -82,9 +113,11 @@ pieOptions = {
 
 var baseUrl = $('meta[name="baseUrl"]').attr('content');
 
+
+
 $(function () {
 
-    var $el = $('table');
+    var $el = $('body');
 
     // confirm restore modal
 
@@ -105,48 +138,27 @@ $(function () {
     });
 
     // confirm delete modal
-
     $el.on('click', '.delete-asset', function (evnt) {
         var $context = $(this);
         var $dataConfirmModal = $('#dataConfirmModal');
         var href = $context.attr('href');
         var message = $context.attr('data-content');
+        var headericon = $context.attr('data-icon');
         var title = $context.attr('data-title');
 
-        $('#myModalLabel').text(title);
-        $dataConfirmModal.find('.modal-body').text(message);
+        // deleteForm is the ID of the modal form itself
         $('#deleteForm').attr('action', href);
+        $dataConfirmModal.find('.modal-header-icon').addClass(headericon);
+        $dataConfirmModal.find('.modal-title').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
+        $dataConfirmModal.find('.modal-body').text(message);
+        $dataConfirmModal.attr('action', href);
+
+        // Fire the modal
         $dataConfirmModal.modal({
             show: true
         });
         return false;
     });
-
-    /*
-    * Slideout help menu
-    */
-     $('.slideout-menu-toggle').on('click', function(event){
-        event.preventDefault();
-        // create menu variables
-        var slideoutMenu = $('.slideout-menu');
-        var slideoutMenuWidth = $('.slideout-menu').width();
-
-        // toggle open class
-        slideoutMenu.toggleClass("open");
-
-        // slide menu
-        if (slideoutMenu.hasClass("open")) {
-         slideoutMenu.show();
-            slideoutMenu.animate({
-                right: "0px"
-            });
-        } else {
-            slideoutMenu.animate({
-                right: -slideoutMenuWidth
-            }, "-350px");
-         slideoutMenu.fadeOut();
-        }
-     });
 
 
 
@@ -197,7 +209,8 @@ $(function () {
                     var data = {
                         search: params.term,
                         page: params.page || 1,
-                        assetStatusType: link.data("asset-status-type"),
+                        statusType: link.data("asset-status-type"),
+                        companyId: link.data("company-id"),
                     };
                     return data;
                 },
@@ -269,9 +282,9 @@ $(function () {
 		
 		if(value && !noForceAjax && !isMouseUp) {
 			var endpoint = element.data("endpoint");
-			var assetStatusType = element.data("asset-status-type");
+            var statusType = element.data("asset-status-type");
 			$.ajax({
-				url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search='+value+'&page=1' + (assetStatusType ? '&assetStatusType='+assetStatusType : ''),
+                url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (statusType ? '&statusType=' + statusType : ''),
 				dataType: 'json',
 				headers: {
 					"X-Requested-With": 'XMLHttpRequest',
@@ -334,8 +347,7 @@ $(function () {
     }
 
     function formatDatalistSafe(datalist) {
-        // console.warn("What in the hell is going on with Select2?!?!!?!?");
-        // console.warn($.select2);
+
         if (datalist.loading) {
             return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
         }
@@ -343,28 +355,29 @@ $(function () {
         var root_div = $("<div class='clearfix'>") ;
         var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
         if (datalist.image) {
-            var inner_div = $("<div style='width: 30px;'>");
+            var inner_div = $("<div style='width: 20px;'>");
             /******************************************************************
-             * 
-             * We are specifically chosing empty alt-text below, because this 
+             *
+             * We are specifically chosing empty alt-text below, because this
              * image conveys no additional information, relative to the text
              * that will *always* be there in any select2 list that is in use
              * in Snipe-IT. If that changes, we would probably want to change
              * some signatures of some functions, but right now, we don't want
-             * screen readers to say "HP SuperJet 5000, .... picture of HP 
+             * screen readers to say "HP SuperJet 5000, .... picture of HP
              * SuperJet 5000..." and so on, for every single row in a list of
              * assets or models or whatever.
-             * 
+             *
              *******************************************************************/
-            var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
-            // console.warn("Img is: ");
-            // console.dir(img);
-            // console.warn("Strigularly, that's: ");
-            // console.log(img);
-            img.attr("src", datalist.image );
+            var img = $("<img src='' style='max-height: 20px; max-width: 20px;' alt=''>");
+            img.attr("src", datalist.image);
             inner_div.append(img)
+        } else if (datalist.tag_color) {
+            var inner_div = $("<div style='width: 20px;'>");
+            var icon = $('<i class="fa-solid fa-square" style="font-size: 20px;" aria-hidden="true"></i>');
+            icon.css("color", datalist.tag_color );
+            inner_div.append(icon)
         } else {
-            var inner_div=$("<div style='height: 20px; width: 30px;'></div>");
+            var inner_div=$("<div style='height: 20px; width: 20px;'></div>");
         }
         left_pull.append(inner_div);
         root_div.append(left_pull);
@@ -566,6 +579,8 @@ function htmlEntities(str) {
     
 })(jQuery);
 
+
+
 /**
  * Universal Livewire Select2 integration
  *
@@ -589,11 +604,186 @@ document.addEventListener('livewire:init', () => {
         Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
     });
 
-    Livewire.hook('request', ({succeed}) => {
-        succeed(() => {
-            queueMicrotask(() => {
-                $('.livewire-select2').select2();
-            });
+  Livewire.interceptMessage(({ onFinish }) => {
+    onFinish(() => {
+      // Runs after DOM morph completes (or on error/cancel)
+        queueMicrotask(() => {
+          $(".livewire-select2").select2();
         });
-    });
+      });
+    }
+  );
 });
+
+
+
+
+// Check/Uncheck all radio buttons in the permissions group
+$('.header-row input:radio').change(function() {
+    value = $(this).attr('value');
+    area = $(this).data('checker-group');
+    $('.radiochecker-'+area+'[value='+value+']').prop('checked', true);
+});
+
+// Generic toggleable callouts with remember state
+$(".remember-toggle").on("click",function(){
+
+    var toggleable_callout_id = $(this).attr('id');
+    var toggle_content_class = 'toggle-content-'+$(this).attr('id');
+    var toggle_arrow = '#toggle-arrow-' + toggleable_callout_id;
+    var toggle_cookie_name='toggle_state_'+toggleable_callout_id;
+
+    $('.'+toggle_content_class).fadeToggle(100);
+    $(toggle_arrow).toggleClass('fa-caret-right fa-caret-down');
+    var toggle_open = $(toggle_arrow).hasClass('fa-caret-down');
+    document.cookie=toggle_cookie_name+"="+toggle_open+';path=/';
+});
+
+var all_cookies = document.cookie.split(';')
+for (var i in all_cookies) {
+    var trimmed_cookie = all_cookies[i].trim(' ')
+    elems = trimmed_cookie.split('=', 2);
+
+    // We have to do more here since we don't know the name of the selector
+    if (trimmed_cookie.startsWith('toggle_state_')) {
+
+        var toggle_selector_name = elems[0].replace('toggle_state_','');
+
+        if (elems[1] != "true") {
+            $('#'+toggle_selector_name+'.remember-toggle').trigger('click')
+        }
+    }
+
+}
+
+
+/**
+ * This handles the show/hide of superuser and admin specific permissions
+ * on the group edit and user edit pages
+ */
+if ($("#superuser_allow").is(':checked')) {
+
+    // Hide here instead of fadeout on pageload to prevent what looks like Flash Of Unstyled Content (FOUC)
+    $(".nonsuperuser").hide();
+    $(".nonsuperuser").attr('display','none');
+}
+
+
+$(".superuser").change(function() {
+    if ($(this).val() == '1') {
+        $(".nonsuperuser").fadeOut();
+        $(".nonsuperuser").attr('display','none');
+        $(".nonadmin").fadeOut();
+        $(".nonadmin").attr('display','none');
+    } else if ($(this).val() != '1') {
+        $(".nonsuperuser").fadeIn();
+        $(".nonsuperuser").attr('display','block');
+
+        // If the superuser button has been set to deny, we need to
+        // check that the admin button isn't set to allow, before we show non-admin stuff
+        if ($("#admin_allow").is(':checked')) {
+
+            // Hide here instead of fadeout on pageload to prevent what looks like Flash Of Unstyled Content (FOUC)
+            $(".nonadmin").hide();
+            $(".nonadmin").attr('display','none');
+        }
+
+    }
+});
+
+
+
+if ($("#admin_allow").is(':checked')) {
+
+    // Hide here instead of fadeout on pageload to prevent what looks like Flash Of Unstyled Content (FOUC)
+    $(".nonadmin").hide();
+    $(".nonadmin").attr('display','none');
+}
+
+$(".admin").change(function() {
+    if ($(this).val() == '1') {
+        $(".nonadmin").fadeOut();
+        $(".nonadmin").attr('display','none');
+    } else if ($(this).val() != '1') {
+        $(".nonadmin").fadeIn();
+        $(".nonadmin").attr('display','block');
+    }
+});
+
+// Handle the select/deselect of the select boxes with the button from right to left
+
+$(function () {
+
+    function moveItems(origin, dest) {
+        $(origin).find(':selected').appendTo(dest);
+        $(dest).attr('selected', true);
+        $(dest).sort_select_box();
+    }
+
+    function moveAllItems(origin, dest) {
+        $(origin).children("option:visible").appendTo(dest);
+        $(dest).attr('selected', true);
+        $(dest).sort_select_box();
+    }
+
+    $('.left').on('click', function () {
+        var container = $(this).closest('.addremove-multiselect');
+        moveItems($(container).find('select.multiselect.selected'), $(container).find('select.multiselect.available'));
+    });
+
+    $('.right').on('click', function () {
+        var container = $(this).closest('.addremove-multiselect');
+        moveItems($(container).find('select.multiselect.available'), $(container).find('select.multiselect.selected'));
+
+    });
+
+    $('.leftall').on('click', function () {
+        var container = $(this).closest('.addremove-multiselect');
+        moveAllItems($(container).find('select.multiselect.selected'), $(container).find('select.multiselect.available'));
+    });
+
+    $('.rightall').on('click', function () {
+        var container = $(this).closest('.addremove-multiselect');
+        moveAllItems($(container).find('select.multiselect.available'), $(container).find('select.multiselect.selected'));
+    });
+
+    $('select.multiselect.selected').on('dblclick keyup',function(e){
+        if(e.which == 13 || e.type == 'dblclick') {
+            var container = $(this).closest('.addremove-multiselect');
+            moveItems($(container).find('select.multiselect.selected'), $(container).find('select.multiselect.available'));
+        }
+    });
+
+    $('select.multiselect.available').on('dblclick keyup',function(e){
+        if(e.which == 13 || e.type == 'dblclick') {
+            var container = $(this).closest('.addremove-multiselect');
+            moveItems($(container).find('select.multiselect.available'), $(container).find('select.multiselect.selected'));
+            $('#hidden_ids_box').val($('#selected-select').val());
+        }
+    });
+
+
+});
+
+$.fn.sort_select_box = function(){
+    // Get options from select box
+    var selected_options = $(this).children('option');
+    // sort alphabetically
+    selected_options.sort(function(a,b) {
+        if (a.text > b.text) return 1;
+        else if (a.text < b.text) return -1;
+        else return 0
+    })
+    //replace with sorted my_options;
+    $(this).empty().append(selected_options);
+
+    var selected_in_box =  $('#selected-select option').toArray().map(item => item.value).join();
+
+    $('#hidden_ids_box').empty().val(selected_in_box);
+
+    $('#count_selected_box').html($('#selected-select option').length);
+    $('#count_unselected_box').html($('#available-select option').length);
+
+    // clearing any selections
+    $("#"+this.attr('id')+" option").attr('selected', true);
+}

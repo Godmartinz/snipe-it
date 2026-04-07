@@ -1,35 +1,35 @@
-FROM alpine:3.19
+FROM alpine:3.23
 # Apache + PHP
 RUN  apk add --no-cache \
         apache2 \
-        php82 \
-        php82-common \
-        php82-apache2 \
-        php82-curl \
-        php82-ldap \
-        php82-mysqli \
-        php82-gd \
-        php82-xml \
-        php82-mbstring \
-        php82-zip \
-        php82-ctype \
-        php82-tokenizer \
-        php82-pdo_mysql \
-        php82-openssl \
-        php82-bcmath \
-        php82-phar \
-        php82-json \
-        php82-iconv \
-        php82-fileinfo \
-        php82-simplexml \
-        php82-session \
-        php82-dom \
-        php82-xmlwriter \
-        php82-xmlreader \
-        php82-sodium \
-        php82-redis \
-        php82-pecl-memcached \
-        php82-exif \
+        php84 \
+        php84-common \
+        php84-apache2 \
+        php84-curl \
+        php84-ldap \
+        php84-mysqli \
+        php84-gd \
+        php84-xml \
+        php84-mbstring \
+        php84-zip \
+        php84-ctype \
+        php84-tokenizer \
+        php84-pdo_mysql \
+        php84-openssl \
+        php84-bcmath \
+        php84-phar \
+        php84-json \
+        php84-iconv \
+        php84-fileinfo \
+        php84-simplexml \
+        php84-session \
+        php84-dom \
+        php84-xmlwriter \
+        php84-xmlreader \
+        php84-sodium \
+        php84-redis \
+        php84-pecl-memcached \
+        php84-exif \
         curl \
         wget \
         vim \
@@ -42,7 +42,7 @@ COPY docker/column-statistics.cnf /etc/mysql/conf.d/column-statistics.cnf
 # Where apache's PID lives
 RUN mkdir -p /run/apache2 && chown apache:apache /run/apache2
 
-RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php82/php.ini
+RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php84/php.ini
 COPY  docker/000-default-2.4.conf /etc/apache2/conf.d/default.conf
 
 # Enable mod_rewrite

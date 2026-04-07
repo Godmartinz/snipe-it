@@ -9,24 +9,24 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use ForceUTF8\Encoding;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use League\Csv\Reader;
 use Illuminate\Support\Facades\Log;
+use League\Csv\Reader;
 
 abstract class Importer
 {
     protected $csv;
+
     /**
      * Id of User performing import
-     * @var
      */
     protected $created_by;
+
     /**
      * Are we updating items in the import
+     *
      * @var bool
      */
-
     protected $updating;
 
     /**
@@ -36,6 +36,7 @@ abstract class Importer
      * This private variable is ONLY used for the cli-importer.
      *
      * @todo - find a way to make this less duplicative
+     *
      * @var array
      */
     private $defaultFieldMap = [
@@ -72,6 +73,7 @@ abstract class Importer
         'termination_date' => 'termination date',
         'warranty_months' => 'warranty',
         'full_name' => 'full name',
+        'display_name' => 'display name',
         'email' => 'email',
         'username' => 'username',
         'address' => 'address',
@@ -88,28 +90,37 @@ abstract class Importer
         'department' => 'department',
         'manager_name' => 'manager full name',
         'manager_username' => 'manager username',
+        'manager_employee_num' => 'manager employee number',
         'min_amt' => 'minimum quantity',
         'remote' => 'remote',
         'vip' => 'vip',
+        'tag_color' => 'tag color',
     ];
+
     /**
      * Map of item fields->csv names
+     *
      * @var array
      */
     protected $fieldMap = [];
+
     /**
      * @var callable
      */
     protected $logCallback;
+
     protected $tempPassword;
+
     /**
      * @var callable
      */
     protected $progressCallback;
+
     /**
      * @var null
      */
     protected $usernameFormat;
+
     /**
      * @var callable
      */
@@ -117,7 +128,8 @@ abstract class Importer
 
     /**
      * ObjectImporter constructor.
-     * @param string $file
+     *
+     * @param  string  $file
      */
     public function __construct($file)
     {
@@ -132,7 +144,7 @@ abstract class Importer
         } else {
             $this->csv = Reader::createFromString($file);
         }
-        $this->tempPassword = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 40);
+        $this->tempPassword = '*** NO PASSWORD - IMPORTED VIA CSV ***';
     }
 
     // Cached Values for import lookups
@@ -142,13 +154,15 @@ abstract class Importer
      * Sets up the database transaction and logging for the importer
      *
      * @return void
+     *
      * @author Daniel Meltzer
+     *
      * @since  5.0
      */
     public function import()
     {
         $headerRow = $this->csv->fetchOne();
-        $this->csv->setHeaderOffset(0); //explicitly sets the CSV document header record
+        $this->csv->setHeaderOffset(0); // explicitly sets the CSV document header record
 
         $this->populateCustomFields($headerRow);
 
@@ -157,7 +171,7 @@ abstract class Importer
             Model::unguard();
 
             foreach ($this->csv->getRecords($headerRow) as $row) {
-                //Lowercase header values to ensure we're comparing values properly.
+                // Lowercase header values to ensure we're comparing values properly.
                 $row = array_change_key_case($row, CASE_LOWER);
 
                 $this->handle($row);
@@ -179,8 +193,11 @@ abstract class Importer
     /**
      * Fetch custom fields from database and translate/parse them into a format
      * appropriate for use in the importer.
+     *
      * @return void
+     *
      * @author Daniel Meltzer
+     *
      * @since  5.0
      */
     protected function populateCustomFields($headerRow)
@@ -207,10 +224,12 @@ abstract class Importer
      * Check to see if the given key exists in the array, and trim excess white space before returning it
      *
      * @author Daniel Melzter
+     *
      * @since 3.0
-     * @param $array array
-     * @param $key string
-     * @param $default string
+     *
+     * @param  $array  array
+     * @param  $key  string
+     * @param  $default  string
      * @return string
      */
     public function findCsvMatch(array $array, $key, $default = null)
@@ -218,11 +237,12 @@ abstract class Importer
         $val = $default;
         $key = $this->lookupCustomKey($key);
 
-       // $this->log("Custom Key: ${key}");
+        // $this->log("Custom Key: ${key}");
         if (array_key_exists($key, $array)) {
             $val = Encoding::toUTF8(trim($array[$key]));
         }
-        //$this->log("${key}: ${val}");
+
+        // $this->log("${key}: ${val}");
         return $val;
     }
 
@@ -230,8 +250,10 @@ abstract class Importer
      * Looks up A custom key in the custom field map
      *
      * @author Daniel Melzter
+     *
      * @since 4.0
-     * @param $key string
+     *
+     * @param  $key  string
      * @return string|null
      */
     public function lookupCustomKey($key)
@@ -239,6 +261,7 @@ abstract class Importer
         if (array_key_exists($key, $this->fieldMap)) {
             return $this->fieldMap[$key];
         }
+
         // Otherwise no custom key, return original.
         return $key;
     }
@@ -247,8 +270,10 @@ abstract class Importer
      * Figure out the fieldname of the custom field
      *
      * @author A. Gianotto <snipe@snipe.net>
+     *
      * @since 3.0
-     * @param $array array
+     *
+     * @param  $array  array
      * @return string
      */
     public function array_smart_custom_field_fetch(array $array, $key)
@@ -272,7 +297,7 @@ abstract class Importer
         }
     }
 
-    protected function addErrorToBag($item, $field,  $error_message)
+    protected function addErrorToBag($item, $field, $error_message)
     {
         if ($this->errorCallback) {
             call_user_func($this->errorCallback, $item, $field, [$field => [$error_message]]);
@@ -286,9 +311,12 @@ abstract class Importer
      * the same time. [ALG]
      *
      * @author Daniel Melzter
+     *
      * @since 3.0
-     * @param $row array
+     *
+     * @param  $row  array
      * @return User Model w/ matching name
+     *
      * @internal param array $user_array User details parsed from csv
      */
     protected function createOrFetchUser($row, $type = 'user')
@@ -298,12 +326,13 @@ abstract class Importer
             'full_name' => $this->findCsvMatch($row, 'full_name'),
             'first_name' => $this->findCsvMatch($row, 'first_name'),
             'last_name' => $this->findCsvMatch($row, 'last_name'),
-            'email'     => $this->findCsvMatch($row, 'email'),
-            'manager_id'=>  '',
-            'department_id' =>  '',
-            'username'  => $this->findCsvMatch($row, 'username'),
-            'activated'  => $this->fetchHumanBoolean($this->findCsvMatch($row, 'activated')),
-            'remote'    => $this->fetchHumanBoolean(($this->findCsvMatch($row, 'remote'))),
+            'display_name' => $this->findCsvMatch($row, 'display_name'),
+            'email' => $this->findCsvMatch($row, 'email'),
+            'manager_id' => '',
+            'department_id' => '',
+            'username' => $this->findCsvMatch($row, 'username'),
+            'activated' => $this->fetchHumanBoolean($this->findCsvMatch($row, 'activated')),
+            'remote' => $this->fetchHumanBoolean(($this->findCsvMatch($row, 'remote'))),
         ];
 
         if ($type == 'manager') {
@@ -312,13 +341,13 @@ abstract class Importer
         }
 
         // Maybe we're lucky and the username was passed and it already exists.
-        if (!empty($user_array['username'])) {
+        if (! empty($user_array['username'])) {
             if ($user = User::where('username', $user_array['username'])->first()) {
                 $this->log('User '.$user_array['username'].' already exists');
+
                 return $user;
             }
         }
-
 
         // If the full name and username is empty, bail out--we need this to extract first name (at the very least)
         if ((empty($user_array['username'])) && (empty($user_array['full_name'])) && (empty($user_array['first_name']))) {
@@ -326,9 +355,9 @@ abstract class Importer
             Log::debug('User array: ');
             Log::debug(print_r($user_array, true));
             Log::debug(print_r($row, true));
+
             return false;
         }
-
 
         // Populate email if it does not exist.
         if (empty($user_array['email'])) {
@@ -353,6 +382,7 @@ abstract class Importer
             // Check for a matching username one more time after trying to guess username.
             if ($user = User::where('username', $user_array['username'])->first()) {
                 $this->log('User '.$user_array['username'].' already exists');
+
                 return $user;
             }
         }
@@ -368,6 +398,7 @@ abstract class Importer
         $user->first_name = $user_array['first_name'];
         $user->last_name = $user_array['last_name'];
         $user->username = $user_array['username'];
+        $user->display_name = $user_array['display_name'] ?? null;
         $user->email = $user_array['email'];
         $user->manager_id = $user_array['manager_id'] ?? null;
         $user->department_id = $user_array['department_id'] ?? null;
@@ -378,6 +409,7 @@ abstract class Importer
 
         if ($user->save()) {
             $this->log('User '.$user_array['username'].' created');
+
             return $user;
         }
 
@@ -388,8 +420,9 @@ abstract class Importer
 
     /**
      * Matches a user by created_by if user_name provided is a number
-     * @param  string $user_name users full name from csv
-     * @return User           User Matching ID
+     *
+     * @param  string  $user_name  users full name from csv
+     * @return User User Matching ID
      */
     protected function findUserByNumber($user_name)
     {
@@ -404,8 +437,7 @@ abstract class Importer
     /**
      * Sets the Id of User performing import.
      *
-     * @param mixed $created_by the user id
-     *
+     * @param  mixed  $created_by  the user id
      * @return self
      */
     public function setCreatedBy($created_by)
@@ -418,8 +450,7 @@ abstract class Importer
     /**
      * Sets the Are we updating items in the import.
      *
-     * @param bool $updating the updating
-     *
+     * @param  bool  $updating  the updating
      * @return self
      */
     public function setUpdating($updating)
@@ -432,8 +463,7 @@ abstract class Importer
     /**
      * Sets whether or not we should notify the user with a welcome email
      *
-     * @param bool $send_welcome the send-welcome flag
-     *
+     * @param  bool  $send_welcome  the send-welcome flag
      * @return self
      */
     public function setShouldNotify($send_welcome)
@@ -446,8 +476,7 @@ abstract class Importer
     /**
      * Defines mappings of csv fields
      *
-     * @param bool $updating the updating
-     *
+     * @param  bool  $updating  the updating
      * @return self
      */
     public function setFieldMappings($fields)
@@ -463,10 +492,9 @@ abstract class Importer
     /**
      * Sets the callbacks for the import
      *
-     * @param callable $logCallback Function to call when we have data to log
-     * @param callable $progressCallback Function to call to display progress
-     * @param callable $errorCallback Function to call when we have errors
-     *
+     * @param  callable  $logCallback  Function to call when we have data to log
+     * @param  callable  $progressCallback  Function to call to display progress
+     * @param  callable  $errorCallback  Function to call when we have errors
      * @return self
      */
     public function setCallbacks(callable $logCallback, callable $progressCallback, callable $errorCallback)
@@ -481,8 +509,7 @@ abstract class Importer
     /**
      * Sets the value of usernameFormat.
      *
-     * @param string $usernameFormat the username format
-     *
+     * @param  string  $usernameFormat  the username format
      * @return self
      */
     public function setUsernameFormat($usernameFormat)
@@ -511,8 +538,10 @@ abstract class Importer
      * Fetch an existing department, or create new if it doesn't exist
      *
      * @author A. Gianotto
+     *
      * @since 4.6.5
-     * @param $user_department string
+     *
+     * @param  $user_department  string
      * @return int id of company created/found
      */
     public function createOrFetchDepartment($user_department_name)
@@ -526,7 +555,7 @@ abstract class Importer
                 return $department->id;
             }
 
-            $department = new Department();
+            $department = new Department;
             $department->name = $user_department_name;
 
             if ($department->save()) {
@@ -540,13 +569,14 @@ abstract class Importer
         return null;
     }
 
-
     /**
      * Fetch an existing manager
      *
      * @author A. Gianotto
+     *
      * @since 4.6.5
-     * @param $user_manager string
+     *
+     * @param  $user_manager  string
      * @return int id of company created/found
      */
     public function fetchManager($user_manager_first_name, $user_manager_last_name)
@@ -567,13 +597,13 @@ abstract class Importer
      * Parse a date or return null
      *
      * @author A. Gianotto
+     *
      * @since 7.0.0
-     * @param $field
-     * @param $format
+     *
      * @return string|null
-
      */
-    public function parseOrNullDate($field, $format = 'date') {
+    public function parseOrNullDate($field, $format = 'date')
+    {
 
         $date_format = 'Y-m-d';
 
@@ -585,12 +615,15 @@ abstract class Importer
 
             try {
                 $value = CarbonImmutable::parse($this->item[$field])->format($date_format);
+
                 return $value;
             } catch (\Exception $e) {
-                $this->log('Unable to parse date: ' . $this->item[$field]);
+                $this->log('Unable to parse date: '.$this->item[$field]);
+
                 return null;
             }
         }
+
         return null;
     }
 }

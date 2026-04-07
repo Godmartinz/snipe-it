@@ -25,15 +25,37 @@
         @endif
 
         <div class="box-body">
+
+            @if ($component->company)
+                <!-- accessory name -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{ trans('general.company') }}</label>
+                    <div class="col-md-6">
+                        <p class="form-control-static">{!! $component->company->present()->formattedNameLink  !!}</p>
+                    </div>
+                </div>
+            @endif
+
+
+            @if ($component->category)
+                <!-- accessory name -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{ trans('general.category') }}</label>
+                    <div class="col-md-6">
+                        <p class="form-control-static">{!! $component->category->present()->formattedNameLink  !!}</p>
+                    </div>
+                </div>
+            @endif
+
           <!-- Asset -->
-            @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id'])
+            @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id', 'company_id' => $component->company_id, 'required' => 'true', 'value' => old('asset_id')])
 
             <div class="form-group {{ $errors->has('assigned_qty') ? ' has-error' : '' }}">
               <label for="assigned_qty" class="col-md-3 control-label">
                 {{ trans('general.qty') }}
               </label>
               <div class="col-md-2 col-sm-5 col-xs-5">
-                <input class="form-control required col-md-12" type="text" name="assigned_qty" id="assigned_qty" value="{{ old('assigned_qty') ?? 1 }}" maxlength="999999" />
+                  <input class="form-control" type="number" name="assigned_qty" id="assigned_qty" value="1" min="1" max="{{ old('assigned_qty') ?? $component->numRemaining()}}" maxlength="999999"/>
               </div>
               @if ($errors->first('assigned_qty'))
                 <div class="col-md-9 col-md-offset-3">
@@ -41,7 +63,31 @@
                 </div>
               @endif
             </div>
+            @if ($component->requireAcceptance() || $component->getEula() || ($snipeSettings->webhook_endpoint!=''))
+              <div class="form-group notification-callout">
+                <div class="col-md-8 col-md-offset-3">
+                  <div class="callout callout-info">
 
+                    @if ($component->category->require_acceptance=='1')
+                      <i class="far fa-envelope"></i>
+                      {{ trans('admin/categories/general.required_acceptance') }}
+                      <br>
+                    @endif
+
+                    @if ($component->getEula())
+                      <i class="far fa-envelope"></i>
+                      {{ trans('admin/categories/general.required_eula') }}
+                      <br>
+                    @endif
+
+                    @if ($snipeSettings->webhook_endpoint!='')
+                      <i class="fab fa-slack"></i>
+                      {{ trans('general.webhook_msg_note') }}
+                    @endif
+                  </div>
+                </div>
+              </div>
+            @endif
 
             <!-- Note -->
             <div class="form-group{{ $errors->has('note') ? ' error' : '' }}">

@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,6 +15,6 @@ return array(
 
     'failed' => 'Nämä tiedot eivät vastaa tietueitamme.',
     'password' => 'Annettu salasana on virheellinen.',
-    'throttle' => 'Liian monta kirjautumisyritystä. Yritä uudelleen :seconds sekunnin kuluttua.',
+    'throttle' => 'Liian monta kirjautumisyritystä. Yritä uudelleen :minutes minuutin kuluttua.',
 
-);
+];

@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Components;
 
 use App\Events\CheckoutableCheckedIn;
-use App\Events\ComponentCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Component;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -20,11 +21,13 @@ class ComponentCheckinController extends Controller
      * Returns a view that allows the checkin of a component from an asset.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @see ComponentCheckinController::store() method that stores the data.
      * @since [v4.1.4]
-     * @param $component_asset_id
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @return View
+     *
+     * @throws AuthorizationException
      */
     public function create($component_asset_id)
     {
@@ -50,12 +53,13 @@ class ComponentCheckinController extends Controller
      * Validate and store checkin data.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @see ComponentCheckinController::create() method that returns the form.
      * @since [v4.1.4]
-     * @param Request $request
-     * @param $component_asset_id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
+     * @return RedirectResponse
+     *
+     * @throws AuthorizationException
      */
     public function store(Request $request, $component_asset_id, $backto = null)
     {
@@ -98,10 +102,10 @@ class ComponentCheckinController extends Controller
 
             event(new CheckoutableCheckedIn($component, $asset, auth()->user(), $request->input('note'), Carbon::now()));
 
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
 
-            return redirect()->to(Helper::getRedirectOption($request, $component->id, 'Components'))->with('success',
-                trans('admin/components/message.checkin.success'));
+            return Helper::getRedirectOption($request, $component->id, 'Components')
+                ->with('success', trans('admin/components/message.checkin.success'));
         }
 
         return redirect()->route('components.index')->with('error', trans('admin/components/message.does_not_exist'));

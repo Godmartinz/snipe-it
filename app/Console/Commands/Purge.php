@@ -62,19 +62,19 @@ class Purge extends Command
             $assetcount = $assets->count();
             $this->info($assets->count().' assets purged.');
             $asset_assoc = 0;
-            $asset_maintenances = 0;
+            $maintenances = 0;
 
             foreach ($assets as $asset) {
-                $this->info('- Asset "'.$asset->present()->name().'" deleted.');
+                $this->info('- Asset "'.$asset->display_name.'" deleted.');
                 $asset_assoc += $asset->assetlog()->count();
                 $asset->assetlog()->forceDelete();
-                $asset_maintenances += $asset->assetmaintenances()->count();
-                $asset->assetmaintenances()->forceDelete();
+                $maintenances += $asset->maintenances()->count();
+                $asset->maintenances()->forceDelete();
                 $asset->forceDelete();
             }
 
             $this->info($asset_assoc.' corresponding log records purged.');
-            $this->info($asset_maintenances.' corresponding maintenance records purged.');
+            $this->info($maintenances.' corresponding maintenance records purged.');
 
             $locations = Location::whereNotNull('deleted_at')->withTrashed()->get();
             $this->info($locations->count().' locations purged.');
@@ -149,13 +149,13 @@ class Purge extends Command
                 $filenames = Actionlog::where('action_type', 'uploaded')
                     ->where('item_id', $user->id)
                     ->pluck('filename');
-                foreach($filenames as $filename) {
+                foreach ($filenames as $filename) {
                     try {
-                        if (Storage::exists($rel_path . '/' . $filename)) {
-                            Storage::delete($rel_path . '/' . $filename);
+                        if (Storage::exists($rel_path.'/'.$filename)) {
+                            Storage::delete($rel_path.'/'.$filename);
                         }
                     } catch (\Exception $e) {
-                        Log::info('An error occurred while deleting files: ' . $e->getMessage());
+                        Log::info('An error occurred while deleting files: '.$e->getMessage());
                     }
                 }
                 $this->info('- User "'.$user->username.'" deleted.');

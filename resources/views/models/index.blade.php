@@ -3,7 +3,7 @@
 {{-- Page title --}}
 @section('title')
 
-  @if (Request::get('status')=='deleted')
+  @if (request()->input('status')=='deleted')
     {{ trans('admin/models/general.view_deleted') }}
     {{ trans('admin/models/table.title') }}
     @else
@@ -12,61 +12,32 @@
 @parent
 @stop
 
-{{-- Page title --}}
-@section('header_right')
-  @can('create', \App\Models\AssetModel::class)
-    <a href="{{ route('models.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-  @endcan
-
-  @if (Request::get('status')=='deleted')
-    <a class="btn btn-default pull-right" href="{{ route('models.index') }}" style="margin-right: 5px;">{{ trans('admin/models/general.view_models') }}</a>
-  @else
-    <a class="btn btn-default pull-right" href="{{ route('models.index', ['status' => 'deleted']) }}" style="margin-right: 5px;">{{ trans('admin/models/general.view_deleted') }}</a>
-  @endif
-
-@stop
-
-
 {{-- Page content --}}
 @section('content')
+    <x-container>
+        <x-box name="models">
 
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-      <div class="box-body">
+            <x-slot:bulkactions>
+                <x-table.bulk-models />
+            </x-slot:bulkactions>
 
-        @include('partials.models-bulk-actions')
-                <table
-                        data-columns="{{ \App\Presenters\AssetModelPresenter::dataTableLayout() }}"
-                        data-cookie-id-table="asssetModelsTable"
-                        data-pagination="true"
-                        data-id-table="asssetModelsTable"
-                        data-search="true"
-                        data-show-footer="true"
-                        data-side-pagination="server"
-                        data-show-columns="true"
-                        data-toolbar="#modelsBulkEditToolbar"
-                        data-bulk-button-id="#bulkModelsEditButton"
-                        data-bulk-form-id="#modelsBulkForm"
-                        data-show-export="true"
-                        data-show-refresh="true"
-                        data-sort-order="asc"
-                        id="asssetModelsTable"
-                        class="table table-striped snipe-table"
-                        data-url="{{ route('api.models.index', ['status' => request('status')]) }}"
-                        data-export-options='{
-              "fileName": "export-models-{{ date('Y-m-d') }}",
-              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-              }'>
-              </table>
-        </div>
-        </div>
-      </div><!-- /.box-body -->
-    </div><!-- /.box -->
-  </div>
-</div>
+            <x-table
+                    name="models"
+                    show_column_search="false"
+                    show_advanced_search="true"
+                    show_footer="true"
+                    buttons="modelButtons"
+                    fixed_right_number="2"
+                    fixed_number="1"
+                    toolbar_id="modelsToolbar"
+                    api_url="{{ route('api.models.index', ['status' => e(request('status'))]) }}"
+                    :presenter="\App\Presenters\AssetModelPresenter::dataTableLayout()"
+                    export_filename="export-models-{{ date('Y-m-d') }}"
+            />
 
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

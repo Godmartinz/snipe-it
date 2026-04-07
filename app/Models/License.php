@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
+use App\Console\Commands\SendExpiringLicenseNotifications;
 use App\Helpers\Helper;
+use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasUploads;
+use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
+use App\Presenters\LicensePresenter;
 use App\Presenters\Presentable;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 use Watson\Validating\ValidatingTrait;
 
@@ -17,12 +25,15 @@ class License extends Depreciable
 {
     use HasFactory;
 
-    protected $presenter = \App\Presenters\LicensePresenter::class;
+    protected $presenter = LicensePresenter::class;
 
-    use SoftDeletes;
     use CompanyableTrait;
+    use HasUploads;
     use Loggable, Presentable;
+    use SoftDeletes;
+
     protected $injectUniqueIdentifier = true;
+
     use ValidatingTrait;
 
     // We set these as protected dates so that they will be easily accessible via Carbon
@@ -30,30 +41,30 @@ class License extends Depreciable
     public $timestamps = true;
 
     protected $guarded = 'id';
-    protected $table = 'licenses';
 
+    protected $table = 'licenses';
 
     protected $casts = [
         'purchase_date' => 'date',
         'expiration_date' => 'date',
         'termination_date' => 'date',
-        'category_id'  => 'integer',
-        'company_id'   => 'integer',
+        'category_id' => 'integer',
+        'company_id' => 'integer',
     ];
 
     protected $rules = [
-        'name'   => 'required|string|min:3|max:255',
-        'seats'   => 'required|min:1|integer',
-        'license_email'   => 'email|nullable|max:120',
-        'license_name'   => 'string|nullable|max:100',
-        'notes'   => 'string|nullable',
+        'name' => 'required|string|max:255',
+        'seats' => 'required|min:1|integer|limit_change:10000', // limit_change is a "pseudo-rule" that translates into 'between', see prepareLimitChangeRule() below
+        'license_email' => 'email|nullable|max:120',
+        'license_name' => 'string|nullable|max:100',
+        'notes' => 'string|nullable',
         'category_id' => 'required|exists:categories,id',
         'company_id' => 'integer|nullable',
-        'purchase_cost'=> 'numeric|nullable|gte:0',
-        'purchase_date'   => 'date_format:Y-m-d|nullable|max:10|required_with:depreciation_id',
-        'expiration_date'   => 'date_format:Y-m-d|nullable|max:10',
-        'termination_date'   => 'date_format:Y-m-d|nullable|max:10',
-        'min_amt'   => 'numeric|nullable|gte:0',
+        'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
+        'purchase_date' => 'date_format:Y-m-d|nullable|max:10|required_with:depreciation_id',
+        'expiration_date' => 'date_format:Y-m-d|nullable|max:10',
+        'termination_date' => 'date_format:Y-m-d|nullable|max:10',
+        'min_amt' => 'numeric|nullable|gte:0',
     ];
 
     /**
@@ -66,7 +77,7 @@ class License extends Depreciable
         'depreciation_id',
         'expiration_date',
         'license_email',
-        'license_name', //actually licensed_to
+        'license_name', // actually licensed_to
         'maintained',
         'manufacturer_id',
         'category_id',
@@ -101,6 +112,8 @@ class License extends Depreciable
         'purchase_cost',
         'purchase_date',
         'expiration_date',
+        'license_email',
+        'license_name',
     ];
 
     /**
@@ -110,50 +123,97 @@ class License extends Depreciable
      */
     protected $searchableRelations = [
         'manufacturer' => ['name'],
-        'company'      => ['name'],
-        'category'     => ['name'],
+        'company' => ['name'],
+        'category' => ['name'],
         'depreciation' => ['name'],
+        'supplier' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
+
     protected $appends = ['free_seat_count'];
 
     /**
      * Update seat counts when the license is updated
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
+     *
+     * @since  [v3.0]
      */
     public static function boot()
     {
         parent::boot();
         // We need to listen for created for the initial setup so that we have a license ID.
-        static::created(function ($license) {
-            $newSeatCount = $license->getAttributes()['seats'];
+        static::created(
+            function ($license) {
+                $newSeatCount = $license->getAttributes()['seats'];
 
-            return static::adjustSeatCount($license, 0, $newSeatCount);
-        });
+                return static::adjustSeatCount($license, 0, $newSeatCount);
+            }
+        );
         // However, we listen for updating to be able to prevent the edit if we cannot delete enough seats.
-        static::updating(function ($license) {
-            $newSeatCount = $license->getAttributes()['seats'];
-            //$oldSeatCount = isset($license->getOriginal()['seats']) ? $license->getOriginal()['seats'] : 0;
-            /*
-               That previous method *did* mostly work, but if you ever managed to get your $license->seats value out of whack
-               with your actual count of license_seats *records*, you would never manage to get back 'into whack'.
-               The below method actually grabs a count of existing license_seats records, so it will be more accurate.
-               This means that if your license_seats are out of whack, you can change the quantity and hit 'save' and it
-               will manage to 'true up' and make your counts line up correctly.
-            */
-            $oldSeatCount = $license->license_seats_count;
+        static::updating(
+            function ($license) {
+                $newSeatCount = $license->getAttributes()['seats'];
+                // $oldSeatCount = isset($license->getOriginal()['seats']) ? $license->getOriginal()['seats'] : 0;
+                /*
+                That previous method *did* mostly work, but if you ever managed to get your $license->seats value out of whack
+                with your actual count of license_seats *records*, you would never manage to get back 'into whack'.
+                The below method actually grabs a count of existing license_seats records, so it will be more accurate.
+                This means that if your license_seats are out of whack, you can change the quantity and hit 'save' and it
+                will manage to 'true up' and make your counts line up correctly.
+                */
+                $oldSeatCount = $license->license_seats_count;
 
-            return static::adjustSeatCount($license, $oldSeatCount, $newSeatCount);
-        });
+                return static::adjustSeatCount($license, $oldSeatCount, $newSeatCount);
+            }
+        );
+    }
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && ($this->free_seats_count == $this->seats)
+            && ($this->deleted_at == '');
+    }
+
+    protected function terminatesFormattedDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['termination_date'] ? Helper::getFormattedDateObject($attributes['termination_date'], 'date', false) : null,
+        );
+    }
+
+    protected function terminatesDiffInDays(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['termination_date'] ? Carbon::now()->diffInDays($attributes['termination_date']) : null,
+        );
+    }
+
+    protected function terminatesDiffForHumans(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['termination_date'] ? Carbon::parse($attributes['termination_date'])->diffForHumans() : null,
+        );
+    }
+
+    public function prepareLimitChangeRule($parameters, $field)
+    {
+        $actual_seat_count = $this->licenseseats()->count(); // we use the *actual* seat count here, in case your license has gone wonky
+        $lower_bound = $actual_seat_count - $parameters[0];
+        $upper_bound = $actual_seat_count + $parameters[0];
+
+        return ['between', ($lower_bound <= 0 ? 1 : $lower_bound), $upper_bound];
     }
 
     /**
      * Balance seat counts
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v3.0]
+     *
+     * @return Relation
      */
     public static function adjustSeatCount($license, $oldSeats, $newSeats)
     {
@@ -164,21 +224,17 @@ class License extends Depreciable
         // On Create, we just make one for each of the seats.
         $change = abs($oldSeats - $newSeats);
         if ($oldSeats > $newSeats) {
-            $license->load('licenseseats.user');
 
             // Need to delete seats... lets see if if we have enough.
-            $seatsAvailableForDelete = $license->licenseseats->reject(function ($seat) {
-                return ((bool) $seat->assigned_to) || ((bool) $seat->asset_id);
-            });
+            $seatsAvailableForDelete = $license->licenseseats()->whereNull('assigned_to')->whereNull('asset_id')->limit($change);
 
             if ($change > $seatsAvailableForDelete->count()) {
                 Session::flash('error', trans('admin/licenses/message.assoc_users'));
 
                 return false;
             }
-            for ($i = 1; $i <= $change; $i++) {
-                $seatsAvailableForDelete->pop()->delete();
-            }
+            $seatsAvailableForDelete->delete();
+
             // Log Deletion of seats.
             $logAction = new Actionlog;
             $logAction->item_type = self::class;
@@ -186,38 +242,44 @@ class License extends Depreciable
             $logAction->created_by = auth()->id() ?: 1; // We don't have an id while running the importer from CLI.
             $logAction->note = "deleted {$change} seats";
             $logAction->target_id = null;
+            $logAction->quantity = $change;
             $logAction->logaction('delete seats');
 
             return true;
         }
         // Else we're adding seats.
-        //Create enough seats for the change.
+        // Create enough seats for the change.
         $licenseInsert = [];
         for ($i = $oldSeats; $i < $newSeats; $i++) {
             $licenseInsert[] = [
                 'created_by' => auth()->id(),
                 'license_id' => $license->id,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ];
         }
-        //Chunk and use DB transactions to prevent timeouts.
+        // Chunk and use DB transactions to prevent timeouts.
 
-        collect($licenseInsert)->chunk(1000)->each(function ($chunk) {
-            DB::transaction(function () use ($chunk) {
-                LicenseSeat::insert($chunk->toArray());
-            });
-        });
+        collect($licenseInsert)->chunk(1000)->each(
+            function ($chunk) {
+                DB::transaction(
+                    function () use ($chunk) {
+                        LicenseSeat::insert($chunk->toArray());
+                    }
+                );
+            }
+        );
 
         // On initial create, we shouldn't log the addition of seats.
         if ($license->id) {
-            //Log the addition of license to the log.
-            $logAction = new Actionlog();
+            // Log the addition of license to the log.
+            $logAction = new Actionlog;
             $logAction->item_type = self::class;
             $logAction->item_id = $license->id;
             $logAction->created_by = auth()->id() ?: 1; // Importer.
             $logAction->note = "added {$change} seats";
             $logAction->target_id = null;
+            $logAction->quantity = $change;
             $logAction->logaction('add seats');
         }
 
@@ -228,7 +290,9 @@ class License extends Depreciable
      * Sets the attribute for whether or not the license is maintained
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     *
+     * @since  [v1.0]
+     *
      * @return mixed
      */
     public function setMaintainedAttribute($value)
@@ -240,7 +304,9 @@ class License extends Depreciable
      * Sets the reassignable attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     *
+     * @since  [v1.0]
+     *
      * @return mixed
      */
     public function setReassignableAttribute($value)
@@ -252,7 +318,9 @@ class License extends Depreciable
      * Sets expiration date attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     *
+     * @since  [v1.0]
+     *
      * @return mixed
      */
     public function setExpirationDateAttribute($value)
@@ -269,7 +337,9 @@ class License extends Depreciable
      * Sets termination date attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return mixed
      */
     public function setTerminationDateAttribute($value)
@@ -281,14 +351,47 @@ class License extends Depreciable
         }
         $this->attributes['termination_date'] = $value;
     }
+
+    public function isInactive(): bool
+    {
+        $day = now()->startOfDay();
+
+        $expired = $this->expiration_date && $this->asDateTime($this->expiration_date)->startofDay()->lessThanOrEqualTo($day);
+
+        $terminated = $this->termination_date && $this->asDateTime($this->termination_date)->startofDay()->lessThanOrEqualTo($day);
+
+        return $this->isExpired() || $this->isTerminated();
+    }
+
+    public function isExpired(): bool
+    {
+        $day = now()->startOfDay();
+
+        $expired = $this->expiration_date && $this->asDateTime($this->expiration_date)->startofDay()->lessThanOrEqualTo($day);
+
+        return $expired;
+    }
+
+    public function isTerminated(): bool
+    {
+        $day = now()->startOfDay();
+
+        $terminated = $this->termination_date && $this->asDateTime($this->termination_date)->startofDay()->lessThanOrEqualTo($day);
+
+        return $terminated;
+    }
+
     /**
      * Sets free_seat_count attribute
      *
      * @author G. Martinez
-     * @since [v6.3]
+     *
+     * @since  [v6.3]
+     *
      * @return mixed
      */
-    public function getFreeSeatCountAttribute(){
+    public function getFreeSeatCountAttribute()
+    {
         return $this->attributes['free_seat_count'] = $this->remaincount();
     }
 
@@ -296,43 +399,51 @@ class License extends Depreciable
      * Establishes the license -> company relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function company()
     {
-        return $this->belongsTo(\App\Models\Company::class, 'company_id');
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     /**
      * Establishes the license -> category relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.4.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v4.4.0]
+     *
+     * @return Relation
      */
     public function category()
     {
-        return $this->belongsTo(\App\Models\Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id')->withTrashed();
     }
 
     /**
      * Establishes the license -> manufacturer relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function manufacturer()
     {
-        return $this->belongsTo(\App\Models\Manufacturer::class, 'manufacturer_id');
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id')->withTrashed();
     }
 
     /**
      * Determine whether the user should be emailed on checkin/checkout
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return bool
      */
     public function checkin_email()
@@ -340,14 +451,37 @@ class License extends Depreciable
         if ($this->category) {
             return $this->category->checkin_email;
         }
+
         return false;
+    }
+
+    public function checkouts()
+    {
+        return $this->assetlog()->where('action_type', '=', 'checkout')
+            ->orderBy('created_at', 'desc')
+            ->withTrashed();
+    }
+
+    public function percentRemaining()
+    {
+        $totalSeats = (int) $this->seats;
+
+        if ($totalSeats <= 0) {
+            return 0;
+        }
+
+        $availableSeats = max(0, min($this->remaincount(), $totalSeats));
+
+        return ($availableSeats / $totalSeats) * 100;
     }
 
     /**
      * Determine whether the user should be required to accept the license
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     *
+     * @since  [v4.0]
+     *
      * @return bool
      */
     public function requireAcceptance()
@@ -360,80 +494,33 @@ class License extends Depreciable
     }
 
     /**
-     * Checks for a category-specific EULA, and if that doesn't exist,
-     * checks for a settings level EULA
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return string | false
-     */
-    public function getEula()
-    {
-        if ($this->category){
-            if ($this->category->eula_text) {
-                return Helper::parseEscapedMarkedown($this->category->eula_text);
-            } elseif ($this->category->use_default_eula == '1') {
-                return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
-            } 
-        }
-
-        return false;
-        
-    }
-
-    /**
      * Establishes the license -> assigned user relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function assignedusers()
     {
-        return $this->belongsToMany(\App\Models\User::class, 'license_seats', 'license_id', 'assigned_to');
+        return $this->belongsToMany(User::class, 'license_seats', 'license_id', 'assigned_to');
     }
 
     /**
      * Establishes the license -> action logs relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function assetlog()
     {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
+        return $this->hasMany(Actionlog::class, 'item_id')
             ->where('item_type', '=', self::class)
             ->orderBy('created_at', 'desc');
-    }
-
-    /**
-     * Establishes the license -> action logs -> uploads relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
-            ->where('item_type', '=', self::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
-
-
-    /**
-     * Establishes the license -> admin user relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     /**
@@ -442,7 +529,9 @@ class License extends Depreciable
      * @todo this can probably be refactored at some point. We don't need counting methods.
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return int
      */
     public static function assetcount()
@@ -451,15 +540,16 @@ class License extends Depreciable
             ->count();
     }
 
-
     /**
      * Return the number of seats for this asset
      *
      * @todo this can also probably be refactored at some point.
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function totalSeatsByLicenseID()
     {
@@ -475,8 +565,10 @@ class License extends Depreciable
      * Otherwise calling "count()" on each model results in n+1 sadness.
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function licenseSeatsRelation()
     {
@@ -487,7 +579,9 @@ class License extends Depreciable
      * Sets the license seat count attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return int
      */
     public function getLicenseSeatsCountAttribute()
@@ -503,7 +597,9 @@ class License extends Depreciable
      * Returns the number of total available seats across all licenses
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return int
      */
     public static function availassetcount()
@@ -517,7 +613,9 @@ class License extends Depreciable
      * Returns the available seats remaining
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
+     *
+     * @since  [v2.0]
+     *
      * @return int
      */
 
@@ -525,22 +623,46 @@ class License extends Depreciable
      * Returns the number of total available seats for this license
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
      */
     public function availCount()
     {
         return $this->licenseSeatsRelation()
             ->whereNull('asset_id')
             ->whereNull('assigned_to')
+            ->where('unreassignable_seat', '=', false)
             ->whereNull('deleted_at');
+    }
+
+    /**
+     * This is really dumb - needs to be refactored, since we have ~3 diff methods that do almost the same thing
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     *
+     * @since  [v2.0]
+     *
+     * @return Relation
+     */
+    public function numRemaining()
+    {
+        return $this->licenseSeatsRelation()
+            ->whereNull('asset_id')
+            ->whereNull('assigned_to')
+            ->where('unreassignable_seat', '=', false)
+            ->whereNull('deleted_at')
+            ->count();
     }
 
     /**
      * Sets the available seats attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
+     *
+     * @since  [v3.0]
+     *
      * @return mixed
      */
     public function getAvailSeatsCountAttribute()
@@ -556,22 +678,28 @@ class License extends Depreciable
      * Retuns the number of assigned seats for this asset
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v3.0]
+     *
+     * @return Relation
      */
     public function assignedCount()
     {
-        return $this->licenseSeatsRelation()->where(function ($query) {
-            $query->whereNotNull('assigned_to')
-                ->orWhereNotNull('asset_id');
-        });
+        return $this->licenseSeatsRelation()->where(
+            function ($query) {
+                $query->whereNotNull('assigned_to')
+                    ->orWhereNotNull('asset_id');
+            }
+        );
     }
 
     /**
      * Sets the assigned seats attribute
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     *
+     * @since  [v1.0]
+     *
      * @return int
      */
     public function getAssignedSeatsCountAttribute()
@@ -584,17 +712,37 @@ class License extends Depreciable
     }
 
     /**
+     * Calculates the number of unreassignable seats
+     *
+     * @author G. Martinez
+     *
+     * @since [v7.1.15]
+     */
+    public static function unReassignableCount($license): int
+    {
+        $count = 0;
+        if (! $license->reassignable) {
+            $count = LicenseSeat::query()->where('unreassignable_seat', '=', true)
+                ->where('license_id', '=', $license->id)
+                ->count();
+        }
+
+        return $count;
+    }
+
+    /**
      * Calculates the number of remaining seats
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
-     * @return int
+     *
+     * @since  [v1.0]
      */
-    public function remaincount()
+    public function remaincount(): int
     {
         $total = $this->licenseSeatsCount;
         $taken = $this->assigned_seats_count;
-        $diff = ($total - $taken);
+        $unreassignable = self::unReassignableCount($this);
+        $diff = ($total - $taken - $unreassignable);
 
         return (int) $diff;
     }
@@ -603,7 +751,9 @@ class License extends Depreciable
      * Returns the total number of seats for this license
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     *
+     * @since  [v1.0]
+     *
      * @return int
      */
     public function totalcount()
@@ -619,39 +769,45 @@ class License extends Depreciable
      * Establishes the license -> seats relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v1.0]
+     *
+     * @return Relation
      */
     public function licenseseats()
     {
-        return $this->hasMany(\App\Models\LicenseSeat::class);
+        return $this->hasMany(LicenseSeat::class);
     }
 
     /**
      * Establishes the license -> supplier relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v1.0]
+     *
+     * @return Relation
      */
     public function supplier()
     {
-        return $this->belongsTo(\App\Models\Supplier::class, 'supplier_id');
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
-
 
     /**
      * Gets the next available free seat - used by
      * the API to populate next_seat
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
+     *
+     * @since  [v3.0]
+     *
      * @return mixed
      */
     public function freeSeat()
     {
-        return  $this->licenseseats()
+        return $this->licenseseats()
             ->whereNull('deleted_at')
+            ->where('unreassignable_seat', '=', false)
             ->where(function ($query) {
                 $query->whereNull('assigned_to')
                     ->whereNull('asset_id');
@@ -660,47 +816,105 @@ class License extends Depreciable
             ->first();
     }
 
-
     /**
      * Establishes the license -> free seats relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v1.0]
+     *
+     * @return Relation
      */
     public function freeSeats()
     {
-        return $this->hasMany(\App\Models\LicenseSeat::class)->whereNull('assigned_to')->whereNull('deleted_at')->whereNull('asset_id');
+        return $this->hasMany(LicenseSeat::class)->whereNull('assigned_to')->whereNull('deleted_at')->whereNull('asset_id');
+    }
+
+    public function scopeActiveLicenses($query)
+    {
+
+        return $query->whereNull('licenses.deleted_at')
+
+            // The termination date is null or within range
+            ->where(function ($query) {
+                $query->whereNull('termination_date')
+                    ->orWhereDate('termination_date', '>', [Carbon::now()]);
+            })
+            ->where(function ($query) {
+                $query->whereNull('expiration_date')
+                    ->orWhereDate('expiration_date', '>', [Carbon::now()]);
+            });
     }
 
     /**
-     * Returns expiring licenses
-     *
-     * @todo should refactor. I don't like get() in model methods
+     * Expiried/terminated licenses scope
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     *
+     * @since  [v1.0]
+     *
+     * @return Relation
+     *
+     * @see SendExpiringLicenseNotifications
      */
-    public static function getExpiringLicenses($days = 60)
+    public function scopeExpiredLicenses($query)
     {
-        $days = (is_null($days)) ? 60 : $days;
+        return $query->whereDate('termination_date', '<=', Carbon::now())// The termination date is null or within range
+            ->orWhere(function ($query) {
+                $query->whereDate('expiration_date', '<=', Carbon::now());
+            })
+            ->whereNull('licenses.deleted_at');
+    }
 
-        return self::whereNotNull('expiration_date')
-            ->whereNull('deleted_at')
-            ->whereRaw('DATE_SUB(`expiration_date`,INTERVAL '.$days.' DAY) <= DATE(NOW()) ')
-            ->where('expiration_date', '>', date('Y-m-d'))
-            ->orderBy('expiration_date', 'ASC')
-            ->get();
+    /**
+     * Expiring/terminating licenses scope
+     *
+     * This checks if:
+     *
+     * 1) The license has not been deleted
+     * 2) The expiration date is between now and the number of days specified
+     * 3) There is an expiration date set and the termination date has not passed
+     * 4) The license termination date is null or has not passed
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     *
+     * @since  [v1.0]
+     *
+     * @return Relation
+     *
+     * @see SendExpiringLicenseNotifications
+     */
+    public function scopeExpiringLicenses($query, $days = 60, $includeExpired = false)
+    {
+        return $query// The termination date is null or within range
+            ->where(function ($query) use ($days) {
+                $query->whereNull('termination_date')
+                    ->orWhereBetween('termination_date', [Carbon::now(), Carbon::now()->addDays($days)]);
+            })
+            ->where(function ($query) use ($days, $includeExpired) {
+                $query->whereNotNull('expiration_date')
+                    // Handle expiring licenses without termination dates
+                    ->where(function ($query) use ($days, $includeExpired) {
+                        $query->whereNull('termination_date')
+                            ->whereBetween('expiration_date', [Carbon::now(), Carbon::now()->addDays($days)])
+                            // include expired licenses if requested
+                            ->when($includeExpired, function ($query) {
+                                $query->orwhereDate('expiration_date', '<=', Carbon::now());
+                            });
+                    })
+                    // Handle expiring licenses with termination dates in the future
+                    ->orWhere(function ($query) use ($days) {
+                        $query->whereBetween('termination_date', [Carbon::now(), Carbon::now()->addDays($days)]);
+                    });
+            });
     }
 
     /**
      * Query builder scope to order on manufacturer
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  string                              $order         Order
-     *
-     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     * @param  Builder  $query  Query builder instance
+     * @param  string  $order  Order
+     * @return Builder Modified query builder
      */
     public function scopeOrderManufacturer($query, $order)
     {
@@ -711,10 +925,9 @@ class License extends Depreciable
     /**
      * Query builder scope to order on supplier
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  string                              $order         Order
-     *
-     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     * @param  Builder  $query  Query builder instance
+     * @param  string  $order  Order
+     * @return Builder Modified query builder
      */
     public function scopeOrderSupplier($query, $order)
     {
@@ -725,10 +938,9 @@ class License extends Depreciable
     /**
      * Query builder scope to order on company
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  text                              $order         Order
-     *
-     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     * @param  Builder  $query  Query builder instance
+     * @param  text  $order  Order
+     * @return Builder Modified query builder
      */
     public function scopeOrderCompany($query, $order)
     {

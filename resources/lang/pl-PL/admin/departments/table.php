@@ -1,11 +1,11 @@
 <?php
 
-return array(
+return [
 
-    'id'                        => 'ID',
-    'name'                      => 'Nazwa wydziału',
-    'manager'                   => 'Menedżer',
-    'location'                  => 'Lokalizacja',
-    'create'                    => 'Utwórz wydział',
-    'update'                    => 'Aktualizuj wydział',
-    );
+    'id' => 'ID',
+    'name' => 'Nazwa oddziału',
+    'manager' => 'Menedżer',
+    'location' => 'Lokalizacja',
+    'create' => 'Utwórz oddział',
+    'update' => 'Aktualizuj oddział',
+];

@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\License;
+use App\Models\Setting;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\JsonResponse;
 
 class LicensesController extends Controller
 {
@@ -17,14 +20,23 @@ class LicensesController extends Controller
      * Display a listing of the resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
      *
+     * @since [v4.0]
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', License::class);
 
-        $licenses = License::with('company', 'manufacturer', 'supplier','category', 'adminuser')->withCount('freeSeats as free_seats_count');
+        $licenses = License::with('company', 'manufacturer', 'supplier', 'category', 'adminuser')->withCount('freeSeats as free_seats_count');
+        $settings = Setting::getSettings();
+
+        if ($request->input('status') == 'inactive') {
+            $licenses->ExpiredLicenses();
+        } elseif ($request->input('status') == 'expiring') {
+            $licenses->ExpiringLicenses($settings->alert_interval);
+        } elseif ($request->input('status') == 'active') {
+            $licenses->ActiveLicenses();
+        }
 
         if ($request->filled('company_id')) {
             $licenses->where('licenses.company_id', '=', $request->input('company_id'));
@@ -74,23 +86,24 @@ class LicensesController extends Controller
             $licenses->where('created_by', '=', $request->input('created_by'));
         }
 
-        if (($request->filled('maintained')) && ($request->input('maintained')=='true')) {
-            $licenses->where('maintained','=',1);
-        } elseif (($request->filled('maintained')) && ($request->input('maintained')=='false')) {
-            $licenses->where('maintained','=',0);
+        if (($request->filled('maintained')) && ($request->input('maintained') == 'true')) {
+            $licenses->where('maintained', '=', 1);
+        } elseif (($request->filled('maintained')) && ($request->input('maintained') == 'false')) {
+            $licenses->where('maintained', '=', 0);
         }
 
-        if (($request->filled('expires')) && ($request->input('expires')=='true')) {
+        if (($request->filled('expires')) && ($request->input('expires') == 'true')) {
             $licenses->whereNotNull('expiration_date');
-        } elseif (($request->filled('expires')) && ($request->input('expires')=='false')) {
+        } elseif (($request->filled('expires')) && ($request->input('expires') == 'false')) {
             $licenses->whereNull('expiration_date');
         }
 
-        if ($request->filled('search')) {
-            $licenses = $licenses->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $licenses->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
-        if ($request->input('deleted')=='true') {
+        if ($request->input('deleted') == 'true') {
             $licenses->onlyTrashed();
         }
 
@@ -101,8 +114,8 @@ class LicensesController extends Controller
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
         switch ($request->input('sort')) {
-                case 'manufacturer':
-                    $licenses = $licenses->leftJoin('manufacturers', 'licenses.manufacturer_id', '=', 'manufacturers.id')->orderBy('manufacturers.name', $order);
+            case 'manufacturer':
+                $licenses = $licenses->leftJoin('manufacturers', 'licenses.manufacturer_id', '=', 'manufacturers.id')->orderBy('manufacturers.name', $order);
                 break;
             case 'supplier':
                 $licenses = $licenses->leftJoin('suppliers', 'licenses.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
@@ -149,6 +162,7 @@ class LicensesController extends Controller
         $total = $licenses->count();
 
         $licenses = $licenses->skip($offset)->take($limit)->get();
+
         return (new LicensesTransformer)->transformLicenses($licenses, $total);
 
     }
@@ -157,10 +171,10 @@ class LicensesController extends Controller
      * Store a newly created resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
      */
-    public function store(Request $request) : JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $this->authorize('create', License::class);
         $license = new License;
@@ -177,9 +191,10 @@ class LicensesController extends Controller
      * Display the specified resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @param  int  $id
      */
-    public function show($id) : JsonResponse | array
+    public function show($id): JsonResponse|array
     {
         $this->authorize('view', License::class);
         $license = License::withCount('freeSeats as free_seats_count')->findOrFail($id);
@@ -192,11 +207,12 @@ class LicensesController extends Controller
      * Update the specified resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  int  $id
      */
-    public function update(Request $request, $id) : JsonResponse | array
+    public function update(Request $request, $id): JsonResponse|array
     {
         //
         $this->authorize('update', License::class);
@@ -215,10 +231,12 @@ class LicensesController extends Controller
      * Remove the specified resource from storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function destroy($id) : JsonResponse
+    public function destroy($id): JsonResponse
     {
         $license = License::findOrFail($id);
         $this->authorize('delete', $license);
@@ -243,9 +261,9 @@ class LicensesController extends Controller
     /**
      * Gets a paginated collection for the select2 menus
      *
-     * @see \App\Http\Transformers\SelectlistTransformer
+     * @see SelectlistTransformer
      */
-    public function selectlist(Request $request) : array
+    public function selectlist(Request $request): array
     {
         $licenses = License::select([
             'licenses.id',
@@ -253,11 +271,23 @@ class LicensesController extends Controller
         ]);
 
         if ($request->filled('search')) {
-            $licenses = $licenses->where('licenses.name', 'LIKE', '%'.$request->get('search').'%');
+            $licenses = $licenses->where('licenses.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $licenses = $licenses->orderBy('name', 'ASC')->paginate(50);
 
         return (new SelectlistTransformer)->transformSelectlist($licenses);
+    }
+
+    public function history(Request $request, License $license): JsonResponse|array
+    {
+        $this->authorize('history', $license);
+        $history = $license->getHistory($request);
+        $total = $license->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

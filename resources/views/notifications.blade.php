@@ -1,5 +1,5 @@
 @if ($errors->any())
-<div class="col-md-12">
+<div class="col-md-12" id="error-notification">
     <div class="alert alert-danger fade in">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
@@ -12,7 +12,7 @@
 
 
 @if ($message = session()->get('status'))
-    <div class="col-md-12">
+    <div class="col-md-12" id="success-notification">
         <div class="alert alert-success fade in">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             <i class="fas fa-check faa-pulse animated"></i>
@@ -24,7 +24,7 @@
 
 
 @if ($message = session()->get('success'))
-<div class="col-md-12">
+<div class="col-md-12" id="success-notification">
     <div class="alert alert-success fade in">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <i class="fas fa-check faa-pulse animated"></i>
@@ -37,7 +37,7 @@
 
 
 @if ($message = session()->get('success-unescaped'))
-    <div class="col-md-12">
+    <div class="col-md-12" id="success-notification">
         <div class="alert alert-success fade in">
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             <i class="fas fa-check faa-pulse animated"></i>
@@ -51,7 +51,7 @@
 
 @if ($assets = session()->get('assets'))
     @foreach ($assets as $asset)
-        <div class="col-md-12">
+        <div class="col-md-12" id="multi-error-notification">
             <div class="alert alert-info fade in">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <i class="fas fa-info-circle faa-pulse animated"></i>
@@ -77,7 +77,7 @@
 
 @if ($consumables = session()->get('consumables'))
     @foreach ($consumables as $consumable)
-        <div class="col-md-12">
+        <div class="col-md-12" id="success-notification">
             <div class="alert alert-info fade in">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <i class="fas fa-info-circle faa-pulse animated"></i>
@@ -145,6 +145,29 @@
             @endforeach
     </div>
 </div>
+@endif
+
+@if ($messages = session()->get('multi_error_messages'))
+    <div class="col-md-12">
+        <div class="alert alert alert-warning fade in">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
+            <strong>{{ trans('general.notification_error') }}: </strong>
+            <ul>
+                @foreach(array_splice($messages, 0,3) as $key => $message)
+                    <li>{{ $message }}</li>
+                @endforeach
+            </ul>
+            <details>
+                <summary>{{ trans('general.show_all') }}</summary>
+                <ul>
+                @foreach(array_splice($messages, 3) as $key => $message)
+                  <li>{{ $message }}</li>
+                @endforeach
+                </ul>
+            </details>
+        </div>
+    </div>
 @endif
 
 

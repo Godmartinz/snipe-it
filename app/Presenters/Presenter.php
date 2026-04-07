@@ -2,6 +2,8 @@
 
 namespace App\Presenters;
 
+use App\Models\Asset;
+use App\Models\Setting;
 use App\Models\SnipeModel;
 
 abstract class Presenter
@@ -13,11 +15,40 @@ abstract class Presenter
 
     /**
      * Presenter constructor.
-     * @param SnipeModel $model
      */
     public function __construct(SnipeModel $model)
     {
         $this->model = $model;
+    }
+
+    public function displayAddress()
+    {
+        $address = '';
+        if ($this->model->address) {
+            $address .= e($this->model->address)."\n";
+        }
+
+        if ($this->model->address2) {
+            $address .= e($this->model->address2)."\n";
+        }
+
+        if ($this->model->city) {
+            $address .= e($this->model->city).', ';
+        }
+
+        if ($this->model->state) {
+            $address .= e($this->model->state).' ';
+        }
+
+        if ($this->model->zip) {
+            $address .= e($this->model->zip).' ';
+        }
+
+        if ($this->model->country) {
+            $address .= e($this->model->country).' ';
+        }
+
+        return $address;
     }
 
     // Convenience functions for datatables stuff
@@ -69,9 +100,29 @@ abstract class Presenter
         return '';
     }
 
-    public function name()
+    /**
+     * Used to take user created URL and dynamically fill in the needed values per item
+     *
+     * @return string
+     */
+    public function dynamicUrl($dynamic_url)
     {
-        return $this->model->name;
+        $url = (str_replace('{LOCALE}', Setting::getSettings()->locale, $dynamic_url));
+
+        if ($this->model instanceof Asset) {
+            $url = (str_replace('{SERIAL}', urlencode($this->model->serial), $url));
+            $url = (str_replace('{MODEL_NAME}', urlencode($this->model->model->name), $url));
+            $url = (str_replace('{MODEL_NUMBER}', urlencode($this->model->model->model_number), $url));
+
+            return $url;
+        }
+
+        $url = (str_replace('{SERIAL}', urlencode($this->serial), $url));
+        $url = (str_replace('{MODEL_NAME}', urlencode($this->model_name), $url));
+        $url = (str_replace('{MODEL_NUMBER}', urlencode($this->model_number), $url));
+
+        return $url;
+
     }
 
     public function __get($property)
@@ -80,7 +131,7 @@ abstract class Presenter
             return $this->{$property}();
         }
 
-        return e($this->model->{$property});
+        return $this->model->{$property};
     }
 
     public function __call($method, $args)

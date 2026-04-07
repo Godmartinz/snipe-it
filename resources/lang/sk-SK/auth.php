@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,6 +15,6 @@ return array(
 
     'failed' => 'Prihlasovacie údaje nezodpovedajú žiadnemu záznamu.',
     'password' => 'Zadané heslo je nesprávne.',
-    'throttle' => 'Priliš veľa pokusov o prihlásenie. Prosím skúste znovu o :seconds sekúnd.',
+    'throttle' => 'Príliš veľa pokusov o prihlásenie. Skúste to znova o :minúty minút.',
 
-);
+];

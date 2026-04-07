@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ Helper::determineLanguageDirection() }}" data-theme="light">
 
 <head>
 
@@ -46,14 +46,14 @@
 <body class="hold-transition login-page">
 
     @if (($snipeSettings) && ($snipeSettings->logo!=''))
-        <center>
-            <a href="{{ config('app.url') }}"><img id="login-logo" src="{{ Storage::disk('public')->url('').e($snipeSettings->logo) }}"></a>
-        </center>
+        <div class="text-center">
+            <a href="{{ config('app.url') }}">
+                <img id="login-logo" src="{{ Storage::disk('public')->url('').e($snipeSettings->logo) }}" alt="{{ $snipeSettings->site_name }}">
+            </a>
+        </div>
     @endif
   <!-- Content -->
   @yield('content')
-
-
 
     <div class="text-center" style="padding-top: 100px;">
         @if (($snipeSettings) && ($snipeSettings->privacy_policy_link!=''))

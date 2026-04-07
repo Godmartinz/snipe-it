@@ -21,13 +21,16 @@ class ConsumableImporter extends ItemImporter
      * Create a consumable if a duplicate does not exist
      *
      * @author Daniel Melzter
-     * @param  array $row CSV Row Being parsed.
+     *
+     * @param  array  $row  CSV Row Being parsed.
+     *
      * @since 3.0
      */
     public function createConsumableIfNotExists($row)
     {
         $consumable = Consumable::where('name', trim($this->item['name']))->first();
         if ($consumable) {
+
             if (! $this->updating) {
                 $this->log('A matching Consumable '.$this->item['name'].' already exists.  ');
 
@@ -39,12 +42,10 @@ class ConsumableImporter extends ItemImporter
 
             return;
         }
+
         $this->log('No matching consumable, creating one');
-        $consumable = new Consumable();
+        $consumable = new Consumable;
         $consumable->created_by = auth()->id();
-        $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
-        $this->item['item_no'] = trim($this->findCsvMatch($row, 'item_number'));
-        $this->item['min_amt'] = trim($this->findCsvMatch($row, "min_amt"));
         $consumable->fill($this->sanitizeItemForStoring($consumable));
 
         // This sets an attribute on the Loggable trait for the action log

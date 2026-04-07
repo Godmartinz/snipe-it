@@ -6,6 +6,7 @@
     'formAction' => (isset($item->id)) ? route('accessories.update', ['accessory' => $item->id]) : route('accessories.store'),
     'index_route' => 'accessories.index',
     'options' => [
+                'back' => trans('admin/hardware/form.redirect_to_type',['type' => trans('general.previous_page')]),
                 'index' => trans('admin/hardware/form.redirect_to_all', ['type' => 'accessories']),
                 'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.accessory')]),
                ]
@@ -22,9 +23,9 @@
 @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
 @include ('partials.forms.edit.model_number')
 @include ('partials.forms.edit.order_number')
-@include ('partials.forms.edit.purchase_date')
-@include ('partials.forms.edit.purchase_cost', ['currency_type' => $item->location->currency ?? null])
-@include ('partials.forms.edit.quantity')
+@include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.purchase_date'),'fieldname' => 'purchase_date'])
+@include ('partials.forms.edit.purchase_cost', ['currency_type' => $item->location->currency ?? null, 'unit_cost' => trans('general.unit_cost')])
+@include ('partials.forms.edit.quantity', ['min' => 0])
 @include ('partials.forms.edit.minimum_quantity')
 @include ('partials.forms.edit.notes')
 @include ('partials.forms.edit.image-upload', ['image_path' => app('accessories_upload_path')])

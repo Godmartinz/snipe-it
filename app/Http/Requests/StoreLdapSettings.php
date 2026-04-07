@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
@@ -18,7 +19,7 @@ class StoreLdapSettings extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -27,12 +28,9 @@ class StoreLdapSettings extends FormRequest
             'ldap_auth_filter_query' => 'not_in:uid=samaccountname|required_if:ldap_enabled,1',
             'ldap_filter' => 'nullable|regex:"^[^(]"|required_if:ldap_enabled,1',
             'ldap_server' => 'nullable|required_if:ldap_enabled,1|starts_with:ldap://,ldaps://',
-            'ldap_uname' => 'nullable|required_if:ldap_enabled,1',
-            'ldap_pword' => 'nullable|required_if:ldap_enabled,1',
             'ldap_basedn' => 'nullable|required_if:ldap_enabled,1',
             'ldap_fname_field' => 'nullable|required_if:ldap_enabled,1',
             'custom_forgot_pass_url' => 'nullable|url',
         ];
     }
-
 }

@@ -2,31 +2,38 @@
 
 @section('title0')
 
-  @if ((Request::get('company_id')) && ($company))
+  @php
+      $requestStatusType = request()->input('status_type');
+      $requestOrderNumber = request()->input('order_number');
+      $requestCompanyId = request()->input('company_id');
+      $requestStatusTypeId = request()->input('status_id');
+  @endphp
+
+  @if (($requestCompanyId) && ($company))
     {{ $company->name }}
   @endif
 
 
 
-@if (Request::get('status'))
-  @if (Request::get('status')=='Pending')
+  @if ($requestStatusType)
+      @if ($requestStatusType=='Pending')
     {{ trans('general.pending') }}
-  @elseif (Request::get('status')=='RTD')
+      @elseif ($requestStatusType=='RTD')
     {{ trans('general.ready_to_deploy') }}
-  @elseif (Request::get('status')=='Deployed')
+      @elseif ($requestStatusType=='Deployed')
     {{ trans('general.deployed') }}
-  @elseif (Request::get('status')=='Undeployable')
+      @elseif ($requestStatusType=='Undeployable')
     {{ trans('general.undeployable') }}
-  @elseif (Request::get('status')=='Deployable')
+      @elseif ($requestStatusType=='Deployable')
     {{ trans('general.deployed') }}
-  @elseif (Request::get('status')=='Requestable')
+      @elseif ($requestStatusType=='Requestable')
     {{ trans('admin/hardware/general.requestable') }}
-  @elseif (Request::get('status')=='Archived')
+      @elseif ($requestStatusType=='Archived')
     {{ trans('general.archived') }}
-  @elseif (Request::get('status')=='Deleted')
-    {{ trans('general.deleted') }}
-  @elseif (Request::get('status')=='byod')
-    {{ trans('general.byod') }}
+      @elseif ($requestStatusType=='Deleted')
+    {{ ucfirst(trans('general.deleted')) }}
+      @elseif ($requestStatusType=='byod')
+    {{ strtoupper(trans('general.byod')) }}
   @endif
 @else
 {{ trans('general.all') }}
@@ -34,7 +41,7 @@
 {{ trans('general.assets') }}
 
   @if (Request::has('order_number'))
-    : Order #{{ strval(Request::get('order_number')) }}
+    : Order #{{ strval($requestOrderNumber) }}
   @endif
 @stop
 
@@ -43,68 +50,18 @@
 @yield('title0')  @parent
 @stop
 
-@section('header_right')
-  <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">
-    {{ trans('admin/hardware/general.custom_export') }}</a>
-  @can('create', \App\Models\Asset::class)
-  <a href="{{ route('hardware.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "n" : ''}} class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
-  @endcan
-
-@stop
 
 {{-- Page content --}}
 @section('content')
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="box">
-      <div class="box-body">
-       
-          <div class="row">
-            <div class="col-md-12">
-
-                @include('partials.asset-bulk-actions', ['status' => Request::get('status')])
-                   
-              <table
-                data-advanced-search="true"
-                data-click-to-select="true"
-                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                data-cookie-id-table="assetsListingTable"
-                data-pagination="true"
-                data-id-table="assetsListingTable"
-                data-search="true"
-                data-search-text="{{ e(Session::get('search')) }}"
-                data-side-pagination="server"
-                data-show-columns="true"
-                data-show-export="true"
-                data-show-footer="true"
-                data-show-refresh="true"
-                data-sort-order="asc"
-                data-sort-name="name"
-                data-show-fullscreen="true"
-                data-toolbar="#assetsBulkEditToolbar"
-                data-bulk-button-id="#bulkAssetEditButton"
-                data-bulk-form-id="#assetsBulkForm"
-                id="assetsListingTable"
-                class="table table-striped snipe-table"
-                data-url="{{ route('api.assets.index',
-                    array('status' => e(Request::get('status')),
-                    'order_number'=>e(strval(Request::get('order_number'))),
-                    'company_id'=>e(Request::get('company_id')),
-                    'status_id'=>e(Request::get('status_id')))) }}"
-                data-export-options='{
-                "fileName": "export{{ (Request::has('status')) ? '-'.str_slug(Request::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-              </table>
-
-            </div><!-- /.col -->
-          </div><!-- /.row -->
-        
-      </div><!-- ./box-body -->
-    </div><!-- /.box -->
-  </div>
-</div>
+    <x-container>
+        <x-box name="assets">
+            <x-table.assets :route="route('api.assets.index',
+                array('status_type' => e($requestStatusType),
+                'order_number'=>e(strval($requestOrderNumber)),
+                'company_id'=>e($requestCompanyId),
+                'status_id'=>e($requestStatusTypeId)))"/>
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

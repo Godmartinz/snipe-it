@@ -12,10 +12,6 @@
 
 @section('content')
 
-@section('header_right')
-<a href="{{ route('fields.index') }}" class="btn btn-primary pull-right">
-  {{ trans('general.back') }}</a>
-@stop
 
 
 {{-- Page content --}}
@@ -46,7 +42,7 @@
               {{ trans('admin/custom_fields/general.field_name') }}
             </label>
             <div class="col-md-8 required">
-                <input class="form-control" aria-label="name" name="name" type="text" value="{{ old('name', $field->name) }}">
+                <input class="form-control" aria-label="name" name="name" type="text" required value="{{ old('name', $field->name) }}">
                 {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
             </div>
           </div>
@@ -58,7 +54,19 @@
             </label>
             <div class="col-md-8 required">
 
-            {!! Form::customfield_elements('element', old('element', $field->element), 'field_element select2 form-control') !!}
+            <x-input.select
+                name="element"
+                :selected="old('element', $field->element)"
+                class="field_element"
+                style="width: 100%;"
+                :options="[
+                    'text' => trans('admin/custom_fields/general.types.text'),
+                    'listbox' => trans('admin/custom_fields/general.types.listbox'),
+                    'textarea' => trans('admin/custom_fields/general.types.textarea'),
+                    'checkbox' => trans('admin/custom_fields/general.types.checkbox'),
+                    'radio' => trans('admin/custom_fields/general.types.radio'),
+                ]"
+            />
             {!! $errors->first('element', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
 
             </div>
@@ -94,7 +102,14 @@
               }
               @endphp
             <div class="col-md-8 required">
-              {{ Form::select("format",Helper::predefined_formats(), ($field_format == '') ? $field->format : $field_format, array('class'=>'format select2 form-control', 'aria-label'=>'format', 'style' => 'width:100%;')) }}
+                <x-input.select
+                    name="format"
+                    :options="Helper::predefined_formats()"
+                    :selected="($field_format == '') ? $field->format : $field_format"
+                    class="format form-control"
+                    style="width:100%"
+                    aria-label="format"
+                />
               {!! $errors->first('format', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
             </div>
           </div>
@@ -104,7 +119,7 @@
               {{ trans('admin/custom_fields/general.field_custom_format') }}
             </label>
             <div class="col-md-8 required">
-                <input class="form-control" id="custom_format" aria-label="custom_format" placeholder="regex:/^[0-9]{15}$/" name="custom_format" type="text" value="{{ old('custom_format', (($field->format!='') && (stripos($field->format,'regex')===0)) ? $field->format : '') }}">
+                <input class="form-control" id="custom_format" aria-label="custom_format" maxlength="191" placeholder="regex:/^[0-9]{15}$/" name="custom_format" type="text" value="{{ old('custom_format', (($field->format!='') && (stripos($field->format,'regex')===0)) ? $field->format : '') }}">
                 <p class="help-block">{!! trans('admin/custom_fields/general.field_custom_format_help') !!}</p>
 
               {!! $errors->first('custom_format', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
@@ -214,6 +229,14 @@
                  <label class="form-control">
                      <input type="checkbox" name="display_checkin" aria-label="display_checkin" value="1" {{ (old('display_checkin') || $field->display_checkin) ? ' checked="checked"' : '' }}>
                      {{ trans('admin/custom_fields/general.display_checkin') }}
+                 </label>
+             </div>
+
+             <!-- Show in Audit Form  -->
+             <div class="col-md-9 col-md-offset-3" id="display_audit" style="padding-bottom: 10px;">
+                 <label class="form-control">
+                     <input type="checkbox" name="display_audit" aria-label="display_audit" value="1" {{ (old('display_audit') || $field->display_audit) ? ' checked="checked"' : '' }}>
+                     {{ trans('admin/custom_fields/general.display_audit') }}
                  </label>
              </div>
 

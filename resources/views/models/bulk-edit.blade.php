@@ -2,15 +2,10 @@
 
 {{-- Page title --}}
 @section('title')
-    Bulk Edit
+    {{ trans('general.bluk_edit') }}
     @parent
 @stop
 
-
-@section('header_right')
-    <a href="{{ URL::previous() }}" class="btn btn-sm btn-primary pull-right">
-        {{ trans('general.back') }}</a>
-@stop
 
 {{-- Page content --}}
 @section('content')
@@ -29,22 +24,21 @@
                         </div>
 
 
-                        <table class="table">
-                            <tbody>
-                        @foreach ($models as $model)
+                        <table class="table table-striped">
+                            @foreach ($models as $model)
 
-                            <tr{!!  (($model->assets_count > 0 ) ? ' class="warning"' : ' class="success"') !!}>
-                                    <td>
-                                        <i class="fa {!!  (($model->assets_count > 0 ) ? 'fa-warning info' : 'fa-check success') !!}"></i>
-                                        {{ $model->display_name }}
+                                <tr>
+                                        <td>
+                                            <i class="fa {!!  (($model->assets_count > 0 ) ? 'fa-warning text-warning fa-fw' : 'fa-check fa-fw text-success') !!}"></i>
+                                            {{ $model->display_name }}
 
-                                            @if ($model->model_number)
-                                                ({{ $model->model_number }})
-                                            @endif
+                                                @if ($model->model_number)
+                                                    ({{ $model->model_number }})
+                                                @endif
+                                            </td>
+                                            <td>{{ $model->assets_count }} assets
                                         </td>
-                                        <td>{{ $model->assets_count }} assets
-                                    </td>
-                            </tr>
+                                </tr>
 
                         @endforeach
                         </table>
@@ -62,7 +56,13 @@
                                     {{ trans('admin/models/general.fieldset') }}
                                 </label>
                                 <div class="col-md-7">
-                                    {{ Form::select('fieldset_id', $fieldset_list , old('fieldset_id', 'NC'), array('class'=>'select2 js-fieldset-field', 'style'=>'width:350px')) }}
+                                    <x-input.select
+                                        name="fieldset_id"
+                                        :options="$fieldset_list"
+                                        :selected="old('fieldset_id', 'NC')"
+                                        class="js-fieldset-field"
+                                        style="width:350px"
+                                    />
                                     {!! $errors->first('fieldset_id', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
                                 </div>
                             </div>
@@ -74,8 +74,30 @@
                                     {{ trans('general.depreciation') }}
                                 </label>
                                 <div class="col-md-7">
-                                    {{ Form::select('depreciation_id', $depreciation_list , old('depreciation_id', 'NC'), array('class'=>'select2', 'style'=>'width:350px')) }}
+                                    <x-input.select
+                                        name="depreciation_id"
+                                        :options="$depreciation_list"
+                                        :selected="old('depreciation_id', 'NC')"
+                                        style="width:350px"
+                                    />
                                     {!! $errors->first('depreciation_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
+
+                            @include ('partials.forms.edit.minimum_quantity')
+                            <!-- require serial boolean -->
+                            <div class="form-group">
+                                <label for="require_serial" class="col-md-3 control-label">
+                                    {{ trans('admin/hardware/general.require_serial') }}
+                                </label>
+
+                                <div class="col-md-9">
+                                    <div class="form-inline" style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" name="require_serial" value="1" id="require_serial" aria-label="require_serial" />
+                                        <x-form.tooltip>
+                                            {{ trans('admin/hardware/general.require_serial_help') }}
+                                        </x-form.tooltip>
+                                    </div>
                                 </div>
                             </div>
 
@@ -108,7 +130,7 @@
 
                     <div class="box-footer text-right">
                         <a class="btn btn-link pull-left" href="{{ URL::previous() }}" method="post" enctype="multipart/form-data">{{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-success" id="submit-button"><x-icon type="checkmark" /> {{ trans('general.update') }}</button>
+                        <button type="submit" class="btn btn-success" id="submit-button"><x-icon type="checkmark" /> {{ trans('general.save') }}</button>
                     </div><!-- /.box-footer -->
                 </div> <!--/.box.box-default-->
             </form>

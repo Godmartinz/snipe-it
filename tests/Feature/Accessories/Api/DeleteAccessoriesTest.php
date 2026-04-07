@@ -5,13 +5,14 @@ namespace Tests\Feature\Accessories\Api;
 use App\Models\Accessory;
 use App\Models\Company;
 use App\Models\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
 
 class DeleteAccessoriesTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $accessory = Accessory::factory()->create();
 
@@ -22,7 +23,7 @@ class DeleteAccessoriesTest extends TestCase implements TestsFullMultipleCompani
         $this->assertNotSoftDeleted($accessory);
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
@@ -53,9 +54,17 @@ class DeleteAccessoriesTest extends TestCase implements TestsFullMultipleCompani
         $this->assertSoftDeleted($accessoryC);
     }
 
-    public function testCannotDeleteAccessoryThatHasCheckouts()
+    public static function checkedOutAccessories()
     {
-        $accessory = Accessory::factory()->checkedOutToUser()->create();
+        yield 'checked out to user' => [fn () => Accessory::factory()->checkedOutToUser()->create()];
+        yield 'checked out to asset' => [fn () => Accessory::factory()->checkedOutToAsset()->create()];
+        yield 'checked out to location' => [fn () => Accessory::factory()->checkedOutToLocation()->create()];
+    }
+
+    #[DataProvider('checkedOutAccessories')]
+    public function test_cannot_delete_accessory_that_has_checkouts($data)
+    {
+        $accessory = $data();
 
         $this->actingAsForApi(User::factory()->deleteAccessories()->create())
             ->deleteJson(route('api.accessories.destroy', $accessory))
@@ -64,7 +73,7 @@ class DeleteAccessoriesTest extends TestCase implements TestsFullMultipleCompani
         $this->assertNotSoftDeleted($accessory);
     }
 
-    public function testCanDeleteAccessory()
+    public function test_can_delete_accessory()
     {
         $accessory = Accessory::factory()->create();
 

@@ -4,22 +4,27 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAssetModelRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetModelsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Asset;
 use App\Models\AssetModel;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * This class controls all actions related to asset models for
  * the Snipe-IT Asset Management application.
  *
  * @version    v4.0
+ *
  * @author [A. Gianotto] [<snipe@snipe.net>]
  */
 class AssetModelsController extends Controller
@@ -28,9 +33,10 @@ class AssetModelsController extends Controller
      * Display a listing of the resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('view', AssetModel::class);
         $allowed_columns =
@@ -46,10 +52,20 @@ class AssetModelsController extends Controller
                 'manufacturer',
                 'requestable',
                 'assets_count',
+                'assets_assigned_count',
+                'assets_archived_count',
+                'remaining',
                 'category',
                 'fieldset',
                 'deleted_at',
                 'updated_at',
+                'require_serial',
+                // These are *relationships* so we wouldn't normally include them in this array,
+                // since they would normally create a `column not found` error,
+                // BUT we account for them in the ordering switch down at the end of this method
+                // DO NOT ADD ANYTHING TO THIS LIST WITHOUT CHECKING THE ORDERING SWITCH BELOW!
+                'manufacturer',
+                'category',
             ];
 
         $assetmodels = AssetModel::select([
@@ -69,11 +85,20 @@ class AssetModelsController extends Controller
             'models.fieldset_id',
             'models.deleted_at',
             'models.updated_at',
-         ])
+            'models.require_serial',
+        ])
             ->with('category', 'depreciation', 'manufacturer', 'fieldset.fields.defaultValues', 'adminuser')
-            ->withCount('assets as assets_count');
+            ->withCount('assets as assets_count')
+            ->withCount('availableAssets as remaining')
+            ->withCount('assignedAssets as assets_assigned_count')
+            ->withCount('archivedAssets as assets_archived_count');
 
-        if ($request->input('status')=='deleted') {
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $assetmodels->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
+        }
+
+        if ($request->input('status') == 'deleted') {
             $assetmodels->onlyTrashed();
         }
 
@@ -83,6 +108,12 @@ class AssetModelsController extends Controller
 
         if ($request->filled('model_number')) {
             $assetmodels = $assetmodels->where('models.model_number', '=', $request->input('model_number'));
+        }
+
+        if ($request->input('requestable') == 'true') {
+            $assetmodels = $assetmodels->where('models.requestable', '=', '1');
+        } elseif ($request->input('requestable') == 'false') {
+            $assetmodels = $assetmodels->where('models.requestable', '=', '0');
         }
 
         if ($request->filled('notes')) {
@@ -132,15 +163,14 @@ class AssetModelsController extends Controller
         return (new AssetModelsTransformer)->transformAssetModels($assetmodels, $total);
     }
 
-
     /**
      * Store a newly created resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \App\Http\Requests\StoreAssetModelRequest  $request
      */
-    public function store(StoreAssetModelRequest $request) : JsonResponse
+    public function store(StoreAssetModelRequest $request): JsonResponse
     {
         $this->authorize('create', AssetModel::class);
         $assetmodel = new AssetModel;
@@ -148,10 +178,10 @@ class AssetModelsController extends Controller
         $assetmodel = $request->handleImages($assetmodel);
 
         if ($assetmodel->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $assetmodel, trans('admin/models/message.create.success')));
+            return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.create.success')));
         }
-        return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));
 
+        return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));
 
     }
 
@@ -159,10 +189,12 @@ class AssetModelsController extends Controller
      * Display the specified resource.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function show($id) :  array
+    public function show($id): array
     {
         $this->authorize('view', AssetModel::class);
         $assetmodel = AssetModel::withCount('assets as assets_count')->findOrFail($id);
@@ -174,10 +206,12 @@ class AssetModelsController extends Controller
      * Display the specified resource's assets
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function assets($id) : array
+    public function assets($id): array
     {
         $this->authorize('view', AssetModel::class);
         $assets = Asset::where('model_id', '=', $id)->get();
@@ -185,23 +219,24 @@ class AssetModelsController extends Controller
         return (new AssetsTransformer)->transformAssets($assets, $assets->count());
     }
 
-
     /**
      * Update the specified resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
-     * @param  \App\Http\Requests\ImageUploadRequest  $request
+     *
+     * @param  ImageUploadRequest  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(StoreAssetModelRequest $request, $id) : JsonResponse
+    public function update(StoreAssetModelRequest $request, $id): JsonResponse
     {
         $this->authorize('update', AssetModel::class);
         $assetmodel = AssetModel::findOrFail($id);
         $assetmodel->fill($request->all());
         $assetmodel = $request->handleImages($assetmodel);
-        
+
         /**
          * Allow custom_fieldset_id to override and populate fieldset_id.
          * This is stupid, but required for legacy API support.
@@ -211,12 +246,11 @@ class AssetModelsController extends Controller
          * it, but I'll be damned if I can think of one. - snipe
          */
         if ($request->filled('custom_fieldset_id')) {
-            $assetmodel->fieldset_id = $request->get('custom_fieldset_id');
+            $assetmodel->fieldset_id = $request->input('custom_fieldset_id');
         }
 
-
         if ($assetmodel->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $assetmodel, trans('admin/models/message.update.success')));
+            return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.update.success')));
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));
@@ -226,10 +260,12 @@ class AssetModelsController extends Controller
      * Remove the specified resource from storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0]
+     *
      * @param  int  $id
      */
-    public function destroy($id) : JsonResponse
+    public function destroy($id): JsonResponse
     {
         $this->authorize('delete', AssetModel::class);
         $assetmodel = AssetModel::findOrFail($id);
@@ -256,10 +292,11 @@ class AssetModelsController extends Controller
      * Gets a paginated collection for the select2 menus
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     *
      * @since [v4.0.16]
-     * @see \App\Http\Transformers\SelectlistTransformer
+     * @see SelectlistTransformer
      */
-    public function selectlist(Request $request) : array
+    public function selectlist(Request $request): array
     {
 
         $this->authorize('view.selectlists');
@@ -272,7 +309,7 @@ class AssetModelsController extends Controller
             'models.category_id',
         ])->with('manufacturer', 'category');
 
-        $settings = \App\Models\Setting::getSettings();
+        $settings = Setting::getSettings();
 
         if ($request->filled('search')) {
             $assetmodels = $assetmodels->SearchByManufacturerOrCat($request->input('search'));
@@ -301,5 +338,17 @@ class AssetModelsController extends Controller
         }
 
         return (new SelectlistTransformer)->transformSelectlist($assetmodels);
+    }
+
+    public function history(Request $request, AssetModel $model): JsonResponse|array
+    {
+        $this->authorize('history', $model);
+        $history = $model->getHistory($request);
+        $total = $model->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

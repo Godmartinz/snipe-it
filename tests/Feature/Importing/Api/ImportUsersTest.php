@@ -24,7 +24,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
 
     protected function importFileResponse(array $parameters = []): TestResponse
     {
-        if (!array_key_exists('import-type', $parameters)) {
+        if (! array_key_exists('import-type', $parameters)) {
             $parameters['import-type'] = 'user';
         }
 
@@ -32,7 +32,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAsForApi(User::factory()->create());
 
@@ -40,7 +40,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function userWithImportAssetsPermissionCanImportUsers(): void
+    public function user_with_import_assets_permission_can_import_users(): void
     {
         $this->actingAsForApi(User::factory()->canImport()->create());
 
@@ -50,7 +50,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function importUsers(): void
+    public function import_users(): void
     {
         Notification::fake();
 
@@ -62,9 +62,9 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->importFileResponse(['import' => $import->id, 'send-welcome' => 1])
             ->assertOk()
             ->assertExactJson([
-                'payload'  => null,
-                'status'   => 'success',
-                'messages' => ['redirect_url' => route('users.index')]
+                'payload' => null,
+                'status' => 'success',
+                'messages' => ['redirect_url' => route('users.index')],
             ]);
 
         $newUser = User::query()
@@ -77,12 +77,13 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals($row['email'], $newUser->email);
         $this->assertEquals($row['firstName'], $newUser->first_name);
         $this->assertEquals($row['lastName'], $newUser->last_name);
+        $this->assertEquals($row['displayName'], $newUser->display_name);
         $this->assertEquals($row['employeeNumber'], $newUser->employee_num);
         $this->assertEquals($row['companyName'], $newUser->company->name);
         $this->assertEquals($row['location'], $newUser->location->name);
         $this->assertEquals($row['phoneNumber'], $newUser->phone);
         $this->assertEquals($row['position'], $newUser->jobtitle);
-        $this->assertTrue(Hash::isHashed($newUser->password));
+        $this->assertFalse(Hash::isHashed($newUser->password));
         $this->assertEquals('', $newUser->website);
         $this->assertEquals('', $newUser->country);
         $this->assertEquals('', $newUser->address);
@@ -117,7 +118,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function willIgnoreUnknownColumnsWhenFileContainsUnknownColumns(): void
+    public function will_ignore_unknown_columns_when_file_contains_unknown_columns(): void
     {
         $row = ImportFileBuilder::new()->definition();
         $row['unknownColumnInCsvFile'] = 'foo';
@@ -132,7 +133,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function willNotCreateNewUserWhenUserWithUserNameAlreadyExist(): void
+    public function will_not_create_new_user_when_user_with_user_name_already_exist(): void
     {
         $user = User::factory()->create(['username' => Str::random()]);
         $importFileBuilder = ImportFileBuilder::times(4)->replace(['username' => $user->username]);
@@ -149,7 +150,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function willGenerateUsernameWhenUsernameFieldIsMissing(): void
+    public function will_generate_username_when_username_field_is_missing(): void
     {
         $importFileBuilder = ImportFileBuilder::new()->forget('username');
         $row = $importFileBuilder->firstRow();
@@ -168,7 +169,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function willUpdateLocationOfAllAssetsAssignedToUser(): void
+    public function will_update_location_of_all_assets_assigned_to_user(): void
     {
         $user = User::factory()->create(['username' => Str::random()]);
         $assetsAssignedToUser = Asset::factory()->create(['assigned_to' => $user->id, 'assigned_type' => User::class]);
@@ -187,7 +188,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function whenRequiredColumnsAreMissingInImportFile(): void
+    public function when_required_columns_are_missing_in_import_file(): void
     {
         $importFileBuilder = ImportFileBuilder::new(['firstName' => ''])->forget(['username']);
         $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
@@ -197,15 +198,15 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->importFileResponse(['import' => $import->id])
             ->assertInternalServerError()
             ->assertExactJson([
-                'status'   => 'import-errors',
-                'payload'  => null,
+                'status' => 'import-errors',
+                'payload' => null,
                 'messages' => [
                     '' => [
                         'User' => [
                             'first_name' => ['The first name field is required.'],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
         $newUsers = User::query()
@@ -216,10 +217,10 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     }
 
     #[Test]
-    public function updateUserFromImport(): void
+    public function update_user_from_import(): void
     {
         $user = User::factory()->create(['username' => Str::random()])->refresh();
-        $importFileBuilder = ImportFileBuilder::new(['username'  => $user->username]);
+        $importFileBuilder = ImportFileBuilder::new(['username' => $user->username]);
 
         $row = $importFileBuilder->firstRow();
         $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
@@ -229,12 +230,22 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
 
         $updatedUser = User::query()->with(['company', 'location'])->find($user->id);
         $updatedAttributes = [
-            'first_name', 'email', 'last_name', 'employee_num', 'company',
-            'location_id', 'company_id', 'updated_at', 'phone', 'jobtitle'
+            'first_name',
+            'display_name',
+            'email',
+            'last_name',
+            'employee_num',
+            'company',
+            'location_id',
+            'company_id',
+            'updated_at',
+            'phone',
+            'jobtitle',
         ];
 
         $this->assertEquals($row['email'], $updatedUser->email);
         $this->assertEquals($row['firstName'], $updatedUser->first_name);
+        $this->assertEquals($row['displayName'], $updatedUser->display_name);
         $this->assertEquals($row['lastName'], $updatedUser->last_name);
         $this->assertEquals($row['employeeNumber'], $updatedUser->employee_num);
         $this->assertEquals($row['companyName'], $updatedUser->company->name);
@@ -249,20 +260,24 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         );
     }
 
+    /**
+     * Some of these should mismatch on purpose to ensure the mapping is working
+     */
     #[Test]
-    public function customColumnMapping(): void
+    public function custom_column_mapping(): void
     {
         $faker = ImportFileBuilder::new()->definition();
         $row = [
-            'companyName'    => $faker['username'],
-            'email'          => $faker['position'],
+            'companyName' => $faker['username'],
+            'email' => $faker['position'],
             'employeeNumber' => $faker['phoneNumber'],
-            'firstName'       => $faker['location'],
-            'lastName'       => $faker['lastName'],
-            'location'       => $faker['firstName'],
-            'phoneNumber'    => $faker['employeeNumber'],
-            'position'       => $faker['email'],
-            'username'       => $faker['companyName'],
+            'firstName' => $faker['location'],
+            'lastName' => $faker['lastName'],
+            'location' => $faker['firstName'],
+            'phoneNumber' => $faker['employeeNumber'],
+            'position' => $faker['email'],
+            'username' => $faker['companyName'],
+            'dumbName' => $faker['displayName'],
         ];
 
         $importFileBuilder = new ImportFileBuilder([$row]);
@@ -273,17 +288,19 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->importFileResponse([
             'import' => $import->id,
             'column-mappings' => [
-                'Company'         => 'username',
-                'email'           => 'jobtitle',
+                'Company' => 'username',
+                'email' => 'jobtitle',
                 'Employee Number' => 'phone_number',
-                'First Name'      => 'location',
-                'Last Name'       => 'last_name',
-                'Location'        => 'first_name',
-                'Phone Number'    => 'employee_num',
-                'Job Title'       => 'email',
-                'Username'        => 'company',
-            ]
-        ])->assertOk();
+                'First Name' => 'location',
+                'Last Name' => 'last_name',
+                'Location' => 'first_name',
+                'Phone Number' => 'employee_num',
+                'Job Title' => 'email',
+                'Username' => 'company',
+                'dumbName' => 'display_name',
+            ],
+        ])->assertOk()
+            ->json();
 
         $newUser = User::query()
             ->with(['company', 'location'])
@@ -293,12 +310,13 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals($row['position'], $newUser->email);
         $this->assertEquals($row['location'], $newUser->first_name);
         $this->assertEquals($row['lastName'], $newUser->last_name);
+        $this->assertEquals($row['dumbName'], $newUser->display_name);
         $this->assertEquals($row['email'], $newUser->jobtitle);
         $this->assertEquals($row['phoneNumber'], $newUser->employee_num);
         $this->assertEquals($row['username'], $newUser->company->name);
         $this->assertEquals($row['firstName'], $newUser->location->name);
         $this->assertEquals($row['employeeNumber'], $newUser->phone);
-        $this->assertTrue(Hash::isHashed($newUser->password));
+        $this->assertFalse(Hash::isHashed($newUser->password));
         $this->assertEquals('', $newUser->website);
         $this->assertEquals('', $newUser->country);
         $this->assertEquals('', $newUser->address);

@@ -9,6 +9,7 @@ class AccessoryPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout()
@@ -21,12 +22,20 @@ class AccessoryPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
+                'printIgnore' => true,
+            ], [
+                'field' => 'name',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'formatter' => 'accessoriesLinkFormatter',
             ], [
                 'field' => 'image',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' => trans('admin/hardware/table.image'),
+                'title' => trans('general.image'),
                 'visible' => true,
                 'formatter' => 'imageFormatter',
             ], [
@@ -37,18 +46,11 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('admin/companies/table.title'),
                 'visible' => false,
                 'formatter' => 'companiesLinkObjFormatter',
-            ], [
-                'field' => 'name',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => false,
-                'title' => trans('general.name'),
-                'formatter' => 'accessoriesLinkFormatter',
-            ], [
+            ],  [
                 'field' => 'category',
                 'searchable' => true,
                 'sortable' => true,
-                'title' => trans('admin/accessories/general.accessory_category'),
+                'title' => trans('general.category'),
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
                 'field' => 'model_number',
@@ -79,28 +81,45 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('general.location'),
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
+                'field' => 'min_amt',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.min_amt'),
+                'formatter' => 'minAmtFormatter',
+                'class' => 'text-right text-padding-number-cell',
+            ], [
                 'field' => 'qty',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/accessories/general.total'),
+                'footerFormatter' => 'qtySumFormatter',
+                'class' => 'text-right text-padding-number-cell',
             ], [
-                'field' => 'remaining_qty',
+                'field' => 'remaining',
                 'searchable' => false,
                 'sortable' => false,
                 'visible' => false,
                 'title' => trans('admin/accessories/general.remaining'),
-            ],[
+                'footerFormatter' => 'qtySumFormatter',
+                'class' => 'text-right text-padding-number-cell',
+            ], [
                 'field' => 'checkouts_count',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => true,
                 'title' => trans('general.checked_out'),
+                'footerFormatter' => 'qtySumFormatter',
+                'class' => 'text-right text-padding-number-cell',
             ], [
-                'field' => 'min_qty',
+                'field' => 'percent_remaining',
                 'searchable' => false,
-                'sortable' => true,
-                'title' => trans('general.min_amt'),
-            ], [
+                'sortable' => false,
+                'switchable' => true,
+                'title' => '% '.trans('general.remaining'),
+                'visible' => true,
+                'formatter' => 'progressBarFormatter',
+            ],
+            [
                 'field' => 'purchase_date',
                 'searchable' => true,
                 'sortable' => true,
@@ -111,22 +130,28 @@ class AccessoryPresenter extends Presenter
                 'field' => 'purchase_cost',
                 'searchable' => true,
                 'sortable' => true,
-                'title' => trans('general.purchase_cost'),
+                'title' => trans('general.unit_cost'),
+                'class' => 'text-right text-padding-number-cell',
+            ], [
+                'field' => 'total_cost',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.total_cost'),
                 'footerFormatter' => 'sumFormatterQuantity',
-                'class' => 'text-right',
+                'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'order_number',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.order_number'),
-            ],[
+            ], [
                 'field' => 'notes',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
-                'formatter' => 'notesFormatter'
+                'formatter' => 'notesFormatter',
             ], [
                 'field' => 'created_by',
                 'searchable' => false,
@@ -157,6 +182,7 @@ class AccessoryPresenter extends Presenter
                 'visible' => true,
                 'title' => trans('general.change'),
                 'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
             ], [
                 'field' => 'available_actions',
                 'searchable' => false,
@@ -164,12 +190,13 @@ class AccessoryPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesActionsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
         return json_encode($layout);
     }
-
 
     public static function assignedDataTableLayout()
     {
@@ -181,15 +208,6 @@ class AccessoryPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
-            ],
-            [
-                'field' => 'assigned_to.image',
-                'searchable' => false,
-                'sortable' => false,
-                'switchable' => true,
-                'title' => trans('general.image'),
-                'visible' => true,
-                'formatter' => 'imageFormatter',
             ],
             [
                 'field' => 'assigned_to',
@@ -221,7 +239,7 @@ class AccessoryPresenter extends Presenter
                 'field' => 'created_by',
                 'searchable' => false,
                 'sortable' => false,
-                'title' => trans('general.admin'),
+                'title' => trans('general.created_by'),
                 'visible' => false,
                 'formatter' => 'usersLinkObjFormatter',
             ],
@@ -232,6 +250,78 @@ class AccessoryPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+        ];
+
+        return json_encode($layout);
+    }
+
+    public static function assignedDataTableLayoutForObject()
+    {
+        $layout = [
+            [
+                'field' => 'id',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.id'),
+                'visible' => false,
+            ],
+
+            [
+                'field' => 'accessory',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'accessoriesLinkObjFormatter',
+            ],
+            [
+                'field' => 'image',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
+            ],
+            [
+                'field' => 'note',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('admin/hardware/table.checkout_date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
+                'field' => 'available_actions',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -240,15 +330,21 @@ class AccessoryPresenter extends Presenter
 
     /**
      * Pregenerated link to this accessories view page.
+     *
      * @return string
      */
     public function nameUrl()
     {
-        return (string) link_to_route('accessories.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Accessory', $this])) {
+            return '<a href="'.route('accessories.show', $this->id).'">'.e($this->display_name).'</a>';
+        } else {
+            return e($this->display_name);
+        }
     }
 
     /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()

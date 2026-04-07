@@ -3,13 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Mail\UnacceptedAssetReminderMail;
+use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
-use App\Models\Setting;
+use App\Models\Component;
+use App\Models\Consumable;
+use App\Models\LicenseSeat;
 use App\Models\User;
-use App\Notifications\CheckoutAssetNotification;
-use App\Notifications\CurrentInventory;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Mail;
 
 class SendAcceptanceReminder extends Command
@@ -26,7 +28,7 @@ class SendAcceptanceReminder extends Command
      *
      * @var string
      */
-    protected $description = 'This will resend users with unaccepted assets a reminder to accept or decline them.';
+    protected $description = 'This will resend users with unaccepted items a reminder to accept or decline them.';
 
     /**
      * Create a new command instance.
@@ -45,28 +47,39 @@ class SendAcceptanceReminder extends Command
      */
     public function handle()
     {
-        $pending = CheckoutAcceptance::pending()->where('checkoutable_type', 'App\Models\Asset')
-                                                ->whereHas('checkoutable', function($query) {
-                                                    $query->where('accepted_at', null)
-                                                          ->where('declined_at', null);
-                                                })
-                                                ->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model', 'checkoutable.adminuser'])
-                                                ->get();
+        $pending = CheckoutAcceptance::query()
+            ->with([
+                'checkoutable' => function (MorphTo $morph) {
+                    $morph->morphWith([
+                        Asset::class => ['model.category', 'assignedTo', 'adminuser', 'company', 'checkouts'],
+                        Accessory::class => ['category', 'company', 'checkouts'],
+                        LicenseSeat::class => ['user', 'license', 'checkouts'],
+                        Component::class => ['assignedTo', 'company', 'checkouts'],
+                        Consumable::class => ['company', 'checkouts'],
+                    ]);
+                },
+                'assignedTo',
+            ])
+            ->whereHasMorph(
+                'checkoutable',
+                [Asset::class, Accessory::class, LicenseSeat::class, Component::class, Consumable::class],
+                fn ($q) => $q->whereNull('accepted_at')
+                    ->whereNull('declined_at')
+            )
+            ->pending()
+            ->get();
 
         $count = 0;
         $unacceptedAssetGroups = $pending
-            ->filter(function($acceptance) {
-                return $acceptance->checkoutable_type == 'App\Models\Asset';
-            })
-            ->map(function($acceptance) {
+            ->map(function ($acceptance) {
                 return ['assetItem' => $acceptance->checkoutable, 'acceptance' => $acceptance];
             })
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return $item['acceptance']->assignedTo ? $item['acceptance']->assignedTo->id : '';
             });
-            $no_email_list= [];
+        $no_email_list = [];
 
-        foreach($unacceptedAssetGroups as $unacceptedAssetGroup) {
+        foreach ($unacceptedAssetGroups as $unacceptedAssetGroup) {
             // The [0] is weird, but it allows for the item_count to work and grabs the appropriate info for each user.
             // Collapsing and flattening the collection doesn't work above.
             $acceptance = $unacceptedAssetGroup[0]['acceptance'];
@@ -74,10 +87,10 @@ class SendAcceptanceReminder extends Command
             $locale = $acceptance->assignedTo?->locale;
             $email = $acceptance->assignedTo?->email;
 
-            if(!$email){
+            if (! $email) {
                 $no_email_list[] = [
                     'id' => $acceptance->assignedTo?->id,
-                    'name' => $acceptance->assignedTo?->present()->fullName(),
+                    'name' => $acceptance->assignedTo?->display_name,
                 ];
             } else {
                 $count++;
@@ -99,10 +112,12 @@ class SendAcceptanceReminder extends Command
         foreach ($no_email_list as $user) {
             $rows[] = [$user['id'], $user['name']];
         }
-        $this->info("The following users do not have an email address:");
-        $this->table($headers, $rows);
+
+        if (! empty($rows)) {
+            $this->info('The following users do not have an email address:');
+            $this->table($headers, $rows);
+        }
 
         return 0;
     }
-
 }

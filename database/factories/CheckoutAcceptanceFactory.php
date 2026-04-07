@@ -24,9 +24,25 @@ class CheckoutAcceptanceFactory extends Factory
         ];
     }
 
+    protected static bool $skipActionLog = false;
+
+    public function withoutActionLog(): static
+    {
+        // turn off for this create() call
+        static::$skipActionLog = true;
+
+        // ensure it turns back on AFTER creating
+        return $this->afterCreating(function () {
+            static::$skipActionLog = false;
+        });
+    }
+
     public function configure(): static
     {
         return $this->afterCreating(function (CheckoutAcceptance $acceptance) {
+            if (static::$skipActionLog) {
+                return; // short-circuit
+            }
             if ($acceptance->checkoutable instanceof Asset) {
                 $this->createdAssociatedActionLogEntry($acceptance);
             }
@@ -62,6 +78,24 @@ class CheckoutAcceptanceFactory extends Factory
             'accepted_at' => now()->subDay(),
             'declined_at' => null,
         ]);
+    }
+
+    public function withoutAlerting()
+    {
+        return $this->state(function () {
+            return [
+                'alert_on_response_id' => null,
+            ];
+        });
+    }
+
+    public function withAlertingTo(User $user)
+    {
+        return $this->state(function () use ($user) {
+            return [
+                'alert_on_response_id' => $user->id,
+            ];
+        });
     }
 
     private function createdAssociatedActionLogEntry(CheckoutAcceptance $acceptance): void

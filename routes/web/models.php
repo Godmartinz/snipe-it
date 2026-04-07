@@ -1,26 +1,14 @@
 <?php
 
 use App\Http\Controllers\AssetModelsController;
-use App\Http\Controllers\AssetModelsFilesController;
 use App\Http\Controllers\BulkAssetModelsController;
 use Illuminate\Support\Facades\Route;
+use Tabuna\Breadcrumbs\Trail;
 
 // Asset Model Management
 
 
 Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
-
-    Route::post('{model}/upload',
-        [AssetModelsFilesController::class, 'store']
-    )->name('upload/models')->withTrashed();
-
-    Route::get('{model}/showfile/{fileId}/{download?}',
-        [AssetModelsFilesController::class, 'show']
-    )->name('show/modelfile')->withTrashed();
-
-    Route::delete('{model}/showfile/{fileId}/delete',
-        [AssetModelsFilesController::class, 'destroy']
-    )->name('delete/modelfile')->withTrashed();
 
     Route::get(
         '{model}/clone',
@@ -28,7 +16,10 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
             AssetModelsController::class, 
             'getClone'
         ]
-    )->name('models.clone.create')->withTrashed();
+    )->name('models.clone.create')->withTrashed()
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('models.index')
+            ->push(trans('admin/models/table.clone'), route('models.index')));
 
     Route::post(
         '{model}/clone',
@@ -68,7 +59,10 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
             BulkAssetModelsController::class, 
             'edit'
         ]
-    )->name('models.bulkedit.index');
+    )->name('models.bulkedit.index')
+    ->breadcrumbs(fn (Trail $trail) =>
+    $trail->parent('models.index')
+        ->push(trans('general.bulk_edit'), route('models.index')));
 
     Route::post(
         'bulksave',

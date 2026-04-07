@@ -6,11 +6,12 @@ use Tests\TestCase;
 
 class OptimizeTest extends TestCase
 {
-    public function testOptimizeSucceeds()
+    public function test_optimize_succeeds()
     {
         $this->beforeApplicationDestroyed(function () {
             $this->artisan('config:clear');
             $this->artisan('route:clear');
+            $this->artisan('view:clear');
         });
 
         $this->artisan('optimize')->assertSuccessful();

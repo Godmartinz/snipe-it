@@ -9,6 +9,7 @@ class LocationPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
+     *
      * @return string
      */
     public static function dataTableLayout()
@@ -18,6 +19,9 @@ class LocationPresenter extends Presenter
                 'field' => 'bulk_selectable',
                 'checkbox' => true,
                 'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ], [
                 'field' => 'id',
                 'searchable' => false,
@@ -25,12 +29,22 @@ class LocationPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.id'),
                 'visible' => false,
-            ], [
+            ],
+            [
+                'field' => 'company',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.company'),
+                'visible' => false,
+                'formatter' => 'companiesLinkObjFormatter',
+            ],
+            [
                 'field' => 'name',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
-                'title' => trans('admin/locations/table.name'),
+                'title' => trans('general.name'),
                 'visible' => true,
                 'formatter' => 'locationsLinkFormatter',
             ], [
@@ -50,18 +64,29 @@ class LocationPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
+                'field' => 'users_count',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.people'),
+                'titleTooltip' => trans('general.people'),
+                'visible' => true,
+                'class' => 'css-house-user',
+            ], [
                 'field' => 'assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/message.current_location'),
+                'title' => trans('admin/locations/message.current_location'),
+                'titleTooltip' => trans('admin/locations/message.current_location'),
                 'visible' => true,
+                'class' => 'css-house-laptop',
             ], [
                 'field' => 'rtd_assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/hardware/form.default_location'),
+                'title' => trans('admin/hardware/form.default_location'),
                 'titleTooltip' => trans('admin/hardware/form.default_location'),
                 'tooltip' => 'true',
                 'visible' => false,
@@ -71,8 +96,8 @@ class LocationPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/message.assigned_assets'),
-                'titleTooltip' =>  trans('admin/locations/message.assigned_assets'),
+                'title' => trans('admin/locations/message.assigned_assets'),
+                'titleTooltip' => trans('admin/locations/message.assigned_assets'),
                 'visible' => true,
                 'class' => 'css-house-laptop',
             ], [
@@ -80,8 +105,8 @@ class LocationPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('general.accessories'),
-                'titleTooltip' =>  trans('general.accessories'),
+                'title' => trans('general.accessories'),
+                'titleTooltip' => trans('general.accessories'),
                 'visible' => true,
                 'class' => 'css-accessory',
             ], [
@@ -89,26 +114,46 @@ class LocationPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('general.accessories_assigned'),
-                'titleTooltip' =>  trans('general.accessories_assigned'),
+                'title' => trans('general.accessories_assigned'),
+                'titleTooltip' => trans('general.accessories_assigned'),
                 'visible' => true,
                 'class' => 'css-accessory-alt',
             ], [
-                'field' => 'users_count',
+                'field' => 'components_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('general.people'),
-                'titleTooltip' =>  trans('general.people'),
+                'title' => trans('general.components'),
+                'titleTooltip' => trans('general.components'),
                 'visible' => true,
-                'class' => 'css-house-user',
+                'class' => 'css-component',
+            ],
+            [
+                'field' => 'consumables_count',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.consumables'),
+                'titleTooltip' => trans('general.consumables'),
+                'visible' => true,
+                'class' => 'css-consumable',
+            ],
+            [
+                'field' => 'children_count',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.child_locations'),
+                'titleTooltip' => trans('general.child_locations'),
+                'visible' => true,
+                'class' => 'css-child-locations',
             ], [
                 'field' => 'currency',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('general.currency_text'),
-                'titleTooltip' =>  trans('general.currency_text'),
+                'title' => trans('general.currency_text'),
+                'titleTooltip' => trans('general.currency_text'),
                 'visible' => true,
                 'class' => 'css-currency',
             ], [
@@ -116,42 +161,42 @@ class LocationPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.address'),
+                'title' => trans('admin/locations/table.address'),
                 'visible' => true,
             ], [
                 'field' => 'address2',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.address2'),
+                'title' => trans('admin/locations/table.address2'),
                 'visible' => false,
             ], [
                 'field' => 'city',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.city'),
+                'title' => trans('admin/locations/table.city'),
                 'visible' => true,
             ], [
                 'field' => 'state',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.state'),
+                'title' => trans('admin/locations/table.state'),
                 'visible' => true,
             ], [
                 'field' => 'zip',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.zip'),
+                'title' => trans('admin/locations/table.zip'),
                 'visible' => false,
             ], [
                 'field' => 'country',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.country'),
+                'title' => trans('admin/locations/table.country'),
                 'visible' => false,
             ], [
                 'field' => 'phone',
@@ -160,7 +205,7 @@ class LocationPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('admin/users/table.phone'),
                 'visible' => false,
-                'formatter'    => 'phoneFormatter',
+                'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'fax',
                 'searchable' => true,
@@ -168,23 +213,31 @@ class LocationPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('admin/suppliers/table.fax'),
                 'visible' => false,
-                'formatter'    => 'phoneFormatter',
+                'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'ldap_ou',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/locations/table.ldap_ou'),
+                'title' => trans('admin/locations/table.ldap_ou'),
                 'visible' => false,
             ], [
                 'field' => 'manager',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  trans('admin/users/table.manager'),
+                'title' => trans('admin/users/table.manager'),
                 'visible' => false,
                 'formatter' => 'usersLinkObjFormatter',
-            ],  [
+            ], [
+                'field' => 'tag_color',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.tag_color'),
+                'visible' => false,
+                'formatter' => 'colorTagFormatter',
+            ], [
                 'field' => 'notes',
                 'searchable' => true,
                 'sortable' => true,
@@ -198,6 +251,15 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.created_at'),
                 'visible' => false,
                 'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'created_by',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'actions',
                 'searchable' => false,
@@ -206,6 +268,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'locationsActionsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -262,7 +326,7 @@ class LocationPresenter extends Presenter
                 'field' => 'created_by',
                 'searchable' => false,
                 'sortable' => false,
-                'title' => trans('general.admin'),
+                'title' => trans('general.created_by'),
                 'visible' => false,
                 'formatter' => 'usersLinkObjFormatter',
             ],
@@ -273,6 +337,8 @@ class LocationPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
             ],
         ];
 
@@ -281,15 +347,21 @@ class LocationPresenter extends Presenter
 
     /**
      * Link to this locations name
+     *
      * @return string
      */
     public function nameUrl()
     {
-        return (string) link_to_route('locations.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Location', $this])) {
+            return '<a href="'.route('locations.show', $this->id).'">'.e($this->display_name).'</a>';
+        } else {
+            return e($this->display_name);
+        }
     }
 
     /**
      * Getter for Polymorphism.
+     *
      * @return mixed
      */
     public function name()
@@ -299,6 +371,7 @@ class LocationPresenter extends Presenter
 
     /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()
@@ -314,5 +387,15 @@ class LocationPresenter extends Presenter
     public function fullName()
     {
         return $this->name;
+    }
+
+    public function formattedNameLink()
+    {
+
+        if (auth()->user()->can('view', ['\App\Models\Location', $this])) {
+            return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('locations.show', e($this->id)).'">'.e($this->display_name).'</a>';
+        }
+
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i> " : '').e($this->display_name);
     }
 }

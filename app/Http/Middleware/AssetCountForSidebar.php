@@ -3,16 +3,17 @@
 namespace App\Http\Middleware;
 
 use App\Models\Asset;
-use Closure;
 use App\Models\Setting;
+use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+
 class AssetCountForSidebar
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -34,10 +35,7 @@ class AssetCountForSidebar
         }
 
         try {
-            $total_assets = Asset::count();
-            if ($settings->show_archived_in_list != '1') {
-                $total_assets -= Asset::Archived()->count();
-            }
+            $total_assets = Asset::AssetsForShow()->count();
             view()->share('total_assets', $total_assets);
         } catch (\Exception $e) {
             Log::debug($e);

@@ -2,20 +2,19 @@
 
 namespace Tests\Feature\Settings;
 
-use Tests\TestCase;
 use App\Models\User;
-
+use Tests\TestCase;
 
 class LdapSettingsTest extends TestCase
 {
-    public function testPermissionRequiredToViewLdapSettings()
+    public function test_permission_required_to_view_ldap_settings()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('settings.ldap.index'))
             ->assertForbidden();
     }
 
-    public function testLdapSettingsCanBeSaved()
+    public function test_ldap_settings_can_be_saved()
     {
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->post(route('settings.ldap.save', [
@@ -28,6 +27,7 @@ class LdapSettingsTest extends TestCase
                 'ldap_basedn' => 'uid=',
                 'ldap_fname_field' => 'SomeFirstnameField',
                 'ldap_server' => 'ldaps://ldap.example.com',
+                'ldap_invert_active_flag' => 0,
             ]))
             ->assertStatus(302)
             ->assertValid('ldap_enabled')
@@ -36,7 +36,7 @@ class LdapSettingsTest extends TestCase
         $this->followRedirects($response)->assertSee('alert-success');
     }
 
-    public function testLdapSettingsAreValidatedCorrectly()
+    public function test_ldap_settings_are_validated_correctly()
     {
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.ldap.index'))
@@ -50,13 +50,10 @@ class LdapSettingsTest extends TestCase
             ->assertSessionHasErrors([
                 'ldap_username_field',
                 'ldap_auth_filter_query',
-                'ldap_uname',
-                'ldap_pword',
                 'ldap_basedn',
                 'ldap_fname_field',
                 'ldap_server',
             ]);
         $this->followRedirects($response)->assertSee('alert-danger');
     }
-
 }

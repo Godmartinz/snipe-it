@@ -7,43 +7,35 @@
 @stop
 
 
-@section('header_right')
-<a href="{{ route('categories.create') }}" class="btn btn-primary pull-right">
-  {{ trans('general.create') }}</a>
-@stop
-
 {{-- Page content --}}
 @section('content')
+    <x-container>
+        <x-box>
 
-<div class="row">
-  <div class="col-md-12">
-    <div class="box box-default">
-      <div class="box-body">
-        <table
-            data-columns="{{ \App\Presenters\CategoryPresenter::dataTableLayout() }}"
-            data-cookie-id-table="categoryTable"
-            data-pagination="true"
-            data-id-table="categoryTable"
-            data-search="true"
-            data-side-pagination="server"
-            data-show-columns="true"
-            data-show-fullscreen="true"
-            data-show-export="true"
-            data-show-refresh="true"
-            data-sort-order="asc"
-            id="categoryTable"
-            class="table table-striped snipe-table"
-            data-url="{{ route('api.categories.index') }}"
-            data-export-options='{
-              "fileName": "export-categories-{{ date('Y-m-d') }}",
-              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-              }'>
-          </table>
-      </div><!-- /.box-body -->
-    </div><!-- /.box -->
-  </div>
-</div>
+            <x-slot:bulkactions>
+                <x-table.bulk-actions
+                    name='category'
+                    action_route="{{route('categories.bulk.delete')}}"
+                    model_name="category"
+                >
+                @can('delete', App\Models\Category::class)
+                    <option>Delete</option>
+                @endcan
+                </x-table.bulk-actions>
+            </x-slot:bulkactions>
 
+            <x-table
+                    name="category"
+                    buttons="categoryButtons"
+                    fixed_right_number="1"
+                    fixed_number="1"
+                    show_advanced_search="true"
+                    api_url="{{ route('api.categories.index') }}"
+                    :presenter="\App\Presenters\CategoryPresenter::dataTableLayout()"
+                    export_filename="export-categories-{{ date('Y-m-d') }}"
+            />
+        </x-box>
+    </x-container>
 @stop
 
 @section('moar_scripts')

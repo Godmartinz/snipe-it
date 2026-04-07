@@ -5,7 +5,9 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Symfony\Component\Mime\Email;
 
+#[AllowDynamicProperties]
 class CurrentInventory extends Notification
 {
     use Queueable;
@@ -34,18 +36,23 @@ class CurrentInventory extends Notification
     /**
      * Get the mail representation of the notification.
      *
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail()
     {
         $message = (new MailMessage)->markdown('notifications.markdown.user-inventory',
             [
-                'assets'  => $this->user->assets,
-                'accessories'  => $this->user->accessories,
-                'licenses'  => $this->user->licenses,
-                'consumables'  => $this->user->consumables,
+                'assets' => $this->user->assets,
+                'accessories' => $this->user->accessories,
+                'licenses' => $this->user->licenses,
+                'consumables' => $this->user->consumables,
             ])
-            ->subject(trans('mail.inventory_report'));
+            ->subject(trans('mail.inventory_report'))
+            ->withSymfonyMessage(function (Email $message) {
+                $message->getHeaders()->addTextHeader(
+                    'X-System-Sender', 'Snipe-IT'
+                );
+            });
 
         return $message;
     }

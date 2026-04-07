@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use \Auth;
 
 /**
  * @extends Factory<User>
@@ -25,12 +24,15 @@ class UserFactory extends Factory
             'city' => $this->faker->city(),
             'company_id' => Company::factory(),
             'country' => $this->faker->country(),
+            'created_by' => 1,
+            'display_name' => null,
             'email' => $this->faker->safeEmail(),
             'employee_num' => $this->faker->numberBetween(3500, 35050),
             'first_name' => $this->faker->firstName(),
             'jobtitle' => $this->faker->jobTitle(),
             'last_name' => $this->faker->lastName(),
             'locale' => 'en-US',
+            'mobile' => $this->faker->phoneNumber(),
             'notes' => 'Created by DB seeder',
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'permissions' => '{}',
@@ -38,7 +40,6 @@ class UserFactory extends Factory
             'state' => $this->faker->stateAbbr(),
             'username' => $this->faker->unique()->username(),
             'zip' => $this->faker->postcode(),
-            'created_by' => 1,
         ];
     }
 
@@ -50,7 +51,6 @@ class UserFactory extends Factory
             ];
         });
     }
-
 
     public function firstAdmin()
     {
@@ -115,6 +115,41 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.view' => '1']);
     }
 
+    public function viewAssetHistory()
+    {
+        return $this->appendPermission(['assets.view' => '1']);
+    }
+
+    public function viewUserHistory()
+    {
+        return $this->appendPermission(['users.view' => '1']);
+    }
+
+    public function viewLocationHistory()
+    {
+        return $this->appendPermission(['locations.view' => '1']);
+    }
+
+    public function viewAccessoryHistory()
+    {
+        return $this->appendPermission(['accessories.view' => '1']);
+    }
+
+    public function viewLicenseHistory()
+    {
+        return $this->appendPermission(['licenses.view' => '1']);
+    }
+
+    public function viewComponentHistory()
+    {
+        return $this->appendPermission(['components.view' => '1']);
+    }
+
+    public function viewConsumableHistory()
+    {
+        return $this->appendPermission(['consumables.view' => '1']);
+    }
+
     public function createAssets()
     {
         return $this->appendPermission(['assets.create' => '1']);
@@ -148,6 +183,11 @@ class UserFactory extends Factory
     public function deleteAssetModels()
     {
         return $this->appendPermission(['models.delete' => '1']);
+    }
+
+    public function viewAssetModels()
+    {
+        return $this->appendPermission(['models.view' => '1']);
     }
 
     public function viewAccessories()
@@ -280,6 +320,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['components.checkout' => '1']);
     }
 
+    public function viewCompanies()
+    {
+        return $this->appendPermission(['companies.view' => '1']);
+    }
+
     public function createCompanies()
     {
         return $this->appendPermission(['companies.create' => '1']);
@@ -288,6 +333,11 @@ class UserFactory extends Factory
     public function deleteCompanies()
     {
         return $this->appendPermission(['companies.delete' => '1']);
+    }
+
+    public function editCompanies()
+    {
+        return $this->appendPermission(['companies.edit' => '1']);
     }
 
     public function viewUsers()
@@ -335,6 +385,16 @@ class UserFactory extends Factory
         return $this->appendPermission(['import' => '1']);
     }
 
+    public function createCustomFields()
+    {
+        return $this->appendPermission(['customfields.create' => '1']);
+    }
+
+    public function viewCustomFields()
+    {
+        return $this->appendPermission(['customfields.view' => '1']);
+    }
+
     public function deleteCustomFields()
     {
         return $this->appendPermission(['customfields.delete' => '1']);
@@ -360,6 +420,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['kits.delete' => '1']);
     }
 
+    public function viewPredefinedKits()
+    {
+        return $this->appendPermission(['kits.view' => '1']);
+    }
+
     public function deleteStatusLabels()
     {
         return $this->appendPermission(['statuslabels.delete' => '1']);
@@ -368,6 +433,11 @@ class UserFactory extends Factory
     public function deleteSuppliers()
     {
         return $this->appendPermission(['suppliers.delete' => '1']);
+    }
+
+    public function auditAssets()
+    {
+        return $this->appendPermission(['assets.audit' => '1']);
     }
 
     private function appendPermission(array $permission)

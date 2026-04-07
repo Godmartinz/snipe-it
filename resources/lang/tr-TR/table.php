@@ -1,11 +1,11 @@
 <?php
 
-return array(
+return [
 
-    'actions'	 	        => 'Hareketler',
-    'action' 		        => 'Hareket',
-    'by'      		        => 'Tarafından',
-    'item' 			        => 'Ürün',
-    'no_matching_records'   => 'No matching records found',
+    'actions' => 'Hareketler',
+    'action' => 'Hareket',
+    'by' => 'Tarafından',
+    'item' => 'Ürün',
+    'no_matching_records' => 'Eşleşen kayıt bulunamadı',
 
-);
+];

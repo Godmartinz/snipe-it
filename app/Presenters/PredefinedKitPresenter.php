@@ -9,6 +9,7 @@ class PredefinedKitPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table of kits
+     *
      * @return string
      */
     public static function dataTableLayout()
@@ -61,6 +62,7 @@ class PredefinedKitPresenter extends Presenter
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
             'formatter' => 'kitsInOutFormatter',
+            'printIgnore' => true,
         ];
 
         $layout[] = [
@@ -70,6 +72,7 @@ class PredefinedKitPresenter extends Presenter
             'switchable' => false,
             'title' => trans('table.actions'),
             'formatter' => 'kitsActionsFormatter',
+            'printIgnore' => true,
         ];
 
         return json_encode($layout);
@@ -77,6 +80,7 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Json Column Layout for bootstrap table of kit models
+     *
      * @return string
      */
     public static function dataTableModels()
@@ -121,6 +125,7 @@ class PredefinedKitPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'kits_modelsActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 
@@ -129,6 +134,7 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Json Column Layout for bootstrap table of kit licenses
+     *
      * @return string
      */
     public static function dataTableLicenses()
@@ -173,6 +179,7 @@ class PredefinedKitPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'kits_licensesActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 
@@ -181,6 +188,7 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Json Column Layout for bootstrap table of kit accessories
+     *
      * @return string
      */
     public static function dataTableAccessories()
@@ -225,6 +233,7 @@ class PredefinedKitPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'kits_accessoriesActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 
@@ -233,6 +242,7 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Json Column Layout for bootstrap table of kit consumables
+     *
      * @return string
      */
     public static function dataTableConsumables()
@@ -277,6 +287,7 @@ class PredefinedKitPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'kits_consumablesActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 
@@ -285,11 +296,17 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Link to this kit Name
+     *
      * @return string
      */
     public function nameUrl()
     {
-        return (string) link_to_route('kits.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\PredefinedKit', $this])) {
+            return '<a href="'.route('kits.show', $this->id).'">'.e($this->display_name).'</a>';
+        } else {
+            return e($this->display_name);
+        }
+
     }
 
     /**
@@ -302,6 +319,7 @@ class PredefinedKitPresenter extends Presenter
 
     /**
      * Url to view this item.
+     *
      * @return string
      */
     public function viewUrl()

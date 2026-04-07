@@ -26,15 +26,23 @@
                     </div>
                     <div class="box-body">
                         {{csrf_field()}}
-                        @if ($asset->company && $asset->company->name)
+                        @if ($asset->company)
+                            <!-- accessory name -->
                             <div class="form-group">
-                                <label for="company" class="col-md-3 control-label">
-                                    {{ trans('general.company') }}
-                                </label>
-                                <div class="col-md-8">
-                                    <p class="form-control-static">
-                                        {{ $asset->company->name }}
-                                    </p>
+                                <label class="col-sm-3 control-label">{{ trans('general.company') }}</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static">{!! $asset->company->present()->formattedNameLink  !!}</p>
+                                </div>
+                            </div>
+                        @endif
+
+
+                        @if ($asset->model->category)
+                            <!-- category name -->
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{ trans('general.category') }}</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static">{!! $asset->model->category->present()->formattedNameLink  !!}</p>
                                 </div>
                             </div>
                         @endif
@@ -45,7 +53,7 @@
                                 {{ trans('admin/hardware/form.model') }}
                             </label>
                             <div class="col-md-8">
-                                <p class="form-control-static">
+                                <p class="form-control-static" style="padding-top: 7px;">
                                     @if (($asset->model) && ($asset->model->name))
                                         {{ $asset->model->name }}
                                     @else
@@ -82,19 +90,22 @@
                                 {{ trans('admin/hardware/form.status') }}
                             </label>
                             <div class="col-md-7 required">
-                                {{ Form::select('status_id', $statusLabel_list, $asset->status_id, array('class'=>'select2', 'style'=>'width:100%','', 'aria-label'=>'status_id')) }}
+                                <x-input.select
+                                    name="status_id"
+                                    :options="$statusLabel_list"
+                                    :selected="$asset->status_id"
+                                    style="width: 100%;"
+                                    aria-label="status_id"
+                                />
                                 {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
                         @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
-
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user'])
-
+                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => (session('checkout_to_type') ?: 'user') == 'user' ? '' : 'display: none;'])
                         <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
-                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;'])
-
-                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => 'display:none;'])
+                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'assigned_asset', 'company_id' => $asset->company_id, 'unselect' => 'true', 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
+                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => session('checkout_to_type') == 'location' ? '' : 'display: none;'])
 
 
 
@@ -104,14 +115,15 @@
                                 {{ trans('admin/hardware/form.checkout_date') }}
                             </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="checkout_at"
-                                           id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
-                                    <span class="input-group-addon">
-                                        <x-icon type="calendar" /></span>
-                                </div>
+
+                                <x-input.datepicker
+                                        name="checkout_at"
+                                        end_date="0d"
+                                        col_size_class="col-md-7"
+                                        :value="old('expected_checkin', date('Y-m-d'))"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
+                                />
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
@@ -123,24 +135,15 @@
                             </label>
 
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-start-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="expected_checkin"
-                                           id="expected_checkin" value="{{ old('expected_checkin') }}">
-                                    <span class="input-group-addon">
-                                        <x-icon type="calendar" />
-                                    </span>
-                                </div>
+                                <x-input.datepicker
+                                        name="expected_checkin"
+                                        :value="old('expected_checkin', $item->expected_checkin)"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
+                                />
                                 {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
-
-                        <!-- Custom fields -->
-                        @include("models/custom_fields_form", [
-                                'model' => $asset->model,
-                                'show_display_checkout_fields' => 'true'
-                        ])
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
@@ -150,13 +153,22 @@
 
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
-                                          name="note">{{ old('note', $asset->note) }}</textarea>
+                                name="note">{{ old('note', $asset->note) }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
+                        <!-- Custom fields -->
+                        @include("models/custom_fields_form", [
+                                'model' => $asset->model,
+                                'show_custom_fields_type' => 'checkout'
+                        ])
+
+
+
                         @if ($asset->requireAcceptance() || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
-                            <div class="form-group notification-callout">
+                            <div class="row">
+                            <div class="notification-callout">
                                 <div class="col-md-8 col-md-offset-3">
                                     <div class="callout callout-info">
 
@@ -178,6 +190,7 @@
                                         @endif
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         @endif
 
@@ -216,15 +229,4 @@
 
 @section('moar_scripts')
     @include('partials/assets-assigned')
-
-    <script>
-        //        $('#checkout_at').datepicker({
-        //            clearBtn: true,
-        //            todayHighlight: true,
-        //            endDate: '0d',
-        //            format: 'yyyy-mm-dd'
-        //        });
-
-
-    </script>
 @stop

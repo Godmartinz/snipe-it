@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CheckoutRequest extends Model
 {
+    use HasFactory;
     use SoftDeletes;
+
     protected $fillable = ['user_id'];
+
     protected $table = 'checkout_requests';
 
     public function user()
@@ -44,7 +48,7 @@ class CheckoutRequest extends Model
     public function name()
     {
         if ($this->itemType() == 'asset') {
-            return $this->itemRequested()->present()->name();
+            return $this->itemRequested()->display_name;
         }
 
         return $this->itemRequested()->name;

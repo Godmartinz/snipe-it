@@ -1,18 +1,3 @@
-.skin-red
-.skin-purple
-.skin-blue
-.skin-black
-.skin-orange
-.skin-yellow
-.skin-green
-.skin-red-dark
-.skin-purple-dark
-.skin-blue-dark
-.skin-black-dark
-.skin-orange-dark
-.skin-yellow-dark
-.skin-green-dark
-.skin-contrast
 .main-header
 
 .logo {
@@ -121,21 +106,7 @@ a.accordion-header {
   padding-top: 10px;
 }
 
-.skin-red
-.skin-purple
-.skin-blue
-.skin-black
-.skin-orange
-.skin-yellow
-.skin-green
-.skin-red-dark
-.skin-purple-dark
-.skin-blue-dark
-.skin-black-dark
-.skin-orange-dark
-.skin-yellow-dark
-.skin-green-dark
-.skin-contrast
+
 .main-header
 .navbar
 .dropdown-menu li a {
@@ -207,9 +178,23 @@ a.accordion-header {
   color: #dd4b39;
 }
 
-.btn-primary.btn-outline:hover, .btn-success.btn-outline:hover, .btn-info.btn-outline:hover, .btn-warning.btn-outline:hover, .btn-danger.btn-outline:hover {
-  color: #fff;
+.btn-primary:hover,
+.btn-success:hover,
+.btn-info:hover,
+.btn-warning:hover,
+.btn-primary,
+.btn-success,
+.btn-info,
+.btn-warning,
+.btn-primary.btn-outline:hover,
+.btn-success.btn-outline:hover,
+.btn-info.btn-outline:hover,
+.btn-warning.btn-outline:hover,
+.btn-danger.btn-outline:hover {
+  color: #fff !important;
 }
+
+
 
 .slideout-menu {
   position: fixed;
@@ -315,21 +300,7 @@ a.accordion-header {
   /* adjust based on your layout */
 
 }
-.skin-red
-.skin-purple
-.skin-blue
-.skin-black
-.skin-orange
-.skin-yellow
-.skin-green
-.skin-red-dark
-.skin-purple-dark
-.skin-blue-dark
-.skin-black-dark
-.skin-orange-dark
-.skin-yellow-dark
-.skin-green-dark
-.skin-contrast
+
 .main-header
 .navbar
 .dropdown-menu li a {
@@ -396,8 +367,6 @@ body {
     word-spacing:1px;
     letter-spacing:0.2px;
     font: 15px "Times New Roman", Times, serif;
-    background:white;
-    color:black;
     width: 100%;
     float: none;
   }
@@ -502,7 +471,6 @@ body {
 }
 
 .select2-selection--multiple {
-    border-color: #d2d6de !important;
     overflow-y: auto;
 }
 
@@ -535,9 +503,10 @@ img.navbar-brand-img, .navbar-brand>img {
   border-radius: 0px !important;
 }
 
-.btn.bg-maroon, .btn.bg-purple{
+.btn-checkin, .btn-checkout {
   min-width:90px;
 }
+
 
 [hidden] {
   display: none !important;
@@ -653,29 +622,22 @@ h4 {
 * display for non-table data as of v6
 **/
 .row-new-striped  > .row:nth-of-type(even) {
-  background: #FFFFFF;
-  border-top: 1px solid #dddddd;
   line-height: 1.9;
   display: table-row;
 }
 
 .row-new-striped > .row:nth-of-type(odd)  {
-  background-color: #F8F8F8;
-  border-top: 1px solid #dddddd;
   display: table-row;
-  line-height: 1.9;
   padding: 2px;
 }
 
 .row-new-striped div {
   display: table-cell;
-  border-top: 1px solid #dddddd;
   padding: 6px;
 }
 
 .row-new-striped div {
   display: table-cell;
-  border-top: 1px solid #dddddd;
   padding: 6px;
 }
 
@@ -731,7 +693,7 @@ h4 {
  Instead, we use CSS to add the icon into the table header, which leaves the column selector
  "title" text as-is and hides the icon.
 
- See https://github.com/snipe/snipe-it/issues/7989
+ See https://github.com/grokability/snipe-it/issues/7989
  */
 th.css-accessory > .th-inner,
 th.css-accessory-alt > .th-inner,
@@ -746,6 +708,7 @@ th.css-license > .th-inner,
 th.css-location > .th-inner,
 th.css-users > .th-inner,
 th.css-currency > .th-inner,
+th.css-child-locations > .th-inner,
 th.css-history > .th-inner
 {
   font-size: 0px;
@@ -769,9 +732,9 @@ th.css-house-laptop > .th-inner::before,
 th.css-house-user > .th-inner::before,
 th.css-license > .th-inner::before,
 th.css-location > .th-inner::before,
-th.css-padlock > .th-inner::before,
 th.css-users > .th-inner::before,
 th.css-currency > .th-inner::before,
+th.css-child-locations > .th-inner::before,
 th.css-history > .th-inner::before
 {
   display: inline-block;
@@ -824,7 +787,9 @@ th.css-component > .th-inner::before
 
 th.css-padlock > .th-inner::before
 {
-  content: "\f023"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+  content: "\f023"; font-family: "Font Awesome 5 Free";
+  font-weight: 800;
+  padding-right: 3px;
 }
 
 th.css-house-user > .th-inner::before {
@@ -847,6 +812,13 @@ th.css-house-laptop > .th-inner::before {
 }
 th.css-accessory-alt > .th-inner::before {
   content: "\f11c";
+  font-family: "Font Awesome 5 Free";
+  font-size: 19px;
+  margin-bottom: 0px;
+}
+
+th.css-child-locations > .th-inner::before {
+  content: "\f64f"; // change this to f51e for coins
   font-family: "Font Awesome 5 Free";
   font-size: 19px;
   margin-bottom: 0px;
@@ -886,7 +858,7 @@ th.css-history > .th-inner::before {
   height: 34px;
 }
 
-.form-group.has-error label {
+.form-group.has-error label, .form-group.has-error .help-block {
   color: #a94442;
 }
 
@@ -973,9 +945,9 @@ label.form-control {
 
 label.form-control--disabled {
   color: #959495;
-  pointer-events:none;
   cursor: not-allowed;
 }
+
 
 /** --------------------------------------- **/
 /** Start checkbox styles to replace iCheck **/
@@ -1011,7 +983,6 @@ input[type="checkbox"]::before {
   transform: scale(0);
   transition: 120ms transform ease-in-out;
   box-shadow: inset 1em 1em rgb(211, 211, 211);
-
   content: "";
   width: 1em;
   height: 1em;
@@ -1079,7 +1050,6 @@ input[type="radio"]::before {
   border-radius: 50%;
   transform: scale(0);
   transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em #428bca;
 }
 
 input[type="radio"]:checked::before {
@@ -1163,4 +1133,262 @@ input[type="radio"]:checked::before {
 /** this is needed to override ekko-lightboxes card view styles **/
 .bootstrap-table .fixed-table-container .table tbody tr .card-view {
   display: table-row !important;
+}
+
+td.text-right.text-padding-number-cell {
+  padding-right: 30px !important;
+  white-space: nowrap;
+}
+
+th.text-right.text-padding-number-footer-cell {
+  padding-right: 20px !important;
+  white-space: nowrap;
+}
+
+code.single-line {
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  max-width: 400px;
+}
+
+p.monospace, span.monospace {
+  font-family: monospace, monospace;
+}
+
+legend.highlight {
+  background: repeating-linear-gradient(
+          45deg,
+          #222d32,
+          #222d32 10px,
+          #444 10px,
+          #444 11px
+  );
+
+  color: #fff;
+  font-size: 18px;
+  padding: 6px 6px 6px 10px;
+}
+
+legend.highlight a {
+  color: #fff;
+  cursor: pointer;
+}
+
+fieldset.bottom-padded {
+  padding-bottom: 20px;
+}
+
+caption.tableCaption {
+  font-size: 18px;
+  padding-left: 8px;
+}
+
+// via https://github.com/grokability/snipe-it/issues/11754
+.sidebar-toggle.btn {
+  border-radius: 3px;
+  box-shadow: none;
+  border-top: 0px solid transparent;
+  border-bottom: 0px solid transparent;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin-left: -47px;
+  margin-top: 2px;
+}
+
+
+.visually-hidden {
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: preserve;
+  display: inline-block;
+}
+
+input[name="columnsSearch"] {
+  width: 120px;
+}
+
+.callout.callout-legend {
+  padding: 15px 30px 15px 15px;
+  font-size: 100%;
+  border-radius: 0px;
+}
+
+.callout.callout-legend h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+
+.callout.callout-legend a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+p.callout-subtext {
+  margin-top: 5px;
+}
+
+/**
+This just hides the padding on the right side of the mark tag for a less weird visual experience
+ */
+mark {
+    padding-right: 0px;
+}
+
+/**
+Radio toggle styles for permission settings and check/uncheck all
+ */
+.radio-toggle-wrapper {
+  display: flex;
+  padding: 2px;
+  background-color: #e9e9e9;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  border: 1px #d6d6d6 solid;
+}
+
+.radio-slider-inputs {
+  flex-grow: 1;
+}
+
+.radio-slider-inputs input[type=radio] {
+  display: none;
+}
+
+.radio-slider-inputs label {
+  display: block;
+  margin-bottom: 0px;
+  padding: 6px 8px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  transition : all .4s 0s ease;
+  cursor: pointer;
+}
+
+.radio-slider-inputs label {
+  color: #9a9999;
+  border-radius: 4px;
+  border: 1px transparent solid;
+}
+
+.radio-slider-inputs .allow:checked + label {
+  background-color: green;
+  color: white;
+  border-radius: 4px;
+  border: 1px transparent solid;
+}
+
+.radio-slider-inputs .inherit:checked + label {
+  background-color: rgba(255, 204, 51, 0.11);
+  color: #9a9999;
+  border-radius: 4px;
+  border: 1px white solid;
+}
+
+.radio-slider-inputs .deny:checked + label {
+  background-color: #a94442;
+  color: white;
+  border-radius: 4px;
+  border: 1px transparent solid;
+}
+
+.remember-toggle {
+  cursor: pointer;
+}
+
+.js-copy-link {
+  color: grey;
+}
+
+.deleted {
+  text-decoration: line-through;
+}
+
+
+//css to add hamburger and create dropdown on small screens
+@nav-link-hover-bg: #eeeeee;
+@border-radius-base: 5px;
+@screen-xs-max: 767px;
+
+.nav-tabs.nav-tabs-dropdown,
+.nav-tabs-dropdown {
+  @media (max-width: @screen-xs-max) {
+    overflow: hidden;
+    position: relative;
+
+    &::after {
+      content: "☰";
+      position: absolute;
+      font-size: 35px;
+      top: 0;
+      right: 15px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    &.open {
+      a {
+        position: relative;
+        display: block;
+      }
+
+      > li.active > a {
+        background-color: @nav-link-hover-bg;
+
+      }
+    }
+
+    li.snipetab {
+      margin-right: 0 !important;
+    }
+
+    li {
+      display: block;
+      padding: 0;
+      vertical-align: bottom;
+      white-space: nowrap !important;
+    }
+
+    > li > a {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      border-color: transparent;
+
+      &:focus,
+      &:hover,
+      &:active {
+        border-color: transparent;
+        border-right: 0 !important;
+      }
+    }
+
+    > li.active > a {
+      display: block;
+      border-color: transparent !important;
+      position: relative;
+      z-index: 1;
+
+      &:focus,
+      &:hover,
+      &:active {
+        border-color: transparent !important;
+      }
+
+    }
+  }
 }

@@ -8,330 +8,72 @@
 @stop
 
 @section('header_right')
-    @can('update', \App\Models\AssetModel::class)
-        <div class="btn-group pull-right">
-            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                @if ($model->deleted_at=='')
-                    <li><a href="{{ route('models.edit', $model->id) }}">{{ trans('admin/models/table.edit') }}</a></li>
-                    <li><a href="{{ route('models.clone.create', $model->id) }}">{{ trans('admin/models/table.clone') }}</a></li>
-                    <li><a href="{{ route('hardware.create', ['model_id' => $model->id]) }}">{{ trans('admin/hardware/form.create') }}</a></li>
-                @else
-                    <li><a href="{{ route('models.restore.store', $model->id) }}">{{ trans('admin/models/general.restore') }}</a></li>
-                @endif
-            </ul>
-        </div>
-    @endcan
-@stop
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+@endsection
 
 {{-- Page content --}}
 @section('content')
+    <x-container columns="2">
 
-
-<div class="row">
-
-    @if ($model->deleted_at!='')
-        <div class="col-md-12">
-            <div class="callout callout-warning">
-                <x-icon type="warning" />
-                {{ trans('admin/models/general.deleted') }}
-            </div>
-        </div>
-    @endif
-
-    <div class="col-md-9">
-
-        <div class="nav-tabs-custom">
-
-            <ul class="nav nav-tabs">
-                <li class="active">
-                    <a href="#assets" data-toggle="tab">
-
-                        <span class="hidden-lg hidden-md">
-                          <i class="fas fa-barcode fa-2x"></i>
-                        </span>
-                        <span class="hidden-xs hidden-sm">
-                            {{ trans('general.assets') }}
-                            {!! ($model->assets()->AssetsForShow()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($model->assets()->AssetsForShow()->count()).'</badge>' : '' !!}
-                        </span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#files" data-toggle="tab">
-
-                        <span class="hidden-lg hidden-md">
-                          <i class="fas fa-barcode fa-2x"></i>
-                        </span>
-                        <span class="hidden-xs hidden-sm">
-                            {{ trans('general.files') }}
-                            {!! ($model->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($model->uploads->count()).'</badge>' : '' !!}
-                          </span>
-                    </a>
-                </li>
-                <li class="pull-right">
-                    <a href="#" data-toggle="modal" data-target="#uploadFileModal">
-                        <x-icon type="paperclip" />
-                        {{ trans('button.upload') }}
-                    </a>
-                </li>
-
-            </ul>
-
-            <div class="tab-content">
-                <div class="tab-pane fade in active" id="assets">
-
-                    @include('partials.asset-bulk-actions')
-
-                    <table
-                            data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="assetListingTable"
-                            data-pagination="true"
-                            data-id-table="assetListingTable"
-                            data-search="true"
-                            data-side-pagination="server"
-                            data-show-columns="true"
-                            data-show-fullscreen="true"
-                            data-toolbar="#assetsBulkEditToolbar"
-                            data-bulk-button-id="#bulkAssetEditButton"
-                            data-bulk-form-id="#assetsBulkForm"
-                            data-click-to-select="true"
-                            data-show-export="true"
-                            data-show-refresh="true"
-                            data-sort-order="asc"
-                            id="assetListingTable"
-                            data-url="{{ route('api.assets.index',['model_id'=> $model->id]) }}"
-                            class="table table-striped snipe-table"
-                            data-export-options='{
-                "fileName": "export-models-{{ str_slug($model->name) }}-assets-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-                    </table>
-                </div> <!-- /.tab-pane assets -->
-
-
-                <div class="tab-pane fade" id="files">
-
-                    <div class="row">
-                        <div class="col-md-12">
-
-                            <x-filestable
-                                    filepath="private_uploads/assetmodels/"
-                                    showfile_routename="show/modelfile"
-                                    deletefile_routename="delete/modelfile"
-                                    :object="$model" />
-
-                        </div> <!-- /.col-md-12 -->
-                    </div> <!-- /.row -->
-
-                </div>
-
-
-            </div> <!-- /.tab-content -->
-        </div>  <!-- /.nav-tabs-custom -->
-    </div><!-- /. col-md-12 -->
-
-    <div class="col-md-3">
-        <div class="row">
+        @if ($model->deleted_at!='')
             <div class="col-md-12">
-                <div class="box box-default">
-                    <div class="box-header with-border">
-                        <div class="box-heading">
-                            <h2 class="box-title"> {{ trans('general.moreinfo') }}:</h2>
-                        </div>
-                    </div><!-- /.box-header -->
-                    <div class="box-body">
-
-
-
-                @if ($model->image)
-                    <img src="{{ Storage::disk('public')->url(app('models_upload_path').e($model->image)) }}" class="img-responsive"></li>
-                @endif
-
-
-                <ul class="list-unstyled" style="line-height: 25px;">
-                    @if ($model->category)
-                        <li>{{ trans('general.category') }}:
-                            <a href="{{ route('categories.show', $model->category->id) }}">{{ $model->category->name }}</a>
-                        </li>
-                    @endif
-
-                    @if ($model->created_at)
-                        <li>{{ trans('general.created_at') }}:
-                            {{ Helper::getFormattedDateObject($model->created_at, 'datetime', false) }}
-                        </li>
-                    @endif
-
-                    @if ($model->adminuser)
-                        <li>{{ trans('general.created_by') }}:
-                            {{ $model->adminuser->present()->name() }}
-                        </li>
-                    @endif
-
-                    @if ($model->deleted_at)
-                        <li>
-                            <strong>
-                                <span class="text-danger">
-                                {{ trans('general.deleted') }}:
-                                {{ Helper::getFormattedDateObject($model->deleted_at, 'datetime', false) }}
-                                </span>
-                            </strong>
-
-                        </li>
-                    @endif
-
-                    @if ($model->min_amt)
-                        <li>{{ trans('general.min_amt') }}:
-                           {{$model->min_amt }}
-                        </li>
-                    @endif
-
-                    @if ($model->manufacturer)
-                        <li>
-                            {{ trans('general.manufacturer') }}:
-                            @can('view', \App\Models\Manufacturer::class)
-                                <a href="{{ route('manufacturers.show', $model->manufacturer->id) }}">
-                                    {{ $model->manufacturer->name }}
-                                </a>
-                            @else
-                                {{ $model->manufacturer->name }}
-                            @endcan
-                        </li>
-
-                        @if ($model->manufacturer->url)
-                            <li>
-                                <i class="fas fa-globe-americas"></i> <a href="{{ $model->manufacturer->url }}">{{ $model->manufacturer->url }}</a>
-                            </li>
-                        @endif
-
-                        @if ($model->manufacturer->support_url)
-                            <li>
-                                <x-icon type="more-info" /> <a href="{{ $model->manufacturer->support_url }}">{{ $model->manufacturer->support_url }}</a>
-                            </li>
-                        @endif
-
-                        @if ($model->manufacturer->support_phone)
-                            <li>
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:{{ $model->manufacturer->support_phone }}">{{ $model->manufacturer->support_phone }}</a>
-
-                            </li>
-                        @endif
-
-                        @if ($model->manufacturer->support_email)
-                            <li>
-                                <i class="far fa-envelope"></i> <a href="mailto:{{ $model->manufacturer->support_email }}">{{ $model->manufacturer->support_email }}</a>
-                            </li>
-                        @endif
-                    @endif
-                    @if ($model->model_number)
-                        <li>
-                            {{ trans('general.model_no') }}:
-                            {{ $model->model_number }}
-                        </li>
-                    @endif
-
-                    @if ($model->depreciation)
-                        <li>
-                            {{ trans('general.depreciation') }}:
-                            {{ $model->depreciation->name }} ({{ $model->depreciation->months.' '.trans('general.months')}})
-                        </li>
-                    @endif
-
-                    @if ($model->eol)
-                        <li>{{ trans('general.eol') }}:
-                            {{ $model->eol .' '. trans('general.months') }}
-                        </li>
-                    @endif
-
-                    @if ($model->fieldset)
-                        <li>{{ trans('admin/models/general.fieldset') }}:
-                            <a href="{{ route('fieldsets.show', $model->fieldset->id) }}">{{ $model->fieldset->name }}</a>
-                        </li>
-                    @endif
-
-                    @if ($model->notes)
-                        <li>
-                            {{ trans('general.notes') }}:
-                            {!! nl2br(Helper::parseEscapedMarkedownInline($model->notes)) !!}
-                        </li>
-                    @endif
-
-                </ul>
-
-                @if ($model->note)
-                    Notes:
-                    <p>
-                        {!! $model->present()->note() !!}
-                    </p>
-                @endif
-            </div>
-        </div>
-        </div>
-            @can('update', \App\Models\AssetModel::class)
-            <div class="col-md-12" style="padding-bottom: 5px;">
-                <a href="{{ ($model->deleted_at=='') ? route('models.edit', $model->id) : '#' }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social hidden-print{{ ($model->deleted_at!='') ? ' disabled' : '' }}">
-                    <x-icon type="edit" />
-                    {{ trans('admin/models/table.edit') }}
-                </a>
-            </div>
-            @endcan
-
-            @can('create', \App\Models\AssetModel::class)
-            <div class="col-md-12" style="padding-bottom: 5px;">
-                <a href="{{ route('models.clone.create', $model->id) }}" style="width: 100%;" class="btn btn-sm btn-info btn-social hidden-print">
-                    <x-icon type="clone" />
-                    {{ trans('admin/models/table.clone') }}
-                </a>
-            </div>
-            @endcan
-
-            @can('delete', \App\Models\AssetModel::class)
-                <div class="col-md-12" style="padding-top: 10px;">
-
-                    @if ($model->deleted_at!='')
-                        <form method="POST" action="{{ route('models.restore.store', $model->id) }}">
-                            @csrf
-                            <button style="width: 100%;" class="btn btn-sm btn-warning btn-social hidden-print">
-                                <x-icon type="restore" />
-                                {{ trans('button.restore') }}
-                            </button>
-                        </form>
-                    @elseif ($model->assets()->count() > 0)
-                        <button class="btn btn-block btn-sm btn-danger btn-social hidden-print disabled" data-tooltip="true"  data-placement="top" data-title="{{ trans('general.cannot_be_deleted') }}">
-                            <x-icon type="delete" />
-                            {{ trans('general.delete') }}
-                        </button>
-                    @else
-                        <button class="btn btn-block btn-sm btn-danger btn-social delete-asset" data-toggle="modal" title="{{ trans('general.delete_what', ['item'=> trans('general.asset_model')]) }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $model->name]) }}" data-target="#dataConfirmModal" data-tooltip="true"  data-placement="top" data-title="{{ trans('general.delete_what', ['item'=> trans('general.asset_model')]) }}">
-                            <x-icon type="delete" />
-                            {{ trans('general.delete') }}
-                        </button>
+                <div class="callout callout-warning">
+                    <x-icon type="warning" />
+                    {{ trans('admin/models/general.deleted') }}
                 </div>
-                @endif
-           @endcan
+            </div>
+        @endif
 
-        </div>
-</div> <!-- /.row -->
+        <x-page-column class="col-md-9 main-panel">
+            <x-tabs>
+                <x-slot:tabnav>
+                    <x-tabs.asset-tab count="{{ $model->assets()->AssetsForShow()->count() }}" />
+                    <x-tabs.files-tab :item="$model" count="{{ $model->uploads()->count() }}"/>
+                    <x-tabs.history-tab count="{{ $model->history()->count() }}" :model="$model"/>
+                    <x-tabs.upload-tab :item="$model"/>
+                </x-slot:tabnav>
 
-@can('update', \App\Models\AssetModel::class)
-    @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
-@endcan
-@stop
+
+                <x-slot:tabpanes>
+                    <x-tabs.pane name="assets">
+                        <x-table.assets :route="route('api.assets.index', ['model_id' => $model->id, 'status' => $model->deleted_at!='' ? 'Deleted' : ''])" />
+                    </x-tabs.pane>
+
+                    <!-- start history tab pane -->
+                    <x-tabs.pane name="history">
+                        <x-table.history :model="$model" :route="route('api.models.history', $model)"/>
+                    </x-tabs.pane>
+                    <!-- end history tab pane -->
+
+                    <x-tabs.pane name="files">
+                        <x-table.files :object="$model" object_type="models" />
+                    </x-tabs.pane>
+                </x-slot:tabpanes>
+            </x-tabs>
+
+        </x-page-column>
+        <x-page-column class="col-md-3">
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$model" img_path="{{ app('models_upload_url') }}">
+                    <x-slot:buttons>
+                        <x-button.edit :item="$model" :route="route('models.edit', $model->id)" />
+                        <x-button.add :item="\App\Models\Asset::class" :tooltip="trans('general.new_asset')" :route="route('hardware.create', ['model_id' => $model->id])"/>
+                        <x-button.restore :item="$model" :route="route('models.restore.store', $model->id)" />
+                        <x-button.clone :item="$model" :route="route('models.clone.create', $model->id)" />
+                        <x-button.delete :item="$model" />
+                    </x-slot:buttons>
+
+                </x-info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
+
+@endsection
 
 @section('moar_scripts')
+    @can('files', $model)
+        @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
+    @endcan
 
-        <script>
-            $('#dataConfirmModal').on('show.bs.modal', function (event) {
-                var content = $(event.relatedTarget).data('content');
-                var title = $(event.relatedTarget).data('title');
-                $(this).find(".modal-body").text(content);
-                $(this).find(".modal-header").text(title);
-            });
-        </script>
-
-    @include ('partials.bootstrap-table', ['exportFile' => 'manufacturer' . $model->name . '-export', 'search' => false])
-
-@stop
+    @include ('partials.bootstrap-table', ['exportFile' => 'models-' . $model->name . '-export', 'search' => false])
+@endsection

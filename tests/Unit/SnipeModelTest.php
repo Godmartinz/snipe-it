@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Unit;
 
 use App\Models\SnipeModel;
@@ -6,27 +7,32 @@ use Tests\TestCase;
 
 class SnipeModelTest extends TestCase
 {
-    public function testSetsPurchaseDatesAppropriately()
+    public function test_sets_purchase_dates_appropriately()
     {
         $c = new SnipeModel;
         $c->purchase_date = '';
-        $this->assertTrue($c->purchase_date === null);
-        $c->purchase_date = '2016-03-25 12:35:50';
-        $this->assertTrue($c->purchase_date === '2016-03-25 12:35:50');
+        $this->assertNull($c->purchase_date);
+        $c->purchase_date = null;
+        $this->assertNull($c->purchase_date);
+        $c->purchase_date = '2016-03-25';
+        $this->assertTrue($c->purchase_date === '2016-03-25');
+        $this->assertEquals('2016-03-25', $c->purchase_date);
     }
 
-    public function testSetsPurchaseCostsAppropriately()
+    public function test_sets_purchase_costs_appropriately()
     {
         $c = new SnipeModel;
+        $c->purchase_cost = '';
+        $this->assertTrue($c->purchase_cost == null);
         $c->purchase_cost = '0.00';
-        $this->assertTrue($c->purchase_cost === null);
+        $this->assertTrue($c->purchase_cost == 0.00);
         $c->purchase_cost = '9.54';
-        $this->assertTrue($c->purchase_cost === 9.54);
+        $this->assertTrue($c->purchase_cost == 9.54);
         $c->purchase_cost = '9.50';
-        $this->assertTrue($c->purchase_cost === 9.5);
+        $this->assertTrue($c->purchase_cost == 9.5);
     }
 
-    public function testNullsBlankLocationIdsButNotOthers()
+    public function test_nulls_blank_location_ids_but_not_others()
     {
         $c = new SnipeModel;
         $c->location_id = '';
@@ -35,7 +41,7 @@ class SnipeModelTest extends TestCase
         $this->assertTrue($c->location_id == 5);
     }
 
-    public function testNullsBlankCategoriesButNotOthers()
+    public function test_nulls_blank_categories_but_not_others()
     {
         $c = new SnipeModel;
         $c->category_id = '';
@@ -44,7 +50,7 @@ class SnipeModelTest extends TestCase
         $this->assertTrue($c->category_id == 1);
     }
 
-    public function testNullsBlankSuppliersButNotOthers()
+    public function test_nulls_blank_suppliers_but_not_others()
     {
         $c = new SnipeModel;
         $c->supplier_id = '';
@@ -53,7 +59,7 @@ class SnipeModelTest extends TestCase
         $this->assertTrue($c->supplier_id == 4);
     }
 
-    public function testNullsBlankDepreciationsButNotOthers()
+    public function test_nulls_blank_depreciations_but_not_others()
     {
         $c = new SnipeModel;
         $c->depreciation_id = '';
@@ -62,7 +68,7 @@ class SnipeModelTest extends TestCase
         $this->assertTrue($c->depreciation_id == 4);
     }
 
-    public function testNullsBlankManufacturersButNotOthers()
+    public function test_nulls_blank_manufacturers_but_not_others()
     {
         $c = new SnipeModel;
         $c->manufacturer_id = '';

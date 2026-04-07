@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,6 +15,6 @@ return array(
 
     'failed' => 'Credenziali non corrispondenti ai dati registrati.',
     'password' => 'La password fornita non è corretta.',
-    'throttle' => 'Troppi tentativi di accesso. Riprova tra :seconds secondi.',
+    'throttle' => 'Troppi tentativi di login. Per favore riprova tra :minutes minuti.',
 
-);
+];
