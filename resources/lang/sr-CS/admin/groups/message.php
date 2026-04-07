@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grupa već postoji!',
     'group_not_found' => 'Grupa [: id] ne postoji.',
     'group_name_required' => 'Polje naziv je obavezno',
+    'assoc_users' => 'Ovaj je department je trenutno povezan s barem jednim korisnikom i ne može se izbrisati. Ažurirajte svoje korisnike da se više ne referenciraju na ovaj department i pokušajte ponovo. ',
 
     'success' => [
         'create' => 'Grupa je uspešno kreirana.',

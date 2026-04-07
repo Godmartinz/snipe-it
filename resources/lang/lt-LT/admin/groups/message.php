@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Tokia grupė jau yra!',
     'group_not_found' => 'Tokios grupės :id nėra.',
     'group_name_required' => 'Pavadinimo laukas yra privalomas',
+    'assoc_users' => 'Šis skyrius šiuo metu susietas su bent vienu naudotoju ir negali būti ištrintas. Prašome atnaujinti savo naudotojus, kad šie nebūtu susieti su šiuo skyriumi ir bandykite dar kartą. ',
 
     'success' => [
         'create' => 'Grupė sukurta sėkmingai.',

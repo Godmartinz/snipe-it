@@ -434,7 +434,44 @@ set_dbpass () {
 
 case $distro in
   Debian)
-    if [[ "$version" =~ ^12 ]]; then
+    if [[ "$version" =~ ^13 ]]; then
+        # Install for Debian 13.x
+        set_fqdn
+        set_dbpass
+        tzone=$(timedatectl show --property=Timezone --value)
+
+        echo "* Adding PHP repository."
+        log "apt-get install -y apt-transport-https lsb-release ca-certificates"
+        log "wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg"
+        echo "deb https://packages.sury.org/php/ $codename main" > /etc/apt/sources.list.d/php.list
+
+        echo -n "* Updating installed packages."
+        log "apt-get update && apt-get -y upgrade" & pid=$!
+        progress
+
+        echo "* Installing Apache httpd, PHP, MariaDB and other requirements."
+        PACKAGES="mariadb-server mariadb-client apache2 libapache2-mod-php8.4 php8.4  php8.4-curl php8.4-mysql php8.4-gd php8.4-ldap php8.4-zip php8.4-mbstring php8.4-xml php8.4-bcmath curl git unzip"
+        install_packages
+
+        echo "* Configuring Apache."
+        create_virtualhost
+        /usr/sbin/a2enmod rewrite
+        /usr/sbin/a2ensite $APP_NAME.conf
+        rename_default_vhost
+
+        set_hosts
+
+        install_snipeit
+
+        echo "* Restarting Apache httpd."
+        /usr/sbin/service apache2 restart
+
+        echo "* Clearing cache and setting final permissions."
+        chmod 777 -R $APP_PATH/storage/framework/cache/
+        run_as_app_user php $APP_PATH/artisan cache:clear
+        chmod 775 -R $APP_PATH/storage/
+
+    elif [[ "$version" =~ ^12 ]]; then
         # Install for Debian 12.x
         set_fqdn
         set_dbpass

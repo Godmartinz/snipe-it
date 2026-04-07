@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Fieldset',
     'no_custom_field' => 'Ei ole lisavälju',
     'add_default_values' => 'Lisa vaikimisi väärtus',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

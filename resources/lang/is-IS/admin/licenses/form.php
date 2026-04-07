@@ -6,7 +6,7 @@ return [
     'checkin' => 'Skila',
     'create' => 'Skrá leyfi',
     'expiration' => 'Expiration Date',
-    'license_key' => 'Product Key',
+    'license_key' => 'Leyfislykill',
     'maintained' => 'Maintained',
     'name' => 'Heiti hugbúnaðar',
     'no_depreciation' => 'Do Not Depreciate',

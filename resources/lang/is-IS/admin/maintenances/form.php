@@ -2,7 +2,7 @@
 
 return [
     'select_type' => 'Select Maintenance Type',
-    'asset_maintenance_type' => 'Asset Maintenance Type',
+    'asset_maintenance_type' => 'Tegund viðhalds',
     'title' => 'Titill',
     'start_date' => 'Upphafsdagsetning',
     'completion_date' => 'Completion Date',

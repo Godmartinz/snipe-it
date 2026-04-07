@@ -45,12 +45,12 @@ return [
         'not_enough_seats' => 'Няма достатъчно лицензи за изписване',
         'mismatch' => 'Броя лицензни места не отговаря на броя лицензи',
         'unavailable' => 'Този лиценз за работно място не е наличен за изписване.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'license_is_inactive' => 'Лиценза е изтекъл или прекратен.',
     ],
 
     'checkin' => [
         'error' => 'Възникна проблем при вписването на лиценза. Моля, опитайте отново.',
-        'not_reassignable' => 'Seat has been used',
+        'not_reassignable' => 'Лиценза е изпозлван',
         'success' => 'Лицензът е вписан',
     ],
 

@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'ส่งอีเมล์ในการคืนสินทรัพย์',
     'import_eula_text' => 'ข้อความ EULA',
     'import_category_type' => 'ชนิดของหมวดหมู่',
+    'import_alert_on_response' => 'แจ้งเตือนเมื่อการตอบรับ',
 
 ];

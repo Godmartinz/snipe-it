@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Fieldset',
     'no_custom_field' => 'Tidak ada bidang khusus',
     'add_default_values' => 'Tambah nilai default',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

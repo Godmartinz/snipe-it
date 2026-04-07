@@ -15,4 +15,8 @@ return [
     'fieldset' => 'مجموعة حقول',
     'no_custom_field' => 'لا يوجد حقول مخصصة',
     'add_default_values' => 'أضف القيم الافتراضية',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

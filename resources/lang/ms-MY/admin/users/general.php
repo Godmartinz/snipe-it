@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Anda akan menyunting sifat: user_count pengguna. Sila ambil perhatian bahawa anda tidak boleh mengubah atribut pengguna anda sendiri menggunakan borang ini, dan mesti membuat pengeditan kepada pengguna anda sendiri secara individu.',
     'bulk_update_help' => 'Borang ini membolehkan anda mengemas kini berbilang pengguna sekaligus. Hanya isikan medan yang perlu anda ubah. Mana-mana medan yang dibiarkan kosong akan kekal tidak berubah.',
     'current_assets' => 'Aset yang sedang diperiksa kepada pengguna ini',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Pendua Nama',
     'contact_user' => 'Hunungi :nama',
     'edit' => 'Kemaskini Pengguna',

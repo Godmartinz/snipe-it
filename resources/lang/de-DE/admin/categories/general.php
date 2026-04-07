@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Rücknahme E-mail senden',
     'import_eula_text' => 'EULA Text',
     'import_category_type' => 'Kategorietyp',
+    'import_alert_on_response' => 'Warnung bei Antwort',
 
 ];

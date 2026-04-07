@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Lauka laukums',
     'no_custom_field' => 'Nav pielāgotu lauku',
     'add_default_values' => 'Pievienot noklusējuma vērtības',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

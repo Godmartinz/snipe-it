@@ -53,4 +53,34 @@ class AccessoryTest extends TestCase
             ]);
         $this->assertInstanceOf(Manufacturer::class, $accessory->manufacturer);
     }
+
+    public function test_percent_remaining_returns_one_hundred_when_nothing_is_checked_out()
+    {
+        $accessory = new Accessory([
+            'qty' => 10,
+        ]);
+        $accessory->checkouts_count = 0;
+
+        $this->assertEquals(100, $accessory->percentRemaining());
+    }
+
+    public function test_percent_remaining_returns_expected_value_when_partially_checked_out()
+    {
+        $accessory = new Accessory([
+            'qty' => 10,
+        ]);
+        $accessory->checkouts_count = 3;
+
+        $this->assertEquals(70.0, $accessory->percentRemaining());
+    }
+
+    public function test_percent_remaining_can_go_negative_when_checked_out_exceeds_quantity()
+    {
+        $accessory = new Accessory([
+            'qty' => 2,
+        ]);
+        $accessory->checkouts_count = 3;
+
+        $this->assertEquals(-50.0, $accessory->percentRemaining());
+    }
 }

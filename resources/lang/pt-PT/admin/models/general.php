@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Conjunto de campos',
     'no_custom_field' => 'Sem campos customizados',
     'add_default_values' => 'Adicione o seu Acordo de Licença de Uso Final',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

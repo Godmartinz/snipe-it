@@ -416,7 +416,7 @@ return [
     'deny_all' => 'Nesuteikti visų teisių į :area',
     'inherit_all' => 'Paveldėti visas teises į :area iš teisių grupių',
     'grant' => 'Suteikti teisę į :area',
-    'deny' => 'Nesuteikti teisės į :area',
+    'deny' => 'Nesuteikti teisės „:area“',
     'inherit' => 'Paveldėti teisę į :area iš teisių grupių',
     'use_groups' => 'Siekiant lengvesnio valdymo, primygtinai rekomenduojame naudoti leidimų grupes, o ne priskirti individualius leidimus.',
 

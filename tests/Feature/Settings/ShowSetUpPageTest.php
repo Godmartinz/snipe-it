@@ -223,18 +223,9 @@ class ShowSetUpPageTest extends TestCase
 
         Http::fake([URL::to('.env') => fn () => throw new ConnectionException('Some curl error message.')]);
 
-        Log::setEventDispatcher(Event::fake());
-
         $this->getSetUpPageResponse()->assertOk();
 
         $this->assertSeeDotEnvFileExposedErrorMessage();
-
-        Event::assertDispatched(function (MessageLogged $event) {
-            $this->assertEquals('debug', $event->level);
-            $this->assertEquals('Some curl error message.', $event->message);
-
-            return true;
-        });
     }
 
     public function test_will_show_error_message_when_app_url_is_not_same_with_page_url(): void

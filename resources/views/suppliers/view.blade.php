@@ -25,26 +25,9 @@
                     <x-tabs.accessory-tab count="{{ $supplier->accessories->count() }}" />
                     <x-tabs.consumable-tab count="{{ $supplier->consumables->count() }}" />
                     <x-tabs.component-tab count="{{ $supplier->components->count() }}" />
-
-                    @can('view', \App\Models\AssetMaintenance::class)
-                        <x-tabs.nav-item
-                                name="maintenances"
-                                icon="fa-solid fa-screwdriver-wrench"
-                                label="{{ trans('general.maintenances') }}"
-                                count="{{ $supplier->maintenances->count() }}"
-                        />
-                    @endcan
-
-                <x-tabs.nav-item
-                    name="files"
-                    icon="fa-solid fa-file-contract fa-fw"
-                    label="{{ trans('general.files') }}"
-                    count="{{ $supplier->uploads()->count() }}"
-                />
-
-                @can('update', $supplier)
-                    <x-tabs.nav-item-upload />
-                @endcan
+                    <x-tabs.maintenance-tab count="{{ $supplier->maintenances->count() }}"/>
+                    <x-tabs.files-tab :item="$supplier" count="{{ $supplier->uploads()->count() }}"/>
+                    <x-tabs.upload-tab :item="$supplier"/>
 
                 </x-slot:tabnav>
 
@@ -53,65 +36,43 @@
                 <x-slot:tabpanes>
 
                     <!-- start assets tab pane -->
-                    @can('view', \App\Models\Asset::class)
-                        <x-tabs.pane name="assets" count="{{ $supplier->assets()->AssetsForShow()->count() }}">
-                            <x-table.assets name="assets" :route="route('api.assets.index', ['supplier_id' => $supplier->id, 'itemtype' => 'assets'])" />
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="assets">
+                        <x-table.assets name="assets" :route="route('api.assets.index', ['supplier_id' => $supplier->id, 'itemtype' => 'assets'])"/>
+                    </x-tabs.pane>
                     <!-- end assets tab pane -->
 
+
                     <!-- start licenses tab pane -->
-                    @can('view', \App\Models\License::class)
-                        <x-tabs.pane name="licenses" class="{{ $supplier->licenses->count() == 0 ? 'hidden-print' : '' }}">
-                            <x-table.licenses name="licenses" :route="route('api.licenses.index', ['supplier_id' => $supplier->id])" />
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="licenses">
+                        <x-table.licenses :name="$supplier->name" :route="route('api.licenses.index', ['supplier_id' => $supplier->id])"/>
+                    </x-tabs.pane>
                     <!-- end licenses tab pane -->
 
                     <!-- start accessories tab pane -->
-                    @can('view', \App\Models\Accessory::class)
-                        <x-tabs.pane name="accessories" class="{{ $supplier->accessories->count() == 0 ? 'hidden-print' : '' }}">
-                            <x-table.accessories name="accessories" :route="route('api.accessories.index', ['supplier_id' => $supplier->id])" />
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="accessories">
+                        <x-table.accessories :name="$supplier->name" :route="route('api.accessories.index', ['supplier_id' => $supplier->id])"/>
+                    </x-tabs.pane>
                     <!-- end accessories tab pane -->
 
-
                     <!-- start components tab pane -->
-                    @can('view', \App\Models\Component::class)
-                        <x-tabs.pane name="components" class="{{ $supplier->components->count() == 0 ? 'hidden-print' : '' }}">
-                            <x-table.components name="components" :route="route('api.components.index', ['supplier_id' => $supplier->id])" />
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="components">
+                        <x-table.accessories :name="$supplier->name" :route="route('api.components.index', ['supplier_id' => $supplier->id])"/>
+                    </x-tabs.pane>
                     <!-- end components tab pane -->
 
                     <!-- start consumables tab pane -->
-                    @can('view', \App\Models\Consumable::class)
-                        <x-tabs.pane name="consumables" class="{{ $supplier->consumables->count() == 0 ? 'hidden-print' : '' }}">
-                            <x-slot:header>
-                                {{ trans('general.consumables') }}
-                            </x-slot:header>
-
-                            <x-slot:content>
-                                <x-table
-                                        show_advanced_search="true"
-                                        buttons="consumableButtons"
-                                        api_url="{{ route('api.consumables.index', ['supplier_id' => $supplier->id]) }}"
-                                        :presenter="\App\Presenters\ConsumablePresenter::dataTableLayout()"
-                                        export_filename="export-{{ str_slug($supplier->name) }}-consumables-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="consumables">
+                        <x-table.consumables :name="$supplier->name" :route="route('api.consumables.index', ['supplier_id' => $supplier->id])"/>
+                    </x-tabs.pane>
                     <!-- end consumables tab pane -->
 
 
                     <!-- start consumables tab pane -->
                     @can('view', \App\Models\Asset::class)
                         <x-tabs.pane name="maintenances" class="{{ $supplier->maintenances->count() == 0 ? 'hidden-print' : '' }}">
-                            <x-slot:header>
+                            <x-slot:table_header>
                                 {{ trans('admin/maintenances/general.maintenances') }}
-                            </x-slot:header>
+                            </x-slot:table_header>
 
                                 <x-table
                                         buttons="maintenanceButtons"
@@ -126,12 +87,7 @@
 
                     <!-- start files tab pane -->
                     <x-tabs.pane name="files" class="{{ $supplier->uploads->count() == 0 ? 'hidden-print' : '' }}">
-                        <x-slot:header>
-                            {{ trans('general.files') }}
-                        </x-slot:header>
-                        <x-slot:content>
-                            <x-filestable object_type="suppliers" :object="$supplier" />
-                        </x-slot:content>
+                        <x-table.files object_type="suppliers" :object="$supplier"/>
                     </x-tabs.pane>
                     <!-- end files tab pane -->
 
@@ -142,7 +98,7 @@
         <x-page-column class="col-md-3 hidden-print">
 
             <x-box class="side-box expanded">
-                <x-box.info-panel :infoPanelObj="$supplier" img_path="{{ app('suppliers_upload_url') }}">
+                <x-info-panel :infoPanelObj="$supplier" img_path="{{ app('suppliers_upload_url') }}">
 
                     <x-slot:buttons>
                         <x-button :item="$supplier" permission="update" :route="route('suppliers.edit', $supplier->id)" class="btn-warning"  />
@@ -150,7 +106,7 @@
                     </x-slot:buttons>
 
 
-                </x-box.info-panel>
+                </x-info-panel>
             </x-box>
         </x-page-column>
 
@@ -187,15 +143,13 @@
         </table>
     </div>
 
-  @can('update', \App\Models\Supplier::class)
-      @include ('modals.upload-file', ['item_type' => 'supplier', 'item_id' => $supplier->id])
-  @endcan
-@stop
+@endsection
 
 @section('moar_scripts')
-  @include ('partials.bootstrap-table', [
-      'exportFile' => 'locations-export',
-      'search' => true
-   ])
+    @can('files', $supplier)
+        @include ('modals.upload-file', ['item_type' => 'suppliers', 'item_id' => $supplier->id])
+    @endcan
 
-@stop
+    @include ('partials.bootstrap-table', ['exportFile' => 'suppliers-' . $supplier->name . '-export', 'search' => false])
+@endsection
+

@@ -21,7 +21,7 @@ return [
         'success' => 'Dostawca usunięty pomyślnie.',
         'not_found' => 'Dostawca nie został odnaleziony.',
         'bulk_success' => 'Pomyślnie usunięto dostawcę.',
-        'partial_success' => 'Pomyślnie usunięto dostawcę. Sprawdź dodatkowe informacje poniżej.|Pomyślnie usunięto :count dostawców. Sprawdź dodatkowe informacje poniżej.',
+        'partial_success' => '.',
     ],
 
 ];

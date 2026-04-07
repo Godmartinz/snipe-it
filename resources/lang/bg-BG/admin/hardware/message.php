@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
+    'undeployable' => 'Следните активи не могат да бъдат предоставени и бяха премахнати от изписването: :asset_tags',
     'does_not_exist' => 'Активът не съществува.',
     'does_not_exist_var' => 'Активът с етике :asset_tag не е намерен.',
     'no_tag' => 'Не е предоставен етикет на актив.',
@@ -20,9 +20,9 @@ return [
         'multi_success_linked' => 'Актив с етикет :links беше създаден успешно.|:count активи бяха създадено успешно. :links.',
         'partial_failure' => 'Грешка при създаване на актив. Съобщението за грешка е: :failures|:count актива не бяха създадени. Съобщението за грешка е: :failures',
         'target_not_found' => [
-            'user' => 'The assigned user could not be found.',
-            'asset' => 'The assigned asset could not be found.',
-            'location' => 'The assigned location could not be found.',
+            'user' => 'Назначеният потребител не можа да бъде намерен.',
+            'asset' => 'Назначения артикул не може да бъде намерен.',
+            'location' => 'Назначената локация не може да бъде намерена.',
         ],
     ],
 

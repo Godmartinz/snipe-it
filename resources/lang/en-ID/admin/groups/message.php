@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grup sudah ada!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Nama field diperlukan',
+    'assoc_users' => 'Saat ini kategori ini terkait dengan setidaknya satu pengguna dan tidak dapat dihapus. Silahkan perbaharui model Anda untuk tidak lagi tereferensi dengan kategori ini dan coba lagi. ',
 
     'success' => [
         'create' => 'Group berhasil dibuat.',

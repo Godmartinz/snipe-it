@@ -124,12 +124,21 @@ class ComponentPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
                 'footerFormatter' => 'qtySumFormatter',
             ], [
+                'field' => 'percent_remaining',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => '% '.trans('general.remaining'),
+                'visible' => true,
+                'formatter' => 'progressBarFormatter',
+            ], [
                 'field' => 'purchase_cost',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.unit_cost'),
                 'visible' => true,
                 'class' => 'text-right',
+                'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'total_cost',
                 'searchable' => false,
@@ -205,12 +214,12 @@ class ComponentPresenter extends Presenter
                 'visible' => false,
             ],
             [
-                'field' => 'name',
+                'field' => 'assigned_to',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.name'),
                 'visible' => true,
-                'formatter' => 'hardwareLinkFormatter',
+                'formatter' => 'polymorphicItemFormatter',
             ],
             [
                 'field' => 'qty',

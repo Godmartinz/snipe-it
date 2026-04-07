@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Fieldset',
     'no_custom_field' => 'No custom fields',
     'add_default_values' => 'បន្ថែមតម្លៃលំនាំដើម',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

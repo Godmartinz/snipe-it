@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Iqembu selivele likhona!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Inkambu yegama iyadingeka',
+    'assoc_users' => 'Lo mnyango njengamanje uhlotshaniswa nomsebenzisi oyedwa futhi awukwazi ukususwa. Sicela ubuyekeze abasebenzisi bakho ukuthi bangasaphinde babhekisele kulo mnyango bese uzama futhi.',
 
     'success' => [
         'create' => 'Iqembu ladalwa ngempumelelo.',

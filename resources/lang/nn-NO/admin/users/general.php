@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Du prøver å redigere egenskapene for: user_count brukere. Merk at du kan ikke endre dine egne brukerens attributter ved hjelp av dette skjemaet, og må gjøre endringer i din egen bruker individuelt.',
     'bulk_update_help' => 'I dette skjemaet kan du oppdatere flere brukere samtidig. Bare fyll ut feltene du vil endre. Eventuelle tomme felt vil forbli uendret.',
     'current_assets' => 'Eiendeler som er sjekket ut til denne brukeren',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Klon bruker',
     'contact_user' => 'Kontakt :navn',
     'edit' => 'Rediger bruker',

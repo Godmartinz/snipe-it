@@ -22,7 +22,7 @@ return [
     'add_maintenance' => 'Přidat údržbu',
     'append' => 'Připojit',
     'new' => 'Nový',
-    'show_hide_info' => 'Show/Hide More Information',
+    'show_hide_info' => 'Zobrazit/skrýt další informace',
     'var' => [
         'clone' => 'Klonovat :item_type',
         'edit' => 'Upravit :item_type',

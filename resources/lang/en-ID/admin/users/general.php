@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Anda akan sunting properti dari :user_count pengguna. Silahkan catat anda tidak dapat menggubah atribut pengguna anda sendiri menggunakan formulir ini, dan harus membuat penyuntingan untuk pengguna anda sendiri secara pribadi.',
     'bulk_update_help' => 'Formulir ini membolehkan anda perbarui beberapa pengguna sekaligus. Hanya mengisi bidang yang anda perlu ubah. Setiap bidang yang kosong akan tetap tidak berubah.',
     'current_assets' => 'Aset saat ini diperiksa untuk pengguna ini',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Gandakan pengguna',
     'contact_user' => 'Kontak :name',
     'edit' => 'Sunting Pengguna',

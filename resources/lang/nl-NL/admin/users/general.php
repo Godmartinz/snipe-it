@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'U staat op het punt om een aanpassing te maken aan de eigenschappen van :user_count gebruikers. Houd er rekening mee dat u niet uw eigen gebruikers eigenschappen kan aanpassen via dit formulier, u zal dit in uw eigen instellingen moeten doen.',
     'bulk_update_help' => 'Dit formulier maakt het mogelijk om meerdere gebruikers tegelijkertijd te bewerken, vul alleen de velden in die veranderd moeten worden. Blanco velden zullen ongewijzigd blijven.',
     'current_assets' => 'Momenteel uitgecheckt aan deze gebruiker',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Gebruiker dupliceren',
     'contact_user' => 'Contact :name',
     'edit' => 'Gebruiker aanpassen',

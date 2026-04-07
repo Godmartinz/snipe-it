@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Selezionando questa casella, l\'utente potrà sovrascrivere il tema dell\'interfaccia con uno diverso.',
     'asset_ids' => 'ID Bene',
     'audit_interval' => 'Intervallo Inventari',
-    'audit_interval_help' => 'Se dovete inventariare fisicamente e regolarmente i vostri beni, inserite l\'intervallo in mesi. Se si aggiorna questo valore, tutte le "prossime date" per i beni con una prossima data d\'inventario saranno aggiornate.',
+    'audit_interval_help' => 'Se sei tenuto a effettuare regolarmente verifiche fisiche dei tuoi beni, inserisci l\'intervallo in mesi che utilizzi ',
     'audit_warning_days' => 'Soglia Avviso di Inventario',
     'audit_warning_days_help' => 'Quanti giorni in anticipo dovremmo avvisare che i beni devono essere inventariati?',
     'auto_increment_assets' => 'Genera tag beni ad incremento automatico',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'ID Cliente',
     'too_many_users_to_show' => 'Il numero di utenti (:count) è superiore al limite dei record non impaginati (:max). Utilizza lo strumento di modifica in blocco degli utenti per gestire le appartenenze ai gruppi.',
+    'update_existing_dates' => 'Aggiornare inoltre tutte le date di "prossima verifica" esistenti per gli asset con una verifica in programma con l\'intervallo di verifica indicato sopra. Questa procedura viene utilizzata più comunemente quando la politica interna relativa all\'intervallo di verifica è cambiata.',
 
     'username_formats' => [
         'username_format' => 'Formato nome utente',

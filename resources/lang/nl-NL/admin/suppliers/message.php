@@ -21,7 +21,7 @@ return [
         'success' => 'De leverancier is succesvol verwijderd.',
         'not_found' => 'Leverancier niet gevonden.',
         'bulk_success' => 'De leveranciers zijn succesvol verwijderd.',
-        'partial_success' => 'Categorie succesvol verwijderd. Zie additionele informatie hieronder. | : count categorieën succesvol verwijderd. Zie additionele informatie hieronder.',
+        'partial_success' => '.',
     ],
 
 ];

@@ -5,11 +5,11 @@ return [
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
     'bulk_manager_warn' => 'Your users have been successfully updated, however your manager entry was not saved because the manager you selected was also in the user list to be edited, and users may not be their own manager. Please select your users again, excluding the manager.',
-    'user_exists' => 'User already exists!',
-    'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
-    'user_not_found' => 'User does not exist or you do not have permission to view them.',
+    'user_exists' => 'Notandinn er þegar til!',
+    'cannot_delete' => 'Þessi notandi er ekki til eða þú hefur ekki heimild til að eyða honum.',
+    'user_not_found' => 'Þessi notandi er ekki til eða þú hefur ekki heimild til að skoða hann.',
     'user_login_required' => 'The login field is required',
-    'user_has_no_assets_assigned' => 'No assets currently assigned to user.',
+    'user_has_no_assets_assigned' => 'Engum eignum er úthlutað til þessa notanda.',
     'user_password_required' => 'The password is required.',
     'insufficient_permissions' => 'Insufficient Permissions.',
     'user_deleted_warning' => 'This user has been deleted. You will have to restore this user to edit them or assign them new assets.',
@@ -46,7 +46,7 @@ return [
         'import' => 'There was an issue importing users. Please try again.',
         'asset_already_accepted' => 'Þessi eign hefur þegar verið samþykkt.',
         'accept_or_decline' => 'Þú verður annað hvort að samþykkja eða hafna þessari eign.',
-        'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
+        'cannot_delete_yourself' => 'Okkur þætti slæmt ef þú myndir eyða sjálfum þér. Vinsamlegast endurskoðaðu þessa aðgerð.',
         'incorrect_user_accepted' => 'Eigninni sem þú reyndir að samþykkja var ekki ráðstafað til þín.',
         'ldap_could_not_connect' => 'Could not connect to the LDAP server. Please check your LDAP server configuration in the LDAP config file. <br>Error from LDAP Server:',
         'ldap_could_not_bind' => 'Could not bind to the LDAP server. Please check your LDAP server configuration in the LDAP config file. <br>Error from LDAP Server: ',
@@ -57,7 +57,7 @@ return [
     ],
 
     'deletefile' => [
-        'error' => 'File not deleted. Please try again.',
+        'error' => 'Skránni var ekki eytt. Vinsamlegast reyndu aftur.',
         'success' => 'File successfully deleted.',
     ],
 

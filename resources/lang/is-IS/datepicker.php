@@ -14,7 +14,7 @@ return [
     */
 
     'week_start_select' => 'Veldu vikudag',
-    'week_start' => 'Day the Week Starts On',
+    'week_start' => 'Dagurinn sem vika hefst á',
     'today' => 'Í dag',
     'clear' => 'Hreinsa',
     'days' => [

@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Odeslat e-mail o vrácení zařízení',
     'import_eula_text' => 'Text EULA',
     'import_category_type' => 'Typ kategorie',
+    'import_alert_on_response' => 'Upozornit při odpovědi',
 
 ];

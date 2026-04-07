@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Stai per modificare le proprietà di: user_count users. Tieni presente che non puoi modificare i tuoi attributi utente utilizzando questo modulo e devi modificare individualmente il tuo utente.',
     'bulk_update_help' => 'Questo modulo consente di aggiornare più utenti contemporaneamente. Inserisci solo i campi che devi modificare. Tutti i campi lasciati vuoti rimarranno invariati.',
     'current_assets' => 'Asset assegnato a questo utente',
+    'current_items' => ':item attualmente assegnato a questo utente',
     'clone' => 'Clona Utente',
     'contact_user' => 'Contatta :name',
     'edit' => 'Modifica Utente',

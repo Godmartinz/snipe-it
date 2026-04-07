@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Zamierzasz edytować właściwości: user_count użytkowników. Należy pamiętać, że nie można zmienić własne atrybuty użytkownika, korzystając z tego formularza i musi przeprowadzić edycję własnych użytkownika indywidualnie.',
     'bulk_update_help' => 'Ten formularz umożliwia zbiorczą aktualizację wielu aktywów na raz. Wypełnij tylko te pola, które chcesz zmienić. Puste pola pozostaną niezmienione.',
     'current_assets' => 'Aktywo obecnie jest przypisane do tego użytkownika',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Kopiuj Użytkownika',
     'contact_user' => 'Kontakt :name',
     'edit' => 'Edycja Użytkownika',

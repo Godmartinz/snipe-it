@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grwp yn bodoli yn barod!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Mae angen llenwi\'r maes enw',
+    'assoc_users' => 'Mae\'r adran yma wedi perthnasu i oleiaf un defnyddiwr a nid yw\'n bosib dileu. Diweddarwch eich defnyddwyr i beidio cyfeirio at yr adran yma ac yna ceisiwch eto. ',
 
     'success' => [
         'create' => 'Wedi llwyddo i creu\'r grwp.',

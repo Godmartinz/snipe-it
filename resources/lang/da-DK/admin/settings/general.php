@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Afkrydsning her giver brugeren afgang til at overskrive UI skin med et andet skin.',
     'asset_ids' => 'Aktiv-id\'er',
     'audit_interval' => 'Revisionsinterval',
-    'audit_interval_help' => 'Hvis du er forpligtet til regelmæssigt fysisk revidere dine aktiver, skal du indtaste intervallet i måneder, som du bruger. Hvis du opdaterer denne værdi, vil alle "næste revisionsdatoer" for aktiver med en kommende revisionsdato blive opdateret.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Audit Warning Threshold',
     'audit_warning_days_help' => 'Hvor mange dage i forvejen skal vi advare dig, når aktiver skal betales for revision?',
     'auto_increment_assets' => 'Generer auto-tilvækst af asset-tags',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Brugernavn Format',

@@ -14,6 +14,6 @@ return [
     'status_type' => 'Būsenos tipas',
     'show_in_nav' => 'Rodyti šoniniame meniu',
     'title' => 'Būsenos žymos',
-    'undeployable' => 'Neišduodama',
+    'undeployable' => 'Negalima išduoti',
     'update' => 'Atnaujinti būsenos žymą',
 ];

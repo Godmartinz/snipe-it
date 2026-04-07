@@ -122,4 +122,50 @@ class CreateUserTest extends TestCase
         $user = User::where('username', 'testuser')->first();
         Notification::assertSentTo($user, WelcomeNotification::class);
     }
+
+    public function test_non_admin_cannot_grant_admin_or_superuser_permissions_when_creating_user_via_api()
+    {
+        $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->postJson(route('api.users.store'), [
+                'first_name' => 'Taylor',
+                'last_name' => 'Tester',
+                'username' => 'taylor-create-api',
+                'password' => 'testpassword1235!!',
+                'password_confirmation' => 'testpassword1235!!',
+                'permissions' => '{"admin":"1","superuser":"1","users.view":"1"}',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $createdUser = User::where('username', 'taylor-create-api')->firstOrFail();
+        $decoded = (array) $createdUser->decodePermissions();
+
+        $this->assertArrayNotHasKey('admin', $decoded, 'Non-admin user should not be able to grant admin during create');
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Non-admin user should not be able to grant superuser during create');
+        $this->assertEquals(1, $decoded['users.view'] ?? null, 'Non-privileged permissions should still be createable');
+    }
+
+    public function test_admin_cannot_grant_superuser_permission_when_creating_user_via_api()
+    {
+        $this->actingAsForApi(User::factory()->admin()->createUsers()->create())
+            ->postJson(route('api.users.store'), [
+                'first_name' => 'Alex',
+                'last_name' => 'Admin',
+                'username' => 'alex-create-api',
+                'password' => 'testpassword1235!!',
+                'password_confirmation' => 'testpassword1235!!',
+                'permissions' => [
+                    'admin' => '1',
+                    'superuser' => '1',
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $createdUser = User::where('username', 'alex-create-api')->firstOrFail();
+        $decoded = (array) $createdUser->decodePermissions();
+
+        $this->assertSame('1', (string) ($decoded['admin'] ?? null), 'Admin should be able to grant admin during create');
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Admin should not be able to grant superuser during create');
+    }
 }

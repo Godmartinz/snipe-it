@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Set polj',
     'no_custom_field' => 'Ni polj po meri',
     'add_default_values' => 'Dodaj privzete vrednosti',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

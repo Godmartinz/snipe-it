@@ -5,6 +5,7 @@ return [
     'group_exists' => '分组已经存在',
     'group_not_found' => '分组 ID :id 不存在。',
     'group_name_required' => '名称为必填项',
+    'assoc_users' => '该位置下关联的还有其他用户，目前不能删除，请更新该用户信息，再尝试删除。 ',
 
     'success' => [
         'create' => '分组创建成功',

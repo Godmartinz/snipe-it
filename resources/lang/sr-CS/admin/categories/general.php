@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Pošalji e-poruku razduživanja',
     'import_eula_text' => 'EULA tekst',
     'import_category_type' => 'Vrsta kategorije',
+    'import_alert_on_response' => 'Upozorenje na odgovor',
 
 ];

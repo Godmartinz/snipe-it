@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Si se marca esta casilla, el usuario podrá reemplazar la apariencia de la interfaz con una diferente.',
     'asset_ids' => 'Códigos de los activos',
     'audit_interval' => 'Intervalo de auditoría',
-    'audit_interval_help' => 'Si está obligado a auditar físicamente sus activos con regularidad, introduzca el intervalo en meses que utilice. Si actualiza este valor, se actualizarán todas las "próximas fechas de auditoría" de los activos con una fecha de auditoría próxima.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Umbral para aviso de auditoría',
     'audit_warning_days_help' => '¿Con cuántos días de antelación es necesario avisar que se deben auditar los activos?',
     'auto_increment_assets' => 'Generar incremento automático en las placas de activos',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'ID de cliente',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Formato del nombre de usuario',

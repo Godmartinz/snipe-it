@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Veldverzameling',
     'no_custom_field' => 'Geen aangepaste velden',
     'add_default_values' => 'Voeg standaardwaarden toe',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

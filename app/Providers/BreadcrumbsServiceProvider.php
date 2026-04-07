@@ -43,10 +43,10 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         /**
          * Asset Breadcrumbs
          */
-        if ((request()->is('hardware*')) && (request()->status != '')) {
+        if ((request()->is('hardware*')) && (request()->status_type != '')) {
             Breadcrumbs::for('hardware.index', fn (Trail $trail) => $trail->parent('home', route('home'))
                 ->push(trans('general.assets'), route('hardware.index'))
-                ->push(trans('general.'.strtolower(e(request()->status))), route('hardware.index', ['status' => request()->status]))
+                ->push(trans('general.'.strtolower(e(request()->status_type))), route('hardware.index', ['status_type' => request()->status_type]))
             );
 
         } else {

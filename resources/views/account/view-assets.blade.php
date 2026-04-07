@@ -316,7 +316,7 @@
                         {{ trans('admin/users/table.manager') }}
                       </div>
                       <div class="col-md-9">
-                        <x-full-user-name :user="$user->manager" />
+                          {!!  $user->manager?->present()->formattedNameLink !!}
                       </div>
 
                     </div>
@@ -540,7 +540,7 @@
                         </td>
                         <td>
                           <x-icon type="circle-solid" class="text-blue" />
-                          {{ $asset->assetstatus?->name }}
+                            {{ $asset->status?->name }}
                           <label class="label label-default">{{ trans('general.deployed') }}</label>
                         </td>
                         <td>

@@ -21,4 +21,9 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
     {
         return $user->hasAccess('assets.audit');
     }
+
+    public function files(User $user, $item = null)
+    {
+        return $user->hasAccess($this->columnName().'.files');
+    }
 }

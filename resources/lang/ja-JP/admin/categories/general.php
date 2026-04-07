@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'チェックインメールを送信',
     'import_eula_text' => 'EULA文書',
     'import_category_type' => 'カテゴリータイプ',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

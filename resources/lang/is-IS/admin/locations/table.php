@@ -12,7 +12,7 @@ return [
     'create' => 'Skrá staðsetningu',
     'update' => 'Uppfæra staðsetningu',
     'print_assigned' => 'Prenta skráð',
-    'print_inventory' => 'Print Inventory',
+    'print_inventory' => 'Prenta eignaskrá',
     'print_all_assigned' => 'Print Inventory and Assigned',
     'name' => 'Heiti staðsetningar',
     'address' => 'Heimilisfang',

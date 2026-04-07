@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Gruppen existerar redan!',
     'group_not_found' => 'Grupp-ID :id finns inte.',
     'group_name_required' => 'Namn är obligatoriskt',
+    'assoc_users' => 'Den här avdelningen är för närvarande kopplad till minst en användare och kan inte raderas. Uppdatera dina användare för att inte längre referera till den här avdelningen och försök igen.',
 
     'success' => [
         'create' => 'Grupp skapad.',

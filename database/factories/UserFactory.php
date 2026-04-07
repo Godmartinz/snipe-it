@@ -115,6 +115,41 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.view' => '1']);
     }
 
+    public function viewAssetHistory()
+    {
+        return $this->appendPermission(['assets.view' => '1']);
+    }
+
+    public function viewUserHistory()
+    {
+        return $this->appendPermission(['users.view' => '1']);
+    }
+
+    public function viewLocationHistory()
+    {
+        return $this->appendPermission(['locations.view' => '1']);
+    }
+
+    public function viewAccessoryHistory()
+    {
+        return $this->appendPermission(['accessories.view' => '1']);
+    }
+
+    public function viewLicenseHistory()
+    {
+        return $this->appendPermission(['licenses.view' => '1']);
+    }
+
+    public function viewComponentHistory()
+    {
+        return $this->appendPermission(['components.view' => '1']);
+    }
+
+    public function viewConsumableHistory()
+    {
+        return $this->appendPermission(['consumables.view' => '1']);
+    }
+
     public function createAssets()
     {
         return $this->appendPermission(['assets.create' => '1']);

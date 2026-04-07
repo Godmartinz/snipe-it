@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Набір полів',
     'no_custom_field' => 'Немає настроюваних полів',
     'add_default_values' => 'Додати значення за замовчуванням',
+    'importer' => [
+        'require_serial' => 'Вимагати серійний номер',
+        'serial_required' => 'Серійний номер обов’язковий',
+    ],
 ];

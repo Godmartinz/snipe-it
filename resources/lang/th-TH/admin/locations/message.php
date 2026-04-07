@@ -3,13 +3,13 @@
 return [
 
     'does_not_exist' => 'ไม่มีสถานที่นี้.',
-    'assoc_users' => 'This location is not currently deletable because it is the location of record for at least one item or user, has assets assigned to it, or is the parent location of another location. Please update your records to no longer reference this location and try again ',
+    'assoc_users' => 'ขณะนี้ไม่สามารถลบสถานที่นี้ได้ เนื่องจากเป็นสถานที่บันทึกข้อมูลสำหรับสิ่งของหรือผู้ใช้อย่างน้อยหนึ่งรายการ, ยังมีสินทรัพย์ที่กำหนดไว้กับสถานที่นี้ หรือเป็นสถานที่หลักของสถานที่อื่น โปรดอัปเดตข้อมูลของคุณเพื่อไม่ให้มีการอ้างอิงถึงสถานที่นี้อีกต่อไป แล้วลองใหม่อีกครั้ง ',
     'assoc_assets' => 'สถานที่นี้ถูกใช้งานหรือเกี่ยวข้องอยู่กับผู้ใช้งานคนใดคนหนึ่ง และไม่สามารถลบได้ กรุณาปรับปรุงผู้ใช้งานของท่านไม่ให้มีส่วนเกี่ยวข้องกับสถานที่นี้ และลองอีกครั้ง. ',
     'assoc_child_loc' => 'สถานที่นี้ถูกใช้งานหรือเกี่ยวข้องอยู่กับหมวดสถานที่ใดที่หนึ่ง และไม่สามารถลบได้ กรุณาปรับปรุงสถานที่ของท่านไม่ให้มีส่วนเกี่ยวข้องกับหมวดสถานที่นี้ และลองอีกครั้ง. ',
     'assigned_assets' => 'สินทรัพย์ถูกมอบหมายแล้ว',
     'current_location' => 'ตำแหน่งปัจจุบัน',
-    'open_map' => 'Open in :map_provider_icon Maps',
-    'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
+    'open_map' => 'เปิดใน :map_provider_icon',
+    'deleted_warning' => 'สถานที่นี้ถูกลบแล้ว กรุณากู้คืนก่อนทำการเปลี่ยนแปลง',
 
     'create' => [
         'error' => 'สถานที่ยังไม่ถูกสร้าง กรุณาลองใหม่อีกครั้ง.',
@@ -22,8 +22,8 @@ return [
     ],
 
     'restore' => [
-        'error' => 'Location was not restored, please try again',
-        'success' => 'Location restored successfully.',
+        'error' => 'ไม่สามารถกู้คืนสถานที่ได้ กรุณาลองอีกครั้ง',
+        'success' => 'กู้คืนสถานที่แล้ว',
     ],
 
     'delete' => [

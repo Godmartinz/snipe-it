@@ -150,6 +150,7 @@ class MaintenancesPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.cost'),
                 'class' => 'text-right',
+                'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'created_by',
                 'searchable' => false,
@@ -317,6 +318,7 @@ class MaintenancesPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.cost'),
                 'class' => 'text-right',
+                'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'created_by',
                 'searchable' => false,

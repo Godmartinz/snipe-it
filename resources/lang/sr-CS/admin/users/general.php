@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Nameravate uređivati ​​svojstva korisnika :user_count users. Imajte na umu da ne možete menjati vlastite korisničke atribute pomoću ovog obrasca i morati sami uređivati ​​vlastiti nalog pojedinačno.',
     'bulk_update_help' => 'Ovaj vam obrazac omogućava ažuriranje više korisnika odjednom. Popunite polja koja su vam potrebna za promjenu. Sva polja koja su ostala prazna će ostati nepromenjena.',
     'current_assets' => 'Imovina dodeljena ovom koriniku',
+    'current_items' => ':item je trenutno zaduženo ovom korisniku',
     'clone' => 'Kloniraj korisnika',
     'contact_user' => 'Kontakt :name',
     'edit' => 'Edit User',

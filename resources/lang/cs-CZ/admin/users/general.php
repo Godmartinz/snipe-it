@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Chystáte se upravit vlastnosti :user_count uživatelů. Nezapomeňte, že pomocí tohoto formuláře nemůžete změnit vlastní atributy uživatele a musíte provádět vlastní úpravy individuálně.',
     'bulk_update_help' => 'Tento formulář umožňuje aktualizovat více uživatelů najednou. Vyplňte pouze pole, která potřebujete změnit. Všechna pole, která jsou prázdná, zůstanou nezměněny.',
     'current_assets' => 'Majetky které jsou v současné době vydány uživateli',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Duplikuj uživatele',
     'contact_user' => 'Kontakt na :name',
     'edit' => 'Upravit uživatele',

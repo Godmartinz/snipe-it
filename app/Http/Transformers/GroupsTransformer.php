@@ -37,7 +37,7 @@ class GroupsTransformer
 
         $permissions_array['available_actions'] = [
             'update' => Gate::allows('superadmin') ? true : false,
-            'delete' => Gate::allows('superadmin') ? true : false,
+            'delete' => $group->isDeletable() ? true : false,
         ];
 
         $array += $permissions_array;

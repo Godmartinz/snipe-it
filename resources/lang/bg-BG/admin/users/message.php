@@ -2,11 +2,11 @@
 
 return [
 
-    'accepted' => 'You have successfully accepted this item.',
-    'declined' => 'You have successfully declined this item.',
+    'accepted' => 'Вие приехте успешно този актив.',
+    'declined' => 'Вие отказахте този актив.',
     'bulk_manager_warn' => 'Вашите потребителски профили бяха обновени успешно, обаче вашето управителско вписване не беше запазено, защото управителят, които сте избрали бе в списъка с потребителски профили за промяна и потребителите не могат да бъдат свои управители. Моля изберете вашите потребителски профили отново, с изключение на управителя.',
     'user_exists' => 'Потребителят вече съществува!',
-    'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
+    'cannot_delete' => 'Потребителят не съществува или нямате права да го изтриете.',
     'user_not_found' => 'Потребителят не съществува или нямате разрешение да го видите.',
     'user_login_required' => 'Полето за вход е задължително',
     'user_has_no_assets_assigned' => 'Няма заведени активи на този потребител.',
@@ -53,7 +53,7 @@ return [
         'ldap_could_not_search' => 'Проблем при търсенето в LDAP сървъра. Моля прегледайте конфигурацията на LDAP.<br/>Грешка от LDAP сървъра: ',
         'ldap_could_not_get_entries' => 'Проблем при извличането на резултат от LDAP сървъра. Моля прегледайте конфигурацията на LDAP.<br/>Грешка от LDAP сървъра:',
         'password_ldap' => 'Паролата за този профил се управлява от LDAP / Active Directory. Моля, свържете се с вашия ИТ отдел, за да промените паролата си.',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'multi_company_items_assigned' => 'Този потребител претежава активи, които пренадлежат на друга фирма. Моля впишете ги обратно или редактирайте фирмата на активите.',
     ],
 
     'deletefile' => [

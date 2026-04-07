@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Send indtjekningsmail',
     'import_eula_text' => 'Slutbrugerlicensaftaletekst',
     'import_category_type' => 'Kategoritype',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

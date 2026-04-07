@@ -15,4 +15,8 @@ return [
     'fieldset' => 'フィールドセット',
     'no_custom_field' => 'カスタム フィールドなし',
     'add_default_values' => 'デフォルト値を追加する',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

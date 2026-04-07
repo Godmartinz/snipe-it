@@ -80,7 +80,7 @@ class CheckinAssetNotification extends Notification
 
         $fields = [
             trans('general.administrator') => '<'.$admin->present()->viewUrl().'|'.$admin->display_name.'>',
-            trans('general.status') => $item->assetstatus?->name,
+            trans('general.status') => $item->status?->name,
             trans('general.location') => ($item->location) ? $item->location->name : '',
         ];
 
@@ -118,7 +118,7 @@ class CheckinAssetNotification extends Notification
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityText')
                 ->fact(trans('mail.checked_into'), ($item->location) ? $item->location->name : '')
                 ->fact(trans('general.administrator'), $admin->display_name)
-                ->fact(trans('admin/hardware/form.status'), $item->assetstatus?->name)
+                ->fact(trans('admin/hardware/form.status'), $item->status?->name)
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 
@@ -127,7 +127,7 @@ class CheckinAssetNotification extends Notification
             trans('mail.asset') => htmlspecialchars_decode($item->display_name),
             trans('mail.checked_into') => ($item->location) ? $item->location->name : '',
             trans('general.administrator') => $admin->display_name,
-            trans('admin/hardware/form.status') => $item->assetstatus?->name,
+            trans('admin/hardware/form.status') => $item->status?->name,
             trans('mail.notes') => $note ?: '',
         ];
 
@@ -153,7 +153,7 @@ class CheckinAssetNotification extends Notification
                             KeyValue::create(
                                 trans('mail.checked_into') ?: '',
                                 ($item->location) ? $item->location->name : '',
-                                trans('admin/hardware/form.status').': '.$item->assetstatus?->name,
+                                trans('admin/hardware/form.status').': '.$item->status?->name,
                             )
                                 ->onClick(route('hardware.show', $item->id))
                         )

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Alan',
     'no_custom_field' => 'Özel alan yok',
     'add_default_values' => 'Varsayılan değerleri ekle',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

@@ -589,4 +589,57 @@ class UpdateUserTest extends TestCase
             'company_id' => $companyB->id,
         ])->assertStatusMessageIs('error');
     }
+
+    public function test_edit_users_permission_cannot_escalate_empty_permissions_user_to_admin_or_superuser_via_api()
+    {
+        $editingUser = User::factory()->editUsers()->create();
+        $targetUser = User::factory()->create([
+            'permissions' => null,
+        ]);
+
+        $this->actingAsForApi($editingUser)
+            ->putJson(route('api.users.update', $targetUser), [
+                'first_name' => $targetUser->first_name,
+                'username' => $targetUser->username,
+                'permissions' => [
+                    'admin' => '1',
+                    'superuser' => '1',
+                    'users.view' => '1',
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $decoded = (array) $targetUser->refresh()->decodePermissions();
+
+        $this->assertArrayNotHasKey('admin', $decoded, 'Non-admin user should not be able to grant admin');
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Non-admin user should not be able to grant superuser');
+        $this->assertEquals(1, $decoded['users.view'] ?? null, 'Non-privileged permissions should still be updateable');
+    }
+
+    public function test_admin_cannot_escalate_empty_permissions_user_to_superuser_via_api()
+    {
+        $adminUser = User::factory()->admin()->create();
+        $targetUser = User::factory()->create([
+            'permissions' => null,
+        ]);
+
+        $this->actingAsForApi($adminUser)
+            ->putJson(route('api.users.update', $targetUser), [
+                'first_name' => $targetUser->first_name,
+                'username' => $targetUser->username,
+                'permissions' => [
+                    'admin' => '1',
+                    'superuser' => '1',
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $decoded = (array) $targetUser->refresh()->decodePermissions();
+
+        $this->assertArrayHasKey('admin', $decoded, 'Admin should be able to grant admin');
+        $this->assertSame('1', (string) $decoded['admin']);
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Admin should not be able to grant superuser');
+    }
 }

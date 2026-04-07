@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Send Checkin Email',
     'import_eula_text' => 'Käyttöehtojen teksti',
     'import_category_type' => 'Kategorian tyyppi',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

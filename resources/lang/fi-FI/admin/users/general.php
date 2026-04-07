@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Aiot muuttaa :user_count käyttäjän ominaisuuksia. Huomaa, että omia käyttäjätunnuksia ei voi muuttaa tämän lomakkeen avulla, vaan sinun on tehtävä muokkauksia omalle tunnuksellesi erikseen.',
     'bulk_update_help' => 'Tällä lomakkeella voit päivittää useita käyttäjiä kerralla. Täytä vain kentät joita haluat muuttaa. Kaikki tyhjäksi jätetyt kentät pysyvät muuttumattomina.',
     'current_assets' => 'Käyttäjälle luovutetut laitteet',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Monista käyttäjä',
     'contact_user' => 'Ota yhteyttä käyttäjään :name',
     'edit' => 'Muokkaa käyttäjää',

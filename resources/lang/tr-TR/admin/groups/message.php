@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grup zaten mevcut.',
     'group_not_found' => 'Group ID : ID mevcut değil.',
     'group_name_required' => 'İsim alanı zorunludur',
+    'assoc_users' => 'Bu bölüm şu anda en az bir kullanıcı ile ilişkili ve silinemez. Bölümü silebilmek için ilişkili kullanıcıları güncelleyin. ',
 
     'success' => [
         'create' => 'Grup oluşturuldu.',

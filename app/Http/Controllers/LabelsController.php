@@ -43,7 +43,9 @@ class LabelsController extends Controller
             'name' => trans('admin/labels/table.example_company'),
             'phone' => '1-555-555-5555',
             'email' => 'company@example.com',
+            'logo' => 'label-preview-logo.png',
         ]);
+        $exampleAsset->is_label_preview = true;
 
         $exampleAsset->setRelation('assignedTo', new User(['first_name' => 'Luke', 'last_name' => 'Skywalker']));
         $exampleAsset->defaultLoc = new Location(['name' => trans('admin/labels/table.example_defaultloc'), 'phone' => '1-555-555-5555']);

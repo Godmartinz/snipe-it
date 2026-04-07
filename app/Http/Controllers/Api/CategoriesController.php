@@ -6,6 +6,7 @@ use App\Actions\Categories\DestroyCategoryAction;
 use App\Exceptions\ItemStillHasChildren;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\CategoriesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -26,62 +27,50 @@ class CategoriesController extends Controller
      *
      * @return Response
      */
-    public function index(Request $request): array
+    public function index(FilterRequest $request): array
     {
         $this->authorize('view', Category::class);
         $allowed_columns = [
-            'id',
-            'name',
-            'category_type',
-            'category_type',
-            'use_default_eula',
-            'eula_text',
-            'require_acceptance',
-            'checkin_email',
-            'assets_count',
             'accessories_count',
-            'consumables_count',
+            'assets_count',
+            'category_type',
+            'checkin_email',
             'components_count',
-            'licenses_count',
+            'consumables_count',
             'created_at',
-            'updated_at',
+            'eula_text',
+            'id',
             'image',
-            'tag_color',
+            'licenses_count',
+            'name',
             'notes',
+            'require_acceptance',
+            'tag_color',
+            'updated_at',
+            'use_default_eula',
         ];
 
         $categories = Category::select([
-            'id',
-            'created_by',
-            'created_at',
-            'updated_at',
-            'name', 'category_type',
-            'use_default_eula',
-            'eula_text',
-            'require_acceptance',
+            'category_type',
             'checkin_email',
+            'created_at',
+            'created_by',
+            'eula_text',
+            'id',
             'image',
-            'tag_color',
+            'name',
             'notes',
+            'require_acceptance',
+            'tag_color',
+            'updated_at',
+            'use_default_eula',
         ])
             ->with('adminuser')
             ->withCount('accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count', 'models as models_count');
 
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
-        }
-
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $categories->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $categories->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $categories->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         /*

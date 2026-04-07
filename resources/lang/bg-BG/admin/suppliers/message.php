@@ -19,9 +19,9 @@ return [
         'confirm' => 'Сигурни ли сте, че искате да изтриете този доставчик?',
         'error' => 'Възникна проблем при изтриване на доставчика. Моля, опитайте отново.',
         'success' => 'Доставчикът е изтрит.',
-        'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
-        'partial_success' => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
+        'not_found' => 'Доставчика не е намерен.',
+        'bulk_success' => 'Доставчиците бяха изтрити успешно.',
+        'partial_success' => '.',
     ],
 
 ];

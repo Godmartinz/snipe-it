@@ -41,6 +41,13 @@ class Settings
         ]);
     }
 
+    public function setAuditInterval(?int $months): Settings
+    {
+        return $this->update([
+            'audit_interval' => $months,
+        ]);
+    }
+
     public function disableAlertEmail(): Settings
     {
         return $this->update([
@@ -85,6 +92,14 @@ class Settings
     public function disableMultipleFullCompanySupport(): Settings
     {
         return $this->update(['full_multiple_companies_support' => 0]);
+    }
+
+    public function enableScopedLocationsWithFullMultipleCompanySupport(): Settings
+    {
+        $this->update(['full_multiple_companies_support' => 1]);
+        $this->update(['scope_locations_fmcs' => 1]);
+
+        return $this;
     }
 
     public function enableSlackWebhook(): Settings

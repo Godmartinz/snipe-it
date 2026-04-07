@@ -101,6 +101,7 @@ return [
     'created_by' => 'Utworzony przez',
     'record_created' => 'Rekord utworzony',
     'updated_at' => 'Updated At',
+    'updated_before' => 'Updated Before',
     'updated_plain' => 'Updated',
     'deleted_plain' => 'Usunięte',
     'purchased_plain' => 'Zakup',
@@ -114,6 +115,7 @@ return [
     'dashboard' => 'Panel główny',
     'data_source' => 'Źródło danych',
     'days' => 'dni',
+    'days_ago' => 'days ago',
     'days_to_next_audit' => 'Dni do następnej inspekcji',
     'date' => 'Data',
     'debug_warning' => 'Ostrzeżenie!',
@@ -128,6 +130,7 @@ return [
     'department' => 'Dział',
     'deployed' => 'Przypisany',
     'depreciation' => 'Amortyzacja',
+    'depreciation_type' => 'Depreciation Type',
     'depreciations' => 'Amortyzacje',
     'depreciation_report' => 'Raport Amortyzacji',
     'details' => 'Szczegóły',
@@ -273,6 +276,7 @@ return [
     'request_item' => 'Poproś o ten przedmiot',
     'external_link_tooltip' => 'Zewnętrzny link do',
     'save' => 'Zapisz',
+    'save_copy' => 'Save Copy',
     'select_var' => 'Wybierz :thing... ', // this will eventually replace all of our other selects
     'select' => 'Wybierz',
     'select_all' => 'Zaznacz wszystko',
@@ -683,7 +687,6 @@ return [
     ],
 
     'breadcrumb_button_actions' => [
-        'edit_item' => 'Edytuj :name',
         'checkout_item' => 'Wydaj :name',
         'checkin_item' => 'Przyjmij :name',
     ],
@@ -710,6 +713,7 @@ return [
 
     'select_all_none' => 'Zaznacz/Odznacz wszystko',
     'generic_model_not_found' => 'Model :model nie został odnaleziony lub nie posiadasz odpowiednich uprawnień, aby uzyskać do niego dostęp',
+    'report_not_editable' => 'You do not have permission to edit this report template',
     'deleted_models' => 'Usunięte modele środków',
     'deleted_users' => 'Usunięci użytkownicy',
     'cost_each' => ':amount sztuk',

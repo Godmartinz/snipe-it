@@ -15,4 +15,8 @@ return [
     'fieldset' => 'FIELDSET',
     'no_custom_field' => 'Nu există câmpuri personalizate',
     'add_default_values' => 'Adăugați valori implicite',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

@@ -9,7 +9,6 @@ use App\Models\Actionlog;
 use App\Models\AssetModel;
 use App\Models\CustomField;
 use App\Models\SnipeModel;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;

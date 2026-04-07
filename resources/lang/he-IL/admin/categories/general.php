@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'שלך אימייל כניסה למלאי',
     'import_eula_text' => 'טקסט EULA',
     'import_category_type' => 'סוג קטגוריה',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

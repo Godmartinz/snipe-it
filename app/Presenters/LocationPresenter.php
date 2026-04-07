@@ -44,7 +44,7 @@ class LocationPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
-                'title' => trans('admin/locations/table.name'),
+                'title' => trans('general.name'),
                 'visible' => true,
                 'formatter' => 'locationsLinkFormatter',
             ], [

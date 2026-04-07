@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Il gruppo esiste già!',
     'group_not_found' => 'Il Gruppo :id non esiste.',
     'group_name_required' => 'E\' richiesto il Nome del campo',
+    'assoc_users' => 'Questo reparto è attualmente associato a almeno un utente e non può essere eliminato. Aggiorna i tuoi utenti per non fare più riferimento a questo reparto e riprovare.',
 
     'success' => [
         'create' => 'Il gruppo è stato creato con successo.',

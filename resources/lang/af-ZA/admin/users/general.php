@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Jy is op die punt om die eienskappe van gebruikers_count gebruikers te wysig. Hou daar rekening mee dat u nie u eie gebruikers eienskappe kan verander deur hierdie vorm te gebruik en u eie gebruikers afzonderlijk moet wysig.',
     'bulk_update_help' => 'Met hierdie vorm kan u verskeie gebruikers gelyktydig bywerk. Vul slegs die velde in wat u moet verander. Enige velde wat leeg is, bly onveranderd.',
     'current_assets' => 'Bates wat tans na hierdie gebruiker gekontroleer word',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Klone gebruiker',
     'contact_user' => 'Kontak naam',
     'edit' => 'Wysig gebruiker',

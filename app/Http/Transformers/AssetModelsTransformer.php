@@ -3,6 +3,7 @@
 namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
+use App\Models\Asset;
 use App\Models\AssetModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -58,6 +59,7 @@ class AssetModelsTransformer
             'assets_assigned_count' => (int) $assetmodel->assets_assigned_count,
             'assets_archived_count' => (int) $assetmodel->assets_archived_count,
             'remaining' => (int) ($assetmodel->assets_count - (int) $assetmodel->assets_assigned_count) - (int) $assetmodel->assets_archived_count,
+            'percent_remaining' => round($assetmodel->percentRemaining()),
             'category' => ($assetmodel->category) ? [
                 'id' => (int) $assetmodel->category->id,
                 'name' => e($assetmodel->category->name),
@@ -83,6 +85,7 @@ class AssetModelsTransformer
         ];
 
         $permissions_array['available_actions'] = [
+            'create_asset' => (Gate::allows('create', Asset::class) && ($assetmodel->deleted_at == '')),
             'update' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
             'delete' => $assetmodel->isDeletable(),
             'clone' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at == '')),

@@ -67,7 +67,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
             ]);
 
         $newAsset = Asset::query()
-            ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
+            ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'status', 'model.category', 'model.manufacturer'])
             ->where('serial', $row['serialNumber'])
             ->sole();
 
@@ -112,7 +112,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals('', $newAsset->image);
         $this->assertNull($newAsset->user_id);
         $this->assertEquals(1, $newAsset->physical);
-        $this->assertEquals($row['status'], $newAsset->assetStatus->name);
+        $this->assertEquals($row['status'], $newAsset->status->name);
         $this->assertEquals(0, $newAsset->archived);
         $this->assertEquals($row['warrantyInMonths'], $newAsset->warranty_months);
         $this->assertNull($newAsset->deprecate);
@@ -296,11 +296,11 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAsset = Asset::query()
-            ->with(['assetStatus'])
+            ->with(['status'])
             ->where('serial', $importFileBuilder->firstRow()['serialNumber'])
             ->sole();
 
-        $this->assertEquals('Ready to Deploy', $newAsset->assetStatus->name);
+        $this->assertEquals('Ready to Deploy', $newAsset->status->name);
         $this->assertNull($newAsset->purchase_date);
         $this->assertNull($newAsset->purchase_cost);
     }
@@ -385,7 +385,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
         $updatedAsset = Asset::query()
-            ->with(['location', 'supplier', 'company', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
+            ->with(['location', 'supplier', 'company', 'defaultLoc', 'status', 'model.category', 'model.manufacturer'])
             ->find($asset->id);
 
         $assignee = User::query()->find($updatedAsset->assigned_to, ['id', 'first_name', 'last_name', 'email', 'username']);
@@ -409,7 +409,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals($row['modelNumber'], $updatedAsset->model->model_number);
         $this->assertEquals($row['purchaseDate'], $updatedAsset->purchase_date->toDateString());
         $this->assertEquals($row['purchaseCost'], $updatedAsset->purchase_cost);
-        $this->assertEquals($row['status'], $updatedAsset->assetStatus->name);
+        $this->assertEquals($row['status'], $updatedAsset->status->name);
         $this->assertEquals($row['warrantyInMonths'], $updatedAsset->warranty_months);
         $this->assertEquals($row['supplierName'], $updatedAsset->supplier->name);
         $this->assertEquals($row['location'], $updatedAsset->defaultLoc->name);
@@ -482,7 +482,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         ])->assertOk();
 
         $asset = Asset::query()
-            ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
+            ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'status', 'model.category', 'model.manufacturer'])
             ->where('serial', $row['assigneeUsername'])
             ->sole();
 
@@ -500,7 +500,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals($row['itemName'], $asset->model->model_number);
         $this->assertEquals($row['supplierName'], $asset->purchase_date->toDateString());
         $this->assertEquals($row['companyName'], $asset->purchase_cost);
-        $this->assertEquals($row['manufacturerName'], $asset->assetStatus->name);
+        $this->assertEquals($row['manufacturerName'], $asset->status->name);
         $this->assertEquals($row['status'], $asset->warranty_months);
         $this->assertEquals($row['assigneeFullName'], $asset->supplier->name);
         $this->assertEquals($row['category'], $asset->defaultLoc->name);

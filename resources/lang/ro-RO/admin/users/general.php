@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Sunteți pe punctul de a edita proprietățile utilizatorilor: user_count. Rețineți că nu puteți modifica propriile atribute ale utilizatorilor utilizând acest formular și trebuie să efectuați modificări individuale ale propriului dvs. utilizator.',
     'bulk_update_help' => 'Acest formular vă permite să actualizați simultan mai mulți utilizatori. Completați câmpurile pe care trebuie să le schimbați. Toate câmpurile rămase necompletate vor rămâne neschimbate.',
     'current_assets' => 'Activele licitate în prezent la acest utilizator',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Cloneaza utilizator',
     'contact_user' => 'Contact :name',
     'edit' => 'Editeaza utilizator',

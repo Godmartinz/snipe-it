@@ -10,6 +10,7 @@ use App\Http\Requests\AccessoryCheckoutRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAccessoryRequest;
 use App\Http\Transformers\AccessoriesTransformer;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
@@ -69,20 +70,9 @@ class AccessoriesController extends Controller
             ->with('category', 'company', 'manufacturer', 'checkouts', 'location', 'supplier', 'adminuser')
             ->withCount('checkouts as checkouts_count');
 
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
-        }
-
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $accessories->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $accessories->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $accessories->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('company_id')) {
@@ -410,5 +400,17 @@ class AccessoriesController extends Controller
         $accessories = $accessories->orderBy('name', 'ASC')->paginate(50);
 
         return (new SelectlistTransformer)->transformSelectlist($accessories);
+    }
+
+    public function history(Request $request, Accessory $accessory): JsonResponse|array
+    {
+        $this->authorize('history', $accessory);
+        $history = $accessory->getHistory($request);
+        $total = $accessory->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

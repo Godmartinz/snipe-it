@@ -25,6 +25,38 @@
             return false;
         }
 
+        /** This handles the responsive tab UI on v iew detail pages **/
+        function resize() {
+            if ($(window).width() < 767) {
+                $('.nav-tabs-dropdown').addClass('nav-justified');
+                $('.uploadtab').removeClass('pull-right');
+
+            }
+            else {
+                $('.nav-tabs-dropdown').removeClass('nav-justified');
+                $('.uploadtab').addClass('pull-right');
+            }
+        }
+
+        // Run the function on page load
+        $(document).ready(function () {
+            resize();
+        });
+
+        // Watch for window resize events
+        $(window).on('resize', function () {
+            resize();
+        });
+
+        //open and close tab menu
+        $('.nav-tabs-dropdown').on("click", "li:not('.active') a", function (event) {
+            $(this).closest('ul').removeClass("open");
+        }).on("click", "li.active a", function (event) {
+            $(this).closest('ul').toggleClass("open");
+        });
+
+        /** End handling the responsive tab UI on view detail pages **/
+
         $('.snipe-table').bootstrapTable('destroy').each(function () {
 
             data_export_options = $(this).attr('data-export-options');
@@ -365,14 +397,14 @@
         },
 
         btnShowDeleted: {
-            text: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+            text: '{{ (request()->input('status_type') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
             icon: 'fa-solid fa-trash',
             event () {
-                window.location.href = '{{ (request()->input('status') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status' => 'Deleted']) }}';
+                window.location.href = '{{ (request()->input('status_type') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status_type' => 'Deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "Deleted") ? 'btn-selected' : '' }}',
-                title: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+                class: '{{ (request()->input('status_type') == "Deleted") ? 'btn-selected' : '' }}',
+                title: '{{ (request()->input('status_type') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
         },
@@ -936,7 +968,7 @@
             }
 
             if (value) {
-                return tag_icon + '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '">' + value + '</a>';
+                return '<span style="white-space:nowrap;">' + tag_icon + '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '">' + value + '</a></span>';
             }
         };
     }
@@ -958,6 +990,21 @@
                 return '<a href="{{ config('app.url') }}/users/' + row.id + '">' + value + '</a>';
             }
 
+    }
+
+    function progressBarFormatter(value) {
+        var bar_color = 'danger';
+
+        if (value <= 25) {
+            bar_color = 'danger';
+        }
+        else if (value <= 75) {
+            bar_color = 'warning';
+        }
+        else if (value <= 100) {
+            bar_color = 'success';
+        }
+        return '<div class="progress progress-sm" data-tooltip="true" title="' + value + '%"><div class="progress-bar progress-bar-' + bar_color + '" role="progressbar" aria-valuenow="' + value + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + value + '%; min-width: 0em;"></div></div>';
     }
 
     // Use this when we're introspecting into a column object and need to link
@@ -1069,6 +1116,10 @@
 
             if(element_name != '') {
                 dest = dest + '/' + row.owner_id + '/' + element_name;
+            }
+
+            if ((row.available_actions) && (row.available_actions.create_asset === true)) {
+                actions += '<a href="{{ config('app.url') }}/hardware/create?model_id=' + row.id + '" class="actions btn btn-sm btn-info hidden-print" data-tooltip="true" title="{{ trans('general.new_asset') }}"><x-icon type="plus" class="fa-fw" /><span class="sr-only">{{ trans('general.new_asset') }}</span></a>&nbsp;';
             }
 
             if ((row.available_actions) && (row.available_actions.clone === true)) {
@@ -1941,6 +1992,20 @@
                 }
             });
         };
+
+        $("[name='clearSearch']").click(function () {
+
+            // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
+            for (storedSearch in localStorage) {
+                if (storedSearch.endsWith('.bs.table.searchText')) {
+                    localStorage.removeItem(storedSearch);
+                }
+            }
+
+            $('.search-input').each(function (index, element) {
+                $(element).val('');
+            });
+        });
 
         $('.search button[name=clearSearch]').click(searchboxHighlighter);
         searchboxHighlighter({ name:'pageload'});

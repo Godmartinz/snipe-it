@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Está a punto de modificar las propiedades de :user_count usuarios. Por favor, tenga en cuenta que no puede modificar las propiedades de su propio usuario con este formulario, y debe realizar las modificaciones a su propio usuario de forma individual.',
     'bulk_update_help' => 'Este formulario le permite actualizar varios usuarios a la vez. Solo diligencie los campos que necesita modificar. Los campos que queden en blanco no se modificarán.',
     'current_assets' => 'Activos actualmente asignados a este usuario',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Clonar usuario',
     'contact_user' => 'Contacto :name',
     'edit' => 'Editar usuario',

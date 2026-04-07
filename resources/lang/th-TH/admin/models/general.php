@@ -15,4 +15,8 @@ return [
     'fieldset' => 'fieldset',
     'no_custom_field' => 'ไม่มีฟิลด์ที่กำหนดเอง',
     'add_default_values' => 'เพิ่มค่าเริ่มต้น',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

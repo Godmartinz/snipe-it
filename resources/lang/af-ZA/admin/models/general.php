@@ -15,4 +15,8 @@ return [
     'fieldset' => 'fieldset',
     'no_custom_field' => 'Geen persoonlike velde nie',
     'add_default_values' => 'Add default values',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

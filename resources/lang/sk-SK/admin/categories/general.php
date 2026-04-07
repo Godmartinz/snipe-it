@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Poslať email o prevzatí',
     'import_eula_text' => 'Znenie EULA',
     'import_category_type' => 'Typ kategórie',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

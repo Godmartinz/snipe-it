@@ -82,6 +82,10 @@ return [
             'permission' => 'assets.view.encrypted_custom_fields',
             'display' => true,
         ],
+        [
+            'permission' => 'assets.files',
+            'display' => true,
+        ],
 
     ],
 
@@ -247,6 +251,10 @@ return [
             'permission' => 'users.delete',
             'display' => true,
         ],
+        [
+            'permission' => 'users.files',
+            'display' => true,
+        ],
 
     ],
 
@@ -265,6 +273,10 @@ return [
         ],
         [
             'permission' => 'models.delete',
+            'display' => true,
+        ],
+        [
+            'permission' => 'models.files',
             'display' => true,
         ],
 
@@ -304,6 +316,10 @@ return [
         ],
         [
             'permission' => 'departments.delete',
+            'display' => true,
+        ],
+        [
+            'permission' => 'departments.files',
             'display' => true,
         ],
     ],
@@ -363,6 +379,10 @@ return [
             'permission' => 'suppliers.delete',
             'display' => true,
         ],
+        [
+            'permission' => 'suppliers.files',
+            'display' => true,
+        ],
     ],
 
     'Manufacturers' => [
@@ -420,6 +440,10 @@ return [
             'permission' => 'locations.delete',
             'display' => true,
         ],
+        [
+            'permission' => 'locations.files',
+            'display' => true,
+        ],
     ],
 
     'Companies' => [
@@ -437,6 +461,10 @@ return [
         ],
         [
             'permission' => 'companies.delete',
+            'display' => true,
+        ],
+        [
+            'permission' => 'companies.files',
             'display' => true,
         ],
     ],

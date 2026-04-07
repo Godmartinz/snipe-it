@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Kenttäsarja',
     'no_custom_field' => 'Ei mukautettuja kenttiä',
     'add_default_values' => 'Lisää oletusarvot',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

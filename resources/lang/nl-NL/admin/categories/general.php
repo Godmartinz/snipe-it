@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Stuur checkin e-mail',
     'import_eula_text' => 'Gebruikersovereenkomst text',
     'import_category_type' => 'Categorietype',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

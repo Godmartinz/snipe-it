@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'crwdns13272:0crwdne13272:0',
     'import_eula_text' => 'crwdns13274:0crwdne13274:0',
     'import_category_type' => 'crwdns13276:0crwdne13276:0',
+    'import_alert_on_response' => 'crwdns14522:0crwdne14522:0',
 
 ];

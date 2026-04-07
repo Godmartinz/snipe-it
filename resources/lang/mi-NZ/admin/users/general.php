@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Kei te tata koe ki te whakatika i nga taonga o: kaiwhakamahi kaiwhakamahi_count. Kia mohio koe kaore e taea e koe te whakarereke i a koe ake huanga kaiwhakamahi me te whakamahi i tenei puka, me te whakarereke i to hoa ake.',
     'bulk_update_help' => 'Ko tenei puka ka taea e koe te whakahou i nga kaiwhakamahi maha i te wa kotahi. Whakakiia nga mara e hiahia ana koe ki te huri. Ko nga mara katoa e mahue ana ka noho tonu.',
     'current_assets' => 'Ko nga taonga kei te tirotirohia i tenei wa ki tenei kaiwhakamahi',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Kaiwhakamahi Tino',
     'contact_user' => 'Whakapā: ingoa',
     'edit' => 'Whakatika Kaiwhakamahi',

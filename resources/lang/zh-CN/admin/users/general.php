@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => '您即将编辑user_count用户的属性。请注意，您不能使用此表单更改您自己的用户属性，必须单独对您自己的用户信息进行编辑。',
     'bulk_update_help' => '此表单允许您一次更新多个用户。仅填写您需要更改的字段。留的空的任何字段将保持不变。',
     'current_assets' => '当前签出给该用户的资产',
+    'current_items' => ':item currently checked out to this user',
     'clone' => '克隆用户',
     'contact_user' => '联系 :name',
     'edit' => '编辑用户',

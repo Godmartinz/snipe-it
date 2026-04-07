@@ -275,7 +275,7 @@ return [
         'name' => 'Видалення відділів',
     ],
     'locations' => [
-        'name' => 'Розташування',
+        'name' => 'Локації',
         'note' => 'Надає доступ до розділу «Локації» в додатку.',
     ],
     'locationsview' => [
@@ -387,37 +387,37 @@ return [
         'note' => 'Дозволяє користувачам редагувати локацію, пов’язану з їхнім власним обліковим записом.',
     ],
     'selfcheckout-assets' => [
-        'name' => 'Self Check Out Assets',
-        'note' => 'Allows users to check out assets to themselves without admin intervention.',
+        'name' => 'Активи для самостійного отримання',
+        'note' => 'Дозволяє користувачам видавати активи самим собі без втручання адміністратора.',
     ],
     'selfview-purchase-cost' => [
-        'name' => 'View Purchase Cost',
-        'note' => 'Allows users to view the purchase cost of items in their account view.',
+        'name' => 'Перегляд вартості придбання',
+        'note' => 'Дозволяє користувачам бачити вартість придбання об’єктів у режимі перегляду свого облікового запису.',
     ],
 
     'depreciations' => [
-        'name' => 'Depreciation Management',
-        'note' => 'Allows users to manage and view asset depreciation details.',
+        'name' => 'Керування амортизацією',
+        'note' => 'Дозволяє користувачам керувати деталями амортизації активів та переглядати їх.',
     ],
     'depreciationsview' => [
-        'name' => 'View Depreciation Details',
+        'name' => 'Перегляд деталей амортизації',
     ],
     'depreciationsedit' => [
-        'name' => 'Edit Depreciation Settings',
+        'name' => 'Редагування налаштувань амортизації',
     ],
     'depreciationsdelete' => [
-        'name' => 'Delete Depreciation Records',
+        'name' => 'Видалення записів про амортизацію',
     ],
     'depreciationscreate' => [
-        'name' => 'Create Depreciation Records',
+        'name' => 'Створення записів про амортизацію',
     ],
 
-    'grant_all' => 'Grant all permissions for :area',
-    'deny_all' => 'Deny all permissions for :area',
-    'inherit_all' => 'Inherit all permissions for :area from permission groups',
-    'grant' => 'Grant Permission for :area',
-    'deny' => 'Deny Permission for :area',
-    'inherit' => 'Inherit Permission for :area from permission groups',
-    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.',
+    'grant_all' => 'Надати всі дозволи для :area',
+    'deny_all' => 'Заборонити всі дозволи для :area',
+    'inherit_all' => 'Успадкувати всі дозволи для :area від груп прав доступу',
+    'grant' => 'Надати дозвіл для :area',
+    'deny' => 'Заборонити дозвіл для :area',
+    'inherit' => 'Успадкувати дозвіл для :area від груп дозволів',
+    'use_groups' => 'Ми наполегливо рекомендуємо використовувати Групи дозволів замість призначення індивідуальних дозволів для полегшення керування.',
 
 ];

@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Bifarea acestei cutii va permite unui utilizator să suprascrie pielea interfeței cu una diferită.',
     'asset_ids' => 'ID-uri de active',
     'audit_interval' => 'Interval de audit',
-    'audit_interval_help' => 'Dacă vi se cere să vă auditați fizic în mod regulat, introduceți intervalul în luni pe care îl folosiți. Dacă actualizați această valoare, toate „următoarele date de audit” pentru activele cu o dată viitoare de audit vor fi actualizate.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Prag de avertizare privind auditul',
     'audit_warning_days_help' => 'Câte zile în avans trebuie să vă avertizăm când activele sunt scadente pentru audit?',
     'auto_increment_assets' => 'Generează tag-uri de active cu auto-incrementare',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Nume de utilizator Format',

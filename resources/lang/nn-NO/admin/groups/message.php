@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Gruppen eksisterer allerede!',
     'group_not_found' => 'Gruppe-ID :id finnes ikke.',
     'group_name_required' => 'Navnefeltet er påkrevd',
+    'assoc_users' => 'Denne avdelingen er knyttet til minst én bruker og kan ikke slettes. Oppdater brukerne ikke lenger refererer til denne avdelingen og prøv igjen. ',
 
     'success' => [
         'create' => 'Gruppen ble opprettet.',

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasUploads;
+use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\CompanyPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +25,9 @@ final class Company extends SnipeModel
 {
     use CompanyableTrait;
     use HasFactory;
+    use HasUploads;
+    use Loggable;
+    use SoftDeletes;
 
     protected $table = 'companies';
 
@@ -54,14 +60,24 @@ final class Company extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'phone', 'fax', 'email', 'created_at', 'updated_at'];
+    protected $searchableAttributes = [
+        'name',
+        'phone',
+        'fax',
+        'email',
+        'created_at',
+        'updated_at',
+        'notes',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -309,11 +325,6 @@ final class Company extends SnipeModel
             return $query->where($table.$column, '=', $company_id);
         }
 
-    }
-
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

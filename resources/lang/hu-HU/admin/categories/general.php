@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'E-mail küldése visszavételkor',
     'import_eula_text' => 'EULA szövege',
     'import_category_type' => 'Kategóriatípus',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

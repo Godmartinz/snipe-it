@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Voit valita tässä voivatko käyttäjät määritellä haluamansa ulkoasun käyttöönsä.',
     'asset_ids' => 'Laitetunnisteet',
     'audit_interval' => 'Tarkastusväli',
-    'audit_interval_help' => 'Jos sinun on säännöllisesti tarkastettava laitteesi fyysisesti, syötä käyttämäsi aikaväli kuukausina. Jos päivität tämän arvon, kaikki "Seuraavat tarkastuspäivät" laitteille, joilla on tuleva tarkastuspäivämäärä, päivitetään.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Tarkastuksen ennakkovaroitus',
     'audit_warning_days_help' => 'Kuinka monta päivää etukäteen varoitamme, kun laitteet on tarkoitus tarkastaa?',
     'auto_increment_assets' => 'Luo automaattisesti kasvavat laitetunnisteet',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Käyttäjätunnuksen muoto',

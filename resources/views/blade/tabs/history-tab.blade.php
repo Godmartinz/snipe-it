@@ -1,10 +1,11 @@
 @props([
-    'count' => null,
+    'count' => 0,
     'model' => null,
     'class' => false,
 ])
 
-@can('view', $model)
+@can('history', $model)
+    @if ($count > 0)
     <x-tabs.nav-item
             :$class
             name="history"
@@ -13,4 +14,5 @@
             count="{{ $count }}"
             tooltip="{{ trans('general.history') }}"
     />
+    @endif
 @endcan

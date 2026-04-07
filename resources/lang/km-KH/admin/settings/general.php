@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Checking this box will allow a user to override the UI skin with a different one.',
     'asset_ids' => 'លេខសម្គាល់ទ្រព្យសកម្ម',
     'audit_interval' => 'ចន្លោះពេលសវនកម្ម',
-    'audit_interval_help' => 'ប្រសិនបើអ្នកត្រូវបានតម្រូវឱ្យធ្វើសវនកម្មលើទ្រព្យសកម្មរបស់អ្នកឱ្យបានទៀងទាត់ សូមបញ្ចូលចន្លោះពេលជាច្រើនខែដែលអ្នកប្រើ។ ប្រសិនបើអ្នកធ្វើបច្ចុប្បន្នភាពតម្លៃនេះ រាល់ "កាលបរិច្ឆេទសវនកម្មបន្ទាប់" សម្រាប់ទ្រព្យសកម្មដែលមានកាលបរិច្ឆេទសវនកម្មនាពេលខាងមុខនឹងត្រូវបានអាប់ដេត។',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Audit Warning Threshold',
     'audit_warning_days_help' => 'តើ​យើង​គួរ​ព្រមាន​អ្នក​មុន​ប៉ុន្មាន​ថ្ងៃ​នៅ​ពេល​ទ្រព្យ​សកម្ម​ត្រូវ​កំណត់​សម្រាប់​ការ​ធ្វើ​សវនកម្ម?',
     'auto_increment_assets' => 'បង្កើត​ស្លាក​ទ្រព្យសកម្ម​បង្កើន​ដោយ​ស្វ័យ​ប្រវត្តិ',
@@ -440,6 +440,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'ទម្រង់ឈ្មោះអ្នកប្រើប្រាស់',

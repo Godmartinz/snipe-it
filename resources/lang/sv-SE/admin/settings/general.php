@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Genom att markera denna ruta kan en användare ändra gränssnittet till ett annat.',
     'asset_ids' => 'Tillgångs-ID',
     'audit_interval' => 'Inventeringsintervall',
-    'audit_interval_help' => 'Om du regelbundet fysiskt behöver granska dina tillgångar, ange intervallet i månader. Om du uppdaterar detta värde kommer alla "nästkommande revisionsdatum" för tillgångar med ett kommande revisionsdatum att uppdateras.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Gränsvärde för varning om nästa inventering',
     'audit_warning_days_help' => 'Hur många dagar i förväg vill du bli varnad när det närmar sig inventering av tillgångar?',
     'auto_increment_assets' => 'Generera automatisk ökning av tillgångstaggar',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Användarnamnsformat',

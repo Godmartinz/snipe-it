@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => '您正在修改 :user_count 位使用者。請注意！您不能透過此表格修改您自己的資訊，您必須單獨編輯您的個人資訊。',
     'bulk_update_help' => '此表格允許您同時修改多位使用者。請僅填寫需要修改的欄位，留空的欄位不會做任何修改。',
     'current_assets' => '目前借出給該使用者的資產',
+    'current_items' => ':item currently checked out to this user',
     'clone' => '複製使用者',
     'contact_user' => '聯繫 :name',
     'edit' => '編輯使用者',

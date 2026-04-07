@@ -5,6 +5,7 @@ return [
     'group_exists' => 'crwdns880:0crwdne880:0',
     'group_not_found' => 'crwdns11491:0crwdne11491:0',
     'group_name_required' => 'crwdns882:0crwdne882:0',
+    'assoc_users' => 'crwdns14562:0crwdne14562:0',
 
     'success' => [
         'create' => 'crwdns883:0crwdne883:0',

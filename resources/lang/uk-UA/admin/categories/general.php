@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Надіслати Email-сповіщення про повернення',
     'import_eula_text' => 'Текст ліцензійної угоди',
     'import_category_type' => 'Тип категорії',
+    'import_alert_on_response' => 'Сповіщення при відповіді',
 
 ];

@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Pošlji email za prijavo',
     'import_eula_text' => 'EULA besedilo',
     'import_category_type' => 'Vrsta kategorije',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Enviar correo de recepción',
     'import_eula_text' => 'Texto del EULA',
     'import_category_type' => 'Tipo de categoría',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

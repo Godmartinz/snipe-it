@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Ketinate redaguoti :user_count naudotojų savybes. Atminkite, kad naudodami šią formą, savo naudotojo atributų keisti negalite – savo naudotoją turite redaguoti atskirai.',
     'bulk_update_help' => 'Ši forma suteikia galimybę atnaujinti iškart kelis naudotojus. Užpildykite tik tuos laukus, kuriuos norite pakeisti. Laukai, kuriuos paliksite tuščius, liks nepakeisti.',
     'current_assets' => 'Šiam naudotojui išduotas turtas',
+    'current_items' => ':item šiuo metu yra išduotas šiam naudotojui',
     'clone' => 'Klonuoti naudotoją',
     'contact_user' => 'Susisiekti su :name',
     'edit' => 'Redaguoti naudotoją',

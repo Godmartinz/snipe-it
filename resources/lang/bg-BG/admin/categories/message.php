@@ -20,9 +20,9 @@ return [
     'delete' => [
         'confirm' => 'Желаете ли да изтриете тази категория?',
         'error' => 'Проблем при изтриване на категорията. Моля опитайте отново.',
-        'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
-        'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
+        'success' => 'Категорията беше изтрита успешно.',
+        'bulk_success' => 'Категорийте бяха изтрити успешно.',
+        'partial_success' => 'Категорията е изтрита. Вижте повече информация по-долу. | :count категорий бяха изтрити успешно. Вижте повече информация по-долу.',
     ],
 
 ];

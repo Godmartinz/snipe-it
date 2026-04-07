@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Skupina že obstaja!',
     'group_not_found' => 'ID skupine :id ne obstaja.',
     'group_name_required' => 'Polje ime je obvezno',
+    'assoc_users' => 'Ta oddelek je trenutno povezan z vsaj enim uporabnikom in ga ni mogoče izbrisati. Prosimo, posodobite svoje uporabnike, da ne bodo več vsebovali tega oddelka in poskusili znova. ',
 
     'success' => [
         'create' => 'Skupina je bila uspešno ustvarjena.',

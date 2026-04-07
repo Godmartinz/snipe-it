@@ -63,7 +63,7 @@
                         </label>
                         <div class="col-md-9">
                             <p class="form-control-static">
-                                <x-copy-to-clipboard copy_what="license_key" style="white-space: pre-wrap">
+                                <x-copy-to-clipboard copy_what="license_key">
                                     <code>{!! nl2br(e($license->serial)) !!}</code>
                                 </x-copy-to-clipboard>
                             </p>

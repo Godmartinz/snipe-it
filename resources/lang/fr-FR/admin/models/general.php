@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Ensemble de champs',
     'no_custom_field' => 'Pas de champs personnalisés',
     'add_default_values' => 'Ajouter des valeurs par défaut',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'קבוצת שדות',
     'no_custom_field' => 'אין שדות מותאמים אישית',
     'add_default_values' => 'הוספת ערכי בררת מחדל',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

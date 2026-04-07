@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Waxaad ku dhowdahay inaad wax ka beddesho sifooyinka isticmaalayaasha :user_count Fadlan ogow inaadan bedeli karin sifooyinkaaga isticmaale adigoo isticmaalaya foomkan, oo waa inaad si gaar ah wax uga beddesho isticmaalahaaga.',
     'bulk_update_help' => 'Foomkan wuxuu kuu ogolaanayaa inaad hal mar cusbooneysiiso isticmaaleyaal badan. Kaliya buuxi meelaha aad u baahan tahay inaad bedesho. Goob kasta oo bannaan ayaa ahaan doonta mid aan isbeddelin.',
     'current_assets' => 'Hantida hadda la hubiyay isticmaalahan',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Isticmaale Clone',
     'contact_user' => 'La xidhiidh :name',
     'edit' => 'Wax ka beddel Isticmaalaha',

@@ -1511,7 +1511,7 @@ class Helper
             case 'pt':
                 return (1 / 72) * static::getUnitConversionFactor('in');
             default:
-                throw new \InvalidArgumentException('Unit: \''.$unit.'\' is not supported');
+                throw new \InvalidArgumentException('Unit: '.e($unit).' is not supported');
 
                 return false;
         }
@@ -1816,6 +1816,8 @@ class Helper
         $labelWidth = ($maxLabelWidthPerUnit * $labelSize) + $labelPadding;
         $valueX = $currentX + $labelWidth + $gap;
         $valueWidth = $usableWidth - $labelWidth - $gap;
+        $fullValueX = $currentX;
+        $fullValueWidth = $usableWidth;
 
         return compact(
             'scale',
@@ -1829,7 +1831,19 @@ class Helper
             'rowAdvance',
             'labelWidth',
             'valueX',
-            'valueWidth'
+            'valueWidth',
+            'fullValueX',
+            'fullValueWidth',
         );
+    }
+
+    public static function normalizeFullModelName($model): string
+    {
+        if (str_contains($model, 'App\\Models\\')) {
+            return $model;
+        }
+
+        return 'App\\Models\\'.ucwords($model);
+
     }
 }

@@ -54,6 +54,7 @@ class ConsumablesTransformer
             'min_amt' => (int) $consumable->min_amt,
             'model_number' => ($consumable->model_number != '') ? e($consumable->model_number) : null,
             'remaining' => $consumable->numRemaining(),
+            'percent_remaining' => round($consumable->percentRemaining()),
             'order_number' => e($consumable->order_number),
             'purchase_cost' => Helper::formatCurrencyOutput($consumable->purchase_cost),
             'total_cost' => Helper::formatCurrencyOutput($consumable->totalCostSum()),

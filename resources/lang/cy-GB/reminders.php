@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'password' => "Rhaid i cyfrineiriau fod yn chwe nod ac cyfateb i'r cadarnhad.",
+    'password' => 'Rhaid i cyfrineiriau fod yn chwe nod ac cyfateb i\'r cadarnhad.',
     'user' => 'Enw defnyddiwr neu cyfrinair yn anghywir',
     'token' => 'This password reset token is invalid or expired, or does not match the username provided.',
     'sent' => 'If a matching user with a valid email address exists in our system, a password recovery email has been sent.',

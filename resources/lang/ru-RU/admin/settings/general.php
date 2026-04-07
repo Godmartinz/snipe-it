@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Включение позволит пользователю изменять тему веб-интерфейса',
     'asset_ids' => 'ID актива',
     'audit_interval' => 'Интервал аудита',
-    'audit_interval_help' => 'Если требуется регулярное проведение аудита, вы можете обозначить необходимый вам интервал в месяцах. При обновлении этого значения, будут обновлены все "даты следующего аудита" у активов с приближающейся датой аудита.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Предупреждающий порог предупреждения',
     'audit_warning_days_help' => 'За сколько дней мы должны предупредить вас, когда активы подлежат аудиту?',
     'auto_increment_assets' => 'Генерировать метки активов авто увеличением',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Формат имени пользователя',

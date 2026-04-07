@@ -37,8 +37,14 @@ class Asset extends Depreciable
     protected $with = ['model', 'adminuser'];
 
     use CompanyableTrait;
-    use HasFactory, Loggable, Presentable, Requestable, SoftDeletes, UniqueUndeletedTrait, ValidatingTrait;
+    use HasFactory;
     use HasUploads;
+    use Loggable;
+    use Presentable;
+    use Requestable;
+    use SoftDeletes;
+    use UniqueUndeletedTrait;
+    use ValidatingTrait;
 
     public const LOCATION = 'location';
 
@@ -200,14 +206,29 @@ class Asset extends Depreciable
      * @var array
      */
     protected $searchableRelations = [
-        'assetstatus' => ['name'],
+        'status' => ['name'],
         'supplier' => ['name'],
         'company' => ['name'],
         'defaultLoc' => ['name'],
         'location' => ['name'],
         'model' => ['name', 'model_number', 'eol'],
-        'model.category' => ['name'],
-        'model.manufacturer' => ['name'],
+        'category' => ['name'],
+        'manufacturer' => ['name'],
+        'assigned_to' => ['name'],
+    ];
+
+    /**
+     * Maps the field names exposed by the API / transformers to the actual
+     * Eloquent relation names used in $searchableRelations.
+     *
+     * This lets callers filter using the same key they see in API responses
+     * without needing to know the internal relation name.
+     *
+     * @var array<string, string> [ api_key => relation_name ]
+     */
+    protected $searchableRelationAliases = [
+        'status_label' => 'status',
+        'assigned_to' => 'assignedTo',
     ];
 
     protected static function booted(): void
@@ -410,6 +431,13 @@ class Asset extends Depreciable
         );
     }
 
+    public function isDeletable()
+    {
+
+        return Gate::allows('delete', $this)
+            && ($this->deleted_at == '');
+    }
+
     /**
      * Establishes the asset -> company relationship
      *
@@ -443,12 +471,28 @@ class Asset extends Depreciable
         if ((! $this->assigned_to) && (! $this->deleted_at)) {
 
             // The asset status is not archived and is deployable
-            if (($this->assetstatus) && ($this->assetstatus->archived == '0')
-                && ($this->assetstatus->deployable == '1')
+            if (($this->status) && ($this->status->archived == '0')
+                && ($this->status->deployable == '1')
             ) {
                 return true;
 
             }
+
+            return false;
+        }
+
+        return false;
+    }
+
+    public function availableForCheckIn()
+    {
+
+        // This asset is currently assigned to anyone and is not deleted...
+        if (($this->assigned_to != '') && ($this->status) && ($this->status->archived == '0')
+            && ($this->status->deployable == '1')
+        ) {
+            return true;
+
         }
 
         return false;
@@ -595,6 +639,16 @@ class Asset extends Depreciable
 
     }
 
+    public function manufacturer()
+    {
+        return $this->hasOneThrough(Manufacturer::class, AssetModel::class, 'id', 'id', 'model_id', 'manufacturer_id');
+    }
+
+    public function category()
+    {
+        return $this->hasOneThrough(Category::class, AssetModel::class, 'id', 'id', 'model_id', 'category_id');
+    }
+
     /**
      * Establishes the asset -> depreciation relationship
      *
@@ -620,7 +674,7 @@ class Asset extends Depreciable
      */
     public function components()
     {
-        return $this->belongsToMany('\App\Models\Component', 'components_assets', 'asset_id', 'component_id')->withPivot('id', 'assigned_qty', 'created_at');
+        return $this->belongsToMany('\App\Models\Component', 'components_assets', 'asset_id', 'component_id')->withPivot('id', 'assigned_qty', 'created_at', 'note');
     }
 
     /**
@@ -729,7 +783,7 @@ class Asset extends Depreciable
                     $first_asset = $this;
                 }
                 if ($iterations > 10) {
-                    throw new \Exception('Asset assignment Loop for Asset ID: '.$first_asset->id);
+                    throw new \Exception('Asset assignment Loop for Asset ID: '.e($first_asset->id));
                 }
                 $assigned_to = self::find($this->assigned_to); // have to do this this way because otherwise it errors
                 if ($assigned_to) {
@@ -819,7 +873,7 @@ class Asset extends Depreciable
      *
      * @return string | false
      */
-    public function getImageUrl()
+    public function getImageUrl($path = null)
     {
         if ($this->image && ! empty($this->image)) {
             return Storage::disk('public')->url(app('assets_upload_path').e($this->image));
@@ -931,20 +985,6 @@ class Asset extends Depreciable
     }
 
     /**
-     * Get user who created the item
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v1.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
-    }
-
-    /**
      * Establishes the asset -> status relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -953,7 +993,7 @@ class Asset extends Depreciable
      *
      * @return Relation
      */
-    public function assetstatus()
+    public function status()
     {
         return $this->belongsTo(Statuslabel::class, 'status_id');
     }
@@ -1028,7 +1068,7 @@ class Asset extends Depreciable
      */
     public function licenses()
     {
-        return $this->belongsToMany(License::class, 'license_seats', 'asset_id', 'license_id');
+        return $this->belongsToMany(License::class, 'license_seats', 'asset_id', 'license_id')->withPivot('notes', 'created_at', 'created_by');
     }
 
     /**
@@ -1288,6 +1328,13 @@ class Asset extends Depreciable
         );
     }
 
+    public function journal()
+    {
+        return $this->assetlog()->where('action_type', '=', 'note added')
+            ->orderBy('created_at', 'desc')
+            ->withTrashed();
+    }
+
     /**
      * -----------------------------------------------
      * BEGIN QUERY SCOPES
@@ -1296,6 +1343,7 @@ class Asset extends Depreciable
 
     /**
      * Run additional, advanced searches.
+     * This overrides the advancedTextSearch method on the Searchable model trait to add searching of assigned user, location, and assets.
      *
      * @param  array  $terms  The search terms
      * @return Builder
@@ -1383,7 +1431,7 @@ class Asset extends Depreciable
     public function scopePending($query)
     {
         return $query->whereHas(
-            'assetstatus', function ($query) {
+            'status', function ($query) {
                 $query->where('deployable', '=', 0)
                     ->where('pending', '=', 1)
                     ->where('archived', '=', 0);
@@ -1440,7 +1488,7 @@ class Asset extends Depreciable
     {
         return $query->whereNull('assets.assigned_to')
             ->whereHas(
-                'assetstatus', function ($query) {
+                'status', function ($query) {
                     $query->where('deployable', '=', 1)
                         ->where('pending', '=', 0)
                         ->where('archived', '=', 0);
@@ -1457,7 +1505,7 @@ class Asset extends Depreciable
     public function scopeUndeployable($query)
     {
         return $query->whereHas(
-            'assetstatus', function ($query) {
+            'status', function ($query) {
                 $query->where('deployable', '=', 0)
                     ->where('pending', '=', 0)
                     ->where('archived', '=', 0);
@@ -1474,7 +1522,7 @@ class Asset extends Depreciable
     public function scopeNotArchived($query)
     {
         return $query->whereHas(
-            'assetstatus', function ($query) {
+            'status', function ($query) {
                 $query->where('archived', '=', 0);
             }
         );
@@ -1643,7 +1691,7 @@ class Asset extends Depreciable
 
         if (Setting::getSettings()->show_archived_in_list != 1) {
             return $query->whereHas(
-                'assetstatus', function ($query) {
+                'status', function ($query) {
                     $query->where('archived', '=', 0);
                 }
             );
@@ -1662,7 +1710,7 @@ class Asset extends Depreciable
     public function scopeArchived($query)
     {
         return $query->whereHas(
-            'assetstatus', function ($query) {
+            'status', function ($query) {
                 $query->where('deployable', '=', 0)
                     ->where('pending', '=', 0)
                     ->where('archived', '=', 1);
@@ -1693,7 +1741,7 @@ class Asset extends Depreciable
 
         return Company::scopeCompanyables($query->where($table.'.requestable', '=', 1))
             ->whereHas(
-                'assetstatus', function ($query) {
+                'status', function ($query) {
                     $query->where(
                         function ($query) {
                             $query->where('deployable', '=', 1)
@@ -1858,235 +1906,6 @@ class Asset extends Depreciable
 
             }
         )->withTrashed()->whereNull('assets.deleted_at'); // workaround for laravel bug
-    }
-
-    /**
-     * Query builder scope to search on text filters for complex Bootstrap Tables API
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  text  $filter  JSON array of search keys and terms
-     * @return \Illuminate\Database\Query\Builder Modified query builder
-     */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $key => $search_val) {
-
-                    $fieldname = str_replace('custom_fields.', '', $key);
-
-                    if ($fieldname == 'asset_tag') {
-                        $query->where('assets.asset_tag', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'name') {
-                        $query->where('assets.name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'serial') {
-                        $query->where('assets.serial', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'purchase_date') {
-                        $query->where('assets.purchase_date', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'purchase_cost') {
-                        $query->where('assets.purchase_cost', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('assets.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'order_number') {
-                        $query->where('assets.order_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'status_label') {
-                        $query->whereHas(
-                            'assetstatus', function ($query) use ($search_val) {
-                                $query->where('status_labels.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'location') {
-                        $query->whereHas(
-                            'location', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'rtd_location') {
-                        $query->whereHas(
-                            'defaultLoc', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'assigned_to') {
-                        $query->whereHasMorph(
-                            'assignedTo', [User::class], function ($query) use ($search_val) {
-                                $query->where(
-                                    function ($query) use ($search_val) {
-                                        $query->where('users.first_name', 'LIKE', '%'.$search_val.'%')
-                                            ->orWhere('users.last_name', 'LIKE', '%'.$search_val.'%')
-                                            ->orWhere('users.display_name', 'LIKE', '%'.$search_val.'%')
-                                            ->orWhere('users.username', 'LIKE', '%'.$search_val.'%');
-                                    }
-                                );
-                            }
-                        )->orWhereHasMorph(
-                            'assignedTo', [Location::class], function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        )->orWhereHasMorph(
-                            'assignedTo', [Asset::class], function ($query) use ($search_val) {
-                                $query->where(
-                                    function ($query) use ($search_val) {
-                                        // Don't use the asset table prefix here because it will pull from the original asset,
-                                        // not the subselect we're doing here to get the assigned asset
-                                        $query->where('name', 'LIKE', '%'.$search_val.'%')
-                                            ->orWhere('asset_tag', 'LIKE', '%'.$search_val.'%');
-                                    }
-                                );
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'manufacturer') {
-                        $query->whereHas(
-                            'model', function ($query) use ($search_val) {
-                                $query->whereHas(
-                                    'manufacturer', function ($query) use ($search_val) {
-                                        $query->where(
-                                            function ($query) use ($search_val) {
-                                                $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
-                                            }
-                                        );
-                                    }
-                                );
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'category') {
-                        $query->whereHas(
-                            'model', function ($query) use ($search_val) {
-                                $query->whereHas(
-                                    'category', function ($query) use ($search_val) {
-                                        $query->where(
-                                            function ($query) use ($search_val) {
-                                                $query->where('categories.name', 'LIKE', '%'.$search_val.'%')
-                                                    ->orWhere('models.name', 'LIKE', '%'.$search_val.'%')
-                                                    ->orWhere('models.model_number', 'LIKE', '%'.$search_val.'%');
-                                            }
-                                        );
-                                    }
-                                );
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'model') {
-                        $query->whereHas(
-                            'model', function ($query) use ($search_val) {
-                                $query->where('models.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'model_number') {
-                        $query->whereHas(
-                            'model', function ($query) use ($search_val) {
-                                $query->where('models.model_number', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'company') {
-                        $query->whereHas(
-                            'company', function ($query) use ($search_val) {
-                                $query->where('companies.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'supplier') {
-                        $query->whereHas(
-                            'supplier', function ($query) use ($search_val) {
-                                $query->where('suppliers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'status_label') {
-                        $query->whereHas(
-                            'assetstatus', function ($query) use ($search_val) {
-                                $query->where('status_labels.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'jobtitle') {
-                        $query->where(function ($query) use ($search_val) {
-                            if (is_array($search_val)) {
-                                $query->whereHasMorph(
-                                    'assignedTo',
-                                    [User::class],
-                                    function ($query) use ($search_val) {
-                                        $query->whereIn('users.jobtitle', $search_val);
-                                    }
-                                );
-                            } else {
-                                $query->whereHasMorph(
-                                    'assignedTo',
-                                    [User::class],
-                                    function ($query) use ($search_val) {
-                                        $query->where(function ($query) use ($search_val) {
-                                            $query->where('users.jobtitle', 'LIKE', '%'.$search_val.'%');
-                                        });
-                                    }
-                                );
-                            }
-                        });
-                    }
-
-                    /**
-                     * THIS CLUNKY BIT IS VERY IMPORTANT
-                     *
-                     * Although inelegant, this section matters a lot when querying against fields that do not
-                     * exist on the asset table. There's probably a better way to do this moving forward, for
-                     * example using the Schema:: methods to determine whether or not a column actually exists,
-                     * or even just using the $searchableRelations variable earlier in this file.
-                     *
-                     * In short, this set of statements tells the query builder to ONLY query against an
-                     * actual field that's being passed if it doesn't meet known relational fields. This
-                     * allows us to query custom fields directly in the assets table
-                     * (regardless of their name) and *skip* any fields that we already know can only be
-                     * searched through relational searches that we do earlier in this method.
-                     *
-                     * For example, we do not store "location" as a field on the assets table, we store
-                     * that relationship through location_id on the assets table, therefore querying
-                     * assets.location would fail, as that field doesn't exist -- plus we're already searching
-                     * against those relationships earlier in this method.
-                     *
-                     * - snipe
-                     */
-                    if (($fieldname != 'category') && ($fieldname != 'model_number') && ($fieldname != 'rtd_location') && ($fieldname != 'location') && ($fieldname != 'supplier')
-                        && ($fieldname != 'status_label') && ($fieldname != 'assigned_to') && ($fieldname != 'model') && ($fieldname != 'jobtitle') && ($fieldname != 'company') && ($fieldname != 'manufacturer')
-                    ) {
-                        $query->where('assets.'.$fieldname, 'LIKE', '%'.$search_val.'%');
-                    }
-
-                }
-
-            }
-        );
-
     }
 
     /**

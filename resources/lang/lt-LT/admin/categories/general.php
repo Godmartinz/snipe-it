@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Siųsti išdavimo el. laišką',
     'import_eula_text' => 'EULA tekstas',
     'import_category_type' => 'Kategorijos tipas',
+    'import_alert_on_response' => 'Pranešti gavus atsakymą',
 
 ];

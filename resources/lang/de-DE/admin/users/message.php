@@ -6,7 +6,7 @@ return [
     'declined' => 'Sie haben diesen Gegenstand erfolgreich abgelehnt.',
     'bulk_manager_warn' => 'Benutzer erfolgreich geändert. Vorgesetzter sollte auch bearbeitet werden und konnte nicht angepasst werden, weil er sich nicht selbst als Vorgesetzter eingetragen haben kann. Bitte Benutzer ohne den Vorgesetzten nochmal bearbeiten.',
     'user_exists' => 'Benutzer existiert bereits!',
-    'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
+    'cannot_delete' => 'Benutzer existiert nicht oder Sie haben nicht die Berechtigung, den Benutzer zu löschen.',
     'user_not_found' => 'Benutzer existiert nicht oder Sie haben keine Berechtigung, ihn anzusehen.',
     'user_login_required' => 'Das Loginfeld ist erforderlich',
     'user_has_no_assets_assigned' => 'Derzeit sind keine Assets dem Benutzer zugewiesen.',

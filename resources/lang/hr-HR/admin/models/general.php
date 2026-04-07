@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Fieldset',
     'no_custom_field' => 'Nema prilagođenih polja',
     'add_default_values' => 'Dodajte zadane vrijednosti',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

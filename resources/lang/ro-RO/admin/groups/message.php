@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grupul exista deja!',
     'group_not_found' => 'ID-ul grupului :id nu există.',
     'group_name_required' => 'Campul "Nume" este obligatoriu',
+    'assoc_users' => 'Acest departament este în prezent asociat cu cel puțin un utilizator și nu poate fi șters. Actualizați-vă utilizatorii astfel încât să nu mai faceți referire la acest departament și încercați din nou.',
 
     'success' => [
         'create' => 'Grupul a fost creat.',

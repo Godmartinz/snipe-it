@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Kumpulan sudah wujud!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Ruangan nama adalah perlu',
+    'assoc_users' => 'Jabatan ini kini dikaitkan dengan sekurang-kurangnya seorang pengguna dan tidak boleh dipadamkan. Sila kemas kini pengguna anda untuk tidak lagi merujuk jabatan ini dan cuba lagi.',
 
     'success' => [
         'create' => 'Kumpulan berjaya dicipta.',

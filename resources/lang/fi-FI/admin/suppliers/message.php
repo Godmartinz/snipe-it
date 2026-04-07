@@ -21,7 +21,7 @@ return [
         'success' => 'Toimittaja poistettiin onnistuneesti.',
         'not_found' => 'Toimittajaa ei löydy.',
         'bulk_success' => 'Toimittajat poistettiin onnistuneesti.',
-        'partial_success' => 'Toimittaja poistettiin onnistuneesti. Katso lisätietoja alapuolelta. | :count toimittajaa poistettiin onnistuneesti. Katso lisätietoja alapuolelta.',
+        'partial_success' => '.',
     ],
 
 ];

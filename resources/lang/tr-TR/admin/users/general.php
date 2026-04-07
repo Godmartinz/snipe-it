@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => ': user_count Kullanıcının özelliklerini düzenlemek üzeresiniz. Lütfen, bu formu kullanarak kendi kullanıcı özniteliklerini değiştiremeyeceğinizi ve kendi kullanıcılarınız için ayrı ayrı düzenlemeler yapmanız gerektiğini unutmayın.',
     'bulk_update_help' => 'Bu form, birden fazla kullanıcıyı bir kerede güncellemenize olanak tanır. Sadece değiştirmek istediğiniz alanları doldurun. Boş bırakılan alanlar değişmeden kalır.',
     'current_assets' => 'Şu anda bu kullanıcıya atanmış varlıklar',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Kullanıcıyı Kopyala',
     'contact_user' => 'İlgili Kişi :name',
     'edit' => 'Kullanıcıyı Düzenle',

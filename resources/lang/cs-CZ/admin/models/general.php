@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Sada polí',
     'no_custom_field' => 'Bez vlastních polí',
     'add_default_values' => 'Přidat výchozí hodnoty',
+    'importer' => [
+        'require_serial' => 'Požadovat výrobní číslo',
+        'serial_required' => 'Výrobní číslo je požadováno',
+    ],
 ];

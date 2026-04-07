@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Pipáld be ezt a dobozt ha szeretnéd, hogy a felhasználok felülírhassák az alap oldal kinézetét egy másikkal.',
     'asset_ids' => 'Eszköz ID',
     'audit_interval' => 'Audit időtartam',
-    'audit_interval_help' => 'Ha rendszeresen fizikailag is ellenőrizni kell az eszközeit, adja meg az Ön által használt intervallumot hónapokban kifejezve. Ha frissíti ezt az értéket, a közelgő ellenőrzési dátummal rendelkező eszközök összes "következő ellenőrzési dátuma" megjelenik.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Ellenőrzési figyelmeztető küszöbérték',
     'audit_warning_days_help' => 'Hány nappal előre figyelmeztetni kell Önt arra, hogy az eszközöknek az ellenőrzésre van szükségük?',
     'auto_increment_assets' => 'Automatikusan növekvő eszközazonosítók generálása',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Felhasználónév formátum',

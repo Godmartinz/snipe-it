@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\Api\AccessoriesController\checkedout;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
@@ -47,7 +46,15 @@ class Accessory extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'model_number', 'order_number', 'purchase_date', 'notes'];
+    protected $searchableAttributes = [
+        'created_at',
+        'model_number',
+        'name',
+        'notes',
+        'order_number',
+        'purchase_cost',
+        'purchase_date',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
@@ -57,9 +64,13 @@ class Accessory extends SnipeModel
     protected $searchableRelations = [
         'category' => ['name'],
         'company' => ['name'],
+        'location' => ['name'],
         'manufacturer' => ['name'],
         'supplier' => ['name'],
-        'location' => ['name'],
+    ];
+
+    protected $searchableCounts = [
+        'checkouts_count',
     ];
 
     /**
@@ -67,7 +78,7 @@ class Accessory extends SnipeModel
      */
     public $rules = [
         'name' => 'required|max:255',
-        'qty' => 'required|integer|min:1',
+        'qty' => 'nullable|integer|min:0',
         'category_id' => 'required|integer|exists:categories,id',
         'company_id' => 'integer|nullable',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
@@ -243,7 +254,7 @@ class Accessory extends SnipeModel
      *
      * @return string
      */
-    public function getImageUrl()
+    public function getImageUrl($path = null)
     {
         if ($this->image) {
             return Storage::disk('public')->url(app('accessories_upload_path').$this->image);
@@ -268,6 +279,18 @@ class Accessory extends SnipeModel
             ->with('assignedTo');
     }
 
+    public function percentRemaining()
+    {
+        if (($this->qty == '' || $this->qty == 0)) {
+            return 0;
+        }
+        if ($this->checkouts_count == 0) {
+            return 100;
+        }
+
+        return ($this->qty - $this->checkouts_count) / $this->qty * 100;
+    }
+
     /**
      * Establishes the accessory -> users relationship
      *
@@ -281,20 +304,6 @@ class Accessory extends SnipeModel
     {
         return $this->belongsToMany(AccessoryCheckout::class, 'accessories_checkout')
             ->with('assignedTo');
-    }
-
-    /**
-     * Establishes the accessory -> admin user relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v7.0.13]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**
@@ -444,84 +453,6 @@ class Accessory extends SnipeModel
      * BEGIN QUERY SCOPES
      * -----------------------------------------------
      **/
-    /**
-     * Query builder scope to search on text filters for complex Bootstrap Tables API
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  text  $filter  JSON array of search keys and terms
-     * @return Builder Modified query builder
-     */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $fieldname => $search_val) {
-
-                    if ($fieldname == 'name') {
-                        $query->where('accessories.name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('accessories.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'model_number') {
-                        $query->where('accessories.model_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'order_number') {
-                        $query->where('accessories.order_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'purchase_cost') {
-                        $query->where('accessories.purchase_cost', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'location') {
-                        $query->whereHas(
-                            'location', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'manufacturer') {
-                        $query->whereHas(
-                            'manufacturer', function ($query) use ($search_val) {
-                                $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'supplier') {
-                        $query->whereHas(
-                            'supplier', function ($query) use ($search_val) {
-                                $query->where('suppliers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'category') {
-                        $query->whereHas(
-                            'category', function ($query) use ($search_val) {
-                                $query->where('categories.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'company') {
-                        $query->whereHas(
-                            'company', function ($query) use ($search_val) {
-                                $query->where('companies.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                }
-
-            }
-        );
-    }
 
     /**
      * Query builder scope to order on created_by name

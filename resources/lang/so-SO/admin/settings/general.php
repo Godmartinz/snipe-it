@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Saxitaanka santuuqan waxay u oggolaan doontaa isticmaaluhu inuu maqaarka UI ku dhaafo mid ka duwan.',
     'asset_ids' => 'Aqoonsiga hantida',
     'audit_interval' => 'Dhexdhexaadinta Hanti-dhawrka',
-    'audit_interval_help' => 'Haddii lagaa rabo inaad si joogto ah u xisaabiso hantidaada, geli inta u dhaxaysa bilaha aad isticmaasho. Haddii aad cusboonaysiiso qiimahan, dhammaan "taariikhda hantidhawrka soo socda" ee hantida leh taariikhda hantidhawrka ee soo socota waa la cusboonaysiin doonaa.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Heerka Digniinta Hanti-dhawrka',
     'audit_warning_days_help' => 'Immisa maalmood ka hor ayaan kaaga digaynaa marka hantida hanti dhawrku ku beegan tahay?',
     'auto_increment_assets' => 'Samee calaamadaynta hantida oo si toos ah u kordhisa',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Qaabka magaca isticmaalaha',

@@ -54,7 +54,7 @@ class LicenseSeatsTransformer
             ] : null,
             'location' => ($seat->location()) ? [
                 'id' => (int) $seat->location()->id,
-                'name' => e($seat->location()->name),
+                'name' => e($seat->location()->display_name),
                 'tag_color' => $seat->location()->tag_color ? e($seat->location()->tag_color) : null,
                 'created_at' => Helper::getFormattedDateObject($seat->created_at, 'datetime'),
             ] : null,

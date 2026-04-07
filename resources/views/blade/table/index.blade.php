@@ -3,14 +3,14 @@
     'buttons' => null,
     'export_filename' => 'export-'.date('Y-m-d'),
     'api_url' => null,
-    'show_column_search' => false,
-    'show_advanced_search' => false,
+    'show_column_search' => null,
+    'show_advanced_search' => null,
     'show_search' => true,
-    'fixed_number' => false,
-    'fixed_right_number' => false,
+    'fixed_number' => null,
+    'fixed_right_number' => null,
     'sort_order' => 'asc',
     'sort_field' => 'name',
-
+    'nosticky' => false,
 ])
 
 @aware(['name'])
@@ -34,6 +34,8 @@
     @if ($presenter)
         data-columns="{{ $presenter }}"
     @endif
+
+    data-fixed-columns="{{ (($fixed_number) || ($fixed_right_number) || ($nosticky!='true')) ? 'true' : 'false' }}"
 
     @if ($fixed_number)
         data-fixed-number="{{ $fixed_number }}"

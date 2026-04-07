@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Potrditev tega polja bo uporabnikom omogočila spremembo preobleke uporabniškega vmesnika z drugo.',
     'asset_ids' => 'ID sredstva',
     'audit_interval' => 'Revizijski interval',
-    'audit_interval_help' => 'Če morate redno fizično pregledovati svoja sredstva, vnesite interval v mesecih, ki ga uporabljate. Če posodobite to vrednost, bodo posodobljeni vsi »naslednji datumi revizije« za sredstva s prihajajočim datumom revizije.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Prag za opozorilo o reviziji',
     'audit_warning_days_help' => 'Koliko dni vnaprej vas opozorimo, kdaj so sredstva namenjena za revizijo?',
     'auto_increment_assets' => 'Ustvari samodejno povečevalne oznake sredstev',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Format za uporabniško ime',

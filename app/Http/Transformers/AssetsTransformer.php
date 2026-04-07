@@ -6,6 +6,8 @@ use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\Asset;
+use App\Models\License;
+use App\Models\LicenseSeat;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,10 +45,16 @@ class AssetsTransformer
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
             'eol' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? (int) Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date, true).' months' : null,
             'asset_eol_date' => ($asset->asset_eol_date != '') ? Helper::getFormattedDateObject($asset->asset_eol_date, 'date') : null,
-            'status_label' => ($asset->assetstatus) ? [
-                'id' => (int) $asset->assetstatus->id,
-                'name' => e($asset->assetstatus->name),
-                'status_type' => e($asset->assetstatus->getStatuslabelType()),
+            'status_label' => ($asset->status) ? [
+                'id' => (int) $asset->status->id,
+                'name' => e($asset->status->name),
+                'status_type' => e($asset->status->getStatuslabelType()),
+                'status_meta' => e($asset->present()->statusMeta),
+            ] : null, // <-- legacy - will be removed
+            'status' => ($asset->status) ? [
+                'id' => (int) $asset->status->id,
+                'name' => e($asset->status->name),
+                'status_type' => e($asset->status->getStatuslabelType()),
                 'status_meta' => e($asset->present()->statusMeta),
             ] : null,
             'category' => (($asset->model) && ($asset->model->category)) ? [
@@ -89,8 +97,8 @@ class AssetsTransformer
                 'tag_color' => ($asset->defaultLoc->tag_color) ? e($asset->defaultLoc->tag_color) : null,
             ] : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
-            'qr' => ($setting->qr_code == '1') ? config('app.url').'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png' : null,
-            'alt_barcode' => ($setting->alt_barcode_enabled == '1') ? config('app.url').'/uploads/barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png' : null,
+            'qr' => ($setting->qr_code == '1') ? Storage::disk('public')->url('barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png') : null,
+            'alt_barcode' => ($setting->alt_barcode_enabled == '1') ? Storage::disk('public')->url('barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png') : null,
             'assigned_to' => $this->transformAssignedTo($asset),
             'warranty_months' => ($asset->warranty_months > 0) ? e($asset->warranty_months.' '.trans('admin/hardware/form.months')) : null,
             'warranty_expires' => ($asset->warranty_months > 0) ? Helper::getFormattedDateObject($asset->warranty_expires, 'date') : null,
@@ -248,7 +256,7 @@ class AssetsTransformer
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
             'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
             'location' => ($asset->location) ? e($asset->location->name) : null,
-            'status' => ($asset->assetstatus) ? $asset->present()->statusMeta : null,
+            'status' => ($asset->status) ? $asset->present()->statusMeta : null,
             'assigned_to_self' => ($asset->assigned_to == auth()->id()),
         ];
 
@@ -340,5 +348,69 @@ class AssetsTransformer
 
             return $array;
         }
+    }
+
+    public function transformLicensesCheckedToAsset($license_checkouts, $total)
+    {
+
+        $array = [];
+        foreach ($license_checkouts as $checkout) {
+            $array[] = self::transformLicenseCheckedToAsset($checkout);
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
+    }
+
+    public function transformLicenseCheckedToAsset(LicenseSeat $licenseseat)
+    {
+
+        if (Gate::allows('viewKeys', $licenseseat->license)) {
+            $product_key = $licenseseat->license->serial ?? null;
+        } else {
+            $product_key = '------------';
+        }
+
+        $array = [
+            'id' => $licenseseat->id,
+            'license' => [
+                'id' => $licenseseat->license?->id,
+                'name' => e($licenseseat->license?->display_name),
+                'serial' => $product_key ? e($product_key) : null,
+                'note' => $licenseseat->license?->note ? e($licenseseat->license?->note) : null,
+
+            ],
+            'assigned_asset' => $licenseseat->asset_id,
+            'expiration_date' => $licenseseat->license?->expiration_date ? Helper::getFormattedDateObject($licenseseat->license?->expiration_date, 'date') : null,
+            'notes' => $licenseseat->notes ? e($licenseseat->notes) : null,
+        ];
+
+        $permissions_array['available_actions'] = [
+            'checkout' => false,
+            'checkin' => Gate::allows('checkin', License::class),
+        ];
+
+        $array += $permissions_array;
+
+        return $array;
+
+    }
+
+    public function transformCheckedoutComponents(Collection $components_assets, $total)
+    {
+        $array = [];
+        foreach ($components_assets as $component) {
+            $array[] = [
+                'assigned_pivot_id' => $component->pivot->id,
+                'id' => (int) $component->id,
+                'name' => e($component->display_name),
+                'qty' => $component->pivot->assigned_qty,
+                'note' => ($component->pivot->note) ? e($component->pivot->note) : null,
+                'type' => 'asset',
+                'created_at' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
+                'available_actions' => ['checkin' => true],
+            ];
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 }

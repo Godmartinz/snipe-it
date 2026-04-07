@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Kontrol E-postası Gönder',
     'import_eula_text' => 'Son Kullanıcı Lisans Sözleşmesi',
     'import_category_type' => 'Kategori Türü',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

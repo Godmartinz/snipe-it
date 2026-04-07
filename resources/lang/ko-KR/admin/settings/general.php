@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => '이 항목을 선택하면 사용자가 다른 UI 스킨을 다른 스킨으로 변경하는 것을 허용합니다.',
     'asset_ids' => '자산 ID',
     'audit_interval' => '감사 간격',
-    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. If you update this value, all of the "next audit dates" for assets with an upcoming audit date will be updated.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => '감사 경고 임계값',
     'audit_warning_days_help' => '자산 회계 감사가 예정되어 있을 때 몇 일 전에 경고할까요?',
     'auto_increment_assets' => 'Generate auto-incrementing asset tags',
@@ -430,7 +430,7 @@ return [
     'due_checkin_days' => 'Due For Checkin Warning',
     'due_checkin_days_help' => 'How many days before the expected checkin of an asset should it be listed in the "Due for checkin" page?',
     'no_groups' => 'No groups have been created yet. Visit <code>Admin Settings > Permission Groups</code> to add one.',
-    'text' => 'Text',
+    'text' => '문자열',
     'manager_view' => 'Manager View',
     'manager_view_enabled_text' => 'Enable Manager View',
     'manager_view_enabled_help' => 'Allow managers to view assigned items to their direct and indirect reports in their account view.',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => '사용자명 형식',

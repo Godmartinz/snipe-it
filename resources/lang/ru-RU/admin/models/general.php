@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Набор полей',
     'no_custom_field' => 'Нет пользовательских полей',
     'add_default_values' => 'Добавить значения по умолчанию',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

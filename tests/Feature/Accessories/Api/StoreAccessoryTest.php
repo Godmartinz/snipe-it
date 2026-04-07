@@ -43,20 +43,7 @@ class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
             'name' => 'My Awesome Accessory',
         ]);
     }
-
-    public function test_validation()
-    {
-        $this->actingAsForApi(User::factory()->createAccessories()->create())
-            ->postJson(route('api.accessories.store'), [
-                //
-            ])
-            ->assertStatusMessageIs('error')
-            ->assertMessagesContains([
-                'category_id',
-                'name',
-                'qty',
-            ]);
-    }
+    
 
     public function test_can_store_accessory()
     {

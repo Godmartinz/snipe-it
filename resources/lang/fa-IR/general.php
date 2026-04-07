@@ -104,6 +104,7 @@ return [
     'created_by' => 'ایجاد شده توسط',
     'record_created' => 'رکورد ایجاد شد',
     'updated_at' => 'Updated At',
+    'updated_before' => 'Updated Before',
     'updated_plain' => 'Updated',
     'deleted_plain' => 'حذف شد',
     'purchased_plain' => 'خریداری شده',
@@ -120,13 +121,14 @@ return [
     'dashboard' => 'میز کار',
     'data_source' => 'منبع داده',
     'days' => 'روزها',
+    'days_ago' => 'days ago',
     'days_to_next_audit' => 'روز به حسابرسی بعدی',
     'date' => 'تاریخ',
     'debug_warning' => 'هشدار!',
     'debug_warning_text' => 'این برنامه در حالت تولید با استفاده از اشکال زدایی فعال است. این می تواند اطلاعات حساس را در صورت درخواست شما برای جهان خارج در دسترس قرار دهد. با تنظیم مقداری <code>APP_DEBUG</code> در <code>.env</code> فایل خود را به <code>false</code> غیرفعال کنید.',
     'delete' => 'حذف',
     'delete_confirm' => 'آیا اطمینان دارید که می خواهید این را حذف نمایید؟',
-    'delete_confirm_no_undo' => 'آیا مطمپنید که می‌خواهید :item را حذف کنید؟ این کار غیرقابل بازگشت است.',
+    'delete_confirm_no_undo' => 'Are you sure you wish to delete :item? This cannot be undone.',
     'deleted' => 'حذف شد',
     'delete_seats' => 'صندلی ها حذف شده
 ',
@@ -136,6 +138,7 @@ return [
     'department' => 'گروه',
     'deployed' => 'مستقر',
     'depreciation' => 'مستهلک کردن',
+    'depreciation_type' => 'Depreciation Type',
     'depreciations' => 'استهلاک ها',
     'depreciation_report' => 'استهلاک گزارش',
     'details' => 'جزئیات',
@@ -176,7 +179,7 @@ return [
     'image_upload' => 'آپلود تصویر',
     'filetypes_accepted_help' => 'نوع فایل پذیرفته شده :types است. حداکثر اندازه مجاز آپلود :size است.|نوع فایل های پذیرفته شده عبارتند از :types. حداکثر اندازه مجاز بارگذاری: اندازه است.',
     'filetypes_size_help' => 'حداکثر سایز مجاز آپلود: سایز.',
-    'image_filetypes_help' => 'نوع فایل های قابل قبول: jpg, webp, png, gif, و svg. حداکثر سایز فایل :size است.',
+    'image_filetypes_help' => 'Accepted filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',
     'unaccepted_image_type' => 'امکان خواندن تصویر وجود ندارد. نوع فایل های قابل قبول: jpg, webp, png, gif, و svg است. mimetype این فایل :mimetype است.',
     'import' => 'واردات',
     'documentation' => 'Open documentation in a new link',
@@ -292,6 +295,7 @@ return [
     'request_item' => 'درخواست این آیتم',
     'external_link_tooltip' => 'لینک خارجی به',
     'save' => 'ذخیره کردن',
+    'save_copy' => 'Save Copy',
     'select_var' => 'انتخاب :thing... ', // this will eventually replace all of our other selects
     'select' => 'انتخاب',
     'select_all' => 'انتخاب همه',
@@ -421,7 +425,7 @@ return [
     'setup_step_4' => 'مرحله 4',
     'setup_config_check' => 'بررسی پیکربندی
 ',
-    'setup_create_database' => 'ایجاد جدول های پایگاه داده',
+    'setup_create_database' => 'Create database tables',
     'setup_create_admin' => 'Create an Admin User',
     'setup_next' => 'بعدی',
     'setup_done' => 'Setup Complete!',
@@ -761,7 +765,6 @@ return [
     ],
 
     'breadcrumb_button_actions' => [
-        'edit_item' => 'Edit :name',
         'checkout_item' => 'Checkout :name',
         'checkin_item' => 'Checkin :name',
     ],
@@ -788,6 +791,7 @@ return [
 
     'select_all_none' => 'Select/Unselect All',
     'generic_model_not_found' => 'That :model was not found or you do not have permission to access it',
+    'report_not_editable' => 'You do not have permission to edit this report template',
     'deleted_models' => 'Deleted Asset Models',
     'deleted_users' => 'Deleted Users',
     'cost_each' => ':amount each',

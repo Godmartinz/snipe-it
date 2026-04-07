@@ -97,4 +97,54 @@ class ComponentTest extends TestCase
         $this->actingAs(User::factory()->for($companyA)->create());
         $this->assertEquals(1, $componentForCompanyA->fresh()->numRemaining());
     }
+
+    public function test_percent_remaining_returns_zero_when_quantity_is_zero()
+    {
+        $component = new class extends Component
+        {
+            public int $remaining = 99;
+
+            public function numRemaining()
+            {
+                return $this->remaining;
+            }
+        };
+        $component->qty = 0;
+
+        $this->assertEquals(0, $component->percentRemaining());
+    }
+
+    public function test_percent_remaining_returns_expected_available_ratio()
+    {
+        $component = new class extends Component
+        {
+            public int $remaining = 3;
+
+            public function numRemaining()
+            {
+                return $this->remaining;
+            }
+        };
+        $component->qty = 8;
+
+        $this->assertEquals(37.5, $component->percentRemaining());
+    }
+
+    public function test_percent_remaining_clamps_to_bounds()
+    {
+        $component = new class extends Component
+        {
+            public int $remaining = -5;
+
+            public function numRemaining()
+            {
+                return $this->remaining;
+            }
+        };
+        $component->qty = 10;
+        $this->assertEquals(0.0, $component->percentRemaining());
+
+        $component->remaining = 15;
+        $this->assertEquals(100.0, $component->percentRemaining());
+    }
 }

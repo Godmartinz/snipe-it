@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Uredili boste lastnosti :user_count uporabnikov. Upoštevajte, da s tem obrazcem ne morete spremeniti lastnosti svojega uporabniškega računa, lastnosti lahko spremenite samo posamično.',
     'bulk_update_help' => 'Ta obrazec omogoča, da posodobite več uporabnikov hkrati. Izpolnite le polja, ki jih morate spremeniti. Vsa polja, ki ostanejo prazna, ostanejo nespremenjena.',
     'current_assets' => 'Sredstva, ki so trenutno izdana temu uporabniku',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Kloniraj uporabnika',
     'contact_user' => 'Kontaktiraj :name',
     'edit' => 'Uredi uporabnika',

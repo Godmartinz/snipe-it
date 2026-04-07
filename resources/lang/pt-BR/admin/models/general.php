@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Conjunto de campos',
     'no_custom_field' => 'Sem campos customizados',
     'add_default_values' => 'Adicionar valores padrão',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

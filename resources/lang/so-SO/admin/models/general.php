@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Goobta garoonka',
     'no_custom_field' => 'Ma jiro garoomo gaar ah',
     'add_default_values' => 'Ku dar qiimayaasha caadiga ah',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

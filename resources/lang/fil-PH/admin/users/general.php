@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Ikaw ay mag-edit ng mga katangian ng :user_count mga gumagamit. Mangyaring tandaan na hindi mo maaaring mabago ang iyong sariling user attributes gamit ang form na ito, at kinakailangang magsagawa ng pag-edit sa iyong sariling user nang mag-isa.',
     'bulk_update_help' => 'Ang form na ito ay nagbibigay sa iyo ng pahintulot para mag-update ng maramihang gumagamit ng isang beses. Lagyan lamang ang mga field na gusto mong baguhin. Anumang mga field na blangko ay mananatiling walang pagbabago.',
     'current_assets' => 'Ang assets ay kasalukuyang nai-check out sa gumagamit na ito',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'I-clone ang User',
     'contact_user' => 'Kontak :name',
     'edit' => 'I-edit ang Gumamit',

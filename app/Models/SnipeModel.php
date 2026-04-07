@@ -7,7 +7,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Storage;
 
 class SnipeModel extends Model
 {
@@ -78,7 +79,6 @@ class SnipeModel extends Model
             $value = null;
         }
         $this->attributes['category_id'] = $value;
-        // dd($this->attributes);
     }
 
     public function setSupplierIdAttribute($value)
@@ -192,9 +192,8 @@ class SnipeModel extends Model
      */
     public function scopeApplyOffsetAndLimit(Builder $query, int $total)
     {
-        $offset = (Request::input('offset') > $total) ? $total : app('api_offset_value');
+        $offset = (request()->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-
         $query->skip($offset)->take($limit);
     }
 
@@ -225,5 +224,80 @@ class SnipeModel extends Model
         }
 
         return null;
+    }
+
+    public function getImageUrl($path = null)
+    {
+        // If there is a consumable image, use that
+        if ($this->image) {
+            return Storage::disk('public')->url($path.$this->image);
+        }
+
+        return false;
+    }
+
+    public function actionlog()
+    {
+        return $this->hasMany(Actionlog::class, 'target_id')->where('target_type', '=', self::class);
+    }
+
+    /**
+     * Establishes the object -> admin user relationship
+     *
+     * @return Relation
+     *
+     * @since  [v3.0]
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function adminuser()
+    {
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
+    }
+
+    public function showCheckoutButton($item)
+    {
+
+        if (method_exists($item, 'numRemaining')) {
+            if ($item->numRemaining() > 0) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
+        }
+
+        if (method_exists($item, 'availableForCheckout')) {
+
+            if ($item->availableForCheckout()) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
+        }
+
+        return false;
+
+    }
+
+    public function showCheckinButton($item)
+    {
+        if (method_exists($item, 'numRemaining')) {
+            if ($item->numRemaining() <= 0) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
+        }
+
+        if (method_exists($item, 'availableForCheckout')) {
+            if ($item->availableForCheckIn()) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
+        }
+
+        return false;
+
     }
 }

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'crwdns1478:0crwdne1478:0',
     'no_custom_field' => 'crwdns1479:0crwdne1479:0',
     'add_default_values' => 'crwdns2025:0crwdne2025:0',
+    'importer' => [
+        'require_serial' => 'crwdns14518:0crwdne14518:0',
+        'serial_required' => 'crwdns14520:0crwdne14520:0',
+    ],
 ];

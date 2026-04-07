@@ -26,8 +26,10 @@ namespace App\Http\Controllers;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
+use App\Models\Department;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Maintenance;
@@ -46,6 +48,8 @@ abstract class Controller extends BaseController
 
     public static $map_object_type = [
         'accessories' => Accessory::class,
+        'companies' => Company::class,
+        'departments' => Department::class,
         'maintenances' => Maintenance::class,
         'assets' => Asset::class,
         'audits' => Asset::class,
@@ -64,6 +68,8 @@ abstract class Controller extends BaseController
         'maintenances' => 'private_uploads/maintenances/',
         'assets' => 'private_uploads/assets/',
         'audits' => 'private_uploads/audits/',
+        'departments' => 'private_uploads/departments/',
+        'companies' => 'private_uploads/companies/',
         'components' => 'private_uploads/components/',
         'consumables' => 'private_uploads/consumables/',
         'hardware' => 'private_uploads/assets/',
@@ -79,6 +85,8 @@ abstract class Controller extends BaseController
         'maintenances' => 'maintenance',
         'assets' => 'asset',
         'audits' => 'audits',
+        'companies' => 'company',
+        'departments' => 'department',
         'components' => 'component',
         'consumables' => 'consumable',
         'hardware' => 'asset',

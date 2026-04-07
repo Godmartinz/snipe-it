@@ -5,6 +5,7 @@ return [
     'group_exists' => 'O grupo já existe!',
     'group_not_found' => 'O grupo [:id] não existe.',
     'group_name_required' => 'O campo nome é requerido',
+    'assoc_users' => 'Este departamento esta atualmente associado a pelo menos um usuário e não pode ser deletado. Por favor atualize seus usuários para não fazer mais referência a este departamento e tente novamente. ',
 
     'success' => [
         'create' => 'O grupo foi criado com sucesso.',

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreConsumableRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Company;
@@ -24,7 +26,7 @@ class ConsumablesController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): array
+    public function index(FilterRequest $request): array
     {
         $this->authorize('index', Consumable::class);
 
@@ -59,21 +61,9 @@ class ConsumablesController extends Controller
             'manufacturer',
         ];
 
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
-        }
-
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $consumables->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $consumables->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $consumables->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {
@@ -366,5 +356,17 @@ class ConsumablesController extends Controller
         $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
 
         return (new SelectlistTransformer)->transformSelectlist($consumables);
+    }
+
+    public function history(Request $request, Consumable $consumable): JsonResponse|array
+    {
+        $this->authorize('history', $consumable);
+        $history = $consumable->getHistory($request);
+        $total = $consumable->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'このチェックボックスをオンにすると、ユーザーはUIスキンを別のものに上書きすることができます。',
     'asset_ids' => '資産ID',
     'audit_interval' => '監査の間隔',
-    'audit_interval_help' => '定期的に資産を監査する必要がある場合は、使用する間隔を数ヶ月で入力します。 この値を更新すると、今後の監査日付を持つアセットの「次の監査日」のすべてが更新されます。',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => '監査警告しきい値',
     'audit_warning_days_help' => '資産の監査期限は何日前に警告する必要がありますか？',
     'auto_increment_assets' => '資産タグを自動採番で生成',
@@ -441,6 +441,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'ユーザー名の書式',

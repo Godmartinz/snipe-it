@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Skupina již existuje!',
     'group_not_found' => 'ID skupiny :id neexistuje.',
     'group_name_required' => 'Název je vyžadován',
+    'assoc_users' => 'Toto oddělení je momentálně přiřazeno alespoň jednomu uživateli a nelze jej smazat. Aktualizujte své uživatele tak, aby již neodkázali na toto oddělení a zkuste to znovu.',
 
     'success' => [
         'create' => 'Skupina byla úspěšně vytvořena.',

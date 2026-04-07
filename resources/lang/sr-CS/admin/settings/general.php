@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Čekiranjem ovog polja omogućava se korisniku da premosti UI \'skin\' sa nekim drugim.',
     'asset_ids' => 'Asset IDs',
     'audit_interval' => 'Interval revizije',
-    'audit_interval_help' => 'Ako ste u obavezi da redovno fizički popisujete imovinu, unesite interval u mesecima. Ako izmenite ovu vrednost, svi "datumi sledećih popisa" za imovinu sa datumima zakazanih popisa će biti ažurirani.',
+    'audit_interval_help' => 'Ako ste u obavezi da redovno fizički popisujete vašu imovinu, unesite interval u mesecima koji koristite. ',
     'audit_warning_days' => 'Prag upozorenja za reviziju',
     'audit_warning_days_help' => 'Koliko dana unapred treba da vas upozorimo kada sredstva dospevaju za reviziju?',
     'auto_increment_assets' => 'Generišite oznake sredstava koje se automatski povećavaju',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Tajna klijenta',
     'client_id' => 'ID klijenta',
     'too_many_users_to_show' => 'Broj korisnika (:count) je veći od ograničenja (:max) broja zapisa na prikazu bez stranica. Koristite alat za masovnu izmenu korisnika da bi ste upravljali članstvom u grupama.',
+    'update_existing_dates' => 'Takođe ažurirajte sve postojeće "datume narednih popisa" za imovinu sa nadolazećim popisom sa Interval popisa iznad. Ovo se najčešće koristi kada se promeni interval popisa u internoj politici.',
 
     'username_formats' => [
         'username_format' => 'Format korisničkog imena',

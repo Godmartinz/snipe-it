@@ -15,4 +15,8 @@ return [
     'fieldset' => 'fieldset',
     'no_custom_field' => 'விருப்ப துறைகள் இல்லை',
     'add_default_values' => 'Add default values',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

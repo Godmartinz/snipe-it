@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Usuzohlela izakhiwo ze: abasebenzisi be-akhawunti_abasebenzisi. Sicela uqaphele ukuthi awukwazi ukushintsha izimfanelo zakho zomsebenzisi usebenzisa le fomu, futhi kufanele uhlele kumsebenzisi wakho ngamunye.',
     'bulk_update_help' => 'Leli fomu ikuvumela ukuba ubuyekeze abasebenzisi abaningi ngesikhathi esisodwa. Gcwalisa kuphela amasimu okudingayo ukuguqula. Noma yiziphi izinkambu ezishiywe zingenakushintshwa.',
     'current_assets' => 'Amafa okwamanje ahlolwe kulo msebenzisi',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Clone Umsebenzisi',
     'contact_user' => 'Igama longaxhumana naye',
     'edit' => 'Hlela umsebenzisi',

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Reitasett',
     'no_custom_field' => 'Engir sérsniðnir reitir',
     'add_default_values' => 'Add default values',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

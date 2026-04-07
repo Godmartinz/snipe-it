@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'You are about to edit the properties of :user_count users. Please note that you cannot change your own user attributes using this form, and must make edits to your own user individually.',
     'bulk_update_help' => 'This form allows you to update multiple users at once. Only fill in the fields you need to change. Any fields left blank will remain unchanged.',
     'current_assets' => 'Eignir sem ráðstafað hefur verið til þessa notanda',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Afrita notenda',
     'contact_user' => 'Tengiliður :name',
     'edit' => 'Breyta notanda',

@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Du er ved at redigere egenskaberne for: user_count-brugere. Bemærk, at du ikke kan ændre dine egne brugerattributter ved hjælp af denne formular, og skal foretage ændringer til din egen bruger individuelt.',
     'bulk_update_help' => 'Denne formular giver dig mulighed for at opdatere flere brugere på én gang. Udfyld kun de felter, du skal ændre. Alle felter, der er tomt, forbliver uændrede.',
     'current_assets' => 'Aktier tjekket ud for denne bruger',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Klon bruger',
     'contact_user' => 'Kontakt :navn',
     'edit' => 'Redigér bruger',

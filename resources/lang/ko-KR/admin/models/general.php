@@ -15,4 +15,8 @@ return [
     'fieldset' => '항목세트',
     'no_custom_field' => '사용자 정의 항목 없음',
     'add_default_values' => '기본값 추가',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

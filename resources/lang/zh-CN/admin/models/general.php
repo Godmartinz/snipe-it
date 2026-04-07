@@ -15,4 +15,8 @@ return [
     'fieldset' => '字段集',
     'no_custom_field' => '没有自定义字段',
     'add_default_values' => '添加默认值',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

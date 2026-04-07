@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'week_start_select' => 'Select Day of Week',
-    'week_start' => 'Day the Week Starts On',
+    'week_start_select' => 'Vyberte den v týdnu',
+    'week_start' => 'Týden začíná dnem',
     'today' => 'Dnes',
     'clear' => 'Vyprázdnit',
     'days' => [

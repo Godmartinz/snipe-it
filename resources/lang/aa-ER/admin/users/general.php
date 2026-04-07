@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'crwdns1846:0crwdne1846:0',
     'bulk_update_help' => 'crwdns1847:0crwdne1847:0',
     'current_assets' => 'crwdns1579:0crwdne1579:0',
+    'current_items' => 'crwdns14530:0crwdne14530:0',
     'clone' => 'crwdns805:0crwdne805:0',
     'contact_user' => 'crwdns1128:0crwdne1128:0',
     'edit' => 'crwdns804:0crwdne804:0',

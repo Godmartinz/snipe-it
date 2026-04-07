@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\License;
@@ -21,7 +23,7 @@ class LicensesController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', License::class);
 
@@ -96,8 +98,9 @@ class LicensesController extends Controller
             $licenses->whereNull('expiration_date');
         }
 
-        if ($request->filled('search')) {
-            $licenses = $licenses->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $licenses->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->input('deleted') == 'true') {
@@ -274,5 +277,17 @@ class LicensesController extends Controller
         $licenses = $licenses->orderBy('name', 'ASC')->paginate(50);
 
         return (new SelectlistTransformer)->transformSelectlist($licenses);
+    }
+
+    public function history(Request $request, License $license): JsonResponse|array
+    {
+        $this->authorize('history', $license);
+        $history = $license->getHistory($request);
+        $total = $license->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

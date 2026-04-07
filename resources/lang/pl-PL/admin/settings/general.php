@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Zaznaczenie tego pola pozwoli użytkownikowi zastąpić skórkę interfejsu użytkownika na inną.',
     'asset_ids' => 'ID środka',
     'audit_interval' => 'Interwał audytu',
-    'audit_interval_help' => 'Jeśli jesteś zobowiązany do regularnego fizycznego audytu swoich aktywów, wprowadź interwał w miesiącach, który stosujesz. Jeśli zaktualizujesz tę wartość, wszystkie "daty następnego audytu" dla aktywów z nadchodzącą datą audytu zostaną zaktualizowane.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Próg ostrzegania przed audytem',
     'audit_warning_days_help' => 'Ile dni wcześniej powinniśmy ostrzec Cię, gdy majątek ma zostać poddany audytowi?',
     'auto_increment_assets' => 'Generuj automatycznie zwiększanjące się tagi zasobów',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Format nazwy użytkownika',

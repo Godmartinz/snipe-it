@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Campo',
     'no_custom_field' => 'Nessun campo personalizzato',
     'add_default_values' => 'Aggiungi valori predefiniti',
+    'importer' => [
+        'require_serial' => 'Richiede Seriale',
+        'serial_required' => 'Seriale Richiesto',
+    ],
 ];

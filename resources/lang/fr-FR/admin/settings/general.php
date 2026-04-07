@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Cocher cette case permettra à un utilisateur de remplacer le thème de l\'interface utilisateur par un autre.',
     'asset_ids' => 'ID de l\'actif',
     'audit_interval' => 'Intervalle d\'audit',
-    'audit_interval_help' => 'Si vous devez régulièrement vérifier physiquement vos ressources, entrez l\'intervalle en mois entre deux vérifications. La mise à jour de cette valeur s\'appliquera à toutes les « prochaines dates de vérifications » pour les ressources avec une date de vérification dans le futur.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Seuil d\'avertissement d\'audit',
     'audit_warning_days_help' => 'Combien de jours à l\'avance devrions-nous vous avertir lorsque les actifs doivent être vérifiés?',
     'auto_increment_assets' => 'Générer des numéros d\'inventaire auto-incrémentés',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Format du nom d\'utilisateur',

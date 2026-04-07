@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Rydych am golygu manylion :user_count o ddefnyddwyr. Nodwch, nid yw\'n bosib i chi newid manylion eich cyfrif yma. Rhaid i chi golygu manylion eich cyfrif yn unigol.',
     'bulk_update_help' => 'Mae\'r ffurflen hon yn caniatáu ichi ddiweddaru nifer o defnyddwyr ar unwaith. Llenwch y meysydd sydd angen i chi eu newid yn unig. Bydd unrhyw bwlch a adewir yn wag yn aros yr un fath.',
     'current_assets' => 'Asedau wedi aseinio ar hyn o bryd i\'r defnyddiwr yma',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Dyblygu Defnyddiwr',
     'contact_user' => 'Cyswllt :name',
     'edit' => 'Golygu Defnyddiwr',

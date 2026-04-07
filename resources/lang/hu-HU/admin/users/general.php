@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'A következő felhasználók tulajdonságait szerkesztheti: user_count felhasználók. Kérjük, vegye figyelembe, hogy a saját felhasználói attribútumait nem tudja megváltoztatni ezzel az űrlappal, és személyre kell változtatni a saját felhasználóit.',
     'bulk_update_help' => 'Ez az űrlap egyszerre több felhasználó frissítését teszi lehetővé. Csak töltse ki a megváltoztatni kívánt mezőket. Az üresen maradt mezők változatlanok maradnak.',
     'current_assets' => 'Az eszköz jelenleg ki van adva ennek a felhasználónak',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Felhasználó másolása',
     'contact_user' => 'Kapcsolattartó neve',
     'edit' => 'Felhasználó szerkesztése',

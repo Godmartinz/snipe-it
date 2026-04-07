@@ -14,6 +14,6 @@ return [
     'username_help_bottom' => 'Вашето потребителско име и е-майл адрес <em>може да</em> са еднакви или да не са, зависимост от вашата конфигурация. Ако не помните вашето потребителско име се свържете с Администратора. <br><br><strong>Потребители които нямат въведен е-майл адрес няма да получат линк за смяна на парола.</strong> ',
     'google_login' => 'Вход с Google Workspace',
     'google_login_failed' => 'Неуспешен вход с Google Login, пробвайте отново.',
-    'invite_password_expires' => 'This password reset link will expire on :expire_date. You can use the manual password reset link to receive a new reset token by clicking here',
+    'invite_password_expires' => 'Линк за ресет на парола ще изтече на :expire_date. Може да създадете нов линк за ресет на парола като кликнете тук',
 
 ];

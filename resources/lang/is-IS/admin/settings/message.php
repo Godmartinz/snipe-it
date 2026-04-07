@@ -24,8 +24,8 @@ return [
     ],
     'mail' => [
         'sending' => 'Sending Test Email...',
-        'success' => 'Mail sent!',
-        'error' => 'Mail could not be sent.',
+        'success' => 'Tölvupóstur sendur!',
+        'error' => 'Gat ekki sent tölvupóstinn.',
         'additional' => 'No additional error message provided. Check your mail settings and your app log.',
     ],
     'ldap' => [

@@ -71,8 +71,8 @@ return [
     'asset_location_update_default' => 'فقط بروزرسانی مکان پیش‌فرض',
     'asset_location_update_actual' => 'Update only actual location',
     'asset_not_deployable' => 'این وضعیت دارایی قابل استقرار نیست. این دارایی قابل پذیرش نیست.',
-    'asset_not_deployable_checkin' => 'That asset status is not deployable. Using this status label will checkin the asset.',
-    'asset_deployable' => 'This asset can be checked out.',
+    'asset_not_deployable_checkin' => '{1} That asset status is not deployable. Using this status label will check in the asset.|[2,*] That asset status in not deployable. Using this status label will result in no change.',
+    'asset_deployable' => '{1} This asset can be checked out.|[2,*] These assets can be checked out.',
     'processing_spinner' => 'Processing... (This might take a bit of time on large files)',
     'processing' => 'در حال پردازش... ',
     'optional_infos' => 'اطلاعات دلخواه

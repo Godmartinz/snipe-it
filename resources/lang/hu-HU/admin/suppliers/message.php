@@ -21,7 +21,7 @@ return [
         'success' => 'A szállító sikeresen törölve lett.',
         'not_found' => 'A beszállító nem található.',
         'bulk_success' => 'A beszállítók sikeresen törlésre kerültek.',
-        'partial_success' => 'A beszállító sikeresen törlésre került. További információk alább. | :count beszállító sikeresen törlésre került. További információk alább.',
+        'partial_success' => '.',
     ],
 
 ];

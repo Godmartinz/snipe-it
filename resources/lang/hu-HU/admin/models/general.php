@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Mezőcsoport',
     'no_custom_field' => 'Nincsenek egyedi mezők',
     'add_default_values' => 'Alapértelmezett érték megadása',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

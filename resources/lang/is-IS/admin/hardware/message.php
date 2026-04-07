@@ -11,7 +11,7 @@ return [
     'warning_audit_date_mismatch' => 'This asset\'s next audit date (:next_audit_date) is before the last audit date (:last_audit_date). Please update the next audit date.',
     'labels_generated' => 'Labels were successfully generated.',
     'error_generating_labels' => 'Error while generating labels.',
-    'no_assets_selected' => 'No assets selected.',
+    'no_assets_selected' => 'Engar eignir valdar.',
 
     'create' => [
         'error' => 'Asset was not created, please try again. :(',
@@ -67,7 +67,7 @@ return [
         'file_delete_success' => 'Your file has been been successfully deleted',
         'file_delete_error' => 'The file was unable to be deleted',
         'file_missing' => 'The file selected is missing',
-        'file_already_deleted' => 'The file selected was already deleted',
+        'file_already_deleted' => 'Skránni sem þú valdir hafði þegar verið eytt',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
         'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',

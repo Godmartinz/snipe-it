@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => '입고 알림 전자 우편 송신',
     'import_eula_text' => '최종 사용자 사용권 계약서(EULA)',
     'import_category_type' => '분류 유형',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

@@ -5,6 +5,7 @@ return [
     'group_exists' => '그룹이 이미 존재합니다!',
     'group_not_found' => '그룹 ID :id가 존재하지 않습니다.',
     'group_name_required' => '이름 항목을 입력해주세요.',
+    'assoc_users' => '이 부서는 현재 적어도 한명의 사용자와 연결되어 있어서 삭제할 수 없습니다. 사용자가 더 이상 이 부서를 참조하지 않게 갱신하고 다시 시도해주세요. ',
 
     'success' => [
         'create' => '그룹이 생성되었습니다.',

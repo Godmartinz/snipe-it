@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Ενεργοποιώντας αυτό το πλαίσιο θα επιτρέπεται σε έναν χρήστη να παρακάμπτει το UI skin με ένα διαφορετικό.',
     'asset_ids' => 'Στοιχεία ταυτότητας περιουσιακών στοιχείων',
     'audit_interval' => 'Διάρκεια ελέγχου',
-    'audit_interval_help' => 'Εάν απαιτείται να ελέγχετε τακτικά τα περιουσιακά σας στοιχεία, εισάγετε το διάστημα σε μήνες που χρησιμοποιείτε. Εάν ενημερώσετε αυτήν την τιμή, όλες οι "επόμενες ημερομηνίες ελέγχου" για τα περιουσιακά στοιχεία με μια επερχόμενη ημερομηνία ελέγχου θα ενημερωθούν.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Όριο προειδοποίησης ελέγχου',
     'audit_warning_days_help' => 'Πόσες μέρες νωρίτερα θα πρέπει να σας προειδοποιήσουμε όταν τα περιουσιακά στοιχεία οφείλονται για έλεγχο;',
     'auto_increment_assets' => 'Δημιουργία ετικετών στοιχείων ενεργητικού αυτόματης αύξησης',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Τύπος ονόματος',

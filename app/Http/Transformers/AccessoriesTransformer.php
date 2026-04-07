@@ -54,6 +54,7 @@ class AccessoriesTransformer
             ] : null,
             'notes' => ($accessory->notes) ? Helper::parseEscapedMarkedownInline($accessory->notes) : null,
             'qty' => ($accessory->qty) ? (int) $accessory->qty : null,
+            'percent_remaining' => round($accessory->percentRemaining()),
             'purchase_date' => ($accessory->purchase_date) ? Helper::getFormattedDateObject($accessory->purchase_date, 'date') : null,
             'purchase_cost' => Helper::formatCurrencyOutput($accessory->purchase_cost),
             'total_cost' => Helper::formatCurrencyOutput($accessory->totalCostSum()),

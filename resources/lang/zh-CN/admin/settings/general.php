@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => '勾选此框将允许用户以不同的方式覆盖界面皮肤。',
     'asset_ids' => '资产ID',
     'audit_interval' => '盘点时间间隔',
-    'audit_interval_help' => '如果您需要定期对您的资产进行盘点，请输入时间间隔（以月为单位）。如果您更新此值，则将更新具有即将到来的盘点日期的资产的所有“下一个盘点日期”。',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => '盘点开始提醒',
     'audit_warning_days_help' => '需要提前多少天让我们通知您需要盘点资产？',
     'auto_increment_assets' => '生成自动递增的资产标签',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => '用户数 (:count) 大于未分页记录限制 (:max)。使用批量用户编辑工具管理组成员关系。',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => '用户名格式',

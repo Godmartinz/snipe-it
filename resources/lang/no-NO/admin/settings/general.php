@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Kryss av denne boksen for å la brukere overstyre standardutseendet med et annet.',
     'asset_ids' => 'Eiendels-IDer',
     'audit_interval' => 'Audit intervall',
-    'audit_interval_help' => 'Hvis du er påkrevd å regelmessig sjekke ressursene dine, angi intervallet i måneder som du bruker. Hvis du oppdaterer denne verdien, vil hele "neste revisjonsdatoer" for ressurser med en kommende revisjonsdato bli oppdatert.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Audit terskelverdi for advarsel',
     'audit_warning_days_help' => 'Hvor mange dager i forveien bør vi advare deg når eiendeler forfaller for overvåking?',
     'auto_increment_assets' => 'Generer automatisk økende eiendelsmerker',
@@ -439,6 +439,7 @@ Linjeskift, topptekst, bilder, osv. kan føre til uventede resultater.',
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Format brukernavn',

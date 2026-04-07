@@ -21,7 +21,7 @@ return [
         'success' => 'Dobavljač je uspešno izbrisan.',
         'not_found' => 'Dobavljač nije pronađen.',
         'bulk_success' => 'Dobavljači su uspešno izbrisani.',
-        'partial_success' => 'Dobavljač je uspešno izbrisan. Detaljne informacije pogledajte ispod. | :count dobavljača je uspešno izbrisano. Detaljne informacije pogledajte ispod.',
+        'partial_success' => '.',
     ],
 
 ];

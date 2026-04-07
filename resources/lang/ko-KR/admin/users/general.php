@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => '당신은 :user_count 사용자의 속성을 수정하려고 합니다. 이 양식을 사용하여 자신의 사용자 속성을 변경할 수 없으며 ,사용자 자신의 개인 정보를 개별적으로 수정해야합니다.',
     'bulk_update_help' => '이 양식을 사용하면 한 번에 여러 사용자를 갱신할 수 있습니다. 변경할 필요가 있는 항목만 채우세요. 아무 것도 입력하지 않으면 변경되지 않습니다.',
     'current_assets' => '현재 이 사용자에게 반출 된 자산',
+    'current_items' => ':item currently checked out to this user',
     'clone' => '사용자 복제',
     'contact_user' => '연락처 :name',
     'edit' => '사용자 편집',

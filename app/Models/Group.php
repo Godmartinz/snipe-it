@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use App\Models\Traits\Searchable;
+use App\Presenters\GroupPresenter;
+use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
 
 class Group extends SnipeModel
 {
     use HasFactory;
+    use Presentable;
 
     protected $table = 'permission_groups';
 
@@ -32,6 +36,8 @@ class Group extends SnipeModel
      */
     protected $injectUniqueIdentifier = true;
 
+    protected $presenter = GroupPresenter::class;
+
     use Searchable;
     use ValidatingTrait;
 
@@ -40,14 +46,26 @@ class Group extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'created_at', 'notes'];
+    protected $searchableAttributes = [
+        'name',
+        'created_at',
+        'notes',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && (($this->users_count ?? $this->users()->count()) === 0);
+    }
 
     /**
      * Establishes the groups -> users relationship
@@ -61,20 +79,6 @@ class Group extends SnipeModel
     public function users()
     {
         return $this->belongsToMany(User::class, 'users_groups');
-    }
-
-    /**
-     * Get the user that created the group
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v6.3.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

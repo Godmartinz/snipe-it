@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Invia Email Restituzione',
     'import_eula_text' => 'Testo dell\'EULA',
     'import_category_type' => 'Tipo di categoria',
+    'import_alert_on_response' => 'Avviso sulla Risposta',
 
 ];

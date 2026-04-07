@@ -151,7 +151,7 @@ class ViewAssetsController extends Controller
             'requests',
             'assets' => function ($q) {
                 $q->where('requestable', 1)
-                    ->whereHas('assetstatus', fn ($s) => $s->where('archived', 0)
+                    ->whereHas('status', fn ($s) => $s->where('archived', 0)
                         ->where(fn ($s) => $s->where('deployable', 1)->orWhere('pending', 1)
                         )
                     );
@@ -205,7 +205,7 @@ class ViewAssetsController extends Controller
             $logaction->logaction(ActionType::RequestCanceled);
 
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
-                $settings->notify(new RequestAssetCancelation($data));
+                $settings->notify((new RequestAssetCancelation($data))->locale($settings->locale));
             }
 
             return redirect()->back()->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
@@ -213,7 +213,7 @@ class ViewAssetsController extends Controller
             $item->request();
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
                 $logaction->logaction('requested');
-                $settings->notify(new RequestAssetNotification($data));
+                $settings->notify((new RequestAssetNotification($data))->locale($settings->locale));
             }
 
             return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.success'));

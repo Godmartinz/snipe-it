@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Du håller på att redigera egenskaperna hos :user_count användare. Observera att du inte kan ändra dina egna användarattribut med hjälp av det här formuläret utan du måste göra ändringar till din egen användare enskilt.',
     'bulk_update_help' => 'Det här formuläret låter dig uppdatera flera användare samtidigt. Fyll i de fält du behöver ändra. Alla fält som lämnas tomma kommer att förbli oförändrade.',
     'current_assets' => 'Tillgångar utcheckade till denna användare',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Kopiera användare',
     'contact_user' => 'Kontakta :name',
     'edit' => 'Redigera användare',

@@ -2,5 +2,5 @@
 
 return [
     'created' => 'Stofnað',
-    'size' => 'Size',
+    'size' => 'Stærð',
 ];

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Талбар',
     'no_custom_field' => 'Өөрчлөгдсөн талбар байхгүй байна',
     'add_default_values' => 'Анхдагч утга нэмэх',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

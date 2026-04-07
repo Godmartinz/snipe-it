@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Grupp on juba olemas!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Nimi on kohustuslik',
+    'assoc_users' => 'See osakond on praegu seotud vähemalt ühe kasutajaga ja seda ei saa kustutada. Palun uuendage oma kasutajaid, et enam seda osakonda viideteta, ja proovige uuesti.',
 
     'success' => [
         'create' => 'Grupi loomine õnnestus.',

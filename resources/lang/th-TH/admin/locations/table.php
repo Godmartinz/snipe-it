@@ -12,8 +12,8 @@ return [
     'create' => 'สร้างสถานที่',
     'update' => 'อัพเดทสถานที่',
     'print_assigned' => 'พิมพ์ งานที่มอบหมาย',
-    'print_inventory' => 'Print Inventory',
-    'print_all_assigned' => 'Print Inventory and Assigned',
+    'print_inventory' => 'พิมพ์รายการพัสดุ',
+    'print_all_assigned' => 'พิมพ์รายการพัสดุและกำหนดค่า',
     'name' => 'ชื่อสถานที่',
     'address' => 'ที่อยู่',
     'address2' => 'ที่อยู่บรรทัดที่ 2',
@@ -40,5 +40,5 @@ return [
     'signed_by_finance_auditor' => 'ลงชื่อ (ผู้ตรวจการเงิน)',
     'signed_by_location_manager' => 'ลงชื่อ (หัวหน้าจุด)',
     'signed_by' => 'ลงชื่อออก',
-    'clone' => 'Clone Location',
+    'clone' => 'โคลนสถานที่',
 ];

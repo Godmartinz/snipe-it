@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Штиклирање на ова поле ќе му овозможи на корисникот да го надмине UI-изгледот со различна.',
     'asset_ids' => 'ID на основни средства',
     'audit_interval' => 'Интервал на ревизија',
-    'audit_interval_help' => 'Доколку се бара редовно физички да ги попишувате вашите средства, Внесете го интервалот во месеци што ги користите. Ако ја ажурирате оваа вредност, ќе се ажурираат сите „следни датуми за попис“ за средства со закажан датум на попис.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Праг за предупредување за ревизија',
     'audit_warning_days_help' => 'Колку дена однапред треба да ве предупредуваме кога средствата доспеваат за попис?',
     'auto_increment_assets' => 'Генерирај ознаки на средства кои автоматски се зголемуваат',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Формат на корисничко име',

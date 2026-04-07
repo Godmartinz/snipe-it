@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Chystáte sa hromadne upraviť nastavenia :user_count používateľlov. Nezapomeňte, že nie je možné zmeniť svoje nastavenia použitím tohto formuláru a tieto musia byť upravené individuálne.',
     'bulk_update_help' => 'Tento formulár umožňuje aktualizovať hromadne viacero používateľov. Vyplňte iba položky, ktoré chces zmeny. Všetky prázdne položky ostanú nezmenené.',
     'current_assets' => 'Majetky aktuálne priradené tomuto používateľovi',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Duplikovať používateľa',
     'contact_user' => 'Kontakt na :name',
     'edit' => 'Upraviť používateľa',

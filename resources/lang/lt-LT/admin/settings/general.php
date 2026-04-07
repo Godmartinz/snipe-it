@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Pažymėjus šį langelį, naudotojas galės pasikeisti numatytąją sąsajos temą kita.',
     'asset_ids' => 'Turto ID',
     'audit_interval' => 'Audito intervalas',
-    'audit_interval_help' => 'Jei jums reikia reguliariai fiziškai audituoti savo turtą, nurodykite naudojamą intervalą mėnesiais. Atnaujinus šią reikšmę, bus atnaujintos visos „kito audito datos“ tam turtui, kuriam yra nurodyta būsimo audito data.',
+    'audit_interval_help' => 'Jei privalote reguliariai fiziškai tikrinti savo turtą, įveskite naudojamą intervalą mėnesiais. ',
     'audit_warning_days' => 'Audito įspėjimo ribinė vertė',
     'audit_warning_days_help' => 'Prieš kiek dienų turėtume jus įspėti, kad turi būti atliktas turto auditas?',
     'auto_increment_assets' => 'Generuoti automatiškai didėjančius inventorinius numerius',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Kliento slaptasis raktas',
     'client_id' => 'Kliento ID',
     'too_many_users_to_show' => 'Naudotojų skaičius (:count) yra didesnis nei į puslapius neskaidomų įrašų riba (:max). Norėdami tvarkyti grupės narystes, naudokite masinio naudotojų redagavimo įrankį.',
+    'update_existing_dates' => 'Taip pat atnaujinkite visas esamas „kito audito datas“ turtui, kurio auditas artėja, su aukščiau nurodytu audito intervalu. Tai dažniausiai naudojama tada, kai pasikeičia vidinė audito intervalo politika.',
 
     'username_formats' => [
         'username_format' => 'Naudotojo vardo formatas',

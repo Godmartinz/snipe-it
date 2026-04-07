@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Zaškrtnutím tohto políčka sa povolí používateľovi nahradiť UI tému vlastnou.',
     'asset_ids' => 'ID-čka majetku',
     'audit_interval' => 'Interval pre auditovanie',
-    'audit_interval_help' => 'Ak je požadovaný pravidelný fyzický audit majetku, zadajte interval v mesiacoch, ktorý používate. Ak túto hodnotu aktualizujete, aktualizujú sa všetky „dátumy ďalšieho auditu“ pre majetok s blížiacim sa dátumom auditu.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Prah výstrahy auditu',
     'audit_warning_days_help' => 'Koľko dní dopredu by sme vás mali upozorňovať, keď je majetok čakajúci na audit?',
     'auto_increment_assets' => 'Generovať automatické inkrementálne označenie majetku',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Klientský kľúč',
     'client_id' => 'Klienské ID',
     'too_many_users_to_show' => 'Počet používateľov (:count) je väčší ako limit nestránkovaných záznamov (:max). Na správu členstva v skupinách použite nástroj na hromadnú úpravu používateľov.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Formát používateľského mena',

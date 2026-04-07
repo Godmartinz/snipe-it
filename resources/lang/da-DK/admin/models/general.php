@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Feltsæt',
     'no_custom_field' => 'Ingen brugerdefinerede felter',
     'add_default_values' => 'Tilføj defaultværdier',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

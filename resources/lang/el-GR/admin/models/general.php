@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Σύνολο πεδίων',
     'no_custom_field' => 'Δεν υπάρχουν προσαρμοσμένα πεδία',
     'add_default_values' => 'Προσθέστε προεπιλεγμένες τιμές',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

@@ -77,7 +77,7 @@ return [
 
     'assetsviewencrypted-custom-fields' => [
         'name' => 'ดูฟิลด์กำหนดเองที่เข้ารหัส',
-        'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
+        'note' => 'อนุญาตให้ผู้ใช้ดู และแก้ไขฟิลด์กำหนดเองที่เข้ารหัสไว้ในสินทรัพย์ได้',
     ],
 
     'accessories' => [
@@ -110,7 +110,7 @@ return [
         'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับอุปกรณ์เสริมได้',
     ],
     'consumables' => [
-        'name' => 'การใช้งาน',
+        'name' => 'วัสดุสิ้นเปลือง',
         'note' => 'อนุญาตให้เข้าถึงส่วนวัสดุสิ้นเปลืองของแอปพลิเคชันได้',
     ],
     'consumablesview' => [
@@ -138,31 +138,31 @@ return [
         'note' => 'Grants access to the Licenses section of the application.',
     ],
     'licensesview' => [
-        'name' => 'View Licenses',
+        'name' => 'ดูข้อมูล License',
     ],
     'licensescreate' => [
-        'name' => 'Create New Licenses',
+        'name' => 'สร้าง License ใหม่',
     ],
     'licensesedit' => [
-        'name' => 'Edit Licenses',
+        'name' => 'แก้ไข License',
     ],
     'licensesdelete' => [
-        'name' => 'Delete Licenses',
+        'name' => 'ลบ License',
     ],
     'licensescheckout' => [
-        'name' => 'Assign Licenses',
+        'name' => 'แจกจ่าย License',
         'note' => 'Allows the user to assign licenses to assets or users.',
     ],
     'licensescheckin' => [
-        'name' => 'Unassign Licenses',
+        'name' => 'เรียกคืน License',
         'note' => 'Allows the user to unassign licenses from assets or users.',
     ],
     'licensesfiles' => [
-        'name' => 'Manage License Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with licenses.',
+        'name' => 'จัดการไฟล์ License',
+        'note' => 'อนุญาตให้ผู้ใช้อัพโหลด, ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับ License',
     ],
     'licenseskeys' => [
-        'name' => 'Manage License Keys',
+        'name' => 'จัดการ License Keys',
         'note' => 'Allows the user to view product keys associated with licenses.',
     ],
     'components' => [
@@ -170,20 +170,20 @@ return [
         'note' => 'Grants access to the Components section of the application.',
     ],
     'componentsview' => [
-        'name' => 'View Components',
+        'name' => 'ดูข้อมูลส่วนประกอบ',
     ],
     'componentscreate' => [
-        'name' => 'Create New Components',
+        'name' => 'สร้างส่วนประกอบใหม่',
     ],
     'componentsedit' => [
-        'name' => 'Edit Components',
+        'name' => 'แก้ไขส่วนประกอบ',
     ],
     'componentsdelete' => [
-        'name' => 'Delete Components',
+        'name' => 'ลบส่วนประกอบ',
     ],
     'componentsfiles' => [
-        'name' => 'Manage Component Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with components.',
+        'name' => 'จัดการไฟล์ส่วนประกอบ',
+        'note' => 'อนุญาตให้ผู้ใช้อัพโหลด, ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับส่วนประกอบ',
     ],
     'componentscheckout' => [
         'name' => 'Check Out Components',
@@ -217,16 +217,16 @@ return [
         'name' => 'ดูผู้ใช้งาน',
     ],
     'userscreate' => [
-        'name' => 'Create New Users',
+        'name' => 'สร้างผู้ใช้งานใหม่',
     ],
     'usersedit' => [
-        'name' => 'Edit Users',
+        'name' => 'แก้ไขผู้ใช้งาน',
     ],
     'usersdelete' => [
-        'name' => 'Delete Users',
+        'name' => 'ลบผู้ใช้งาน',
     ],
     'models' => [
-        'name' => 'Models',
+        'name' => 'รุ่น',
         'note' => 'Grants access to the Models section of the application.',
     ],
     'modelsview' => [
@@ -234,45 +234,45 @@ return [
     ],
 
     'modelscreate' => [
-        'name' => 'Create New Models',
+        'name' => 'สร้างข้อมูลรุ่นใหม่',
     ],
     'modelsedit' => [
-        'name' => 'Edit Models',
+        'name' => 'แก้ไขข้อมูลรุ่น',
     ],
     'modelsdelete' => [
-        'name' => 'Delete Models',
+        'name' => 'ลบข้อมูลรุ่น',
     ],
     'categories' => [
         'name' => 'ประเภท',
         'note' => 'Grants access to the Categories section of the application.',
     ],
     'categoriesview' => [
-        'name' => 'View Categories',
+        'name' => 'ดูข้อมูลหมวดหมู่',
     ],
     'categoriescreate' => [
-        'name' => 'Create New Categories',
+        'name' => 'สร้างหมวดหมู่ใหม่',
     ],
     'categoriesedit' => [
-        'name' => 'Edit Categories',
+        'name' => 'แก้ไขหมวดหมู่',
     ],
     'categoriesdelete' => [
-        'name' => 'Delete Categories',
+        'name' => 'ลบหมวดหมู่',
     ],
     'departments' => [
         'name' => 'หน่วยงาน',
         'note' => 'Grants access to the Departments section of the application.',
     ],
     'departmentsview' => [
-        'name' => 'View Departments',
+        'name' => 'ดูข้อมูลแผนก',
     ],
     'departmentscreate' => [
-        'name' => 'Create New Departments',
+        'name' => 'สร้างแผนกใหม่',
     ],
     'departmentsedit' => [
-        'name' => 'Edit Departments',
+        'name' => 'แก้ไขแผนก',
     ],
     'departmentsdelete' => [
-        'name' => 'Delete Departments',
+        'name' => 'ลบแผนก',
     ],
     'locations' => [
         'name' => 'สถานที่',
@@ -343,16 +343,16 @@ return [
         'note' => 'Grants access to the Manufacturers section of the application.',
     ],
     'manufacturersview' => [
-        'name' => 'View Manufacturers',
+        'name' => 'ดูข้อมูลผู้ผลิต',
     ],
     'manufacturerscreate' => [
-        'name' => 'Create New Manufacturers',
+        'name' => 'สร้างข้อมูลผู้ผลิต',
     ],
     'manufacturersedit' => [
-        'name' => 'Edit Manufacturers',
+        'name' => 'แก้ไขข้อมูลผู้ผลิต',
     ],
     'manufacturersdelete' => [
-        'name' => 'Delete Manufacturers',
+        'name' => 'ลบข้อมูลผู้ผลิต',
     ],
     'companies' => [
         'name' => 'บริษัท',
@@ -375,49 +375,49 @@ return [
         'note' => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
     ],
     'selftwo-factor' => [
-        'name' => 'Manage Two-Factor Authentication',
-        'note' => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
+        'name' => 'จัดการระบบพิสูจน์ตัวตนแบบสองปัจจัย',
+        'note' => 'อนุญาตให้ผู้ใช้ เปิด/ปิด และจัดการระบบพิสูจน์ตัวตนแบบสองปัจจัยของบัญชีตนเอง',
     ],
     'selfapi' => [
-        'name' => 'Manage API Tokens',
+        'name' => 'จัดการ API tokens',
         'note' => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
     ],
     'selfedit-location' => [
-        'name' => 'Edit Location',
-        'note' => 'Allows users to edit the location associated with their own user account.',
+        'name' => 'แก้ไขสถานที่',
+        'note' => 'อนุญาตให้แก้ไขสถานที่ของตนเองได้',
     ],
     'selfcheckout-assets' => [
         'name' => 'Self Check Out Assets',
         'note' => 'Allows users to check out assets to themselves without admin intervention.',
     ],
     'selfview-purchase-cost' => [
-        'name' => 'View Purchase Cost',
+        'name' => 'ดูข้อมูลราคา',
         'note' => 'Allows users to view the purchase cost of items in their account view.',
     ],
 
     'depreciations' => [
-        'name' => 'Depreciation Management',
-        'note' => 'Allows users to manage and view asset depreciation details.',
+        'name' => 'จัดการข้อมูลการเสื่อมราคา',
+        'note' => 'อนุญาตให้ผู้ใช้จัดการและดูข้อมูลรายละเอียดการเสื่อมราคาของสินทรัพย์ได้',
     ],
     'depreciationsview' => [
-        'name' => 'View Depreciation Details',
+        'name' => 'ดูข้อมูลการเสื่อมราคา',
     ],
     'depreciationsedit' => [
-        'name' => 'Edit Depreciation Settings',
+        'name' => 'แก้ไขข้อมูลการเสื่อมราคา',
     ],
     'depreciationsdelete' => [
-        'name' => 'Delete Depreciation Records',
+        'name' => 'ลบข้อมูลการเสื่อมราคา',
     ],
     'depreciationscreate' => [
-        'name' => 'Create Depreciation Records',
+        'name' => 'สร้างข้อมูลการเสื่อมราคา',
     ],
 
-    'grant_all' => 'Grant all permissions for :area',
-    'deny_all' => 'Deny all permissions for :area',
-    'inherit_all' => 'Inherit all permissions for :area from permission groups',
-    'grant' => 'Grant Permission for :area',
-    'deny' => 'Deny Permission for :area',
-    'inherit' => 'Inherit Permission for :area from permission groups',
-    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.',
+    'grant_all' => 'ให้สิทธิ์ทุกอย่างสำหรับ :area',
+    'deny_all' => 'ลบสิทธิ์ทุกอย่างสำหรับ :area',
+    'inherit_all' => 'สืบทอดสิทธิ์ทั้งหมดสำหรับ :area จากสิทธิ์ของกลุ่ม',
+    'grant' => 'ให้สิทธิ์สำหรับ :area',
+    'deny' => 'ลบสิทธิ์สำหรับ :area',
+    'inherit' => 'สืบทอดสิทธิ์สำหรับ :area จากสิทธิ์ของกลุ่ม',
+    'use_groups' => 'เราขอแนะนำให้ใช้สิทธิ์ของกลุ่ม แทนการกำหนดสิทธิ์รายบุคคลเพื่อให้ง่ายต่อการจัดการ',
 
 ];

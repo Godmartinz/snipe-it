@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Bạn sắp chỉnh sửa các thuộc tính của: user_count users. Xin lưu ý rằng bạn không thể thay đổi thuộc tính người dùng của mình bằng cách sử dụng biểu mẫu này và phải thực hiện chỉnh sửa cho người dùng riêng của mình.',
     'bulk_update_help' => 'Biểu mẫu này cho phép bạn cập nhật nhiều người dùng cùng một lúc. Chỉ điền vào các trường mà bạn cần thay đổi. Bất kỳ trường nào để trống sẽ không thay đổi.',
     'current_assets' => 'Tài sản hiện được kiểm tra cho người dùng này',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Nhân đôi người dùng',
     'contact_user' => 'Liên hệ :name',
     'edit' => 'Sửa người dùng',

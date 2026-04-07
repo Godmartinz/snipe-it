@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => '勾選此框將允許使用者使用不同的使用者介面。',
     'asset_ids' => '資產ID',
     'audit_interval' => '稽核間隔',
-    'audit_interval_help' => '如果您需要定期實地稽核您的資產，請輸入您使用的間隔月數。如果您更新此值，所有具有即將進行的稽核日期的資產的 "下一次稽核日期" 將被更新。',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => '稽核警告閾值',
     'audit_warning_days_help' => '當資產到期時，我們應該提前幾天提前審核？',
     'auto_increment_assets' => '產生自動遞增資產標籤',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => '使用者名稱格式',

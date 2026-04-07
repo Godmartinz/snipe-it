@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Zestaw pól',
     'no_custom_field' => 'Brak niestandardowych pól',
     'add_default_values' => 'Dodaj wartości domyślne',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

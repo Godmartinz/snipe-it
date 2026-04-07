@@ -6,6 +6,7 @@ use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Asset;
 use App\Models\Component;
@@ -72,10 +73,9 @@ class ComponentsController extends Controller
 
         }
 
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $components->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $components->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $components->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {
@@ -386,5 +386,17 @@ class ComponentsController extends Controller
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, 'No matching checkouts for that component join record'));
+    }
+
+    public function history(Request $request, Component $component): JsonResponse|array
+    {
+        $this->authorize('history', $component);
+        $history = $component->getHistory($request);
+        $total = $component->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

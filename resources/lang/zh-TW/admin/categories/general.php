@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => '發送借出郵件',
     'import_eula_text' => 'EULA 文字',
     'import_category_type' => '類別類型',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

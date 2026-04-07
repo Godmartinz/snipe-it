@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Namjeravate uređivati ​​svojstva korisnika: user_count. Imajte na umu da ne možete mijenjati vlastite korisničke atribute pomoću ovog obrasca i morati sami uređivati ​​vlastiti korisnik.',
     'bulk_update_help' => 'Ovaj vam obrazac omogućuje ažuriranje više korisnika odjednom. Popunite polja koja su vam potrebna za promjenu. Sva polja koja su ostala prazna ostat će nepromijenjena.',
     'current_assets' => 'Aktiva koji su trenutačno prijavljeni ovom korisniku',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Korisnik klona',
     'contact_user' => 'Ime kontakta',
     'edit' => 'Uređivanje korisnika',

@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'التحقق من هذا المربع سيسمح للمستخدم باستخدام مظهر واجهة المستخدم بمظهر آخر.',
     'asset_ids' => 'ارقام تعريف الاصول',
     'audit_interval' => 'مدة التدقيق',
-    'audit_interval_help' => 'إذا كان مطلوبا منك التدقيق المادي بانتظام في الأصول الخاصة بك، قم بإدخال الفاصل الزمني في الأشهر التي تستخدمها. إذا قمت بتحديث هذه القيمة، سيتم تحديث جميع "تواريخ المراجعة التالية" للأصول مع تاريخ مراجعة الحسابات المقبل.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'عتبة تحذير التدقيق',
     'audit_warning_days_help' => 'كم يوما مقدما يجب أن نحذركم عندما تكون الأصول مستحقة للتدقيق؟',
     'auto_increment_assets' => 'إنشاء علامات الأصول الإضافية التلقائية',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'تنسيق اسم المستخدم',

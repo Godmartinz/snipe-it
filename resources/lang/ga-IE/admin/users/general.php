@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Tá tú ar tí in eagar na hairíonna seo a leanas: úsáideoirí user_count. Tabhair faoi deara nach féidir leat tréithe úsáideora féin a athrú ag baint úsáide as an bhfoirm seo, agus ní mór duit athruithe a dhéanamh chuig d\'úsáideoir féin ina n-aonar.',
     'bulk_update_help' => 'Ceadaíonn an fhoirm seo duit il-úsáideoirí a thabhairt cothrom le dáta ag an am céanna. Líon isteach na réimsí is gá duit a athrú ach amháin. Ní dhéanfar aon réimsí fágtha gan athrú.',
     'current_assets' => 'Seiceáil na sócmhainní faoi láthair don úsáideoir seo',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Úsáideoir Clón',
     'contact_user' => 'Ainm an Teagmhálaí',
     'edit' => 'Athraigh Úsáideoir',

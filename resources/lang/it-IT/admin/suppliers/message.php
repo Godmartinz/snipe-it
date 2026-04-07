@@ -21,7 +21,7 @@ return [
         'success' => 'Fornitore eliminato con successo.',
         'not_found' => 'Fornitore non trovato.',
         'bulk_success' => 'Fornitori eliminati con successo.',
-        'partial_success' => 'Fornitore eliminato con successo. Leggi le informazioni aggiuntive qui sotto. | :count fornitori eliminati con successo. Leggi le informazioni aggiuntive qui sotto.',
+        'partial_success' => '.',
     ],
 
 ];

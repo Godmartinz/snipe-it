@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Gruppen eksisterer allerede!',
     'group_not_found' => 'Gruppe ID :id eksisterer ikke.',
     'group_name_required' => 'Navnefeltet er påkrævet',
+    'assoc_users' => 'Denne afdeling er i øjeblikket knyttet til mindst én bruger og kan ikke slettes. Opdater venligst dine brugere for at ikke længere referere til denne afdeling, og prøv igen. ',
 
     'success' => [
         'create' => 'Gruppen er oprettet.',

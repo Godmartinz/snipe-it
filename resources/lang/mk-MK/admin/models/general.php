@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Група на полиња',
     'no_custom_field' => 'Без полиња по желба',
     'add_default_values' => 'Додајте default вредности',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

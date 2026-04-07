@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Полета',
     'no_custom_field' => 'Няма потребителски полета',
     'add_default_values' => 'Добавяне на стойности по подразбиране',
+    'importer' => [
+        'require_serial' => 'Изисква сериен номер',
+        'serial_required' => 'Изисква се сериен номер',
+    ],
 ];

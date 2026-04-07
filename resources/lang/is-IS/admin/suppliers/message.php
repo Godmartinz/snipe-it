@@ -17,11 +17,11 @@ return [
 
     'delete' => [
         'confirm' => 'Ertu viss um að þú viljir afskrá þennan birgi?',
-        'error' => 'There was an issue deleting the supplier. Please try again.',
+        'error' => 'Það kom upp vandamál þegar reynt var að eyða birgjanum. Vinsamlegast reyndu aftur.',
         'success' => 'Supplier was deleted successfully.',
-        'not_found' => 'Supplier not found.',
+        'not_found' => 'Birgir fannst ekki.',
         'bulk_success' => 'Suppliers were deleted successfully.',
-        'partial_success' => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
+        'partial_success' => '.',
     ],
 
 ];

@@ -21,7 +21,7 @@ return [
         'success' => 'crwdns869:0crwdne869:0',
         'not_found' => 'crwdns13842:0crwdne13842:0',
         'bulk_success' => 'crwdns13844:0crwdne13844:0',
-        'partial_success' => 'crwdns13882:0crwdne13882:0',
+        'partial_success' => 'crwdns14506:0crwdne14506:0',
     ],
 
 ];

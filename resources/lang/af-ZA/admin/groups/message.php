@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Groep bestaan ​​reeds!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Die naam veld is nodig',
+    'assoc_users' => 'Hierdie afdeling word tans geassosieer met minstens een gebruiker en kan nie verwyder word nie. Dateer asseblief u gebruikers op om nie meer hierdie departement te verwys nie en probeer weer.',
 
     'success' => [
         'create' => 'Groep is suksesvol geskep.',

@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Skupina polí',
     'no_custom_field' => 'Žiadne vlastné polia',
     'add_default_values' => 'Pridať predvolené hodnoty',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

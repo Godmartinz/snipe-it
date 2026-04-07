@@ -13,11 +13,12 @@
         <x-box>
 
             <x-table.licenses
-                    fixed_right_number="2"
-                    fixed_number="1"
-                    show_footer="true"
-                    name="licenses"
-                    :route="route('api.licenses.index', ['status' => e(request('status'))])" />
+                fixed_right_number="2"
+                fixed_number="1"
+                show_footer="true"
+                show_advanced_search="true"
+                name="licenses"
+                :route="route('api.licenses.index', ['status' => e(request('status'))])"/>
 
         </x-box>
     </x-container>

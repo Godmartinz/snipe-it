@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Laukų rinkinys',
     'no_custom_field' => 'Nėra pritaikytų laukų',
     'add_default_values' => 'Pridėti numatytąsias reikšmes',
+    'importer' => [
+        'require_serial' => 'Reikalauti serijinio numerio',
+        'serial_required' => 'Serijinis numeris yra privalomas',
+    ],
 ];

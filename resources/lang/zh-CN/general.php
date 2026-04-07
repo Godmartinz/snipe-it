@@ -101,6 +101,7 @@ return [
     'created_by' => '创建者',
     'record_created' => '记录已创建',
     'updated_at' => 'Updated At',
+    'updated_before' => 'Updated Before',
     'updated_plain' => 'Updated',
     'deleted_plain' => '已删除',
     'purchased_plain' => '已购买',
@@ -114,13 +115,14 @@ return [
     'dashboard' => '控制面板',
     'data_source' => '数据源',
     'days' => '天数',
+    'days_ago' => 'days ago',
     'days_to_next_audit' => '距离下一次盘点的天数',
     'date' => '日期',
     'debug_warning' => '警告!',
     'debug_warning_text' => '此应用程序正在生产模式下运行，但启用了调试模式。 如果您的应用程序可以从外部访问，这可能会泄露敏感数据。 请通过将 <code>APP_DEBUG</code> 值在您的 <code>.env</code> 文件中设置为 <code>false</code> 来禁用调试模式。',
     'delete' => '刪除',
     'delete_confirm' => '您确定要删除 :item？',
-    'delete_confirm_no_undo' => '您确定要删除 :item吗？此操作无法撤消。',
+    'delete_confirm_no_undo' => '您确定要删除 :item？此操作无法撤消。',
     'deleted' => '已删除',
     'delete_seats' => '已移除席位',
     'deletion_failed' => '删除失败',
@@ -128,6 +130,7 @@ return [
     'department' => '部门',
     'deployed' => '已分配',
     'depreciation' => '折旧',
+    'depreciation_type' => 'Depreciation Type',
     'depreciations' => '折旧',
     'depreciation_report' => '折旧报告',
     'details' => '详细信息',
@@ -164,7 +167,7 @@ return [
     'image_upload' => '上传图片',
     'filetypes_accepted_help' => '可接受的文件类型是 :type 。允许的最大大小是 :size.|可接受的文件类型是 :type 。允许最大上传大小是 :size。',
     'filetypes_size_help' => '允许最大上传大小为 :size',
-    'image_filetypes_help' => '可接受的文件类型是jpg, webp, png, gif, svg和avif。允许最大上传大小为 :size。',
+    'image_filetypes_help' => '可接受的文件类型是jpg、webp、png、gif、svg和avif。允许的最大上传大小为 :size。',
     'unaccepted_image_type' => '此图像文件不可读。可接受的文件类型为jpg、webp、png、gif和svg。此文件的 mimetype 类型为：:mimetype。',
     'import' => '导入',
     'documentation' => '在新链接中打开文档',
@@ -273,6 +276,7 @@ return [
     'request_item' => '申领此项',
     'external_link_tooltip' => '外部链接到',
     'save' => '保存​​',
+    'save_copy' => 'Save Copy',
     'select_var' => '选择 :thing... ', // this will eventually replace all of our other selects
     'select' => '选择',
     'select_all' => '全选',
@@ -683,7 +687,6 @@ return [
     ],
 
     'breadcrumb_button_actions' => [
-        'edit_item' => '编辑 :name',
         'checkout_item' => '签出 :name',
         'checkin_item' => '归还 :name',
     ],
@@ -710,6 +713,7 @@ return [
 
     'select_all_none' => '选择/取消选择所有',
     'generic_model_not_found' => ':model 未找到或您没有访问权限',
+    'report_not_editable' => 'You do not have permission to edit this report template',
     'deleted_models' => '已删除的资产型号',
     'deleted_users' => '已删除的用户',
     'cost_each' => '每项:amount',
@@ -748,6 +752,6 @@ return [
         'percent' => '百分比',
     ],
 
-    'months_plural' => '1月|:count月',
+    'months_plural' => '1月|:count 月',
 
 ];

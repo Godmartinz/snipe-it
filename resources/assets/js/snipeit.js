@@ -209,7 +209,7 @@ $(function () {
                     var data = {
                         search: params.term,
                         page: params.page || 1,
-                        assetStatusType: link.data("asset-status-type"),
+                        statusType: link.data("asset-status-type"),
                         companyId: link.data("company-id"),
                     };
                     return data;
@@ -282,9 +282,9 @@ $(function () {
 		
 		if(value && !noForceAjax && !isMouseUp) {
 			var endpoint = element.data("endpoint");
-			var assetStatusType = element.data("asset-status-type");
+            var statusType = element.data("asset-status-type");
 			$.ajax({
-				url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search='+value+'&page=1' + (assetStatusType ? '&assetStatusType='+assetStatusType : ''),
+                url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (statusType ? '&statusType=' + statusType : ''),
 				dataType: 'json',
 				headers: {
 					"X-Requested-With": 'XMLHttpRequest',

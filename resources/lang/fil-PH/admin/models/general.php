@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Ang Fieldset',
     'no_custom_field' => 'Walang nai-kustom na mga field',
     'add_default_values' => 'Add default values',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

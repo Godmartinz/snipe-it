@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => 'Kirim email checkin',
     'import_eula_text' => 'Teks EULA',
     'import_category_type' => 'Tipe kategori',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

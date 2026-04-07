@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Mencentang kotak ini akan memungkinkan pengguna untuk mengganti skin UI yang berbeda.',
     'asset_ids' => 'Aset id',
     'audit_interval' => 'Interval Audit',
-    'audit_interval_help' => 'Jika Anda diharuskan untuk mengaudit fisik aset Anda secara berkala, masukkan interval dalam bulan yang Anda gunakan. Jika Anda memperbarui nilai ini, semua "tanggal audit berikutnya" untuk aset dengan tanggal audit mendatang akan diperbarui.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Ambang Peringatan Audit',
     'audit_warning_days_help' => 'Berapa hari sebelumnya yang harus kami peringatkan saat aset akan dilelang?',
     'auto_increment_assets' => 'Buat tag aset yang bertambah otomatis',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Format pengguna',

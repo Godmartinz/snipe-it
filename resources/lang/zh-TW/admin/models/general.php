@@ -15,4 +15,8 @@ return [
     'fieldset' => '欄位集',
     'no_custom_field' => '沒有自訂欄位',
     'add_default_values' => '新增預設值',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

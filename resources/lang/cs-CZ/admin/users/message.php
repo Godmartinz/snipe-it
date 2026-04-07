@@ -2,11 +2,11 @@
 
 return [
 
-    'accepted' => 'You have successfully accepted this item.',
-    'declined' => 'You have successfully declined this item.',
+    'accepted' => 'Tuto položku jste úspěšně přijali.',
+    'declined' => 'Tuto položku jste úspěšně odmítli.',
     'bulk_manager_warn' => 'Uživatelé byli úspěšně aktualizováni, položka správce však nebyla uložena, protože správce, který jste si vybrali, byl také v seznamu uživatelů, který má být upraven, a uživatelé nemusí být jejich vlastní správce. Zvolte své uživatele znovu, kromě správce.',
     'user_exists' => 'Uživatel již existuje!',
-    'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
+    'cannot_delete' => 'Uživatel neexistuje nebo nemáte oprávnění k jeho odstranění.',
     'user_not_found' => 'Uživatel neexistuje nebo nemáte oprávnění k jeho zobrazení.',
     'user_login_required' => 'Přihlašovací pole je povinné',
     'user_has_no_assets_assigned' => 'Momentálně nejsou uživateli přiřazeny žádné položky.',

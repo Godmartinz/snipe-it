@@ -40,7 +40,10 @@ class Depreciation extends SnipeModel
      *
      * @var array
      */
-    protected $fillable = ['name', 'months'];
+    protected $fillable = [
+        'name',
+        'months',
+    ];
 
     use Searchable;
 
@@ -49,14 +52,19 @@ class Depreciation extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'months'];
+    protected $searchableAttributes = [
+        'name',
+        'months',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     public function isDeletable()
     {

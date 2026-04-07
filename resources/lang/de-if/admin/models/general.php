@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Feldsatz',
     'no_custom_field' => 'Keine benutzerdefinierten Felder',
     'add_default_values' => 'Füge Standardwerte hinzu',
+    'importer' => [
+        'require_serial' => 'Seriennummer verlangen',
+        'serial_required' => 'Seriennummer erforderlich',
+    ],
 ];

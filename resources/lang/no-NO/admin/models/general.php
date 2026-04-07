@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Felt',
     'no_custom_field' => 'Ingen egendefinerte felt',
     'add_default_values' => 'Legg til standardverdier',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

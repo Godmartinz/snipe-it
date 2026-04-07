@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Door dit selectievakje aan te vinken, kan een gebruiker de skin van de gebruikersinterface met een andere overschrijven.',
     'asset_ids' => 'Asset IDs',
     'audit_interval' => 'Interval audit',
-    'audit_interval_help' => 'Als je verplicht bent regelmatig fysiek je bezitting te controleren, kies dan een interval in maanden. Als je deze interval bijwerkt worden alle "volgende controle datums" aangepast.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Audit waarschuwingsdrempel',
     'audit_warning_days_help' => 'Hoeveel dagen op voorhand moeten we je waarschuwen wanneer assets gecontroleerd moeten worden?',
     'auto_increment_assets' => 'Genereer automatisch verhogen van asset Id\'s',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Gebruikersnaam indeling',

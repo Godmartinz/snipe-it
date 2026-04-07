@@ -54,7 +54,7 @@ class DepartmentsController extends Controller
         $department->created_by = auth()->id();
         $department->manager_id = ($request->filled('manager_id') ? $request->input('manager_id') : null);
         $department->location_id = ($request->filled('location_id') ? $request->input('location_id') : null);
-        $department->company_id = ($request->filled('company_id') ? $request->input('company_id') : null);
+        $department->company_id = ($request->filled('company_id') ? Company::getIdForCurrentUser($request->input('company_id')) : null);
         $department->tag_color = $request->input('tag_color');
         $department->notes = $request->input('notes');
         $department = $request->handleImages($department);
@@ -107,12 +107,8 @@ class DepartmentsController extends Controller
      *
      * @since [v4.0]
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(Department $department): RedirectResponse
     {
-        if (is_null($department = Department::find($id))) {
-            return redirect()->to(route('departments.index'))->with('error', trans('admin/departments/message.not_found'));
-        }
-
         $this->authorize('delete', $department);
 
         if ($department->users->count() > 0) {
@@ -168,7 +164,7 @@ class DepartmentsController extends Controller
         $department->fill($request->all());
         $department->manager_id = ($request->filled('manager_id') ? $request->input('manager_id') : null);
         $department->location_id = ($request->filled('location_id') ? $request->input('location_id') : null);
-        $department->company_id = ($request->filled('company_id') ? $request->input('company_id') : null);
+        $department->company_id = ($request->filled('company_id') ? Company::getIdForCurrentUser($request->input('company_id')) : null);
         $department->phone = $request->input('phone');
         $department->fax = $request->input('fax');
         $department->tag_color = $request->input('tag_color');

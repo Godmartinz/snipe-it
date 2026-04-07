@@ -31,7 +31,7 @@ return [
         'numeric' => 'Полето :attribute трябва да бъде между :min и :max .',
         'string' => 'Полето :attribute трябва да бъде между :min и :max символа.',
     ],
-    'valid_regex' => 'The regular expression is invalid.',
+    'valid_regex' => 'Регулярният израз е невалиден.',
     'boolean' => 'Полето :attribute трябва да бъде Да или Не.',
     'can' => 'Полето :attribute съдържа неприемлива стойност.',
     'confirmed' => 'Полето :attribute не съвпада.',
@@ -174,7 +174,7 @@ return [
     'ulid' => 'Полето :attribute трябва да бъде валиден ULID.',
     'uuid' => 'Полето :attribute трябва да съдържа валиден UUID.',
     'fmcs_location' => 'Пълна поддръжка за множество компаний и местоположения е включена в админ настройките, но избраната локация и компания не са съвместими.',
-    'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
+    'is_unique_across_company_and_location' => ':attribute трябва да бъде уникален за тази фирма и локация.',
 
     /*
     |--------------------------------------------------------------------------

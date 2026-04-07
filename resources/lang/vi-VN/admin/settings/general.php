@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'Check ô này cho phép người dùng sử dụng giao diện bên ngoài.',
     'asset_ids' => 'ID tài sản',
     'audit_interval' => 'Khoảng Kiểm toán',
-    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. If you update this value, all of the "next audit dates" for assets with an upcoming audit date will be updated.',
+    'audit_interval_help' => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. ',
     'audit_warning_days' => 'Ngưỡng cảnh báo kiểm tra',
     'audit_warning_days_help' => 'Bao nhiêu ngày trước chúng tôi nên cảnh báo bạn khi tài sản đến hạn kiểm toán?',
     'auto_increment_assets' => 'Generate auto-incrementing asset tags',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'Client Secret',
     'client_id' => 'Client ID',
     'too_many_users_to_show' => 'The number of users (:count) is larger than the unpaginated record limit (:max). Use the bulk user edit tool to manage group memberships.',
+    'update_existing_dates' => 'Also update all of the existing "next audit dates" for assets with an upcoming audit with the Audit Interval above. This is most commonly used when the internal policy for audit interval has changed.',
 
     'username_formats' => [
         'username_format' => 'Định dạng Tên người dùng',

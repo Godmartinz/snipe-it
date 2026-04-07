@@ -27,5 +27,6 @@ return [
     'import_checkin_email' => '发送签入邮件',
     'import_eula_text' => 'EULA（最终用户许可协议）文本',
     'import_category_type' => '分类类型',
+    'import_alert_on_response' => 'Alert on Response',
 
 ];

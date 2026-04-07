@@ -10,7 +10,7 @@ return [
     'country' => 'Land',
     'create' => 'Skrá birgja',
     'email' => 'Netfang',
-    'fax' => 'Fax',
+    'fax' => 'Bréfsími',
     'id' => 'ID',
     'licenses' => 'Leyfi',
     'name' => 'Heiti birgja',
@@ -18,9 +18,9 @@ return [
     'phone' => 'Sími',
     'state' => 'Fylki',
     'suppliers' => 'Birgjar',
-    'update' => 'Update Supplier',
+    'update' => 'Uppfæra birgja',
     'view' => 'Skoða birgja',
-    'view_assets_for' => 'View Assets for',
+    'view_assets_for' => 'Skoða eignir frá',
     'zip' => 'Póstnúmer',
 
 ];

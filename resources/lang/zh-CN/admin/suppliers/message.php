@@ -21,7 +21,7 @@ return [
         'success' => '供应商成功被删除。',
         'not_found' => '找不到供应商。',
         'bulk_success' => '供应商已成功删除。',
-        'partial_success' => '供应商已成功删除。请参阅下面的额外信息。 | :count 个供应商已成功删除。请参阅下面的额外信息。',
+        'partial_success' => '.',
     ],
 
 ];

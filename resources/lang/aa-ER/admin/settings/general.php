@@ -24,7 +24,7 @@ return [
     'allow_user_skin_help_text' => 'crwdns6050:0crwdne6050:0',
     'asset_ids' => 'crwdns1294:0crwdne1294:0',
     'audit_interval' => 'crwdns1908:0crwdne1908:0',
-    'audit_interval_help' => 'crwdns11201:0crwdne11201:0',
+    'audit_interval_help' => 'crwdns14526:0crwdne14526:0',
     'audit_warning_days' => 'crwdns1910:0crwdne1910:0',
     'audit_warning_days_help' => 'crwdns1911:0crwdne1911:0',
     'auto_increment_assets' => 'crwdns13178:0crwdne13178:0',
@@ -438,6 +438,7 @@ return [
     'client_secret' => 'crwdns14260:0crwdne14260:0',
     'client_id' => 'crwdns14262:0crwdne14262:0',
     'too_many_users_to_show' => 'crwdns14324:0crwdne14324:0',
+    'update_existing_dates' => 'crwdns14528:0crwdne14528:0',
 
     'username_formats' => [
         'username_format' => 'crwdns13090:0crwdne13090:0',

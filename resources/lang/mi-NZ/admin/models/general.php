@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Whakaputu',
     'no_custom_field' => 'Karekau he mara ritenga',
     'add_default_values' => 'Add default values',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

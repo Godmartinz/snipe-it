@@ -3,6 +3,7 @@
 namespace App\Presenters;
 
 use DateTime;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class DepreciationReportPresenter
@@ -232,7 +233,7 @@ class DepreciationReportPresenter extends Presenter
             $imagePath = $this->model->image;
         }
         if (! empty($imagePath)) {
-            return config('app.url').'/uploads/assets/'.$imagePath;
+            return Storage::disk('public')->url(app('assets_upload_path').e($imagePath));
         }
 
         return $imagePath;
@@ -327,7 +328,7 @@ class DepreciationReportPresenter extends Presenter
             return 'deployed';
         }
 
-        return $this->model->assetstatus->getStatuslabelType();
+        return $this->model->status->getStatuslabelType();
     }
 
     /**
@@ -341,7 +342,7 @@ class DepreciationReportPresenter extends Presenter
             return trans('general.deployed');
         }
 
-        return $this->model->assetstatus->name;
+        return $this->model->status->name;
     }
 
     /**
@@ -361,14 +362,14 @@ class DepreciationReportPresenter extends Presenter
     public function fullStatusText()
     {
         // Make sure the status is valid
-        if ($this->assetstatus) {
+        if ($this->status) {
 
             // If the status is assigned to someone or something...
             if ($this->model->assigned) {
 
                 // If it's assigned and not set to the default "ready to deploy" status
-                if ($this->assetstatus->name != trans('general.ready_to_deploy')) {
-                    return trans('general.deployed').' ('.$this->model->assetstatus->name.')';
+                if ($this->status->name != trans('general.ready_to_deploy')) {
+                    return trans('general.deployed').' ('.$this->model->status->name.')';
                 }
 
                 // If it's assigned to the default "ready to deploy" status, just
@@ -378,7 +379,7 @@ class DepreciationReportPresenter extends Presenter
             }
 
             // Return just the status name
-            return $this->model->assetstatus->name;
+            return $this->model->status->name;
         }
 
         // This status doesn't seem valid - either data has been manually edited or

@@ -133,18 +133,21 @@ class TZe_24mm_E extends TZe_24mm
         );
 
         foreach ($fields as $field) {
-            static::writeText(
-                $pdf, $field['label'],
-                $currentX, $currentY,
-                'freesans', '', $field_layout['labelSize'], 'L',
-                $field_layout['labelWidth'], $field_layout['rowAdvance'], true, 0
-            );
+            $hasLabel = is_string($field['label'] ?? null) && trim($field['label']) !== '';
+            if ($hasLabel) {
+                static::writeText(
+                    $pdf, $field['label'],
+                    $currentX, $currentY,
+                    'freesans', '', $field_layout['labelSize'], 'L',
+                    $field_layout['labelWidth'], $field_layout['rowAdvance'], true, 0
+                );
+            }
 
             static::writeText(
                 $pdf, $field['value'],
-                $field_layout['valueX'], $currentY,
+                $hasLabel ? $field_layout['valueX'] : $field_layout['fullValueX'], $currentY,
                 'freemono', 'B', $field_layout['fieldSize'], 'L',
-                $field_layout['valueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
+                $hasLabel ? $field_layout['valueWidth'] : $field_layout['fullValueWidth'], $field_layout['rowAdvance'], true, 0, 0.01
             );
             $currentY += $field_layout['rowAdvance'];
         }

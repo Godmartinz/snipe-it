@@ -10,23 +10,14 @@
 @section('content')
     <x-container>
         <x-box>
-            <table
-                    data-cookie-id-table="maintenancesReport"
-                    data-columns="{{ \App\Presenters\MaintenancesPresenter::reportLayout() }}"
-                    data-show-footer="true"
-                    data-id-table="maintenancesReport"
-                    data-side-pagination="server"
-                    data-sort-order="asc"
-                    id="maintenancesReport"
-                    data-advanced-search="false"
-                    data-url="{{route('api.maintenances.index', ['format' => 'flat']) }}"
-                    class="table table-striped snipe-table"
-                    data-export-options='{
-                        "fileName": "maintenance-report-{{ date('Y-m-d') }}",
-                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                        }'>
 
-            </table>
+            <x-table
+                nosticky="true"
+                name="maintenanceReport"
+                api_url="{{ route('api.maintenances.index', ['format' => 'flat']) }}"
+                :presenter="\App\Presenters\MaintenancesPresenter::reportLayout()"
+                export_filename="export-maintenances-{{ date('Y-m-d') }}"
+            />
         </x-box>
     </x-container>
 @stop

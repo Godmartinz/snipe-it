@@ -21,7 +21,7 @@ return [
         'success' => 'Dodávateľ bol úspešne odstránený.',
         'not_found' => 'Dodávateľ nenájdený.',
         'bulk_success' => 'Dodávatelia boli úspešne odstránení.',
-        'partial_success' => 'Dodávateľ bol úspešne odstránený. Ďalšie informácie nájdete nižšie. | :count dodávatelia boli úspešne odstránení. Ďalšie informácie nájdete nižšie.',
+        'partial_success' => '.',
     ],
 
 ];

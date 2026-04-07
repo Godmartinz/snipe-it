@@ -7,6 +7,7 @@ return [
     'bulk_update_warn' => 'Sa oled muutmas :user_count kasutaja andmeid. Palun pane tähele, et saa ei saa selle vormi kaudu muuta enda kasutaja andmeid, neid pead muutma eraldi.',
     'bulk_update_help' => 'Selle vormiga saad muuta mitmeid kasutajaid korraga. Täida ainult need väljad, mida on vaja muuta. Tühjaks jäetud väljasid ei muudeta.',
     'current_assets' => 'Selle kasutaja valduses olevad vahendid',
+    'current_items' => ':item currently checked out to this user',
     'clone' => 'Klooni kasutaja',
     'contact_user' => 'Võta ühendust :name-ga',
     'edit' => 'Muuda kasutajat',

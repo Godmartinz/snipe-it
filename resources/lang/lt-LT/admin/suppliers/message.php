@@ -21,7 +21,7 @@ return [
         'success' => 'Tiekėjas panaikintas sėkmingai.',
         'not_found' => 'Tiekėjas nerastas.',
         'bulk_success' => 'Tiekėjas sėkmingai ištrintas.',
-        'partial_success' => 'Tiekėjas sėkmingai ištrintas. Daugiau informacijos rasite žemiau. | :count tiekėjai (-ų) buvo sėkmingai ištrinti. Daugiau informacijos rasite žemiau.',
+        'partial_success' => '.',
     ],
 
 ];

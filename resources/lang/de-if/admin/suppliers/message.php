@@ -21,7 +21,7 @@ return [
         'success' => 'Lieferant wurde erfolgreich gelöscht.',
         'not_found' => 'Lieferant nicht gefunden.',
         'bulk_success' => 'Lieferanten wurden erfolgreich gelöscht.',
-        'partial_success' => 'Lieferant wurde erfolgreich gelöscht. Siehe weitere Informationen unten. | :count Lieferanten wurden erfolgreich gelöscht. Siehe weitere Informationen unten.',
+        'partial_success' => '.',
     ],
 
 ];

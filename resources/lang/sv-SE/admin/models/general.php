@@ -15,4 +15,8 @@ return [
     'fieldset' => 'Fältuppsättning',
     'no_custom_field' => 'Inga egenanpassade fält',
     'add_default_values' => 'Lägg till standardvärden',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

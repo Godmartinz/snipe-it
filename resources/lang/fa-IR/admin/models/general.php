@@ -17,4 +17,8 @@ return [
     'no_custom_field' => 'بدون زمینه های سفارشی
 ',
     'add_default_values' => 'مقادیر پیش فرض',
+    'importer' => [
+        'require_serial' => 'Require Serial',
+        'serial_required' => 'Serial Required',
+    ],
 ];

@@ -50,7 +50,7 @@ class DeleteDepartmentsTest extends TestCase implements TestsFullMultipleCompani
 
         $this->assertDatabaseHas('departments', ['id' => $departmentA->id]);
         $this->assertDatabaseHas('departments', ['id' => $departmentB->id]);
-        $this->assertDatabaseMissing('departments', ['id' => $departmentC->id]);
+        $this->assertSoftDeleted($departmentC);
     }
 
     public function test_cannot_delete_department_that_still_has_users()
@@ -72,6 +72,6 @@ class DeleteDepartmentsTest extends TestCase implements TestsFullMultipleCompani
             ->deleteJson(route('api.departments.destroy', $department))
             ->assertStatusMessageIs('success');
 
-        $this->assertDatabaseMissing('departments', ['id' => $department->id]);
+        $this->assertSoftDeleted($department);
     }
 }

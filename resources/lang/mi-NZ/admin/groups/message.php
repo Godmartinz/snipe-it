@@ -5,6 +5,7 @@ return [
     'group_exists' => 'Kua oti te roopu!',
     'group_not_found' => 'Group ID :id does not exist.',
     'group_name_required' => 'Kei te hiahiatia te mara ingoa',
+    'assoc_users' => 'Kei te hono tonu tenei tari ki tetahi kaiwhakamahi kotahi, kaore e taea te muku. Whakaorangia nga kaiwhakamahi ki te kore e tuhi atu ki tenei tari ka ngana ano.',
 
     'success' => [
         'create' => 'He pai te waihanga o te roopu.',
