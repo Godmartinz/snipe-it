@@ -2,6 +2,7 @@
 
 namespace App\Models\Labels\CustomLabels;
 
+use App\Helpers\Helper;
 use App\Models\Labels\RectangleSheet;
 
 abstract class CustomSheetLabel extends CustomLabel
@@ -238,6 +239,24 @@ abstract class CustomSheetLabel extends CustomLabel
         $pdf->SetAutoPageBreak(false, 0);
     }
 
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'barcode_size' => $this->getBarcodeSize(),
+            'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->get2DBarcodeSize(),
+            'logo_max_width' => $this->getLogoMaxWidth(),
+            'logo_margin' => $this->getLogoMargin(),
+            'tag_font_size' => $this->getTagSize(),
+            'title_font_size' => $this->getTitleSize(),
+            'title_margin' => $this->getTitleMargin(),
+            'field_label_font_size' => $this->getLabelSize(),
+            'field_label_margin' => $this->getLabelMargin(),
+            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_margin' => $this->getFieldMargin(),
+        ];
+    }
+
     public function seedFromTemplate($template): static
     {
         $this->unit = $template->getUnit();
@@ -355,12 +374,12 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->labelMarginBottom = isset($label['padding_bottom']) ? (float)$label['padding_bottom'] : $this->labelMarginBottom;
         $this->labelMarginLeft = isset($label['padding_left']) ? (float)$label['padding_left'] : $this->labelMarginLeft;
 
-        $this->supportTitle = isset($supports['title']) ? (bool)$supports['title'] : $this->supportTitle;
         $this->supportFields = isset($supports['fields']) ? (int)$supports['fields'] : $this->supportFields;
-        $this->support1DBarcode = isset($supports['barcode_1d']) ? (bool)$supports['barcode_1d'] : $this->support1DBarcode;
-        $this->support2DBarcode = isset($supports['barcode_2d']) ? (bool)$supports['barcode_2d'] : $this->support2DBarcode;
-        $this->supportLogo = isset($supports['logo']) ? (bool)$supports['logo'] : $this->supportLogo;
-        $this->supportAssetTag = isset($supports['asset_tag']) ? (bool)$supports['asset_tag'] : $this->supportAssetTag;
+        $this->supportTitle = (bool)($supports['title'] ?? false);
+        $this->support1DBarcode = (bool)($supports['barcode_1d'] ?? false);
+        $this->support2DBarcode = (bool)($supports['barcode_2d'] ?? false);
+        $this->supportLogo = (bool)($supports['logo'] ?? false);
+        $this->supportAssetTag = (bool)($supports['asset_tag'] ?? false);
 
         $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
         $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
@@ -386,10 +405,13 @@ abstract class CustomSheetLabel extends CustomLabel
         $currentY = $pa->y1;
         $usableWidth = $pa->w;
         $usableHeight = $pa->h;
+        $bottomLimit = $pa->y2;
 
         if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
             $barcodeSize = $this->getBarcodeSize();
             $barcodeMargin = $this->getBarcodeMargin();
+
+            $bottomLimit -= $barcodeSize + $barcodeMargin;
 
             static::write1DBarcode(
                 $pdf,
@@ -403,6 +425,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
             $usableHeight -= $barcodeSize + $barcodeMargin;
         }
+
         if ($record->has('logo') && $this->getSupportLogo()) {
             $logoMaxWidth = $this->getLogoMaxWidth();
             $logoMargin = $this->getLogoMargin();
@@ -425,97 +448,158 @@ abstract class CustomSheetLabel extends CustomLabel
             $currentX += $logoSize[0] + $logoMargin;
             $usableWidth -= $logoSize[0] + $logoMargin;
         }
+
+        $textX = $currentX;
+        $textY = $currentY;
+
         if ($record->has('barcode2d') && $this->getSupport2DBarcode()) {
             $barcodeSize = $this->get2DBarcodeSize();
             $barcodeMargin = $this->getBarcodeMargin();
+            $tagSize = $this->getTagSize();
+
+            $barcodeX = $currentX;
+            $barcodeY = $currentY;
 
             static::write2DBarcode(
                 $pdf,
                 $record->get('barcode2d')->content,
                 $record->get('barcode2d')->type,
-                $currentX,
-                $currentY,
+                $barcodeX,
+                $barcodeY,
                 $barcodeSize,
                 $barcodeSize
             );
 
-            $currentX += $barcodeSize + $barcodeMargin;
-            $usableWidth -= $barcodeSize + $barcodeMargin;
-        }
-
-        if ($record->has('title') && $this->getSupportTitle()) {
-            static::writeText(
-                $pdf,
-                $record->get('title'),
-                $currentX,
-                $currentY,
-                'freesans',
-                '',
-                $this->getTitleSize(),
-                'L',
-                $usableWidth,
-                8,
-                true,
-                0
-            );
-
-            $currentY += $this->getTitleSize() + $this->getTitleMargin();
-        }
-
-        if ($record->has('fields') && $this->getSupportFields()) {
-            foreach ($record->get('fields') as $field) {
-                static::writeText(
-                    $pdf,
-                    $field['label'] ?? '',
-                    $currentX,
-                    $currentY,
-                    'freesans',
-                    '',
-                    $this->getLabelSize(),
-                    'L',
-                    $usableWidth,
-                    $this->getLabelSize(),
-                    true,
-                    0
-                );
-
-                $currentY += $this->getLabelSize() + $this->getLabelMargin();
+            if ($record->has('tag') && $this->getSupportAssetTag()) {
+                $tagY = $barcodeY + $barcodeSize + $barcodeMargin;
 
                 static::writeText(
                     $pdf,
-                    $field['value'] ?? '',
-                    $currentX,
-                    $currentY,
+                    $record->get('tag'),
+                    $barcodeX,
+                    $tagY,
                     'freemono',
                     'B',
-                    $this->getFieldSize(),
+                    $tagSize,
+                    'L',
+                    $barcodeSize,
+                    $tagSize,
+                    true,
+                    0,
+                    0.3
+                );
+            }
+
+            $textX = $barcodeX + $barcodeSize + $barcodeMargin;
+            $usableWidth = max(0, ($pa->x1 + $pa->w) - $textX);
+            $textY = $barcodeY;
+        }
+
+        $title = null;
+        if ($record->has('title') && $this->getSupportTitle()) {
+            $title = $record->get('title');
+        }
+
+        $fields = [];
+        if ($record->has('fields') && $this->getSupportFields()) {
+            $fields = collect($record->get('fields'))
+                ->take($this->getSupportFields())
+                ->values()
+                ->all();
+        }
+
+        if ($title !== null || !empty($fields)) {
+            $availableHeight = max(0, $bottomLimit - $textY);
+
+            $layout = \App\Helpers\Helper::labelFieldLayoutScaling(
+                $pdf,
+                $fields,
+                $textX,
+                $usableWidth,
+                $availableHeight,
+                $this->getLabelSize(),
+                $this->getFieldSize(),
+                $this->getFieldMargin(),
+                $title,
+                $this->getTitleSize(),
+                $this->getTitleMargin(),
+                $this->getLabelMargin(),
+                $this->getFieldMargin()
+            );
+
+            if ($layout['hasTitle']) {
+                static::writeText(
+                    $pdf,
+                    $title,
+                    $textX,
+                    $textY,
+                    'freesans',
+                    '',
+                    $layout['titleSize'],
                     'L',
                     $usableWidth,
-                    $this->getFieldSize(),
+                    $layout['titleSize'],
                     true,
                     0
                 );
 
-                $currentY += $this->getFieldSize() + $this->getFieldMargin();
+                $textY += $layout['titleAdvance'];
             }
-        }
 
-        if ($record->has('tag') && $this->getSupportAssetTag()) {
-            static::writeText(
-                $pdf,
-                $record->get('tag'),
-                $currentX,
-                $pa->y2 - $this->getBarcodeSize() - $this->getBarcodeMargin() - $this->getTagSize(),
-                'freemono',
-                'B',
-                $this->getTagSize(),
-                'R',
-                $usableWidth,
-                $this->getTagSize(),
-                true,
-                0,
-                0.3
-            );
+            // Clamp layout widths so value column cannot disappear
+            $labelWidth = min($layout['labelWidth'], $usableWidth * 0.45);
+            $gap = max(0.8, $this->getFieldMargin() * max($layout['scale'], 0.5));
+            $valueX = $textX + $labelWidth + $gap;
+            $valueWidth = max(0, ($textX + $usableWidth) - $valueX);
+
+            foreach ($fields as $field) {
+                if ($textY + $layout['rowAdvance'] > $bottomLimit) {
+                    break;
+                }
+
+                $label = $field['label'] ?? '';
+                $value = $field['value'] ?? '';
+
+                if (is_string($label) && trim($label) !== '') {
+                    $label = rtrim($label, ':') . ':';
+                }
+
+                if ($label !== '') {
+                    static::writeText(
+                        $pdf,
+                        $label,
+                        $textX,
+                        $textY,
+                        'freesans',
+                        '',
+                        $layout['labelSize'],
+                        'L',
+                        $labelWidth,
+                        $layout['labelSize'],
+                        true,
+                        0
+                    );
+                }
+
+                if ($valueWidth > 0) {
+                    static::writeText(
+                        $pdf,
+                        $value,
+                        $valueX,
+                        $textY,
+                        'freemono',
+                        'B',
+                        $layout['fieldSize'],
+                        'L',
+                        $valueWidth,
+                        $layout['fieldSize'],
+                        true,
+                        0
+                    );
+                }
+
+                $textY += $layout['rowAdvance'];
+            }
         }
     }
 }

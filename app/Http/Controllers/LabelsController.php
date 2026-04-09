@@ -106,18 +106,19 @@ class LabelsController extends Controller
         }
 
         try {
-            $label = $selectedLabel
-                ? Label::find($selectedLabel)
+            $template = $selectedLabel
+                ? Label::find(str_replace('/', '\\', $selectedLabel))
                 : new \App\Models\Labels\DefaultLabel();
         } catch (\Throwable $e) {
-            $label = new \App\Models\Labels\DefaultLabel();
-            $selectedLabel = null;
+            $template = new \App\Models\Labels\DefaultLabel();
         }
+
+        $label = (new \App\Models\Labels\CustomLabels\PreviewLabel())
+            ->seedFromTemplate($template);
 
         return view('settings.label-edit', [
             'config' => $label->toEditorConfig(),
-            'selectedLabel' => $label->getName(),
-            'labels' => Label::find(),
+            'selectedLabel' => $selectedLabel,
         ]);
     }
 

@@ -779,7 +779,20 @@ abstract class Label
 
     protected function getContentEditorConfig(): array
     {
-        return [];
+        return [
+            'barcode_size' => $this->getBarcodeSize(),
+            'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->get2DBarcodeSize(),
+            'logo_max_width' => $this->getLogoMaxWidth(),
+            'logo_margin' => $this->getLogoMargin(),
+            'tag_font_size' => $this->getTagSize(),
+            'title_font_size' => $this->getTitleSize(),
+            'title_margin' => $this->getTitleMargin(),
+            'field_label_font_size' => $this->getLabelSize(),
+            'field_label_margin' => $this->getLabelMargin(),
+            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_margin' => $this->getFieldMargin(),
+        ];
     }
 
     protected function getMetaEditorConfig(): array

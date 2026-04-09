@@ -257,6 +257,7 @@
                                             <label class="col-md-5 control-label">{{ $key }}</label>
                                             <div class="col-md-7">
                                                 @if(is_bool($value))
+                                                    <input type="hidden" name="supports[{{ $key }}]" value="0">
                                                     <label class="form-control" style="height:auto; min-height:34px;">
                                                         <input type="checkbox" name="supports[{{ $key }}]"
                                                                value="1" {{ $value ? 'checked' : '' }}>
