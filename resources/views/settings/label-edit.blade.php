@@ -231,8 +231,20 @@
                                         <div class="form-group">
                                             <label class="col-md-5 control-label">{{ $key }}</label>
                                             <div class="col-md-7">
-                                                <input type="number" step="0.001" name="content[{{ $key }}]"
-                                                       value="{{ $value }}" class="form-control">
+                                                @if($key === 'tag_alignment')
+                                                    <select name="content[{{ $key }}]" class="form-control">
+                                                        <option value="L" {{ $value === 'L' ? 'selected' : '' }}>Left
+                                                        </option>
+                                                        <option value="C" {{ $value === 'C' ? 'selected' : '' }}>
+                                                            Center
+                                                        </option>
+                                                        <option value="R" {{ $value === 'R' ? 'selected' : '' }}>Right
+                                                        </option>
+                                                    </select>
+                                                @else
+                                                    <input type="number" step="0.001" name="content[{{ $key }}]"
+                                                           value="{{ $value }}" class="form-control">
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach

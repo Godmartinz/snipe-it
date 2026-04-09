@@ -783,6 +783,7 @@ abstract class Label
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode_2d_size' => $this->get2DBarcodeSize(),
+            'tag_alignment' => $this->getTagAlignment(),
             'logo_max_width' => $this->getLogoMaxWidth(),
             'logo_margin' => $this->getLogoMargin(),
             'tag_font_size' => $this->getTagSize(),

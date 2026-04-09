@@ -53,6 +53,8 @@ abstract class CustomSheetLabel extends CustomLabel
     protected float $labelMargin = 1.5;
     protected float $fieldMargin = 2.0;
 
+    protected string $tagAlignment = 'L';
+
     public function getUnit()
     {
         return $this->unit;
@@ -198,6 +200,11 @@ abstract class CustomSheetLabel extends CustomLabel
         return $this->tagSize;
     }
 
+    public function getTagAlignment(): string
+    {
+        return $this->tagAlignment;
+    }
+
     public function getTitleSize(): float
     {
         return $this->titleSize;
@@ -244,6 +251,7 @@ abstract class CustomSheetLabel extends CustomLabel
         return [
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
+            'tag_alignment' => $this->getTagAlignment(),
             'barcode_2d_size' => $this->get2DBarcodeSize(),
             'logo_max_width' => $this->getLogoMaxWidth(),
             'logo_margin' => $this->getLogoMargin(),
@@ -388,6 +396,7 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
 
         $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
+        $this->tagAlignment = isset($content['tag_alignment']) ? (string)$content['tag_alignment'] : $this->tagAlignment;
         $this->titleSize = isset($content['title_font_size']) ? (float)$content['title_font_size'] : $this->titleSize;
         $this->labelSize = isset($content['field_label_font_size']) ? (float)$content['field_label_font_size'] : $this->labelSize;
         $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
@@ -406,6 +415,9 @@ abstract class CustomSheetLabel extends CustomLabel
         $usableWidth = $pa->w;
         $usableHeight = $pa->h;
         $bottomLimit = $pa->y2;
+        $barcodeX = null;
+        $barcodeY = null;
+        $barcodeSize = null;
 
         if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
             $barcodeSize = $this->getBarcodeSize();
@@ -452,10 +464,11 @@ abstract class CustomSheetLabel extends CustomLabel
         $textX = $currentX;
         $textY = $currentY;
 
+        $tagAlign = $this->getTagAlignment();
+
         if ($record->has('barcode2d') && $this->getSupport2DBarcode()) {
             $barcodeSize = $this->get2DBarcodeSize();
             $barcodeMargin = $this->getBarcodeMargin();
-            $tagSize = $this->getTagSize();
 
             $barcodeX = $currentX;
             $barcodeY = $currentY;
@@ -470,29 +483,42 @@ abstract class CustomSheetLabel extends CustomLabel
                 $barcodeSize
             );
 
-            if ($record->has('tag') && $this->getSupportAssetTag()) {
-                $tagY = $barcodeY + $barcodeSize + $barcodeMargin;
-
-                static::writeText(
-                    $pdf,
-                    $record->get('tag'),
-                    $barcodeX,
-                    $tagY,
-                    'freemono',
-                    'B',
-                    $tagSize,
-                    'L',
-                    $barcodeSize,
-                    $tagSize,
-                    true,
-                    0,
-                    0.3
-                );
-            }
-
             $textX = $barcodeX + $barcodeSize + $barcodeMargin;
             $usableWidth = max(0, ($pa->x1 + $pa->w) - $textX);
             $textY = $barcodeY;
+        }
+
+        if ($record->has('tag') && $this->getSupportAssetTag()) {
+            $tagSize = $this->getTagSize();
+            $barcodeMargin = $this->getBarcodeMargin();
+
+            if ($barcodeX !== null && $barcodeY !== null && $barcodeSize !== null) {
+                // normal case: put tag under 2D barcode
+                $tagX = $barcodeX;
+                $tagY = $barcodeY + $barcodeSize + $barcodeMargin;
+                $tagWidth = $barcodeSize;
+            } else {
+                // fallback: no 2D barcode, still show tag
+                $tagX = $currentX;
+                $tagY = $currentY;
+                $tagWidth = $usableWidth;
+            }
+
+            static::writeText(
+                $pdf,
+                $record->get('tag'),
+                $tagX,
+                $tagY,
+                'freemono',
+                'B',
+                $tagSize,
+                $tagAlign,
+                $tagWidth,
+                $tagSize,
+                true,
+                0,
+                0.3
+            );
         }
 
         $title = null;
