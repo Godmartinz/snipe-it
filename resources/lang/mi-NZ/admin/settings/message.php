@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'I puta he hapa i te whakahou.',
-        'success'               => 'Kua whakahoutia nga tautuhinga.',
+        'error' => 'I puta he hapa i te whakahou.',
+        'success' => 'Kua whakahoutia nga tautuhinga.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Kei te hiahia koe ki te muku i tenei kōnae taapiri? Kaore e taea te whakakore tenei mahi.',
-        'file_deleted'          => 'Kua mukua te kōnae taapiri.',
-        'generated'             => 'He pai te waihanga i tetahi kōnae taapiri hou.',
-        'file_not_found'        => 'Kāore i kitea te kōnae taapiri i runga i te tūmau.',
-        'restore_warning'       => 'Yes, restore it. I acknowledge that this will overwrite any existing data currently in the database. This will also log out all of your existing users (including you).',
-        'restore_confirm'       => 'Are you sure you wish to restore your database from :filename?'
+        'delete_confirm' => 'Kei te hiahia koe ki te muku i tenei kōnae taapiri? Kaore e taea te whakakore tenei mahi.',
+        'file_deleted' => 'Kua mukua te kōnae taapiri.',
+        'generated' => 'He pai te waihanga i tetahi kōnae taapiri hou.',
+        'file_not_found' => 'Kāore i kitea te kōnae taapiri i runga i te tūmau.',
+        'restore_warning' => 'Yes, restore it. I acknowledge that this will overwrite any existing data currently in the database. This will also log out all of your existing users (including you).',
+        'restore_confirm' => 'Are you sure you wish to restore your database from :filename?',
     ],
     'restore' => [
-        'success'               => 'Your system backup has been restored. Please log in again.'
+        'success' => 'Your system backup has been restored. Please log in again.',
     ],
     'purge' => [
-        'error'     => 'Kua puta he hapa i te wa e purea ana.',
-        'validation_failed'     => 'He hē te whakauru o te purge. Tena koa tuhia te kupu "MOTORI" i roto i te pouaka whakauru.',
-        'success'               => 'I horoia nga tuhinga kua mukua.',
+        'error' => 'Kua puta he hapa i te wa e purea ana.',
+        'validation_failed' => 'He hē te whakauru o te purge. Tena koa tuhia te kupu "MOTORI" i roto i te pouaka whakauru.',
+        'success' => 'I horoia nga tuhinga kua mukua.',
     ],
     'mail' => [
         'sending' => 'Sending Test Email...',
         'success' => 'Mail sent!',
         'error' => 'Mail could not be sent.',
-        'additional' => 'No additional error message provided. Check your mail settings and your app log.'
+        'additional' => 'No additional error message provided. Check your mail settings and your app log.',
     ],
     'ldap' => [
         'testing' => 'Testing LDAP Connection, Binding & Query ...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Something went wrong :(',
         'sync_success' => 'A sample of 10 users returned from the LDAP server based on your settings:',
         'testing_authentication' => 'Testing LDAP Authentication...',
-        'authentication_success' => 'User authenticated against LDAP successfully!'
+        'authentication_success' => 'User authenticated against LDAP successfully!',
     ],
     'labels' => [
         'null_template' => 'Label template not found. Please select a template.',
-        ],
+    ],
     'webhook' => [
         'sending' => 'Sending :app test message...',
         'success' => 'Your :webhook_name Integration works!',

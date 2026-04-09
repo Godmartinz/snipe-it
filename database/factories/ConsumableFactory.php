@@ -6,10 +6,10 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\Manufacturer;
+use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Supplier;
 
 class ConsumableFactory extends Factory
 {
@@ -118,7 +118,7 @@ class ConsumableFactory extends Factory
         });
     }
 
-    public function checkedOutToUser(User $user = null)
+    public function checkedOutToUser(?User $user = null)
     {
         return $this->afterCreating(function (Consumable $consumable) use ($user) {
             $consumable->users()->attach($consumable->id, [

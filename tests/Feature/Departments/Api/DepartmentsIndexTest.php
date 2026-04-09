@@ -10,19 +10,19 @@ use Tests\TestCase;
 
 class DepartmentsIndexTest extends TestCase
 {
-    public function testViewingDepartmentIndexRequiresAuthentication()
+    public function test_viewing_department_index_requires_authentication()
     {
         $this->getJson(route('api.departments.index'))->assertRedirect();
     }
 
-    public function testViewingDepartmentIndexRequiresPermission()
+    public function test_viewing_department_index_requires_permission()
     {
         $this->actingAsForApi(User::factory()->create())
             ->getJson(route('api.departments.index'))
             ->assertForbidden();
     }
 
-    public function testDepartmentIndexReturnsExpectedDepartments()
+    public function test_department_index_returns_expected_departments()
     {
         Department::factory()->count(3)->create();
 
@@ -39,10 +39,10 @@ class DepartmentsIndexTest extends TestCase
                 'total',
                 'rows',
             ])
-            ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 3)->etc());
     }
 
-    public function testDepartmentIndexAdheresToCompanyScoping()
+    public function test_department_index_adheres_to_company_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 

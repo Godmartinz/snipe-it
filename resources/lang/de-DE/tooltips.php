@@ -1,24 +1,24 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
-        'accessory' => 'This accessory cannot be deleted because it still has items, users, or locations associated with it',
-        'asset' => 'This asset cannot be deleted because it still has items associated with it',
-        'category' => 'This category cannot be deleted because it still has items associated with it',
-        'company' => 'This company cannot be deleted because it still has items or users associated with it',
-        'component' => 'This component cannot be deleted because it still has items associated with it',
-        'custom_field' => 'This custom field cannot be deleted because it is still associated with at least one fieldset',
-        'department' => 'This department cannot be deleted because it still has users associated with it',
-        'location' => 'This location cannot be deleted because it still has items or users associated with it',
-        'manufacturer' => 'This manufacturer cannot be deleted because it still has items associated with it',
-        'supplier' => 'This supplier cannot be deleted because it still has items associated with it',
-        'user' => 'This user cannot be deleted because it still has items associated with it',
-        'user_self' => 'Du kannst deinen eigenen Account nicht löschen',
+    'disabled_assoc' => [
+        'accessory' => 'Dieses Zubehör kann nicht gelöscht werden, da es immer noch Gegenstände, Benutzer oder Orte hat, die mit ihm verbunden sind',
+        'asset' => 'Dieses Asset kann nicht gelöscht werden, da es noch Gegenstände hat, die mit ihm verbunden sind',
+        'category' => 'Diese Kategorie kann nicht gelöscht werden, da sie noch Gegenstände hat, die mit ihr verbunden sind',
+        'company' => 'Diese Firma kann nicht gelöscht werden, da sie noch Gegenstände oder Benutzer hat, die mit ihr verbunden sind',
+        'component' => 'Diese Komponente kann nicht gelöscht werden, da sie noch Elemente hat, die mit ihr verbunden sind',
+        'custom_field' => 'Dieses benutzerdefinierte Feld kann nicht gelöscht werden, da es noch mit mindestens einem Feldsatz verknüpft ist',
+        'department' => 'Diese Abteilung kann nicht gelöscht werden, da ihr noch Benutzer zugeordnet sind',
+        'location' => 'Dieser Standort kann nicht gelöscht werden, da ihm noch Elemente oder Benutzer zugeordnet sind',
+        'manufacturer' => 'Dieser Hersteller kann nicht gelöscht werden, da ihm noch Artikel zugeordnet sind',
+        'supplier' => 'Dieser Lieferant kann nicht gelöscht werden, da ihm noch Artikel zugeordnet sind',
+        'user' => 'Dieser Benutzer kann nicht gelöscht werden, da ihm noch Elemente zugeordnet sind',
+        'user_self' => 'Sie können sich nicht selbst löschen',
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.'
+        'user' => 'Alle Einträge für diesen Benutzer einchecken und optional löschen. Sie können dies auf der nächsten Seite bestätigen.',
     ],
 
-);
+];

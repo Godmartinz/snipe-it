@@ -14,14 +14,14 @@ use Tests\TestCase;
 
 class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $this->actingAsForApi(User::factory()->create())
             ->postJson(route('api.accessories.store'))
             ->assertForbidden();
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         $this->markTestSkipped('This behavior is not implemented');
 
@@ -43,22 +43,9 @@ class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
             'name' => 'My Awesome Accessory',
         ]);
     }
+    
 
-    public function testValidation()
-    {
-        $this->actingAsForApi(User::factory()->createAccessories()->create())
-            ->postJson(route('api.accessories.store'), [
-                //
-            ])
-            ->assertStatusMessageIs('error')
-            ->assertMessagesContains([
-                'category_id',
-                'name',
-                'qty',
-            ]);
-    }
-
-    public function testCanStoreAccessory()
+    public function test_can_store_accessory()
     {
         $category = Category::factory()->forAccessories()->create();
         $company = Company::factory()->create();

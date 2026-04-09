@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     'personal_api_keys' => 'API keys ส่วนตัว',
     'personal_access_token' => 'โทเค็นการเข้าถึงส่วนบุคคล',
     'personal_api_keys_success' => 'API keys ส่วนตัวได้ถูกสร้างแล้ว',
@@ -14,4 +14,4 @@ return array(
     'no_tokens' => 'คุณไม่ได้สร้างโทเค็น การเข้าถึงส่วนตัวใด ๆ',
     'enable_sounds' => 'เปิดใช้งานเอฟเฟกต์เสียง',
     'enable_confetti' => 'เปิดใช้งาน confetti effects',
-);
+];

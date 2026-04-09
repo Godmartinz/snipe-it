@@ -25,7 +25,7 @@ class GroupFactory extends Factory
         return [
             'created_by' => User::factory()->superuser(),
             'name' => $this->faker->name(),
-            'notes'   => 'Created by DB seeder',
+            'notes' => 'Created by DB seeder',
             'permissions' => json_encode([]),
         ];
     }

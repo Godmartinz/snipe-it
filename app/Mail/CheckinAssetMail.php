@@ -8,9 +8,9 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Queue\SerializesModels;
 
 class CheckinAssetMail extends BaseMailable
@@ -53,11 +53,10 @@ class CheckinAssetMail extends BaseMailable
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return Content
      */
     public function content(): Content
     {
-        $this->item->load('assetstatus');
+        $this->item->load('status');
         $fields = [];
 
         // Check if the item has custom fields associated with it
@@ -67,14 +66,14 @@ class CheckinAssetMail extends BaseMailable
 
         return new Content(
             markdown: 'mail.markdown.checkin-asset',
-            with:  [
-                'item'          => $this->item,
-                'status'        => $this->item->assetstatus?->name,
-                'admin'         => $this->admin,
-                'note'          => $this->note,
-                'target'        => $this->target,
-                'fields'        => $fields,
-                'expected_checkin'  => $this->expected_checkin,
+            with: [
+                'item' => $this->item,
+                'status' => $this->item->status?->name,
+                'admin' => $this->admin,
+                'note' => $this->note,
+                'target' => $this->target,
+                'fields' => $fields,
+                'expected_checkin' => $this->expected_checkin,
             ],
         );
     }
@@ -82,7 +81,7 @@ class CheckinAssetMail extends BaseMailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

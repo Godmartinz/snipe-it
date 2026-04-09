@@ -12,14 +12,14 @@ use Tests\TestCase;
 
 class EditMaintenanceTest extends TestCase
 {
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('maintenances.edit', Maintenance::factory()->create()->id))
             ->assertOk();
     }
 
-    public function testCanUpdateMaintenance()
+    public function test_can_update_maintenance()
     {
         $actor = User::factory()->superuser()->create();
         $asset = Asset::factory()->create();
@@ -65,5 +65,4 @@ class EditMaintenanceTest extends TestCase
 
         $this->assertHasTheseActionLogs($maintenance, ['create', 'update']);
     }
-
 }

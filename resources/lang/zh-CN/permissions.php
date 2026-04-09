@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,29 +15,28 @@ return array(
     |---------------------------------------------------------------------------
     */
 
-    "superuser" => [
+    'superuser' => [
         'name' => '超级用户',
-        'note'       => '决定该用户是否拥有完整的管理访问权限。此设置将覆盖全系统中所有其他特定或受限的权限。 ',
+        'note' => '决定该用户是否拥有完整的管理访问权限。此设置将覆盖全系统中所有其他特定或受限的权限。 ',
     ],
     'admin' => [
         'name' => '管理权限',
-        'note'       => '决定用户是否拥有除系统管理设置外的系统大部分访问权限。此类用户可管理用户、位置、类别等，但若启用了完整多公司支持，他们将受其限制。',
+        'note' => '决定用户是否拥有除系统管理设置外的系统大部分访问权限。此类用户可管理用户、位置、类别等，但若启用了完整多公司支持，他们将受其限制。',
     ],
 
     'import' => [
         'name' => 'CSV 导入',
-        'note'       => '这将允许用户执行导入操作，即使他们在其他地方被拒绝了对用户、资产等的访问权限。',
+        'note' => '这将允许用户执行导入操作，即使他们在其他地方被拒绝了对用户、资产等的访问权限。',
     ],
 
     'reports' => [
         'name' => '报告访问',
-        'note'       => '确定用户是否有权访问应用程序的报表部分。',
+        'note' => '确定用户是否有权访问应用程序的报表部分。',
     ],
 
-    'assets' =>
-        [
-            'name' => '资产',
-            'note' => '授予访问应用资产部分的权限。',
+    'assets' => [
+        'name' => '资产',
+        'note' => '授予访问应用资产部分的权限。',
     ],
 
     'assetsview' => [
@@ -81,9 +80,9 @@ return array(
         'note' => '允许用户查看和修改资产上的加密自定义字段。',
     ],
 
-    'accessories'   => [
+    'accessories' => [
         'name' => '配件',
-        'note'       => '授予访问应用配件模块的权限。',
+        'note' => '授予访问应用配件模块的权限。',
     ],
 
     'accessoriesview' => [
@@ -110,9 +109,9 @@ return array(
         'name' => '管理配件文件',
         'note' => '允许用户上传、下载和删除与配件相关的文件。',
     ],
-    'consumables'   => [
+    'consumables' => [
         'name' => '耗材',
-        'note'       => '授予访问应用消耗品部分的权限。',
+        'note' => '授予访问应用消耗品部分的权限。',
     ],
     'consumablesview' => [
         'name' => '查看耗材',
@@ -134,9 +133,9 @@ return array(
         'name' => '管理耗材文件',
         'note' => '允许用户上传、下载和删除与消耗品相关的文件。',
     ],
-    'licenses'   => [
+    'licenses' => [
         'name' => '许可证',
-        'note'       => '授予访问应用许可证部分的权限。',
+        'note' => '授予访问应用许可证部分的权限。',
     ],
     'licensesview' => [
         'name' => '查看许可证',
@@ -153,7 +152,7 @@ return array(
     'licensescheckout' => [
         'name' => '分配许可证',
         'note' => '允许用户给资产或用户分配许可证。',
-        ],
+    ],
     'licensescheckin' => [
         'name' => '取消分配许可证',
         'note' => '允许用户取消分配给资产或用户的许可证。',
@@ -166,9 +165,9 @@ return array(
         'name' => '管理许可证密钥',
         'note' => '允许用户查看与许可证相关联的产品密钥。',
     ],
-    'components'   => [
+    'components' => [
         'name' => '组件',
-        'note'       => '授予访问应用组件部分的权限。',
+        'note' => '授予访问应用组件部分的权限。',
     ],
     'componentsview' => [
         'name' => '查看组件',
@@ -194,9 +193,9 @@ return array(
         'name' => '归还组件',
         'note' => '将当前已签出的组件归还至库存。',
     ],
-    'kits'   => [
+    'kits' => [
         'name' => '预定义的 Kits',
-        'note'       => '授予访问应用预定义工具部分的权限。',
+        'note' => '授予访问应用预定义工具部分的权限。',
     ],
     'kitsview' => [
         'name' => '查看预定义套件',
@@ -210,9 +209,9 @@ return array(
     'kitsdelete' => [
         'name' => '删除预定义套件',
     ],
-    'users'   => [
+    'users' => [
         'name' => '用户',
-        'note'       => '授予应用用户部分的访问权限。',
+        'note' => '授予应用用户部分的访问权限。',
     ],
     'usersview' => [
         'name' => '查看用户',
@@ -226,9 +225,9 @@ return array(
     'usersdelete' => [
         'name' => '删除用户',
     ],
-    'models'   => [
+    'models' => [
         'name' => '资产型号',
-        'note'       => '授予访问应用资产型号部分的权限。',
+        'note' => '授予访问应用资产型号部分的权限。',
     ],
     'modelsview' => [
         'name' => '查看型号',
@@ -243,9 +242,9 @@ return array(
     'modelsdelete' => [
         'name' => '删除资产型号',
     ],
-    'categories'   => [
+    'categories' => [
         'name' => '分类',
-        'note'       => '授予访问分类资产部分的权限。',
+        'note' => '授予访问分类资产部分的权限。',
     ],
     'categoriesview' => [
         'name' => '查看分类',
@@ -259,9 +258,9 @@ return array(
     'categoriesdelete' => [
         'name' => '删除分类',
     ],
-    'departments'   => [
+    'departments' => [
         'name' => '部门',
-        'note'       => '授予访问应用部门部分的权限。',
+        'note' => '授予访问应用部门部分的权限。',
     ],
     'departmentsview' => [
         'name' => '查看部门',
@@ -275,9 +274,9 @@ return array(
     'departmentsdelete' => [
         'name' => '删除部门',
     ],
-    'locations'   => [
+    'locations' => [
         'name' => '地理位置',
-        'note'       => '授予访问应用位置部分的权限。',
+        'note' => '授予访问应用位置部分的权限。',
     ],
     'locationsview' => [
         'name' => '查看位置',
@@ -291,9 +290,9 @@ return array(
     'locationsdelete' => [
         'name' => '删除位置',
     ],
-    'status-labels'   => [
+    'status-labels' => [
         'name' => '状态标签',
-        'note'       => '授予访问应用状态标签部分的权限。',
+        'note' => '授予访问应用状态标签部分的权限。',
     ],
     'statuslabelsview' => [
         'name' => '查看状态标签',
@@ -307,9 +306,9 @@ return array(
     'statuslabelsdelete' => [
         'name' => '删除状态标签',
     ],
-    'custom-fields'   => [
+    'custom-fields' => [
         'name' => '自定义字段',
-        'note'       => '授予访问应用自定义字段部分的权限。',
+        'note' => '授予访问应用自定义字段部分的权限。',
     ],
     'customfieldsview' => [
         'name' => '查看自定义字段',
@@ -323,9 +322,9 @@ return array(
     'customfieldsdelete' => [
         'name' => '删除自定义字段',
     ],
-    'suppliers'   => [
+    'suppliers' => [
         'name' => '供应商',
-        'note'       => '授予访问应用供应商部分的权限。',
+        'note' => '授予访问应用供应商部分的权限。',
     ],
     'suppliersview' => [
         'name' => '查看供应商',
@@ -339,9 +338,9 @@ return array(
     'suppliersdelete' => [
         'name' => '删除供应商',
     ],
-    'manufacturers'   => [
+    'manufacturers' => [
         'name' => '制造商',
-        'note'       => '授予访问应用制造商部分的权限。',
+        'note' => '授予访问应用制造商部分的权限。',
     ],
     'manufacturersview' => [
         'name' => '查看制造商',
@@ -355,9 +354,9 @@ return array(
     'manufacturersdelete' => [
         'name' => '删除制造商',
     ],
-    'companies'   => [
+    'companies' => [
         'name' => '公司',
-        'note'       => '授予访问应用公司部分的权限。',
+        'note' => '授予访问应用公司部分的权限。',
     ],
     'companiesview' => [
         'name' => '查看公司',
@@ -373,32 +372,32 @@ return array(
     ],
     'user-self-accounts' => [
         'name' => '用户自己账户',
-        'note'       => '授予非管理员用户管理自己用户帐户某些方面的能力。',
+        'note' => '授予非管理员用户管理自己用户帐户某些方面的能力。',
     ],
     'selftwo-factor' => [
         'name' => '管理两步验证',
-        'note'       => '允许用户为自己的账户启用、禁用和管理双重身份验证。',
+        'note' => '允许用户为自己的账户启用、禁用和管理双重身份验证。',
     ],
     'selfapi' => [
         'name' => '管理 API 令牌',
-        'note'       => '允许用户创建、查看和撤销其自身的API令牌。用户令牌将拥有与创建者相同的权限。',
+        'note' => '允许用户创建、查看和撤销其自身的API令牌。用户令牌将拥有与创建者相同的权限。',
     ],
     'selfedit-location' => [
         'name' => '编辑位置',
-        'note'       => '允许用户编辑与其个人账户关联的位置信息。',
+        'note' => '允许用户编辑与其个人账户关联的位置信息。',
     ],
     'selfcheckout-assets' => [
         'name' => '自我签出资产',
-        'note'       => '允许用户在没有管理员干预的情况下查看资产。',
+        'note' => '允许用户在没有管理员干预的情况下查看资产。',
     ],
     'selfview-purchase-cost' => [
         'name' => '查看购买成本',
-        'note'       => '允许用户在其账户视图中查看物品购买成本。',
+        'note' => '允许用户在其账户视图中查看物品购买成本。',
     ],
 
     'depreciations' => [
         'name' => '折旧管理',
-        'note'       => '允许用户管理和查看资产折旧详情。',
+        'note' => '允许用户管理和查看资产折旧详情。',
     ],
     'depreciationsview' => [
         'name' => '查看详细折旧信息',
@@ -419,6 +418,6 @@ return array(
     'grant' => '授予:area 权限',
     'deny' => '拒绝 :area 的权限',
     'inherit' => '继承来自权限组的 :area 的权限',
-    'use_groups' => '为简化管理，我们强烈建议使用权限组进行权限分配，而非逐一设置单个权限。'
+    'use_groups' => '为简化管理，我们强烈建议使用权限组进行权限分配，而非逐一设置单个权限。',
 
-);
+];

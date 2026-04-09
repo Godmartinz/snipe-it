@@ -5,7 +5,7 @@
         <div class="col-md-7">
             <x-input.textarea
                 name="eula_text"
-                wire:model.live="eulaText"
+                wire:model.live.change.live="eulaText"
                 aria-label="eula_text"
                 :disabled="$this->eulaTextDisabled"
             />

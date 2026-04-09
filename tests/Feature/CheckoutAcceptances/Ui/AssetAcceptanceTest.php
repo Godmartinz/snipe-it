@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class AssetAcceptanceTest extends TestCase
 {
-    public function testAssetCheckoutAcceptPageRenders()
+    public function test_asset_checkout_accept_page_renders()
     {
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
 
@@ -21,7 +21,7 @@ class AssetAcceptanceTest extends TestCase
             ->assertViewIs('account.accept.create');
     }
 
-    public function testCannotAcceptAssetAlreadyAccepted()
+    public function test_cannot_accept_asset_already_accepted()
     {
         Event::fake([CheckoutAccepted::class]);
 
@@ -40,7 +40,7 @@ class AssetAcceptanceTest extends TestCase
         Event::assertNotDispatched(CheckoutAccepted::class);
     }
 
-    public function testCannotAcceptAssetForAnotherUser()
+    public function test_cannot_accept_asset_for_another_user()
     {
         Event::fake([CheckoutAccepted::class]);
 
@@ -63,7 +63,7 @@ class AssetAcceptanceTest extends TestCase
         Event::assertNotDispatched(CheckoutAccepted::class);
     }
 
-    public function testUserCanAcceptAsset()
+    public function test_user_can_accept_asset()
     {
         Event::fake([CheckoutAccepted::class]);
 
@@ -88,7 +88,7 @@ class AssetAcceptanceTest extends TestCase
         Event::assertDispatched(CheckoutAccepted::class);
     }
 
-    public function testUserCanDeclineAsset()
+    public function test_user_can_decline_asset()
     {
         Event::fake([CheckoutAccepted::class]);
 
@@ -113,7 +113,7 @@ class AssetAcceptanceTest extends TestCase
         Event::assertNotDispatched(CheckoutAccepted::class);
     }
 
-    public function testActionLoggedWhenAcceptingAsset()
+    public function test_action_logged_when_accepting_asset()
     {
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
 
@@ -137,7 +137,7 @@ class AssetAcceptanceTest extends TestCase
         );
     }
 
-    public function testActionLoggedWhenDecliningAsset()
+    public function test_action_logged_when_declining_asset()
     {
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
 

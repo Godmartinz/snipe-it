@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Válaszon a lehetőségekből az eszköz riporthoz.',
+    'info' => 'Válaszon a lehetőségekből az eszköz riporthoz.',
     'deleted_user' => 'Törölt felhasználó',
     'send_reminder' => 'Emlékeztető küldése',
     'cannot_send_reminder' => 'A felhasználó törölve lett, vagy nincs e-mail címe, ezért nem tud emlékeztetőt kapni',
@@ -10,14 +10,20 @@ return [
     'acceptance_request' => 'Elfogadási kérelem',
     'custom_export' => [
         'user_address' => 'Felhasználó címe',
+        'user_company' => 'User Company',
         'user_city' => 'Város',
         'user_state' => 'Megye',
         'user_country' => 'Megye',
-        'user_zip' => 'Irányító szám'
+        'user_zip' => 'Irányító szám',
+        'target_notes' => 'Megjegyzések',
     ],
     'open_saved_template' => 'Sablon megnyitása',
-    'save_template' =>  'Sablon mentése',
+    'save_template' => 'Sablon mentése',
     'select_a_template' => 'Sablon kiválasztása',
     'template_name' => 'Sablon neve',
     'update_template' => 'Sablon frissítése',
+    'share_template' => 'Share This Template',
+    'template_shared' => 'Template shared with you',
+    'template_shared_with_others' => 'Template shared with others',
+    'template_not_shared' => 'Template not shared with others',
 ];

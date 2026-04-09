@@ -7,6 +7,7 @@ use App\Mail\CheckoutAssetMail;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
+use App\Models\CheckoutAcceptance;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\Group;
@@ -16,8 +17,11 @@ use Tests\TestCase;
 class EmailNotificationsToUserUponCheckoutTest extends TestCase
 {
     private Asset $asset;
+
     private AssetModel $assetModel;
+
     private Category $category;
+
     private User $user;
 
     protected function setUp(): void
@@ -46,6 +50,31 @@ class EmailNotificationsToUserUponCheckoutTest extends TestCase
         $this->fireCheckoutEvent();
 
         $this->assertUserSentEmail();
+    }
+
+    public function test_email_contains_link_to_confirm_acceptance_when_category_requires_acceptance()
+    {
+        $this->category->update(['require_acceptance' => true]);
+
+        $this->fireCheckoutEvent();
+
+        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+            $acceptance = CheckoutAcceptance::query()
+                ->forUser($this->user)
+                ->whereCheckoutableId($this->asset->id)
+                ->whereCheckoutableType(Asset::class)
+                ->firstOrFail();
+
+            $url = route('account.accept.item', $acceptance);
+
+            $mailContents = $mail->render();
+
+            if (! str_contains($mailContents, $url)) {
+                $this->fail("Email does not contain the acceptance url. Expected to find $url in email contents.");
+            }
+
+            return $mail->hasTo($this->user->email);
+        });
     }
 
     public function test_email_sent_to_user_when_category_using_default_eula()

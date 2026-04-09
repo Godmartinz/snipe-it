@@ -1,0 +1,1 @@
+<i class="fa-regular fa-2x fa-square-caret-right pull-right hidden-xs" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>

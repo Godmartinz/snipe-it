@@ -12,22 +12,21 @@ use Tests\TestCase;
 
 class CreateMaintenanceTest extends TestCase
 {
-    public function testPageRequiresPermission()
+    public function test_page_requires_permission()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('maintenances.create'))
             ->assertForbidden();
     }
 
-    public function testPageRenders()
+    public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('maintenances.create'))
             ->assertOk();
     }
 
-
-    public function testCanCreateMaintenance()
+    public function test_can_create_maintenance()
     {
         Storage::fake('public');
         $actor = User::factory()->superuser()->create();
@@ -56,7 +55,6 @@ class CreateMaintenanceTest extends TestCase
 
         // Assert file was stored...
         Storage::disk('public')->assertExists(app('maintenances_path').$maintenance->image);
-
 
         $this->assertDatabaseHas('maintenances', [
             'asset_id' => $asset->id,

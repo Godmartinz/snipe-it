@@ -3,10 +3,10 @@
 @section('title0')
 
   @php
-    $requestStatus = request()->input('status');
-    $requestOrderNumber = request()->input('order_number');
-    $requestCompanyId = request()->input('company_id');
-    $requestStatusId = request()->input('status_id');
+      $requestStatusType = request()->input('status_type');
+      $requestOrderNumber = request()->input('order_number');
+      $requestCompanyId = request()->input('company_id');
+      $requestStatusTypeId = request()->input('status_id');
   @endphp
 
   @if (($requestCompanyId) && ($company))
@@ -15,24 +15,24 @@
 
 
 
-@if ($requestStatus)
-  @if ($requestStatus=='Pending')
+  @if ($requestStatusType)
+      @if ($requestStatusType=='Pending')
     {{ trans('general.pending') }}
-  @elseif ($requestStatus=='RTD')
+      @elseif ($requestStatusType=='RTD')
     {{ trans('general.ready_to_deploy') }}
-  @elseif ($requestStatus=='Deployed')
+      @elseif ($requestStatusType=='Deployed')
     {{ trans('general.deployed') }}
-  @elseif ($requestStatus=='Undeployable')
+      @elseif ($requestStatusType=='Undeployable')
     {{ trans('general.undeployable') }}
-  @elseif ($requestStatus=='Deployable')
+      @elseif ($requestStatusType=='Deployable')
     {{ trans('general.deployed') }}
-  @elseif ($requestStatus=='Requestable')
+      @elseif ($requestStatusType=='Requestable')
     {{ trans('admin/hardware/general.requestable') }}
-  @elseif ($requestStatus=='Archived')
+      @elseif ($requestStatusType=='Archived')
     {{ trans('general.archived') }}
-  @elseif ($requestStatus=='Deleted')
+      @elseif ($requestStatusType=='Deleted')
     {{ ucfirst(trans('general.deleted')) }}
-  @elseif ($requestStatus=='byod')
+      @elseif ($requestStatusType=='byod')
     {{ strtoupper(trans('general.byod')) }}
   @endif
 @else
@@ -56,10 +56,10 @@
     <x-container>
         <x-box name="assets">
             <x-table.assets :route="route('api.assets.index',
-                    array('status' => e($requestStatus),
-                    'order_number'=>e(strval($requestOrderNumber)),
-                    'company_id'=>e($requestCompanyId),
-                    'status_id'=>e($requestStatusId)))" />
+                array('status_type' => e($requestStatusType),
+                'order_number'=>e(strval($requestOrderNumber)),
+                'company_id'=>e($requestCompanyId),
+                'status_id'=>e($requestStatusTypeId)))"/>
         </x-box>
     </x-container>
 @stop

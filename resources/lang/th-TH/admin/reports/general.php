@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'เลือกออฟชั่นสำหรับรายงานสินทรัพย์ที่คุณต้องการ',
+    'info' => 'เลือกออฟชั่นสำหรับรายงานสินทรัพย์ที่คุณต้องการ',
     'deleted_user' => 'ผู้ใช้งานที่ถูกลบ',
     'send_reminder' => 'แจ้งเตือนการส่ง',
     'cannot_send_reminder' => 'ผู้ใช้ถูกลบไปแล้ว หรือไม่มีที่อยู่อีเมล จึงไม่สามารถรับการแจ้งเตือนได้',
@@ -10,14 +10,20 @@ return [
     'acceptance_request' => 'คำขอการยอมรับ',
     'custom_export' => [
         'user_address' => 'ที่อยู่',
+        'user_company' => 'User Company',
         'user_city' => 'เมือง / อำเภอ',
         'user_state' => 'รัฐ / จังหวัด',
         'user_country' => 'ประเทศ',
-        'user_zip' => 'รหัสไปรษณณีย์'
+        'user_zip' => 'รหัสไปรษณณีย์',
+        'target_notes' => 'หมายเหตุ',
     ],
     'open_saved_template' => 'เปิดเทมเพลตที่บันทึกไว้',
-    'save_template' =>  'บันทึกเทมเพลต',
+    'save_template' => 'บันทึกเทมเพลต',
     'select_a_template' => 'เลือกเทมเพลต',
     'template_name' => 'ชื่อเทมเพลต',
     'update_template' => 'อัพเดทเทมเพลต',
+    'share_template' => 'Share This Template',
+    'template_shared' => 'Template shared with you',
+    'template_shared_with_others' => 'Template shared with others',
+    'template_not_shared' => 'Template not shared with others',
 ];

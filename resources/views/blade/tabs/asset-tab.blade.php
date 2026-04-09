@@ -1,7 +1,7 @@
 @props([
     'count' => null,
+    'class' => false,
 ])
-@aware(['class'])
 
 @can('view', \App\Models\Asset::class)
     <x-tabs.nav-item

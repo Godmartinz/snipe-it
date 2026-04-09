@@ -18,7 +18,7 @@ class LicenseSeatFactory extends Factory
         ];
     }
 
-    public function assignedToAsset(Asset $asset = null)
+    public function assignedToAsset(?Asset $asset = null)
     {
         return $this->state(function () use ($asset) {
             return [
@@ -27,7 +27,7 @@ class LicenseSeatFactory extends Factory
         });
     }
 
-    public function assignedToUser(User $user = null)
+    public function assignedToUser(?User $user = null)
     {
         return $this->state(function () use ($user) {
             return [
@@ -40,6 +40,13 @@ class LicenseSeatFactory extends Factory
     {
         return $this->afterMaking(function (LicenseSeat $seat) {
             $seat->license->update(['reassignable' => true]);
+        });
+    }
+
+    public function unreassignable()
+    {
+        return $this->afterMaking(function (LicenseSeat $seat) {
+            $seat->license->update(['reassignable' => false]);
         });
     }
 

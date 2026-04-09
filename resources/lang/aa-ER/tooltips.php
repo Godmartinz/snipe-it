@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'crwdns14418:0crwdne14418:0',
         'asset' => 'crwdns14420:0crwdne14420:0',
         'category' => 'crwdns14422:0crwdne14422:0',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'crwdns14442:0crwdne14442:0'
+        'user' => 'crwdns14442:0crwdne14442:0',
     ],
 
-);
+];

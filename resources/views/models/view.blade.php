@@ -28,51 +28,52 @@
             <x-tabs>
                 <x-slot:tabnav>
                     <x-tabs.asset-tab count="{{ $model->assets()->AssetsForShow()->count() }}" />
-                    <x-tabs.files-tab name="files" count="{{ $model->uploads()->count() }}" />
-
-                    @can('update', $model)
-                        <x-tabs.nav-item-upload />
-                    @endcan
+                    <x-tabs.files-tab :item="$model" count="{{ $model->uploads()->count() }}"/>
+                    <x-tabs.history-tab count="{{ $model->history()->count() }}" :model="$model"/>
+                    <x-tabs.upload-tab :item="$model"/>
                 </x-slot:tabnav>
 
 
                 <x-slot:tabpanes>
-                    <x-tabs.pane name="assets" class="in active">
-                        <x-table.assets :route="route('api.assets.index', ['model_id' => $model->id])" />
+                    <x-tabs.pane name="assets">
+                        <x-table.assets :route="route('api.assets.index', ['model_id' => $model->id, 'status' => $model->deleted_at!='' ? 'Deleted' : ''])" />
                     </x-tabs.pane>
 
+                    <!-- start history tab pane -->
+                    <x-tabs.pane name="history">
+                        <x-table.history :model="$model" :route="route('api.models.history', $model)"/>
+                    </x-tabs.pane>
+                    <!-- end history tab pane -->
+
                     <x-tabs.pane name="files">
-                        <x-filestable :object="$model" object_type="models" />
+                        <x-table.files :object="$model" object_type="models" />
                     </x-tabs.pane>
                 </x-slot:tabpanes>
             </x-tabs>
 
         </x-page-column>
         <x-page-column class="col-md-3">
-            <x-box>
-                <x-box.info-panel :infoPanelObj="$model" img_path="{{ app('models_upload_url') }}">
-                    <x-slot:before_list>
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$model" img_path="{{ app('models_upload_url') }}">
+                    <x-slot:buttons>
+                        <x-button.edit :item="$model" :route="route('models.edit', $model->id)" />
+                        <x-button.add :item="\App\Models\Asset::class" :tooltip="trans('general.new_asset')" :route="route('hardware.create', ['model_id' => $model->id])"/>
+                        <x-button.restore :item="$model" :route="route('models.restore.store', $model->id)" />
+                        <x-button.clone :item="$model" :route="route('models.clone.create', $model->id)" />
+                        <x-button.delete :item="$model" />
+                    </x-slot:buttons>
 
-                        <x-button.wide-edit :item="$model" :route="route('models.edit', $model->id)" />
-                        <x-button.wide-clone :item="$model" :route="route('models.clone.create', $model->id)" />
-                        <x-button.wide-delete :item="$model" />
-
-                    </x-slot:before_list>
-
-                </x-box.info-panel>
+                </x-info-panel>
             </x-box>
         </x-page-column>
     </x-container>
 
-
-
-@can('update', \App\Models\AssetModel::class)
-    @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
-@endcan
-@stop
+@endsection
 
 @section('moar_scripts')
+    @can('files', $model)
+        @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
+    @endcan
 
-    @include ('partials.bootstrap-table', ['exportFile' => 'manufacturer' . $model->name . '-export', 'search' => false])
-
-@stop
+    @include ('partials.bootstrap-table', ['exportFile' => 'models-' . $model->name . '-export', 'search' => false])
+@endsection

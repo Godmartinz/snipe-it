@@ -14,7 +14,8 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Osama\LaravelTeamsNotification\TeamsNotification;
@@ -26,13 +27,88 @@ trait Loggable
     public ?bool $imported = false;
 
     /**
-     * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @return MorphMany
+     *
      * @since  [v3.4]
-     * @return \App\Models\Actionlog
+     *
+     * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
      */
     public function log()
     {
         return $this->morphMany(Actionlog::class, 'item');
+    }
+
+    public function history()
+    {
+
+        return $this->morphMany(Actionlog::class, 'item')
+            ->orWhere(function ($query) {
+                $query->where('target_type', '=', static::class)
+                    ->where('target_id', '=', $this->getKey());
+            });
+
+    }
+
+    public function getHistory(Request $request)
+    {
+        $allowed_columns = [
+            'id',
+            'created_at',
+            'target_id',
+            'created_by',
+            'accept_signature',
+            'action_type',
+            'note',
+            'remote_ip',
+            'user_agent',
+            'target_type',
+            'item_type',
+            'action_source',
+            'action_date',
+        ];
+
+        // Start with the polymorphic history relation so all filters and
+        // ordering are applied to the same query instance.
+        $history = $this->history();
+
+        if ($request->filled('search')) {
+            $history = $history->TextSearch(e($request->input('search')));
+        }
+
+        if ($request->filled('action_type')) {
+            $history = $history->where('action_type', '=', $request->input('action_type'));
+        }
+
+        if ($request->filled('created_by')) {
+            $history = $history->where('created_by', '=', $request->input('created_by'));
+        }
+
+        if ($request->filled('action_source')) {
+            $history = $history->where('action_source', '=', $request->input('action_source'));
+        }
+
+        if ($request->filled('remote_ip')) {
+            $history = $history->where('remote_ip', '=', $request->input('remote_ip'));
+        }
+
+        if ($request->filled('uploads')) {
+            $history = $history->whereNotNull('filename');
+        }
+
+        $order = ($request->input('order') == 'asc') ? 'asc' : 'desc';
+
+        switch ($request->input('sort')) {
+            case 'created_by':
+                $history = $history->OrderByCreatedBy($order);
+                break;
+            default:
+                $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'action_logs.created_at';
+                $history = $history->orderBy($sort, $order);
+                break;
+        }
+
+        return $history;
+
     }
 
     public function setImported(bool $bool): void
@@ -42,8 +118,10 @@ trait Loggable
 
     /**
      * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
+     *
      * @since  [v3.4]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logCheckout($note, $target, $action_date = null, $originalValues = [], $quantity = 1)
     {
@@ -71,7 +149,6 @@ trait Loggable
 
         $log->target_type = get_class($target);
         $log->target_id = $target->id;
-
 
         // Figure out what the target is
         if ($log->target_type == Location::class) {
@@ -103,9 +180,8 @@ trait Loggable
 
         $changed = [];
         $array_to_flip = array_keys($fields_array);
-        $array_to_flip = array_merge($array_to_flip, ['name','status_id','location_id','expected_checkin']);
+        $array_to_flip = array_merge($array_to_flip, ['name', 'status_id', 'location_id', 'expected_checkin']);
         $originalValues = array_intersect_key($originalValues, array_flip($array_to_flip));
-
 
         foreach ($originalValues as $key => $value) {
             // TODO - action_date isn't a valid attribute of any first-class object, so we might want to remove this?
@@ -119,7 +195,7 @@ trait Loggable
             // NOTE - if the attribute exists in $originalValues, but *not* in ->getAttributes(), it isn't added to $changed
         }
 
-        if (!empty($changed)) {
+        if (! empty($changed)) {
             $log->log_meta = json_encode($changed);
         }
 
@@ -147,8 +223,10 @@ trait Loggable
 
     /**
      * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
+     *
      * @since  [v3.4]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logCheckin($target, $note, $action_date = null, $originalValues = [])
     {
@@ -156,7 +234,7 @@ trait Loggable
 
         $fields_array = [];
 
-        if($target != null) {
+        if ($target != null) {
             $log->target_type = get_class($target);
             $log->target_id = $target->id;
 
@@ -190,7 +268,7 @@ trait Loggable
         $log->note = $note;
         $log->action_date = $action_date;
 
-        if (!$action_date) {
+        if (! $action_date) {
             $log->action_date = date('Y-m-d H:i:s');
         }
 
@@ -201,7 +279,7 @@ trait Loggable
         $changed = [];
 
         $array_to_flip = array_keys($fields_array);
-        $array_to_flip = array_merge($array_to_flip, ['name','status_id','location_id','expected_checkin']);
+        $array_to_flip = array_merge($array_to_flip, ['name', 'status_id', 'location_id', 'expected_checkin']);
 
         $originalValues = array_intersect_key($originalValues, array_flip($array_to_flip));
 
@@ -216,7 +294,7 @@ trait Loggable
             }
         }
 
-        if (!empty($changed)) {
+        if (! empty($changed)) {
             $log->log_meta = json_encode($changed);
         }
 
@@ -227,8 +305,10 @@ trait Loggable
 
     /**
      * @author A. Gianotto <snipe@snipe.net>
+     *
      * @since  [v4.0]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logAudit($note, $location_id, $filename = null, $originalValues = [])
     {
@@ -260,10 +340,9 @@ trait Loggable
             }
         }
 
-        if (!empty($changed)) {
+        if (! empty($changed)) {
             $log->log_meta = json_encode($changed);
         }
-
 
         $location = Location::find($location_id);
         if (static::class == LicenseSeat::class) {
@@ -288,7 +367,7 @@ trait Loggable
             'note' => $note,
         ];
 
-        if(Setting::getSettings()->webhook_selected === 'microsoft' && Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
+        if (Setting::getSettings()->webhook_selected === 'microsoft' && Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
 
             $endpoint = Setting::getSettings()->webhook_endpoint;
 
@@ -300,7 +379,7 @@ trait Loggable
             } catch (ConnectException $e) {
                 Log::warning('Teams webhook connection failed', [
                     'endpoint' => $endpoint,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
 
             } catch (ServerException $e) {
@@ -324,15 +403,14 @@ trait Loggable
                     'endpoint' => $endpoint,
                     'error' => $e->getMessage(),
                 ]);
-            }catch (Throwable $e) {
+            } catch (Throwable $e) {
                 Log::error('Teams webhook failed unexpectedly', [
                     'endpoint' => $endpoint,
                     'exception' => get_class($e),
                     'error' => $e->getMessage(),
                 ]);
             }
-        }
-        else {
+        } else {
             Setting::getSettings()->notify(new AuditNotification($params));
         }
 
@@ -341,8 +419,10 @@ trait Loggable
 
     /**
      * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
+     *
      * @since  [v3.5]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logCreate($note = null)
     {
@@ -370,8 +450,10 @@ trait Loggable
 
     /**
      * @author Daniel Meltzer <dmeltzer.devel@gmail.com>
+     *
      * @since  [v3.4]
-     * @return \App\Models\Actionlog
+     *
+     * @return Actionlog
      */
     public function logUpload($filename, $note)
     {
@@ -401,7 +483,6 @@ trait Loggable
      * Returns the latest acceptance ActionLog that contains a signature
      * from $user or null if there is none
      *
-     * @param  User $user
      * @return null|Actionlog
      **/
     public function getLatestSignedAcceptance(User $user)

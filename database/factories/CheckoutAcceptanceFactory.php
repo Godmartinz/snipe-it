@@ -23,6 +23,7 @@ class CheckoutAcceptanceFactory extends Factory
             'assigned_to_id' => User::factory(),
         ];
     }
+
     protected static bool $skipActionLog = false;
 
     public function withoutActionLog(): static
@@ -48,13 +49,12 @@ class CheckoutAcceptanceFactory extends Factory
 
             if ($acceptance->checkoutable instanceof Asset && $acceptance->assignedTo instanceof User) {
                 $acceptance->checkoutable->update([
-                    'assigned_to'  => $acceptance->assigned_to_id,
-                    'assigned_type'=> get_class($acceptance->assignedTo),
+                    'assigned_to' => $acceptance->assigned_to_id,
+                    'assigned_type' => get_class($acceptance->assignedTo),
                 ]);
             }
         });
     }
-
 
     public function forAccessory()
     {

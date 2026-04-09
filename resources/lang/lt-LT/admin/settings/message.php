@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'Atnaujinant įvyko klaida. ',
-        'success'               => 'Nustatymai atnaujinti sėkmingai.',
+        'error' => 'Atnaujinant įvyko klaida. ',
+        'success' => 'Nustatymai atnaujinti sėkmingai.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Ar tikrai norite ištrinti atsarginę kopiją? Šis veiksmas negrįžtamas. ',
-        'file_deleted'          => 'Atsarginė kopija ištrinta sėkmingai. ',
-        'generated'             => 'Atsarginė kopija sukurta sėkmingai.',
-        'file_not_found'        => 'Šio atsarginės kopijos failo serveryje rasti nepavyko.',
-        'restore_warning'       => 'Taip, atkurti. Suprantu, kad tai perrašys visus šiuo metu duomenų bazėje esančius duomenis. Taip pat, kad bus atjungti visi esami naudotojai (įskaitant mane).',
-        'restore_confirm'       => 'Ar tikrai norite atkurti savo duomenų bazę iš :filename?'
+        'delete_confirm' => 'Ar tikrai norite ištrinti atsarginę kopiją? Šis veiksmas negrįžtamas. ',
+        'file_deleted' => 'Atsarginė kopija ištrinta sėkmingai. ',
+        'generated' => 'Atsarginė kopija sukurta sėkmingai.',
+        'file_not_found' => 'Šio atsarginės kopijos failo serveryje rasti nepavyko.',
+        'restore_warning' => 'Taip, atkurti. Suprantu, kad tai perrašys visus šiuo metu duomenų bazėje esančius duomenis. Taip pat, kad bus atjungti visi esami naudotojai (įskaitant mane).',
+        'restore_confirm' => 'Ar tikrai norite atkurti savo duomenų bazę iš :filename?',
     ],
     'restore' => [
-        'success'               => 'Jūsų sistemos atsarginė kopija buvo atkurta. Prisijunkite iš naujo.'
+        'success' => 'Jūsų sistemos atsarginė kopija buvo atkurta. Prisijunkite iš naujo.',
     ],
     'purge' => [
-        'error'     => 'Valymo metu įvyko klaida. ',
-        'validation_failed'     => 'Jūsų įvestas išvalymo patvirtinimas yra neteisingas. Patvirtinimo lauke įveskite žodį „DELETE“.',
-        'success'               => 'Anksčiau panaikinti įrašai sėkmingai išvalyti.',
+        'error' => 'Valymo metu įvyko klaida. ',
+        'validation_failed' => 'Jūsų įvestas išvalymo patvirtinimas yra neteisingas. Patvirtinimo lauke įveskite žodį „DELETE“.',
+        'success' => 'Anksčiau panaikinti įrašai sėkmingai išvalyti.',
     ],
     'mail' => [
         'sending' => 'Siunčiamas bandomasis el. laiškas...',
         'success' => 'El. laiškas išsiųstas!',
         'error' => 'El. laiško išsiųsti nepavyko.',
-        'additional' => 'Nėra jokio papildomo klaidos pranešimo. Patikrinkite pašto nustatymus ir programos žurnalą.'
+        'additional' => 'Nėra jokio papildomo klaidos pranešimo. Patikrinkite pašto nustatymus ir programos žurnalą.',
     ],
     'ldap' => [
         'testing' => 'Tikrinamas LDAP ryšys, susiejimas ir užklausos...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Kažkas ne taip :(',
         'sync_success' => '10 naudotojų, gautų iš LDAP serverio, pagal jūsų nustatymus:',
         'testing_authentication' => 'Tikrinamas LDAP autentifikavimas...',
-        'authentication_success' => 'Naudotojas sėkmingai atpažintas naudojant LDAP!'
+        'authentication_success' => 'Naudotojas sėkmingai atpažintas naudojant LDAP!',
     ],
     'labels' => [
         'null_template' => 'Etiketės šablonas nerastas. Pasirinkite šabloną.',
-        ],
+    ],
     'webhook' => [
         'sending' => ':app siunčiamas bandomasis pranešimas...',
         'success' => 'Jūsų :webhook_name integracija veikia!',

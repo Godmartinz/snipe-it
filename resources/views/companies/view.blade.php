@@ -16,210 +16,57 @@
         <x-page-column class="col-md-9 main-panel">
             <x-tabs>
                 <x-slot:tabnav>
-
-                    @can('view', \App\Models\Asset::class)
-                        <x-tabs.nav-item
-                                class="active"
-                                name="assets"
-                                icon_type="asset"
-                                label="{{ trans('general.assets') }}"
-                                count="{{ $company->assets()->AssetsForShow()->count() }}"
-                                tooltip="{{ trans('general.assets') }}"
-                        />
-                    @endcan
-
-                    @can('view', \App\Models\License::class)
-                        <x-tabs.nav-item
-                                name="licenses"
-                                icon_type="licenses"
-                                label="{{ trans('general.licenses') }}"
-                                count="{{ $company->licenses()->count() }}"
-                                tooltip="{{ trans('general.licenses') }}"
-                        />
-                    @endcan
-
-                    @can('view', \App\Models\Accessory::class)
-                        <x-tabs.nav-item
-                                name="accessories"
-                                icon_type="accessories"
-                                label="{{ trans('general.accessories') }}"
-                                count="{{ $company->accessories()->count() }}"
-                                tooltip="{{ trans('general.accessories') }}"
-                        />
-                    @endcan
-
-                    @can('view', \App\Models\Consumable::class)
-                        <x-tabs.nav-item
-                                name="consumables"
-                                icon_type="consumables"
-                                label="{{ trans('general.consumables') }}"
-                                count="{{ $company->consumables()->count() }}"
-                                tooltip="{{ trans('general.consumables') }}"
-                        />
-                    @endcan
-
-                    @can('view', \App\Models\Component::class)
-                        <x-tabs.nav-item
-                                name="components"
-                                icon_type="components"
-                                label="{{ trans('general.components') }}"
-                                count="{{ $company->components()->count() }}"
-                                tooltip="{{ trans('general.components') }}"
-                        />
-                    @endcan
-
-
-                    @can('view', \App\Models\User::class)
-                        <x-tabs.nav-item
-                                name="users"
-                                icon_type="users"
-                                label="{{ trans('general.users') }}"
-                                count="{{ $company->users()->count() }}"
-                                tooltip="{{ trans('general.users') }}"
-                        />
-                    @endcan
-
-
-
-                    @can('update', $company)
-                        <x-tabs.nav-item-upload />
-                    @endcan
-
-
+                    <x-tabs.user-tab count="{{ $company->users->count() }}"/>
+                    <x-tabs.asset-tab count="{{ $company->assets()->AssetsForShow()->count() }}"/>
+                    <x-tabs.license-tab count="{{ $company->licenses->count() }}"/>
+                    <x-tabs.accessory-tab count="{{ $company->accessories->count() }}"/>
+                    <x-tabs.consumable-tab count="{{ $company->consumables->count() }}"/>
+                    <x-tabs.component-tab count="{{ $company->components->count() }}"/>
+                    <x-tabs.files-tab :item="$company" count="{{ $company->uploads()->count() }}"/>
+                    <x-tabs.upload-tab :item="$company"/>
                 </x-slot:tabnav>
 
                 <x-slot:tabpanes>
+                    <!-- start users tab pane -->
+                    <x-tabs.pane name="users">
+                        <x-table.users name="users" :route="route('api.users.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end users tab pane -->
 
                     <!-- start assets tab pane -->
-                    @can('view', \App\Models\Asset::class)
-                        <x-tabs.pane name="assets" class="in active">
-                            <x-slot:header>
-                                {{ trans('general.assets') }}
-                            </x-slot:header>
-
-                            <x-slot:bulkactions>
-                                <x-table.bulk-assets />
-                            </x-slot:bulkactions>
-
-                            <x-slot:content>
-                                <x-table
-                                        show_column_search="true"
-                                        show_advanced_search="true"
-                                        buttons="assetButtons"
-                                        api_url="{{ route('api.assets.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\AssetPresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-assets-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                        <!-- end assets tab pane -->
-                    @endcan
-
+                    <x-tabs.pane name="assets">
+                        <x-table.assets name="assets" :route="route('api.assets.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end assets tab pane -->
 
                     <!-- start licenses tab pane -->
-                    @can('view', \App\Models\License::class)
-                        <x-tabs.pane name="licenses">
-                            <x-slot:header>
-                                {{ trans('general.licenses') }}
-                            </x-slot:header>
-                            <x-slot:content>
-                                <x-table
-                                        name="licenses"
-                                        buttons="licenseButtons"
-                                        api_url="{{ route('api.licenses.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\LicensePresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-licences-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="licenses">
+                        <x-table.licenses name="licenses" :route="route('api.licenses.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
                     <!-- end licenses tab pane -->
 
-
                     <!-- start accessory tab pane -->
-                    @can('view', \App\Models\Accessory::class)
-                        <x-tabs.pane name="accessories">
-                            <x-slot:header>
-                                {{ trans('general.accessories') }}
-                            </x-slot:header>
-                            <x-slot:content>
-                                <x-table
-                                        name="accessories"
-                                        buttons="accessoryButtons"
-                                        api_url="{{ route('api.accessories.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\AccessoryPresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-accessories-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="accessories">
+                        <x-table.accessories name="accessories" :route="route('api.accessories.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
                     <!-- end accessory tab pane -->
-
 
                     <!-- start consumables tab pane -->
-                    @can('view', \App\Models\Consumable::class)
-                        <x-tabs.pane name="consumables">
-                            <x-slot:header>
-                                {{ trans('general.consumables') }}
-                            </x-slot:header>
-                            <x-slot:content>
-                                <x-table
-                                        name="consumables"
-                                        buttons="consumableButtons"
-                                        api_url="{{ route('api.consumables.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\ConsumablePresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-consumables-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
+                    <x-tabs.pane name="consumables">
+                        <x-table.consumables name="consumables" :route="route('api.consumables.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
                     <!-- end components tab pane -->
-
 
                     <!-- start components tab pane -->
-                    @can('view', \App\Models\Component::class)
-                        <x-tabs.pane name="components">
-                            <x-slot:header>
-                                {{ trans('general.components') }}
-                            </x-slot:header>
-                            <x-slot:content>
-                                <x-table
-                                        name="components"
-                                        buttons="componentButtons"
-                                        api_url="{{ route('api.components.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\ComponentPresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
-                    <!-- end components tab pane -->
+                    <x-tabs.pane name="components">
+                        <x-table.components name="components" :route="route('api.components.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
 
-
-                    <!-- start user tab pane -->
-                    @can('view', \App\Models\User::class)
-                        <x-tabs.pane name="users">
-                            <x-slot:header>
-                                {{ trans('general.users') }}
-                            </x-slot:header>
-
-                            <x-slot:bulkactions>
-                                <x-table.bulk-users />
-                            </x-slot:bulkactions>
-
-
-                            <x-slot:content>
-                                <x-table
-                                        name="users"
-                                        buttons="userButtons"
-                                        api_url="{{ route('api.users.index', ['company_id' => $company->id]) }}"
-                                        :presenter="\App\Presenters\UserPresenter::dataTableLayout()"
-                                        export_filename="export-company-{{ str_slug($company->name) }}-users-{{ date('Y-m-d') }}"
-                                />
-                            </x-slot:content>
-                        </x-tabs.pane>
-                    @endcan
-                    <!-- end accessory tab pane -->
+                    <!-- start files tab pane -->
+                    <x-tabs.pane name="files">
+                        <x-table.files object_type="companies" :object="$company"/>
+                    </x-tabs.pane>
+                    <!-- end files tab pane -->
 
                 </x-slot:tabpanes>
 
@@ -227,27 +74,25 @@
 
         </x-page-column>
         <x-page-column class="col-md-3">
-            <x-box>
-                <x-box.info-panel :infoPanelObj="$company" img_path="{{ app('companies_upload_url') }}">
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$company" img_path="{{ app('companies_upload_url') }}">
 
-                    <x-slot:before_list>
+                    <x-slot:buttons>
+                        <x-button.edit :item="$company" :route="route('companies.edit', $company->id)" />
+                        <x-button.delete :item="$company" />
+                    </x-slot:buttons>
 
-                        <x-button.wide-edit :item="$company" :route="route('companies.edit', $company->id)" />
-                        <x-button.wide-delete :item="$company" />
-
-                    </x-slot:before_list>
-
-
-                </x-box.info-panel>
+                </x-info-panel>
             </x-box>
         </x-page-column>
     </x-container>
 
+@endsection
 
-
-@stop
 @section('moar_scripts')
+    @can('files', $company)
+        @include ('modals.upload-file', ['item_type' => 'companies', 'item_id' => $company->id])
+    @endcan
     @include ('partials.bootstrap-table')
-
-@stop
+@endsection
 

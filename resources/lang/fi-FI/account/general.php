@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     'personal_api_keys' => 'Henkilökohtaiset API-avaimet',
     'personal_access_token' => 'Personal Access Token',
     'personal_api_keys_success' => 'Henkilökohtainen API-avain :key luotiin onnistuneesti',
@@ -14,4 +14,4 @@ return array(
     'no_tokens' => 'You have not created any personal access tokens.',
     'enable_sounds' => 'Enable sound effects',
     'enable_confetti' => 'Enable confetti effects',
-);
+];

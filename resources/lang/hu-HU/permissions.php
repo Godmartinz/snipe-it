@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -15,29 +15,28 @@ return array(
     |---------------------------------------------------------------------------
     */
 
-    "superuser" => [
+    'superuser' => [
         'name' => 'Super user',
-        'note'       => 'Meghatározza, hogy a felhasználó teljes hozzáféréssel rendelkezik-e az adminisztráció minden területéhez. Ez a beállítás felülír minden egyéb, a rendszerben megadott specifikusabb és korlátozóbb jogosultságot ',
+        'note' => 'Meghatározza, hogy a felhasználó teljes hozzáféréssel rendelkezik-e az adminisztráció minden területéhez. Ez a beállítás felülír minden egyéb, a rendszerben megadott specifikusabb és korlátozóbb jogosultságot ',
     ],
     'admin' => [
         'name' => 'Adminisztrátori hozzáférés',
-        'note'       => 'Meghatározza, hogy a felhasználó hozzáfér-e a rendszer legtöbb területéhez, KIVÉVE a Rendszeradminisztrátori beállításokat. Ezek a felhasználók kezelhetik a felhasználókat, helyszíneket, kategóriákat stb., de a Teljes többvállalatos támogatás beállításai korlátozzák őket, amennyiben az engedélyezve van.',
+        'note' => 'Meghatározza, hogy a felhasználó hozzáfér-e a rendszer legtöbb területéhez, KIVÉVE a Rendszeradminisztrátori beállításokat. Ezek a felhasználók kezelhetik a felhasználókat, helyszíneket, kategóriákat stb., de a Teljes többvállalatos támogatás beállításai korlátozzák őket, amennyiben az engedélyezve van.',
     ],
 
     'import' => [
         'name' => 'CSV betöltés',
-        'note'       => 'Ez lehetővé teszi a felhasználók számára az importálást akkor is, ha máshol a rendszerben nincs hozzáférésük a felhasználókhoz, eszközökhöz stb.',
+        'note' => 'Ez lehetővé teszi a felhasználók számára az importálást akkor is, ha máshol a rendszerben nincs hozzáférésük a felhasználókhoz, eszközökhöz stb.',
     ],
 
     'reports' => [
         'name' => 'Hozzáférés a jelentésekhez',
-        'note'       => 'Meghatározza, hogy a felhasználó hozzáfér-e az alkalmazás Jelentések menüpontjához.',
+        'note' => 'Meghatározza, hogy a felhasználó hozzáfér-e az alkalmazás Jelentések menüpontjához.',
     ],
 
-    'assets' =>
-        [
-            'name' => 'Eszközök',
-            'note' => 'Hozzáférést biztosít az alkalmazás Eszközök menüpontjához.',
+    'assets' => [
+        'name' => 'Eszközök',
+        'note' => 'Hozzáférést biztosít az alkalmazás Eszközök menüpontjához.',
     ],
 
     'assetsview' => [
@@ -81,9 +80,9 @@ return array(
         'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
     ],
 
-    'accessories'   => [
+    'accessories' => [
         'name' => 'Tartozékok',
-        'note'       => 'Grants access to the Accessories section of the application.',
+        'note' => 'Grants access to the Accessories section of the application.',
     ],
 
     'accessoriesview' => [
@@ -110,9 +109,9 @@ return array(
         'name' => 'Manage Accessory Files',
         'note' => 'Allows the user to upload, download, and delete files associated with accessories.',
     ],
-    'consumables'   => [
+    'consumables' => [
         'name' => 'Fogyóeszközök',
-        'note'       => 'Grants access to the Consumables section of the application.',
+        'note' => 'Grants access to the Consumables section of the application.',
     ],
     'consumablesview' => [
         'name' => 'View Consumables',
@@ -134,9 +133,9 @@ return array(
         'name' => 'Manage Consumable Files',
         'note' => 'Allows the user to upload, download, and delete files associated with consumables.',
     ],
-    'licenses'   => [
+    'licenses' => [
         'name' => 'Licencek',
-        'note'       => 'Grants access to the Licenses section of the application.',
+        'note' => 'Grants access to the Licenses section of the application.',
     ],
     'licensesview' => [
         'name' => 'View Licenses',
@@ -153,7 +152,7 @@ return array(
     'licensescheckout' => [
         'name' => 'Assign Licenses',
         'note' => 'Allows the user to assign licenses to assets or users.',
-        ],
+    ],
     'licensescheckin' => [
         'name' => 'Unassign Licenses',
         'note' => 'Allows the user to unassign licenses from assets or users.',
@@ -166,9 +165,9 @@ return array(
         'name' => 'Manage License Keys',
         'note' => 'Allows the user to view product keys associated with licenses.',
     ],
-    'components'   => [
+    'components' => [
         'name' => 'Alkatrészek',
-        'note'       => 'Grants access to the Components section of the application.',
+        'note' => 'Grants access to the Components section of the application.',
     ],
     'componentsview' => [
         'name' => 'View Components',
@@ -194,9 +193,9 @@ return array(
         'name' => 'Check In Components',
         'note' => 'Check components back into inventory that are currently checked out.',
     ],
-    'kits'   => [
+    'kits' => [
         'name' => 'Előre definiált csomagok',
-        'note'       => 'Grants access to the Predefined Kits section of the application.',
+        'note' => 'Grants access to the Predefined Kits section of the application.',
     ],
     'kitsview' => [
         'name' => 'View Predefined Kits',
@@ -210,9 +209,9 @@ return array(
     'kitsdelete' => [
         'name' => 'Delete Predefined Kits',
     ],
-    'users'   => [
+    'users' => [
         'name' => 'Felhasználók',
-        'note'       => 'Grants access to the Users section of the application.',
+        'note' => 'Grants access to the Users section of the application.',
     ],
     'usersview' => [
         'name' => 'Felhasználók megtekintése',
@@ -226,9 +225,9 @@ return array(
     'usersdelete' => [
         'name' => 'Delete Users',
     ],
-    'models'   => [
+    'models' => [
         'name' => 'Models',
-        'note'       => 'Grants access to the Models section of the application.',
+        'note' => 'Grants access to the Models section of the application.',
     ],
     'modelsview' => [
         'name' => 'Modellek megtekintése',
@@ -243,9 +242,9 @@ return array(
     'modelsdelete' => [
         'name' => 'Delete Models',
     ],
-    'categories'   => [
+    'categories' => [
         'name' => 'Kategóriák',
-        'note'       => 'Grants access to the Categories section of the application.',
+        'note' => 'Grants access to the Categories section of the application.',
     ],
     'categoriesview' => [
         'name' => 'View Categories',
@@ -259,9 +258,9 @@ return array(
     'categoriesdelete' => [
         'name' => 'Delete Categories',
     ],
-    'departments'   => [
+    'departments' => [
         'name' => 'Osztályok',
-        'note'       => 'Grants access to the Departments section of the application.',
+        'note' => 'Grants access to the Departments section of the application.',
     ],
     'departmentsview' => [
         'name' => 'View Departments',
@@ -275,9 +274,9 @@ return array(
     'departmentsdelete' => [
         'name' => 'Delete Departments',
     ],
-    'locations'   => [
+    'locations' => [
         'name' => 'Helyek',
-        'note'       => 'Grants access to the Locations section of the application.',
+        'note' => 'Grants access to the Locations section of the application.',
     ],
     'locationsview' => [
         'name' => 'View Locations',
@@ -291,9 +290,9 @@ return array(
     'locationsdelete' => [
         'name' => 'Delete Locations',
     ],
-    'status-labels'   => [
+    'status-labels' => [
         'name' => 'Státusz címkék',
-        'note'       => 'Grants access to the Status Labels section of the application used by Assets.',
+        'note' => 'Grants access to the Status Labels section of the application used by Assets.',
     ],
     'statuslabelsview' => [
         'name' => 'View Status Labels',
@@ -307,9 +306,9 @@ return array(
     'statuslabelsdelete' => [
         'name' => 'Delete Status Labels',
     ],
-    'custom-fields'   => [
+    'custom-fields' => [
         'name' => 'Egyéni mezők',
-        'note'       => 'Grants access to the Custom Fields section of the application used by Assets.',
+        'note' => 'Grants access to the Custom Fields section of the application used by Assets.',
     ],
     'customfieldsview' => [
         'name' => 'View Custom Fields',
@@ -323,9 +322,9 @@ return array(
     'customfieldsdelete' => [
         'name' => 'Delete Custom Fields',
     ],
-    'suppliers'   => [
+    'suppliers' => [
         'name' => 'Beszállítók',
-        'note'       => 'Grants access to the Suppliers section of the application.',
+        'note' => 'Grants access to the Suppliers section of the application.',
     ],
     'suppliersview' => [
         'name' => 'View Suppliers',
@@ -339,9 +338,9 @@ return array(
     'suppliersdelete' => [
         'name' => 'Delete Suppliers',
     ],
-    'manufacturers'   => [
+    'manufacturers' => [
         'name' => 'Gyártók',
-        'note'       => 'Grants access to the Manufacturers section of the application.',
+        'note' => 'Grants access to the Manufacturers section of the application.',
     ],
     'manufacturersview' => [
         'name' => 'View Manufacturers',
@@ -355,9 +354,9 @@ return array(
     'manufacturersdelete' => [
         'name' => 'Delete Manufacturers',
     ],
-    'companies'   => [
+    'companies' => [
         'name' => 'Cégek',
-        'note'       => 'Grants access to the Companies section of the application.',
+        'note' => 'Grants access to the Companies section of the application.',
     ],
     'companiesview' => [
         'name' => 'View Companies',
@@ -373,32 +372,32 @@ return array(
     ],
     'user-self-accounts' => [
         'name' => 'User Self Accounts',
-        'note'       => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
+        'note' => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
     ],
     'selftwo-factor' => [
         'name' => 'Manage Two-Factor Authentication',
-        'note'       => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
+        'note' => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
     ],
     'selfapi' => [
         'name' => 'Manage API Tokens',
-        'note'       => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
+        'note' => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
     ],
     'selfedit-location' => [
         'name' => 'Edit Location',
-        'note'       => 'Allows users to edit the location associated with their own user account.',
+        'note' => 'Allows users to edit the location associated with their own user account.',
     ],
     'selfcheckout-assets' => [
         'name' => 'Self Check Out Assets',
-        'note'       => 'Allows users to check out assets to themselves without admin intervention.',
+        'note' => 'Allows users to check out assets to themselves without admin intervention.',
     ],
     'selfview-purchase-cost' => [
         'name' => 'View Purchase Cost',
-        'note'       => 'Allows users to view the purchase cost of items in their account view.',
+        'note' => 'Allows users to view the purchase cost of items in their account view.',
     ],
 
     'depreciations' => [
         'name' => 'Depreciation Management',
-        'note'       => 'Allows users to manage and view asset depreciation details.',
+        'note' => 'Allows users to manage and view asset depreciation details.',
     ],
     'depreciationsview' => [
         'name' => 'View Depreciation Details',
@@ -419,6 +418,6 @@ return array(
     'grant' => 'Grant Permission for :area',
     'deny' => 'Deny Permission for :area',
     'inherit' => 'Inherit Permission for :area from permission groups',
-    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.'
+    'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.',
 
-);
+];

@@ -1,8 +1,8 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
+    'disabled_assoc' => [
         'accessory' => 'Šio priedo negalima panaikinti, nes jis vis dar turi su juo susietų daiktų, naudotojų arba vietų',
         'asset' => 'Šio turto negalima panaikinti, nes jis vis dar turi su juo susietų daiktų',
         'category' => 'Šios kategorijos negalima panaikinti, nes ji vis dar turi su ja susietų daiktų',
@@ -18,7 +18,7 @@ return array(
     ],
 
     'checkin_all' => [
-        'user' => 'Paimkite visus šio naudotojo daiktus ir pasirinktinai jį panaikinkite. Tai galėsite patvirtinti kitame puslapyje.'
+        'user' => 'Paimkite visus šio naudotojo daiktus ir pasirinktinai jį panaikinkite. Tai galėsite patvirtinti kitame puslapyje.',
     ],
 
-);
+];

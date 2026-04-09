@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'info'   => 'Demirbaş Raporu için istediğiniz seçenekleri seçiniz.',
+    'info' => 'Demirbaş Raporu için istediğiniz seçenekleri seçiniz.',
     'deleted_user' => 'Kullanıcı silindi',
     'send_reminder' => 'Hatırlatma gönder',
     'cannot_send_reminder' => 'Kullanıcı silinmiştir veya e-posta adresi olmadığı için hatırlatma alamamaktadır',
@@ -10,14 +10,20 @@ return [
     'acceptance_request' => 'Kabul talebi',
     'custom_export' => [
         'user_address' => 'Kullanıcı Adresi',
+        'user_company' => 'User Company',
         'user_city' => 'Kullanıcı Şehri',
         'user_state' => 'Kullanıcı Durumu',
         'user_country' => 'Kullanıcı Ülkesi',
-        'user_zip' => 'Kullanıcı Posta Kodu'
+        'user_zip' => 'Kullanıcı Posta Kodu',
+        'target_notes' => 'Notlar',
     ],
     'open_saved_template' => 'Kaydedilen Şablonu Aç',
-    'save_template' =>  'Şablonu Kaydet',
+    'save_template' => 'Şablonu Kaydet',
     'select_a_template' => 'Bir Şablon Seç',
     'template_name' => 'Şablon Adı',
     'update_template' => 'Şablonu Güncelle',
+    'share_template' => 'Share This Template',
+    'template_shared' => 'Template shared with you',
+    'template_shared_with_others' => 'Template shared with others',
+    'template_not_shared' => 'Template not shared with others',
 ];

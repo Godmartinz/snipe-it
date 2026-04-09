@@ -3,30 +3,30 @@
 return [
 
     'update' => [
-        'error'                 => 'Terjadi kesalahan saat memperbarui. ',
-        'success'               => 'Pengaturan berhasil diperbarui.',
+        'error' => 'Terjadi kesalahan saat memperbarui. ',
+        'success' => 'Pengaturan berhasil diperbarui.',
     ],
     'backup' => [
-        'delete_confirm'        => 'Apakah anda yakin ingin menghapus berkas cadangan ini? Tindakan ini tidak dibatalkan. ',
-        'file_deleted'          => 'Berkas cadangan berhasil dihapus. ',
-        'generated'             => 'Berkas cadangan baru berhasil dibuat.',
-        'file_not_found'        => 'Berkas cadangan itu tidak dapat ditemukan di peladen.',
-        'restore_warning'       => 'Yes, restore it. I acknowledge that this will overwrite any existing data currently in the database. This will also log out all of your existing users (including you).',
-        'restore_confirm'       => 'Are you sure you wish to restore your database from :filename?'
+        'delete_confirm' => 'Apakah anda yakin ingin menghapus berkas cadangan ini? Tindakan ini tidak dibatalkan. ',
+        'file_deleted' => 'Berkas cadangan berhasil dihapus. ',
+        'generated' => 'Berkas cadangan baru berhasil dibuat.',
+        'file_not_found' => 'Berkas cadangan itu tidak dapat ditemukan di peladen.',
+        'restore_warning' => 'Yes, restore it. I acknowledge that this will overwrite any existing data currently in the database. This will also log out all of your existing users (including you).',
+        'restore_confirm' => 'Are you sure you wish to restore your database from :filename?',
     ],
     'restore' => [
-        'success'               => 'Your system backup has been restored. Please log in again.'
+        'success' => 'Your system backup has been restored. Please log in again.',
     ],
     'purge' => [
-        'error'     => 'Terjadi kesalahan saat membersihkan. ',
-        'validation_failed'     => 'Konfirmasi pembersihan Anda salah Ketikkan kata "HAPUS" di kotak konfirmasi.',
-        'success'               => 'Catatan yang dihapus berhasil dibersihkan.',
+        'error' => 'Terjadi kesalahan saat membersihkan. ',
+        'validation_failed' => 'Konfirmasi pembersihan Anda salah Ketikkan kata "HAPUS" di kotak konfirmasi.',
+        'success' => 'Catatan yang dihapus berhasil dibersihkan.',
     ],
     'mail' => [
         'sending' => 'Sending Test Email...',
         'success' => 'Mail sent!',
         'error' => 'Mail could not be sent.',
-        'additional' => 'No additional error message provided. Check your mail settings and your app log.'
+        'additional' => 'No additional error message provided. Check your mail settings and your app log.',
     ],
     'ldap' => [
         'testing' => 'Testing LDAP Connection, Binding & Query ...',
@@ -34,11 +34,11 @@ return [
         'error' => 'Something went wrong :(',
         'sync_success' => 'A sample of 10 users returned from the LDAP server based on your settings:',
         'testing_authentication' => 'Testing LDAP Authentication...',
-        'authentication_success' => 'User authenticated against LDAP successfully!'
+        'authentication_success' => 'User authenticated against LDAP successfully!',
     ],
     'labels' => [
         'null_template' => 'Label template not found. Please select a template.',
-        ],
+    ],
     'webhook' => [
         'sending' => 'Sending :app test message...',
         'success' => 'Your :webhook_name Integration works!',

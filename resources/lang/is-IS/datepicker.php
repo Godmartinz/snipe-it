@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -14,37 +14,37 @@ return array(
     */
 
     'week_start_select' => 'Veldu vikudag',
-    'week_start' => 'Day the Week Starts On',
+    'week_start' => 'Dagurinn sem vika hefst á',
     'today' => 'Í dag',
     'clear' => 'Hreinsa',
     'days' => [
         'sunday' => 'Sunnudagur',
         'monday' => 'Mánudagur',
         'tuesday' => 'Þriðjudagur',
-        'wednesday' =>  'Miðvikudagur',
-        'thursday' =>  'Fimmtudagur',
-        'friday' =>  'Föstudagur',
-        'saturday' =>  'Laugardagur',
-        ],
+        'wednesday' => 'Miðvikudagur',
+        'thursday' => 'Fimmtudagur',
+        'friday' => 'Föstudagur',
+        'saturday' => 'Laugardagur',
+    ],
 
     'short_days' => [
         'sunday' => 'Sun',
         'monday' => 'Mán',
         'tuesday' => 'Þri',
-        'wednesday' =>  'Mið',
-        'thursday' =>  'Fim',
-        'friday' =>  'Fös',
-        'saturday' =>  'Lau',
+        'wednesday' => 'Mið',
+        'thursday' => 'Fim',
+        'friday' => 'Fös',
+        'saturday' => 'Lau',
     ],
 
     'min_days' => [
         'sunday' => 'Su',
         'monday' => 'Má',
         'tuesday' => 'Þr',
-        'wednesday' =>  'Mi',
-        'thursday' =>  'Fi',
-        'friday' =>  'Fö',
-        'saturday' =>  'La',
+        'wednesday' => 'Mi',
+        'thursday' => 'Fi',
+        'friday' => 'Fö',
+        'saturday' => 'La',
     ],
 
     'months' => [
@@ -77,4 +77,4 @@ return array(
         'december' => 'Des',
     ],
 
-);
+];

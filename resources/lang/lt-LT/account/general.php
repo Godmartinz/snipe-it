@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     'personal_api_keys' => 'Asmeniniai API raktai',
     'personal_access_token' => 'Asmeninis prieigos raktas',
     'personal_api_keys_success' => 'Asmeninis API raktas :key sėkmingai sukurtas',
@@ -14,4 +14,4 @@ return array(
     'no_tokens' => 'Nesate sukūrę jokių asmeninių prieigos raktų.',
     'enable_sounds' => 'Įjungti garso efektus',
     'enable_confetti' => 'Įgalinti konfeti efektus',
-);
+];

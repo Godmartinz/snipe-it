@@ -1,7 +1,8 @@
 @props([
     'count' => null,
+    'class' => false,
 ])
-@aware(['class'])
+
 
 @can('view', \App\Models\License::class)
     <x-tabs.nav-item

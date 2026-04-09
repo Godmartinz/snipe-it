@@ -26,7 +26,7 @@
 
                 <x-slot:tabpanes>
 
-                    <x-tabs.pane name="assets" class="in active">
+                    <x-tabs.pane name="assets">
                         <x-table.assets :route="route('api.assets.index', ['manufacturer_id' => $manufacturer->id, 'itemtype' => 'assets'])" />
                     </x-tabs.pane>
 
@@ -51,17 +51,15 @@
         </x-page-column>
         <x-page-column class="col-md-3">
 
-            <x-box>
-                <x-box.info-panel :infoPanelObj="$manufacturer" img_path="{{ app('manufacturers_upload_url') }}">
+            <x-box class="side-box expanded">
+                <x-info-panel :infoPanelObj="$manufacturer" img_path="{{ app('manufacturers_upload_url') }}">
 
-                    <x-slot:before_list>
+                    <x-slot:buttons>
+                        <x-button.edit :item="$manufacturer" :route="route('manufacturers.edit', $manufacturer->id)" />
+                        <x-button.delete :item="$manufacturer" />
+                    </x-slot:buttons>
 
-                        <x-button.wide-edit :item="$manufacturer" :route="route('manufacturers.edit', $manufacturer->id)" />
-                        <x-button.wide-delete :item="$manufacturer" />
-
-                    </x-slot:before_list>
-
-                </x-box.info-panel>
+                </x-info-panel>
             </x-box>
         </x-page-column>
     </x-container>

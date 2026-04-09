@@ -1,24 +1,24 @@
 <?php
 
-return array(
+return [
 
-    'disabled_assoc'  => [
-        'accessory' => 'This accessory cannot be deleted because it still has items, users, or locations associated with it',
-        'asset' => 'This asset cannot be deleted because it still has items associated with it',
-        'category' => 'This category cannot be deleted because it still has items associated with it',
-        'company' => 'This company cannot be deleted because it still has items or users associated with it',
-        'component' => 'This component cannot be deleted because it still has items associated with it',
-        'custom_field' => 'This custom field cannot be deleted because it is still associated with at least one fieldset',
-        'department' => 'This department cannot be deleted because it still has users associated with it',
-        'location' => 'This location cannot be deleted because it still has items or users associated with it',
-        'manufacturer' => 'This manufacturer cannot be deleted because it still has items associated with it',
-        'supplier' => 'This supplier cannot be deleted because it still has items associated with it',
-        'user' => 'This user cannot be deleted because it still has items associated with it',
-        'user_self' => 'You cannot delete yourself',
+    'disabled_assoc' => [
+        'accessory' => 'Този аксесоар не може да бъде изтрит, защото все още има артикули, потребители или локации свързани с него',
+        'asset' => 'Този актив не може да бъде изтрит, защото все още има артикули свързани с него',
+        'category' => 'Тази категория не може да бъде изтрита, защото все още има артикули свързани с нея',
+        'company' => 'Тази фирма не може да бъде изтрита, защото все още има артикули свързани с нея',
+        'component' => 'Този компонент не може да бъде изтрит, защото все още има артикули свързани с него',
+        'custom_field' => 'Това потребителско поле не може да бъде изтрито, защото е свързано с поне едно друго поле',
+        'department' => 'Този отдел не може да бъде изтрит, защото все още има потребители свързани с него',
+        'location' => 'Тази локация не може да бъде изтрита, защото все още има артикули свързани с нея',
+        'manufacturer' => 'Този производител не може да бъде изтрит, защото има артикули свързани с него',
+        'supplier' => 'Този доставчик не може да бъде изтрит, защото има аритукли свързани с него',
+        'user' => 'Този потребител не може да бъде изтрит, защото има артикули исписани на негово име',
+        'user_self' => 'Не можете да изтриете себе си',
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.'
+        'user' => 'Впиши всички артикули за този потребител и го изтрий при желание. Ще можете да потвърдите това на следващата страница.',
     ],
 
-);
+];

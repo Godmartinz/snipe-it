@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class UpdateAccessoryTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    public function test_requires_permission()
     {
         $accessory = Accessory::factory()->create();
 
@@ -24,7 +24,7 @@ class UpdateAccessoryTest extends TestCase implements TestsFullMultipleCompanies
             ->assertForbidden();
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
@@ -55,7 +55,7 @@ class UpdateAccessoryTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertEquals('New Name', $accessoryC->fresh()->name);
     }
 
-    public function testCanUpdateAccessoryViaPatch()
+    public function test_can_update_accessory_via_patch()
     {
         [$categoryA, $categoryB] = Category::factory()->count(2)->create();
         [$companyA, $companyB] = Company::factory()->count(2)->create();
