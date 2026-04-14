@@ -267,29 +267,39 @@ abstract class CustomSheetLabel extends CustomLabel
 
     public function seedFromTemplate($template): static
     {
-        $this->unit = $template->getUnit();
+        $sourceUnit = $template->getUnit();
 
-        $this->pageWidth = $template->getPageWidth();
-        $this->pageHeight = $template->getPageHeight();
+        $convert = function ($value) use ($sourceUnit) {
+            if ($value === null) {
+                return null;
+            }
 
-        $this->pageMarginTop = $template->getPageMarginTop();
-        $this->pageMarginRight = $template->getPageMarginRight();
-        $this->pageMarginBottom = $template->getPageMarginBottom();
-        $this->pageMarginLeft = $template->getPageMarginLeft();
+            return $sourceUnit === 'in' ? $value * 25.4 : $value;
+        };
+
+        $this->unit = 'mm';
+
+        $this->pageWidth = $convert($template->getPageWidth());
+        $this->pageHeight = $convert($template->getPageHeight());
+
+        $this->pageMarginTop = $convert($template->getPageMarginTop());
+        $this->pageMarginRight = $convert($template->getPageMarginRight());
+        $this->pageMarginBottom = $convert($template->getPageMarginBottom());
+        $this->pageMarginLeft = $convert($template->getPageMarginLeft());
+
+        $this->labelWidth = $convert($template->getLabelWidth());
+        $this->labelHeight = $convert($template->getLabelHeight());
+
+        $this->labelRowSpacing = $convert($template->getLabelRowSpacing());
+        $this->labelColumnSpacing = $convert($template->getLabelColumnSpacing());
+
+        $this->labelMarginTop = $convert($template->getLabelMarginTop());
+        $this->labelMarginRight = $convert($template->getLabelMarginRight());
+        $this->labelMarginBottom = $convert($template->getLabelMarginBottom());
+        $this->labelMarginLeft = $convert($template->getLabelMarginLeft());
 
         $this->rows = $template->getRows();
         $this->columns = $template->getColumns();
-
-        $this->labelWidth = $template->getLabelWidth();
-        $this->labelHeight = $template->getLabelHeight();
-
-        $this->labelRowSpacing = $template->getLabelRowSpacing();
-        $this->labelColumnSpacing = $template->getLabelColumnSpacing();
-
-        $this->labelMarginTop = $template->getLabelMarginTop();
-        $this->labelMarginRight = $template->getLabelMarginRight();
-        $this->labelMarginBottom = $template->getLabelMarginBottom();
-        $this->labelMarginLeft = $template->getLabelMarginLeft();
 
         $this->supportAssetTag = $template->getSupportAssetTag();
         $this->support1DBarcode = $template->getSupport1DBarcode();
@@ -299,47 +309,51 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->supportTitle = $template->getSupportTitle();
 
         if (method_exists($template, 'getBarcodeSize')) {
-            $this->barcodeSize = $template->getBarcodeSize();
+            $this->barcodeSize = $convert($template->getBarcodeSize());
+        }
+
+        if (method_exists($template, 'get2DBarcodeSize')) {
+            $this->barcode2DSize = $convert($template->get2DBarcodeSize());
         }
 
         if (method_exists($template, 'getBarcodeMargin')) {
-            $this->barcodeMargin = $template->getBarcodeMargin();
+            $this->barcodeMargin = $convert($template->getBarcodeMargin());
         }
 
         if (method_exists($template, 'getLogoMaxWidth')) {
-            $this->logoMaxWidth = $template->getLogoMaxWidth();
+            $this->logoMaxWidth = $convert($template->getLogoMaxWidth());
         }
 
         if (method_exists($template, 'getLogoMargin')) {
-            $this->logoMargin = $template->getLogoMargin();
+            $this->logoMargin = $convert($template->getLogoMargin());
         }
 
         if (method_exists($template, 'getTagSize')) {
-            $this->tagSize = $template->getTagSize();
+            $this->tagSize = $convert($template->getTagSize());
         }
 
         if (method_exists($template, 'getTitleSize')) {
-            $this->titleSize = $template->getTitleSize();
+            $this->titleSize = $convert($template->getTitleSize());
         }
 
         if (method_exists($template, 'getTitleMargin')) {
-            $this->titleMargin = $template->getTitleMargin();
+            $this->titleMargin = $convert($template->getTitleMargin());
         }
 
         if (method_exists($template, 'getLabelSize')) {
-            $this->labelSize = $template->getLabelSize();
+            $this->labelSize = $convert($template->getLabelSize());
         }
 
         if (method_exists($template, 'getLabelMargin')) {
-            $this->labelMargin = $template->getLabelMargin();
+            $this->labelMargin = $convert($template->getLabelMargin());
         }
 
         if (method_exists($template, 'getFieldSize')) {
-            $this->fieldSize = $template->getFieldSize();
+            $this->fieldSize = $convert($template->getFieldSize());
         }
 
         if (method_exists($template, 'getFieldMargin')) {
-            $this->fieldMargin = $template->getFieldMargin();
+            $this->fieldMargin = $convert($template->getFieldMargin());
         }
 
         return $this;
@@ -406,6 +420,12 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
     }
 
+    protected function toMm(float $value): float
+    {
+        return $this->getUnit() === 'in'
+            ? $value * 25.4
+            : $value;
+    }
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

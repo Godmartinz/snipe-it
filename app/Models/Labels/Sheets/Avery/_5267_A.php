@@ -101,11 +101,25 @@ class _5267_A extends _5267
         return true;
     }
 
+    public function get2DBarcodeSize()
+    {
+        $pa = $this->getLabelPrintableArea();
+
+        $barcode2dSize = $pa->h;
+
+        if ($this->getSupportTitle()) {
+            $barcode2dSize -= $this->getTitleSize();
+        }
+
+        return $barcode2dSize;
+    }
+
     protected function getContentEditorConfig(): array
     {
         return [
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
+            '2dbarcode_size' => $this->get2DBarcodeSize(),
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'field_value_font_size' => $this->getFieldSize(),
