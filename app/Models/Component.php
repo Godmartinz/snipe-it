@@ -8,6 +8,7 @@ use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\ComponentPresenter;
 use App\Presenters\Presentable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -115,6 +116,7 @@ class Component extends SnipeModel
         'location' => ['name'],
         'supplier' => ['name'],
         'manufacturer' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     public static function booted()
@@ -164,20 +166,24 @@ class Component extends SnipeModel
         return $this->belongsToMany(Asset::class, 'components_assets')->withPivot('id', 'assigned_qty', 'created_at', 'created_by', 'note');
     }
 
-    /**
-     * Establishes the component -> admin user relationship
-     *
-     * @todo this is probably not needed - refactor
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v3.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
+    protected function calculatedPurchaseCost(): Attribute
     {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
+        return Attribute::make(
+            get: function ($value) {
+                $unitPurchaseCost = $this->getRawOriginal('purchase_cost');
+                $assignedQty = $this->pivot?->assigned_qty;
+
+                if ($unitPurchaseCost === null) {
+                    return $assignedQty !== null ? 0.0 : null;
+                }
+
+                if ($assignedQty !== null) {
+                    return (float) $unitPurchaseCost * (int) $assignedQty;
+                }
+
+                return (float) $unitPurchaseCost;
+            }
+        );
     }
 
     /**
@@ -409,93 +415,6 @@ class Component extends SnipeModel
      * BEGIN QUERY SCOPES
      * -----------------------------------------------
      **/
-
-    /**
-     * Query builder scope to search on text filters for complex Bootstrap Tables API
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  text  $filter  JSON array of search keys and terms
-     * @return Builder Modified query builder
-     */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $fieldname => $search_val) {
-
-                    if ($fieldname == 'name') {
-                        $query->where('components.name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('components.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'model_number') {
-                        $query->where('components.model_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'order_number') {
-                        $query->where('components.order_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'serial') {
-                        $query->where('components.serial', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'serial') {
-                        $query->where('components.serial', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'purchase_cost') {
-                        $query->where('components.purchase_cost', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'location') {
-                        $query->whereHas(
-                            'location', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'manufacturer') {
-                        $query->whereHas(
-                            'manufacturer', function ($query) use ($search_val) {
-                                $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'supplier') {
-                        $query->whereHas(
-                            'supplier', function ($query) use ($search_val) {
-                                $query->where('suppliers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'category') {
-                        $query->whereHas(
-                            'category', function ($query) use ($search_val) {
-                                $query->where('categories.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'company') {
-                        $query->whereHas(
-                            'company', function ($query) use ($search_val) {
-                                $query->where('companies.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                }
-
-            }
-        );
-    }
 
     /**
      * Query builder scope to order on company

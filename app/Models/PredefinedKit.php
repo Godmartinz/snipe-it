@@ -143,12 +143,9 @@ class PredefinedKit extends SnipeModel
      *
      * @var array
      */
-    protected $searchableRelations = [];
-
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     /**
      * Establishes the kits -> models relationship

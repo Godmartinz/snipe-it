@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Accessory;
 use App\Models\Asset;
+use App\Models\AssetModel;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\License;
@@ -13,6 +14,7 @@ use App\Models\Setting;
 use App\Models\SnipeSCIMConfig;
 use App\Models\User;
 use App\Observers\AccessoryObserver;
+use App\Observers\AssetModelObserver;
 use App\Observers\AssetObserver;
 use App\Observers\ComponentObserver;
 use App\Observers\ConsumableObserver;
@@ -76,6 +78,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         Accessory::observe(AccessoryObserver::class);
         Asset::observe(AssetObserver::class);
+        AssetModel::observe(AssetModelObserver::class);
         Component::observe(ComponentObserver::class);
         Consumable::observe(ConsumableObserver::class);
         License::observe(LicenseObserver::class);

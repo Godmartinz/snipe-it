@@ -98,7 +98,7 @@ class ImageUploadRequest extends Request
             $image = $this->file($form_fieldname);
         }
 
-        if (isset($image)) {
+        if ((isset($image)) && ($image != '')) {
 
             $ext = $image->guessExtension();
             $file_name = $type.'-'.$form_fieldname.($item->id ?? '-'.$item->id).'-'.str_random(10).'.'.$ext;

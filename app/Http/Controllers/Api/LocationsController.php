@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\LocationsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -31,7 +33,7 @@ class LocationsController extends Controller
      *
      * @return Response
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
@@ -106,8 +108,9 @@ class LocationsController extends Controller
             $locations = Company::scopeCompanyables($locations);
         }
 
-        if ($request->filled('search')) {
-            $locations = $locations->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $locations->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {
@@ -308,7 +311,7 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'status', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
 
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
@@ -318,7 +321,7 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'status', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
 
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
@@ -454,5 +457,17 @@ class LocationsController extends Controller
         $paginated_results = new LengthAwarePaginator($locations_formatted->forPage($page, 500), $locations_formatted->count(), 500, $page, []);
 
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+    }
+
+    public function history(Request $request, Location $location): JsonResponse|array
+    {
+        $this->authorize('history', $location);
+        $history = $location->getHistory($request);
+        $total = $location->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

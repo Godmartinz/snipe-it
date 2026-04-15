@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Permissions\NormalizePermissionsPayloadAction;
 use App\Helpers\Helper;
 use App\Models\Group;
 use App\Models\User;
@@ -79,14 +80,12 @@ class GroupsController extends Controller
         // create a new group instance
         $group = new Group;
         $group->name = $request->input('name');
-
-        if ($request->filled('permission')) {
-            $group->permissions = json_encode($request->array('permission'));
-        } else {
-            $group->permissions = null;
-        }
-
-        $group->permissions = json_encode($request->input('permission'));
+        $group->permissions = json_encode(
+            Helper::selectedPermissionsArray(
+                config('permissions'),
+                NormalizePermissionsPayloadAction::run($request->input('permission'))
+            )
+        );
         $group->created_by = auth()->id();
         $group->notes = $request->input('notes');
 
@@ -167,14 +166,16 @@ class GroupsController extends Controller
     public function update(Request $request, Group $group): RedirectResponse
     {
         $group->name = $request->input('name');
-
-        if ($request->filled('permission')) {
-            $group->permissions = json_encode($request->array('permission'));
-        } else {
-            $group->permissions = null;
-        }
-
         $group->notes = $request->input('notes');
+
+        if ($request->has('permission')) {
+            $group->permissions = json_encode(
+                Helper::selectedPermissionsArray(
+                    config('permissions'),
+                    NormalizePermissionsPayloadAction::run($request->input('permission'))
+                )
+            );
+        }
 
         if (! config('app.lock_passwords')) {
             if ($group->save()) {

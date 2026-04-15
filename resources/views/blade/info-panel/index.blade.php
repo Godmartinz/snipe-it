@@ -8,7 +8,7 @@
 <div class="box-header with-border" style="padding-top: 0;">
 
     @if (isset($buttons))
-        <div class="row hidden-print" style="padding-left: 10px">
+        <div class="row hidden-print" style="padding-left: 5px">
             {{ $buttons }}
         </div>
     @endif
@@ -21,16 +21,37 @@
 
         {{--<x-info-panel.image />--}}
 
+        <div class="text-center">
 
-        <a href="{{ $infoPanelObj->getImageUrl() }}" data-toggle="lightbox" data-type="image">
-            <img src="{{ $infoPanelObj->getImageUrl() }}" class="profile-user-img img-responsive img-thumbnail" alt="{{ $infoPanelObj->name }}" style=" width: 100% !important; margin-bottom: 10px;">
+            @if (method_exists($infoPanelObj, 'isSuperUser'))
+
+                @if (($infoPanelObj->isSuperUser()))
+                    <x-icon type="superadmin" class="fa-2x text-danger"/>
+                    <div class="text-danger" style="font-weight: bold">
+                        {{ strtolower(trans('general.superuser')) }}
+                    </div>
+
+                @elseif ($infoPanelObj->isAdmin())
+                    <x-icon type="admin" class="fa-2x text-warning"/>
+                    <div class="text-warning" style="font-weight: bold">
+                        {{ strtolower(trans('general.admin_user')) }}
+                    </div>
+                @endif
+
+            @endif
+
+                <a href="{{ $infoPanelObj->getImageUrl($img_path) }}" data-toggle="lightbox" data-type="image">
+                    <img src="{{ $infoPanelObj->getImageUrl($img_path) }}" class="img-responsive img-thumbnail" alt="{{ $infoPanelObj->name }}" style="max-width: 300px !important; width: 100% !important; margin-bottom: 10px;">
             </a>
+        </div>
         <br>
     @endif
 
 
     @if ($infoPanelObj->present()->displayAddress)
-        {!! nl2br($infoPanelObj->present()->displayAddress) !!}
+        <x-copy-to-clipboard class="pull-right" copy_what="address">
+            {!! nl2br($infoPanelObj->present()->displayAddress) !!}
+        </x-copy-to-clipboard>
         <br><br>
     @endif
 
@@ -44,18 +65,20 @@
 
         {{ $slot }}
 
-        <x-info-element icon_type="notes" title="{{ trans('general.notes') }}">
-            {!! nl2br(Helper::parseEscapedMarkedownInline($infoPanelObj->notes)) !!}
-        </x-info-element>
+        @if ($infoPanelObj->notes)
+            <x-info-element icon_type="notes" title="{{ trans('general.notes') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="notes">{!! nl2br(Helper::parseEscapedMarkedownInline($infoPanelObj->notes)) !!}</x-copy-to-clipboard>
+            </x-info-element>
+        @endif
 
         @if ($infoPanelObj->serial)
-            @can('viewKeys', $infoPanelObj)
+            @if(($infoPanelObj::class != "App\Models\License") || (Gate::allows('viewKeys', $infoPanelObj)))
                 <x-info-element icon_type="number" title="{{ trans('general.serial_number') }}">
                     <x-copy-to-clipboard class="pull-right" copy_what="license_key">
                         <code>{{ $infoPanelObj->serial }}</code>
                     </x-copy-to-clipboard>
                 </x-info-element>
-            @endcan
+            @endif
         @endif
 
 
@@ -93,13 +116,21 @@
                     {!!  $infoPanelObj->model->present()->formattedNameLink !!}
                 </x-copy-to-clipboard>
             </x-info-element>
-        @endif
 
-        @if ($infoPanelObj->model_number)
+            <!-- This is an asset, so look into the model for the model number -->
             <x-info-element icon_type="number" title="{{ trans('general.model_no') }}">
                 {{ trans('general.model_no') }}
                 <x-copy-to-clipboard copy_what="model_number" class="pull-right">
-                {{ $infoPanelObj->model_number }}
+                    {{ $infoPanelObj->model->model_number }}
+                </x-copy-to-clipboard>
+            </x-info-element>
+
+        @elseif ($infoPanelObj->model_number)
+            <!-- This is not an asset (with a model) so just grab it off the object -->
+            <x-info-element icon_type="number" title="{{ trans('general.model_no') }}">
+                {{ trans('general.model_no') }}
+                <x-copy-to-clipboard copy_what="model_number" class="pull-right">
+                    {{ $infoPanelObj->model_number }}
                 </x-copy-to-clipboard>
             </x-info-element>
         @endif
@@ -170,7 +201,11 @@
         @if ($infoPanelObj->order_number)
             <x-info-element icon_type="order" title="{{ trans('general.order_number') }}">
                 <x-copy-to-clipboard copy_what="order_number" class="pull-right">
-                    {{ $infoPanelObj->order_number }}
+                    @if ($infoPanelObj::class == "App\Models\Asset")
+                        <a href="{{ route('hardware.index', ['order_number' => $infoPanelObj->order_number]) }}">{{ $infoPanelObj->order_number }}</a>
+                    @else
+                        {{ $infoPanelObj->order_number }}
+                    @endif
                 </x-copy-to-clipboard>
             </x-info-element>
         @endif
@@ -186,34 +221,44 @@
 
         @if ($infoPanelObj->company)
             <x-info-element icon_type="company" icon_color="{{ $infoPanelObj->company->tag_color }}" title="{{ trans('general.company') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="company">
                 {!!  $infoPanelObj->company->present()->nameUrl !!}
+                </x-copy-to-clipboard>
+            </x-info-element>
+        @endif
+
+        @if ($infoPanelObj->department)
+            <x-info-element icon_type="department" icon_color="{{ $infoPanelObj->department->tag_color }}" title="{{ trans('general.department') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="department">
+                    {!!  $infoPanelObj->department->present()->nameUrl !!}
+                </x-copy-to-clipboard>
             </x-info-element>
         @endif
 
         @if ($infoPanelObj->category)
             <x-info-element icon_type="category" icon_color="{{ $infoPanelObj->category->tag_color }}" title="{{ trans('general.category') }}">
-                {!!  $infoPanelObj->category->present()->formattedNameLink !!}
+                <x-copy-to-clipboard class="pull-right" copy_what="category">{!!  $infoPanelObj->category->present()->nameUrl !!}</x-copy-to-clipboard>
             </x-info-element>
         @endif
+
 
         @if ($infoPanelObj->category_type)
             <x-info-element icon_type="{{ $infoPanelObj->category_type }}" title="{{ trans('general.type') }}">
-                {{ $infoPanelObj->category_type }}
+                <x-copy-to-clipboard class="pull-right" copy_what="category_type">{{ $infoPanelObj->category_type }}</x-copy-to-clipboard>
             </x-info-element>
         @endif
-
 
 
         @if ($infoPanelObj->location)
             <x-info-element icon_type="location" icon_color="{{ $infoPanelObj->location->tag_color }}" title="{{ trans('general.location') }}">
-                {!!  $infoPanelObj->location->present()->nameUrl !!}
+                <x-copy-to-clipboard class="pull-right" copy_what="location">{!!  $infoPanelObj->location->present()->nameUrl !!}</x-copy-to-clipboard>
             </x-info-element>
         @endif
 
 
         @if ($infoPanelObj->manager)
             <x-info-element icon_type="manager" title="{{ trans('admin/users/table.manager') }}">
-                {!!  $infoPanelObj->manager->present()->nameUrl !!}
+                <x-copy-to-clipboard class="pull-right" copy_what="manager">{!!  $infoPanelObj->manager->present()->nameUrl !!}</x-copy-to-clipboard>
             </x-info-element>
         @endif
 
@@ -230,8 +275,19 @@
         <x-info-panel.manufacturer :asset="$infoPanelObj" :manufacturer="($infoPanelObj->manufacturer ?? $infoPanelObj->model?->manufacturer)"/>
 
         @if ((isset($infoPanelObj->parent)) && ($infoPanelObj->parent))
+            @php
+                $locationAncestors = [];
+                $ancestorCursor = $infoPanelObj->parent;
+
+                while ($ancestorCursor) {
+                    array_unshift($locationAncestors, $ancestorCursor);
+                    $ancestorCursor = $ancestorCursor->parent;
+                }
+            @endphp
             <x-info-element icon_type="parent" title="{{ trans('admin/locations/table.parent') }}">
-                <a href="{{ route('locations.show', $infoPanelObj->parent->id) }}">{{ $infoPanelObj->parent->display_name }}</a>
+                @foreach ($locationAncestors as $ancestor)
+                    <a href="{{ route('locations.show', $ancestor->id) }}">{{ $ancestor->display_name }}</a>@if (! $loop->last) &rsaquo; @endif
+                @endforeach
             </x-info-element>
         @endif
 
@@ -254,18 +310,34 @@
             </x-info-element>
         @endif
 
+        @if ($infoPanelObj->email)
+            <x-info-element icon_type="email" title="{{ trans('general.email') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="email">
+                    <x-info-element.email title="{{ trans('general.email') }}">
+                        {{ $infoPanelObj->email }}
+                    </x-info-element.email>
+                </x-copy-to-clipboard>
+            </x-info-element>
+        @endif
 
-        <x-info-element icon_type="email" title="{{ trans('general.email') }}">
-            <x-info-element.email title="{{ trans('general.email') }}">
-                {{ $infoPanelObj->email }}
-            </x-info-element.email>
-        </x-info-element>
 
         @if ($infoPanelObj->phone)
             <x-info-element icon_type="phone" title="{{ trans('general.phone') }}">
-                <x-info-element.phone>
+                <x-copy-to-clipboard class="pull-right" copy_what="phone">
+                    <x-info-element.phone>
                     {{ $infoPanelObj->phone }}
-                </x-info-element.phone>
+                    </x-info-element.phone>
+                </x-copy-to-clipboard>
+            </x-info-element>
+        @endif
+
+        @if ($infoPanelObj->mobile)
+            <x-info-element icon_type="mobile" title="{{ trans('admin/users/table.mobile') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="mobile">
+                    <x-info-element.phone>
+                        {{ $infoPanelObj->mobile }}
+                    </x-info-element.phone>
+                </x-copy-to-clipboard>
             </x-info-element>
         @endif
 
@@ -283,11 +355,13 @@
             </x-info-element.url>
         </x-info-element>
 
-        <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
-            <x-info-element.url>
-                {{ $infoPanelObj->support_url }}
-            </x-info-element.url>
-        </x-info-element>
+        @if ($infoPanelObj->manufacturer)
+            <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->present()->dynamicUrl($infoPanelObj->manufacturer->support_url) }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
 
 
         @if (($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))
@@ -302,12 +376,12 @@
         @if ((($infoPanelObj->address!='') && ($infoPanelObj->city!='')) || ($infoPanelObj->state!='') || ($infoPanelObj->country!=''))
             <x-info-element>
                 <a class="btn btn-sm btn-theme" href="https://maps.google.com/?q={{ urlencode($infoPanelObj->address.','. $infoPanelObj->city.','.$infoPanelObj->state.','.$infoPanelObj->country.','.$infoPanelObj->zip) }}" target="_blank">
-                    {!! trans('admin/locations/message.open_map', ['map_provider_icon' => '<i class="fa-brands fa-google hidden-print" aria-hidden="true"></i>']) !!}
+                    <x-icon type="google" class="hidden-print"/>
                     <x-icon type="external-link"/>
                 </a>
 
                 <a class="btn btn-sm btn-theme"  href="https://maps.apple.com/?q={{ urlencode($infoPanelObj->address.','. $infoPanelObj->city.','.$infoPanelObj->state.','.$infoPanelObj->country.','.$infoPanelObj->zip) }}" target="_blank">
-                    {!! trans('admin/locations/message.open_map', ['map_provider_icon' => '<i class="fa-brands fa-apple hidden-print" aria-hidden="true"></i>']) !!}
+                    <x-icon type="apple" class="hidden-print"/>
                     <x-icon type="external-link"/>
                 </a>
             </x-info-element>
@@ -338,7 +412,7 @@
             <x-info-element>
                 <x-icon type="calendar" class="fa-fw" title="{{ trans('general.purchase_date') }}" />
                 {{ trans('general.purchased_plain') }}
-                {{ Helper::getFormattedDateObject($infoPanelObj->purchase_date, 'datetime', false) }} -
+                {{ Helper::getFormattedDateObject($infoPanelObj->purchase_date, 'date', false) }} -
                 <span class="text-muted">{{ Carbon::parse($infoPanelObj->purchase_date)->diffForHumans(['parts' => 2]) }}</span>
             </x-info-element>
         @endif

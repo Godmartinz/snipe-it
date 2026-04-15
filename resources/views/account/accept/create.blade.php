@@ -146,7 +146,6 @@
         @if ($snipeSettings->require_accept_signature=='1')
 
         var wrapper = document.getElementById("signature-pad"),
-            clearButton = wrapper.querySelector("[data-action=clear]"),
             saveButton = wrapper.querySelector("[data-action=save]"),
             canvas = wrapper.querySelector("canvas"),
             signaturePad;

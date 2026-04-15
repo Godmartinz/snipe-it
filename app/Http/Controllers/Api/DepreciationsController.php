@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Transformers\DepreciationsTransformer;
 use App\Models\Depreciation;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +19,7 @@ class DepreciationsController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Depreciation::class);
         $allowed_columns = [
@@ -33,14 +34,15 @@ class DepreciationsController extends Controller
             'licenses_count',
         ];
 
-        $depreciations = Depreciation::select('id', 'name', 'months', 'depreciation_min', 'depreciation_type', 'created_at', 'updated_at', 'created_by')
+        $depreciations = Depreciation::select(['id', 'name', 'months', 'depreciation_min', 'depreciation_type', 'created_at', 'updated_at', 'created_by'])
             ->with('adminuser')
             ->withCount('assets as assets_count')
             ->withCount('models as models_count')
             ->withCount('licenses as licenses_count');
 
-        if ($request->filled('search')) {
-            $depreciations = $depreciations->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $depreciations->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits

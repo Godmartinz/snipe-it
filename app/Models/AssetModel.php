@@ -85,10 +85,12 @@ class AssetModel extends SnipeModel
      * @var array
      */
     protected $searchableAttributes = [
-        'name',
-        'model_number',
-        'notes',
+        'created_at',
         'eol',
+        'min_amt',
+        'model_number',
+        'name',
+        'notes',
     ];
 
     /**
@@ -100,6 +102,20 @@ class AssetModel extends SnipeModel
         'depreciation' => ['name'],
         'category' => ['name'],
         'manufacturer' => ['name'],
+        'fieldset' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
+
+    /**
+     * Computed aliases (withCount/withSum) that can be searched via TextSearch filters.
+     *
+     * @var array
+     */
+    protected $searchableCounts = [
+        'assets_count',
+        'remaining',
+        'assets_assigned_count',
+        'assets_archived_count',
     ];
 
     protected static function booted(): void
@@ -147,6 +163,7 @@ class AssetModel extends SnipeModel
         if ($this->availableAssets()->count() == 0) {
             return 0;
         }
+
         return $this->availableAssets()->count() / $this->assets()->count() * 100;
     }
 
@@ -262,71 +279,10 @@ class AssetModel extends SnipeModel
     }
 
     /**
-     * Get user who created the item
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v1.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
-    }
-
-    /**
      * -----------------------------------------------
      * BEGIN QUERY SCOPES
      * -----------------------------------------------
      **/
-
-    /**
-     * Query builder scope to search on text filters for complex Bootstrap Tables API
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  text  $filter  JSON array of search keys and terms
-     * @return Builder Modified query builder
-     */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $fieldname => $search_val) {
-
-                    if ($fieldname == 'name') {
-                        $query->where('models.name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('models.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'model_number') {
-                        $query->where('models.model_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'category') {
-                        $query->whereHas(
-                            'category', function ($query) use ($search_val) {
-                                $query->where('categories.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'manufacturer') {
-                        $query->whereHas(
-                            'manufacturer', function ($query) use ($search_val) {
-                                $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                }
-
-            }
-        );
-    }
 
     /**
      * scopeInCategory

@@ -95,7 +95,7 @@ class UpdateAssetTest extends TestCase
         $this->assertEquals('1', $updatedAsset->requestable);
         $this->assertTrue($updatedAsset->defaultLoc->is($rtdLocation));
         $this->assertEquals('1234567890', $updatedAsset->serial);
-        $this->assertTrue($updatedAsset->assetstatus->is($status));
+        $this->assertTrue($updatedAsset->status->is($status));
         $this->assertTrue($updatedAsset->supplier->is($supplier));
         $this->assertEquals(10, $updatedAsset->warranty_months);
         // $this->assertEquals('2023-09-03 00:00:00', $updatedAsset->last_audit_date->format('Y-m-d H:i:s'));

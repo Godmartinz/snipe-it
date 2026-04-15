@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Permissions\NormalizePermissionsPayloadAction;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Transformers\GroupsTransformer;
 use App\Models\Group;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +20,7 @@ class GroupsController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('superadmin');
 
@@ -26,8 +28,9 @@ class GroupsController extends Controller
 
         $groups = Group::select(['id', 'name', 'permissions', 'notes', 'created_at', 'updated_at', 'created_by'])->with('adminuser')->withCount('users as users_count');
 
-        if ($request->filled('search')) {
-            $groups = $groups->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $groups->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {
@@ -75,14 +78,17 @@ class GroupsController extends Controller
     {
         $this->authorize('superadmin');
         $group = new Group;
-        // Get all the available permissions
-        $permissions = json_encode(config('permissions'));
-        $groupPermissions = Helper::selectedPermissionsArray($permissions, $permissions);
+        $defaultPermissions = Helper::selectedPermissionsArray(config('permissions'), config('permissions'));
 
-        $group->name = $request->input('name');
+        $requestedPermissions = $request->has('permissions')
+            ? NormalizePermissionsPayloadAction::run($request->input('permissions'))
+            : $defaultPermissions;
+
+        $group->fill($request->only(['name', 'notes']));
         $group->created_by = auth()->id();
-        $group->notes = $request->input('notes');
-        $group->permissions = json_encode($request->input('permissions', $groupPermissions));
+        $group->permissions = json_encode(
+            Helper::selectedPermissionsArray(config('permissions'), $requestedPermissions)
+        );
 
         if ($group->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new GroupsTransformer)->transformGroup($group), trans('admin/groups/message.success.create')));
@@ -122,9 +128,18 @@ class GroupsController extends Controller
         $this->authorize('superadmin');
         $group = Group::findOrFail($id);
 
-        $group->name = $request->input('name');
-        $group->notes = $request->input('notes');
-        $group->permissions = $request->input('permissions'); // Todo - some JSON validation stuff here
+        // Fill only the keys present in the request, so PATCH skips absent fields naturally.
+        $group->fill($request->only(['name', 'notes']));
+
+        // Preserve existing permissions when omitted from PATCH/PUT payload.
+        if ($request->has('permissions')) {
+            $group->permissions = json_encode(
+                Helper::selectedPermissionsArray(
+                    config('permissions'),
+                    NormalizePermissionsPayloadAction::run($request->input('permissions'))
+                )
+            );
+        }
 
         if ($group->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new GroupsTransformer)->transformGroup($group), trans('admin/groups/message.success.update')));

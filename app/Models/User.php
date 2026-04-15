@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
@@ -167,6 +168,17 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'groups' => ['name'],
         'company' => ['name'],
         'manager' => ['first_name', 'last_name', 'username', 'display_name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
+
+    protected $searchableCounts = [
+        'accessories_count',
+        'assets_count',
+        'licenses_count',
+        'consumables_count',
+        'accessories_count',
+        'manages_users_count',
+        'manages_locations_count',
     ];
 
     /**
@@ -196,11 +208,55 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         static::forceDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->forceDelete();
+            $user->purgeAssociatedPassportTokens();
         });
 
         static::softDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->delete();
+            $user->revokeAssociatedPassportTokens();
         });
+    }
+
+    /**
+     * Revoke all Passport access/refresh tokens associated with this user.
+     */
+    private function revokeAssociatedPassportTokens(): void
+    {
+        $accessTokenIds = DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->pluck('id');
+
+        if ($accessTokenIds->isEmpty()) {
+            return;
+        }
+
+        DB::table('oauth_access_tokens')
+            ->whereIn('id', $accessTokenIds)
+            ->update(['revoked' => true]);
+
+        DB::table('oauth_refresh_tokens')
+            ->whereIn('access_token_id', $accessTokenIds)
+            ->update(['revoked' => true]);
+    }
+
+    /**
+     * Hard-delete all Passport access/refresh tokens associated with this user.
+     */
+    private function purgeAssociatedPassportTokens(): void
+    {
+        $accessTokenIds = DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->pluck('id');
+
+        if ($accessTokenIds->isNotEmpty()) {
+            DB::table('oauth_refresh_tokens')
+                ->whereIn('access_token_id', $accessTokenIds)
+                ->delete();
+        }
+
+        DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->delete();
     }
 
     /**
@@ -524,6 +580,12 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function reportTemplates(): HasMany
     {
         return $this->hasMany(ReportTemplate::class, 'created_by');
+    }
+
+    public function getImageUrl($path = null)
+    {
+        return $this->present()->gravatar();
+
     }
 
     /**
@@ -940,137 +1002,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
 
         return new \stdClass;
-    }
-
-    /**
-     * Query builder scope to search on text filters for complex Bootstrap Tables API
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  text  $filter  JSON array of search keys and terms
-     * @return \Illuminate\Database\Query\Builder Modified query builder
-     */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $fieldname => $search_val) {
-
-                    if ($fieldname == 'first_name') {
-                        $query->where('users.first_name', 'LIKE', '%'.$search_val.'%');
-                    }
-                    if ($fieldname == 'last_name') {
-                        $query->where('users.last_name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'display_name') {
-                        $query->where('users.display_name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'name') {
-                        $query->where('users.last_name', 'LIKE', '%'.$search_val.'%')
-                            ->orWhere('users.first_name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'username') {
-                        $query->where('users.username', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'email') {
-                        $query->where('users.email', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'phone') {
-                        $query->where('users.phone', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'mobile') {
-                        $query->where('users.mobile', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'phone') {
-                        $query->where('users.phone', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'jobtitle') {
-                        $query->where('users.jobtitle', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'created_at') {
-                        $query->where('users.created_at', '=', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'updated_at') {
-                        $query->where('users.updated_at', '=', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'start_date') {
-                        $query->where('users.start_date', '=', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'end_date') {
-                        $query->where('users.end_date', '=', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'employee_num') {
-                        $query->where('users.employee_num', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'locale') {
-                        $query->where('users.locale', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'address') {
-                        $query->where('users.address', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'state') {
-                        $query->where('users.state', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'zip') {
-                        $query->where('users.zip', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'country') {
-                        $query->where('users.country', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'vip') {
-                        $query->where('users.vip', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'remote') {
-                        $query->where('users.remote', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'start_date') {
-                        $query->where('users.purchase_date', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('users.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'location') {
-                        $query->whereHas(
-                            'location', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'company') {
-                        $query->whereHas(
-                            'company', function ($query) use ($search_val) {
-                                $query->where('companies.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                }
-
-            }
-        );
     }
 
     /**

@@ -639,6 +639,10 @@ class Importer extends Component
                 'color code',
                 trans('general.tag_color'),
             ],
+            'checkout_class' => [
+                'checkout type',
+                'checkout class',
+            ],
         ];
 
         $this->columnOptions[''] = $this->getColumns(''); // blank mode? I don't know what this is supposed to mean

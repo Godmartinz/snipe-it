@@ -540,7 +540,7 @@
                         </td>
                         <td>
                           <x-icon type="circle-solid" class="text-blue" />
-                          {{ $asset->assetstatus?->name }}
+                            {{ $asset->status?->name }}
                           <label class="label label-default">{{ trans('general.deployed') }}</label>
                         </td>
                         <td>

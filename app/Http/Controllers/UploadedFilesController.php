@@ -37,7 +37,7 @@ class UploadedFilesController extends Controller
 
         // Check the permissions to make sure the user can view the object
         $object = self::$map_object_type[$object_type]::withTrashed()->find($id);
-        $this->authorize('update', $object);
+        $this->authorize('files', $object);
 
         if (! $object) {
             return redirect()->back()->withFragment('files')->with('error', trans('general.file_upload_status.invalid_object'));
@@ -85,7 +85,7 @@ class UploadedFilesController extends Controller
     {
         // Check the permissions to make sure the user can view the object
         $object = self::$map_object_type[$object_type]::withTrashed()->find($id);
-        $this->authorize('view', $object);
+        $this->authorize('files', $object);
 
         if (! $object) {
             return redirect()->back()->withFragment('files')->with('error', trans('general.file_upload_status.invalid_object'));
@@ -96,7 +96,7 @@ class UploadedFilesController extends Controller
             return redirect()->back()->withFragment('files')->with('error', trans('general.file_upload_status.invalid_id'));
         }
 
-        if (! Storage::exists(self::$map_storage_path[$object_type].'/'.$log->filename)) {
+        if (! Storage::exists(self::$map_storage_path[$object_type].$log->filename)) {
             return redirect()->back()->withFragment('files')->with('error', trans('general.file_upload_status.file_not_found'));
         }
 
@@ -105,10 +105,10 @@ class UploadedFilesController extends Controller
                 'Content-Disposition' => 'inline',
             ];
 
-            return Storage::download(self::$map_storage_path[$object_type].'/'.$log->filename, $log->filename, $headers);
+            return Storage::download(self::$map_storage_path[$object_type].$log->filename, $log->filename, $headers);
         }
 
-        return StorageHelper::downloader(self::$map_storage_path[$object_type].'/'.$log->filename);
+        return StorageHelper::downloader(self::$map_storage_path[$object_type].$log->filename);
 
     }
 
@@ -129,7 +129,7 @@ class UploadedFilesController extends Controller
 
         // Check the permissions to make sure the user can view the object
         $object = self::$map_object_type[$object_type]::withTrashed()->find($id);
-        $this->authorize('update', $object);
+        $this->authorize('files', $object);
 
         if (! $object) {
             return redirect()->back()->withFragment('files')->with('error', trans('general.file_upload_status.invalid_object'));
@@ -141,8 +141,8 @@ class UploadedFilesController extends Controller
 
         if ($log) {
             // Check the file actually exists, and delete it
-            if (Storage::exists(self::$map_storage_path[$object_type].'/'.$log->filename)) {
-                Storage::delete(self::$map_storage_path[$object_type].'/'.$log->filename);
+            if (Storage::exists(self::$map_storage_path[$object_type].$log->filename)) {
+                Storage::delete(self::$map_storage_path[$object_type].$log->filename);
             }
             // Delete the record of the file
             if ($log->logUploadDelete($object, $log->filename)) {

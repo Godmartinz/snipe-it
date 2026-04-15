@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Permissions\NormalizePermissionsPayloadAction;
+use App\Actions\Permissions\PreserveUnauthorizedPrivilegedPermissionsAction;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
@@ -171,10 +173,9 @@ class UsersController extends Controller
 
         }
 
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $users->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $users->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $users->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('activated')) {
@@ -437,27 +438,17 @@ class UsersController extends Controller
     {
         $this->authorize('create', User::class);
 
+        $authenticatedUser = auth()->user();
         $user = new User;
         $user->fill($request->all());
         $user->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $user->created_by = auth()->id();
 
         if ($request->has('permissions')) {
-            $permissions_array = $request->input('permissions');
-
-            if (! auth()->user()->isSuperUser()) {
-                if ((is_array($permissions_array)) && (array_key_exists('superuser', $permissions_array))) {
-                    unset($permissions_array['superuser']);
-                }
-            }
-
-            if (! auth()->user()->isAdmin()) {
-                if ((is_array($permissions_array)) && (array_key_exists('admin', $permissions_array))) {
-                    unset($permissions_array['admin']);
-                }
-            }
-
-            $user->permissions = $permissions_array;
+            $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
+                requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permissions')),
+                authenticatedUser: $authenticatedUser,
+            ));
         }
 
         //
@@ -536,6 +527,8 @@ class UsersController extends Controller
     {
         $this->authorize('update', $user);
 
+        $authenticatedUser = auth()->user();
+
         /**
          * This is a janky hack to prevent people from changing admin demo user data on the public demo.
          * The $ids 1 and 2 are special since they are seeded as superadmins in the demo seeder.
@@ -571,39 +564,14 @@ class UsersController extends Controller
             }
 
             if ($request->has('permissions')) {
-
-                $permissions_array = $request->input('permissions');
-                $orig_permissions_array = $user->decodePermissions();
-
-                // Strip out the individual superuser permission if the API user isn't a superadmin
-                if (! auth()->user()->isSuperUser()) {
-
-                    if (is_array($orig_permissions_array)) {
-                        if (array_key_exists('superuser', $orig_permissions_array)) {
-                            $permissions_array['superuser'] = $orig_permissions_array['superuser'];
-                        }
-                    }
-
-                }
-
-                // Strip out the individual admin permission if the API user isn't an admin
-                if ((! auth()->user()->isAdmin()) && (! auth()->user()->isSuperUser())) {
-
-                    if (is_array($orig_permissions_array)) {
-                        if (array_key_exists('admin', $orig_permissions_array)) {
-                            $permissions_array['admin'] = $orig_permissions_array['admin'];
-                        }
-                    }
-                }
-
-                // This is going to update the whole thing, not just what was passed
-                $user->permissions = $permissions_array;
+                // This is going to update the whole thing, not just what was passed.
+                $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
+                    requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permissions')),
+                    authenticatedUser: $authenticatedUser,
+                    originalPermissions: NormalizePermissionsPayloadAction::run($user->decodePermissions()),
+                ));
             }
 
-        }
-
-        if ($request->filled('display_name')) {
-            $user->display_name = $request->input('display_name');
         }
 
         if ($request->filled('company_id')) {
@@ -966,5 +934,17 @@ class UsersController extends Controller
 
         return response()->json(Helper::formatStandardApiResponse('success', null, $ldap_results['summary']), 200);
 
+    }
+
+    public function history(Request $request, User $user): JsonResponse|array
+    {
+        $this->authorize('history', $user);
+        $history = $user->getHistory($request);
+        $total = $user->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

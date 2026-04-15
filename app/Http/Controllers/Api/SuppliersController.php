@@ -11,6 +11,7 @@ use App\Exceptions\ItemStillHasLicenses;
 use App\Exceptions\ItemStillHasMaintenances;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Http\Transformers\SuppliersTransformer;
@@ -31,7 +32,7 @@ class SuppliersController extends Controller
      *
      * @return Response
      */
-    public function index(Request $request): array
+    public function index(FilterRequest $request): array
     {
         $this->authorize('view', Supplier::class);
         $allowed_columns = [
@@ -67,8 +68,9 @@ class SuppliersController extends Controller
             ->withCount('consumables as consumables_count')
             ->with('adminuser');
 
-        if ($request->filled('search')) {
-            $suppliers->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $suppliers->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {

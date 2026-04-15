@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\PieChartTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -23,7 +24,7 @@ class StatuslabelsController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): array
+    public function index(FilterRequest $request): array
     {
         $this->authorize('view', Statuslabel::class);
         $allowed_columns = [
@@ -38,8 +39,9 @@ class StatuslabelsController extends Controller
 
         $statuslabels = Statuslabel::with('adminuser')->withCount('assets as assets_count');
 
-        if ($request->filled('search')) {
-            $statuslabels = $statuslabels->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $statuslabels->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {

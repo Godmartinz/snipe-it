@@ -7,6 +7,10 @@ class IconHelper
     public static function icon($type)
     {
         switch ($type) {
+            case 'apple':
+                return 'fa-brands fa-apple';
+            case 'google':
+                return 'fa-brands fa-google';
             case 'checkout':
                 return 'fa-solid fa-rotate-left';
             case 'checkin':
@@ -116,7 +120,7 @@ class IconHelper
             case 'password':
                 return 'fa-solid fa-key';
             case 'api-key':
-                return 'fa-solid fa-user-secret';
+                return 'fas fa-user-secret';
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':
@@ -139,10 +143,18 @@ class IconHelper
                 return 'fa-regular fa-clipboard';
             case 'paperclip':
                 return 'fas fa-paperclip';
+            case 'files':
+                return 'fa-solid fa-file-contract';
             case 'contact-card':
                 return 'fa-regular fa-id-card';
-            case 'files':
-                return 'fa-solid fa-file-contract fa-fw';
+            case 'eula':
+            case 'eulas':
+                return 'fa-regular fa-handshake';
+            case 'star':
+            case 'vip':
+                return 'fa-solid fa-star';
+            case 'remote':
+                return 'fa-solid fa-house-laptop';
             case 'more-info':
             case 'support':
                 return 'far fa-life-ring';
@@ -213,7 +225,7 @@ class IconHelper
             case 'highlight':
                 return 'fa-solid fa-highlighter';
             case 'manager':
-                return 'fa-solid fa-building-user';
+                return 'fa-solid fa-user-tie';
             case 'company':
                 return 'fa-regular fa-building';
             case 'parent':
@@ -229,8 +241,10 @@ class IconHelper
             case 'terminates':
                 return 'fa-regular fa-calendar-xmark';
             case 'deleted-date':
+            case 'end_date':
                 return 'fa-solid fa-calendar-xmark';
             case 'expected_checkin':
+            case 'start_date':
                 return 'fa-solid fa-calendar-check';
             case 'eol':
                 return 'fa-regular fa-calendar-days';
@@ -252,6 +266,8 @@ class IconHelper
                 return 'fa-solid fa-file-invoice';
             case 'checkout-all':
                 return 'fa-solid fa-arrows-down-to-people';
+            case 'checkin-all':
+                return 'fa-solid fa-arrows-turn-right';
             case 'square-right':
                 return 'fa-regular fa-square-caret-right';
             case 'square-left':

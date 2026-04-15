@@ -35,6 +35,7 @@ class Group extends SnipeModel
      * @var bool
      */
     protected $injectUniqueIdentifier = true;
+
     protected $presenter = GroupPresenter::class;
 
     use Searchable;
@@ -45,15 +46,20 @@ class Group extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'created_at', 'notes'];
+    protected $searchableAttributes = [
+        'name',
+        'created_at',
+        'notes',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
-
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     public function isDeletable()
     {
@@ -73,20 +79,6 @@ class Group extends SnipeModel
     public function users()
     {
         return $this->belongsToMany(User::class, 'users_groups');
-    }
-
-    /**
-     * Get the user that created the group
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v6.3.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

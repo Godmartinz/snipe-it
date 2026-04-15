@@ -141,7 +141,7 @@ class ReportsController extends Controller
     {
         $this->authorize('reports.view');
         // Grab all the assets
-        $assets = Asset::with('model', 'assignedTo', 'assetstatus', 'defaultLoc', 'assetlog')
+        $assets = Asset::with('model', 'assignedTo', 'status', 'defaultLoc', 'assetlog')
             ->orderBy('created_at', 'DESC')->get();
 
         $csv = Writer::createFromFileObject(new \SplTempFileObject);
@@ -675,7 +675,7 @@ class ReportsController extends Controller
             }
 
             $assets = Asset::select('assets.*')->with(
-                'location', 'assetstatus', 'company', 'defaultLoc', 'assignedTo',
+                'location', 'status', 'company', 'defaultLoc', 'assignedTo',
                 'model.category', 'model.manufacturer', 'supplier');
 
             if ($request->filled('by_location_id')) {
@@ -1022,7 +1022,7 @@ class ReportsController extends Controller
                     }
 
                     if ($request->filled('status')) {
-                        $row[] = ($asset->assetstatus) ? $asset->assetstatus->name.' ('.$asset->present()->statusMeta.')' : '';
+                        $row[] = ($asset->status) ? $asset->status->name.' ('.$asset->present()->statusMeta.')' : '';
                     }
 
                     if ($request->filled('checkout_date')) {

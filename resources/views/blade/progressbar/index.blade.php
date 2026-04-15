@@ -26,11 +26,11 @@ if ($percent < 25) {
     <div class="progress-group">
         <span class="progress-text">{{ $text }}</span>
         <span class="progress-number">
-                        {{ $slot }}
-                        <span class="text-muted">{{ round($percent) }}%</span>
-                    </span>
+            {{ $slot }}
+            <span class="text-muted">{{ round($percent) }}%</span>
+        </span>
         <div class="progress {{ $size }}">
-            <div class="progress-bar progress-bar-{{ $color_class }}" style="width: {{ round($percent) }}%"></div>
+            <div class="progress-bar progress-bar-{{ $color_class }}" role="progressbar" style="width: {{ round($percent) }}%"></div>
         </div>
     </div>
     {!! ($use_well=='true') ? '</div>' : '' !!}

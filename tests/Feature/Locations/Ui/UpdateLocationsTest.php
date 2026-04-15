@@ -105,4 +105,27 @@ class UpdateLocationsTest extends TestCase
         // Storage::disk('local')->assertExists($logentry->filename);
 
     }
+
+    public function test_edit_page_includes_parent_location_breadcrumb_hierarchy()
+    {
+        $grandparent = Location::factory()->create(['name' => 'Grandparent Edit Breadcrumb Location']);
+        $parent = Location::factory()->create([
+            'name' => 'Parent Edit Breadcrumb Location',
+            'parent_id' => $grandparent->id,
+        ]);
+        $child = Location::factory()->create([
+            'name' => 'Child Edit Breadcrumb Location',
+            'parent_id' => $parent->id,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('locations.edit', $child))
+            ->assertOk()
+            ->assertSeeInOrder([
+                route('locations.show', $grandparent),
+                route('locations.show', $parent),
+                route('locations.show', $child),
+                trans('general.update'),
+            ]);
+    }
 }

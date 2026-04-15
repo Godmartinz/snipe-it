@@ -113,7 +113,11 @@ class LocationsTransformer
 
         $array = [
             'id' => $accessory_checkout->id,
-            'assigned_to' => $accessory_checkout->assigned_to,
+            'assigned_to' => $accessory_checkout->assignedTo ? [
+                'id' => $accessory_checkout->assignedTo?->id,
+                'name' => $accessory_checkout->assignedTo?->display_name,
+                'type' => strtolower($accessory_checkout->assignedType()),
+            ] : null,
             'accessory' => $this->transformAccessory($accessory_checkout->accessory),
             'image' => ($accessory_checkout?->accessory?->image) ? Storage::disk('public')->url('accessories/'.e($accessory_checkout->accessory->image)) : null,
             'note' => $accessory_checkout->note ? e($accessory_checkout->note) : null,

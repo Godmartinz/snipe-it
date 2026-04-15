@@ -82,6 +82,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      */
     Route::group(['prefix' => 'accessories'], function () {
 
+        Route::get('{accessory}/history',
+            [
+                Api\AccessoriesController::class,
+                'history',
+            ]
+        )->name('api.accessories.history')->withTrashed();
+
         Route::get('{accessory}/checkedout',
             [
                 Api\AccessoriesController::class,
@@ -215,6 +222,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      */
     Route::group(['prefix' => 'components'], function () {
 
+        Route::get('{component}/history',
+            [
+                Api\ComponentsController::class,
+                'history',
+            ]
+        )->name('api.components.history')->withTrashed();
+
         Route::get('selectlist',
             [
                 Api\ComponentsController::class,
@@ -262,6 +276,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      * Consumables API routes
      */
     Route::group(['prefix' => 'consumables'], function () {
+
+        Route::get('{consumable}/history',
+            [
+                Api\ConsumablesController::class,
+                'history',
+            ]
+        )->name('api.consumables.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -436,6 +457,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.assets.licenselist');
 
+        Route::get('{asset}/history',
+            [
+                Api\AssetsController::class,
+                'history',
+            ]
+        )->name('api.assets.history')->withTrashed();
+
         Route::get('bytag/{tag}',
             [
                 Api\AssetsController::class,
@@ -572,6 +600,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
     /**
      * Asset maintenances API routes
      */
+    Route::get('/maintenances/{maintenance}/history',
+        [
+            Api\MaintenancesController::class,
+            'history',
+        ]
+    )->name('api.maintenances.history')->withTrashed();
+
     Route::resource('maintenances',
         Api\MaintenancesController::class,
         ['names' => [
@@ -636,6 +671,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'selectlist',
             ]
         )->name('api.licenses.selectlist');
+
+        Route::get('{license}/history',
+            [
+                Api\LicensesController::class,
+                'history',
+            ]
+        )->name('api.licenses.history')->withTrashed();
 
     });
 
@@ -708,6 +750,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'assignedAccessories',
             ]
         )->name('api.locations.assigned_accessories');
+
+        Route::get('{location}/history',
+            [
+                Api\LocationsController::class,
+                'history',
+            ]
+        )->name('api.locations.history')->withTrashed();
+
         /** End assigned routes */
     });
 
@@ -764,6 +814,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      * Asset models API routes
      */
     Route::group(['prefix' => 'models'], function () {
+
+        Route::get('{model}/history',
+            [
+                Api\AssetModelsController::class,
+                'history',
+            ]
+        )->name('api.models.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -1001,6 +1058,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      * Users API routes
      */
     Route::group(['prefix' => 'users'], function () {
+
+        Route::get('{user}/history',
+            [
+                Api\UsersController::class,
+                'history',
+            ]
+        )->name('api.users.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -1288,7 +1352,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'index',
         ]
     )->name('api.files.index')
-        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users']);
+        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users|companies|departments']);
 
     // Get a file
     Route::get('{object_type}/{id}/files/{file_id}',
@@ -1297,7 +1361,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'show',
         ]
     )->name('api.files.show')
-        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users']);
+        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users|companies|departments']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -1306,7 +1370,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'store',
         ]
     )->name('api.files.store')
-        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users']);
+        ->where(['object_type' => 'accessories|audits|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users|companies|departments']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -1315,6 +1379,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'destroy',
         ]
     )->name('api.files.destroy')
-        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users']);
+        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|suppliers|users|companies|departments']);
 
 }); // end API routes

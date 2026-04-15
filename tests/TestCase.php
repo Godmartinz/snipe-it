@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Http\Middleware\SecurityHeaders;
+use App\Models\Asset;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use RuntimeException;
@@ -39,7 +40,13 @@ abstract class TestCase extends BaseTestCase
         $this->withoutMiddleware($this->globallyDisabledMiddleware);
 
         $this->initializeSettings();
+
+        // Flush the custom field filter map cache between tests so that
+        // dynamically-created custom fields are always picked up fresh.
+        Asset::flushCustomFieldFilterMap();
     }
+
+    // ...existing code...
 
     private function guardAgainstMissingEnv(): void
     {

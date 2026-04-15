@@ -96,7 +96,15 @@ class Consumable extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'order_number', 'purchase_cost', 'purchase_date', 'item_no', 'model_number', 'notes'];
+    protected $searchableAttributes = [
+        'name',
+        'order_number',
+        'purchase_cost',
+        'purchase_date',
+        'item_no',
+        'model_number',
+        'notes',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
@@ -109,6 +117,7 @@ class Consumable extends SnipeModel
         'location' => ['name'],
         'manufacturer' => ['name'],
         'supplier' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     /**
@@ -142,20 +151,6 @@ class Consumable extends SnipeModel
     }
 
     /**
-     * Establishes the consumable -> admin user relationship
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v3.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
-    }
-
-    /**
      * Establishes the component -> assignments relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -174,6 +169,11 @@ class Consumable extends SnipeModel
         if ($this->consumables_users_count == 0) {
             return 100;
         }
+
+        if (($this->qty == '') || ($this->qty == 0)) {
+            return 0;
+        }
+
         return ($this->qty - $this->consumables_users_count) / $this->qty * 100;
     }
 
@@ -186,7 +186,6 @@ class Consumable extends SnipeModel
      *
      * @return Relation
      */
-
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
@@ -417,85 +416,6 @@ class Consumable extends SnipeModel
      * @param  text  $filter  JSON array of search keys and terms
      * @return Builder Modified query builder
      */
-    public function scopeByFilter($query, $filter)
-    {
-        return $query->where(
-            function ($query) use ($filter) {
-                foreach ($filter as $fieldname => $search_val) {
-
-                    if ($fieldname == 'name') {
-                        $query->where('consumables.name', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'notes') {
-                        $query->where('consumables.notes', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'model_number') {
-                        $query->where('consumables.model_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'order_number') {
-                        $query->where('consumables.order_number', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'item_no') {
-                        $query->where('consumables.item_no', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'serial') {
-                        $query->where('consumables.serial', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'purchase_cost') {
-                        $query->where('consumables.purchase_cost', 'LIKE', '%'.$search_val.'%');
-                    }
-
-                    if ($fieldname == 'location') {
-                        $query->whereHas(
-                            'location', function ($query) use ($search_val) {
-                                $query->where('locations.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'manufacturer') {
-                        $query->whereHas(
-                            'manufacturer', function ($query) use ($search_val) {
-                                $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'supplier') {
-                        $query->whereHas(
-                            'supplier', function ($query) use ($search_val) {
-                                $query->where('suppliers.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'category') {
-                        $query->whereHas(
-                            'category', function ($query) use ($search_val) {
-                                $query->where('categories.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                    if ($fieldname == 'company') {
-                        $query->whereHas(
-                            'company', function ($query) use ($search_val) {
-                                $query->where('companies.name', 'LIKE', '%'.$search_val.'%');
-                            }
-                        );
-                    }
-
-                }
-
-            }
-        );
-    }
 
     /**
      * Query builder scope to order on company

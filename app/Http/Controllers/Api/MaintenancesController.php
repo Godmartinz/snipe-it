@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\MaintenancesTransformer;
 use App\Models\Asset;
 use App\Models\Company;
@@ -31,15 +33,16 @@ class MaintenancesController extends Controller
      *
      * @since [v1.8]
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Asset::class);
 
         $maintenances = Maintenance::select('maintenances.*')
-            ->with('asset', 'asset.model', 'asset.location', 'asset.defaultLoc', 'supplier', 'asset.company', 'asset.assetstatus', 'adminuser', 'asset.assignedTo',);
+            ->with('asset', 'asset.model', 'asset.location', 'asset.defaultLoc', 'supplier', 'asset.company', 'asset.status', 'adminuser', 'asset.assignedTo');
 
-        if ($request->filled('search')) {
-            $maintenances = $maintenances->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $maintenances->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('asset_id')) {
@@ -129,7 +132,7 @@ class MaintenancesController extends Controller
         if (request()->input('format') == 'flat') {
             return (new MaintenancesTransformer)->transformMaintenancesFlat($maintenances, $total);
         }
-        
+
         return (new MaintenancesTransformer)->transformMaintenances($maintenances, $total);
 
     }
@@ -250,5 +253,19 @@ class MaintenancesController extends Controller
 
         return (new MaintenancesTransformer)->transformMaintenance($maintenance);
 
+    }
+
+    public function history(Request $request, Maintenance $maintenance): JsonResponse|array
+    {
+        $this->authorize('view', Asset::class);
+        $asset = $maintenance->asset;
+        $this->authorize('history', $asset);
+        $history = $maintenance->getHistory($request);
+        $total = $maintenance->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

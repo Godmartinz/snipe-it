@@ -407,7 +407,7 @@ class BulkAssetsController extends Controller
                     // Otherwise we need to make sure the status type is still a deployable one.
 
                     $unassigned = $asset->assigned_to == '';
-                    $deployable = $updated_status->deployable == '1' && $asset->assetstatus?->deployable == '1';
+                    $deployable = $updated_status->deployable == '1' && $asset->status?->deployable == '1';
                     $pending = $updated_status->pending === 1;
 
                     if ($unassigned || $deployable || $pending) {

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 
 class Location extends SnipeModel
@@ -114,6 +115,7 @@ class Location extends SnipeModel
     protected $searchableRelations = [
         'parent' => ['name'],
         'company' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     /**
@@ -158,18 +160,6 @@ class Location extends SnipeModel
     }
 
     /**
-     * Establishes the location -> admin user relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
-    }
-
-    /**
      * Find assets with this location as their location_id
      *
      * @author A. Gianotto <snipe@snipe.net>
@@ -182,12 +172,17 @@ class Location extends SnipeModel
     {
         return $this->hasMany(Asset::class, 'location_id')
             ->whereHas(
-                'assetstatus', function ($query) {
+                'status', function ($query) {
                     $query->where('status_labels.deployable', '=', 1)
                         ->orWhere('status_labels.pending', '=', 1)
                         ->orWhere('status_labels.archived', '=', 0);
                 }
             );
+    }
+
+    public function countAllTheThings()
+    {
+        return $this->assets()->count() + $this->consumables()->count() + $this->components()->count() + $this->users()->count() + $this->assignedAccessories()->count() + $this->assignedAssets()->count() + $this->accessories()->count();
     }
 
     /**
@@ -323,7 +318,7 @@ class Location extends SnipeModel
      */
     public function assignedAssets()
     {
-        return $this->morphMany(Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+        return $this->morphMany(Asset::class, 'assigned', 'assigned_type', 'assigned_to')->AssetsForShow()->withTrashed();
     }
 
     /**
@@ -362,7 +357,7 @@ class Location extends SnipeModel
 
         foreach ($locations_with_children[$parent_id] as $location) {
             $location->use_text = $prefix.' '.$location->name;
-            $location->use_image = ($location->image) ? config('app.url').'/uploads/locations/'.$location->image : null;
+            $location->use_image = ($location->image) ? Storage::disk('public')->url('locations/'.$location->image) : null;
             $results[] = $location;
             // now append the children. (if we have any)
             if (array_key_exists($location->id, $locations_with_children)) {

@@ -35,7 +35,7 @@ class AccessoryPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' => trans('admin/hardware/table.image'),
+                'title' => trans('general.image'),
                 'visible' => true,
                 'formatter' => 'imageFormatter',
             ], [
@@ -115,7 +115,7 @@ class AccessoryPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
-                'title' => '% ' . trans('general.remaining'),
+                'title' => '% '.trans('general.remaining'),
                 'visible' => true,
                 'formatter' => 'progressBarFormatter',
             ],
@@ -210,15 +210,6 @@ class AccessoryPresenter extends Presenter
                 'visible' => false,
             ],
             [
-                'field' => 'assigned_to.image',
-                'searchable' => false,
-                'sortable' => false,
-                'switchable' => true,
-                'title' => trans('general.image'),
-                'visible' => true,
-                'formatter' => 'imageFormatter',
-            ],
-            [
                 'field' => 'assigned_to',
                 'searchable' => false,
                 'sortable' => false,
@@ -226,6 +217,76 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('general.checked_out_to'),
                 'visible' => true,
                 'formatter' => 'polymorphicItemFormatter',
+            ],
+            [
+                'field' => 'note',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('admin/hardware/table.checkout_date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
+                'field' => 'available_actions',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+        ];
+
+        return json_encode($layout);
+    }
+
+    public static function assignedDataTableLayoutForObject()
+    {
+        $layout = [
+            [
+                'field' => 'id',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.id'),
+                'visible' => false,
+            ],
+
+            [
+                'field' => 'accessory',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'accessoriesLinkObjFormatter',
+            ],
+            [
+                'field' => 'image',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
             ],
             [
                 'field' => 'note',

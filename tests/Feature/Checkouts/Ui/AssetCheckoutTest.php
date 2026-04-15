@@ -205,7 +205,7 @@ class AssetCheckoutTest extends TestCase
         $this->assertTrue($asset->assignedTo()->is($target));
         $this->assertTrue($asset->location->is($expectedLocation));
         $this->assertEquals('Changed Name', $asset->name);
-        $this->assertTrue($asset->assetstatus->is($newStatus));
+        $this->assertTrue($asset->status->is($newStatus));
         $this->assertEquals('2024-03-18 00:00:00', $asset->last_checkout);
         $this->assertEquals('2024-03-28 00:00:00', (string) $asset->expected_checkin);
 

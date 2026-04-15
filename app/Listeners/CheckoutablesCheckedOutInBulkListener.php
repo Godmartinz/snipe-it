@@ -135,14 +135,18 @@ class CheckoutablesCheckedOutInBulkListener
         return false;
     }
 
-    private function getNotifiableUser(CheckoutablesCheckedOutInBulk $event): ?Model
+    private function getNotifiableUser(CheckoutablesCheckedOutInBulk $event): ?User
     {
         $target = $event->target;
 
         if ($target instanceof Asset) {
             $target->load('assignedTo');
 
-            return $target->assignedto;
+            if ($target->assigned instanceof User) {
+                return $target->assigned;
+            }
+
+            return null;
         }
 
         if ($target instanceof Location) {

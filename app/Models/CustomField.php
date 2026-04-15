@@ -57,6 +57,7 @@ class CustomField extends Model
         'show_in_listview' => 'boolean',
         'show_in_requestable_list' => 'boolean',
         'show_in_email' => 'boolean',
+        'format' => 'nullable|string|max:191',
     ];
 
     protected $casts = [
@@ -85,6 +86,30 @@ class CustomField extends Model
         'display_checkin',
         'display_audit',
         'show_in_requestable_list',
+    ];
+
+    /**
+     * The attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableAttributes = [
+        'name',
+        'format',
+        'element',
+        'db_column',
+        'help_text',
+    ];
+
+    /**
+     * The relations and their attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableRelations = [
+        'fieldset' => ['name'],
+        'assetModels' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     /**

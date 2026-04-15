@@ -360,8 +360,23 @@ class AssetsController extends Controller
                 'url' => route('qr_code/hardware', $asset),
             ];
 
+            $total_maintenance_cost = $asset->maintenances?->sum('cost');
+            $total_asset_cost = ($asset->assignedAssets()?->AssetsForShow()) ? $asset->assignedAssets()?->AssetsForShow()?->sum('purchase_cost') : 0;
+            $total_license_cost = ($asset->licenses) ? $asset->licenses->sum('purchase_cost') : 0;
+            $total_accessory_cost = ($asset->accessories) ? $asset->accessories()->sum('purchase_cost') : 0;
+            $total_component_cost = ($asset->components) ? $asset->components->sum('calculated_purchase_cost') : 0;
+
+            $total_cost_for_asset = $asset->purchase_cost + $total_maintenance_cost + $total_asset_cost + $total_license_cost + $total_accessory_cost + $total_component_cost;
+
             return view('hardware/view', compact('asset', 'qr_code', 'settings'))
-                ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
+                ->with('total_maintenance_cost', $total_maintenance_cost)
+                ->with('total_asset_cost', $total_asset_cost)
+                ->with('total_license_cost', $total_license_cost)
+                ->with('total_accessory_cost', $total_accessory_cost)
+                ->with('total_component_cost', $total_component_cost)
+                ->with('total_cost_for_asset', $total_cost_for_asset)
+                ->with('use_currency', $use_currency)
+                ->with('audit_log', $audit_log);
         }
 
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));

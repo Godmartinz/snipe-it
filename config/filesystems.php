@@ -109,6 +109,14 @@ $config = [
 // (by default, the PUBLIC_FILESYSTEM DISK is 'local_public', in the public/uploads directory)
 $config['disks']['public'] = $config['disks'][env('PUBLIC_FILESYSTEM_DISK', 'local_public')];
 
+// When PUBLIC_S3_PROXY is enabled, all "public" uploads are served through the application
+// instead of being accessed directly from S3. This allows using a single private S3 bucket
+// for all storage, with the app proxying requests for public files (images, logos, avatars).
+if (env('PUBLIC_S3_PROXY', false)) {
+    $config['disks']['public']['visibility'] = 'private';
+    $config['disks']['public']['url'] = env('APP_URL').'/storage-proxy';
+}
+
 // This is used to determine which files to accept, and also to populate the language strings for the upload-file blade
 $config['allowed_upload_extensions_array'] = [
     'avif',

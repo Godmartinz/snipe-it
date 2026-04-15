@@ -18,9 +18,49 @@ class ActivityReportTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_can_view_activity_if_item_is_given_and_user_has_permissions()
+    {
+        $asset = Asset::factory()->create();
+        $this->actingAsForApi(User::factory()->viewAssets()->create())
+            ->getJson(route('api.activity.index',
+                [
+                    'item_type' => 'asset',
+                    'item_id' => $asset->id,
+                ]))
+            ->assertOk()
+            ->assertJsonStructure([
+                'rows',
+            ])
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->etc());
+    }
+
+    public function test_can_view_activity_if_target_is_given_and_user_has_permissions()
+    {
+
+        $user = User::factory()->create();
+        $user->update([
+            'first_name' => 'Test Update',
+        ]);
+        $user->update([
+            'first_name' => 'Test Update Again',
+        ]);
+
+        $this->actingAsForApi(User::factory()->viewUsers()->create())
+            ->getJson(route('api.activity.index',
+                [
+                    'target_type' => 'user',
+                    'target_id' => $user->id,
+                ]))
+            ->assertOk()
+            ->assertJsonStructure([
+                'rows',
+            ])
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 2)->etc());
+    }
+
     public function test_records_are_scoped_to_company_when_multiple_company_support_enabled()
     {
-        $this->markTestIncomplete('This test returns strange results. Need to figure out why.');
+        // $this->markTestIncomplete('This test returns strange results. Need to figure out why.');
         $this->settings->enableMultipleFullCompanySupport();
 
         $companyA = Company::factory()->create();

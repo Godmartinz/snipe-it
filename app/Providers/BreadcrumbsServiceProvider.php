@@ -43,10 +43,10 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         /**
          * Asset Breadcrumbs
          */
-        if ((request()->is('hardware*')) && (request()->status != '')) {
+        if ((request()->is('hardware*')) && (request()->status_type != '')) {
             Breadcrumbs::for('hardware.index', fn (Trail $trail) => $trail->parent('home', route('home'))
                 ->push(trans('general.assets'), route('hardware.index'))
-                ->push(trans('general.'.strtolower(e(request()->status))), route('hardware.index', ['status' => request()->status]))
+                ->push(trans('general.'.strtolower(e(request()->status_type))), route('hardware.index', ['status_type' => request()->status_type]))
             );
 
         } else {
@@ -342,14 +342,16 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push(trans('admin/locations/table.clone'), route('locations.create'))
         );
 
-        Breadcrumbs::for('locations.show', fn (Trail $trail, Location $location) => $trail->parent('locations.index', route('locations.index'))
-            ->push($location->name, route('locations.show', $location))
-        );
+        Breadcrumbs::for('locations.show', function (Trail $trail, Location $location) {
+            $trail->parent('locations.index', route('locations.index'));
+            $this->pushLocationHierarchy($trail, $location);
+        });
 
-        Breadcrumbs::for('locations.edit', fn (Trail $trail, Location $location) => $trail->parent('locations.index', route('locations.index'))
-            ->push($location->display_name, route('locations.show', $location))
-            ->push(trans('general.update'))
-        );
+        Breadcrumbs::for('locations.edit', function (Trail $trail, Location $location) {
+            $trail->parent('locations.index', route('locations.index'));
+            $this->pushLocationHierarchy($trail, $location);
+            $trail->push(trans('general.update'));
+        });
 
         /**
          * Maintenances Breadcrumbs
@@ -509,5 +511,23 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push(trans('general.update'))
         );
 
+    }
+
+    /**
+     * Append parent -> child location breadcrumbs recursively for a location.
+     */
+    private function pushLocationHierarchy(Trail $trail, Location $location): void
+    {
+        $ancestorChain = [];
+        $cursor = $location;
+
+        while ($cursor !== null) {
+            array_unshift($ancestorChain, $cursor);
+            $cursor = $cursor->parent;
+        }
+
+        foreach ($ancestorChain as $node) {
+            $trail->push($node->name, route('locations.show', $node));
+        }
     }
 }

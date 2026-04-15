@@ -52264,8 +52264,8 @@ $(function () {
     // deleteForm is the ID of the modal form itself
     $('#deleteForm').attr('action', href);
     $dataConfirmModal.find('.modal-header-icon').addClass(headericon);
-    $dataConfirmModal.find('.modal-title').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
-    $dataConfirmModal.find('.modal-body').text(message);
+    $dataConfirmModal.find('.modal-title').text('').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
+    $dataConfirmModal.find('.modal-body').text('').text(message);
     $dataConfirmModal.attr('action', href);
 
     // Fire the modal
@@ -52317,7 +52317,7 @@ $(function () {
           var data = {
             search: params.term,
             page: params.page || 1,
-            assetStatusType: link.data("asset-status-type"),
+            statusType: link.data("asset-status-type"),
             companyId: link.data("company-id")
           };
           return data;
@@ -52377,9 +52377,9 @@ $(function () {
     if (e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
     if (value && !noForceAjax && !isMouseUp) {
       var endpoint = element.data("endpoint");
-      var assetStatusType = element.data("asset-status-type");
+      var statusType = element.data("asset-status-type");
       $.ajax({
-        url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (assetStatusType ? '&assetStatusType=' + assetStatusType : ''),
+        url: baseUrl + 'api/v1/' + endpoint + '/selectlist?search=' + value + '&page=1' + (statusType ? '&statusType=' + statusType : ''),
         dataType: 'json',
         headers: {
           "X-Requested-With": 'XMLHttpRequest',
@@ -52872,7 +52872,7 @@ $(function () {
               var data = {
                 search: params.term,
                 page: params.page || 1,
-                assetStatusType: link.data("asset-status-type")
+                statusType: link.data("asset-status-type")
               };
               return data;
             },

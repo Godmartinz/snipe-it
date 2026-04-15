@@ -1,8 +1,10 @@
 @props([
     'count' => null,
     'class' => false,
+    'item' => false,
 ])
 
+@can('files', $item)
 <x-tabs.nav-item
         :$class
         name="files"
@@ -11,3 +13,4 @@
         count="{{ $count }}"
         tooltip="{{ trans('general.files') }}"
 />
+@endcan

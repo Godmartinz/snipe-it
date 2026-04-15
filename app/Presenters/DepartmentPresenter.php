@@ -141,4 +141,13 @@ class DepartmentPresenter extends Presenter
 
         return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').$this->name;
     }
+
+    public function nameUrl()
+    {
+        if (auth()->user()->can('view', ['\App\Models\Department', $this])) {
+            return '<a href="'.route('departments.show', $this->id).'">'.e($this->display_name).'</a>';
+        } else {
+            return e($this->display_name);
+        }
+    }
 }

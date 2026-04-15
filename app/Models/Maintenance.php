@@ -92,8 +92,9 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'asset' => ['name', 'asset_tag', 'serial'],
         'asset.model' => ['name', 'model_number'],
         'asset.supplier' => ['name'],
-        'asset.assetstatus' => ['name'],
+        'asset.status' => ['name'],
         'supplier' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     public function getCompanyableParents()
@@ -192,21 +193,6 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         return $this->hasMany(Actionlog::class, 'item_id')
             ->where('item_type', '=', self::class)
             ->orderBy('created_at', 'desc')
-            ->withTrashed();
-    }
-
-    /**
-     * Get the admin who created the maintenance
-     *
-     * @return mixed
-     *
-     * @author  A. Gianotto <snipe@snipe.net>
-     *
-     * @version v3.0
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')
             ->withTrashed();
     }
 

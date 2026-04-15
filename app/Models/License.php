@@ -112,6 +112,8 @@ class License extends Depreciable
         'purchase_cost',
         'purchase_date',
         'expiration_date',
+        'license_email',
+        'license_name',
     ];
 
     /**
@@ -125,6 +127,7 @@ class License extends Depreciable
         'category' => ['name'],
         'depreciation' => ['name'],
         'supplier' => ['name'],
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
     protected $appends = ['free_seat_count'];
@@ -518,20 +521,6 @@ class License extends Depreciable
         return $this->hasMany(Actionlog::class, 'item_id')
             ->where('item_type', '=', self::class)
             ->orderBy('created_at', 'desc');
-    }
-
-    /**
-     * Establishes the license -> admin user relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v2.0]
-     *
-     * @return Relation
-     */
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

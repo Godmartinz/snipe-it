@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * SnipePermissionsPolicy provides methods for handling the granular permissions used throughout Snipe-IT.
@@ -89,6 +90,16 @@ abstract class SnipePermissionsPolicy
     public function view(User $user, $item = null)
     {
         return $user->hasAccess($this->columnName().'.view');
+    }
+
+    public function history(User $user, $item = null)
+    {
+        return Gate::allows('view', $item) || $user->hasAccess('activity.view');
+    }
+
+    public function journal(User $user, $item = null)
+    {
+        return Gate::allows('view', $item) || $user->hasAccess('activity.view');
     }
 
     public function files(User $user, $item = null)

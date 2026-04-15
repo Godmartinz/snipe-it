@@ -11,6 +11,7 @@ use App\Http\Middleware\CheckLocale;
 use App\Http\Middleware\CheckPermissions;
 use App\Http\Middleware\CheckUserIsActivated;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\LogAuthedUserHeader;
 use App\Http\Middleware\NoSessionStore;
 use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -82,6 +83,7 @@ class Kernel extends HttpKernel
         'api' => [
             'auth:api',
             CheckLocale::class,
+            LogAuthedUserHeader::class,
             SubstituteBindings::class,
         ],
 

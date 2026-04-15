@@ -80,7 +80,7 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('1', $asset->requestable);
         $this->assertTrue($asset->defaultLoc->is($rtdLocation));
         $this->assertEquals('1234567890', $asset->serial);
-        $this->assertTrue($asset->assetstatus->is($status));
+        $this->assertTrue($asset->status->is($status));
         $this->assertTrue($asset->supplier->is($supplier));
         $this->assertEquals(10, $asset->warranty_months);
 

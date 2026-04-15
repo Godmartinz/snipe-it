@@ -234,6 +234,21 @@ return [
     'allow_iframing' => env('ALLOW_IFRAMING', false),
 
     /*
+   |--------------------------------------------------------------------------
+   | LOG AUTHED USER HEADER
+   |--------------------------------------------------------------------------
+   |
+   | This is an additional header that can be enabled to include the authenticated user's ID
+   | in the response headers of each request. This can be useful for debugging and auditing purposes,
+   | but it may also expose sensitive information if not used carefully.
+   | It should normally be set to false unless you have a specific need for it and
+   | understand the security implications.
+   |
+   */
+
+    'authorized_user_header' => env('INCLUDE_AUTHED_USER_HEADER', false),
+
+    /*
     |--------------------------------------------------------------------------
     | ENABLE HTTP Strict Transport Security (HSTS)
     |--------------------------------------------------------------------------

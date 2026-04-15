@@ -4,10 +4,10 @@
 
 
 @if ($infoPanelObj->supplier)
-    <x-info-element icon_type="supplier" title="{{ trans('general.supplier') }}">
-        {!!  $infoPanelObj->supplier->present()->formattedNameLink !!}
+    <x-info-element icon_type="supplier" icon_color="{{ $infoPanelObj->supplier->tag_color }}" title="{{ trans('general.supplier') }}">
+        {!!  $infoPanelObj->supplier->present()->nameUrl !!}
         <a class="pull-right js-copy-link" style="font-size: 16px; margin-right: 3px;" type="button" data-toggle="collapse" data-target="#supplierContact" aria-expanded="false" aria-controls="supplierContact">
-            <x-icon type="plus" class="fa-faw"/>
+            <x-icon type="plus" class="fa-fw"/>
         </a>
     </x-info-element>
 

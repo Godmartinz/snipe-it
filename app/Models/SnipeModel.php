@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
 
 class SnipeModel extends Model
@@ -235,29 +236,68 @@ class SnipeModel extends Model
         return false;
     }
 
+    public function actionlog()
+    {
+        return $this->hasMany(Actionlog::class, 'target_id')->where('target_type', '=', self::class);
+    }
+
+    /**
+     * Establishes the object -> admin user relationship
+     *
+     * @return Relation
+     *
+     * @since  [v3.0]
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function adminuser()
+    {
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
+    }
+
     public function showCheckoutButton($item)
     {
-        if ((method_exists($item, 'numRemaining')) && ($item->numRemaining() > 0)) {
-            return true;
+
+        if (method_exists($item, 'numRemaining')) {
+            if ($item->numRemaining() > 0) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
         }
 
-        if ((method_exists($item, 'availableForCheckout')) && ($item->availableForCheckout())) {
-            return true;
+        if (method_exists($item, 'availableForCheckout')) {
+
+            if ($item->availableForCheckout()) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
         }
 
         return false;
+
     }
 
     public function showCheckinButton($item)
     {
-        if ((method_exists($item, 'numRemaining')) && ($item->numRemaining() <= 0)) {
-            return true;
+        if (method_exists($item, 'numRemaining')) {
+            if ($item->numRemaining() <= 0) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
         }
 
-        if ((method_exists($item, 'availableForCheckIn')) && ($item->availableForCheckIn())) {
-            return true;
+        if (method_exists($item, 'availableForCheckout')) {
+            if ($item->availableForCheckIn()) {
+                return 'show-active';
+            }
+
+            return 'show-disabled';
         }
 
         return false;
+
     }
 }

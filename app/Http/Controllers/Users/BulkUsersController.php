@@ -362,7 +362,9 @@ class BulkUsersController extends Controller
             $logAction->target_id = $item->assigned_to;
             $logAction->target_type = User::class;
             $logAction->created_by = auth()->id();
-            $logAction->note = 'Bulk checkin items';
+            $logAction->action_date = now();
+            $logAction->created_at = now();
+            $logAction->note = 'Bulk checkin items on user bulk edit/delete';
             $logAction->logaction('checkin from');
         }
     }
@@ -376,7 +378,9 @@ class BulkUsersController extends Controller
             $logAction->target_id = $accessoryUserRow->assigned_to;
             $logAction->target_type = User::class;
             $logAction->created_by = auth()->id();
-            $logAction->note = 'Bulk checkin items';
+            $logAction->created_at = now();
+            $logAction->action_date = now();
+            $logAction->note = 'Bulk checkin accessory on user bulk edit/delete';
             $logAction->logaction('checkin from');
         }
     }

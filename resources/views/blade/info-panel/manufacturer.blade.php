@@ -6,10 +6,10 @@
 
 
 @if ($manufacturer)
-    <x-info-element icon_type="manufacturer" title="{{ trans('general.manufacturer') }}">
-        {!!  $manufacturer->present()->formattedNameLink !!}
+    <x-info-element icon_type="manufacturer" title="{{ trans('general.manufacturer') }}" icon_color="{{ $manufacturer->tag_color }}">
+        {!!  $manufacturer->present()->nameUrl !!}
         <a class="pull-right js-copy-link" style="font-size: 16px; margin-right: 3px;" type="button" data-toggle="collapse" data-target="#manufacturerContact" aria-expanded="false" aria-controls="manufacturerContact">
-            <x-icon type="plus" class="fa-faw"/>
+            <x-icon type="plus" class="fa-fw"/>
         </a>
     </x-info-element>
 
@@ -35,10 +35,10 @@
                 @endif
 
 
-                    @if(($asset) && ($asset->model) && ($manufacturer->warranty_lookup_url))
+                    @if(($asset) && ($manufacturer->warranty_lookup_url))
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                    {{ $asset->present()->dynamicUrl($asset->model->manufacturer->warranty_lookup_url) }}
+                    {{ $asset->present()->dynamicUrl($asset->manufacturer->warranty_lookup_url) }}
                     </x-info-element.url>
                     <br>
                 @endif
@@ -54,7 +54,7 @@
                 @if($manufacturer->support_url)
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                    {{ $manufacturer->support_url }}
+                    {{ $asset->present()->dynamicUrl($asset->manufacturer->support_url) }}
                 </x-info-element.url>
                     <br>
                 @endif

@@ -248,7 +248,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'assets_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'escape' => true,
@@ -259,7 +259,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'licenses_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'class' => 'css-license',
@@ -269,7 +269,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'consumables_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'class' => 'css-consumable',
@@ -279,7 +279,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'accessories_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'class' => 'css-accessory',
@@ -289,7 +289,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'manages_users_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'class' => 'css-users',
@@ -299,7 +299,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'manages_locations_count',
-                'searchable' => false,
+                'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'class' => 'css-location',

@@ -24,8 +24,8 @@
                             count="{{ $snipe_component->numCheckedOut() }}"
                     />
 
-                    <x-tabs.files-tab count="{{ $snipe_component->uploads()->count() }}" />
-                    <x-tabs.history-tab model="\App\Models\Component::class"/>
+                    <x-tabs.files-tab :item="$snipe_component" count="{{ $snipe_component->uploads()->count() }}"/>
+                    <x-tabs.history-tab count="{{ $snipe_component->history()->count() }}" :model="$snipe_component"/>
                     <x-tabs.upload-tab :item="$snipe_component"/>
 
                 </x-slot:tabnav>
@@ -45,23 +45,16 @@
 
                     </x-tabs.pane>
 
+                    <!-- start files tab pane -->
                     <x-tabs.pane name="files">
                         <x-table.files object_type="components" :object="$snipe_component"/>
                     </x-tabs.pane>
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-slot:table_header>
-                            {{ trans('general.history') }}
-                        </x-slot:table_header>
-
-                        <x-table
-                            name="componentHistory"
-                            api_url="{{ route('api.activity.index', ['item_id' => $snipe_component->id, 'item_type' => 'component']) }}"
-                            :presenter="\App\Presenters\HistoryPresenter::dataTableLayout()"
-                            export_filename="export-licenses-{{ str_slug($snipe_component->name) }}-{{ date('Y-m-d') }}"
-                        />
+                        <x-table.history :model="$snipe_component" :route="route('api.components.history', $snipe_component)"/>
                     </x-tabs.pane>
+
                 </x-slot:tabpanes>
             </x-tabs>
         </x-page-column>
@@ -71,9 +64,9 @@
                 <x-info-panel :infoPanelObj="$snipe_component" img_path="{{ app('components_upload_url') }}">
 
                     <x-slot:buttons>
+                        <x-button.edit :item="$snipe_component" :route="route('components.edit', $snipe_component->id)"/>
+                        <x-button.clone :item="$snipe_component" :route="route('components.clone.create', $snipe_component->id)"/>
                         <x-button.checkout :item="$snipe_component" :route="route('components.checkout.show', $snipe_component->id)" />
-                        <x-button.edit :item="$snipe_component" :route="route('components.edit', $snipe_component->id)" />
-                        <x-button.clone :item="$snipe_component" :route="route('components.clone.create', $snipe_component->id)" />
                         <x-button.delete :item="$snipe_component" />
                     </x-slot:buttons>
 
@@ -82,12 +75,13 @@
         </x-page-column>
     </x-container>
 
-
-@can('components.files', Component::class)
-  @include ('modals.upload-file', ['item_type' => 'component', 'item_id' => $component->id])
-@endcan
 @endsection
 
+
+
 @section('moar_scripts')
-@include ('partials.bootstrap-table', ['exportFile' => 'component' . $component->name . '-export', 'search' => false])
-@stop
+    @can('files', $snipe_component)
+        @include ('modals.upload-file', ['item_type' => 'components', 'item_id' => $snipe_component->id])
+    @endcan
+    @include ('partials.bootstrap-table', ['exportFile' => 'component' . $snipe_component->name . '-export', 'search' => false])
+@endsection

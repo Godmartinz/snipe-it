@@ -42,7 +42,6 @@ class CreateAccessoriesTest extends TestCase
             ])
             ->assertSessionHasErrors([
                 'name',
-                'qty',
                 'category_id',
             ]);
     }

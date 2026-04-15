@@ -247,7 +247,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
     #[Test]
     public function when_required_columns_are_missing_in_import_file(): void
     {
-        $importFileBuilder = ImportFileBuilder::new()->forget(['itemName', 'quantity', 'category']);
+        $importFileBuilder = ImportFileBuilder::new()->forget(['itemName', 'category']);
         $import = Import::factory()->accessory()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
         $this->actingAsForApi(User::factory()->superuser()->create());
@@ -259,9 +259,8 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
                 'messages' => [
                     '' => [
                         'Accessory' => [
-                            'name' => ['The name field is required.'],
-                            'qty' => ['The qty field must be at least 1.'],
                             'category_id' => ['The category id field is required.'],
+                            'name' => ['The name field is required.'],
                         ],
                     ],
                 ],
@@ -317,7 +316,6 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
             'purchaseDate' => '  ',
             'purchaseCost' => '',
             'location' => '',
-            'companyName' => '',
             'orderNumber' => '',
             'category' => '',
             'quantity' => '',
@@ -340,7 +338,6 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
                 'messages' => [
                     $importFileBuilder->firstRow()['itemName'] => [
                         'Accessory' => [
-                            'qty' => ['The qty field must be at least 1.'],
                             'category_id' => ['The category id field is required.'],
                         ],
                     ],

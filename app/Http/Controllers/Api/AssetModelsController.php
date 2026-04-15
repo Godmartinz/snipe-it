@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAssetModelRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetModelsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -92,21 +93,9 @@ class AssetModelsController extends Controller
             ->withCount('assignedAssets as assets_assigned_count')
             ->withCount('archivedAssets as assets_archived_count');
 
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
-        }
-
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $assetmodels->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $assetmodels->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $assetmodels->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->input('status') == 'deleted') {
@@ -349,5 +338,17 @@ class AssetModelsController extends Controller
         }
 
         return (new SelectlistTransformer)->transformSelectlist($assetmodels);
+    }
+
+    public function history(Request $request, AssetModel $model): JsonResponse|array
+    {
+        $this->authorize('history', $model);
+        $history = $model->getHistory($request);
+        $total = $model->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

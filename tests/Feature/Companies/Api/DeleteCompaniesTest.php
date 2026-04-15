@@ -51,7 +51,7 @@ class DeleteCompaniesTest extends TestCase implements TestsPermissionsRequiremen
             ->deleteJson(route('api.companies.destroy', $company))
             ->assertStatusMessageIs('success');
 
-        $this->assertDatabaseMissing('companies', ['id' => $company->id]);
+        $this->assertSoftDeleted($company);
     }
 
     public function test_adheres_to_full_multiple_companies_support_scoping()

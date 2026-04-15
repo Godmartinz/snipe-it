@@ -262,7 +262,7 @@ class LicensesController extends Controller
      */
     public function show(License $license)
     {
-        $license = License::with('assignedusers')->find($license->id);
+        $license = License::with('assignedusers')->withCount('freeSeats as free_seats_count')->find($license->id);
 
         $users_count = User::where('autoassign_licenses', '1')->count();
 

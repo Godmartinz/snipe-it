@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Transformers\DepartmentsTransformer;
@@ -22,7 +23,7 @@ class DepartmentsController extends Controller
      *
      * @since [v4.0]
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Department::class);
         $allowed_columns = ['id', 'name', 'image', 'users_count', 'notes', 'tag_color'];
@@ -43,8 +44,9 @@ class DepartmentsController extends Controller
                 'departments.notes',
             ])->with('location')->with('manager')->with('company')->withCount('users as users_count');
 
-        if ($request->filled('search')) {
-            $departments = $departments->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $departments->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {

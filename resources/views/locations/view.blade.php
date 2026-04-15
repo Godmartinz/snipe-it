@@ -32,6 +32,19 @@
           <x-tabs>
 
               <x-slot:tabnav>
+
+                  @can('view', \App\Models\User::class)
+                      <x-tabs.nav-item
+                          class="active"
+                          name="users"
+                          icon="fa-solid fa-house-user fa-fw"
+                          label="{{ trans('general.users') }}"
+                          count="{{ $location->users()->count() }}"
+                          tooltip="{{ trans('general.users') }}"
+                      />
+                  @endcan
+
+
                   <x-tabs.asset-tab count="{{ $location->assets()->AssetsForShow()->count() }}"/>
 
                   @can('view', \App\Models\Asset::class)
@@ -83,8 +96,8 @@
                   @endcan
 
 
-                  <x-tabs.consumable-tab count="{{ $location->consumables->count() }}"/>
-                  <x-tabs.component-tab count="{{ $location->components->count() }}"/>
+                  <x-tabs.consumable-tab count="{{ $location->consumables()->count() }}"/>
+                  <x-tabs.component-tab count="{{ $location->components()->count() }}"/>
 
                   <x-tabs.nav-item
                           name="child_locations"
@@ -94,9 +107,9 @@
                           tooltip="{{ trans('general.child_locations') }}"
                   />
 
-                  <x-tabs.files-tab count="{{ $location->uploads->count() }}"/>
-                  <x-tabs.history-tab model="\App\Models\Location::class"/>
-                  <x-tabs.upload-tab :item="$location"/>
+                      <x-tabs.files-tab :item="$location" count="{{ $location->uploads()->count() }}"/>
+                      <x-tabs.history-tab count="{{ $location->history()->count() }}" :model="$location"/>
+                      <x-tabs.upload-tab :item="$location"/>
 
               </x-slot:tabnav>
 
@@ -150,7 +163,12 @@
 
                   <!-- start assigned accessories tab pane -->
                   <x-tabs.pane name="accessories_assigned">
-                      <x-table.accessories :table_header="trans('general.accessories_assigned')" :route="route('api.locations.assigned_accessories', ['location' => $location])  "/>
+
+                      <x-table.accessories
+                          :table_header="trans('general.accessories_assigned')"
+                          :presenter="\App\Presenters\AccessoryPresenter::assignedDataTableLayoutForObject()"
+                          :route="route('api.locations.assigned_accessories', ['location' => $location])  "/>
+
                   </x-tabs.pane>
                   @endcan
                   <!-- end assigned accessories tab pane -->
@@ -187,17 +205,7 @@
 
                   <!-- start history tab pane -->
                   <x-tabs.pane name="history">
-                      <x-slot:table_header>
-                          {{ trans('general.history') }}
-                      </x-slot:table_header>
-
-                      <x-table
-                          name="locationHistory"
-                          api_url="{{ route('api.activity.index', ['item_id' => $location->id, 'item_type' => 'location']) }}"
-                          :presenter="\App\Presenters\HistoryPresenter::dataTableLayout()"
-                          export_filename="export-locations-history-{{ str_slug($location->name) }}-{{ date('Y-m-d') }}"
-                      />
-
+                      <x-table.history :model="$location" :route="route('api.locations.history', $location)"/>
                   </x-tabs.pane>
                   <!-- end history tab pane -->
 
@@ -213,11 +221,13 @@
                     <x-slot:buttons>
                         <x-button.edit :item="$location" :route="route('locations.edit', $location->id)" />
                         <x-button.clone :item="$location" :route="route('clone/location', $location->id)" />
-                        <x-button.delete :item="$location" />
                         <x-button.restore :item="$location" :route="route('locations.restore', ['location' => $location->id])" />
+                        <x-button.print :count="$location->countAllTheThings()" :tooltip="trans('admin/locations/table.print_inventory')" :item="$location" :route="route('locations.print_assigned', ['locationId' => $location->id])"/>
+                        <x-button.print :count="$location->assignedAssets()->AssetsForShow()->count()" :item="$location" :route="route('locations.print_all_assigned', ['locationId' => $location->id])"/>
+                        <x-button.delete :item="$location"/>
                     </x-slot:buttons>
 
-                @if ($location->ldap_ou)
+                    @if ($location->ldap_ou)
                         <x-info-element icon_type="ldap">
                             {{ $location->ldap_ou }}
                         </x-info-element>
@@ -230,17 +240,14 @@
         </x-page-column>
     </x-container>
 
-@stop
+@endsection
 
-@can('update', Location::class)
-    @section('moar_scripts')
-       @include ('modals.upload-file', ['item_type' => 'locations', 'item_id' => $location->id])
-    @endsection
-@endcan
 
-@include ('partials.bootstrap-table', [
-'exportFile' => 'locations-export',
-'search' => true
-])
+@section('moar_scripts')
+    @can('files', $location)
+        @include ('modals.upload-file', ['item_type' => 'locations', 'item_id' => $location->id])
+    @endcan
 
+    @include ('partials.bootstrap-table')
+@endsection
 

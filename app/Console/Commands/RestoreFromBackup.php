@@ -456,7 +456,11 @@ class RestoreFromBackup extends Command
         if (! file_exists($mysql_binary)) {
             return $this->error("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
         }
-        $proc_results = proc_open("$mysql_binary -h ".escapeshellarg(config('database.connections.mysql.host')).' -u '.escapeshellarg(config('database.connections.mysql.username')).' '.escapeshellarg(config('database.connections.mysql.database')), // yanked -p since we pass via ENV
+        $proc_results = proc_open("$mysql_binary -h " .
+            escapeshellarg(config('database.connections.mysql.host')) .
+            ' -u ' . escapeshellarg(config('database.connections.mysql.username')) . ' ' .
+            ' -P ' . escapeshellarg(config('database.connections.mysql.port')) . ' ' .
+            escapeshellarg(config('database.connections.mysql.database')), // yanked -p since we pass via ENV
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             null,

@@ -26,7 +26,7 @@
 
                 <x-slot:tabpanes>
 
-                    <x-tabs.pane name="assets" class="in active">
+                    <x-tabs.pane name="assets">
                         <x-table.assets :route="route('api.assets.index', ['manufacturer_id' => $manufacturer->id, 'itemtype' => 'assets'])" />
                     </x-tabs.pane>
 

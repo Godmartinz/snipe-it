@@ -2,25 +2,25 @@
     'infoObject',
 ])
 
-@if (($infoObject) && ($infoObject->assetstatus))
+@if (($infoObject) && ($infoObject->status))
 
     @if (($infoObject->assignedTo) && ($infoObject->deleted_at==''))
         <x-icon type="circle-solid" class="text-blue"/>
-        {{ $infoObject->assetstatus->name }}
+        {{ $infoObject->status->name }}
         <label class="label label-default">{{ trans('general.deployed') }}</label>
         <x-icon type="long-arrow-right"/>
         <x-icon type="{{ $infoObject->assignedType() }}" class="fa-fw"/>
         {!!  $infoObject->assignedTo->present()->nameUrl() !!}
     @else
-        @if (($infoObject->assetstatus) && ($infoObject->assetstatus->deployable=='1'))
+        @if (($infoObject->status) && ($infoObject->status->deployable=='1'))
             <x-icon type="circle-solid" class="text-green"/>
-        @elseif (($infoObject->assetstatus) && ($infoObject->assetstatus->pending=='1'))
+        @elseif (($infoObject->status) && ($infoObject->status->pending=='1'))
             <x-icon type="circle-solid" class="text-orange"/>
         @else
             <x-icon type="x" class="text-red"/>
         @endif
-        <a href="{{ route('statuslabels.show', $infoObject->assetstatus->id) }}">
-            {{ $infoObject->assetstatus->name }}</a>
+        <a href="{{ route('statuslabels.show', $infoObject->status->id) }}">
+            {{ $infoObject->status->name }}</a>
         <label class="label label-default">{{ $infoObject->present()->statusMeta }}</label>
 
     @endif

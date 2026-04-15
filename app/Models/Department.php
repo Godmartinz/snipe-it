@@ -4,11 +4,14 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasUploads;
+use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\DepartmentPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
@@ -17,6 +20,9 @@ class Department extends SnipeModel
 {
     use CompanyableTrait;
     use HasFactory;
+    use HasUploads;
+    use Loggable;
+    use SoftDeletes;
 
     /**
      * Whether the model should inject it's identifier to the unique
@@ -71,14 +77,21 @@ class Department extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'notes', 'phone', 'fax'];
+    protected $searchableAttributes = [
+        'name',
+        'notes',
+        'phone',
+        'fax',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     public function isDeletable()
     {

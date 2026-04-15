@@ -28,15 +28,15 @@
                             count="{{ $consumable->numCheckedOut() }}"
                     />
 
-                    <x-tabs.files-tab count="{{ $consumable->uploads()->count() }}" />
-                    <x-tabs.history-tab model="\App\Models\Consumable::class"/>
+                    <x-tabs.files-tab :item="$consumable" count="{{ $consumable->uploads()->count() }}"/>
+                    <x-tabs.history-tab count="{{ $consumable->history()->count() }}" :model="$consumable"/>
                     <x-tabs.upload-tab :item="$consumable"/>
 
                 </x-slot:tabnav>
 
                 <x-slot:tabpanes>
 
-                    <x-tabs.pane name="assigned" class="in active">
+                    <x-tabs.pane name="assigned">
 
                         <x-table
                             :presenter="\App\Presenters\ConsumablePresenter::checkedOut()"
@@ -51,17 +51,10 @@
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-slot:table_header>
-                            {{ trans('general.history') }}
-                        </x-slot:table_header>
-
-                        <x-table
-                            name="consumableHistory"
-                            api_url="{{ route('api.activity.index', ['item_id' => $consumable->id, 'item_type' => 'consumable']) }}"
-                            :presenter="\App\Presenters\HistoryPresenter::dataTableLayout()"
-                            export_filename="export-licenses-{{ str_slug($consumable->name) }}-{{ date('Y-m-d') }}"
-                        />
+                        <x-table.history :model="$consumable" :route="route('api.consumables.history', $consumable)"/>
                     </x-tabs.pane>
+                    <!-- end history tab pane -->
+
                 </x-slot:tabpanes>
 
             </x-tabs>
@@ -72,10 +65,10 @@
                 <x-info-panel :infoPanelObj="$consumable" img_path="{{ app('consumables_upload_url') }}">
 
                     <x-slot:buttons>
+                        <x-button.edit :item="$consumable" :route="route('consumables.edit', $consumable->id)"/>
+                        <x-button.clone :item="$consumable" :route="route('consumables.clone.create', $consumable->id)"/>
+                        <x-button.delete :item="$consumable"/>
                         <x-button.checkout :item="$consumable" :route="route('consumables.checkout.show', $consumable->id)" />
-                        <x-button.edit :item="$consumable" :route="route('consumables.edit', $consumable->id)" />
-                        <x-button.clone :item="$consumable" :route="route('consumables.clone.create', $consumable->id)" />
-                        <x-button.delete :item="$consumable" />
                     </x-slot:buttons>
 
                 </x-info-panel>
@@ -83,14 +76,13 @@
         </x-page-column>
     </x-container>
 
-  @can('update', \App\Models\User::class)
-    @include ('modals.upload-file', ['item_type' => 'consumable', 'item_id' => $consumable->id])
-  @endcan
-
-
-
-@stop
+@endsection
 
 @section('moar_scripts')
-  @include ('partials.bootstrap-table', ['simple_view' => true])
+    @can('files', $consumable)
+        @include ('modals.upload-file', ['item_type' => 'consumables', 'item_id' => $consumable->id])
+    @endcan
+
+    @include ('partials.bootstrap-table', ['exportFile' => 'consumable-' . $consumable->name . '-export', 'search' => false])
 @endsection
+

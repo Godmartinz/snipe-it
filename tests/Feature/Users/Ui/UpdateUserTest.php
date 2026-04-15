@@ -251,6 +251,59 @@ class UpdateUserTest extends TestCase
         $this->followRedirects($response)->assertSee('success');
     }
 
+    public function test_edit_users_permission_cannot_escalate_empty_permissions_user_to_admin_or_superuser_via_ui()
+    {
+        $editingUser = User::factory()->editUsers()->create();
+        $targetUser = User::factory()->create([
+            'permissions' => null,
+        ]);
+
+        $this->actingAs($editingUser)
+            ->put(route('users.update', $targetUser), [
+                'first_name' => $targetUser->first_name,
+                'username' => $targetUser->username,
+                'permission' => [
+                    'admin' => '1',
+                    'superuser' => '1',
+                    'users.view' => '1',
+                ],
+                'redirect_option' => 'index',
+            ])
+            ->assertRedirect(route('users.index'));
+
+        $decoded = (array) $targetUser->refresh()->decodePermissions();
+
+        $this->assertArrayNotHasKey('admin', $decoded, 'Non-admin user should not be able to grant admin');
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Non-admin user should not be able to grant superuser');
+        $this->assertEquals(1, $decoded['users.view'] ?? null, 'Non-privileged permissions should still be updateable');
+    }
+
+    public function test_admin_cannot_escalate_empty_permissions_user_to_superuser_via_ui()
+    {
+        $adminUser = User::factory()->admin()->create();
+        $targetUser = User::factory()->create([
+            'permissions' => null,
+        ]);
+
+        $this->actingAs($adminUser)
+            ->put(route('users.update', $targetUser), [
+                'first_name' => $targetUser->first_name,
+                'username' => $targetUser->username,
+                'permission' => [
+                    'admin' => '1',
+                    'superuser' => '1',
+                ],
+                'redirect_option' => 'index',
+            ])
+            ->assertRedirect(route('users.index'));
+
+        $decoded = (array) $targetUser->refresh()->decodePermissions();
+
+        $this->assertArrayHasKey('admin', $decoded, 'Admin should be able to grant admin');
+        $this->assertSame('1', (string) $decoded['admin']);
+        $this->assertArrayNotHasKey('superuser', $decoded, 'Admin should not be able to grant superuser');
+    }
+
     /**
      * This can occur if the user edit screen is open in one tab and
      * the user is deleted in another before the edit form is submitted.

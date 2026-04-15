@@ -3,7 +3,7 @@
     'class' => false,
 ])
 
-@can('view', \App\Models\AssetMaintenance::class)
+@can('view', \App\Models\Asset::class)
 <x-tabs.nav-item
     :$class
     name="maintenances"

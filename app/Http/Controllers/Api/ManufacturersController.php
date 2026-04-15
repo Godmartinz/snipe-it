@@ -6,6 +6,7 @@ use App\Actions\Manufacturers\DeleteManufacturerAction;
 use App\Exceptions\ItemStillHasChildren;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\ManufacturersTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -28,7 +29,7 @@ class ManufacturersController extends Controller
      *
      * @return Response
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Manufacturer::class);
         $allowed_columns = [
@@ -81,8 +82,9 @@ class ManufacturersController extends Controller
             $manufacturers->onlyTrashed();
         }
 
-        if ($request->filled('search')) {
-            $manufacturers = $manufacturers->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $manufacturers->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         if ($request->filled('name')) {

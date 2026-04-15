@@ -14,7 +14,7 @@
     </x-slot:table_header>
 
     <x-slot:bulkactions>
-        <x-table.bulk-users/>
+        <x-table.bulk-models/>
     </x-slot:bulkactions>
     
     <x-table

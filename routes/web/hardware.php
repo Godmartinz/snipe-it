@@ -146,7 +146,7 @@ Route::group(
         )->name('hardware.bulkedit.show')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('hardware.index')
-            ->push(trans('general.bulk_delete'), route('hardware.index')));
+            ->push(trans('general.bulk_edit'), route('hardware.index')));
 
         Route::post(
             'bulkdelete',

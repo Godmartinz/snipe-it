@@ -30,7 +30,7 @@ class LicensesTransformer
                 'name' => e($license->manufacturer->name),
                 'tag_color' => ($license->manufacturer->tag_color) ? e($license->manufacturer->tag_color) : null,
             ] : null,
-            'product_key' => (Gate::allows('viewKeys', License::class)) ? e($license->serial) : '------------',
+            'product_key' => (Gate::allows('viewKeys', $license)) ? e($license->serial) : '------------',
             'order_number' => ($license->order_number) ? e($license->order_number) : null,
             'purchase_order' => ($license->purchase_order) ? e($license->purchase_order) : null,
             'purchase_date' => Helper::getFormattedDateObject($license->purchase_date, 'date'),

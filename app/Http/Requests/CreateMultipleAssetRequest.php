@@ -22,6 +22,15 @@ class CreateMultipleAssetRequest extends ImageUploadRequest // should I extend f
         return true; // TODO - should I do the auth check here?
     }
 
+    protected function prepareForValidation()
+    {
+        parent::prepareForValidation();
+
+        if (Setting::getSettings()->full_multiple_companies_support == '1' && ! $this->user()->isSuperUser()) {
+            $this->mergeIfMissing(['company_id' => $this->user()->company_id]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

@@ -56,7 +56,7 @@ class CheckinAssetMail extends BaseMailable
      */
     public function content(): Content
     {
-        $this->item->load('assetstatus');
+        $this->item->load('status');
         $fields = [];
 
         // Check if the item has custom fields associated with it
@@ -68,7 +68,7 @@ class CheckinAssetMail extends BaseMailable
             markdown: 'mail.markdown.checkin-asset',
             with: [
                 'item' => $this->item,
-                'status' => $this->item->assetstatus?->name,
+                'status' => $this->item->status?->name,
                 'admin' => $this->admin,
                 'note' => $this->note,
                 'target' => $this->target,

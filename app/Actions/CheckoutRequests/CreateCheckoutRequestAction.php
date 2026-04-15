@@ -44,7 +44,7 @@ class CreateCheckoutRequestAction
         $asset->request();
         $asset->increment('requests_counter', 1);
         try {
-            $settings->notify(new RequestAssetNotification($data));
+            $settings->notify((new RequestAssetNotification($data))->locale($settings->locale));
         } catch (\Exception $e) {
             Log::warning($e);
         }

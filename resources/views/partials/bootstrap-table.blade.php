@@ -25,6 +25,38 @@
             return false;
         }
 
+        /** This handles the responsive tab UI on v iew detail pages **/
+        function resize() {
+            if ($(window).width() < 767) {
+                $('.nav-tabs-dropdown').addClass('nav-justified');
+                $('.uploadtab').removeClass('pull-right');
+
+            }
+            else {
+                $('.nav-tabs-dropdown').removeClass('nav-justified');
+                $('.uploadtab').addClass('pull-right');
+            }
+        }
+
+        // Run the function on page load
+        $(document).ready(function () {
+            resize();
+        });
+
+        // Watch for window resize events
+        $(window).on('resize', function () {
+            resize();
+        });
+
+        //open and close tab menu
+        $('.nav-tabs-dropdown').on("click", "li:not('.active') a", function (event) {
+            $(this).closest('ul').removeClass("open");
+        }).on("click", "li.active a", function (event) {
+            $(this).closest('ul').toggleClass("open");
+        });
+
+        /** End handling the responsive tab UI on view detail pages **/
+
         $('.snipe-table').bootstrapTable('destroy').each(function () {
 
             data_export_options = $(this).attr('data-export-options');
@@ -275,6 +307,28 @@
 
     }); // end user table buttons
 
+    // Oauth table buttons
+    window.oauthButtons = () => ({
+
+        btnAdd: {
+            text: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+            icon: 'fa fa-plus',
+            attributes: {
+                event() {
+                    wire:click = "$dispatch('openModal')"
+                    onclick = "$('#modal-create-client').modal('show');"
+                },
+
+                title: '{{ trans('general.create') }}',
+                class: 'btn-warning',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            },
+        },
+
+    }); // end user table buttons
+
 
     @can('create', \App\Models\Company::class)
     // Company table buttons
@@ -365,14 +419,14 @@
         },
 
         btnShowDeleted: {
-            text: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+            text: '{{ (request()->input('status_type') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
             icon: 'fa-solid fa-trash',
             event () {
-                window.location.href = '{{ (request()->input('status') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status' => 'Deleted']) }}';
+                window.location.href = '{{ (request()->input('status_type') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status_type' => 'Deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "Deleted") ? 'btn-selected' : '' }}',
-                title: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+                class: '{{ (request()->input('status_type') == "Deleted") ? 'btn-selected' : '' }}',
+                title: '{{ (request()->input('status_type') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
         },
@@ -972,7 +1026,7 @@
         else if (value <= 100) {
             bar_color = 'success';
         }
-        return '<div class="progress progress-sm" data-tooltip="true" title="' + value + '%"><div class="progress-bar progress-bar-' + bar_color + '" role="progressbar" aria-valuenow="' + value + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + value + '%; min-width: 1em;"></div></div>';
+        return '<div class="progress progress-sm" data-tooltip="true" title="' + value + '%"><div class="progress-bar progress-bar-' + bar_color + '" role="progressbar" aria-valuenow="' + value + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + value + '%; min-width: 0em;"></div></div>';
     }
 
     // Use this when we're introspecting into a column object and need to link
@@ -1186,6 +1240,11 @@
             // display the username if it's checked out to a user, but don't do it if the username's there already
             if (value.username && !value.name.match('\\(') && !value.name.match('\\)')) {
                 value.name = value.name + ' (' + value.username + ')';
+            }
+
+            // Show as strikethrough if it's been deleted
+            if (value.deleted_at && value.deleted_at != '') {
+                return '<nobr><span class="text-muted" data-tooltip="true" title="{{ trans('general.deleted') }} ' + value.type + '"><del><i class="' + item_icon + ' fa-fw"></i> ' + value.name + '</del></span></nobr>';
             }
 
             return '<nobr><a href="{{ config('app.url') }}/' + item_destination +'/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="' + item_icon + ' fa-fw"></i> ' + value.name + '</a></nobr>';
@@ -1985,6 +2044,20 @@
                 }
             });
         };
+
+        $("[name='clearSearch']").click(function () {
+
+            // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
+            for (storedSearch in localStorage) {
+                if (storedSearch.endsWith('.bs.table.searchText')) {
+                    localStorage.removeItem(storedSearch);
+                }
+            }
+
+            $('.search-input').each(function (index, element) {
+                $(element).val('');
+            });
+        });
 
         $('.search button[name=clearSearch]').click(searchboxHighlighter);
         searchboxHighlighter({ name:'pageload'});

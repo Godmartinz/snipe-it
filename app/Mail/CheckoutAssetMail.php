@@ -71,7 +71,7 @@ class CheckoutAssetMail extends BaseMailable
      */
     public function content(): Content
     {
-        $this->item->load('assetstatus');
+        $this->item->load('status');
         $eula = method_exists($this->item, 'getEula') ? $this->item->getEula() : '';
         $req_accept = $this->requiresAcceptance();
         $fields = [];
@@ -97,7 +97,7 @@ class CheckoutAssetMail extends BaseMailable
             with: [
                 'item' => $this->item,
                 'admin' => $this->admin,
-                'status' => $this->item->assetstatus?->name,
+                'status' => $this->item->status?->name,
                 'note' => $this->note,
                 'target' => $name,
                 'fields' => $fields,
@@ -132,6 +132,9 @@ class CheckoutAssetMail extends BaseMailable
 
     private function introductionLine(): string
     {
+        if (is_null($this->acceptance)) {
+            return trans_choice('mail.new_item_checked', 1);
+        }
         if ($this->firstTimeSending && $this->target instanceof Location) {
             return trans_choice('mail.new_item_checked_location', 1, ['location' => $this->target->name]);
         }
@@ -149,7 +152,7 @@ class CheckoutAssetMail extends BaseMailable
         }
 
         // we shouldn't get here but let's send a default message just in case
-        return trans('new_item_checked');
+        return trans('mail.new_item_checked');
     }
 
     private function requiresAcceptance(): int|bool

@@ -26,7 +26,7 @@
                     <x-tabs.consumable-tab count="{{ $supplier->consumables->count() }}" />
                     <x-tabs.component-tab count="{{ $supplier->components->count() }}" />
                     <x-tabs.maintenance-tab count="{{ $supplier->maintenances->count() }}"/>
-                    <x-tabs.files-tab count="{{ $supplier->uploads->count() }}"/>
+                    <x-tabs.files-tab :item="$supplier" count="{{ $supplier->uploads()->count() }}"/>
                     <x-tabs.upload-tab :item="$supplier"/>
 
                 </x-slot:tabnav>
@@ -143,15 +143,13 @@
         </table>
     </div>
 
-  @can('update', \App\Models\Supplier::class)
-      @include ('modals.upload-file', ['item_type' => 'supplier', 'item_id' => $supplier->id])
-  @endcan
-@stop
+@endsection
 
 @section('moar_scripts')
-  @include ('partials.bootstrap-table', [
-      'exportFile' => 'locations-export',
-      'search' => true
-   ])
+    @can('files', $supplier)
+        @include ('modals.upload-file', ['item_type' => 'suppliers', 'item_id' => $supplier->id])
+    @endcan
 
-@stop
+    @include ('partials.bootstrap-table', ['exportFile' => 'suppliers-' . $supplier->name . '-export', 'search' => false])
+@endsection
+

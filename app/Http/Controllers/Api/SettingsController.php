@@ -162,6 +162,12 @@ class SettingsController extends Controller
     public function ajaxTestEmail(): JsonResponse
     {
         if (! config('app.lock_passwords')) {
+
+            if (config('mail.reply_to.address') == '') {
+                Log::debug('MAIL_REPLYTO_ADDR not set in env. Skipping mail test.');
+                return response()->json(['message' => trans('admin/settings/general.mail_test_no_email')], 403);
+            }
+
             try {
                 Notification::send(Setting::first(), new MailTest);
                 Log::debug('Attempting to sending to '.config('mail.reply_to.address'));

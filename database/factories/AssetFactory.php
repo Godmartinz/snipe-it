@@ -314,7 +314,7 @@ class AssetFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'model_id' => 1,
+                'model_id' => AssetModel::factory(),
                 'assigned_to' => Asset::factory(),
                 'assigned_type' => Asset::class,
             ];

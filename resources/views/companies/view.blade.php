@@ -16,15 +16,22 @@
         <x-page-column class="col-md-9 main-panel">
             <x-tabs>
                 <x-slot:tabnav>
+                    <x-tabs.user-tab count="{{ $company->users->count() }}"/>
                     <x-tabs.asset-tab count="{{ $company->assets()->AssetsForShow()->count() }}"/>
                     <x-tabs.license-tab count="{{ $company->licenses->count() }}"/>
                     <x-tabs.accessory-tab count="{{ $company->accessories->count() }}"/>
                     <x-tabs.consumable-tab count="{{ $company->consumables->count() }}"/>
                     <x-tabs.component-tab count="{{ $company->components->count() }}"/>
-                    <x-tabs.user-tab count="{{ $company->users->count() }}"/>
+                    <x-tabs.files-tab :item="$company" count="{{ $company->uploads()->count() }}"/>
+                    <x-tabs.upload-tab :item="$company"/>
                 </x-slot:tabnav>
 
                 <x-slot:tabpanes>
+                    <!-- start users tab pane -->
+                    <x-tabs.pane name="users">
+                        <x-table.users name="users" :route="route('api.users.index', ['company_id' => $company->id])"/>
+                    </x-tabs.pane>
+                    <!-- end users tab pane -->
 
                     <!-- start assets tab pane -->
                     <x-tabs.pane name="assets">
@@ -55,11 +62,11 @@
                         <x-table.components name="components" :route="route('api.components.index', ['company_id' => $company->id])"/>
                     </x-tabs.pane>
 
-                    <!-- start users tab pane -->
-                    <x-tabs.pane name="users">
-                        <x-table.users name="users" :route="route('api.users.index', ['company_id' => $company->id])"/>
+                    <!-- start files tab pane -->
+                    <x-tabs.pane name="files">
+                        <x-table.files object_type="companies" :object="$company"/>
                     </x-tabs.pane>
-                    <!-- end users tab pane -->
+                    <!-- end files tab pane -->
 
                 </x-slot:tabpanes>
 
@@ -80,11 +87,12 @@
         </x-page-column>
     </x-container>
 
+@endsection
 
-
-@stop
 @section('moar_scripts')
+    @can('files', $company)
+        @include ('modals.upload-file', ['item_type' => 'companies', 'item_id' => $company->id])
+    @endcan
     @include ('partials.bootstrap-table')
-
-@stop
+@endsection
 

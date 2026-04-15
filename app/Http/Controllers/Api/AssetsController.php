@@ -11,6 +11,7 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\AccessoryCheckout;
@@ -19,6 +20,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\ComponentAssignment;
 use App\Models\CustomField;
 use App\Models\License;
 use App\Models\LicenseSeat;
@@ -126,9 +128,9 @@ class AssetsController extends Controller
             'location',
             'rtd_location',
             'category',
-            'status_label',
             'manufacturer',
             'supplier',
+            'status',
             'jobtitle',
             'assigned_to',
             'created_by',
@@ -139,17 +141,6 @@ class AssetsController extends Controller
 
         foreach ($all_custom_fields as $field) {
             $allowed_columns[] = $field->db_column_name();
-        }
-
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
         }
 
         $assets = Asset::select('assets.*')
@@ -165,7 +156,7 @@ class AssetsController extends Controller
             ->with(
                 'model',
                 'location',
-                'assetstatus',
+                'status',
                 'company',
                 'defaultLoc',
                 'assignedTo',
@@ -183,21 +174,9 @@ class AssetsController extends Controller
             $assets->InModelList($non_deprecable_models->toArray());
         }
 
-        // These are used by the API to query against specific ID numbers.
-        // They are also used by the individual searches on detail pages like
-        // locations, etc.
-
-        // Search custom fields by column name
-        foreach ($all_custom_fields as $field) {
-            if ($request->filled($field->db_column_name()) && $field->db_column_name()) {
-                $assets->where('assets.'.$field->db_column_name(), '=', $request->input($field->db_column_name()));
-            }
-        }
-
-        if ((! is_null($filter)) && (count($filter)) > 0) {
-            $assets->ByFilter($filter);
-        } elseif ($request->filled('search')) {
-            $assets->TextSearch($request->input('search'));
+        // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
+        if ($request->filled('filter') || $request->filled('search')) {
+            $assets->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
 
         /**
@@ -240,10 +219,18 @@ class AssetsController extends Controller
 
         // This is used by the sidenav, mostly
 
-        // We switched from using query scopes here because of a Laravel bug
-        // related to fulltext searches on complex queries.
-        // I am sad. :(
-        switch ($request->input('status')) {
+        // This bit here accounts for folks actually using the formerly-known-as status like we previously used in the sidenav
+        // to return a list of all assets with the status *type* of Deployed, etc. The inuput field used to be "status" (which was consistent
+        // with the relation rename, but it broke the sidebar. This should handle both use cases in the event that someone didn't update
+        // their API integration code
+        $status_type_key = null;
+        if ($request->filled('status_type')) {
+            $status_type_key = $request->input('status_type');
+        } elseif ($request->filled('status')) {
+            $status_type_key = $request->input('status');
+        }
+
+        switch ($status_type_key) {
             case 'Deleted':
                 $assets->onlyTrashed();
                 break;
@@ -415,7 +402,7 @@ class AssetsController extends Controller
             case 'rtd_location':
                 $assets->OrderRtdLocation($order);
                 break;
-            case 'status_label':
+            case 'status':
                 $assets->OrderStatus($order);
                 break;
             case 'supplier':
@@ -487,7 +474,7 @@ class AssetsController extends Controller
     public function showByTag(Request $request, $tag): JsonResponse|array
     {
         $this->authorize('index', Asset::class);
-        $assets = Asset::where('asset_tag', $tag)->with('assetstatus')->with('assignedTo');
+        $assets = Asset::where('asset_tag', $tag)->with('status')->with('assignedTo');
 
         // Check if they've passed ?deleted=true
         if ($request->input('deleted', 'false') == 'true') {
@@ -527,7 +514,7 @@ class AssetsController extends Controller
     {
         $this->authorize('index', Asset::class);
         $assets = Asset::where('serial', $serial)->with([
-            'assetstatus',
+            'status',
             'assignedTo',
             'company',
             'defaultLoc',
@@ -571,7 +558,7 @@ class AssetsController extends Controller
      */
     public function show(Request $request, $id): JsonResponse|array
     {
-        if ($asset = Asset::with('assetstatus')
+        if ($asset = Asset::with('status')
             ->with('assignedTo')->withTrashed()
             ->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as user_requests_count')->find($id)
         ) {
@@ -611,14 +598,14 @@ class AssetsController extends Controller
             'assets.assigned_to',
             'assets.assigned_type',
             'assets.status_id',
-        ])->with('model', 'assetstatus', 'assignedTo')
+        ])->with('model', 'status', 'assignedTo')
             ->NotArchived();
 
         if ((Setting::getSettings()->full_multiple_companies_support == '1') && ($request->filled('companyId'))) {
             $assets->where('assets.company_id', $request->input('companyId'));
         }
 
-        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'RTD') {
+        if ($request->filled('statusType') && $request->input('statusType') === 'RTD') {
             $assets = $assets->RTD();
         }
 
@@ -639,8 +626,8 @@ class AssetsController extends Controller
                 $asset->use_text .= ' → '.$asset->assigned->display_name;
             }
 
-            if ($asset->assetstatus->getStatuslabelType() == 'pending') {
-                $asset->use_text .= '('.$asset->assetstatus->getStatuslabelType().')';
+            if ($asset->status->getStatuslabelType() == 'pending') {
+                $asset->use_text .= '('.$asset->status->getStatuslabelType().')';
             }
 
             $asset->use_image = ($asset->getImageUrl()) ? $asset->getImageUrl() : null;
@@ -1124,7 +1111,11 @@ class AssetsController extends Controller
         $this->authorize('audit', Asset::class);
 
         $settings = Setting::getSettings();
-        $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
+
+        $dt = null;
+        if (! is_null($settings->audit_interval)) {
+            $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
+        }
 
         // Allow the asset tag to be passed in the payload (legacy method)
         if ($request->filled('asset_tag')) {
@@ -1154,8 +1145,8 @@ class AssetsController extends Controller
                 'id' => $asset->id,
                 'asset_tag' => $asset->asset_tag,
                 'note' => e($request->input('note')),
-                'status_label' => e($asset->assetstatus?->display_name),
-                'status_type' => $asset->assetstatus?->getStatuslabelType(),
+                'status_label' => e($asset->status?->display_name),
+                'status_type' => $asset->status?->getStatuslabelType(),
                 'next_audit_date' => Helper::getFormattedDateObject($asset->next_audit_date),
             ];
 
@@ -1262,7 +1253,7 @@ class AssetsController extends Controller
         $assets = Asset::select('assets.*')
             ->with(
                 'location',
-                'assetstatus',
+                'status',
                 'assetlog',
                 'company',
                 'assignedTo',
@@ -1337,7 +1328,6 @@ class AssetsController extends Controller
 
     public function assignedAccessories(Request $request, Asset $asset): JsonResponse|array
     {
-        $this->authorize('view', Asset::class);
         $this->authorize('view', $asset);
         $accessory_checkouts = AccessoryCheckout::AssetsAssigned()
             ->where('assigned_to', $asset->id)
@@ -1353,14 +1343,41 @@ class AssetsController extends Controller
         return (new AssetsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
     }
 
-    public function assignedComponents(Asset $asset): JsonResponse|array
+    public function assignedComponents(Request $request, Asset $asset): JsonResponse|array
     {
         $this->authorize('view', $asset);
         $asset->loadCount('components');
-        $total = $asset->components_count;
-        $components = $asset->load(['components' => fn ($query) => $query->applyOffsetAndLimit($total)])->components;
 
-        return (new AssetsTransformer)->transformCheckedoutComponents($components, $total);
+        $allowed_columns = [
+            'created_at',
+            'assigned_qty',
+            'note',
+        ];
+
+        $component_checkouts = ComponentAssignment::where('asset_id', $asset->id)->with('adminuser')->with('component');
+
+        $sort_override = $request->input('sort');
+        $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'created_at';
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+
+        switch ($sort_override) {
+            case 'created_by':
+                $component_checkouts = $component_checkouts->OrderByCreatedByName($order);
+                break;
+            case 'name':
+                $component_checkouts = $component_checkouts->OrderByComponentName($order);
+                break;
+            default:
+                $component_checkouts = $component_checkouts->orderBy($column_sort, $order);
+                break;
+        }
+
+        $offset = ($request->input('offset') > $component_checkouts->count()) ? $component_checkouts->count() : app('api_offset_value');
+        $total = $component_checkouts->count();
+        $limit = app('api_limit_value');
+        $component_checkouts = $component_checkouts->skip($offset)->take($limit)->get();
+
+        return (new AssetsTransformer)->transformCheckedoutComponents($component_checkouts, $total);
     }
 
     /**
@@ -1446,5 +1463,17 @@ class AssetsController extends Controller
                 'error_file' => $e->getFile(),
             ], $e->getMessage()), 500);
         }
+    }
+
+    public function history(Request $request, Asset $asset): JsonResponse|array
+    {
+        $this->authorize('history', $asset);
+        $history = $asset->getHistory($request);
+        $total = $asset->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
+
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

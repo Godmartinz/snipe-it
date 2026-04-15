@@ -274,7 +274,7 @@
                                         <label for="purge_barcodes" class="control-label">{{ trans('admin/settings/general.purge_barcodes') }}</label>
                                     </div>
                                     <div class="col-md-7">
-                                        <a class="btn btn-default btn-sm pull-left" id="purgebarcodes" style="margin-right: 10px;">
+                                        <a class="btn btn-theme btn-sm pull-left" id="purgebarcodes" style="margin-right: 10px;">
                                             {{ trans('admin/settings/general.barcode_delete_cache') }}
                                         </a>
                                         <span id="purgebarcodesicon"></span>

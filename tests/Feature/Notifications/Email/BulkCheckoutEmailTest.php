@@ -214,6 +214,20 @@ class BulkCheckoutEmailTest extends TestCase
         Mail::assertNotSent(BulkAssetCheckoutMail::class);
     }
 
+    public function test_handles_assignee_asset_already_being_checked_out_to_asset()
+    {
+        $this->assignee = Asset::factory()->assignedToAsset()->create();
+
+        $this->sendRequest();
+    }
+
+    public function test_handles_assignee_asset_already_being_checked_out_to_location()
+    {
+        $this->assignee = Asset::factory()->assignedToLocation()->create();
+
+        $this->sendRequest();
+    }
+
     private function sendRequest()
     {
         $assigned = match (get_class($this->assignee)) {

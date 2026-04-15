@@ -67,14 +67,20 @@ class Manufacturer extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'created_at', 'notes'];
+    protected $searchableAttributes = [
+        'name',
+        'created_at',
+        'notes',
+    ];
 
     /**
      * The relations and their attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableRelations = [];
+    protected $searchableRelations = [
+        'adminuser' => ['first_name', 'last_name', 'display_name'],
+    ];
 
     public function isDeletable()
     {
@@ -115,11 +121,6 @@ class Manufacturer extends SnipeModel
     public function components()
     {
         return $this->hasMany(Component::class, 'manufacturer_id');
-    }
-
-    public function adminuser()
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**
