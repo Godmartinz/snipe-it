@@ -38,9 +38,10 @@ abstract class CustomSheetLabel extends CustomLabel
     protected bool $supportLogo = false;
     protected bool $supportAssetTag = true;
 
-    protected float $barcodeSize = 12.0;
-    protected float $barcode2DSize = 12.0;
+    protected float $barcodeSize = 0.15;
+    protected float $barcode2DSize = .76;
     protected float $barcodeMargin = 2.0;
+    protected float $barcode2Margin = 0.075;
     protected float $logoMaxWidth = 12.0;
     protected float $logoMargin = 2.0;
     protected float $tagSize = 6.0;
@@ -310,18 +311,28 @@ abstract class CustomSheetLabel extends CustomLabel
 
         if (method_exists($template, 'getBarcodeSize')) {
             $this->barcodeSize = $convert($template->getBarcodeSize());
+        } elseif (method_exists($template, 'getBarcode1DSize')) {
+            $this->barcodeSize = $convert($template->getBarcode1DSize());
         }
 
         if (method_exists($template, 'get2DBarcodeSize')) {
             $this->barcode2DSize = $convert($template->get2DBarcodeSize());
+        } elseif (method_exists($template, 'getBarcode2DSize')) {
+            $this->barcode2DSize = $convert($template->getBarcode2DSize());
         }
 
         if (method_exists($template, 'getBarcodeMargin')) {
             $this->barcodeMargin = $convert($template->getBarcodeMargin());
+        } elseif (method_exists($template, 'getBarcode2DMargin')) {
+            $this->barcodeMargin = $convert($template->getBarcode2DMargin());
+            $this->barcode2Margin = $convert($template->getBarcode2DMargin());
         }
 
         if (method_exists($template, 'getLogoMaxWidth')) {
             $this->logoMaxWidth = $convert($template->getLogoMaxWidth());
+        } elseif (method_exists($template, 'getLogoSize')) {
+            $logoSize = $template->getLogoSize();
+            $this->logoMaxWidth = isset($logoSize[0]) ? $convert($logoSize[0]) : $this->logoMaxWidth;
         }
 
         if (method_exists($template, 'getLogoMargin')) {
@@ -330,26 +341,37 @@ abstract class CustomSheetLabel extends CustomLabel
 
         if (method_exists($template, 'getTagSize')) {
             $this->tagSize = $convert($template->getTagSize());
+        } elseif (method_exists($template, 'getTextSize')) {
+            $textSize = $convert($template->getTextSize());
+            $this->tagSize = $textSize;
+            $this->titleSize = $textSize;
+            $this->labelSize = $textSize;
+            $this->fieldSize = $textSize;
         }
 
         if (method_exists($template, 'getTitleSize')) {
             $this->titleSize = $convert($template->getTitleSize());
         }
 
-        if (method_exists($template, 'getTitleMargin')) {
-            $this->titleMargin = $convert($template->getTitleMargin());
-        }
-
         if (method_exists($template, 'getLabelSize')) {
             $this->labelSize = $convert($template->getLabelSize());
         }
 
-        if (method_exists($template, 'getLabelMargin')) {
-            $this->labelMargin = $convert($template->getLabelMargin());
-        }
-
         if (method_exists($template, 'getFieldSize')) {
             $this->fieldSize = $convert($template->getFieldSize());
+        }
+
+        if (method_exists($template, 'getTitleMargin')) {
+            $this->titleMargin = $convert($template->getTitleMargin());
+        } elseif (method_exists($template, 'getTextMargin')) {
+            $textMargin = $convert($template->getTextMargin());
+            $this->titleMargin = $textMargin;
+            $this->labelMargin = $textMargin;
+            $this->fieldMargin = $textMargin;
+        }
+
+        if (method_exists($template, 'getLabelMargin')) {
+            $this->labelMargin = $convert($template->getLabelMargin());
         }
 
         if (method_exists($template, 'getFieldMargin')) {
@@ -420,12 +442,6 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
     }
 
-    protected function toMm(float $value): float
-    {
-        return $this->getUnit() === 'in'
-            ? $value * 25.4
-            : $value;
-    }
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();
