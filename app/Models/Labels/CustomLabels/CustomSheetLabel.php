@@ -38,8 +38,8 @@ abstract class CustomSheetLabel extends CustomLabel
     protected bool $supportLogo = false;
     protected bool $supportAssetTag = true;
 
-    protected float $barcodeSize = 0.15;
-    protected float $barcode2DSize = .76;
+    protected float $barcodeSize = 3;
+    protected float $barcode2DSize = 12;
     protected float $barcodeMargin = 2.0;
     protected float $barcode2Margin = 0.075;
     protected float $logoMaxWidth = 12.0;
