@@ -117,10 +117,16 @@ class L7163_A extends L7163
         return true;
     }
 
+    public function get2DBarcodeSize()
+    {
+        return 31;
+    }
+
     protected function getContentEditorConfig(): array
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->get2DBarcodeSize(),
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),

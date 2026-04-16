@@ -202,6 +202,8 @@ class LabelsController extends Controller
         $exampleAsset->model->category->id = 999999;
         $exampleAsset->model->category->name = trans('admin/labels/table.example_category');
 
+        $exampleAsset->is_label_preview = true;
+
         $customFieldColumns = CustomField::where('field_encrypted', 0)->pluck('db_column');
 
         collect(explode(';', Setting::getSettings()->label2_fields))

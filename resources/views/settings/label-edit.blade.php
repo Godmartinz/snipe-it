@@ -231,14 +231,25 @@
                                         <div class="form-group">
                                             <label class="col-md-5 control-label">{{ $key }}</label>
                                             <div class="col-md-7">
-                                                @if($key === 'tag_alignment')
+                                                @if($key === 'tag_alignment' || $key === 'logo_h_align' || $key === 'barcode2D_h_align')
                                                     <select name="content[{{ $key }}]" class="form-control">
-                                                        <option value="L" {{ $value === 'L' ? 'selected' : '' }}>Left
+                                                        <option value="L" {{ $value === 'L' ? 'selected' : '' }}>
+                                                            Left
+                                                        </option>
+                                                        <option value="R" {{ $value === 'R' ? 'selected' : '' }}>
+                                                            Right
+                                                        </option>
+                                                    </select>
+                                                @elseif($key === 'logo_v_align' || $key === 'barcode2D_v_align')
+                                                    <select name="content[{{ $key }}]" class="form-control">
+                                                        <option value="T" {{ $value === 'T' ? 'selected' : '' }}>
+                                                            Top
                                                         </option>
                                                         <option value="C" {{ $value === 'C' ? 'selected' : '' }}>
                                                             Center
                                                         </option>
-                                                        <option value="R" {{ $value === 'R' ? 'selected' : '' }}>Right
+                                                        <option value="B" {{ $value === 'B' ? 'selected' : '' }}>
+                                                            Bottom
                                                         </option>
                                                     </select>
                                                 @else
