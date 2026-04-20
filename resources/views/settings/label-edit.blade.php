@@ -253,7 +253,7 @@
                                                         </option>
                                                     </select>
                                                 @else
-                                                    <input type="number" step="0.001" name="content[{{ $key }}]"
+                                                    <input type="number" step="1" name="content[{{ $key }}]"
                                                            value="{{ $value }}" class="form-control">
                                                 @endif
                                             </div>

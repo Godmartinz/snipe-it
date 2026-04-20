@@ -59,11 +59,23 @@ abstract class CustomSheetLabel extends CustomLabel
     protected string $tagAlignment = 'L';
     protected string $barcode2DHAlign = 'L';
     protected string $barcode2DVAlign = 'T';
-
     protected string $tagHAlign = 'R';
     protected string $tagVAlign = 'B';
     protected string $tagPositionMode = 'free';
+    protected ?float $textAreaWidth = null;
+    protected ?float $textAreaHeight = null;
+    protected float $tagOffsetX = 0.0;
+    protected float $tagOffsetY = 0.0;
 
+    public function getTagOffsetX(): float
+    {
+        return $this->tagOffsetX;
+    }
+
+    public function getTagOffsetY(): float
+    {
+        return $this->tagOffsetY;
+    }
     public function getUnit()
     {
         return $this->unit;
@@ -283,6 +295,15 @@ abstract class CustomSheetLabel extends CustomLabel
         return $this->tagPositionMode;
     }
 
+    public function getTextAreaWidth(): ?float
+    {
+        return $this->textAreaWidth;
+    }
+
+    public function getTextAreaHeight(): ?float
+    {
+        return $this->textAreaHeight;
+    }
 
     public function preparePDF($pdf)
     {
@@ -304,12 +325,16 @@ abstract class CustomSheetLabel extends CustomLabel
             'logo_h_align' => $this->getLogoHAlign(),
             'logo_v_align' => $this->getLogoVAlign(),
             'tag_font_size' => $this->getTagSize(),
+            'tag_offset_x' => $this->getTagOffsetX(),
+            'tag_offset_y' => $this->getTagOffsetY(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
+            'text_area_width' => $this->getTextAreaWidth(),
+            'text_area_height' => $this->getTextAreaHeight(),
         ];
     }
 
@@ -481,238 +506,19 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
 
         $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
+        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float)$content['tag_offset_x'] : $this->tagOffsetX;
+        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float)$content['tag_offset_y'] : $this->tagOffsetY;
         $this->tagAlignment = isset($content['tag_alignment']) ? (string)$content['tag_alignment'] : $this->tagAlignment;
         $this->titleSize = isset($content['title_font_size']) ? (float)$content['title_font_size'] : $this->titleSize;
         $this->labelSize = isset($content['field_label_font_size']) ? (float)$content['field_label_font_size'] : $this->labelSize;
         $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
+        $this->textAreaWidth = isset($content['text_area_width']) && $content['text_area_width'] !== '' ? (float)$content['text_area_width'] : $this->textAreaWidth;
+        $this->textAreaHeight = isset($content['text_area_height']) && $content['text_area_height'] !== '' ? (float)$content['text_area_height'] : $this->textAreaHeight;
 
         $this->titleMargin = isset($content['title_margin']) ? (float)$content['title_margin'] : $this->titleMargin;
         $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
     }
-
-//    public function write($pdf, $record)
-//    {
-//        $pa = $this->getLabelPrintableArea();
-//
-//        $currentX = $pa->x1;
-//        $currentY = $pa->y1;
-//        $usableWidth = $pa->w;
-//        $usableHeight = $pa->h;
-//        $bottomLimit = $pa->y2;
-//        $barcodeX = null;
-//        $barcodeY = null;
-//        $barcodeSize = null;
-//
-//        if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
-//            $barcodeSize = $this->getBarcodeSize();
-//            $barcodeMargin = $this->getBarcodeMargin();
-//
-//            $bottomLimit -= $barcodeSize + $barcodeMargin;
-//
-//            static::write1DBarcode(
-//                $pdf,
-//                $record->get('barcode1d')->content,
-//                $record->get('barcode1d')->type,
-//                $pa->x1,
-//                $pa->y2 - $barcodeSize,
-//                $usableWidth,
-//                $barcodeSize
-//            );
-//
-//            $usableHeight -= $barcodeSize + $barcodeMargin;
-//        }
-//
-//        if ($record->has('logo') && $this->getSupportLogo()) {
-//            $logoMaxWidth = $this->getLogoMaxWidth();
-//            $logoMargin = $this->getLogoMargin();
-//
-//            $logoSize = static::writeImage(
-//                $pdf,
-//                $record->get('logo'),
-//                $pa->x1,
-//                $pa->y1,
-//                $logoMaxWidth,
-//                $usableHeight,
-//                $this->getLogoHAlign(),
-//                $this->getLogoVAlign(),
-//                300,
-//                true,
-//                false,
-//                0
-//            );
-//
-//            $currentX += $logoSize[0] + $logoMargin;
-//            $usableWidth -= $logoSize[0] + $logoMargin;
-//        }
-//
-//        $textX = $currentX;
-//        $textY = $currentY;
-//
-//        $tagAlign = $this->getTagAlignment();
-//
-//        if ($record->has('barcode2d') && $this->getSupport2DBarcode()) {
-//            $barcodeSize = $this->get2DBarcodeSize();
-//            $barcodeMargin = $this->getBarcodeMargin();
-//
-//            $barcodeX = $currentX;
-//            $barcodeY = $currentY;
-//
-//            static::write2DBarcode(
-//                $pdf,
-//                $record->get('barcode2d')->content,
-//                $record->get('barcode2d')->type,
-//                $barcodeX,
-//                $barcodeY,
-//                $barcodeSize,
-//                $barcodeSize
-//            );
-//
-//            $textX = $barcodeX + $barcodeSize + $barcodeMargin;
-//            $usableWidth = max(0, ($pa->x1 + $pa->w) - $textX);
-//            $textY = $barcodeY;
-//        }
-//
-//        if ($record->has('tag') && $this->getSupportAssetTag()) {
-//            $tagSize = $this->getTagSize();
-//            $barcodeMargin = $this->getBarcodeMargin();
-//
-//            if ($barcodeX !== null && $barcodeY !== null && $barcodeSize !== null) {
-//                // normal case: put tag under 2D barcode
-//                $tagX = $barcodeX;
-//                $tagY = $barcodeY + $barcodeSize + $barcodeMargin;
-//                $tagWidth = $barcodeSize;
-//            } else {
-//                // fallback: no 2D barcode, still show tag
-//                $tagX = $currentX;
-//                $tagY = $currentY;
-//                $tagWidth = $usableWidth;
-//            }
-//
-//            static::writeText(
-//                $pdf,
-//                $record->get('tag'),
-//                $tagX,
-//                $tagY,
-//                'freemono',
-//                'B',
-//                $tagSize,
-//                $tagAlign,
-//                $tagWidth,
-//                $tagSize,
-//                true,
-//                0,
-//                0.3
-//            );
-//        }
-//
-//        $title = null;
-//        if ($record->has('title') && $this->getSupportTitle()) {
-//            $title = $record->get('title');
-//        }
-//
-//        $fields = [];
-//        if ($record->has('fields') && $this->getSupportFields()) {
-//            $fields = collect($record->get('fields'))
-//                ->take($this->getSupportFields())
-//                ->values()
-//                ->all();
-//        }
-//
-//        if ($title !== null || !empty($fields)) {
-//            $availableHeight = max(0, $bottomLimit - $textY);
-//
-//            $layout = \App\Helpers\Helper::labelFieldLayoutScaling(
-//                $pdf,
-//                $fields,
-//                $textX,
-//                $usableWidth,
-//                $availableHeight,
-//                $this->getLabelSize(),
-//                $this->getFieldSize(),
-//                $this->getFieldMargin(),
-//                $title,
-//                $this->getTitleSize(),
-//                $this->getTitleMargin(),
-//                $this->getLabelMargin(),
-//                $this->getFieldMargin()
-//            );
-//
-//            if ($layout['hasTitle']) {
-//                static::writeText(
-//                    $pdf,
-//                    $title,
-//                    $textX,
-//                    $textY,
-//                    'freesans',
-//                    '',
-//                    $layout['titleSize'],
-//                    'L',
-//                    $usableWidth,
-//                    $layout['titleSize'],
-//                    true,
-//                    0
-//                );
-//
-//                $textY += $layout['titleAdvance'];
-//            }
-//
-//            // Clamp layout widths so value column cannot disappear
-//            $labelWidth = min($layout['labelWidth'], $usableWidth * 0.45);
-//            $gap = max(0.8, $this->getFieldMargin() * max($layout['scale'], 0.5));
-//            $valueX = $textX + $labelWidth + $gap;
-//            $valueWidth = max(0, ($textX + $usableWidth) - $valueX);
-//
-//            foreach ($fields as $field) {
-//                if ($textY + $layout['rowAdvance'] > $bottomLimit) {
-//                    break;
-//                }
-//
-//                $label = $field['label'] ?? '';
-//                $value = $field['value'] ?? '';
-//
-//                if (is_string($label) && trim($label) !== '') {
-//                    $label = rtrim($label, ':') . ':';
-//                }
-//
-//                if ($label !== '') {
-//                    static::writeText(
-//                        $pdf,
-//                        $label,
-//                        $textX,
-//                        $textY,
-//                        'freesans',
-//                        '',
-//                        $layout['labelSize'],
-//                        'L',
-//                        $labelWidth,
-//                        $layout['labelSize'],
-//                        true,
-//                        0
-//                    );
-//                }
-//
-//                if ($valueWidth > 0) {
-//                    static::writeText(
-//                        $pdf,
-//                        $value,
-//                        $valueX,
-//                        $textY,
-//                        'freemono',
-//                        'B',
-//                        $layout['fieldSize'],
-//                        'L',
-//                        $valueWidth,
-//                        $layout['fieldSize'],
-//                        true,
-//                        0
-//                    );
-//                }
-//
-//                $textY += $layout['rowAdvance'];
-//            }
-//        }
-//    }
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();
@@ -756,7 +562,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
         /*
         |--------------------------------------------------------------------------
-        | 1) Reserve bottom strip for 1D barcode
+        |Reserve bottom strip for 1D barcode
         |--------------------------------------------------------------------------
         */
         if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
@@ -822,6 +628,19 @@ abstract class CustomSheetLabel extends CustomLabel
                 ->all();
         }
 
+        $textBox = $layout['text'];
+
+        if ($this->getTextAreaWidth() !== null) {
+            $textBox['w'] = min($this->getTextAreaWidth(), $textBox['w']);
+            $textBox['x2'] = $textBox['x1'] + $textBox['w'];
+        }
+
+        if ($this->getTextAreaHeight() !== null) {
+            $textBox['h'] = min($this->getTextAreaHeight(), $textBox['h']);
+            $textBox['y2'] = $textBox['y1'] + $textBox['h'];
+        }
+
+        $layout['text'] = $textBox;
         $textY = $layout['text']['y1'];
         $bottomLimit = $layout['text']['y2'];
         $availableHeight = max(0, $bottomLimit - $textY);
@@ -875,7 +694,6 @@ abstract class CustomSheetLabel extends CustomLabel
 
         return $layout;
     }
-
     protected function boxesOverlap(?array $a, ?array $b): bool
     {
         if (!$a || !$b) {
@@ -987,73 +805,44 @@ abstract class CustomSheetLabel extends CustomLabel
 
         $tagHeight = max(0, $this->getTagSize());
 
+        // If tag and barcode share the same horizontal side, anchor tag to barcode region
         if (
             $barcode2dBox &&
-            $record->has('barcode2d') &&
-            $this->getSupport2DBarcode() &&
-            $this->shareHorizontalSideWithBarcode()
+            strtoupper($this->getTagAlignment()) === strtoupper($this->getBarcode2DHAlign())
         ) {
             $box = [
                 'x' => $barcode2dBox['x'],
-                'y' => $barcode2dBox['y'] + $barcode2dBox['h'] + $this->getBarcodeMargin(),
+                'y' => $barcode2dBox['y'] + $barcode2dBox['h'],
                 'w' => $barcode2dBox['w'],
                 'h' => $tagHeight,
             ];
+
+            $box['x'] += $this->getTagOffsetX();
+            $box['y'] += $this->getTagOffsetY();
 
             return $this->clampBox($box, $body);
         }
 
         $tagWidth = $this->calculateTagWidth($record, $body, $barcode2dBox);
+        $tagAlign = strtoupper($this->getTagAlignment());
 
-        $box = $this->anchorBox(
-            $body,
-            $tagWidth,
-            $tagHeight,
-            $this->getTagHAlign(),
-            $this->getTagVAlign()
-        );
-
-        if ($this->boxesOverlap($box, $logoBox) || $this->boxesOverlap($box, $barcode2dBox)) {
-            $altVAlign = strtoupper($this->getTagVAlign()) === 'B' ? 'T' : 'B';
-
-            $altBox = $this->anchorBox(
-                $body,
-                $tagWidth,
-                $tagHeight,
-                $this->getTagHAlign(),
-                $altVAlign
-            );
-
-            if (
-                !$this->boxesOverlap($altBox, $logoBox) &&
-                !$this->boxesOverlap($altBox, $barcode2dBox)
-            ) {
-                $box = $altBox;
-            }
+        if ($tagAlign === 'R') {
+            $x = $body['x2'] - $tagWidth;
+        } else {
+            $x = $body['x1'];
         }
 
-        return $box;
-    }
+        $box = [
+            'x' => $x,
+            'y' => $body['y2'] - $tagHeight,
+            'w' => $tagWidth,
+            'h' => $tagHeight,
+        ];
 
-    protected function shareHorizontalSideWithBarcode(): bool
-    {
-        return strtoupper($this->getTagHAlign()) === strtoupper($this->getBarcode2DHAlign());
-    }
+        $box['x'] += $this->getTagOffsetX();
+        $box['y'] += $this->getTagOffsetY();
 
-    protected function resolveMediaColumnSide(): string
-    {
-        $logoAlign = $this->getLogoHAlign();
-
-        return $logoAlign === 'R' ? 'right' : 'left';
-    }
-
-    protected function getPlanned2DBarcodeSize($record, array $box): float
-    {
-        return min(
-            $this->get2DBarcodeSize(),
-            $box['w'] ?? $this->get2DBarcodeSize(),
-            $box['h'] ?? $this->get2DBarcodeSize()
-        );
+        return $this->clampBox($box, $body);
     }
 
     protected function render1DBarcode($pdf, $record, array $layout): void
