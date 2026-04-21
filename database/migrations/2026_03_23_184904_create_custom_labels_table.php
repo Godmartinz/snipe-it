@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('custom_labels', function (Blueprint $table) {
+        Schema::create('custom_user_labels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('base_label')->nullable();
             $table->string('type')->default('sheet');
             $table->json('overrides')->nullable();
-            $table->json('config_snapshot')->nullable();
+            $table->json('config_snapshot')->nullable(); //change to text
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('custom_labels');
+        Schema::dropIfExists('custom_user_labels');
     }
 };

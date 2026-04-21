@@ -598,7 +598,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
         /*
         |--------------------------------------------------------------------------
-        | 3) Derive remaining text box
+        | Derive remaining text box
         |--------------------------------------------------------------------------
         */
         $layout['text'] = $this->resolveTextBox(

@@ -82,7 +82,8 @@
                 </div>
             </fieldset>
             <div class="label-form-scroll">
-                <form id="label-customizer-form" method="POST" action="#" class="form-horizontal">
+                <form id="label-customizer-form" method="POST" action="{{route('settings.labels.store')}}"
+                      class="form-horizontal">
                     @csrf
 
                     @php

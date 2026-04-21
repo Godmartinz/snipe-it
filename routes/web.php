@@ -210,7 +210,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('/settings/labels/edit', [LabelsController::class, 'edit'])
         ->name('settings.labels.edit');
-
+    Route::post('/settings/labels', [LabelsController::class, 'store'])
+        ->name('settings.labels.store');
+    
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')

@@ -7,6 +7,7 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\DefaultLabel;
 use App\Models\Labels\Label;
 use App\Models\Location;
@@ -97,6 +98,73 @@ class LabelsController extends Controller
             ->with('bulkedit', false)
             ->with('count', 0);
 
+    }
+
+    public function store(Request $request)
+    {
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'template' => ['nullable', 'string'],
+            'type' => ['nullable', 'string'],
+            'page' => ['required', 'array'],
+            'grid' => ['required', 'array'],
+            'label' => ['required', 'array'],
+            'content' => ['required', 'array'],
+            'supports' => ['required', 'array'],
+        ]);
+
+        $supports = collect($validated['supports'])
+            ->map(fn($value) => (bool)$value)
+            ->toArray();
+
+        $castNumeric = function ($array) {
+            return collect($array)->map(function ($value) {
+                if (is_numeric($value)) {
+                    return (float)$value;
+                }
+                return $value;
+            })->toArray();
+        };
+
+        $page = $castNumeric($validated['page']);
+        $grid = $castNumeric($validated['grid']);
+        $label = $castNumeric($validated['label']);
+        $content = $castNumeric($validated['content']);
+        $baseLabel = Models\Labels\
+        $finalConfig = [
+            'page' => $page,
+            'grid' => $grid,
+            'label' => $label,
+            'content' => $content,
+            'supports' => $supports,
+        ];
+        $baseConfig = [
+            'page' => $baseLabel->getPageEditorConfig(),
+            'grid' => $baseLabel->getGridEditorConfig(),
+            'label' => $baseLabel->getLabelEditorConfig(),
+            'content' => $baseLabel->getContentEditorConfig(),
+            'supports' => $baseLabel->getSupportsEditorConfig(),
+        ];
+
+        $configSnapshot = [
+            'template' => $validated['template'],
+            'type' => $validated['type'] ?? 'sheet',
+            'name' => $validated['name'],
+            ...$overrides,
+        ];
+
+        $label = CustomUserLabel::create([
+            'name' => $validated['name'],
+            'base_label' => $validated['template'] ?? null,
+            'type' => $validated['type'] ?? 'sheet',
+            'overrides' => $overrides,
+            'config_snapshot' => $configSnapshot,
+            'is_default' => false,
+        ]);
+
+        return app(SettingsController::class)->getLabels()
+            ->with('success', $label['name'] . ' created successfully.');
     }
 
     public function edit(Request $request)
