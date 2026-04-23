@@ -803,4 +803,15 @@ abstract class Label
             'rotation' => $this->getRotation(),
         ];
     }
+
+    public function getEditorConfigSections(): array
+    {
+        return [
+            'page' => $this->getPageEditorConfig(),
+            'grid' => $this->getGridEditorConfig(),
+            'label' => $this->getLabelEditorConfig(),
+            'content' => $this->getContentEditorConfig(),
+            'supports' => $this->getSupportsEditorConfig(),
+        ];
+    }
 }

@@ -131,7 +131,14 @@ class LabelsController extends Controller
         $grid = $castNumeric($validated['grid']);
         $label = $castNumeric($validated['label']);
         $content = $castNumeric($validated['content']);
-        $baseLabel = Models\Labels\
+
+        $baseLabel = CustomUserLabel::makeBaseLabel($validated['template'] ?? null);
+
+        if (!$baseLabel) {
+            return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
+        }
+        $baseConfig = $baseLabel->getEditorConfigSections();
+
         $finalConfig = [
             'page' => $page,
             'grid' => $grid,
@@ -139,22 +146,16 @@ class LabelsController extends Controller
             'content' => $content,
             'supports' => $supports,
         ];
-        $baseConfig = [
-            'page' => $baseLabel->getPageEditorConfig(),
-            'grid' => $baseLabel->getGridEditorConfig(),
-            'label' => $baseLabel->getLabelEditorConfig(),
-            'content' => $baseLabel->getContentEditorConfig(),
-            'supports' => $baseLabel->getSupportsEditorConfig(),
-        ];
 
         $configSnapshot = [
             'template' => $validated['template'],
             'type' => $validated['type'] ?? 'sheet',
             'name' => $validated['name'],
-            ...$overrides,
+            ...$finalConfig,
         ];
+        $overrides = CustomUserLabel::diffEditorConfig($finalConfig, $baseConfig);
 
-        $label = CustomUserLabel::create([
+        $customLabel = CustomUserLabel::create([
             'name' => $validated['name'],
             'base_label' => $validated['template'] ?? null,
             'type' => $validated['type'] ?? 'sheet',
@@ -164,7 +165,7 @@ class LabelsController extends Controller
         ]);
 
         return app(SettingsController::class)->getLabels()
-            ->with('success', $label['name'] . ' created successfully.');
+            ->with('success', $customLabel['name'] . ' created successfully.');
     }
 
     public function edit(Request $request)
