@@ -7,7 +7,9 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Labels\CustomLabels\PreviewLabel;
 use App\Models\Labels\CustomUserLabel;
+use App\Models\Labels\CustomLabels\CustomSheetLabel;
 use App\Models\Labels\DefaultLabel;
 use App\Models\Labels\Label;
 use App\Models\Location;
@@ -115,7 +117,15 @@ class LabelsController extends Controller
         ]);
 
         $supports = collect($validated['supports'])
-            ->map(fn($value) => (bool)$value)
+            ->map(function ($value, $key) {
+                if ($key === 'fields') {
+                    return (int)$value;
+                }
+
+                return in_array($key, ['asset_tag', 'barcode_1d', 'barcode_2d', 'logo', 'title'], true)
+                    ? (bool)$value
+                    : $value;
+            })
             ->toArray();
 
         $castNumeric = function ($array) {
@@ -129,7 +139,7 @@ class LabelsController extends Controller
 
         $page = $castNumeric($validated['page']);
         $grid = $castNumeric($validated['grid']);
-        $label = $castNumeric($validated['label']);
+        $labelConfig = $castNumeric($validated['label']);
         $content = $castNumeric($validated['content']);
 
         $baseLabel = CustomUserLabel::makeBaseLabel($validated['template'] ?? null);
@@ -137,15 +147,27 @@ class LabelsController extends Controller
         if (!$baseLabel) {
             return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
         }
-        $baseConfig = $baseLabel->getEditorConfigSections();
 
-        $finalConfig = [
+        // Loading both base and working label in the preview to ensure millimeter-based comparisons for overrides.
+        $baseWorkingLabel = new PreviewLabel();
+        $baseWorkingLabel->seedFromTemplate($baseLabel);
+        $baseConfig = $baseWorkingLabel->getEditorConfigSections();
+
+        $submittedConfig = [
             'page' => $page,
             'grid' => $grid,
-            'label' => $label,
+            'label' => $labelConfig,
             'content' => $content,
             'supports' => $supports,
         ];
+
+        $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
+
+        $workingLabel = new PreviewLabel();
+        $workingLabel->seedFromTemplate($baseLabel);
+        $workingLabel->applyEditorConfig($mergedConfig);
+
+        $finalConfig = $workingLabel->getEditorConfigSections();
 
         $configSnapshot = [
             'template' => $validated['template'],
@@ -153,6 +175,7 @@ class LabelsController extends Controller
             'name' => $validated['name'],
             ...$finalConfig,
         ];
+
         $overrides = CustomUserLabel::diffEditorConfig($finalConfig, $baseConfig);
 
         $customLabel = CustomUserLabel::create([
@@ -165,7 +188,7 @@ class LabelsController extends Controller
         ]);
 
         return app(SettingsController::class)->getLabels()
-            ->with('success', $customLabel['name'] . ' created successfully.');
+            ->with('success', $customLabel->name . ' created successfully.');
     }
 
     public function edit(Request $request)

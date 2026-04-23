@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\LabelsTransformer;
+use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,12 +22,33 @@ class LabelsController extends Controller
     {
         $this->authorize('view', Label::class);
 
-        $labels = Label::find();
+        $baseLabels = Label::find()
+            ->map(function (Label $label) {
+                return [
+                    'source' => 'base',
+                    'label' => $label,
+                ];
+            });
+
+        $customLabels = CustomUserLabel::query()
+            ->get()
+            ->map(function ($label) {
+                return [
+                    'source' => 'custom',
+                    'label' => $label,
+                ];
+            });
+        
+        $labels = $baseLabels->merge($customLabels);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $labels = $labels->filter(function ($label, $index) use ($search) {
-                return stripos($label->getName(), $search) !== false;
+
+            $labels = $labels->filter(function ($row) use ($search) {
+                $label = $row['label'];
+                $name = $row['source'] === 'custom' ? $label->name : $label->getName();
+
+                return stripos($name, $search) !== false;
             });
         }
 

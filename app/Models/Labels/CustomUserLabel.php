@@ -26,11 +26,14 @@ class CustomUserLabel extends Model
         'is_default' => 'boolean',
     ];
 
-
-    public function applyOverrides(array $config): array
-    {
-        return array_merge($config, $this->overrides ?? []);
-    }
+    /**
+     * Builds a lookup of base label templates for instantiation.
+     * Example:
+     * [
+     *     'L4736_A' => App\Models\Labels\Sheets\Avery\L4736_A::class,
+     *     'DefaultLabel' => App\Models\Labels\DefaultLabel::class,
+     * ]
+     */
 
     public static function availableBaseLabels(): array
     {
@@ -81,6 +84,12 @@ class CustomUserLabel extends Model
         return $labels;
     }
 
+    /**
+     * Creates a base label instance from a template.
+     *
+     * @param string|null $template
+     * @return object|null
+     */
     public static function makeBaseLabel(?string $template): ?object
     {
         if (!$template) {
@@ -88,8 +97,9 @@ class CustomUserLabel extends Model
         }
 
         $available = static::availableBaseLabels();
+        $templateKey = class_basename(str_replace('\\', '/', $template));
 
-        $class = $available[$template] ?? null;
+        $class = $available[$templateKey] ?? null;
 
         if (!$class || !class_exists($class)) {
             return null;
@@ -98,12 +108,22 @@ class CustomUserLabel extends Model
         return new $class();
     }
 
+    /**
+     * Returns the differences between the final config and base config.
+     *
+     * Only includes values that have been added or overridden.
+     *
+     * @param array<string, mixed> $finalConfig
+     * @param array<string, mixed> $baseConfig
+     * @return array<string, mixed>
+     */
     public static function diffEditorConfig(array $finalConfig, array $baseConfig): array
     {
         $diff = [];
 
         foreach ($finalConfig as $key => $value) {
-            $baseValue = $baseConfig[$key] ?? null;
+            $hasBaseKey = array_key_exists($key, $baseConfig);
+            $baseValue = $hasBaseKey ? $baseConfig[$key] : null;
 
             if (is_array($value) && is_array($baseValue)) {
                 $nestedDiff = static::diffEditorConfig($value, $baseValue);
@@ -115,11 +135,46 @@ class CustomUserLabel extends Model
                 continue;
             }
 
-            if ($value !== $baseValue) {
-                $diff[$key] = $value;
+            if (!$hasBaseKey) {
+                $diff[$key] = static::normalizeDiffValue($value);
+                continue;
+            }
+
+            if (static::valuesDiffer($value, $baseValue)) {
+                $diff[$key] = static::normalizeDiffValue($value);
             }
         }
 
         return $diff;
+    }
+
+    /**
+     * Determines if values differ for override detection, applying a tolerance
+     * to prevent insignificant numeric differences from being treated as changes.
+     */
+    protected static function valuesDiffer($value, $baseValue, float $epsilon = 0.001): bool
+    {
+        if (is_bool($value) || is_bool($baseValue)) {
+            return (bool)$value !== (bool)$baseValue;
+        }
+
+        if (is_numeric($value) && is_numeric($baseValue)) {
+            return abs((float)$value - (float)$baseValue) > $epsilon;
+        }
+
+        return $value !== $baseValue;
+    }
+
+    /**
+     * Normalizes values for diff output, rounding numerics to reduce noise
+     * from minor precision differences.
+     */
+    protected static function normalizeDiffValue($value)
+    {
+        if (is_numeric($value)) {
+            return round((float)$value, 3);
+        }
+
+        return $value;
     }
 }
