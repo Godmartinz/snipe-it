@@ -584,6 +584,10 @@
     </div> <!-- /.row-->
 
     </form>
+    <form id="delete-custom-label-form" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
 
 @stop
 
@@ -639,14 +643,43 @@
 
             });
         });
-        document.addEventListener('DOMContentLoaded', () => {
-            const display = document.getElementById('selected-template-display');
+        const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => '__LABEL_ID__']) }}";
 
-            $('#label2TemplateTable').on('change', 'input[name="label2_template"]', function () {
-                if (display) {
-                    display.textContent = this.value || '';
-                }
-            });
+        $(document).on('click', '.delete-custom-label', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const id = $(this).data('id');
+            const name = $(this).data('name') || 'this label';
+
+            if (!confirm('{{ trans('general.sure_to_delete') }}: ' + name + '?')) {
+                return;
+            }
+
+            const url = deleteLabelUrlTemplate.replace('__LABEL_ID__', id);
+
+            $('#delete-custom-label-form')
+                .attr('action', url)
+                .trigger('submit');
+        });
+        $(document).on('click', '.label-config-snapshot', async function () {
+            const index = $(this).data('index');
+            const row = $('#label2TemplateTable').bootstrapTable('getData')[index];
+
+            if (!row || !row.config_snapshot) {
+                alert('No config snapshot found.');
+                return;
+            }
+
+            const json = JSON.stringify(row.config_snapshot, null, 2);
+
+            try {
+                await navigator.clipboard.writeText(json);
+                alert('Label JSON copied!');
+            } catch (e) {
+                console.error(e);
+                alert('Could not copy label JSON.');
+            }
         });
     </script>
     {{-- Can't use @script here because we're not in a livewire component so let's manually load --}}

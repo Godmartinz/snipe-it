@@ -10,6 +10,7 @@ use App\Models\Labels\Label;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\ItemNotFoundException;
+use App\Models\Labels\CustomLabels\PreviewLabel;
 
 class LabelsController extends Controller
 {
@@ -23,6 +24,7 @@ class LabelsController extends Controller
         $this->authorize('view', Label::class);
 
         $baseLabels = Label::find()
+            ->reject(fn(Label $label) => $label instanceof PreviewLabel)
             ->map(function (Label $label) {
                 return [
                     'source' => 'base',
@@ -38,7 +40,7 @@ class LabelsController extends Controller
                     'label' => $label,
                 ];
             });
-        
+
         $labels = $baseLabels->merge($customLabels);
 
         if ($request->filled('search')) {

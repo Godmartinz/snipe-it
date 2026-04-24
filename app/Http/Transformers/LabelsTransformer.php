@@ -82,11 +82,13 @@ class LabelsTransformer
         $snapshot = $label->config_snapshot ?? [];
 
         return [
+            'custom_label_id' => $label->id,
             'name' => $label->name,
             'source' => 'custom',
             'source_label' => 'Custom',
             'base_label' => $label->base_label,
             'type' => $label->type,
+            'config_snapshot' => $label->config_snapshot,
             'is_default' => $label->is_default,
 
             'unit' => 'mm',

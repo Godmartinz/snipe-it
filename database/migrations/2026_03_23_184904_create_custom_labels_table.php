@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('base_label')->nullable();
             $table->string('type')->default('sheet');
-            $table->json('overrides')->nullable();
-            $table->json('config_snapshot')->nullable(); //change to text
+            $table->text('overrides')->nullable();
+            $table->text('config_snapshot')->nullable(); //change to text
             $table->boolean('is_default')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

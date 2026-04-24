@@ -212,6 +212,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.labels.edit');
     Route::post('/settings/labels', [LabelsController::class, 'store'])
         ->name('settings.labels.store');
+    Route::delete('settings/labels/{label}', [LabelsController::class, 'destroy'])
+        ->name('settings.labels.destroy');
     
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')

@@ -1893,20 +1893,51 @@
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
-    function labelActionsFormatter(value, row) {
+    function labelActionsFormatter(value, row, index) {
         if (!row.name) return '';
 
-        const baseUrl = '{{ route('settings.labels.edit') }}';
+        const editUrl = '{{ route('settings.labels.edit') }}';
+        const deleteUrl = '{{ route('settings.labels.destroy', '__id__') }}';
 
-        return `
-                    <a href="${baseUrl}?label=${encodeURIComponent(row.name)}"
-                       class="actions btn btn-sm btn-primary hidden-print"
-                       data-tooltip="true"
-                       title="{{ trans('general.clone') }}">
-                       <i class="fa-regular fa-clone"></i>
-                       <span class="sr-only">{{ trans('general.clone') }}</span>
-                    </a>
-                `;
+        let actions = `
+            <a href="${editUrl}?label=${encodeURIComponent(row.name)}"
+               class="actions btn btn-sm btn-primary hidden-print"
+               data-tooltip="true"
+               title="{{ trans('general.clone') }}">
+               <i class="fa-regular fa-clone"></i>
+               <span class="sr-only">{{ trans('general.clone') }}</span>
+            </a>
+        `;
+        // Only allow delete/share for custom labels
+        if (row.source === 'custom') {
+
+            // Share button
+            actions += `
+                       <button
+                            type="button"
+                            class="btn btn-sm btn-primary copy-label-json"
+                            title="Share Label"
+                            data-tooltip="true"
+                        >
+                            <i class="fa-solid fa-up-right-from-square"></i>
+                            <span class="sr-only">Share Label</span>
+                        </button>
+                    `;
+            // Delete button
+
+            var safeName = $('<div>').text(row.name || 'this label').html();
+
+            actions += '<button type="button" '
+                + 'class="btn btn-danger btn-sm delete-custom-label hidden-print" '
+                + 'data-id="' + row.custom_label_id + '" '
+                + 'data-name="' + safeName + '">'
+                + '<x-icon type="delete" class="fa-fw" />'
+                + '<span class="sr-only">{{ trans('general.delete') }}</span>'
+                + '</button>&nbsp;';
+        }
+
+
+        return actions;
     }
 
     function labelNameFormatter(value) {

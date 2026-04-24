@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class CustomUserLabel extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'custom_user_labels';
 
     protected $fillable = [
@@ -19,11 +21,9 @@ class CustomUserLabel extends Model
         'config_snapshot',
         'is_default',
     ];
-
     protected $casts = [
         'overrides' => 'array',
         'config_snapshot' => 'array',
-        'is_default' => 'boolean',
     ];
 
     /**

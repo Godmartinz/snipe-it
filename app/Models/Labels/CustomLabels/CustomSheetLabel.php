@@ -17,8 +17,8 @@ abstract class CustomSheetLabel extends CustomLabel
     protected ?float $pageMarginBottom = 0.0;
     protected ?float $pageMarginLeft = 0.0;
 
-    protected int $rows = 1;
-    protected int $columns = 1;
+    protected int $rows = 9;
+    protected int $columns = 3;
 
     protected ?float $labelWidth = 50.0;
     protected ?float $labelHeight = 25.0;
@@ -40,7 +40,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected float $barcodeSize = 3;
     protected float $barcode2DSize = 20;
-    protected float $barcodeMargin = 2.0;
+    protected float $barcodeMargin = .025;
     protected float $barcode2Margin = 0.075;
     protected float $logoMaxWidth = 12.0;
     protected float $logoMargin = 2.0;
@@ -53,6 +53,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
 
     protected float $titleMargin = 2.0;
+    protected float $titleOffsetX = 0.0;
     protected float $labelMargin = 1.5;
     protected float $fieldMargin = 2.0;
 
@@ -241,6 +242,11 @@ abstract class CustomSheetLabel extends CustomLabel
         return $this->titleSize;
     }
 
+    public function getTitleOffsetX(): float
+    {
+        return $this->titleOffsetX;
+    }
+
     public function getLabelSize(): float
     {
         return $this->labelSize;
@@ -329,6 +335,7 @@ abstract class CustomSheetLabel extends CustomLabel
             'tag_offset_y' => $this->getTagOffsetY(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
+            'title_offset_x' => $this->getTitleOffsetX(),
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
             'field_value_font_size' => $this->getFieldSize(),
@@ -343,111 +350,203 @@ abstract class CustomSheetLabel extends CustomLabel
         $sourceUnit = $template->getUnit();
 
         $convert = function ($value) use ($sourceUnit) {
-            if ($value === null) {
-                return null;
+            if ($value === null || $value === '') {
+                return $value;
             }
 
-            return $sourceUnit === 'in' ? $value * 25.4 : $value;
+            return $sourceUnit === 'in' && is_numeric($value)
+                ? (float)$value * 25.4
+                : $value;
         };
 
         $this->unit = 'mm';
 
-        $this->pageWidth = $convert($template->getPageWidth());
-        $this->pageHeight = $convert($template->getPageHeight());
+        /*
+        |--------------------------------------------------------------------------
+        | Page / label measurements
+        |--------------------------------------------------------------------------
+        */
+        $measurementMap = [
+            'pageWidth' => 'getPageWidth',
+            'pageHeight' => 'getPageHeight',
+            'pageMarginTop' => 'getPageMarginTop',
+            'pageMarginRight' => 'getPageMarginRight',
+            'pageMarginBottom' => 'getPageMarginBottom',
+            'pageMarginLeft' => 'getPageMarginLeft',
 
-        $this->pageMarginTop = $convert($template->getPageMarginTop());
-        $this->pageMarginRight = $convert($template->getPageMarginRight());
-        $this->pageMarginBottom = $convert($template->getPageMarginBottom());
-        $this->pageMarginLeft = $convert($template->getPageMarginLeft());
+            'labelWidth' => 'getLabelWidth',
+            'labelHeight' => 'getLabelHeight',
+            'labelRowSpacing' => 'getLabelRowSpacing',
+            'labelColumnSpacing' => 'getLabelColumnSpacing',
+            'labelMarginTop' => 'getLabelMarginTop',
+            'labelMarginRight' => 'getLabelMarginRight',
+            'labelMarginBottom' => 'getLabelMarginBottom',
+            'labelMarginLeft' => 'getLabelMarginLeft',
+        ];
 
-        $this->labelWidth = $convert($template->getLabelWidth());
-        $this->labelHeight = $convert($template->getLabelHeight());
-
-        $this->labelRowSpacing = $convert($template->getLabelRowSpacing());
-        $this->labelColumnSpacing = $convert($template->getLabelColumnSpacing());
-
-        $this->labelMarginTop = $convert($template->getLabelMarginTop());
-        $this->labelMarginRight = $convert($template->getLabelMarginRight());
-        $this->labelMarginBottom = $convert($template->getLabelMarginBottom());
-        $this->labelMarginLeft = $convert($template->getLabelMarginLeft());
-
-        $this->rows = $template->getRows();
-        $this->columns = $template->getColumns();
-
-        $this->supportAssetTag = $template->getSupportAssetTag();
-        $this->support1DBarcode = $template->getSupport1DBarcode();
-        $this->support2DBarcode = $template->getSupport2DBarcode();
-        $this->supportFields = $template->getSupportFields();
-        $this->supportLogo = $template->getSupportLogo();
-        $this->supportTitle = $template->getSupportTitle();
-
-        if (method_exists($template, 'getBarcodeSize')) {
-            $this->barcodeSize = $convert($template->getBarcodeSize());
-        } elseif (method_exists($template, 'getBarcode1DSize')) {
-            $this->barcodeSize = $convert($template->getBarcode1DSize());
+        foreach ($measurementMap as $property => $method) {
+            if (method_exists($template, $method)) {
+                $this->{$property} = $convert($template->{$method}());
+            }
         }
 
-        if (method_exists($template, 'get2DBarcodeSize')) {
-            $this->barcode2DSize = $convert($template->get2DBarcodeSize());
-        } elseif (method_exists($template, 'getBarcode2DSize')) {
-            $this->barcode2DSize = $convert($template->getBarcode2DSize());
+        /*
+        |--------------------------------------------------------------------------
+        | Grid
+        |--------------------------------------------------------------------------
+        */
+        if (method_exists($template, 'getRows')) {
+            $this->rows = (int)$template->getRows();
         }
 
-        if (method_exists($template, 'getBarcodeMargin')) {
-            $this->barcodeMargin = $convert($template->getBarcodeMargin());
-        } elseif (method_exists($template, 'getBarcode2DMargin')) {
-            $this->barcodeMargin = $convert($template->getBarcode2DMargin());
-            $this->barcode2Margin = $convert($template->getBarcode2DMargin());
+        if (method_exists($template, 'getColumns')) {
+            $this->columns = (int)$template->getColumns();
         }
 
-        if (method_exists($template, 'getLogoMaxWidth')) {
-            $this->logoMaxWidth = $convert($template->getLogoMaxWidth());
-        } elseif (method_exists($template, 'getLogoSize')) {
+        /*
+        |--------------------------------------------------------------------------
+        | Supports
+        |--------------------------------------------------------------------------
+        */
+        $supportMap = [
+            'supportAssetTag' => 'getSupportAssetTag',
+            'support1DBarcode' => 'getSupport1DBarcode',
+            'support2DBarcode' => 'getSupport2DBarcode',
+            'supportFields' => 'getSupportFields',
+            'supportLogo' => 'getSupportLogo',
+            'supportTitle' => 'getSupportTitle',
+        ];
+
+        foreach ($supportMap as $property => $method) {
+            if (method_exists($template, $method)) {
+                $this->{$property} = $template->{$method}();
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Legacy getter fallbacks
+        |--------------------------------------------------------------------------
+        */
+        $legacyContentMap = [
+            'barcodeSize' => ['getBarcodeSize', 'getBarcode1DSize'],
+            'barcode2DSize' => ['get2DBarcodeSize', 'getBarcode2DSize'],
+            'barcodeMargin' => ['getBarcodeMargin'],
+            'barcode2Margin' => ['getBarcode2DMargin'],
+            'logoMaxWidth' => ['getLogoMaxWidth'],
+            'logoMargin' => ['getLogoMargin'],
+            'tagSize' => ['getTagSize'],
+            'titleSize' => ['getTitleSize'],
+            'labelSize' => ['getLabelSize'],
+            'fieldSize' => ['getFieldSize'],
+            'titleMargin' => ['getTitleMargin'],
+            'labelMargin' => ['getLabelMargin'],
+            'fieldMargin' => ['getFieldMargin'],
+        ];
+
+        foreach ($legacyContentMap as $property => $methods) {
+            foreach ($methods as $method) {
+                if (method_exists($template, $method)) {
+                    $this->{$property} = $convert($template->{$method}());
+                    break;
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Special legacy fallbacks
+        |--------------------------------------------------------------------------
+        */
+        if (method_exists($template, 'getLogoSize') && !method_exists($template, 'getLogoMaxWidth')) {
             $logoSize = $template->getLogoSize();
-            $this->logoMaxWidth = isset($logoSize[0]) ? $convert($logoSize[0]) : $this->logoMaxWidth;
+            $this->logoMaxWidth = isset($logoSize[0])
+                ? $convert($logoSize[0])
+                : $this->logoMaxWidth;
         }
 
-        if (method_exists($template, 'getLogoMargin')) {
-            $this->logoMargin = $convert($template->getLogoMargin());
-        }
-
-        if (method_exists($template, 'getTagSize')) {
-            $this->tagSize = $convert($template->getTagSize());
-        } elseif (method_exists($template, 'getTextSize')) {
+        if (method_exists($template, 'getTextSize')) {
             $textSize = $convert($template->getTextSize());
-            $this->tagSize = $textSize;
-            $this->titleSize = $textSize;
-            $this->labelSize = $textSize;
-            $this->fieldSize = $textSize;
+
+            if (!method_exists($template, 'getTagSize')) {
+                $this->tagSize = $textSize;
+            }
+
+            if (!method_exists($template, 'getTitleSize')) {
+                $this->titleSize = $textSize;
+            }
+
+            if (!method_exists($template, 'getLabelSize')) {
+                $this->labelSize = $textSize;
+            }
+
+            if (!method_exists($template, 'getFieldSize')) {
+                $this->fieldSize = $textSize;
+            }
         }
 
-        if (method_exists($template, 'getTitleSize')) {
-            $this->titleSize = $convert($template->getTitleSize());
-        }
-
-        if (method_exists($template, 'getLabelSize')) {
-            $this->labelSize = $convert($template->getLabelSize());
-        }
-
-        if (method_exists($template, 'getFieldSize')) {
-            $this->fieldSize = $convert($template->getFieldSize());
-        }
-
-        if (method_exists($template, 'getTitleMargin')) {
-            $this->titleMargin = $convert($template->getTitleMargin());
-        } elseif (method_exists($template, 'getTextMargin')) {
+        if (method_exists($template, 'getTextMargin')) {
             $textMargin = $convert($template->getTextMargin());
-            $this->titleMargin = $textMargin;
-            $this->labelMargin = $textMargin;
-            $this->fieldMargin = $textMargin;
+
+            if (!method_exists($template, 'getTitleMargin')) {
+                $this->titleMargin = $textMargin;
+            }
+
+            if (!method_exists($template, 'getLabelMargin')) {
+                $this->labelMargin = $textMargin;
+            }
+
+            if (!method_exists($template, 'getFieldMargin')) {
+                $this->fieldMargin = $textMargin;
+            }
         }
 
-        if (method_exists($template, 'getLabelMargin')) {
-            $this->labelMargin = $convert($template->getLabelMargin());
+        /*
+        |--------------------------------------------------------------------------
+        | Editor config overrides
+        |--------------------------------------------------------------------------
+        |
+        | These are applied last so editor-specific values win over legacy getters.
+        */
+        $content = method_exists($template, 'getEditorConfigSections')
+            ? ($template->getEditorConfigSections()['content'] ?? [])
+            : [];
+
+        $contentMap = [
+            'barcode_size' => 'barcodeSize',
+            'barcode_margin' => 'barcodeMargin',
+            'barcode_2d_size' => 'barcode2DSize',
+            'logo_max_width' => 'logoMaxWidth',
+            'logo_margin' => 'logoMargin',
+            'tag_font_size' => 'tagSize',
+            'title_font_size' => 'titleSize',
+            'title_margin' => 'titleMargin',
+            'field_label_font_size' => 'labelSize',
+            'field_label_margin' => 'labelMargin',
+            'field_value_font_size' => 'fieldSize',
+            'field_value_margin' => 'fieldMargin',
+            'text_area_width' => 'textAreaWidth',
+            'text_area_height' => 'textAreaHeight',
+        ];
+
+        foreach ($contentMap as $key => $property) {
+            if (array_key_exists($key, $content)) {
+                $this->{$property} = $convert($content[$key]);
+            }
         }
 
-        if (method_exists($template, 'getFieldMargin')) {
-            $this->fieldMargin = $convert($template->getFieldMargin());
+        $stringContentMap = [
+            'barcode2D_h_align' => 'barcode2DHAlign',
+            'barcode2D_v_align' => 'barcode2DVAlign',
+            'logo_h_align' => 'logoHAlign',
+            'logo_v_align' => 'logoVAlign',
+            'tag_alignment' => 'tagAlignment',
+        ];
+
+        foreach ($stringContentMap as $key => $property) {
+            if (array_key_exists($key, $content)) {
+                $this->{$property} = (string)$content[$key];
+            }
         }
 
         return $this;
@@ -516,6 +615,7 @@ abstract class CustomSheetLabel extends CustomLabel
         $this->textAreaHeight = isset($content['text_area_height']) && $content['text_area_height'] !== '' ? (float)$content['text_area_height'] : $this->textAreaHeight;
 
         $this->titleMargin = isset($content['title_margin']) ? (float)$content['title_margin'] : $this->titleMargin;
+        $this->titleOffsetX = isset($content['title_offset_x']) ? (float)$content['title_offset_x'] : $this->titleOffsetX;
         $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
     }
@@ -662,10 +762,11 @@ abstract class CustomSheetLabel extends CustomLabel
         );
 
         if ($fieldLayout['hasTitle']) {
+            $x = $layout['text']['x1'] + $this->getTitleOffsetX();
             $layout['title'] = [
-                'x' => $layout['text']['x1'],
+                'x' => $x,
                 'y' => $textY,
-                'w' => $layout['text']['w'],
+                'w' => max(0, $layout['text']['x2'] - $x),
                 'h' => $fieldLayout['titleSize'],
                 'font_size' => $fieldLayout['titleSize'],
                 'advance' => $fieldLayout['titleAdvance'],

@@ -216,6 +216,23 @@ class LabelsController extends Controller
         ]);
     }
 
+    public function destroy(CustomUserLabel $label)
+    {
+        $labelName = $label->name;
+        if ($label->is_default) {
+            return response()->json([
+                'status' => 'error',
+                'message' => trans('admin/labels/labels.default_label_cannot_be_deleted'),
+            ], 403);
+        }
+
+        $label->delete();
+
+        return redirect()
+            ->route('settings.labels.index')
+            ->with('success', $labelName . ' ' . trans('admin/labels/labels.label_deleted_successfully'));
+    }
+
     public function customLabelPreview(Request $request, string $labelName)
     {
         $labelName = str_replace('/', '\\', $labelName);

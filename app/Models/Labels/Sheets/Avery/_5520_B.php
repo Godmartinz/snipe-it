@@ -125,7 +125,7 @@ class _5520_B extends _5520
     {
         return [
             'barcode_size' => $this->getBarcodeSize(),
-            'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_margin' => .025,
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
