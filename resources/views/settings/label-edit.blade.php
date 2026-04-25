@@ -82,9 +82,12 @@
                 </div>
             </fieldset>
             <div class="label-form-scroll">
-                <form id="label-customizer-form" method="POST" action="{{route('settings.labels.store')}}"
-                      class="form-horizontal">
+                <form id="label-customizer-form" method="POST" action="{{ $formAction }}" class="form-horizontal">
                     @csrf
+
+                    @if (($formMethod ?? 'POST') !== 'POST')
+                        @method($formMethod)
+                    @endif
                     @if (! empty($importedConfig))
                         <input type="hidden" name="imported_config_snapshot"
                                value="{{ e(json_encode($importedConfig)) }}">

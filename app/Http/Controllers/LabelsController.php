@@ -7,6 +7,7 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Labels\CustomLabels\CustomLabel;
 use App\Models\Labels\CustomLabels\PreviewLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\CustomLabels\CustomSheetLabel;
@@ -103,6 +104,112 @@ class LabelsController extends Controller
 
     }
 
+    public function edit(CustomUserLabel $label)
+    {
+        return view('settings.label-edit', [
+            'config' => $label->config_snapshot,
+            'selectedLabel' => $label->base_label,
+            'importedConfig' => null,
+            'customLabel' => $label,
+            'formMethod' => 'PUT',
+            'formAction' => route('settings.labels.update', $label),
+        ]);
+    }
+
+    public function update(Request $request, CustomUserLabel $label)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['nullable', 'string'],
+            'page' => ['required', 'array'],
+            'grid' => ['required', 'array'],
+            'label' => ['required', 'array'],
+            'content' => ['required', 'array'],
+            'supports' => ['required', 'array'],
+        ]);
+
+        $supports = collect($validated['supports'])
+            ->map(function ($value, $key) {
+                if ($key === 'fields') {
+                    return (int)$value;
+                }
+
+                return in_array($key, ['asset_tag', 'barcode_1d', 'barcode_2d', 'logo', 'title'], true)
+                    ? (bool)$value
+                    : $value;
+            })
+            ->toArray();
+
+        $castNumeric = function ($array) {
+            return collect($array)->map(function ($value) {
+                return is_numeric($value) ? (float)$value : $value;
+            })->toArray();
+        };
+
+        $page = $castNumeric($validated['page']);
+        $grid = $castNumeric($validated['grid']);
+        $labelConfig = $castNumeric($validated['label']);
+        $content = $castNumeric($validated['content']);
+
+        $baseLabel = CustomUserLabel::makeBaseLabel($label->base_label);
+
+        if (!$baseLabel) {
+            return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
+        }
+
+
+        $baseWorkingLabel = new PreviewLabel();
+        $baseWorkingLabel->seedFromTemplate($baseLabel);
+
+        $baseEditorConfig = $baseWorkingLabel->toEditorConfig();
+        $baseConfig = $baseWorkingLabel->getEditorConfigSections();
+
+        $submittedConfig = [
+            'page' => $page,
+            'grid' => $grid,
+            'label' => $labelConfig,
+            'content' => $content,
+            'supports' => $supports,
+        ];
+
+        $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
+
+        $workingLabel = new PreviewLabel();
+        $workingLabel->seedFromTemplate($baseLabel);
+        $workingLabel->applyEditorConfig($mergedConfig);
+
+        $finalConfig = $workingLabel->getEditorConfigSections();
+
+        $configSnapshot = [
+            'unit' => $baseEditorConfig['unit'] ?? 'mm',
+            'template' => $label->base_label,
+            'type' => $label->type ?? 'sheet',
+            'name' => $validated['name'],
+        ];
+
+        foreach (['printable_area', 'label_printable_area'] as $key) {
+            if (array_key_exists($key, $baseEditorConfig)) {
+                $configSnapshot[$key] = $baseEditorConfig[$key];
+            }
+        }
+
+        $configSnapshot = [
+            ...$configSnapshot,
+            ...$finalConfig,
+        ];
+
+        $overrides = CustomUserLabel::diffEditorConfig($finalConfig, $baseConfig);
+
+        $label->update([
+            'name' => $validated['name'],
+            'overrides' => $overrides,
+            'config_snapshot' => $configSnapshot,
+        ]);
+
+        return redirect()
+            ->route('settings.labels.index')
+            ->with('success', $label->name . ' updated successfully.');
+    }
     public function store(Request $request)
     {
 
@@ -193,15 +300,34 @@ class LabelsController extends Controller
             ->with('success', $customLabel->name . ' created successfully.');
     }
 
-    public function edit(Request $request)
+    public function create(Request $request)
     {
+        $customLabelId = $request->get('custom_label_id');
+
+        if ($customLabelId) {
+            //creating a custom label from another custom label
+            $customLabel = CustomUserLabel::findOrFail($customLabelId);
+
+            $config = $customLabel->config_snapshot;
+            $config['name'] = 'Copy of ' . $customLabel->name;
+
+            return view('settings.label-edit', [
+                'config' => $config,
+                'selectedLabel' => $customLabel->base_label,
+                'importedConfig' => null,
+                'customLabel' => null,
+                'formMethod' => 'POST',
+                'formAction' => route('settings.labels.store'),
+            ]);
+        }
         $selectedLabel = $request->get('label');
 
         if ($selectedLabel) {
             $selectedLabel = str_replace('/', '\\', $selectedLabel);
         }
         $importedConfig = session('imported_label_config');
-        if (!$importedConfig) {
+
+        if ($importedConfig) {
             $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
         }
         try {
@@ -210,16 +336,19 @@ class LabelsController extends Controller
                 : new DefaultLabel();
         } catch (\Throwable $e) {
             $template = new DefaultLabel();
+            $selectedLabel = "DefaultLabel";
         }
 
-        $label = (new PreviewLabel())
-            ->seedFromTemplate($template);
+        $label = (new PreviewLabel())->seedFromTemplate($template);
         $config = $importedConfig ?: $label->toEditorConfig();
 
         return view('settings.label-edit', [
             'config' => $config,
             'selectedLabel' => $selectedLabel,
             'importedConfig' => $importedConfig,
+            'customLabel' => null,
+            'formMethod' => 'POST',
+            'formAction' => route('settings.labels.store'),
         ]);
     }
 
@@ -381,7 +510,7 @@ class LabelsController extends Controller
         }
 
         return redirect()
-            ->route('settings.labels.edit')
+            ->route('settings.labels.create')
             ->with('imported_label_config', $config);
     }
 

@@ -208,10 +208,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
 
-    Route::get('/settings/labels/edit', [LabelsController::class, 'edit'])
+    Route::get('/settings/labels/create', [LabelsController::class, 'create'])
+        ->name('settings.labels.create');
+    Route::get('/settings/labels/{label}/edit', [LabelsController::class, 'edit'])
         ->name('settings.labels.edit');
     Route::post('/settings/labels', [LabelsController::class, 'store'])
         ->name('settings.labels.store');
+    Route::put('/settings/labels/{label}', [LabelsController::class, 'update'])
+        ->name('settings.labels.update');
     Route::delete('settings/labels/{label}', [LabelsController::class, 'destroy'])
         ->name('settings.labels.destroy');
     Route::post('/settings/labels/import', [LabelsController::class, 'import'])
