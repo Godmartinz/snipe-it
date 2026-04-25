@@ -1893,11 +1893,10 @@
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
-    function labelActionsFormatter(value, row, index) {
+    function labelActionsFormatter(value, row) {
         if (!row.name) return '';
 
         const editUrl = '{{ route('settings.labels.edit') }}';
-        const deleteUrl = '{{ route('settings.labels.destroy', '__id__') }}';
 
         let actions = `
             <a href="${editUrl}?label=${encodeURIComponent(row.name)}"
@@ -1908,32 +1907,34 @@
                <span class="sr-only">{{ trans('general.clone') }}</span>
             </a>
         `;
-        // Only allow delete/share for custom labels
+        // Only allow delete || share for custom labels
         if (row.source === 'custom') {
 
             // Share button
-            actions += `
-                       <button
-                            type="button"
-                            class="btn btn-sm btn-primary copy-label-json"
-                            title="Share Label"
-                            data-tooltip="true"
-                        >
-                            <i class="fa-solid fa-up-right-from-square"></i>
-                            <span class="sr-only">Share Label</span>
-                        </button>
-                    `;
-            // Delete button
-
-            var safeName = $('<div>').text(row.name || 'this label').html();
+            var encodedJson = encodeURIComponent(JSON.stringify(row.config_snapshot || {}, null, 2));
 
             actions += '<button type="button" '
-                + 'class="btn btn-danger btn-sm delete-custom-label hidden-print" '
-                + 'data-id="' + row.custom_label_id + '" '
-                + 'data-name="' + safeName + '">'
+                + 'class="btn btn-primary btn-sm copy-label-json hidden-print" '
+                + 'data-json="' + encodedJson + '" '
+                + 'title="Share Label" '
+                + 'data-tooltip="true">'
+                + '<i class="fa-solid fa-up-right-from-square"></i>'
+                + '<span class="sr-only">Share Label</span>'
+                + '</button>&nbsp;';
+
+            // Delete button
+            var safeName = $('<div>').text(row.name || 'this label').html();
+            var deleteUrl = deleteLabelUrlTemplate.replace('__LABEL_ID__', row.custom_label_id);
+
+            actions += '<a href="' + deleteUrl + '" '
+                + 'class="actions btn btn-danger btn-sm delete-custom-label hidden-print" '
+                + 'data-tooltip="true" '
+                + 'data-icon="fa-trash" '
+                + 'data-content="{{ trans('general.sure_to_delete') }}: ' + safeName + '?" '
+                + 'data-title="{{ trans('general.delete') }}">'
                 + '<x-icon type="delete" class="fa-fw" />'
                 + '<span class="sr-only">{{ trans('general.delete') }}</span>'
-                + '</button>&nbsp;';
+                + '</a>&nbsp;';
         }
 
 

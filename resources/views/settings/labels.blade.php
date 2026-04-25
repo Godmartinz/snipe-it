@@ -645,40 +645,43 @@
         });
         const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => '__LABEL_ID__']) }}";
 
-        $(document).on('click', '.delete-custom-label', function (e) {
+        $(document).on('click', '.copy-label-json', async function (e) {
             e.preventDefault();
             e.stopPropagation();
 
-            const id = $(this).data('id');
-            const name = $(this).data('name') || 'this label';
-
-            if (!confirm('{{ trans('general.sure_to_delete') }}: ' + name + '?')) {
-                return;
-            }
-
-            const url = deleteLabelUrlTemplate.replace('__LABEL_ID__', id);
-
-            $('#delete-custom-label-form')
-                .attr('action', url)
-                .trigger('submit');
-        });
-        $(document).on('click', '.label-config-snapshot', async function () {
-            const index = $(this).data('index');
-            const row = $('#label2TemplateTable').bootstrapTable('getData')[index];
-
-            if (!row || !row.config_snapshot) {
-                alert('No config snapshot found.');
-                return;
-            }
-
-            const json = JSON.stringify(row.config_snapshot, null, 2);
+            const $btn = $(this);
+            const originalHtml = $btn.html();
 
             try {
+                const json = decodeURIComponent($btn.data('json'));
+
                 await navigator.clipboard.writeText(json);
-                alert('Label JSON copied!');
+
+                $btn
+                    .removeClass('btn-primary')
+                    .addClass('btn-success')
+                    .html('<i class="fa fa-check"></i>');
+
+                setTimeout(() => {
+                    $btn
+                        .removeClass('btn-success')
+                        .addClass('btn-primary')
+                        .html(originalHtml);
+                }, 1500);
             } catch (e) {
                 console.error(e);
-                alert('Could not copy label JSON.');
+
+                $btn
+                    .removeClass('btn-primary')
+                    .addClass('btn-danger')
+                    .html('<i class="fa fa-times"></i>');
+
+                setTimeout(() => {
+                    $btn
+                        .removeClass('btn-danger')
+                        .addClass('btn-primary')
+                        .html(originalHtml);
+                }, 1500);
             }
         });
     </script>
