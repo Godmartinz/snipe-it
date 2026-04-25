@@ -65,7 +65,7 @@ class LabelsController extends Controller
 
         $labels = $labels->skip($offset)->take($limit);
 
-        return (new LabelsTransformer)->transformLabels($labels, $total, $request);
+        return (new LabelsTransformer)->transformLabels($labels, $total);
     }
 
     /**
@@ -75,6 +75,18 @@ class LabelsController extends Controller
      */
     public function show(string $labelName): JsonResponse|array
     {
+        $customLabel = CustomUserLabel::find($labelName);
+
+        if ($customLabel) {
+            $this->authorize('view', $customLabel);
+
+            return (new LabelsTransformer)->transformLabels(
+                collect([[
+                    'source' => 'custom',
+                    'label' => $customLabel,
+                ]]), 1);
+        }
+
         $labelName = str_replace('/', '\\', $labelName);
         try {
             $label = Label::find($labelName);
@@ -87,6 +99,9 @@ class LabelsController extends Controller
         }
         $this->authorize('view', $label);
 
-        return (new LabelsTransformer)->transformLabel($label);
+        return (new LabelsTransformer)->transformLabels(collect([[
+            'source' => 'base',
+            'label' => $label,
+        ]]), 1);
     }
 }

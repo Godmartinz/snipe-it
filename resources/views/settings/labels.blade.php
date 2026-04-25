@@ -656,7 +656,8 @@
 
             });
         });
-        const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => '__LABEL_ID__']) }}";
+        const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => 'label_id']) }}";
+        const editLabelUrlTemplate = "{{ route('settings.labels.edit', ['label' => 'label_id']) }}";
 
         $(document).on('click', '.copy-label-json', async function (e) {
             e.preventDefault();
