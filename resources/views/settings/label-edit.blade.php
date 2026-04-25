@@ -85,6 +85,10 @@
                 <form id="label-customizer-form" method="POST" action="{{route('settings.labels.store')}}"
                       class="form-horizontal">
                     @csrf
+                    @if (! empty($importedConfig))
+                        <input type="hidden" name="imported_config_snapshot"
+                               value="{{ e(json_encode($importedConfig)) }}">
+                    @endif
 
                     @php
                         $printable = $config['label_printable_area'] ?? $config['printable_area'] ?? null;
@@ -106,7 +110,7 @@
                                         type="text"
                                         name="name"
                                         class="form-control"
-                                        value="{{ old('name', $defaultName) }}"
+                                        value="{{ old('name', data_get($importedConfig ?? [], 'name', $defaultName)) }}"
                                         placeholder="Enter label name"
                                         style="max-width: 320px;"
                                 >

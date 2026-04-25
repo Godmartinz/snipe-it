@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use App\Models\Supplier;
 use App\Models\User;
 use App\View\Label as LabelView;
+use Illuminate\Validation\ValidationException;
 
 class LabelsController extends Controller
 {
@@ -170,6 +171,7 @@ class LabelsController extends Controller
         $finalConfig = $workingLabel->getEditorConfigSections();
 
         $configSnapshot = [
+            'unit' => 'mm',
             'template' => $validated['template'],
             'type' => $validated['type'] ?? 'sheet',
             'name' => $validated['name'],
@@ -198,21 +200,26 @@ class LabelsController extends Controller
         if ($selectedLabel) {
             $selectedLabel = str_replace('/', '\\', $selectedLabel);
         }
-
+        $importedConfig = session('imported_label_config');
+        if (!$importedConfig) {
+            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
+        }
         try {
             $template = $selectedLabel
                 ? Label::find(str_replace('/', '\\', $selectedLabel))
-                : new \App\Models\Labels\DefaultLabel();
+                : new DefaultLabel();
         } catch (\Throwable $e) {
-            $template = new \App\Models\Labels\DefaultLabel();
+            $template = new DefaultLabel();
         }
 
-        $label = (new \App\Models\Labels\CustomLabels\PreviewLabel())
+        $label = (new PreviewLabel())
             ->seedFromTemplate($template);
+        $config = $importedConfig ?: $label->toEditorConfig();
 
         return view('settings.label-edit', [
-            'config' => $label->toEditorConfig(),
+            'config' => $config,
             'selectedLabel' => $selectedLabel,
+            'importedConfig' => $importedConfig,
         ]);
     }
 
@@ -350,4 +357,32 @@ class LabelsController extends Controller
             ->with('bulkedit', false)
             ->with('count', 0);
     }
+
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'config_snapshot' => ['required', 'json'],
+        ]);
+
+        $config = json_decode($validated['config_snapshot'], true);
+
+        if (!is_array($config)) {
+            throw ValidationException::withMessages([
+                'config_snapshot' => 'The imported label config must be a JSON object.',
+            ]);
+        }
+
+        foreach (['template', 'type', 'name'] as $requiredKey) {
+            if (!array_key_exists($requiredKey, $config)) {
+                throw ValidationException::withMessages([
+                    'config_snapshot' => "The imported label config is missing [{$requiredKey}].",
+                ]);
+            }
+        }
+
+        return redirect()
+            ->route('settings.labels.edit')
+            ->with('imported_label_config', $config);
+    }
+
 }

@@ -807,8 +807,10 @@ abstract class Label
     public function getEditorConfigSections(): array
     {
         return [
+            'unit' => 'mm',
             'page' => $this->getPageEditorConfig(),
             'grid' => $this->getGridEditorConfig(),
+            'printable_area' => $this->getPrintableAreaEditorConfig(),
             'label' => $this->getLabelEditorConfig(),
             'content' => $this->getContentEditorConfig(),
             'supports' => $this->getSupportsEditorConfig(),

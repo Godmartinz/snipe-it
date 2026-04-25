@@ -62,7 +62,17 @@
 
                         @if ($setting->label2_enable)
                             <!-- New Settings -->
+                        <textarea
+                                name="config_snapshot"
+                                form="import-label-form"
+                                class="form-control"
+                                rows="6"
+                                placeholder="Paste label config JSON here"
+                        >{{ old('config_snapshot') }}</textarea>
 
+                        <button type="submit" form="import-label-form" class="btn btn-primary">
+                            Import Label Config
+                        </button>
                         <fieldset name="select-template">
                             <x-form.legend>
                                 {{ trans('admin/settings/general.select_template') }}
@@ -587,6 +597,9 @@
     <form id="delete-custom-label-form" method="POST" style="display:none;">
         @csrf
         @method('DELETE')
+    </form>
+    <form id="import-label-form" method="POST" action="{{ route('settings.labels.import') }}">
+        @csrf
     </form>
 
 @stop
