@@ -1898,7 +1898,15 @@
 
         const createUrl = '{{ route('settings.labels.create') }}';
         // Clone Button
-        let actions = '<a href="' + createUrl + '?custom_label_id=' + row.custom_label_id + '" '
+        let cloneHref;
+
+        if (row.source === 'custom') {
+            cloneHref = createUrl + '?custom_label_id=' + row.custom_label_id;
+        } else {
+            cloneHref = createUrl + '?label=' + encodeURIComponent(row.name);
+        }
+
+        let actions = '<a href="' + cloneHref + '" '
             + 'class="actions btn btn-sm btn-primary hidden-print" '
             + 'data-tooltip="true" '
             + 'title="{{ trans('general.clone') }}">'
