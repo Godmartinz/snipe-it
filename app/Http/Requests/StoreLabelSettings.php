@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use App\Models\Labels\CustomUserLabel;
 
 class StoreLabelSettings extends FormRequest
 {
@@ -27,7 +28,15 @@ class StoreLabelSettings extends FormRequest
     {
         $names = Label::find()?->map(function ($label) {
             return $label->getName();
-        })->values()->toArray();
+        })->values()->toArray() ?? [];
+
+        $customNames = CustomUserLabel::query()
+            ->pluck('id')
+            ->map(fn($id) => 'custom:' . $id)
+            ->values()
+            ->toArray();
+
+        $names = array_merge($names, $customNames);
 
         if (empty($this->input('label2_template'))) {
             $this->merge([

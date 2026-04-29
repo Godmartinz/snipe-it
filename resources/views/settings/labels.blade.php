@@ -87,18 +87,6 @@
                                             <x-table.labels/>
                                         </x-box>
                                     </x-container>
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', () => {
-                                            const chosenLabel = "{{ old('label2_template', $chosenLabel ?? '') }}";
-                                            $('#label2TemplateTable').on('load-success.bs.table', (e) => {
-                                                if (chosenLabel) {
-                                                    $('input[name="label2_template"][value="' + chosenLabel + '"]').prop('checked', true);
-                                                }
-                                                let form = document.getElementById('settingsForm');
-                                                form.dispatchEvent(new Event('change'));
-                                            });
-                                        });
-                                    </script>
                                 </div>
                             </div>
                         </fieldset>
@@ -383,11 +371,12 @@
                     <fieldset name="label-preview">
                         <x-form.legend>
                             {{ trans('admin/settings/general.label2_label_preview') }}: <code
-                                    id="selected-template-display">{{ $setting->label2_template }}</code>
+                                    id="selected-template-display">{{ $setting->label2_template_display }}</code>
                         </x-form.legend>
                             <div class="col-md-12" style="margin-bottom: 10px;">
+                                <input type="hidden" name="label2_template" id="label2_template"
+                                       value="{{ old('label2_template', $setting->label2_template) }}">
                                 @include('partials.label2-preview')
-                                <input type="hidden" name="label2_template" id="label2_template" value="DefaultLabel">
                             </div>
                     </fieldset>
 
@@ -657,17 +646,47 @@
 
             });
         });
-        $('#label2TemplateTable').on('check.bs.table', function (e, row) {
 
-            const value = row.source === 'custom'
-                ? 'custom:' + row.custom_label_id
-                : row.name;
+        $(function () {
+            let isPreselecting = false;
 
-            $('#label2_template').val(value);
-            $('#selected-template-display').text(row.name || value);
+            $('#label2TemplateTable').on('check.bs.table', function (e, row) {
+                if (isPreselecting) {
+                    return;
+                }
 
-            document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
+                const value = row.source === 'custom'
+                    ? 'custom:' + row.custom_label_id
+                    : row.name;
+
+                $('#label2_template').val(value);
+                $('#selected-template-display').text(row.name || value);
+
+                document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
+            });
+
+            $('#label2TemplateTable').on('load-success.bs.table', function () {
+                const selected = $('#label2_template').val();
+
+                isPreselecting = true;
+
+                $('#label2TemplateTable').bootstrapTable('getData').forEach((row, index) => {
+                    const value = row.source === 'custom'
+                        ? 'custom:' + row.custom_label_id
+                        : row.name;
+
+                    if (value === selected) {
+                        $('#label2TemplateTable').bootstrapTable('check', index);
+                    }
+                });
+
+                isPreselecting = false;
+
+                document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
+            });
         });
+
+
         const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => 'label_id']) }}";
         const editLabelUrlTemplate = "{{ route('settings.labels.edit', ['label' => 'label_id']) }}";
 

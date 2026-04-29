@@ -10,7 +10,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Traits\Macroable;
 use TCPDF;
-
+use App\Models\Labels\CustomUserLabel;
+use App\Models\Labels\CustomLabels\PreviewLabel;
 class Label implements View
 {
     use Macroable { __call as macroCall; }
@@ -46,6 +47,29 @@ class Label implements View
         $offset = $this->data->get('offset');
         $template = $this->data->get('template');
 
+        if ($template === null) {
+            $templateSetting = $settings->label2_template ?? 'DefaultLabel';
+
+            if (str_starts_with((string) $templateSetting, 'custom:')) {
+                $customLabel = CustomUserLabel::find((int) str_replace('custom:', '', $templateSetting));
+
+                if ($customLabel) {
+                    $baseLabel = CustomUserLabel::makeBaseLabel(
+                        data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
+                    );
+
+                    $template = new PreviewLabel();
+
+                    if ($baseLabel) {
+                        $template->seedFromTemplate($baseLabel);
+                    }
+
+                    $template->applyEditorConfig($customLabel->config_snapshot ?? []);
+                }
+            } else {
+                $template = LabelModel::find($templateSetting);
+            }
+        }
         // If disabled, pass to legacy view
         if ((! $settings->label2_enable)) {
             return view('hardware/labels')
