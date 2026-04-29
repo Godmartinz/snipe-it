@@ -2,7 +2,7 @@
     @push('css')
         <style>
             :root {
-                --l2p-height: 200px;
+                --l2p-height: 400px;
                 --l2p-background-color: aliceblue;
             }
 
@@ -57,21 +57,21 @@
                 },
 
                 updateURL: function() {
+                    const settings = Object.assign({}, ...$(this._form)
+                        .serializeArray()
+                        .filter((value) => value.name.includes('label2_'))
+                        .map((value) => ({[value.name]: value.value}))
+                    );
 
-                    let params = {
-                        settings: Object.assign({}, ...$(this._form)
-                            .serializeArray()
-                            .filter((value, index, all) => value.name.includes('label2_'))
-                            .map((value, index, all) => ({[value.name]: value.value}))
-                            )
-                    };
+                    const template = $('#label2_template').val() || settings.label2_template;
 
-                    let template = params.settings.label2_template;
                     if (!template) return;
+
+                    settings.label2_template = template;
 
                     this.previewURL = '{{ route("labels.show", ["labelName" => ":label"]) }}'
                         .replace(':label', template.replaceAll('\\', '/'))
-                        .concat('?', $.param(params), '#toolbar=0');
+                        .concat('?', $.param({settings: settings}), '#toolbar=0');
                 },
 
                 _previewURL: '',

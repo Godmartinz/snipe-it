@@ -32,7 +32,36 @@ class LabelsController extends Controller
     public function show(string $labelName)
     {
         $labelName = str_replace('/', '\\', $labelName);
-        $template = Label::find($labelName);
+
+        if (str_starts_with($labelName, 'custom:')) {
+
+            $id = (int)str_replace('custom:', '', $labelName);
+            $customLabel = CustomUserLabel::find($id);
+
+            if (!$customLabel) {
+                $template = new DefaultLabel();
+            } else {
+                $baseLabel = CustomUserLabel::makeBaseLabel(
+                    data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
+                );
+
+                $template = new PreviewLabel();
+
+                if ($baseLabel) {
+                    $template->seedFromTemplate($baseLabel);
+                }
+
+                $template->applyEditorConfig($customLabel->config_snapshot ?? []);
+            }
+
+        } else {
+
+            $template = $labelName === 'DefaultLabel'
+                ? new DefaultLabel()
+                : Label::find($labelName);
+
+        }
+
 
         $exampleAsset = new Asset;
 

@@ -387,6 +387,7 @@
                         </x-form.legend>
                             <div class="col-md-12" style="margin-bottom: 10px;">
                                 @include('partials.label2-preview')
+                                <input type="hidden" name="label2_template" id="label2_template" value="DefaultLabel">
                             </div>
                     </fieldset>
 
@@ -655,6 +656,17 @@
 
 
             });
+        });
+        $('#label2TemplateTable').on('check.bs.table', function (e, row) {
+
+            const value = row.source === 'custom'
+                ? 'custom:' + row.custom_label_id
+                : row.name;
+
+            $('#label2_template').val(value);
+            $('#selected-template-display').text(row.name || value);
+
+            document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
         });
         const deleteLabelUrlTemplate = "{{ route('settings.labels.destroy', ['label' => 'label_id']) }}";
         const editLabelUrlTemplate = "{{ route('settings.labels.edit', ['label' => 'label_id']) }}";
