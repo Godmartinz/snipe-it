@@ -458,22 +458,29 @@ class AssetFactory extends Factory
                 'phone' => '1-555-555-5555',
             ]);
 
-            $asset->model = new AssetModel;
-            $asset->model->id = 999999;
-            $asset->model->name = trans('admin/labels/table.example_model');
-            $asset->model->model_number = 'MDL5678';
+            $model = new AssetModel;
+            $model->id = 999999;
+            $model->name = trans('admin/labels/table.example_model');
+            $model->model_number = 'MDL5678';
 
-            $asset->model->manufacturer = new Manufacturer;
-            $asset->model->manufacturer->id = 999999;
-            $asset->model->manufacturer->name = trans('admin/labels/table.example_manufacturer');
+            $asset->setRelation('model', $model);
+
+            $manufacturer = new Manufacturer;
+            $manufacturer->id = 999999;
+            $manufacturer->name = trans('admin/labels/table.example_manufacturer');
+
+            $model->setRelation('manufacturer', $manufacturer);
 
             $asset->supplier = new Supplier([
                 'name' => trans('admin/labels/table.example_company'),
             ]);
 
-            $asset->model->category = new Category;
-            $asset->model->category->id = 999999;
-            $asset->model->category->name = trans('admin/labels/table.example_category');
+            $category = new Category;
+            $category->id = 999999;
+            $category->name = trans('admin/labels/table.example_category');
+
+            $model->setRelation('category', $category);
+
             $asset->is_label_preview = true;
         });
 
