@@ -18,6 +18,22 @@
         .checkbox label {
             padding-right: 40px;
         }
+
+        .import-toggle .btn {
+            background-color: #f5f5f5; /* light neutral */
+            color: #333;
+            border-color: #ccc;
+        }
+
+        .import-toggle .btn:hover {
+            background-color: #e6e6e6;
+        }
+
+        .import-toggle .btn.active {
+            background-color: #337ab7; /* Bootstrap primary */
+            color: #fff;
+            border-color: #2e6da4;
+        }
     </style>
 
     <form method="POST" action="{{ route('settings.labels.save') }}" accept-charset="UTF-8" id="settingsForm" autocomplete="off" class="form-horizontal" role="form">
@@ -61,18 +77,85 @@
 
 
                         @if ($setting->label2_enable)
-                            <!-- New Settings -->
-                        <textarea
-                                name="config_snapshot"
-                                form="import-label-form"
-                                class="form-control"
-                                rows="6"
-                                placeholder="Paste label config JSON here"
-                        >{{ old('config_snapshot') }}</textarea>
+                        <div class="form-group{{ $errors->has('config_snapshot') ? ' has-error' : '' }}">
+                            <div class="col-md-3 text-right">
+                                <label for="config_snapshot" class="control-label">
+                                    Import Label Config
+                                </label>
+                            </div>
 
-                        <button type="submit" form="import-label-form" class="btn btn-primary">
-                            Import Label Config
-                        </button>
+                            <div class="col-md-7">
+                                <input type="hidden" name="import_method" id="import_method" value="text"
+                                       form="import-label-form">
+
+                                <div class="btn-group import-toggle" role="group">
+                                    <button type="button"
+                                            class="btn btn-primary import-toggle-btn active"
+                                            data-method="json">
+                                        JSON
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-default import-toggle-btn"
+                                            data-method="text">
+                                        Text
+                                    </button>
+                                </div>
+
+                                <div id="text-input-group" style="margin-top:10px;">
+                                    <div class="import-inline-row">
+                <textarea
+                        name="config_snapshot"
+                        form="import-label-form"
+                        id="config_snapshot"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Paste label config JSON here"
+                >{{ old('config_snapshot') }}</textarea>
+
+                                        <button
+                                                type="submit"
+                                                form="import-label-form"
+                                                id="import-text-button"
+                                                class="btn btn-primary"
+                                                disabled
+                                        >
+                                            Import
+                                        </button>
+                                    </div>
+
+                                    <p id="json-validation-message" class="help-block" style="display:none;"></p>
+                                </div>
+
+                                <div id="json-input-group" style="display:none; margin-top:10px;">
+                                    <div class="input-group">
+                                        <input
+                                                type="file"
+                                                name="config_file"
+                                                form="import-label-form"
+                                                id="config_file"
+                                                class="form-control"
+                                                accept=".json,application/json"
+                                        >
+
+                                        <span class="input-group-btn">
+                    <button
+                            type="submit"
+                            form="import-label-form"
+                            id="import-file-button"
+                            class="btn btn-primary"
+                            disabled
+                    >
+                        Import
+                    </button>
+                </span>
+                                    </div>
+                                </div>
+
+                                {!! $errors->first('config_snapshot', '<span class="alert-msg">:message</span>') !!}
+                            </div>
+                        </div>
+                        <!-- New Settings -->
                         <fieldset name="select-template">
                             <x-form.legend>
                                 {{ trans('admin/settings/general.select_template') }}
@@ -588,7 +671,8 @@
         @csrf
         @method('DELETE')
     </form>
-    <form id="import-label-form" method="POST" action="{{ route('settings.labels.import') }}">
+    <form id="import-label-form" method="POST" enctype="multipart/form-data"
+          action="{{ route('settings.labels.import') }}">
         @csrf
     </form>
 
@@ -728,6 +812,23 @@
                         .html(originalHtml);
                 }, 1500);
             }
+        });
+
+        $('.import-toggle-btn').on('click', function () {
+            const method = $(this).data('method');
+
+            $('.import-toggle-btn')
+                .removeClass('btn-primary active')
+                .addClass('btn-default');
+
+            $(this)
+                .addClass('btn-primary active')
+                .removeClass('btn-default');
+
+            $('#import_method').val(method);
+
+            $('#text-input-group').toggle(method === 'text');
+            $('#json-input-group').toggle(method === 'json');
         });
     </script>
     {{-- Can't use @script here because we're not in a livewire component so let's manually load --}}
