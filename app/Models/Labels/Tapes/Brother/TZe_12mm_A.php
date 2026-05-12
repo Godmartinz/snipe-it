@@ -20,6 +20,22 @@ class TZe_12mm_A extends TZe_12mm
         return 50.0;
     }
 
+    public function getBarcodeSize(): float
+    {
+        return self::BARCODE_SIZE;
+    }
+
+    public function getBarcodeMargin(): float
+    {
+        return self::BARCODE_MARGIN;
+    }
+
+    public function getTextSizeMod(): float
+    {
+        return self::TEXT_SIZE_MOD;
+    }
+
+
     public function getSupportAssetTag()
     {
         return true;
@@ -48,6 +64,15 @@ class TZe_12mm_A extends TZe_12mm
     public function getSupportTitle()
     {
         return false;
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'barcode_size' => $this->getBarcodeSize(),
+            'barcode_margin' => $this->getBarcodeMargin(),
+            'text_size_mod' => $this->getTextSizeMod(),
+        ];
     }
 
     public function preparePDF($pdf) {}

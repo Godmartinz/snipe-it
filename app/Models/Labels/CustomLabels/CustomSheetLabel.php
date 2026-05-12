@@ -3,9 +3,12 @@
 namespace App\Models\Labels\CustomLabels;
 
 use App\Helpers\Helper;
+use App\Models\Labels\RectangleSheet;
 
-abstract class CustomSheetLabel extends CustomLabel
+abstract class CustomSheetLabel extends RectangleSheet
 {
+    protected array $editorConfig = [];
+
     protected string $unit = 'mm';
 
     protected ?float $pageWidth = 210.0;

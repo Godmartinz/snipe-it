@@ -806,13 +806,12 @@ abstract class Label
     public function getEditorConfigSections(): array
     {
         return [
-            'unit' => 'mm',
-            'page' => $this->getPageEditorConfig(),
-            'grid' => $this->getGridEditorConfig(),
+            'unit' => $this->getUnit(),
+            'dimensions' => $this->getDimensionsEditorConfig(),
             'printable_area' => $this->getPrintableAreaEditorConfig(),
-            'label' => $this->getLabelEditorConfig(),
             'content' => $this->getContentEditorConfig(),
             'supports' => $this->getSupportsEditorConfig(),
+            'meta' => $this->getMetaEditorConfig(),
         ];
     }
 }

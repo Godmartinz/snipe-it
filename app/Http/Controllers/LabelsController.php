@@ -7,7 +7,8 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\CustomField;
-use App\Models\Labels\CustomLabels\PreviewLabel;
+use App\Models\Labels\CustomLabels\PreviewSheetLabel;
+use App\Models\Labels\CustomLabels\PreviewTapeLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\DefaultLabel;
 use App\Models\Labels\Label;
@@ -43,7 +44,7 @@ class LabelsController extends Controller
                     data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
                 );
 
-                $template = new PreviewLabel;
+                $template = new PreviewSheetLabel;
 
                 if ($baseLabel) {
                     $template->seedFromTemplate($baseLabel);
@@ -107,12 +108,18 @@ class LabelsController extends Controller
 
     public function update(Request $request, CustomUserLabel $label)
     {
+        $type = $request->input('type', $label->type ?? 'sheet');
+        $isTape = $type === 'tape';
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string'],
-            'page' => ['required', 'array'],
-            'grid' => ['required', 'array'],
-            'label' => ['required', 'array'],
+
+            'page' => [$isTape ? 'nullable' : 'required', 'array'],
+            'grid' => [$isTape ? 'nullable' : 'required', 'array'],
+            'label' => [$isTape ? 'nullable' : 'required', 'array'],
+            'tape' => [$isTape ? 'required' : 'nullable', 'array'],
+
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
         ]);
@@ -134,35 +141,48 @@ class LabelsController extends Controller
                 return is_numeric($value) ? (float)$value : $value;
             })->toArray();
         };
-
-        $page = $castNumeric($validated['page']);
-        $grid = $castNumeric($validated['grid']);
-        $labelConfig = $castNumeric($validated['label']);
-        $content = $castNumeric($validated['content']);
-
         $baseLabel = CustomUserLabel::makeBaseLabel($label->base_label);
 
         if (!$baseLabel) {
             return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
         }
 
-        $baseWorkingLabel = new PreviewLabel;
+        $chosenLabelType = function () use ($isTape) {
+            return $isTape ? new PreviewTapeLabel : new PreviewSheetLabel;
+        };
+        $baseWorkingLabel = $chosenLabelType();
         $baseWorkingLabel->seedFromTemplate($baseLabel);
 
         $baseEditorConfig = $baseWorkingLabel->toEditorConfig();
         $baseConfig = $baseWorkingLabel->getEditorConfigSections();
 
-        $submittedConfig = [
-            'page' => $page,
-            'grid' => $grid,
-            'label' => $labelConfig,
-            'content' => $content,
-            'supports' => $supports,
-        ];
+        $content = $castNumeric($validated['content']);
+
+        if ($isTape) {
+            $tape = $castNumeric($validated['tape'] ?? []);
+
+            $submittedConfig = [
+                'tape' => $tape,
+                'content' => $content,
+                'supports' => $supports,
+            ];
+        } else {
+            $page = $castNumeric($validated['page']);
+            $grid = $castNumeric($validated['grid']);
+            $labelConfig = $castNumeric($validated['label']);
+
+            $submittedConfig = [
+                'page' => $page,
+                'grid' => $grid,
+                'label' => $labelConfig,
+                'content' => $content,
+                'supports' => $supports,
+            ];
+        }
 
         $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
 
-        $workingLabel = new PreviewLabel;
+        $workingLabel = $chosenLabelType();
         $workingLabel->seedFromTemplate($baseLabel);
         $workingLabel->applyEditorConfig($mergedConfig);
 
@@ -171,7 +191,7 @@ class LabelsController extends Controller
         $configSnapshot = [
             'unit' => $baseEditorConfig['unit'] ?? 'mm',
             'template' => $label->base_label,
-            'type' => $label->type ?? 'sheet',
+            'type' => $type,
             'name' => $validated['name'],
         ];
 
@@ -247,7 +267,7 @@ class LabelsController extends Controller
         }
 
         // Loading both base and working label in the preview to ensure millimeter-based comparisons for overrides.
-        $baseWorkingLabel = new PreviewLabel;
+        $baseWorkingLabel = new PreviewSheetLabel;
         $baseWorkingLabel->seedFromTemplate($baseLabel);
         $baseConfig = $baseWorkingLabel->getEditorConfigSections();
 
@@ -261,7 +281,7 @@ class LabelsController extends Controller
 
         $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
 
-        $workingLabel = new PreviewLabel;
+        $workingLabel = new PreviewSheetLabel;
         $workingLabel->seedFromTemplate($baseLabel);
         $workingLabel->applyEditorConfig($mergedConfig);
 
@@ -304,6 +324,7 @@ class LabelsController extends Controller
             return view('settings.label-edit', [
                 'config' => $config,
                 'selectedLabel' => $customLabel->base_label,
+                'selectedType' => $customLabel->type,
                 'importedConfig' => null,
                 'customLabel' => null,
                 'formMethod' => 'POST',
@@ -329,12 +350,14 @@ class LabelsController extends Controller
             $selectedLabel = 'DefaultLabel';
         }
 
-        $label = (new PreviewLabel)->seedFromTemplate($template);
+        $label = $this->previewLabelForTemplate($template);
         $config = $importedConfig ?: $label->toEditorConfig();
+        $type = str_starts_with($template->getName(), 'Tapes\\') ? 'tape' : 'sheet';
 
         return view('settings.label-edit', [
             'config' => $config,
             'selectedLabel' => $selectedLabel,
+            'selectedType' => $type,
             'importedConfig' => $importedConfig,
             'customLabel' => null,
             'formMethod' => 'POST',
@@ -375,7 +398,7 @@ class LabelsController extends Controller
             'supports' => $request->input('supports', []),
         ];
 
-        $template = new PreviewLabel;
+        $template = new PreviewSheetLabel;
 
         if (method_exists($template, 'seedFromTemplate')) {
             $template->seedFromTemplate($baseTemplate);
@@ -637,5 +660,16 @@ class LabelsController extends Controller
         return redirect()
             ->route('settings.labels.create')
             ->with('imported_label_config', $config);
+    }
+
+    protected function previewLabelForTemplate($template)
+    {
+        $name = $template->getName();
+
+        if (str_starts_with($name, 'Tapes\\')) {
+            return (new PreviewTapeLabel)->seedFromTemplate($template);
+        }
+
+        return (new PreviewSheetLabel)->seedFromTemplate($template);
     }
 }

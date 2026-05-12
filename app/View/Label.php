@@ -2,7 +2,7 @@
 
 namespace App\View;
 
-use App\Models\Labels\CustomLabels\PreviewLabel;
+use App\Models\Labels\CustomLabels\PreviewSheetLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Field;
 use App\Models\Labels\Label as LabelModel;
@@ -59,7 +59,7 @@ class Label implements View
                         data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
                     );
 
-                    $template = new PreviewLabel;
+                    $template = new PreviewSheetLabel;
 
                     if ($baseLabel) {
                         $template->seedFromTemplate($baseLabel);

@@ -104,6 +104,11 @@
                         $printable = $config['label_printable_area'] ?? $config['printable_area'] ?? null;
                     @endphp
                     <input type="hidden" name="template" value="{{ $selectedLabel ?: 'DefaultLabel' }}">
+                    <input
+                            type="hidden"
+                            name="type"
+                            value="{{ $selectedType ?? data_get($config, 'type', 'sheet') }}"
+                    >
                     <div class="label-config-grid">
                         <div class="label-form-header">
                             @php
@@ -154,7 +159,24 @@
                                 </div>
                             </div>
                         @endif
-
+                        @if(!empty($config['tape']))
+                            <div class="panel box box-default label-config-panel">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Tape</h3>
+                                </div>
+                                <div id="tape-config" class="box-body collapse in">
+                                    @foreach($config['tape'] as $key => $value)
+                                        <div class="form-group">
+                                            <label class="col-md-5 control-label">{{ $key }}</label>
+                                            <div class="col-md-7">
+                                                <input type="number" step="0.001" name="tape[{{ $key }}]"
+                                                       value="{{ $value }}" class="form-control">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                         @if(!empty($config['grid']))
                             <div class="panel box box-default label-config-panel">
                                 <div class="box-header with-border">
