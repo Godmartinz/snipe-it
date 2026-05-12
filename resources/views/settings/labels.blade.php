@@ -142,7 +142,7 @@
                                     <p id="json-validation-message" class="help-block" style="display:none;"></p>
                                 </div>
 
-                                <div id="json-input-group" style="margin-top:10px;">
+                                <div id="json-input-group" style="margin-top:10px; margin-bottom:15px;">
                                     <div class="input-group">
                                         <input
                                                 type="file"
