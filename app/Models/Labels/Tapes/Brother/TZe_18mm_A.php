@@ -10,6 +10,20 @@ class TZe_18mm_A extends TZe_18mm
 
     private const TEXT_SIZE_MOD = 1.00;
 
+    public function getBarcodeSize(): float
+    {
+        return self::BARCODE_SIZE;
+    }
+
+    public function getBarcodeMargin(): float
+    {
+        return self::BARCODE_MARGIN;
+    }
+
+    public function getTextSizeMod(): float
+    {
+        return self::TEXT_SIZE_MOD;
+    }
     public function getUnit()
     {
         return 'mm';
@@ -48,6 +62,15 @@ class TZe_18mm_A extends TZe_18mm
     public function getSupportTitle()
     {
         return false;
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'barcode_size' => $this->getBarcodeSize(),
+            'barcode_margin' => $this->getBarcodeMargin(),
+            'text_size_mod' => $this->getTextSizeMod(),
+        ];
     }
 
     public function preparePDF($pdf) {}

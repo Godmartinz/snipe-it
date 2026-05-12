@@ -2,10 +2,13 @@
 
 namespace App\Models\Labels\CustomLabels;
 
+use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
 use App\Models\Labels\Label;
+use App\Helpers\Helper;
 
 abstract class CustomTapeLabel extends Label
 {
+    use RenderCustomLabelContent;
     protected array $editorConfig = [];
 
     protected string $unit = 'mm';
@@ -32,6 +35,27 @@ abstract class CustomTapeLabel extends Label
     protected float $fieldSize = 5.5;
     protected string $tagAlignment = 'L';
     protected string $fieldAlignment = 'R';
+    protected float $logoMaxWidth = 12.0;
+    protected float $logoMargin = 2.0;
+    protected string $logoHAlign = 'L';
+    protected string $logoVAlign = 'T';
+
+    protected float $barcode2DSize = 10.0;
+    protected string $barcode2DHAlign = 'L';
+    protected string $barcode2DVAlign = 'T';
+    protected float $tagOffsetX = 0.0;
+    protected float $tagOffsetY = 0.0;
+    protected string $tagPositionMode = 'free';
+
+    protected float $titleSize = 8.0;
+    protected float $titleMargin = 1.0;
+    protected float $titleOffsetX = 0.0;
+
+    protected float $labelSize = 5.0;
+    protected float $labelMargin = 1.0;
+    protected float $fieldMargin = 1.0;
+    protected ?float $textAreaWidth = null;
+    protected ?float $textAreaHeight = null;
 
     public function getUnit()
     {
@@ -133,6 +157,96 @@ abstract class CustomTapeLabel extends Label
         return $this->fieldAlignment;
     }
 
+    public function getLogoMaxWidth(): float
+    {
+        return $this->logoMaxWidth;
+    }
+
+    public function getLogoMargin(): float
+    {
+        return $this->logoMargin;
+    }
+
+    public function getLogoHAlign(): string
+    {
+        return $this->logoHAlign;
+    }
+
+    public function getLogoVAlign(): string
+    {
+        return $this->logoVAlign;
+    }
+
+    public function get2DBarcodeSize(): float
+    {
+        return $this->barcode2DSize;
+    }
+
+    public function getBarcode2DHAlign(): string
+    {
+        return $this->barcode2DHAlign;
+    }
+
+    public function getBarcode2DVAlign(): string
+    {
+        return $this->barcode2DVAlign;
+    }
+
+    public function getTagOffsetX(): float
+    {
+        return $this->tagOffsetX;
+    }
+
+    public function getTagOffsetY(): float
+    {
+        return $this->tagOffsetY;
+    }
+
+    public function getTagPositionMode(): string
+    {
+        return $this->tagPositionMode;
+    }
+
+    public function getTitleSize(): float
+    {
+        return $this->titleSize;
+    }
+
+    public function getTitleMargin(): float
+    {
+        return $this->titleMargin;
+    }
+
+    public function getTitleOffsetX(): float
+    {
+        return $this->titleOffsetX;
+    }
+
+    public function getLabelSize(): float
+    {
+        return $this->labelSize;
+    }
+
+    public function getLabelMargin(): float
+    {
+        return $this->labelMargin;
+    }
+
+    public function getFieldMargin(): float
+    {
+        return $this->fieldMargin;
+    }
+
+    public function getTextAreaWidth(): ?float
+    {
+        return $this->textAreaWidth;
+    }
+
+    public function getTextAreaHeight(): ?float
+    {
+        return $this->textAreaHeight;
+    }
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
@@ -229,6 +343,7 @@ abstract class CustomTapeLabel extends Label
         $contentMap = [
             'barcode_size' => 'barcodeSize',
             'barcode_margin' => 'barcodeMargin',
+            'text_size_mod' => 'textSizeMod',
             'tag_font_size' => 'tagSize',
             'field_value_font_size' => 'fieldSize',
             'tag_alignment' => 'tagAlignment',
@@ -288,63 +403,134 @@ abstract class CustomTapeLabel extends Label
     {
         $pa = $this->getPrintableArea();
 
+        $layout = $this->buildLayout($pdf, $record, $pa);
+
+        $this->render1DBarcode($pdf, $record, $layout);
+        $this->renderTapeTag($pdf, $record, $layout);
+        $this->renderTapeField($pdf, $record, $layout);
+    }
+
+    protected function buildLayout($pdf, $record, $pa): array
+    {
+        $layout = [
+            'printable' => [
+                'x1' => $pa->x1,
+                'y1' => $pa->y1,
+                'x2' => $pa->x2,
+                'y2' => $pa->y2,
+                'w' => $pa->w,
+                'h' => $pa->h,
+            ],
+            'body' => [
+                'x1' => $pa->x1,
+                'y1' => $pa->y1,
+                'x2' => $pa->x2,
+                'y2' => $pa->y2,
+                'w' => $pa->w,
+                'h' => $pa->h,
+            ],
+            'barcode1d' => null,
+            'barcode2d' => null,
+            'logo' => null,
+            'tag' => null,
+            'field' => null,
+            'text' => null,
+            'title' => null,
+            'fields' => null,
+        ];
+        $barcodeHeight = 0;
+        $barcodeMargin = 0;
+
         if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
-            static::write1DBarcode(
-                $pdf,
-                $record->get('barcode1d')->content,
-                $record->get('barcode1d')->type,
-                $pa->x1,
-                $pa->y1,
-                $pa->w,
-                $this->getBarcodeSize()
-            );
+            $barcodeHeight = min(max(0, $this->getBarcodeSize()), $pa->h);
+            $barcodeMargin = max(0, $this->getBarcodeMargin());
+
+            $layout['barcode1d'] = [
+                'x' => $pa->x1,
+                'y' => $pa->y1,
+                'w' => $pa->w,
+                'h' => $barcodeHeight,
+            ];
         }
 
-        $currentY = $pa->y1 + $this->getBarcodeSize() + $this->getBarcodeMargin();
-        $usableHeight = max(0, $pa->h - $this->getBarcodeSize() - $this->getBarcodeMargin());
+        $currentY = $pa->y1 + $barcodeHeight + $barcodeMargin;
+        $usableHeight = max(0, $pa->h - $barcodeHeight - $barcodeMargin);
         $fontSize = $usableHeight + $this->getTextSizeMod();
 
         $tagWidth = $pa->w / 3;
         $fieldWidth = $pa->w - $tagWidth;
 
-        if ($record->has('tag') && $this->getSupportAssetTag()) {
-            static::writeText(
-                $pdf,
-                $record->get('tag'),
-                $pa->x1,
-                $currentY,
-                'freemono',
-                'B',
-                $fontSize,
-                $this->getTagAlignment(),
-                $tagWidth,
-                $usableHeight,
-                true,
-                0,
-                0
-            );
+        $layout['tag'] = [
+            'x' => $pa->x1,
+            'y' => $currentY,
+            'w' => $tagWidth,
+            'h' => $usableHeight,
+            'font_size' => $fontSize,
+            'align' => $this->getTagAlignment(),
+            'spacing' => 0,
+        ];
+
+        $layout['field'] = [
+            'x' => $pa->x1 + $tagWidth,
+            'y' => $currentY,
+            'w' => $fieldWidth,
+            'h' => $usableHeight,
+            'font_size' => $fontSize,
+            'align' => $this->getFieldAlignment(),
+            'spacing' => 0,
+        ];
+
+        return $layout;
+    }
+
+    protected function renderTapeTag($pdf, $record, array $layout): void
+    {
+        if (empty($layout['tag']) || !$record->has('tag') || !$this->getSupportAssetTag()) {
+            return;
         }
 
+        static::writeText(
+            $pdf,
+            $record->get('tag'),
+            $layout['tag']['x'],
+            $layout['tag']['y'],
+            'freemono',
+            'B',
+            $layout['tag']['font_size'],
+            $layout['tag']['align'],
+            $layout['tag']['w'],
+            $layout['tag']['h'],
+            true,
+            0,
+            $layout['tag']['spacing']
+        );
+    }
+
+    protected function renderTapeField($pdf, $record, array $layout): void
+    {
         if (
-            $record->has('fields') &&
-            $this->getSupportFields() >= 1 &&
-            $record->get('fields')->count() >= 1
+            empty($layout['field']) ||
+            !$record->has('fields') ||
+            $record->get('fields')->count() < 1 ||
+            $this->getSupportFields() < 1
         ) {
-            static::writeText(
-                $pdf,
-                $record->get('fields')->values()->get(0)['value'],
-                $pa->x1 + $tagWidth,
-                $currentY,
-                'freemono',
-                'B',
-                $fontSize,
-                $this->getFieldAlignment(),
-                $fieldWidth,
-                $usableHeight,
-                true,
-                0,
-                0
-            );
+            return;
         }
+
+        static::writeText(
+            $pdf,
+            $record->get('fields')->values()->get(0)['value'],
+            $layout['field']['x'],
+            $layout['field']['y'],
+            'freemono',
+            'B',
+            $layout['field']['font_size'],
+            $layout['field']['align'],
+            $layout['field']['w'],
+            $layout['field']['h'],
+            true,
+            0,
+            $layout['field']['spacing']
+        );
     }
 }

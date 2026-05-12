@@ -390,15 +390,25 @@ class LabelsController extends Controller
             ? new DefaultLabel
             : Label::find($labelName);
 
+        $isTape = str_starts_with($labelName, 'Tapes\\');
+
         $editorConfig = [
-            'page' => $request->input('page', []),
-            'grid' => $request->input('grid', []),
-            'label' => $request->input('label', []),
             'content' => $request->input('content', []),
             'supports' => $request->input('supports', []),
         ];
 
-        $template = new PreviewSheetLabel;
+        if ($isTape) {
+            $editorConfig['tape'] = $request->input('tape', []);
+            $template = new PreviewTapeLabel;
+        } else {
+            $editorConfig['page'] = $request->input('page', []);
+            $editorConfig['grid'] = $request->input('grid', []);
+            $editorConfig['label'] = $request->input('label', []);
+            $template = new PreviewSheetLabel;
+        }
+
+        $template->seedFromTemplate($baseTemplate);
+        $template->applyEditorConfig($editorConfig);
 
         if (method_exists($template, 'seedFromTemplate')) {
             $template->seedFromTemplate($baseTemplate);
