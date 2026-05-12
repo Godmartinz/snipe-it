@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Tipos de archivos permitidos son png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, y rar.',
     'history_user' => 'Historial de :name',
     'info' => 'Información',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Haga clic aquí para restaurarlos.',
     'last_login' => 'Último acceso',
     'ldap_config_text' => 'La ubicación seleccionada se establecerá para TODOS los usuarios importados. Esto sobreescribirá su ubicación existente, y es un caso de uso poco usual, por lo que dejarlo en blanco es típicamente mejor.',

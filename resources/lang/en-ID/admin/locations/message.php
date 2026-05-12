@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Lokasi ini saat ini merupakan induk dari setidaknya satu lokasi anak dan tidak dapat dihapus. Perbarui lokasi Anda agar tidak lagi merujuk lokasi ini dan coba lagi. ',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Lokasi saat ini',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

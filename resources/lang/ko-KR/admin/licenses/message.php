@@ -37,6 +37,9 @@ return [
         'confirm' => '이 라이선스를 삭제하시겠습니까?',
         'error' => '라이선스 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.',
         'success' => '라이선스가 삭제되었습니다.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

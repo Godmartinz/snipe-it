@@ -479,6 +479,9 @@
                       <th data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.serial') }}
                       </th>
+                        <th data-switchable="true" data-visible="true">
+                            {{ trans('general.manufacturer') }}
+                        </th>
                       <th data-switchable="true" data-visible="false">
                         {{ trans('admin/hardware/form.default_location') }}
                       </th>
@@ -552,6 +555,11 @@
                         <td>
                           {{ $asset->serial }}
                         </td>
+                          <td>
+                              @if (($asset->model) && ($asset->model->manufacturer))
+                                  {!! $asset->model->manufacturer->present()->formattedNameLink  !!}
+                              @endif
+                          </td>
                         <td>
                             {!!  ($asset->defaultLoc) ? $asset->defaultLoc->present()->formattedNameLink : '' !!}
 

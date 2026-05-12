@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'select_type' => 'Select Maintenance Type',
+    'select_type' => 'Välj underhållstyp',
     'asset_maintenance_type' => 'Typ av tillgångsunderhåll',
     'title' => 'Titel',
     'start_date' => 'Startdatum',

@@ -81,6 +81,12 @@ class Group extends SnipeModel
         return $this->belongsToMany(User::class, 'users_groups');
     }
 
+    /* this is just a shim for SCIM to work */
+    public function members()
+    {
+        return $this->users();
+    }
+
     /**
      * Decode JSON permissions into array
      *

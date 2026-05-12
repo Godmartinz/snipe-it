@@ -4,6 +4,7 @@ namespace Tests\Feature\Checkouts\Api;
 
 use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
+use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -114,5 +115,41 @@ class ConsumableCheckoutTest extends TestCase
             ])->count(),
             'Log entry either does not exist or there are more than expected'
         );
+    }
+
+    public function test_superuser_cannot_checkout_consumable_to_a_user_in_another_company_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $consumableInCompanyA = Consumable::factory()->for($companyA)->create(['qty' => 1]);
+        $userInCompanyB = User::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($superuser)
+            ->postJson(route('api.consumables.checkout', $consumableInCompanyA), [
+                'assigned_to' => $userInCompanyB->id,
+                'checkout_qty' => 1,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $this->assertDatabaseMissing('consumables_users', [
+            'consumable_id' => $consumableInCompanyA->id,
+            'assigned_to' => $userInCompanyB->id,
+        ]);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'created_by' => $superuser->id,
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $userInCompanyB->id,
+            'item_type' => Consumable::class,
+            'item_id' => $consumableInCompanyA->id,
+        ]);
+
+        $this->assertEquals(1, $consumableInCompanyA->fresh()->numRemaining());
     }
 }

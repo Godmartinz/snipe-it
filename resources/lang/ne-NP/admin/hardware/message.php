@@ -99,6 +99,9 @@ return [
         'success' => 'Asset checked in successfully.',
         'user_does_not_exist' => 'That user is invalid. Please try again.',
         'already_checked_in' => 'That asset is already checked in.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 
@@ -106,7 +109,7 @@ return [
         'error' => 'Request was not successful, please try again.',
         'success' => 'Request successfully submitted.',
         'canceled' => 'Request successfully canceled.',
-        'cancel' => 'Cancel this item request',
+        'cancel' => 'यो वस्तुको अनुरोध रद्द गर्नुहोस्',
     ],
 
 ];

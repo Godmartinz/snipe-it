@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Toegelate filetipes is png, gif, jpg, jpeg, doc, docx, pdf, txt, zip en rar.',
     'history_user' => 'Geskiedenis vir: naam',
     'info' => 'info',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Klik hier om dit te herstel.',
     'last_login' => 'Laaste Aanmelding',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

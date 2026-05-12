@@ -9,7 +9,7 @@ return [
     'edit' => 'Pinda Aksesori',
     'eula_text' => 'Kategori EULA',
     'eula_text_help' => 'Bidang ini membolehkan anda menyesuaikan EULA anda untuk jenis aset tertentu. Jika anda hanya mempunyai satu EULA untuk semua aset anda, anda boleh menyemak kotak di bawah untuk menggunakan lalai utama.',
-    'require_acceptance' => 'Memerlukan pengguna untuk mengesahkan penerimaan aset dalam kategori ini.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Tiada EULA lalai utama dijumpai. Tambah satu dalam Tetapan.',
     'total' => 'Jumlah',
     'remaining' => 'Masih ada',

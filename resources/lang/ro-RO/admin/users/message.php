@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Acest utilizator a fost sters. Trebuie sa restaurati utilizator ca sa-l editati sau sa-i desemnati active noi.',
     'ldap_not_configured' => 'Integrarea LDAP nu a fost configurată pentru această instalare.',
     'password_resets_sent' => 'Utilizatorii selectați care sunt activați și au o adresă de e-mail validă au primit un link de resetare a parolei.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Un link de resetare a parolei a fost trimis la :email!',
     'user_has_no_email' => 'Acest utilizator nu are o adresă de e-mail în profilul său.',
     'log_record_not_found' => 'Nu s-a putut găsi o înregistrare de identificare pentru acest utilizator.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Utilizatorul a fost activat.',
         'restored' => 'Utilizatorul a fost restaurat.',
         'import' => 'Utilizatorii importați cu succes.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'A aparut o problema la reactivarea utilizatorului. Incercati iar.',
         'import' => 'A apărut o problemă la importarea utilizatorilor. Vă rugăm să încercați din nou.',
-        'asset_already_accepted' => 'Acest activ a fost deja acceptat.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Trebuie să acceptați sau să refuzați acest activ.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Activitatea pe care ați încercat să o acceptați nu a fost verificată de dvs.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nu s-au putut obține intrări de pe serverul LDAP. Verificați configurația serverului LDAP în fișierul de configurare LDAP. <br>Error de la LDAP Server:',
         'password_ldap' => 'Parola pentru acest cont este gestionată de LDAP / Active Directory. Contactați departamentul IT pentru a vă schimba parola.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

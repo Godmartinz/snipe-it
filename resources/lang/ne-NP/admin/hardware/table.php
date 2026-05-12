@@ -26,7 +26,7 @@ return [
     'days_without_acceptance' => 'Days Without Acceptance',
     'monthly_depreciation' => 'Monthly Depreciation',
     'requesting_user' => 'Requesting User',
-    'requested_date' => 'Requested Date',
-    'changed' => 'Changed',
+    'requested_date' => 'अनुरोध गरिएको मिति',
+    'changed' => 'परिवर्तन गरियो',
     'icon' => 'Icon',
 ];

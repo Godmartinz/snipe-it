@@ -52496,7 +52496,11 @@ $(function () {
   // This handles the radio button selectors for the checkout-to-foo options
   // on asset checkout and also on asset edit
   $(function () {
-    $('input[name=checkout_to_type]').on("change", function () {
+    var checkoutToTypeInputs = $('input[name=checkout_to_type]');
+    if (!checkoutToTypeInputs.length) {
+      return;
+    }
+    function syncCheckoutToTypeUi(resetSelections) {
       var assignto_type = $('input[name=checkout_to_type]:checked').val();
       var userid = $('#assigned_user option:selected').val();
       if (assignto_type == 'asset') {
@@ -52505,16 +52509,20 @@ $(function () {
         $('#assigned_user').hide();
         $('#assigned_location').hide();
         $('.notification-callout').fadeOut();
-        $('[name="assigned_location"]').val('').trigger('change.select2');
-        $('[name="assigned_user"]').val('').trigger('change.select2');
+        if (resetSelections) {
+          $('[name="assigned_location"]').val('').trigger('change.select2');
+          $('[name="assigned_user"]').val('').trigger('change.select2');
+        }
       } else if (assignto_type == 'location') {
         $('#current_assets_box').fadeOut();
         $('#assigned_asset').hide();
         $('#assigned_user').hide();
         $('#assigned_location').show();
         $('.notification-callout').fadeOut();
-        $('[name="assigned_asset"]').val('').trigger('change.select2');
-        $('[name="assigned_user"]').val('').trigger('change.select2');
+        if (resetSelections) {
+          $('[name="assigned_asset"]').val('').trigger('change.select2');
+          $('[name="assigned_user"]').val('').trigger('change.select2');
+        }
       } else {
         $('#assigned_asset').hide();
         $('#assigned_user').show();
@@ -52523,10 +52531,18 @@ $(function () {
           $('#current_assets_box').fadeIn();
         }
         $('.notification-callout').fadeIn();
-        $('[name="assigned_asset"]').val('').trigger('change.select2');
-        $('[name="assigned_location"]').val('').trigger('change.select2');
+        if (resetSelections) {
+          $('[name="assigned_asset"]').val('').trigger('change.select2');
+          $('[name="assigned_location"]').val('').trigger('change.select2');
+        }
       }
+    }
+    checkoutToTypeInputs.on('change', function () {
+      syncCheckoutToTypeUi(true);
     });
+
+    // Apply the current radio selection on initial render.
+    syncCheckoutToTypeUi(false);
   });
 
   // ------------------------------------------------

@@ -9,6 +9,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Component;
+use App\Models\Depreciation;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -193,6 +194,55 @@ class AssetTest extends TestCase
         $this->assertEquals(Carbon::createFromDate(2017, 1, 1)->format('Y-m-d'), $asset->purchase_date->format('Y-m-d'));
         $this->assertEquals(Carbon::createFromDate(2019, 1, 1)->format('Y-m-d'), $asset->warranty_expires->format('Y-m-d'));
 
+    }
+
+    public function test_eol_progress_percent_returns_expected_value(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 1, 1, 0, 0, 0));
+
+        try {
+            $asset = Asset::factory()->create([
+                'purchase_date' => '2025-01-01',
+                'eol_explicit' => 1,
+            ]);
+
+            $asset->asset_eol_date = '2027-01-01';
+            $asset->save();
+            $asset->refresh();
+
+            $this->assertSame(50.0, $asset->eolProgressPercent());
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_depreciation_progress_percent_returns_expected_value(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 1, 1, 0, 0, 0));
+
+        try {
+            $depreciation = Depreciation::factory()->create(['months' => 24]);
+            $model = AssetModel::factory()->create(['depreciation_id' => $depreciation->id]);
+
+            $asset = Asset::factory()->create([
+                'model_id' => $model->id,
+                'purchase_date' => '2025-01-01',
+            ]);
+
+            $this->assertSame(50.0, $asset->depreciationProgressPercent());
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_warranty_progress_percent_returns_zero_without_required_dates(): void
+    {
+        $asset = Asset::factory()->create([
+            'purchase_date' => null,
+            'warranty_months' => 24,
+        ]);
+
+        $this->assertSame(0.0, $asset->warrantyProgressPercent());
     }
 
     public function test_assigned_type_without_assign_to()

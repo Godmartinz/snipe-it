@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'این مکان در حال حاضر پدر و مادر کودک حداقل یک مکان است و قادر به حذف نمی شود. لطفا به روز رسانی مکان خود را به دیگر این مکان مرجع و دوباره امتحان کنید. ',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Current Location',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

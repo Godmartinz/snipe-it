@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Esta ubicación es actualmente el padre de al menos una ubicación hija y no puede ser eliminada.   Por favor actualice sus ubicaciones para que ya no hagan referencia a esta ubicación e inténtelo de nuevo. ',
     'assigned_assets' => 'Activos asignados',
     'current_location' => 'Ubicación actual',
-    'open_map' => 'Abrir en mapas :map_provider_icon',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

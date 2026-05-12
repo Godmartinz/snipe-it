@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'סוגי קבצים מותרים הם png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, ו rar.',
     'history_user' => 'היסטוריה עבור: שם',
     'info' => 'מידע',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'לחץ כאן כדי לשחזר אותם.',
     'last_login' => 'כניסה אחרונה',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

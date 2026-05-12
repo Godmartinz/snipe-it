@@ -7,7 +7,7 @@
 @stop
 
 @section('header_right')
-    <x-button.info-panel-toggle/>
+    <x-button.info-panel-toggle hide-on-xs/>
 @endsection
 
 {{-- Page content --}}
@@ -67,7 +67,7 @@
 
                         <!-- well column -->
                         <x-page-column class="col-md-4">
-                            <x-well style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+                            <x-well>
                                 <x-icon type="start_date" class="fa-fw"/>
                                 <strong>{{ trans('general.start_date') }}</strong>
                                 @if ($user->start_date != '')
@@ -81,8 +81,8 @@
                         <!-- ./ well column -->
 
                         <!-- well column -->
-                        <x-page-column class="col-md-4" style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
-                            <x-well style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+                        <x-page-column class="col-md-4">
+                            <x-well>
                                 <x-icon type="end_date" class="fa-fw {{ (($user->end_date!='' && $user->end_date < Carbon::now()) ? ' text-danger' : '') }}"/>
                                 <strong>{{ trans('general.end_date') }}</strong>
                                 @if ($user->end_date != '')
@@ -146,6 +146,43 @@
                                         <span class="text-warning"><x-icon type="warning"/> {{ trans('admin/users/general.individual_override') }}</span>
                                     @endif
                                 </x-data-row>
+
+                                <x-data-row :label="trans('general.permissions')">
+                                    @if ($user->isSuperUser())
+                                        <span class="label label-danger" data-tooltip="true" title="{{ trans('general.superuser_tooltip') }}">
+                                            <x-icon type="superadmin" style="padding-right: 5px;"/>{{ trans('general.superuser') }}
+                                        </span>
+                                    @elseif ($user->hasAccess('admin'))
+                                        <span class="label label-warning" data-tooltip="true" title="{{ trans('general.admin_tooltip') }}">
+                                            <x-icon type="superadmin" style="padding-right: 5px;"/>{{ trans('general.admin_user') }}
+                                        </span>
+                                    @elseif (!empty($effectivePermissionsBySection))
+                                        @foreach ($effectivePermissionsBySection as $section => $permissions)
+                                            @foreach ($permissions as $permission)
+                                                @if (($permission['status'] ?? 'allowed') === 'denied')
+                                                    <span class="label label-danger denied-permission" data-tooltip="true" title="{{ $permission['source_label'] }}"><x-icon type="x" class="fa-fw"/> {{ $permission['permission'] }}</span>
+                                                @else
+                                                    <span class="label label-success" data-tooltip="true" title="{{ $permission['source_label'] }}"><x-icon type="checkmark" class="fa-fw"/> {{ $permission['permission'] }}</span>
+                                                @endif
+                                            @endforeach
+
+                                        @endforeach
+                                    @endif
+                                </x-data-row>
+
+                            @if (($user->email!='') && ($user->activated=='1')  && ($user->getAssignedItemsWithPendingAcceptance()->count() > 0))
+
+                                    <x-data-row :label="trans_choice('admin/users/general.unaccepted_items', $user->getAssignedItemsWithPendingAcceptance()->count())">
+                                        <form action="{{ route('users.acceptance_reminder', $user) }}" method="POST" class="form-inline" style="display: inline;">
+                                            {{ csrf_field() }}
+                                            <button class="btn btn-warning btn-sm" type="submit">
+                                                {{ trans('admin/users/general.send_acceptance_reminder') }}
+                                            </button>
+                                        </form>
+                                    </x-data-row>
+                                @endif
+
+
                             </x-page-data>
 
                             <!-- ./ definition list column -->
@@ -155,6 +192,34 @@
 
                         <!-- begin side stats well column-->
                         <x-page-column class="col-md-4 col-sm-12">
+
+
+                            @if($user->getUserTotalCost()->total_user_cost > 0)
+                                <x-well class="well-sm">
+
+                                    <div class="well-display">
+
+                                        <x-data-row icon_type="asset" label="{{ trans('general.assets') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->asset_cost) }}
+                                        </x-data-row>
+
+                                        <x-data-row icon_type="licenses" label="{{ trans('general.licenses') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->license_cost)}}
+                                        </x-data-row>
+
+                                        <x-data-row icon_type="accessories" label="{{ trans('general.accessories') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->accessory_cost)}}
+                                        </x-data-row>
+
+                                        <x-data-row icon_type="cost" label=" {{ trans('admin/users/table.total_assets_cost') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->total_user_cost) }}
+                                        </x-data-row>
+
+                                    </div>
+
+                                </x-well>
+                            @endif
+
 
                             <x-well class="well-sm" style="padding-left: 15px;">
 
@@ -216,33 +281,6 @@
                                 <br>
 
                             </x-well>
-
-                            @if($user->getUserTotalCost()->total_user_cost > 0)
-                                <x-well class="well-sm">
-
-                                    <div class="well-display">
-
-                                        <x-data-row icon_type="asset" label="{{ trans('general.assets') }}" align="right">
-                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->asset_cost) }}
-                                        </x-data-row>
-
-                                        <x-data-row icon_type="licenses" label="{{ trans('general.licenses') }}" align="right">
-                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->license_cost)}}
-                                        </x-data-row>
-
-                                        <x-data-row icon_type="accessories" label="{{ trans('general.accessories') }}" align="right">
-                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->accessory_cost)}}
-                                        </x-data-row>
-
-                                        <x-data-row icon_type="cost" label=" {{ trans('admin/users/table.total_assets_cost') }}" align="right">
-                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->total_user_cost) }}
-                                        </x-data-row>
-
-                                    </div>
-
-                                </x-well>
-                            @endif
-
 
 
                             @if ( ($user->activated == '1') && (auth()->user()->isSuperUser()) && ($user->two_factor_active_and_enrolled()) && ($snipeSettings->two_factor_enabled!='0') && ($snipeSettings->two_factor_enabled!=''))

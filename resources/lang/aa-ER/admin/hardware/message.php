@@ -99,6 +99,9 @@ return [
         'success' => 'crwdns753:0crwdne753:0',
         'user_does_not_exist' => 'crwdns754:0crwdne754:0',
         'already_checked_in' => 'crwdns1603:0crwdne1603:0',
+        'force_checkin_orphaned_success' => 'crwdns14742:0crwdne14742:0',
+        'force_checkin_not_orphaned' => 'crwdns14744:0crwdne14744:0',
+        'force_checkin_error' => 'crwdns14746:0crwdne14746:0',
 
     ],
 

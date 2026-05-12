@@ -12,7 +12,7 @@ return [
     'purchased' => 'Purchased',
     'seats' => 'Seats',
     'hardware' => 'Hardware',
-    'serial' => 'Serial',
+    'serial' => 'Número de sèrie',
     'title' => 'License',
 
 ];

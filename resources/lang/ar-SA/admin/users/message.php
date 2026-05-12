@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'تم حذف المستخدم. سيكون عليك استعادة هذا المستخدم اذا ارت التعديل عليه او تسليمه اجهزة جديدة.',
     'ldap_not_configured' => 'لم يتم تكوين دمج لداب لهذا التثبيت.',
     'password_resets_sent' => 'تم إرسال رابط إعادة تعيين كلمة المرور للمستخدمين المحددين الذين تم تفعيلهم ولديهم عناوين بريد إلكتروني صالحة.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'تم إرسال رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني!',
     'user_has_no_email' => 'هذا المستخدم ليس لديه عنوان بريد إلكتروني في ملفه الشخصي.',
     'log_record_not_found' => 'تعذر العثور على سجل مطابق لهذا المستخدم.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'تم إلغاء التعليق عن المستخدم بنجاح.',
         'restored' => 'تم استعادة المستخدم بنجاح.',
         'import' => 'تم استيراد المستخدمين بنجاح.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'حدث خطأ ما أثناء إلغاء تقييد الانتظار. حاول مرة أخرى.',
         'import' => 'حدث خطأ أثناء استيراد المستخدمين. حاول مرة أخرى.',
-        'asset_already_accepted' => 'هذا الجهاز تم قبوله مسبقاً.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'يجب إما قبول مادة العرض هذه أو رفضها.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'لم يتم سحب مادة العرض التي حاولت قبولها.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'تعذر الحصول على إدخالات من خادم LDAP. الرجاء التحقق من الاعدادات الخاصة بخادم LDAP في ملف اعدادات LDAP. <br>الخطأ من خادم LDAP:',
         'password_ldap' => 'تتم إدارة كلمة المرور لهذا الحساب بواسطة لداب / أكتيف ديركتوري. يرجى الاتصال بقسم تقنية المعلومات لتغيير كلمة المرور.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

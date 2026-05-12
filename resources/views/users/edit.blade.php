@@ -612,7 +612,7 @@
 
                                                     @foreach ($groups as $id => $group)
                                                         <option value="{{ $id }}"
-                                                                {{ ($userGroups->keys()->contains($id) ? ' selected="selected"' : '') }}>
+                                                                {{ ($userGroups->keys()->contains($id) ? ' selected' : '') }}>
                                                             {{ $group }}
                                                         </option>
                                                     @endforeach

@@ -75,6 +75,7 @@ class CheckoutAssetMail extends BaseMailable
         $eula = method_exists($this->item, 'getEula') ? $this->item->getEula() : '';
         $req_accept = $this->requiresAcceptance();
         $fields = [];
+        $customFields = [];
         $name = null;
 
         if ($this->target instanceof User) {
@@ -88,6 +89,21 @@ class CheckoutAssetMail extends BaseMailable
         // Check if the item has custom fields associated with it
         if (($this->item->model) && ($this->item->model->fieldset)) {
             $fields = $this->item->model->fieldset->fields;
+
+            foreach ($fields as $field) {
+                if (! $field->show_in_email || $field->field_encrypted == '1') {
+                    continue;
+                }
+
+                $value = $this->item->{$field->db_column_name()};
+
+                if (! is_null($value) && $value !== '') {
+                    $customFields[] = [
+                        'label' => $field->name,
+                        'value' => $value,
+                    ];
+                }
+            }
         }
 
         $accept_url = is_null($this->acceptance) ? null : route('account.accept.item', $this->acceptance);
@@ -101,6 +117,7 @@ class CheckoutAssetMail extends BaseMailable
                 'note' => $this->note,
                 'target' => $name,
                 'fields' => $fields,
+                'custom_fields' => $customFields,
                 'eula' => $eula,
                 'req_accept' => $req_accept,
                 'accept_url' => $accept_url,

@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Dopuštene vrste datoteka su png, gif, jpg, jpeg, doc, docx, pdf, txt, zip i rar.',
     'history_user' => 'Istorija za :name',
     'info' => 'Info',
+    'send_acceptance_reminder' => 'Pošalji podsetnik',
+    'unaccepted_items' => ':count neprihvaćene stavke',
     'restore_user' => 'Kliknite ovdje da biste ih vratili.',
     'last_login' => 'Poslednja prijava',
     'ldap_config_text' => 'Izabrana lokacija će biti podešena za SVE uvežene korisnike. Ovo će preduprediti njihovu postojeću lokaciju, što je neuobičajen slučaj, tako da ostaviti ovo prazno je obično najbolje.',

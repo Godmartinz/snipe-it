@@ -9,7 +9,7 @@ return [
     'edit' => 'Editar acessório',
     'eula_text' => 'EULA da Categoria',
     'eula_text_help' => 'Este atributo permite-lhe personalizar os seus EULAs para tipos específicos de ativos. Se apenas tem um para todos os seus ativos, pode selecionar a caixa abaixo, para usar o EULA padrão.',
-    'require_acceptance' => 'Solicitar aos utilizadores que confirmem a aceitação de ativos nesta categoria.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Não foi encontrado o EULA padrão. Defina um nas Configurações.',
     'total' => 'Total',
     'remaining' => 'Disponíveis',

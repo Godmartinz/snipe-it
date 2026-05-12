@@ -872,6 +872,11 @@ class SettingsController extends Controller
     public function downloadFile($filename = null): RedirectResponse|BinaryFileResponse
     {
         $path = 'app/backups';
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
 
         if (! config('app.lock_passwords')) {
             if (Storage::exists($path.'/'.$filename)) {
@@ -897,6 +902,12 @@ class SettingsController extends Controller
      */
     public function deleteFile($filename = null): RedirectResponse
     {
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
+
         if (config('app.allow_backup_delete') == 'true') {
 
             if (! config('app.lock_passwords')) {
@@ -971,6 +982,11 @@ class SettingsController extends Controller
      */
     public function postRestore(Request $request, $filename = null): RedirectResponse
     {
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
 
         if (! config('app.lock_passwords')) {
             $path = 'app/backups';
@@ -1283,5 +1299,15 @@ class SettingsController extends Controller
         return redirect()
             ->to(route('settings.oauth.index').'#oauth-clients')
             ->with('success', trans('admin/settings/message.oauth.client_unrevoked'));
+    }
+
+    private function hasInvalidBackupFilename(string $filename): bool
+    {
+        if ($filename === '' || $filename === '.' || $filename === '..') {
+            return true;
+        }
+
+        // Reject path separators in case a crafted value survives route decoding.
+        return str_contains($filename, '/') || str_contains($filename, '\\');
     }
 }

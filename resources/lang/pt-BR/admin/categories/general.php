@@ -3,8 +3,8 @@
 return [
     'asset_categories' => 'Categorias de Ativos',
     'category_name' => 'Nome da Categoria',
-    'email_to_user_upon_checkin' => 'Send email to user upon checkin.',
-    'email_to_user_upon_checkin_and_checkout' => 'Send email to user upon checkin/checkout.',
+    'email_to_user_upon_checkin' => 'Enviar e-mail ao usuário após o check-in.',
+    'email_to_user_upon_checkin_and_checkout' => 'Enviar e-mail ao usuário após o check-in/check-out.',
     'email_to_initiator' => 'Envie um e-mail para você quando o usuário aceitar ou recusar o pagamento.',
     'checkin_email_notification' => 'Este usuário receberá um email no checkin / checkout.',
     'clone' => 'Clonar Categoria',
@@ -17,6 +17,7 @@ return [
     'name' => 'Nome da Categoria',
     'require_acceptance' => 'Requer que usuários confirmem a aceitação de ativos nesta categoria.',
     'required_acceptance' => 'Este usuário receberá um e-mail com um link para confirmar a aceitação deste item.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Este usuário receberá um e-mail com uma cópia do EULA',
     'no_default_eula' => 'Nenhum EULA padrão primário foi encontrado. Adicione um nas Configurações.',
     'update' => 'Atualizar Categoria',

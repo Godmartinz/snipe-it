@@ -16,7 +16,7 @@ return [
     'no_custom_field' => 'Pas de champs personnalisés',
     'add_default_values' => 'Ajouter des valeurs par défaut',
     'importer' => [
-        'require_serial' => 'Require Serial',
-        'serial_required' => 'Serial Required',
+        'require_serial' => 'Nécessite numéro de série',
+        'serial_required' => 'Numéro de série requis',
     ],
 ];

@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'ผู้ใช้งานนี้ถูกลบแล้ว คุณจำเป็นต้องกู้คืนผู้ใช้งานก่อนแก้ไข',
     'ldap_not_configured' => 'การทำงานร่วมกับ LDAP ไม่ได้ถูกตั้งค่าไว้สำหรับการติดตั้งนี้',
     'password_resets_sent' => 'ผู้ใช้งานที่เลือกซึ่งเปิดใช้งานแล้วและมีที่อยู่อีเมลที่ถูกต้อง ได้รับลิงก์สำหรับรีเซ็ตรหัสผ่านแล้ว',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'ผู้ใช้นี้ยังไม่มีอีเมล์ในโปรไฟล์',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'ยกเลิกระงับผู้ใช้งานเสร็จสมบูรณ์แล้ว',
         'restored' => 'กู้คืนผู้ใช้งานเสร็จสมบูรณ์แล้ว',
         'import' => 'นำเข้าผู้ใช้งานเสร็จสมบูรณ์แล้ว',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'มีปัญหาระหว่างการยกเลิกการระงับผู้ใช้งาน กรุณาลองใหม่อีกครั้ง',
         'import' => 'มีปัญหาระหว่างการนำเข้าผู้ใช้งาน กรุณาลองใหม่อีกครั้ง',
-        'asset_already_accepted' => 'ทรัพย์สินนี้ได้รับการยอมรับแล้ว',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'คุณต้องยอมรับ หรือปฏิเสธสินทรัพย์นี้',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'เนื้อหาที่คุณพยายามยอมรับไม่ได้ถูกเช็คเอาท์ให้คุณ',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'ไม่สามารถดึงข้อมูลจาก LDAP Server ได้ กรุณาตรวจสอบการตั้งค่า LDAP Server ของคุณในไฟล์ตั้งค่า LDAP <br>ผิดพลาดจาก LDAP Server:',
         'password_ldap' => 'รหัสผ่านสำหรับบัญชีนี้ได้รับการจัดการโดย LDAP / Active Directory โปรดติดต่อฝ่ายไอทีของคุณเพื่อเปลี่ยนรหัสผ่านของคุณ',
         'multi_company_items_assigned' => 'ผู้ใช้นี้มีสิ่งของที่ได้รับมอบหมายซึ่งเป็นของบริษัทอื่น โปรดตรวจสอบรายการเหล่านั้นหรือแก้ไขข้อมูลบริษัทของผู้ใช้',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

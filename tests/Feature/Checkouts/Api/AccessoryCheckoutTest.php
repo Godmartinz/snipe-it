@@ -5,6 +5,7 @@ namespace Tests\Feature\Checkouts\Api;
 use App\Mail\CheckoutAccessoryMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Tests\Concerns\TestsPermissionsRequirement;
@@ -188,5 +189,43 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
         );
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);
 
+    }
+
+    public function test_superuser_cannot_checkout_accessory_to_a_target_in_another_company_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $accessoryInCompanyA = Accessory::factory()->for($companyA)->create(['qty' => 1]);
+        $userInCompanyB = User::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($superuser)
+            ->postJson(route('api.accessories.checkout', $accessoryInCompanyA), [
+                'assigned_user' => $userInCompanyB->id,
+                'checkout_to_type' => 'user',
+                'checkout_qty' => 1,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $this->assertDatabaseMissing('accessories_checkout', [
+            'accessory_id' => $accessoryInCompanyA->id,
+            'assigned_to' => $userInCompanyB->id,
+            'assigned_type' => User::class,
+        ]);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'created_by' => $superuser->id,
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $userInCompanyB->id,
+            'item_type' => Accessory::class,
+            'item_id' => $accessoryInCompanyA->id,
+        ]);
+
+        $this->assertEquals(1, $accessoryInCompanyA->fresh()->numRemaining());
     }
 }

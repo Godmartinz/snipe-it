@@ -83,6 +83,14 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('users.email');
 
     Route::post(
+        '{user}/acceptance-reminder',
+        [
+            Users\UsersController::class,
+            'resendAcceptanceReminder',
+        ]
+    )->name('users.acceptance_reminder')->withTrashed();
+
+    Route::post(
         'bulkedit',
         [
             Users\BulkUsersController::class,

@@ -17,6 +17,7 @@ return [
     'name' => 'Kategooria nimi',
     'require_acceptance' => 'Nõua kasutajatelt selle kategooria puhul vahendi vastuvõtmiseks kinnitust.',
     'required_acceptance' => 'Kasutajale saadetakse e-mailiga link, et selle vahendi vastuvõtmine kinnitada.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Kasutajale saadetakse EULA koopia',
     'no_default_eula' => 'Peamine vaikimisi EULA puudub. Lisa see seadete alt.',
     'update' => 'Uuenda kategooriat',

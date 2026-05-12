@@ -54,7 +54,7 @@ return [
     'avatar_upload' => 'Įkelti avatarą',
     'back' => 'Grįžti',
     'bad_data' => 'Nieko nerasta. Galbūt blogi duomenys?',
-    'bulkaudit' => 'Masinis auditas',
+    'bulkaudit' => 'Masinis auditas skenuojant',
     'bulkaudit_status' => 'Audito būsena',
     'bulk_checkout' => 'Išduoti kelis',
     'bulk_edit' => 'Redaguoti kelis',
@@ -154,7 +154,7 @@ return [
     'first_checkout' => '1-as išdavimas',
     'generate' => 'Generuoti',
     'generate_labels' => 'Generuoti etiketes',
-    'github_markdown' => 'Šis laukas leidžia naudoti <a href="https://help.github.com/articles/github-flavored-markdown/">Github tipo žymėjimą (markdown)</a>.',
+    'github_markdown' => 'Šis laukas leidžia naudoti <a href="https://help.github.com/articles/github-flavored-markdown/" target="_blank">Github tipo žymes (markdown)</a>.',
     'groups' => 'Grupės',
     'gravatar_email' => 'Gravatar el. pašto adresas',
     'gravatar_url' => '<a href="http://gravatar.com"><small>Pasikeiskite savo avatarą Gravatar.com</small></a>.',
@@ -196,6 +196,7 @@ return [
     'license' => 'Licencija',
     'license_report' => 'Licencijų ataskaita',
     'licenses_available' => 'Turimos licencijos',
+    'licenses_with_no_seats' => 'Licenses with No Available Seats',
     'licenses' => 'Licencijos',
     'list_all' => 'Parodyti viską',
     'loading' => 'Įkeliama... Prašome palaukti...',
@@ -224,6 +225,9 @@ return [
     'next_audit_date_help' => 'Jei organizacijoje naudojate auditą, įprastai tai yra apskaičiuojama automatiškai, atsižvelgiant į paskutinio audito datą ir dažnumą, todėl šį lauką (skiltyje <code>Administratoriaus nustatymai &gt; Įspėjimai</code>) galite palikti tuščią. Jei reikia, rankiniu būdu čia galite nustatyti šią datą, tačiau ji privalo būti vėlesnė nei paskutinio audito data. ',
     'audit_images_help' => 'Audito atvaizdus galite rasti turto skirtuke „Istorija“.',
     'no_email' => 'Su šiuo naudotoju nėra susietas joks el. pašto adresas',
+    'no_value' => 'Nenurodyta',
+    'device_eol' => 'Įrenginio eksploatacijos pabaiga (EOL)',
+    'na' => 'N/A',
     'last_audit' => 'Paskutinis auditas',
     'new' => 'naujas!',
     'no_depreciation' => 'Nėra nusidėvėjimo',
@@ -271,7 +275,7 @@ return [
     'rtd' => 'Paruoštas naudojimui',
     'requested_date' => 'Prašymo data',
     'requested_assets' => 'Prašomas turtas',
-    'requested_assets_menu' => 'Prašomi daiktai',
+    'requested_assets_menu' => 'Užsakomi daiktai',
     'request_canceled' => 'Prašymas atšauktas',
     'request_item' => 'Užsakyti šį daiktą',
     'external_link_tooltip' => 'Išorinė nuoroda',
@@ -482,8 +486,22 @@ return [
     'set_to_null' => 'Ištrinti šio pasirinkimo reikšmes|Ištrinti visų :selection_count pasirinkimų reikšmes ',
     'set_users_field_to_null' => 'Išvalyti :field reikšmes šiam naudotojui|Išvalyti :field reikšmes visiems :user_count naudotojams ',
     'na_no_purchase_date' => 'N/D - Nenurodyta įsigijimo data',
+    'assets_by_category' => 'Assets by Category',
     'assets_by_status' => 'Turtas pagal būseną',
     'assets_by_status_type' => 'Turtas pagal būsenos tipą',
+    'activity_overview' => 'Activity Overview',
+    'checkouts_checkins' => 'Checkouts & Check-ins',
+    'assets_newly_added' => 'Assets Added',
+    'checkouts' => 'Išduota',
+    'checkins' => 'Check-ins',
+    'assets' => 'Turtas',
+
+    'vs_prior_period' => 'vs. prior period',
+    'time_range' => 'Select Date Range',
+    'last_n_days' => 'Last :days Days',
+    'custom_range' => 'Custom Range',
+    'download_chart' => 'Download Chart as PNG',
+    'fullscreen' => 'Fullscreen',
     'pie_chart_type' => 'Valdymo skydo skritulinės diagramos tipas',
     'hello_name' => 'Sveiki, :name!',
     'unaccepted_profile_warning' => 'Turite vieną daiktą, kurį reikia priimti. Spustelėkite čia, jei norite jį priimti arba atmesti | Turite :count daiktus(-ų), kuriuos reikia priimti. Spustelėkite čia, jei norite juos priimti arba atmesti',
@@ -559,6 +577,11 @@ return [
     'error_user_company_accept_view' => 'Jums paskirtas turtas priklauso kitai įmonei, todėl jūs negalite jo priimti arba atsisakyti. Kreipkitės į savo vadovą.',
     'error_assets_already_checked_out' => 'Vienas ar keli daiktai jau yra išduoti',
     'assigned_assets_removed' => 'Šie daiktai buvo pašalinti iš pasirinkto turto sąrašo, kadangi jie jau yra išduoti',
+    'upload_files' => 'Įkelti failus',
+    'uploaded_files' => 'Įkelti failai',
+    'sign_in_place' => 'Pasirašyti / Priimti vietoje',
+    'sign_in_place_help' => 'Pažymėkite šį langelį, jei naudotojas yra šalia ir norite, kad jis dabar priimtų daiktą ir pasirašytų / sutiktų su EULA (jei taikoma).',
+    'unauthorized' => 'Neautorizuotas arba neautentifikuotas.',
     'importer' => [
         'checked_out_to_fullname' => 'Išduota: vardas, pavardė',
         'checked_out_to_first_name' => 'Išduota: vardas',
@@ -592,10 +615,16 @@ return [
     'status_compatibility' => 'Jei turtas jau yra išduotas, jo būsena negali būti pakeista į neišduotinos būsenos tipą, todėl šios reikšmės pakeitimas nebus atliekamas.',
     'rtd_location_help' => 'Tai yra turto buvimo vieta, kai jis nėra išduotas',
     'item_not_found' => ':item_type ID :id neegzistuoja arba buvo panaikintas',
+    'item_target_not_found_hard' => ':item_type su ID :id neegzistuoja arba buvo galutinai ištrintas. Ar norėtumėte priverstinai paimti?',
+    'force_checkin' => 'Priverstinai paimti',
+    'item_not_found_short' => ':item_type su ID :id neegzistuoja',
     'action_permission_denied' => 'Neturite teisių atlikti :action :item_type ID :id',
     'action_permission_generic' => 'Neturite teisių atlikti :action šiam :item_type',
     'edit' => 'redaguoti',
+    'search_operator' => 'Paieškos funkcija',
+    'and' => 'ir',
     'action_source' => 'Veiksmo šaltinis',
+    'search_tip' => 'Searches return a partial match by default. For more specific results, you can use <code>not:value</code> to fuzzy-exclude, <code>is:value</code> for an exact match, <code>is_not:value</code> for an exact exclusion, <code>is:null</code> for empty values, and <code>is:not_null</code> for non-empty. (In these examples, <code>value</code> is the text you are searching for.)',
     'or' => 'arba',
     'url' => 'URL',
     'phone' => 'Telefono Nr.',
@@ -662,12 +691,16 @@ return [
     'child_locations' => 'Antrinės vietos',
     'append' => 'Papildyti',
     'optional' => 'PASIRINKTINAI',
+    'audit_by_field' => 'Audituoti pagal lauką',
+    'audit_by_field_help' => 'Auditas nuskaitant serijinius numerius yra galimas tik tuo atveju, jei administratoriaus nustatymuose nurodyta, kad serijiniai numeriai turi būti unikalūs.',
+    'audit_key' => 'Turtas',
 
     // Add form placeholders here
     'placeholders' => [
         'notes' => 'Pridėti pastabą',
     ],
 
+    'last_note' => 'Paskutinė pastaba',
     'bulk_delete_associations' => [
         'general_assoc_warning' => ':item_name vis dar turi susietų daiktų. Prieš ištrindami šį :item, pašalinkite juos.',
         'assoc_assets' => ':item_name šiuo metu yra susietas su :asset_count turto vienetu (-ais) ir negali būti panaikintas. Atnaujinkite savo turtą, kad nebebūtų sąsajos su :item, ir bandykite dar kartą.',
@@ -691,26 +724,6 @@ return [
         'checkin_item' => 'Paimti :name',
     ],
 
-    'skins' => [
-        'site_default' => 'Svetainės numatytoji',
-        'default_blue' => 'Numatytoji mėlyna',
-        'blue_dark' => 'Mėlyna (tamsus režimas)',
-        'green' => 'Žalia',
-        'green_dark' => 'Žalia (tamsus režimas)',
-        'red' => 'Raudona',
-        'red_dark' => 'Raudona (tamsus režimas)',
-        'orange' => 'Oranžinė',
-        'orange_dark' => 'Oranžinė (tamsus režimas)',
-        'black' => 'Juoda',
-        'black_dark' => 'Juoda (tamsus režimas)',
-        'purple' => 'Violetinė',
-        'purple_dark' => 'Violetinė (tamsus režimas)',
-        'yellow' => 'Geltona',
-        'yellow_dark' => 'Geltona (tamsus režimas)',
-        'high_contrast' => 'Didelis kontrastas',
-
-    ],
-
     'select_all_none' => 'Pažymėti/atžymėti viską',
     'generic_model_not_found' => 'Tokio :model nėra arba jūs neturite teisės jo pasiekti',
     'report_not_editable' => 'Jūs neturite teisės redaguoti šio ataskaitos šablono',
@@ -723,7 +736,7 @@ return [
         'manufacturers' => [
             'button' => 'Sukurti gamintojus',
             'prompt' => 'Dar neturite jokių gamintojų. Ar norėtumėte įkelti dažniausiai naudojamų gamintojų sąrašą? (TAI PERRAŠYS ESAMUS GAMINTOJUS, įskaitant ir tuos, kurie buvo panaikinti, bet ne visiškai ištrinti.)',
-            'success' => 'Gamintojai sukurti sėkmingai',
+            'success' => 'Gamintojai sėkmingai įrašyti',
             'error' => 'Nepavyko įkelti gamintojų. Gamintojo įrašas jau yra ir įkėlimas jį perrašytų.|Nepavyko įkelti gamintojų. :count gamintojo įrašai (-ų) jau yra ir įkėlimas juos perrašytų.',
         ],
     ],
@@ -731,12 +744,12 @@ return [
     'file_upload_status' => [
 
         'upload' => [
-            'success' => 'Failas įkeltas sėkmingai|:count failai (-ų) įkelti sėkmingai',
+            'success' => 'Failas sėkmingai įkeltas|:count failai(-ų) sėkmingai įkelti',
             'error' => 'Failo įkelti nepavyko |:count failų įkelti nepavyko',
         ],
 
         'delete' => [
-            'success' => 'Failas ištrintas sėkmingai|:count failai (-ų) ištrinti sėkmingai',
+            'success' => 'Failas sėkmingai ištrintas|:count failai(-ų) sėkmingai ištrinti',
             'error' => 'Failo ištrinti nepavyko |:count failų ištrinti nepavyko',
         ],
 
@@ -753,5 +766,8 @@ return [
     ],
 
     'months_plural' => '1 mėnuo|:count mėnesiai (-ių)',
+
+    'token_unrevoked' => 'API prieigos raktas atkurtas',
+    'token_revoked' => 'API prieigos raktas atšauktas',
 
 ];

@@ -7,18 +7,18 @@ return [
 
     'create' => [
         'error' => 'Nusidėvėjimo klasė nebuvo sukurta, badykite dar kartą.',
-        'success' => 'Nusidėvėjimo klasė sukurta sėkmingai.',
+        'success' => 'Nusidėvėjimo grupė sėkmingai sukurta. :)',
     ],
 
     'update' => [
         'error' => 'Nusidėvėjimo klasė nebuvo atnaujinta, bandykite dar kartą.',
-        'success' => 'Nusidėvėjimo klasė atnaujinta sėkmingai.',
+        'success' => 'Nusidėvėjimo klasė sėkmingai atnaujinta.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šią nusidėvėjimo klasę?',
         'error' => 'Bandant panaikinti nusidėvėjimo klasę įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Nusidėvėjimo klasė panaikinta sėkmingai.',
+        'success' => 'Nusidėvėjimo klasė sėkmingai panaikinta.',
     ],
 
 ];

@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Zubehördateien verwalten',
-        'note' => 'Ermöglicht dem Benutzer das Hochladen, Herunterladen und Löschen von Zubehör Dateien.',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Manage Asset Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Manage User Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Manage Model Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Manage Department Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Manage Supplier Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Manage Location Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Manage Company Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with companies. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Verbrauchsdateien verwalten',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => 'Verbrauchsmaterialien',
         'note' => 'Gewährt Zugriff auf den Bereich Verbrauchsmaterialien der Anwendung.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Verbrauchsmaterialien auschecken',
         'note' => 'Verbrauchsmaterialien im Inventar zuweisen, indem sie ausgecheckt werden.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Verbrauchsdateien verwalten',
-        'note' => 'Ermöglicht dem Benutzer das Hochladen, Herunterladen und Löschen von Verbrauchsmaterialien.',
-    ],
+
     'licenses' => [
         'name' => 'Lizenzen',
         'note' => 'Gewährt Zugriff auf den Abschnitt Lizenzen der Anwendung.',
@@ -161,6 +199,11 @@ return [
         'name' => 'Lizenzdateien Verwalten',
         'note' => 'Ermöglicht dem Benutzer das Hochladen, Herunterladen und Löschen in Verbindung mit Lizenzen.',
     ],
+    'componentsfiles' => [
+        'name' => 'Komponentendateien Verwalten',
+        'note' => 'Ermöglicht dem Benutzer das Hochladen, Herunterladen und Löschen in Verbindung mit Komponenten.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Lizenzschlüssel Verwalten',
         'note' => 'Ermöglicht dem Benutzer, Produktschlüssel anzuzeigen, die mit Lizenzen verknüpft sind.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Komponenten Löschen',
     ],
-    'componentsfiles' => [
-        'name' => 'Komponentendateien Verwalten',
-        'note' => 'Ermöglicht dem Benutzer das Hochladen, Herunterladen und Löschen in Verbindung mit Komponenten.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Komponenten Auschecken',
         'note' => 'Komponenten im Inventar zuweisen, indem sie ausgecheckt werden.',

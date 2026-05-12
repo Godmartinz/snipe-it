@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class UpdateUserTest extends TestCase
@@ -51,6 +52,7 @@ class UpdateUserTest extends TestCase
                 'vip' => true,
                 'start_date' => '2021-08-01',
                 'end_date' => '2025-12-31',
+                'avatar' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAEsAQMAAADXeXeBAAAABlBMVEX+AAD///+KQee0AAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH5QQbCAoNcoiTQAAAACZJREFUaN7twTEBAAAAwqD1T20JT6AAAAAAAAAAAAAAAAAAAICnATvEAAEnf54JAAAAAElFTkSuQmCC',
             ])
             ->assertOk()
             ->assertStatus(200)
@@ -79,6 +81,12 @@ class UpdateUserTest extends TestCase
         $this->assertEquals(1, $user->vip, 'VIP was not updated');
         $this->assertEquals('2021-08-01', $user->start_date, 'Start date was not updated');
         $this->assertEquals('2025-12-31', $user->end_date, 'End date was not updated');
+
+        // assert against resized hash
+        $this->assertEquals(
+            'db2e13ba04318c99058ca429d67777322f48566b',
+            sha1(Storage::disk('public')->get(app('users_upload_path').$user->avatar))
+        );
 
         // `groups` can be an id or array or ids
         $this->patch(route('api.users.update', $user), ['groups' => [$groupA->id, $groupB->id]]);
@@ -127,6 +135,7 @@ class UpdateUserTest extends TestCase
                 'vip' => true,
                 'start_date' => '2021-08-01',
                 'end_date' => '2025-12-31',
+                'avatar' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAEsAQMAAADXeXeBAAAABlBMVEX+AAD///+KQee0AAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH5QQbCAoNcoiTQAAAACZJREFUaN7twTEBAAAAwqD1T20JT6AAAAAAAAAAAAAAAAAAAICnATvEAAEnf54JAAAAAElFTkSuQmCC',
             ])
             ->assertOk()
             ->assertStatus(200)
@@ -155,6 +164,12 @@ class UpdateUserTest extends TestCase
         $this->assertEquals(1, $user->vip, 'VIP was not updated');
         $this->assertEquals('2021-08-01', $user->start_date, 'Start date was not updated');
         $this->assertEquals('2025-12-31', $user->end_date, 'End date was not updated');
+
+        // assert against resized hash
+        $this->assertEquals(
+            'db2e13ba04318c99058ca429d67777322f48566b',
+            sha1(Storage::disk('public')->get(app('users_upload_path').$user->avatar))
+        );
 
         // `groups` can be an id or array or ids
         $this->patch(route('api.users.update', $user), ['groups' => [$groupA->id, $groupB->id]]);

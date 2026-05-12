@@ -9,7 +9,7 @@ return [
     'edit' => 'Editar acessório',
     'eula_text' => 'EULA da Categoria',
     'eula_text_help' => 'Este campo lhe permite personalizar seus EULAs para tipos específicos de ativos. Se você apenas tem um EULA para todos os seus ativos, você pode selecionar a caixa abaixo para usar o padrão primário.',
-    'require_acceptance' => 'Requer que usuários confirmem a aceitação de ativos nesta categoria.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nenhum EULA padrão primário foi encontrado. Adicione um nas Configurações.',
     'total' => 'Total',
     'remaining' => 'Disponível',

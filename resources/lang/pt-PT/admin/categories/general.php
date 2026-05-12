@@ -17,6 +17,7 @@ return [
     'name' => 'Nome da Categoria',
     'require_acceptance' => 'Solicitar aos utilizadores que confirmem a aceitação de artigos nesta categoria.',
     'required_acceptance' => 'Será enviado um email ao utilizador com um link para confirmar a aceitação deste item.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Será enviada uma cópia dos EULA a este utilizador',
     'no_default_eula' => 'Não foi encontrado o EULA padrão. Defina um nas Configurações.',
     'update' => 'Actualizar Categoria',

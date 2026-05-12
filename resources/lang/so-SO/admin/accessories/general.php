@@ -9,7 +9,7 @@ return [
     'edit' => 'Wax ka beddel Agabka',
     'eula_text' => 'Qaybta EULA',
     'eula_text_help' => 'Goobtani waxay kuu ogolaanaysaa inaad u habayso EULA-gaaga noocyo gaar ah oo hanti ah. Haddii aad haysato hal EULA oo keliya dhammaan hantidaada, waxaad calamdi kartaa sanduuqa hoose si aad u isticmaasho asalka aasaasiga ah.',
-    'require_acceptance' => 'U baahan isticmaalayaashu inay xaqiijiyaan aqbalaadda hantida qaybtan.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ma jiro hannaanka EULA ee aasaasiga ah oo la helay. Mid ku dar Settings.',
     'total' => 'Wadarta',
     'remaining' => 'Ka faaideyso',

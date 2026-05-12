@@ -716,6 +716,10 @@ class BulkAssetsController extends Controller
                         $asset->status_id = $request->input('status_id');
                     }
 
+                    if ($request->boolean('set_not_requestable')) {
+                        $asset->requestable = false;
+                    }
+
                     $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);
 
                     // TODO - I think this logic is duplicated in the checkOut method?

@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use App\Enums\ActionType;
 use App\Models\License;
 use App\Models\User;
+use Carbon\Carbon;
 use Tests\TestCase;
 
 class LicenseTest extends TestCase
@@ -99,5 +100,41 @@ class LicenseTest extends TestCase
 
         $license->remaining = 99;
         $this->assertEquals(100.0, $license->percentRemaining());
+    }
+
+    public function test_depreciation_progress_percent_is_available_for_license(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 1, 1, 0, 0, 0));
+
+        try {
+            $license = new class extends License
+            {
+                public function depreciated_date()
+                {
+                    return date_create('2027-01-01');
+                }
+            };
+
+            $license->purchase_date = '2025-01-01';
+
+            $this->assertSame(50.0, $license->depreciationProgressPercent());
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_depreciation_progress_percent_returns_zero_when_dates_are_missing(): void
+    {
+        $license = new class extends License
+        {
+            public function depreciated_date()
+            {
+                return null;
+            }
+        };
+
+        $license->purchase_date = null;
+
+        $this->assertSame(0.0, $license->depreciationProgressPercent());
     }
 }

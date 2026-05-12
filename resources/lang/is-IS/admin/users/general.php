@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Leyfðar skráar týpur eru png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, and rar.',
     'history_user' => 'Saga :name',
     'info' => 'Upplýsingar',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Click here to restore them.',
     'last_login' => 'Siðasta innskráning',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

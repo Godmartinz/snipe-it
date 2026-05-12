@@ -16,6 +16,7 @@ use App\Notifications\CheckinAssetNotification;
 use App\Notifications\CheckinComponentNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -143,6 +144,28 @@ class SlackNotificationsUponCheckinTest extends TestCase
         );
 
         $this->assertSlackNotificationSent(CheckinAssetNotification::class);
+    }
+
+    public function test_asset_checkin_slack_notification_uses_updated_asset_location()
+    {
+        $this->settings->enableSlackWebhook();
+
+        $previousLocation = Location::factory()->create(['name' => 'Region B']);
+        $newLocation = Location::factory()->create(['name' => 'Office A']);
+        $target = User::factory()->create(['location_id' => $previousLocation->id]);
+        $asset = Asset::factory()->create(['location_id' => $previousLocation->id]);
+
+        // Simulate post-checkin state while keeping a stale in-memory relation loaded.
+        $asset->location_id = $newLocation->id;
+        $asset->save();
+
+        $this->fireCheckInEvent($asset, $target);
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            CheckinAssetNotification::class,
+            fn (CheckinAssetNotification $notification): bool => $notification->item->location?->is($newLocation)
+        );
     }
 
     #[DataProvider('licenseCheckInTargets')]

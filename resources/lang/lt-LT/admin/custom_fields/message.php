@@ -9,19 +9,19 @@ return [
 
         'create' => [
             'error' => 'Laukas nebuvo sukurtas, bandykite dar kartą.',
-            'success' => 'Laukas sukurtas sėkmingai.',
+            'success' => 'Laukas sėkmingai sukurtas.',
             'assoc_success' => 'Laukas sėkmingai įtrauktas į laukų rinkinį.',
         ],
 
         'update' => [
             'error' => 'Laukas nebuvo atnaujintas, bandykite dar kartą',
-            'success' => 'Laukas atnaujintas sėkmingai.',
+            'success' => 'Laukas sėkmingai atnaujintas.',
         ],
 
         'delete' => [
             'confirm' => 'Ar tikrai norite panaikinti šį lauką?',
             'error' => 'Bandant panaikinti lauką įvyko klaida. Bandykite dar kartą.',
-            'success' => 'Laukas panaikintas sėkmingai.',
+            'success' => 'Laukas sėkmingai panaikintas.',
             'in_use' => 'Laukas yra naudojamas.',
         ],
 
@@ -33,18 +33,18 @@ return [
 
         'create' => [
             'error' => 'Laukas nebuvo sukurtas, bandykite dar kartą.',
-            'success' => 'Laukų rinkinys sukurtas sėkmingai.',
+            'success' => 'Laukų rinkinys sėkmingai sukurtas.',
         ],
 
         'update' => [
             'error' => 'Laukų rinkinys nebuvo atnaujintas, bandykite dar kartą',
-            'success' => 'Laukų rinkinys atnaujintas sėkmingai.',
+            'success' => 'Laukų rinkinys sėkmingai atnaujintas.',
         ],
 
         'delete' => [
             'confirm' => 'Ar tikrai norite panaikinti šį laukų rinkinį?',
             'error' => 'Bandant panaikinti laukų rinkinį įvyko klaida. Bandykite dar kartą.',
-            'success' => 'Laukų rinkinys panaikintas sėkmingai.',
+            'success' => 'Laukų rinkinys sėkmingai panaikintas.',
             'in_use' => 'Laukų rinkinys yra naudojamas.',
         ],
 

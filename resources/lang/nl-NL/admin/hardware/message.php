@@ -99,6 +99,9 @@ return [
         'success' => 'Asset is met succes ingecheckt.',
         'user_does_not_exist' => 'De gebruiker is ongeldig. Probeer het opnieuw.',
         'already_checked_in' => 'Dat asset is al ingecheckt.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

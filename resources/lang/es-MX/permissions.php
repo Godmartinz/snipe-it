@@ -20,17 +20,17 @@ return [
         'note' => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
+        'name' => 'Acceso de administrador',
         'note' => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
+        'name' => 'Importar CSV',
         'note' => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
     ],
 
     'reports' => [
-        'name' => 'Reports Access',
+        'name' => 'Acceso a Informes',
         'note' => 'Determines whether the user has access to the Reports section of the application.',
     ],
 
@@ -76,7 +76,7 @@ return [
     ],
 
     'assetsviewencrypted-custom-fields' => [
-        'name' => 'View Encrypted Custom Fields',
+        'name' => 'Ver Campos Personalizados Encriptados',
         'note' => 'Allows the user to view and modify encrypted custom fields on assets.',
     ],
 
@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Administrar archivos de accesorios',
-        'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a accesorios.',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Gestionar Archivos de Activos',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Administrar archivos de usuario',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Gestionar Archivos de Modelos',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Gestionar Ficheros del Departamento',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Gestionar Ficheros del Proveedor',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Gestionar Archivos de Ubicaciones',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Gestionar Archivos de Empresa',
+        'note' => 'Permite al usuario subir, descargar y eliminar archivos asociados con empresas. (Esto sólo tiene sentido con privilegios de visualización o superiores)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Administrar archivos de Consumibles.',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => 'Consumibles',
         'note' => 'Otorga acceso a la sección Consumibles de la aplicación.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Entregar Consumibles',
         'note' => 'Asignar consumibles en inventario al entregarlos.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Administrar archivos de Consumibles.',
-        'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a consumibles.',
-    ],
+
     'licenses' => [
         'name' => 'Licencias',
         'note' => 'Otorga acceso a la sección Licencias de la aplicación.',
@@ -161,6 +199,11 @@ return [
         'name' => 'Administrar archivos de Licencias',
         'note' => 'Permite al usuario subir, descargar, y eliminar archivos asociados a licencias.',
     ],
+    'componentsfiles' => [
+        'name' => '',
+        'note' => 'Allows the user to upload, download, and delete files associated with components.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Administrar claves de licencia',
         'note' => 'Permite al usuario ver las claves de producto asociadas a licencias.',
@@ -173,18 +216,15 @@ return [
         'name' => 'Ver Componentes',
     ],
     'componentscreate' => [
-        'name' => 'Create New Components',
+        'name' => 'Crear nuevos componentes',
     ],
     'componentsedit' => [
-        'name' => 'Edit Components',
+        'name' => 'Editar Componentes',
     ],
     'componentsdelete' => [
-        'name' => 'Delete Components',
+        'name' => 'Eliminar Componentes',
     ],
-    'componentsfiles' => [
-        'name' => '',
-        'note' => 'Allows the user to upload, download, and delete files associated with components.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Check Out Components',
         'note' => 'Assign components in inventory by checking them out.',
@@ -198,16 +238,16 @@ return [
         'note' => 'Grants access to the Predefined Kits section of the application.',
     ],
     'kitsview' => [
-        'name' => 'View Predefined Kits',
+        'name' => 'Ver Kits Predefinidos',
     ],
     'kitscreate' => [
-        'name' => 'Create New Predefined Kits',
+        'name' => 'Crear Nuevos Kit Predefinidos',
     ],
     'kitsedit' => [
-        'name' => 'Edit Predefined Kits',
+        'name' => 'Editar Kits Predefinidos',
     ],
     'kitsdelete' => [
-        'name' => 'Delete Predefined Kits',
+        'name' => 'Eliminar Kits Predefinidos',
     ],
     'users' => [
         'name' => 'Usuarios',
@@ -217,17 +257,17 @@ return [
         'name' => 'Ver usuarios',
     ],
     'userscreate' => [
-        'name' => 'Create New Users',
+        'name' => 'Crear Nuevos Usuarios',
     ],
     'usersedit' => [
-        'name' => 'Edit Users',
+        'name' => 'Editar Usuarios',
     ],
     'usersdelete' => [
-        'name' => 'Delete Users',
+        'name' => 'Eliminar Usuarios',
     ],
     'models' => [
-        'name' => 'Models',
-        'note' => 'Grants access to the Models section of the application.',
+        'name' => 'Modelos',
+        'note' => 'Dar acceso a la sección de Modelos de la aplicación.',
     ],
     'modelsview' => [
         'name' => 'Ver modelos',
@@ -247,48 +287,48 @@ return [
         'note' => 'Grants access to the Categories section of the application.',
     ],
     'categoriesview' => [
-        'name' => 'View Categories',
+        'name' => 'Ver categorias',
     ],
     'categoriescreate' => [
-        'name' => 'Create New Categories',
+        'name' => 'Crer Nuevas Categorias',
     ],
     'categoriesedit' => [
-        'name' => 'Edit Categories',
+        'name' => 'Editar Categorias',
     ],
     'categoriesdelete' => [
-        'name' => 'Delete Categories',
+        'name' => 'Eliminar Categorias',
     ],
     'departments' => [
         'name' => 'Departamentos',
-        'note' => 'Grants access to the Departments section of the application.',
+        'note' => 'Dar acceso a la sección de Departamentos de la aplicación.',
     ],
     'departmentsview' => [
-        'name' => 'View Departments',
+        'name' => 'Ver Departamentos',
     ],
     'departmentscreate' => [
         'name' => 'Create New Departments',
     ],
     'departmentsedit' => [
-        'name' => 'Edit Departments',
+        'name' => 'Editar Departamentos',
     ],
     'departmentsdelete' => [
-        'name' => 'Delete Departments',
+        'name' => 'Eliminar Departamentos',
     ],
     'locations' => [
         'name' => 'Ubicaciones',
         'note' => 'Grants access to the Locations section of the application.',
     ],
     'locationsview' => [
-        'name' => 'View Locations',
+        'name' => 'Ver Ubicaciones',
     ],
     'locationscreate' => [
-        'name' => 'Create New Locations',
+        'name' => 'Crear Nuevas Ubicaciones',
     ],
     'locationsedit' => [
-        'name' => 'Edit Locations',
+        'name' => 'Editar Ubicaciones',
     ],
     'locationsdelete' => [
-        'name' => 'Delete Locations',
+        'name' => 'Eliminar Ubicaciones',
     ],
     'status-labels' => [
         'name' => 'Etiquetas de estado',
@@ -311,79 +351,79 @@ return [
         'note' => 'Grants access to the Custom Fields section of the application used by Assets.',
     ],
     'customfieldsview' => [
-        'name' => 'View Custom Fields',
+        'name' => 'Ver Campos Personalizados',
     ],
     'customfieldscreate' => [
-        'name' => 'Create New Custom Fields',
+        'name' => 'Crear Nuevos Campos Personalizados',
     ],
     'customfieldsedit' => [
-        'name' => 'Edit Custom Fields',
+        'name' => 'Editar Campos Personalizados',
     ],
     'customfieldsdelete' => [
-        'name' => 'Delete Custom Fields',
+        'name' => 'Eliminar Campos Personalizados',
     ],
     'suppliers' => [
         'name' => 'Proveedores',
-        'note' => 'Grants access to the Suppliers section of the application.',
+        'note' => 'Dar acceso a la sección de Proveedores  de la aplicación. ',
     ],
     'suppliersview' => [
-        'name' => 'View Suppliers',
+        'name' => 'Ver proveedor',
     ],
     'supplierscreate' => [
-        'name' => 'Create New Suppliers',
+        'name' => 'Crear nuevos proveedores',
     ],
     'suppliersedit' => [
-        'name' => 'Edit Suppliers',
+        'name' => 'Editar Proveedores',
     ],
     'suppliersdelete' => [
-        'name' => 'Delete Suppliers',
+        'name' => 'Eliminar Proveedores',
     ],
     'manufacturers' => [
         'name' => 'Fabricantes',
         'note' => 'Grants access to the Manufacturers section of the application.',
     ],
     'manufacturersview' => [
-        'name' => 'View Manufacturers',
+        'name' => 'Ver Fabricantes',
     ],
     'manufacturerscreate' => [
-        'name' => 'Create New Manufacturers',
+        'name' => 'Crear Nuevos Fabricantes',
     ],
     'manufacturersedit' => [
-        'name' => 'Edit Manufacturers',
+        'name' => 'Editar Fabricantes',
     ],
     'manufacturersdelete' => [
-        'name' => 'Delete Manufacturers',
+        'name' => 'Eliminar Fabricantes',
     ],
     'companies' => [
         'name' => 'Compañías',
         'note' => 'Grants access to the Companies section of the application.',
     ],
     'companiesview' => [
-        'name' => 'View Companies',
+        'name' => 'Ver empresas',
     ],
     'companiescreate' => [
-        'name' => 'Create New Companies',
+        'name' => 'Crear Nuevas Empresas',
     ],
     'companiesedit' => [
-        'name' => 'Edit Companies',
+        'name' => 'Editar Empresas',
     ],
     'companiesdelete' => [
-        'name' => 'Delete Companies',
+        'name' => 'Eliminar Empresas',
     ],
     'user-self-accounts' => [
-        'name' => 'User Self Accounts',
+        'name' => 'Cuentas propias del usuario',
         'note' => 'Grants non-admin users the ability to manage certain aspects of their own user accounts.',
     ],
     'selftwo-factor' => [
-        'name' => 'Manage Two-Factor Authentication',
-        'note' => 'Allows users to enable, disable, and manage two-factor authentication for their own accounts.',
+        'name' => 'Administrar Autenticación de dos Factores',
+        'note' => 'Permite a los usuarios habilitar, desactivar y administrar la autenticación de dos factores para sus propias cuentas.',
     ],
     'selfapi' => [
-        'name' => 'Manage API Tokens',
+        'name' => 'Administrar las claves del API',
         'note' => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
     ],
     'selfedit-location' => [
-        'name' => 'Edit Location',
+        'name' => 'Editar Ubicación',
         'note' => 'Allows users to edit the location associated with their own user account.',
     ],
     'selfcheckout-assets' => [
@@ -391,7 +431,7 @@ return [
         'note' => 'Allows users to check out assets to themselves without admin intervention.',
     ],
     'selfview-purchase-cost' => [
-        'name' => 'View Purchase Cost',
+        'name' => 'Ver Coste de Compra',
         'note' => 'Allows users to view the purchase cost of items in their account view.',
     ],
 
@@ -412,12 +452,12 @@ return [
         'name' => 'Create Depreciation Records',
     ],
 
-    'grant_all' => 'Grant all permissions for :area',
+    'grant_all' => 'Permitir todos los permisos para :area',
     'deny_all' => 'Deny all permissions for :area',
-    'inherit_all' => 'Inherit all permissions for :area from permission groups',
-    'grant' => 'Grant Permission for :area',
-    'deny' => 'Deny Permission for :area',
-    'inherit' => 'Inherit Permission for :area from permission groups',
+    'inherit_all' => 'Heredar todos los permisos del :area de grupos de permisos',
+    'grant' => 'Otorgar permiso para :area',
+    'deny' => 'Denegar permiso para :area',
+    'inherit' => 'Heredar permiso para :area de los grupos de permisos',
     'use_groups' => 'We strongly suggest using Permission Groups instead of assigning individual permissions for easier management.',
 
 ];

@@ -66,7 +66,8 @@ class AssetsController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('index', Asset::class);
-        $company = Company::find($request->input('company_id'));
+        $companyId = $request->input('company_id');
+        $company = is_scalar($companyId) ? Company::find($companyId) : null;
 
         return view('hardware/index')->with('company', $company);
     }

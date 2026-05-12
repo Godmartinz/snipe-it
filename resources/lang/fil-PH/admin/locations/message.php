@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Ang lokasyong ito ay kasalukuyang pinagmumulan sa hindi bumaba sa lokasyon isang bata at hindi maaaring mai-delete. Mangyaring i-update ang iyong mga lokasyon upang hindi na magreperens sa lokasyong ito at paki-subok muli. ',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Current Location',
-    'open_map' => 'Buksan sa :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

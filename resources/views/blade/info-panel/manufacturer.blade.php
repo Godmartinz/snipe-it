@@ -35,10 +35,10 @@
                 @endif
 
 
-                    @if(($asset) && ($manufacturer->warranty_lookup_url))
+                    @if(($asset) && ($asset->manufacturer) && ($asset->manufacturer->warranty_lookup_url))
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                    {{ $asset->present()->dynamicUrl($asset->manufacturer->warranty_lookup_url) }}
+                        {{ $asset->present()->dynamicUrl($asset->manufacturer->warranty_lookup_url) }}
                     </x-info-element.url>
                     <br>
                 @endif
@@ -46,7 +46,7 @@
                 @if($manufacturer->url)
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                    {{ $manufacturer->url }}
+                        {{ $manufacturer->url }}
                     </x-info-element.url>
                     <br>
                 @endif
@@ -54,8 +54,8 @@
                 @if($manufacturer->support_url)
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                    {{ $asset->present()->dynamicUrl($asset->manufacturer->support_url) }}
-                </x-info-element.url>
+                        {{ $manufacturer->support_url }}
+                    </x-info-element.url>
                     <br>
                 @endif
 

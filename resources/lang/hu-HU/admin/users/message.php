@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ezt a felhasználót törölték. Ezt a felhasználót vissza kell állítania, hogy szerkeszteni tudja őket, vagy hozzárendelhessen új eszközökhöz.',
     'ldap_not_configured' => 'Az LDAP integráció nem lett konfigurálva ehhez a telepítéshez.',
     'password_resets_sent' => 'A kiválasztott felhasználók számára, akik aktívak és van nekik érvényes email cím, elküldésre került egy jelszó visszaállítási link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A jelszó visszaállítási link elküldésre került a :email címre!',
     'user_has_no_email' => 'Ez a felhasználó nem rendelkezik e-mail címmel a profiljában.',
     'log_record_not_found' => 'Nem található illeszkedő naplóbejegyzés ehhez a felhasználóhoz.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'A felhasználó sikeresen felfüggesztésre került.',
         'restored' => 'A felhasználó sikeresen visszaállt.',
         'import' => 'A felhasználók sikeresen importáltak.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Ez a felhasználó még egy másik felhasználó menedzsere. Kérjük, előbb állítson be másik menedzsert számára.|Ez a felhasználó még :count felhasználó menedzsere. Kérjük, előbb állítson be másik menedzsert számukra.',
         'unsuspend' => 'A felhasználó felfüggesztette a problémát. Kérlek próbáld újra.',
         'import' => 'Hiba történt a felhasználók importálása során. Kérlek próbáld újra.',
-        'asset_already_accepted' => 'Ezt az eszközt már elfogadták.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'El kell fogadnia vagy el kell utasítania ezt az eszközt.',
         'cannot_delete_yourself' => 'Nagyon rosszul éreznénk magunkat, ha törölné önmagát. Kérjük, gondolja át még egyszer.',
         'incorrect_user_accepted' => 'Az általad megpróbált eszköz nem lett kiegyenlítve.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nem sikerült bejegyzéseket szerezni az LDAP kiszolgálóról. Ellenőrizze az LDAP kiszolgáló konfigurációját az LDAP konfigurációs fájlban. <br>Az LDAP kiszolgáló hibája:',
         'password_ldap' => 'A fiókhoz tartozó jelszót az LDAP / Active Directory kezeli. Kérjük, lépjen kapcsolatba informatikai részlegével a jelszó megváltoztatásához.',
         'multi_company_items_assigned' => 'Ehhez a felhasználóhoz olyan tételek vannak hozzárendelve, amelyek egy másik céghez tartoznak. Kérjük, előbb végezze el azok visszavételét, vagy módosítsa az cégüket.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

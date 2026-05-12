@@ -17,6 +17,7 @@ return [
     'name' => 'カテゴリー名',
     'require_acceptance' => 'このカテゴリの資産を承認するための利用者が必要です。',
     'required_acceptance' => 'このアイテムを承認すると、この利用者にメールが送信されます。',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'この利用者はEULAのコピーをメールで受信します。',
     'no_default_eula' => 'EULAの初期値が見つかりませんでした。最低1つは設定して下さい。',
     'update' => 'カテゴリーの更新',

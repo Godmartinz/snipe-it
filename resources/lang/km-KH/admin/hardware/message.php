@@ -99,6 +99,9 @@ return [
         'success' => 'ទ្រព្យសកម្មបាន checked in ជោគជ័យ។',
         'user_does_not_exist' => 'អ្នកប្រើប្រាស់នោះមិនត្រឹមត្រូវទេ។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'already_checked_in' => 'ទ្រព្យសកម្មនោះត្រូវ checked in រួចហើយ។',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

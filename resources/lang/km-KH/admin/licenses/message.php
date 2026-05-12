@@ -37,6 +37,9 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបអាជ្ញាប័ណ្ណនេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបអាជ្ញាប័ណ្ណ។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'អាជ្ញាប័ណ្ណត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

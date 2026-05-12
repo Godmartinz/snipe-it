@@ -99,6 +99,9 @@ return [
         'success' => 'Aktīvs ir pārbaudīts veiksmīgi.',
         'user_does_not_exist' => 'Šis lietotājs ir nederīgs. Lūdzu mēģiniet vēlreiz.',
         'already_checked_in' => 'Šis aktīvs jau ir reģistrēts.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

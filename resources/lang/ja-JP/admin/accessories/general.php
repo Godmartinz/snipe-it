@@ -9,7 +9,7 @@ return [
     'edit' => '付属品の編集',
     'eula_text' => 'EULAカテゴリー',
     'eula_text_help' => 'このフィールドは特殊なタイプの資産のためにEULAをカスタマイズすることが許可されています。全ての資産に一つだけEULAを適用する場合、以下の初期値を利用するにチェックすることも可能です。',
-    'require_acceptance' => 'このカテゴリの資産を承認するための利用者が必要です。',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'EULAの初期値が見つかりませんでした。最低1つは設定して下さい。',
     'total' => '合計',
     'remaining' => '利用可能',

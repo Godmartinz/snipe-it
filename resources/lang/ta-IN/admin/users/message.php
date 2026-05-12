@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'இந்த பயனர் நீக்கப்பட்டது. நீங்கள் அவற்றை திருத்தவோ அல்லது புதிய சொத்துகளை ஒதுக்கவோ இந்த பயனரை மீட்டெடுக்க வேண்டும்.',
     'ldap_not_configured' => 'இந்த நிறுவலுக்கு LDAP ஒருங்கிணைப்பு கட்டமைக்கப்படவில்லை.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'பயனர் வெற்றிகரமாக தடுக்கப்படவில்லை.',
         'restored' => 'பயனர் வெற்றிகரமாக மீட்டமைக்கப்பட்டார்.',
         'import' => 'பயனர்கள் வெற்றிகரமாக இறக்குமதி செய்தனர்.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'பயனரை unsuspending ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'import' => 'பயனர்களை இறக்குமதி செய்வதில் சிக்கல் ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
-        'asset_already_accepted' => 'இந்த சொத்து ஏற்கனவே ஏற்கப்பட்டுள்ளது.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'நீங்கள் இந்த சொத்தை ஏற்கவோ அல்லது குறைக்கவோ கூடாது.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'நீங்கள் ஏற்றுக்கொள்ள முயற்சித்த சொத்து உங்களிடம் சோதிக்கப்படவில்லை.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'LDAP சேவையகத்திலிருந்து உள்ளீடுகளை பெற முடியவில்லை. LDAP கட்டமைப்பு கோப்பில் உங்கள் LDAP சர்வர் கட்டமைப்பை சரிபார்க்கவும். <br> LDAP சேவையகத்திலிருந்து பிழை:',
         'password_ldap' => 'இந்த கணக்கிற்கான கடவுச்சொல் LDAP / Active Directory மூலம் நிர்வகிக்கப்படுகிறது. உங்கள் கடவுச்சொல்லை மாற்ற உங்கள் IT பிரிவை தொடர்பு கொள்ளவும்.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

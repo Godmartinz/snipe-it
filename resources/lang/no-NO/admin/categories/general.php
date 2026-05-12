@@ -17,6 +17,7 @@ return [
     'name' => 'Kategorinavn',
     'require_acceptance' => 'Krev at brukere bekrefter aksept av eiendeler i denne kategorien.',
     'required_acceptance' => 'Denne brukeren vil få e-post med en lenke for å bekrefte aksept av enheten.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Denne brukeren vil få en kopi av EULA på e-post',
     'no_default_eula' => 'Ingen standard EULA funnet. Legg til en i Innstillinger.',
     'update' => 'Oppdatere kategori',

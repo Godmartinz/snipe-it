@@ -17,6 +17,7 @@ return [
     'name' => 'Ingoa Kāwai',
     'require_acceptance' => 'Me tono nga kaiwhakamahi ki te whakauru i nga hua o tenei waahanga.',
     'required_acceptance' => 'Ka tukuna tenei kaiwhakamahi ki te hono ki te whakauru i tenei waahanga.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Ka tukuna tenei kaiwhakamahi i te kape o te EULA',
     'no_default_eula' => 'Karekau he taunga tuatahi taunoa EULA. Tāpirihia tetahi i te Tautuhinga.',
     'update' => 'Whakahōuhia te Kāwai',

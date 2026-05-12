@@ -4,12 +4,12 @@ namespace Tests\Feature\Reporting;
 
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\CustomField;
 use App\Models\ReportTemplate;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Testing\TestResponse;
+use Illuminate\Support\Facades\Crypt;
 use League\Csv\Reader;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
@@ -17,37 +17,6 @@ use Tests\TestCase;
 #[Group('custom-reporting')]
 class CustomReportTest extends TestCase implements TestsPermissionsRequirement
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        TestResponse::macro(
-            'assertSeeTextInStreamedResponse',
-            function (string $needle) {
-                Assert::assertTrue(
-                    collect(Reader::createFromString($this->streamedContent())->getRecords())
-                        ->pluck(0)
-                        ->contains($needle)
-                );
-
-                return $this;
-            }
-        );
-
-        TestResponse::macro(
-            'assertDontSeeTextInStreamedResponse',
-            function (string $needle) {
-                Assert::assertFalse(
-                    collect(Reader::createFromString($this->streamedContent())->getRecords())
-                        ->pluck(0)
-                        ->contains($needle)
-                );
-
-                return $this;
-            }
-        );
-    }
-
     public function test_requires_permission()
     {
         $this->actingAs(User::factory()->create())
@@ -119,30 +88,26 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
 
         $this->actingAs($superUser)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
-            ->assertSeeTextInStreamedResponse('Asset A')
-            ->assertSeeTextInStreamedResponse('Asset B');
+            ->assertSeeTextInStreamedResponse(['Asset A', 'Asset B']);
 
         $this->actingAs($userInCompanyA)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
-            ->assertSeeTextInStreamedResponse('Asset A')
-            ->assertSeeTextInStreamedResponse('Asset B');
+            ->assertSeeTextInStreamedResponse(['Asset A', 'Asset B']);
 
         $this->actingAs($userInCompanyB)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
-            ->assertSeeTextInStreamedResponse('Asset A')
-            ->assertSeeTextInStreamedResponse('Asset B');
+            ->assertSeeTextInStreamedResponse(['Asset A', 'Asset B']);
 
         $this->settings->enableMultipleFullCompanySupport();
 
         $this->actingAs($superUser)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
-            ->assertSeeTextInStreamedResponse('Asset A')
-            ->assertSeeTextInStreamedResponse('Asset B');
+            ->assertSeeTextInStreamedResponse(['Asset A', 'Asset B']);
 
         $this->actingAs($userInCompanyA)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
             ->assertSeeTextInStreamedResponse('Asset A')
-            ->assertDontSeeTextInStreamedResponse('Asset B');
+            ->assertDontSeeTextInStreamedResponse(['Asset B']);
 
         $this->actingAs($userInCompanyB)
             ->post('reports/custom', ['asset_name' => '1', 'asset_tag' => '1', 'serial' => '1'])
@@ -173,5 +138,66 @@ class CustomReportTest extends TestCase implements TestsPermissionsRequirement
             ->assertSeeTextInStreamedResponse('Asset C')
             ->assertSeeTextInStreamedResponse('Asset D')
             ->assertDontSeeTextInStreamedResponse('Asset E');
+    }
+
+    public function test_can_limit_custom_report_to_assigned_assets(): void
+    {
+        Asset::factory()->assignedToUser()->create(['name' => 'Assigned Asset']);
+        Asset::factory()->create(['name' => 'Unassigned Asset']);
+
+        $this->actingAs(User::factory()->canViewReports()->create())
+            ->post('reports/custom', [
+                'asset_name' => '1',
+                'assignment_status' => 'assigned',
+            ])
+            ->assertOk()
+            ->assertSeeTextInStreamedResponse('Assigned Asset')
+            ->assertDontSeeTextInStreamedResponse('Unassigned Asset');
+    }
+
+    public function test_can_limit_custom_report_to_unassigned_assets(): void
+    {
+        Asset::factory()->assignedToUser()->create(['name' => 'Assigned Asset']);
+        Asset::factory()->create(['name' => 'Unassigned Asset']);
+
+        $this->actingAs(User::factory()->canViewReports()->create())
+            ->post('reports/custom', [
+                'asset_name' => '1',
+                'assignment_status' => 'unassigned',
+            ])
+            ->assertOk()
+            ->assertDontSeeTextInStreamedResponse('Assigned Asset')
+            ->assertSeeTextInStreamedResponse('Unassigned Asset');
+    }
+
+    public function test_custom_report_decrypts_encrypted_custom_fields_when_user_has_permission(): void
+    {
+        $customField = CustomField::factory()->encrypt()->create();
+        $columnName = $customField->db_column_name();
+
+        $asset = Asset::factory()->create(['name' => 'Encrypted Asset']);
+        $asset->{$columnName} = Crypt::encrypt('super-secret-value');
+        $asset->save();
+
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'reports.view' => '1',
+                'assets.view.encrypted_custom_fields' => '1',
+            ]),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post('reports/custom', [
+                'asset_name' => '1',
+                $columnName => '1',
+            ])
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=utf-8');
+
+        $records = collect(Reader::createFromString($response->streamedContent())->getRecords())
+            ->flatten()
+            ->filter();
+
+        $this->assertTrue($records->contains('super-secret-value'));
     }
 }

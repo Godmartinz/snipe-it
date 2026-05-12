@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Дозволені типи файлів - png, gif, jpg, jpeg, doc, docx, pdf, txt, zip і rar.',
     'history_user' => 'Історія для :name',
     'info' => 'Інфо',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Натисніть тут, щоб відновити їх.',
     'last_login' => 'Останній вхід',
     'ldap_config_text' => 'Вибрана локація буде встановлена для ВСІХ імпортованих користувачів. Це перезапише їхню поточну локацію і є рідкісним сценарієм використання, тому зазвичай найкраще залишити це поле порожнім.',

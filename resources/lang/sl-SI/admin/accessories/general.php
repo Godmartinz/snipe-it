@@ -9,7 +9,7 @@ return [
     'edit' => 'Uredi Dodatek',
     'eula_text' => 'Kategorija EULA',
     'eula_text_help' => 'To polje vam omogoča prilagajanje vaše EULA za določene vrste sredstev. Če imate samo eno EULA za vsa vaša sredstva, lahko potrdite spodnje polje, da uporabite za privzeto.',
-    'require_acceptance' => 'Uporabniki morajo potrditi sprejem sredstev v tej kategoriji.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ni privzete EULA. Dodajte eno v Nastavitvah.',
     'total' => 'Skupaj',
     'remaining' => 'Razpoložljivo',

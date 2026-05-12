@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Scriosadh an t-úsáideoir seo. Beidh ort an t-úsáideoir seo a athchóiriú chun iad a eagrú nó sócmhainní nua a shannadh dóibh.',
     'ldap_not_configured' => 'Níl cumasc LDAP cumraithe don suiteáil seo.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Rinneadh an t-úsáideoir a neamhshlánú go rathúil.',
         'restored' => 'Cuireadh an t-úsáideoir ar ais go rathúil.',
         'import' => 'Allmhairítear úsáideoirí go rathúil.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Bhí ceist ann gan an t-úsáideoir a chaitheamh. Arís, le d\'thoil.',
         'import' => 'Bhí ceist ann a bhí ag iompórtáil úsáideoirí. Arís, le d\'thoil.',
-        'asset_already_accepted' => 'Glactar leis an tsócmhainn seo cheana féin.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Ní mór duit an tsócmhainn seo a ghlacadh nó a laghdú.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Níor seiceáladh an tsócmhainn a d\'iarr tú glacadh leis.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Níorbh fhéidir iontrálacha a fháil ón fhreastalaí LDAP. Seiceáil do chumraíocht an fhreastalaí LDAP sa chomhad cumraíochta LDAP. <br>Error ó Freastalaí LDAP:',
         'password_ldap' => 'Bainistíonn LDAP / Active Directory an focal faire don chuntas seo. Téigh i dteagmháil le do roinn TF chun do phasfhocal a athrú.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

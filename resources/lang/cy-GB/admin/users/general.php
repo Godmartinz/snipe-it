@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Math o ffeiliau a caniateir yw png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, a rar.',
     'history_user' => 'Hanes ar gyfer :name',
     'info' => 'Gwybodaeth',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Cliciwch yma yw adfer.',
     'last_login' => 'Mewngofnodi Diwethaf',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

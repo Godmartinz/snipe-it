@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'ប្រភេទឯកសារដែលបានអនុញ្ញាតគឺ png, gif, jpg, jpeg, doc, docx, pdf, txt, zip និង rar ។',
     'history_user' => 'ប្រវត្តិសម្រាប់៖ ឈ្មោះ',
     'info' => 'ព័ត៌មាន',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'ចុចទីនេះដើម្បីស្ដារពួកវាឡើងវិញ។',
     'last_login' => 'ការចូលចុងក្រោយ',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

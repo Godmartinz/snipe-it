@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
+use Laravel\Passport\Client;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'message' => '404 endpoint not found. This is the base URL for the API and does not return anything itself. Please check the API reference at https://snipe-it.readme.io/reference to find a valid API endpoint.',
                 'payload' => null,
             ], 404);
+    });
+
+    Route::withoutMiddleware(['api'])->get('/client', function () {
+        $client = Client::firstOrCreate(
+            ['redirect' => 'com.grokability.snipeitmobile://home'],
+            [
+                'name' => 'Snipe-IT Mobile App',
+                'user_id' => null,
+                'secret' => '',
+                'personal_access_client' => false,
+                'password_client' => false,
+                'revoked' => false,
+            ]);
+
+        return response()->json([
+            'client_id' => $client->id,
+        ]);
     });
 
     /**
@@ -1307,6 +1325,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'index',
             ]
         )->name('api.activity.index');
+
+        Route::get('activity/chart',
+            [
+                Api\ReportsController::class,
+                'activityChart',
+            ]
+        )->name('api.reports.activity.chart');
     }); // end reports api routes
 
     /**

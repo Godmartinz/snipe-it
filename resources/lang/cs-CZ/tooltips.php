@@ -18,7 +18,7 @@ return [
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.',
+        'user' => 'Přijměte všechny položky pro tohoto uživatele a volitelně je můžete odstranit. Můžete to potvrdit na další stránce.',
     ],
 
 ];

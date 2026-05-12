@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'この設置場所は、少なくとも一つの配下の設置場所があります。この設置場所を参照しないよう更新して下さい。 ',
     'assigned_assets' => '割り当て済みアセット',
     'current_location' => '現在の場所',
-    'open_map' => ':map_provider_icon マップで開く',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

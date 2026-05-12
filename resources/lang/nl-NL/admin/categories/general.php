@@ -17,6 +17,7 @@ return [
     'name' => 'Categorienaam',
     'require_acceptance' => 'Verplicht de gebruikers de overeenkomst te accepteren voor de activa in deze catagorie.',
     'required_acceptance' => 'Deze gebruiker ontvangt een e-mail met een link om de acceptatie van dit item te bevestigen.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Deze gebruiker ontvangt een e-mail met een kopie van de gebruikersovereenkomst',
     'no_default_eula' => 'Standaard gebruikersovereenkomst niet gevonden. Ga naar Instellingen en voeg er één toe.',
     'update' => 'Categorie bijwerken',

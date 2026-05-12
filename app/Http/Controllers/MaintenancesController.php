@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Requests\UploadFileRequest;
 use App\Models\Asset;
 use App\Models\Maintenance;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * This controller handles all actions related to Asset Maintenance for
@@ -72,6 +75,7 @@ class MaintenancesController extends Controller
     public function store(ImageUploadRequest $request): RedirectResponse
     {
         $this->authorize('update', Asset::class);
+        $this->validateUploadedFiles($request);
 
         $assets = Asset::whereIn('id', $request->input('selected_assets'))->get();
 
@@ -102,12 +106,14 @@ class MaintenancesController extends Controller
                 $maintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
             }
 
-            $maintenance = $request->handleImages($maintenance);
+            $request->handleImages($maintenance);
 
             // Was the asset maintenance created?
             if (! $maintenance->save()) {
                 return redirect()->back()->withInput()->withErrors($maintenance->getErrors());
             }
+
+            $this->storeUploadedFiles($request, $maintenance);
         }
 
         return redirect()->route('maintenances.index')
@@ -156,6 +162,7 @@ class MaintenancesController extends Controller
     {
         $this->authorize('update', Asset::class);
         $this->authorize('update', $maintenance->asset);
+        $this->validateUploadedFiles($request);
 
         $maintenance->supplier_id = $request->input('supplier_id');
         $maintenance->is_warranty = $request->input('is_warranty', 0);
@@ -184,14 +191,66 @@ class MaintenancesController extends Controller
             $completionDate = Carbon::parse($maintenance->completion_date);
             $maintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
         }
-        $maintenance = $request->handleImages($maintenance);
+        $request->handleImages($maintenance);
 
         if ($maintenance->save()) {
+            $this->storeUploadedFiles($request, $maintenance);
+
             return redirect()->route('maintenances.index')
                 ->with('success', trans('admin/maintenances/message.edit.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($maintenance->getErrors());
+    }
+
+    /**
+     * Stores any generic file uploads submitted from the maintenance form.
+     */
+    private function storeUploadedFiles(ImageUploadRequest $request, Maintenance $maintenance): void
+    {
+        if (! $request->hasFile('file')) {
+            return;
+        }
+
+        $objectType = 'maintenances';
+        $storagePath = self::$map_storage_path[$objectType];
+
+        if (! Storage::exists($storagePath)) {
+            Storage::makeDirectory($storagePath, 775);
+        }
+
+        $uploadFileRequest = app(UploadFileRequest::class);
+
+        foreach ((array) $request->file('file') as $file) {
+            if (! $file) {
+                continue;
+            }
+
+            $fileName = $uploadFileRequest->handleFile(
+                $storagePath,
+                self::$map_file_prefix[$objectType].'-'.$maintenance->id,
+                $file
+            );
+
+            $maintenance->logUpload($fileName, $request->input('file_notes'));
+        }
+    }
+
+    /**
+     * Validate generic file uploads with the shared UploadFileRequest rules.
+     */
+    private function validateUploadedFiles(ImageUploadRequest $request): void
+    {
+        if (! $request->hasFile('file')) {
+            return;
+        }
+
+        $uploadFileRequest = app(UploadFileRequest::class);
+
+        Validator::make(
+            array_merge($request->all(), ['file' => $request->file('file')]),
+            $uploadFileRequest->rules()
+        )->validate();
     }
 
     /**

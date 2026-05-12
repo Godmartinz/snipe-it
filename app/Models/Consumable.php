@@ -322,7 +322,7 @@ class Consumable extends SnipeModel
      */
     public function requireAcceptance()
     {
-        return $this->category->require_acceptance;
+        return $this->category?->require_acceptance ?? false;
     }
 
     /**

@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Filetype yang dibenarkan adalah png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, dan rar.',
     'history_user' => 'Sejarah untuk :nama',
     'info' => 'Maklumat',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Klik di sini untuk memulihkannya.',
     'last_login' => 'Log masuk terakhir',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

@@ -9,6 +9,7 @@ return [
         'am-ET' => 'Amharic',
         'af-ZA' => 'Afrikánština',
         'ar-SA' => 'Arabština',
+        'hy-AM' => 'Armenian',
         'bg-BG' => 'Bulharština',
         'zh-CN' => 'Zjednodušená čínština',
         'zh-TW' => 'Tradiční čínština',

@@ -9,7 +9,7 @@ return [
     'edit' => 'Golygu Ategolyn',
     'eula_text' => 'Categori CTDT',
     'eula_text_help' => 'Mae\'r blwch yma yn caniatau i chi addasu eich CTDTs ar gyfer mathau penodol o asedau. Os ydych yn defnyddio un CTDT ar gyfer eich asedau yna cewch ticio\'r blwch isod i defnyddio\'r fersiwn diofyn.',
-    'require_acceptance' => 'Gorfodi defnyddwyr i cadarnhau derbyn asedau yn y categori yma.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Wedi methu darganfod CTDT, Ychwanegwch un yn gosodiadau.',
     'total' => 'Cyfanswm',
     'remaining' => 'Yn weddill',

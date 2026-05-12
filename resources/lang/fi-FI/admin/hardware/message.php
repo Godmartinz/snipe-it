@@ -99,6 +99,9 @@ return [
         'success' => 'Laite palautettu onnistuneesti.',
         'user_does_not_exist' => 'Käyttäjä on virheellinen. Yritä uudelleen.',
         'already_checked_in' => 'Tämä laite on jo palautettu.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

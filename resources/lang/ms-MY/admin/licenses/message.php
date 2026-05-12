@@ -37,6 +37,9 @@ return [
         'confirm' => 'Anda pasti and ingin menghapuskan lesen ini?',
         'error' => 'Ada isu semada menghapuskan lesen, sila cuba lagi.',
         'success' => 'Lesen berjaya dihapuskan.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

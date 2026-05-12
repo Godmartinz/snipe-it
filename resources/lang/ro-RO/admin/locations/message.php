@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Această locație este în prezent părinte pentru cel puțin o locație copil și nu poate fi ștearsă. Actualizați locațiile dvs. pentru a nu mai referi această locație și încercați din nou.',
     'assigned_assets' => 'Atribuire Active',
     'current_location' => 'Locația curentă',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

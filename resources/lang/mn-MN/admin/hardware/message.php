@@ -99,6 +99,9 @@ return [
         'success' => 'Хөрөнгө амжилттай шалгагдсан.',
         'user_does_not_exist' => 'Энэ хэрэглэгч буруу байна. Дахин оролдоно уу.',
         'already_checked_in' => 'Энэ аккаунтыг аль хэдийн шалгасан байна.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

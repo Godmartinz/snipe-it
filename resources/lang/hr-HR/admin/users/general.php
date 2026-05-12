@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Dopuštene vrste datoteka su png, gif, jpg, jpeg, doc, docx, pdf, txt, zip i rar.',
     'history_user' => 'Povijest za: ime',
     'info' => 'Informacije',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Kliknite ovdje da biste ih vratili.',
     'last_login' => 'Zadnja prijava',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

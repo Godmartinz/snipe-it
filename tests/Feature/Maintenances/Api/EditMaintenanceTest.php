@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Maintenances\Api;
 
+use App\Models\Actionlog;
+use App\Models\Company;
 use App\Models\Maintenance;
 use App\Models\Supplier;
 use App\Models\User;
@@ -60,5 +62,38 @@ class EditMaintenanceTest extends TestCase
         ]);
 
         $this->assertHasTheseActionLogs($maintenance, ['create', 'update']);
+
+        $updateLog = Actionlog::query()
+            ->where('item_type', Maintenance::class)
+            ->where('item_id', $maintenance->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog);
+        $this->assertNotNull($updateLog->log_meta);
+        $this->assertArrayHasKey('name', json_decode($updateLog->log_meta, true));
+    }
+
+    public function test_user_cannot_edit_maintenance_for_another_company_when_fmcs_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $userInCompanyA = $companyA->users()->save(User::factory()->editAssets()->make());
+        $maintenanceForCompanyB = Maintenance::factory()->create();
+        $maintenanceForCompanyB->asset->update(['company_id' => $companyB->id]);
+
+        $this->actingAsForApi($userInCompanyA)
+            ->putJson(route('api.maintenances.update', $maintenanceForCompanyB), [
+                'name' => 'Should Not Update',
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertDatabaseMissing('maintenances', [
+            'id' => $maintenanceForCompanyB->id,
+            'name' => 'Should Not Update',
+        ]);
     }
 }

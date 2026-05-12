@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'actions' => 'Actions',
+    'actions' => 'Accions',
     'add' => 'Add New',
     'cancel' => 'Cancel·la',
     'checkin_and_delete' => 'Checkin All / Delete User',
@@ -19,9 +19,9 @@ return [
     'send_password_link' => 'Send Password Reset Link',
     'go' => 'Go',
     'bulk_actions' => 'Bulk Actions',
-    'add_maintenance' => 'Add Maintenance',
+    'add_maintenance' => 'Afegeix manteniment',
     'append' => 'Append',
-    'new' => 'New',
+    'new' => 'Nou',
     'show_hide_info' => 'Show/Hide More Information',
     'var' => [
         'clone' => 'Clone :item_type',

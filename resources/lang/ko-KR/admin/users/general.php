@@ -14,6 +14,8 @@ return [
     'filetype_info' => '허용되는 형식들은 png, gif, jpeg, doc, docx, pdf, txt, zip, rar 입니다.',
     'history_user' => '이력 :name',
     'info' => '정보',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => '그것들을 복원하려면 여기를 클릭하세요.',
     'last_login' => '마지막 로그인',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

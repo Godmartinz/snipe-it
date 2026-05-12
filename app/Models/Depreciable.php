@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+
 class Depreciable extends SnipeModel
 {
     /**
@@ -185,6 +187,39 @@ class Depreciable extends SnipeModel
 
         return null;
 
+    }
+
+    /**
+     * Return depreciation progress percentage (0-100), based on elapsed months
+     * since purchase date over the depreciation window.
+     */
+    public function depreciationProgressPercent(): float
+    {
+        if (! $this->purchase_date || ! $this->depreciated_date()) {
+            return 0.0;
+        }
+
+        return $this->calculateProgressPercent(
+            start: Carbon::parse($this->purchase_date),
+            end: Carbon::instance($this->depreciated_date()),
+        );
+    }
+
+    /**
+     * Calculate elapsed/total month percentage and clamp to 0-100.
+     */
+    protected function calculateProgressPercent(Carbon $start, Carbon $end): float
+    {
+        $totalMonths = (float) $start->diffInMonths($end);
+
+        if ($totalMonths <= 0) {
+            return 0.0;
+        }
+
+        $elapsedMonths = (float) $start->diffInMonths(Carbon::now());
+        $rawPercent = ($elapsedMonths / $totalMonths) * 100;
+
+        return (float) min(100, max(0, $rawPercent));
     }
 
     // it's necessary for unit tests

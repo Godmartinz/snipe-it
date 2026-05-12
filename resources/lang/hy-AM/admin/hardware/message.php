@@ -2,110 +2,122 @@
 
 return [
 
-    'undeployable' => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
-    'does_not_exist' => 'Asset does not exist.',
-    'does_not_exist_var' => 'Asset with tag :asset_tag not found.',
-    'no_tag' => 'No asset tag provided.',
-    'does_not_exist_or_not_requestable' => 'That asset does not exist or is not requestable.',
-    'assoc_users' => 'This asset is currently checked out to a user and cannot be deleted. Please check the asset in first, and then try deleting again. ',
-    'warning_audit_date_mismatch' => 'This asset\'s next audit date (:next_audit_date) is before the last audit date (:last_audit_date). Please update the next audit date.',
-    'labels_generated' => 'Labels were successfully generated.',
-    'error_generating_labels' => 'Error while generating labels.',
-    'no_assets_selected' => 'No assets selected.',
+    'undeployable' => 'Հետևյալ ակտիվները հնարավոր չէ տեղակայել և հեռացվել են հանձնումից՝ :asset_tags',
+    'does_not_exist' => 'Ակտիվը գոյություն չունի։',
+    'does_not_exist_var' => ':asset_tag թեգով ակտիվը չի գտնվել։',
+    'no_tag' => 'Ակտիվի թեգ չի տրամադրվել։',
+    'does_not_exist_or_not_requestable' => 'Այդ ակտիվը գոյություն չունի կամ հնարավոր չէ հայցել։',
+    'assoc_users' => 'Այս ակտիվը ներկայումս հանձնված է օգտատիրոջը և հնարավոր չէ ջնջել։ Խնդրում ենք նախ վերադարձնել ակտիվը, ապա կրկին փորձել ջնջել։',
+    'warning_audit_date_mismatch' => 'Այս ակտիվի հաջորդ աուդիտի ամսաթիվը (:next_audit_date) նախորդ աուդիտի ամսաթվից (:last_audit_date) վաղ է։ Խնդրում ենք թարմացնել հաջորդ աուդիտի ամսաթիվը։',
+    'labels_generated' => 'Պիտակները հաջողությամբ ստեղծվել են։',
+    'error_generating_labels' => 'Պիտակների ստեղծման ժամանակ սխալ է տեղի ունեցել։',
+    'no_assets_selected' => '
+Ոչ մի ակտիվ չի ընտրվել։',
 
     'create' => [
-        'error' => 'Asset was not created, please try again. :(',
-        'success' => 'Asset created successfully. :)',
-        'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
-        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
-        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
+        'error' => 'Ակտիվը չի ստեղծվել, խնդրում ենք կրկին փորձել։ :',
+        'success' => 'Ակտիվը հաջողությամբ ստեղծվել է։ :)
+',
+        'success_linked' => ':tag թեգով ակտիվը հաջողությամբ ստեղծվել է։ <strong><a href=":link" style="color: white;">Սեղմեք այստեղ՝ դիտելու համար</a></strong>։
+
+
+',
+        'multi_success_linked' => ':links թեգով ակտիվը հաջողությամբ ստեղծվել է։|:count ակտիվ հաջողությամբ ստեղծվել է։ :links։
+',
+        'partial_failure' => 'Մեկ ակտիվ հնարավոր չեղավ ստեղծել։ Պատճառը՝ :failures|:count ակտիվ հնարավոր չեղավ ստեղծել։ Պատճառները՝ :failures',
         'target_not_found' => [
-            'user' => 'The assigned user could not be found.',
-            'asset' => 'The assigned asset could not be found.',
-            'location' => 'The assigned location could not be found.',
+            'user' => 'Հանձնված օգտատերը չի գտնվել։',
+            'asset' => 'Հանձնված ակտիվը չի գտնվել։',
+            'location' => 'Հանձնված գտնվելու վայրը չի գտնվել։',
         ],
     ],
 
     'update' => [
-        'error' => 'Asset was not updated, please try again',
-        'success' => 'Asset updated successfully.',
-        'encrypted_warning' => 'Asset updated successfully, but encrypted custom fields were not due to permissions',
-        'nothing_updated' => 'No fields were selected, so nothing was updated.',
-        'no_assets_selected' => 'No assets were selected, so nothing was updated.',
-        'assets_do_not_exist_or_are_invalid' => 'Selected assets cannot be updated.',
+        'error' => 'Ակտիվը չի թարմացվել, խնդրում ենք կրկին փորձել։
+',
+        'success' => 'Ակտիվը հաջողությամբ թարմացվել է։',
+        'encrypted_warning' => 'Ակտիվը հաջողությամբ թարմացվել է, սակայն կոդավորված հատուկ դաշտերը չեն թարմացվել թույլտվությունների պատճառով',
+        'nothing_updated' => 'Դաշտեր չեն ընտրվել, ուստի ոչինչ չի թարմացվել։
+',
+        'no_assets_selected' => 'Ակտիվներ չեն ընտրվել, ուստի ոչինչ չի թարմացվել։',
+        'assets_do_not_exist_or_are_invalid' => 'Ընտրված ակտիվները հնարավոր չէ թարմացնել։',
     ],
 
     'restore' => [
-        'error' => 'Asset was not restored, please try again',
-        'success' => 'Asset restored successfully.',
-        'bulk_success' => 'Asset restored successfully.',
-        'nothing_updated' => 'No assets were selected, so nothing was restored.',
+        'error' => 'Ակտիվը չի վերականգնվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Ակտիվը հաջողությամբ վերականգնվել է։',
+        'bulk_success' => 'Ակտիվը հաջողությամբ վերականգնվել է։',
+        'nothing_updated' => 'Ակտիվներ չեն ընտրվել, ուստի ոչինչ չի վերականգնվել։',
     ],
 
     'audit' => [
-        'error' => 'Asset audit unsuccessful: :error ',
-        'success' => 'Asset audit successfully logged.',
+        'error' => 'Ակտիվի աուդիտը ձախողվել է՝ :error',
+        'success' => 'Ակտիվի աուդիտը հաջողությամբ գրանցվել է։',
     ],
 
     'deletefile' => [
-        'error' => 'File not deleted. Please try again.',
-        'success' => 'File successfully deleted.',
+        'error' => 'Ֆայլը չի ջնջվել։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Ֆայլը հաջողությամբ ջնջվել է։',
     ],
 
     'upload' => [
-        'error' => 'File(s) not uploaded. Please try again.',
-        'success' => 'File(s) successfully uploaded.',
-        'nofiles' => 'You did not select any files for upload, or the file you are trying to upload is too large',
-        'invalidfiles' => 'One or more of your files is too large or is a filetype that is not allowed. Allowed filetypes are png, gif, jpg, doc, docx, pdf, and txt.',
+        'error' => 'Ֆայլ(եր)ը չի(են) վերբեռնվել։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Ֆայլ(եր)ը հաջողությամբ վերբեռնվել է(են)։',
+        'nofiles' => 'Դուք չեք ընտրել որևէ ֆայլ վերբեռնելու համար, կամ վերբեռնել փորձող ֆայլը չափազանց մեծ է',
+        'invalidfiles' => 'Ձեր ֆայլերից մեկը կամ մի քանիսը չափազանց մեծ են կամ անթույլատրելի տեսակի են։ Թույլատրելի ֆայլի տեսակներն են՝ png, gif, jpg, doc, docx, pdf և txt։',
     ],
 
     'import' => [
-        'import_button' => 'Process Import',
-        'error' => 'Some items did not import correctly.',
-        'errorDetail' => 'The following Items were not imported because of errors.',
-        'success' => 'Your file has been imported',
-        'file_delete_success' => 'Your file has been been successfully deleted',
-        'file_delete_error' => 'The file was unable to be deleted',
-        'file_missing' => 'The file selected is missing',
-        'file_already_deleted' => 'The file selected was already deleted',
-        'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
-        'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
-        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
+        'import_button' => 'Մշակել ներմուծումը',
+        'error' => 'Որոշ տարրեր ճիշտ չեն ներմուծվել։',
+        'errorDetail' => 'Հետևյալ տարրերը սխալների պատճառով չեն ներմուծվել։
+',
+        'success' => 'Ձեր ֆայլը ներմուծվել է։',
+        'file_delete_success' => 'Ձեր ֆայլը հաջողությամբ ջնջվել է։',
+        'file_delete_error' => 'Ֆայլը հնարավոր չեղավ ջնջել։',
+        'file_missing' => 'Ընտրված ֆայլը բացակայում է',
+        'file_already_deleted' => 'Ընտրված ֆայլն արդեն ջնջվել է',
+        'header_row_has_malformed_characters' => 'Վերնագրի տողի մեկ կամ մի քանի հատկանիշ պարունակում են սխալ UTF-8 նիշեր',
+        'content_row_has_malformed_characters' => 'Բովանդակության առաջին տողի մեկ կամ մի քանի հատկանիշ պարունակում են սխալ UTF-8 նիշեր',
+        'transliterate_failure' => ':encoding-ից UTF-8 տառադարձումը ձախողվել է մուտքագրման անվավեր նիշերի պատճառով',
     ],
 
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this asset?',
-        'error' => 'There was an issue deleting the asset. Please try again.',
-        'assigned_to_error' => '{1}Asset Tag: :asset_tag is currently checked out. Check in this device before deletion.|[2,*]Asset Tags: :asset_tag are currently checked out. Check in these devices before deletion.',
-        'nothing_updated' => 'No assets were selected, so nothing was deleted.',
-        'success' => 'The asset was deleted successfully.',
+        'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս ակտիվը։',
+        'error' => 'Ակտիվի ջնջման ժամանակ խնդիր է առաջացել։ Խնդրում ենք կրկին փորձել։',
+        'assigned_to_error' => '{1}Ակտիվի թեգը՝ :asset_tag, ներկայումս հանձնված է։ Ջնջելուց առաջ վերադարձրեք այս սարքը։|[2,*]Ակտիվի թեգերը՝ :asset_tag, ներկայումս հանձնված են։ Ջնջելուց առաջ վերադարձրեք այս սարքերը։',
+        'nothing_updated' => 'Ակտիվներ չեն ընտրվել, ուստի ոչինչ չի ջնջվել։',
+        'success' => 'Ակտիվը հաջողությամբ ջնջվել է։',
     ],
 
     'checkout' => [
-        'error' => 'Asset was not checked out, please try again',
-        'success' => 'Asset checked out successfully.',
-        'user_does_not_exist' => 'That user is invalid. Please try again.',
-        'not_available' => 'That asset is not available for checkout!',
-        'no_assets_selected' => 'You must select at least one asset from the list',
+        'error' => 'Ակտիվը չի հանձնվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Ակտիվը հաջողությամբ հանձնվել է։',
+        'user_does_not_exist' => 'Այդ օգտատերն անվավեր է։ Խնդրում ենք կրկին փորձել։',
+        'not_available' => 'Այդ ակտիվը հասանելի չէ հանձնելու համար։',
+        'no_assets_selected' => 'Դուք պետք է ցանկից ընտրեք առնվազն մեկ ակտիվ։',
     ],
 
     'multi-checkout' => [
-        'error' => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
-        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
+        'error' => 'Ակտիվը հաջողությամբ հանձնվել է։|Ակտիվները հաջողությամբ հանձնվել են։',
+        'success' => 'Ակտիվը հաջողությամբ հանձնվել է։|Ակտիվները հաջողությամբ հանձնվել են։',
     ],
 
     'checkin' => [
-        'error' => 'Asset was not checked in, please try again',
-        'success' => 'Asset checked in successfully.',
-        'user_does_not_exist' => 'That user is invalid. Please try again.',
-        'already_checked_in' => 'That asset is already checked in.',
+        'error' => 'Ակտիվը չի վերադարձվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Ակտիվը հաջողությամբ վերադարձվել է։',
+        'user_does_not_exist' => 'Այդ օգտատերն անվավեր է։ Խնդրում ենք կրկին փորձել։',
+        'already_checked_in' => 'Այդ ակտիվն արդեն վերադարձվել է։',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 
     'requests' => [
-        'error' => 'Request was not successful, please try again.',
-        'success' => 'Request successfully submitted.',
-        'canceled' => 'Request successfully canceled.',
+        'error' => 'Հարցումը հաջողված չէ, խնդրում ենք կրկին փորձել։',
+        'success' => 'Հարցումը հաջողությամբ ուղարկվել է։',
+        'canceled' => 'Հարցումը հաջողությամբ չեղարկվել է։',
         'cancel' => 'Չեղարկել այս տարրի հարցումը',
     ],
 

@@ -37,6 +37,9 @@ return [
         'confirm' => 'Uqinisekile ukuthi ufisa ukususa le layisensi?',
         'error' => 'Kube nenkinga yokususa ilayisense. Ngicela uzame futhi.',
         'success' => 'Ilayisense isusiwe ngempumelelo.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

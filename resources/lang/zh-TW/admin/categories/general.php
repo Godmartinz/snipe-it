@@ -17,6 +17,7 @@ return [
     'name' => '類別名稱',
     'require_acceptance' => '要求使用者確認接受此類別的資產',
     'required_acceptance' => '使用者會收到包含確認接收連結的郵件',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => '使用者將收到EULA（最終使用者許可協議）的郵件',
     'no_default_eula' => '沒有找到預設EULA（最終使用者許可協議）。請在設定中增加一個。',
     'update' => '更新類別',

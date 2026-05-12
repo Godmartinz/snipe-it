@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'அனுமதிக்கப்பட்ட கோப்புரிமைகள் png, gif, jpg, jpeg, doc, docx, pdf, txt, zip மற்றும் rar ஆகியவை.',
     'history_user' => 'வரலாறு: பெயர்',
     'info' => 'தகவல்',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'அவற்றை மீட்டெடுக்க இங்கு கிளிக் செய்க.',
     'last_login' => 'கடைசி தேதி',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

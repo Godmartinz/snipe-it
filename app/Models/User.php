@@ -182,6 +182,44 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     ];
 
     /**
+     * Virtual column aliases that map a single filter key to a set of real columns
+     * searched via CONCAT (SQL) so that, for example, filtering by "name" searches
+     * across both first_name and last_name together.
+     *
+     * Because "name" is not a real column on the users table we cannot add it to
+     * $searchableAttributes; this map bridges that gap for structured filter queries.
+     *
+     * @var array<string, list<string>>
+     */
+    protected $searchableVirtualColumns = [
+        'name' => ['first_name', 'last_name'],
+    ];
+
+    /**
+     * Maps filter/API keys to the actual Eloquent relation names used in
+     * $searchableRelations.  The User model uses "userloc" as its location
+     * relation name (to avoid a collision with the framework's own "location"
+     * magic), but every consumer — UI and API alike — sends the key "location".
+     *
+     * @var array<string, string>
+     */
+    protected $searchableRelationAliases = [
+        'location' => 'userloc',
+    ];
+
+    /**
+     * Narrow structured-filter relation columns for specific UI/API filter keys.
+     *
+     * The advanced-search "location" field represents the location name, so
+     * structured filters should target only userloc.name (not address/city/etc).
+     *
+     * @var array<string, list<string>>
+     */
+    protected $searchableRelationFilterColumns = [
+        'location' => ['name'],
+    ];
+
+    /**
      * This sets the name property on the user. It's not a real field in the database
      * (since we use first_name and last_name), but the Laravel mailable method
      * uses this to determine the name of the user to send emails to.
@@ -302,6 +340,120 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
 
         return false;
+    }
+
+    /**
+     * Build a list of effective user permissions grouped by permission section.
+     *
+     * Includes explicit denials from user or group permissions so the UI can
+     * show both allowed and denied entries.
+     *
+     * This is kind of duplicative from the other permission-checking methods, but it allows us to build a
+     * list of permissions for display purposes without having to do a lot of super-confusing and
+     * redundant checks in the UI layer.
+     *
+     * This will likely go away once we refactor the permissions to be in a database table instead of the
+     * stupiud config file.
+     */
+    public function getEffectivePermissionsBySection(): array
+    {
+        $displayablePermissions = collect(config('permissions'))
+            ->map(static fn (array $permissions): array => array_values(array_filter($permissions, static fn (array $permission): bool => ($permission['display'] ?? false) === true)))
+            ->all();
+
+        $configuredPermissions = collect($displayablePermissions)
+            ->flatMap(static function (array $permissions, string $section) {
+                return collect($permissions)->map(static function (array $permission) use ($section): array {
+                    return [
+                        'section' => $section,
+                        'permission' => $permission['permission'],
+                    ];
+                });
+            })
+            ->unique('permission')
+            ->values();
+
+        $directPermissions = $this->decodePermissions();
+        $directPermissions = is_array($directPermissions) ? $directPermissions : [];
+
+        $groupGrantsByPermission = [];
+        $groupDenialsByPermission = [];
+        foreach ($this->groups as $group) {
+            $groupPermissions = $group->decodePermissions();
+            if (! is_array($groupPermissions)) {
+                continue;
+            }
+
+            foreach ($groupPermissions as $permissionKey => $permissionValue) {
+                if ((int) $permissionValue === 1) {
+                    $groupGrantsByPermission[$permissionKey][] = $group->name;
+                } elseif ((int) $permissionValue === -1) {
+                    $groupDenialsByPermission[$permissionKey][] = $group->name;
+                }
+            }
+        }
+
+        $effectiveBySection = [];
+        foreach ($configuredPermissions as $permissionConfig) {
+            $permissionKey = $permissionConfig['permission'];
+            $directPermissionValue = (int) ($directPermissions[$permissionKey] ?? 0);
+            $isAllowed = $this->hasAccess($permissionKey);
+            $isDenied = ($directPermissionValue === -1) || ((count($groupDenialsByPermission[$permissionKey] ?? []) > 0) && ! $isAllowed);
+
+            if (! $isAllowed && ! $isDenied) {
+                continue;
+            }
+
+            $status = $isDenied ? 'denied' : 'allowed';
+            $source = 'group';
+            $sourceGroups = $isDenied
+                ? ($groupDenialsByPermission[$permissionKey] ?? [])
+                : ($groupGrantsByPermission[$permissionKey] ?? []);
+
+            if ($isDenied && $directPermissionValue === -1) {
+                $source = 'individual';
+                $sourceGroups = [];
+            } elseif ($this->isSuperUser()) {
+                $source = 'superuser';
+                $sourceGroups = [];
+            } elseif (! $isDenied && $directPermissionValue === 1) {
+                $source = 'individual';
+                $sourceGroups = [];
+            }
+
+            $effectiveBySection[$permissionConfig['section']][] = [
+                'permission' => $permissionKey,
+                'status' => $status,
+                'source' => $source,
+                'groups' => array_values(array_unique($sourceGroups)),
+                'source_label' => $this->buildPermissionSourceLabel(
+                    status: $status,
+                    source: $source,
+                    sourceGroups: $sourceGroups
+                ),
+            ];
+        }
+
+        return $effectiveBySection;
+    }
+
+    /**
+     * Build a compact source label for a permission entry.
+     */
+    private function buildPermissionSourceLabel(string $status, string $source, array $sourceGroups = []): string
+    {
+        $statusLabel = $status === 'denied' ? 'Denied' : 'Allowed';
+        $sourceLabel = match ($source) {
+            'individual' => 'Individual',
+            'superuser' => 'Superuser',
+            default => 'Group',
+        };
+
+        if ($sourceGroups === []) {
+            return $statusLabel.' ('.$sourceLabel.')';
+        }
+
+        return $statusLabel.' ('.$sourceLabel.'): '.implode(', ', array_values(array_unique($sourceGroups)));
     }
 
     /**
@@ -573,6 +725,10 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at');
     }
+    public function directLicenses()
+    {
+        return $this->belongsToMany(\App\Models\License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at')->wherePivotNull('asset_id')->withTrashed();
+    }
 
     /**
      * Establishes the user -> reportTemplates relationship
@@ -740,6 +896,22 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->where('target_type', self::class)
             ->where('action_type', '=', 'accepted')
             ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get all assigned items that still have a pending acceptance for this user.
+     */
+    public function getAssignedItemsWithPendingAcceptance(): Collection
+    {
+        return CheckoutAcceptance::query()
+            ->forUser($this)
+            ->pending()
+            ->with('checkoutable')
+            ->get()
+            ->map(fn (CheckoutAcceptance $acceptance) => $acceptance->checkoutable)
+            ->filter()
+            ->unique(fn ($item) => $item::class.':'.$item->getKey())
+            ->values();
     }
 
     /**
@@ -1221,7 +1393,47 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->orwhereRaw('CONCAT(users.first_name," ",users.last_name) LIKE \''.$search.'%\'');
 
     }
-
+    public function scopeWithInventoryRelations($query, int $id)
+    {
+        return $query->where('id', $id)
+            ->with([
+                'assets.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'assets.defaultLoc',
+                'assets.location',
+                'assets.model.category',
+                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'assets.assignedAssets.assignedTo',
+                'assets.assignedAssets.defaultLoc',
+                'assets.assignedAssets.location',
+                'assets.assignedAssets.model.category',
+                'assets.components.category',
+                'assets.licenses',
+                'assets.licenses.category',
+                'assets.assignedAccessories',
+                'assets.assignedAccessories.accessory.category',
+                'accessories.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'accessories.category',
+                'accessories.manufacturer',
+                'consumables.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'consumables.category',
+                'consumables.manufacturer',
+                'directLicenses.category',
+                'licenses.category',
+            ])
+            ->withTrashed();
+    }
     /**
      * Get all direct and indirect subordinates for this user.
      *

@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Αυτός ο χρήστης έχει διαγραφεί. Θα πρέπει να επαναφέρετε αυτό το χρήστη για να τον επεξεργαστείτε ή να του εκχωρήσετε νέα πάγια.',
     'ldap_not_configured' => 'Η ενσωμάτωση LDAP δεν έχει ρυθμιστεί για αυτήν την εγκατάσταση.',
     'password_resets_sent' => 'Οι επιλεγμένοι χρήστες που είναι ενεργοποιημένοι και έχουν μια έγκυρη διεύθυνση ηλεκτρονικού ταχυδρομείου έχουν σταλεί ένα σύνδεσμο επαναφοράς κωδικού πρόσβασης.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Ένας σύνδεσμος επαναφοράς κωδικού πρόσβασης έχει σταλεί στο :email!',
     'user_has_no_email' => 'Αυτός ο χρήστης δεν έχει μια διεύθυνση ηλεκτρονικού ταχυδρομείου στο προφίλ του.',
     'log_record_not_found' => 'Δεν ήταν δυνατή η εύρεση μιας εγγραφής καταγραφής που να ταιριάζει με αυτόν το χρήστη.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Ο χρήστης καταργήθηκε με επιτυχία.',
         'restored' => 'Ο Χρήστης επαναφέρθηκε με επιτυχία.',
         'import' => 'Οι χρήστες εισήχθησαν με επιτυχία.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Παρουσιάστηκε ένα ζήτημα που δεν ανέβαλε τον χρήστη. ΠΑΡΑΚΑΛΩ προσπαθησε ξανα.',
         'import' => 'Παρουσιάστηκε πρόβλημα κατά την εισαγωγή χρηστών. ΠΑΡΑΚΑΛΩ προσπαθησε ξανα.',
-        'asset_already_accepted' => 'Το στοιχείο αυτό έχει ήδη γίνει αποδεκτό.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Πρέπει είτε να αποδεχθείτε είτε να απορρίψετε αυτό το στοιχείο.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Το περιουσιακό στοιχείο που προσπαθήσατε να δεχτείτε δεν σας έχει αποσταλεί.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Δεν ήταν δυνατή η λήψη καταχωρήσεων από το διακομιστή LDAP. Ελέγξτε τη διαμόρφωση του διακομιστή LDAP στο αρχείο ρύθμισης LDAP. <br>Ερώτηση από διακομιστή LDAP:',
         'password_ldap' => 'Ο κωδικός πρόσβασης για αυτόν τον λογαριασμό γίνεται από το LDAP / Active Directory. Επικοινωνήστε με το τμήμα πληροφορικής σας για να αλλάξετε τον κωδικό πρόσβασής σας.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

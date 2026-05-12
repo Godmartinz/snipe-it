@@ -2,14 +2,14 @@
 
 return [
 
-    'asset' => 'Asset',
-    'checkin' => 'Checkin',
+    'asset' => 'Ակտիվ',
+    'checkin' => 'Վերադարձ',
     'create' => 'Ստեղծել լիցենզիա',
     'expiration' => 'Պիտանելիության ժամկետը',
     'license_key' => 'Պրոդուկտի բանալի',
     'maintained' => 'Սպասարկվում է',
     'name' => 'Ծրագրի անվանում',
-    'no_depreciation' => 'Do Not Depreciate',
+    'no_depreciation' => 'Չմաշել',
     'purchase_order' => 'Գնման պատվերի համարը',
     'reassignable' => 'Վերանշանակելի',
     'remaining_seats' => 'Մնացած տեղեր',
@@ -17,6 +17,6 @@ return [
     'termination_date' => 'Դադարեցման ամսաթիվ',
     'to_email' => 'Լիցենզավորված էլ․ հասցե',
     'to_name' => 'Լիցենզիա՝',
-    'update' => 'Update License',
+    'update' => 'Թարմացնել լիցենզիա',
     'checkout_help' => 'Լիցենզիան պետք է տրամադրվի սարքային ակտիվին կամ անձին։ Կարող եք ընտրել երկուսն էլ, սակայն ակտիվի սեփականատերը պետք է համապատասխանի այն անձին, ում տրամադրվելու է ակտիվը։',
 ];

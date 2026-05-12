@@ -99,6 +99,9 @@ return [
         'success' => 'Activul a fost primit.',
         'user_does_not_exist' => 'Utilizatorul este invalid. Va rugam incercati iar.',
         'already_checked_in' => 'Activul respectiv este deja înregistrat.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

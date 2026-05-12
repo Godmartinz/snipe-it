@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'انواع صيغ الملفات المسوح بها هي png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, and rar.',
     'history_user' => 'الأرشيف الخاص بـ :name',
     'info' => 'معلومات',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'انقر هنا لاستعادتها.',
     'last_login' => 'آخر دخول للمستخدم',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

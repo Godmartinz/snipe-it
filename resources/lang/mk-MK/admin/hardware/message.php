@@ -99,6 +99,9 @@ return [
         'success' => 'Основното средство е раздолжено.',
         'user_does_not_exist' => 'Корисникот е неважечки. Обидете се повторно.',
         'already_checked_in' => 'Основното средство е веќе задолжено.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

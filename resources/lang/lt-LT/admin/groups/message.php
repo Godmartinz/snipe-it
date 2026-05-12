@@ -8,9 +8,9 @@ return [
     'assoc_users' => 'Šis skyrius šiuo metu susietas su bent vienu naudotoju ir negali būti ištrintas. Prašome atnaujinti savo naudotojus, kad šie nebūtu susieti su šiuo skyriumi ir bandykite dar kartą. ',
 
     'success' => [
-        'create' => 'Grupė sukurta sėkmingai.',
-        'update' => 'Grupė atnaujinta sėkmingai.',
-        'delete' => 'Grupė panaikinta sėkmingai.',
+        'create' => 'Grupė sėkmingai sukurta.',
+        'update' => 'Grupė sėkmingai atnaujinta.',
+        'delete' => 'Grupė sėkmingai panaikinta.',
     ],
 
     'delete' => [

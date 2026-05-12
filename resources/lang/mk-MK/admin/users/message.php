@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Овој корисник е избришан. Ќе мора да го вратите за да го ажурирате или да му доделите нови основни средства.',
     'ldap_not_configured' => 'Интеграција со LDAP не е конфигурирана.',
     'password_resets_sent' => 'На избраниот корисник кој е активиран и има валидна адреса на е-пошта испратен е линк за обнова на лозинката.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Линк за обнова на лозинка е испратен на :email!',
     'user_has_no_email' => 'Корисникот нема адреса на е-пошта во неговиот профил.',
     'log_record_not_found' => 'Не можеше да се најде соодветен запис од дневникот за овој корисник.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Привременото блокирање е отстрането.',
         'restored' => 'Корисникот е вратен.',
         'import' => 'Корисниците се увезени.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Овој корисник сè уште управува со друг корисник. Ве молиме прво изберете друг менаџер за тој корисник.|Овој корисник управува со :count корисници. Ве молиме прво за него изберете друг менаџер.',
         'unsuspend' => 'Имаше проблем со отстранување на привременото блокирање. Обидете се повторно.',
         'import' => 'Имаше проблем со увозот на корисници. Обидете се повторно.',
-        'asset_already_accepted' => 'Ова основно средство веќе е прифатено.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Мора да го прифатите или одбиете основното средство.',
         'cannot_delete_yourself' => 'Ќе се чувствуваме навистина лошо ако се избришите самиот себе, ве молиме размислете.',
         'incorrect_user_accepted' => 'Средството што се обидовте да го прифатите не е задожено на Вас.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Не можам да добијам записи од LDAP серверот. Проверете ја конфигурацијата за LDAP сервер во LDAP конфигурациската датотека. <br>Грешка од LDAP-серверот:',
         'password_ldap' => 'Лозинката за корисникот е управувана од LDAP/Active Directory. Ве молиме контактирајте го одделот за ИТ за да ја смените вашата лозинка. ',
         'multi_company_items_assigned' => 'Овој корисник има доделени ставки кои припаѓаат на друга компанија. Ве молиме проверете ги или уредете ја нивната компанија.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

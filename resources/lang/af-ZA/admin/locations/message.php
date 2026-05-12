@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Hierdie ligging is tans die ouer van ten minste een kind se plek en kan nie uitgevee word nie. Werk asseblief jou liggings by om nie meer hierdie ligging te verwys nie en probeer weer.',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Current Location',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

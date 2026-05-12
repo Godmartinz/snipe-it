@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Ta lokacija je trenutno starš vsaj ene lokacije otroka in je ni mogoče izbrisati. Posodobite svoje lokacije, da ne bodo več vsebovale te lokacije in poskusite znova. ',
     'assigned_assets' => 'Dodeljena sredstva',
     'current_location' => 'Trenutna lokacija',
-    'open_map' => 'Odpri v :map_provider_icon Zemljevidih',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

@@ -67,5 +67,5 @@ return [
         'checkbox' => 'Onay Kutusu',
         'radio' => 'Radyo Butonları',
     ],
-    'general_help_text' => 'Custom fields store additional information not covered by the default asset fields. <a href="https://snipe-it.readme.io/docs/custom-fields#/"><i class="fa fa-external-link"></i></a>.',
+    'general_help_text' => 'Özel alanlar, varsayılan varlık alanlarının kapsamadığı ek bilgileri saklar. <a href="https://snipe-it.readme.io/docs/custom-fields#/"><i class="fa fa-external-link"></i></a>.',
 ];

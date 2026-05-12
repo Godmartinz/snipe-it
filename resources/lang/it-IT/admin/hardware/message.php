@@ -99,6 +99,9 @@ return [
         'success' => 'Bene restituito con successo.',
         'user_does_not_exist' => 'Questo utente non è valido. Riprova.',
         'already_checked_in' => 'Il prodotto è già rientrato.',
+        'force_checkin_orphaned_success' => 'Assegnazione non valida annullata con successo.',
+        'force_checkin_not_orphaned' => 'L\'articolo non è in uno stato di assegnazione non valido.',
+        'force_checkin_error' => 'Impossibile cancellare l\'assegnazione non valida.',
 
     ],
 

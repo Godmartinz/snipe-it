@@ -9,7 +9,7 @@ return [
     'edit' => 'Accessoire bewerken',
     'eula_text' => 'Categorie-gebruikersovereenkomst',
     'eula_text_help' => 'Dit veld geeft je de mogelijkheid om je gebruikersovereenkomsten aan te passen voor specifieke activa. Als je maar één gebruikersovereenkomst hebt voor al je activa, vink dan het vakje hieronder aan om de primaire als standaard in te stellen.',
-    'require_acceptance' => 'Verplicht gebruikers om de acceptatie van activa in deze categorie te bevestigen.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Standaard gebruikersovereenkomst niet gevonden. Ga naar Instellingen en voeg er één toe.',
     'total' => 'Totaal',
     'remaining' => 'Besch.',

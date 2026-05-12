@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'هذا الموقع هو حاليا أحد الوالدين لموقع طفل واحد على الأقل ولا يمكن حذفه. يرجى تحديث مواقعك لم تعد تشير إلى هذا الموقع ثم أعد المحاولة.',
     'assigned_assets' => 'الأصول المعينة',
     'current_location' => 'الموقع الحالي',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Dozwolone typy plików: png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar.',
     'history_user' => 'Historia',
     'info' => 'Informacje',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Kliknij tutaj, aby je przywrócić.',
     'last_login' => 'Ostatnie logowanie',
     'ldap_config_text' => 'Wybrana lokalizacja zostanie ustawiona dla wszystkich zaimportowanych użytkowników. To nadpisze ich istniejącą lokalizację i jest nietypowym rozwiązaniem, więc najlepiej jest pozostawić to miejsce pustym.',

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Lokasi saat ini digunakan oleh induk salah satu dari turunan lokasi dan tidak dapat di hapus. Mohon perbarui lokasi Anda ke yang tidak ada referensi dengan lokasi ini dan coba kembali. ',
     'assigned_assets' => 'Aset yang Ditetapkan',
     'current_location' => 'Lokasi Saat Ini',
-    'open_map' => 'Buka di Peta :map_provider_icon',
     'deleted_warning' => 'Lokasi ini telah dihapus. Harap pulihkan sebelum mencoba melakukan perubahan apa pun.',
 
     'create' => [

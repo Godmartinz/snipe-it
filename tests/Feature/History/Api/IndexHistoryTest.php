@@ -11,6 +11,7 @@ use App\Models\License;
 use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class IndexHistoryTest extends TestCase
@@ -439,5 +440,62 @@ class IndexHistoryTest extends TestCase
             ->assertJsonPath('total', 3)
             ->assertJsonCount(1, 'rows')
             ->assertJsonPath('rows.0.id', $second->id);
+    }
+
+    public function test_viewing_user_history_avoids_n_plus_one_queries_for_polymorphic_relations()
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUserHistory()->create();
+        $uniqueNote = 'history-polymorphic-n-plus-one-'.uniqid();
+
+        $locations = Location::factory()->count(10)->create();
+        $assets = Asset::factory()->count(10)->create();
+        $users = User::factory()->count(10)->create();
+
+        for ($index = 0; $index < 30; $index++) {
+            $itemType = $index % 3;
+
+            if ($itemType === 0) {
+                $item = $assets[$index % $assets->count()];
+                $itemTypeClass = Asset::class;
+            } elseif ($itemType === 1) {
+                $item = $locations[$index % $locations->count()];
+                $itemTypeClass = Location::class;
+            } else {
+                $item = $users[$index % $users->count()];
+                $itemTypeClass = User::class;
+            }
+
+            Actionlog::factory()->create([
+                'item_id' => $item->id,
+                'item_type' => $itemTypeClass,
+                'target_id' => $subject->id,
+                'target_type' => User::class,
+                'location_id' => $locations[$index % $locations->count()]->id,
+                'created_by' => $actor->id,
+                'action_type' => 'update',
+                'note' => $uniqueNote,
+            ]);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.users.history', [
+                'user' => $subject,
+                'limit' => 30,
+                'offset' => 0,
+                'search' => $uniqueNote,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('total', 30);
+
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        // This threshold is intentionally generous but prevents N+1 regressions.
+        $this->assertLessThan(45, $queryCount, 'History endpoint query count regressed and may have reintroduced N+1 behavior.');
+        $this->assertCount(30, $response->json('rows'));
     }
 }

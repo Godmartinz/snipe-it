@@ -120,6 +120,35 @@ class AssetCheckinTest extends TestCase
         $this->assertNull($asset->refresh()->licenseseats->first()->assigned_to);
     }
 
+    public function test_checking_in_asset_updates_location_of_assets_assigned_to_it()
+    {
+        $originalLocation = Location::factory()->create();
+        $checkedOutLocation = Location::factory()->create();
+
+        $parentAsset = Asset::factory()->assignedToLocation($checkedOutLocation)->create([
+            'location_id' => $checkedOutLocation->id,
+            'rtd_location_id' => $originalLocation->id,
+        ]);
+
+        $childAsset = Asset::factory()->create([
+            'assigned_to' => $parentAsset->id,
+            'assigned_type' => Asset::class,
+            'location_id' => $checkedOutLocation->id,
+            'rtd_location_id' => $originalLocation->id,
+        ]);
+
+        $this->actingAsForApi(User::factory()->checkinAssets()->create())
+            ->postJson(route('api.asset.checkin', $parentAsset), [
+                'location_id' => $originalLocation->id,
+            ])
+            ->assertOk();
+
+        $this->assertEquals($originalLocation->id, $parentAsset->fresh()->location_id);
+        $this->assertEquals($originalLocation->id, $childAsset->fresh()->location_id);
+        $this->assertEquals($parentAsset->id, $childAsset->fresh()->assigned_to);
+        $this->assertEquals(Asset::class, $childAsset->fresh()->assigned_type);
+    }
+
     public function test_legacy_location_values_set_to_zero_are_updated()
     {
         $asset = Asset::factory()->canBeInvalidUponCreation()->assignedToUser()->create([

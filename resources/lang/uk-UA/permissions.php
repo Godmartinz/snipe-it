@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Керування файлами аксесуарів',
-        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з аксесуарами.',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Manage Asset Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Manage User Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Manage Model Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Manage Department Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Manage Supplier Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Manage Location Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Manage Company Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with companies. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Керування файлами витратних матеріалів',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => 'Витратні матеріали',
         'note' => 'Надає доступ до розділу «Витратні матеріали» в додатку.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Видавати витратні матеріали',
         'note' => 'Призначення витратних матеріалів зі складу шляхом їх видачі.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Керування файлами витратних матеріалів',
-        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з витратними матеріалами.',
-    ],
+
     'licenses' => [
         'name' => 'Ліцензії',
         'note' => 'Надає доступ до розділу «Ліцензії» в додатку.',
@@ -161,6 +199,11 @@ return [
         'name' => 'Керування файлами ліцензій',
         'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з ліцензіями.',
     ],
+    'componentsfiles' => [
+        'name' => 'Керування файлами компонентів',
+        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з компонентами.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Керування ліцензійними ключами',
         'note' => 'Дозволяє користувачеві переглядати ключі продуктів, пов’язані з ліцензіями.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Видалення компонентів',
     ],
-    'componentsfiles' => [
-        'name' => 'Керування файлами компонентів',
-        'note' => 'Дозволяє користувачеві завантажувати, викачувати та видаляти файли, пов’язані з компонентами.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Видача компонентів',
         'note' => 'Призначайте компоненти в інвентарі, видаючи їх.',

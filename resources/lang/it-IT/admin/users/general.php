@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'I formati di file permessi sono png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, e rar.',
     'history_user' => 'Storico per :name',
     'info' => 'Informazioni',
+    'send_acceptance_reminder' => 'Invia Promemoria',
+    'unaccepted_items' => ':count articoli non accettati',
     'restore_user' => 'Clicca qui per ripristinarli.',
     'last_login' => 'Ultimo accesso',
     'ldap_config_text' => 'La posizione selezionata verrà impostata per TUTTI gli utenti importati. Questo sovrascriverà la posizione esistente e rappresenta un caso d\'uso insolito, quindi in genere è meglio lasciare vuoto questo campo.',

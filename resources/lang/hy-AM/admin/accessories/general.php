@@ -9,7 +9,7 @@ return [
     'edit' => 'Խմբագրել աքսեսուար',
     'eula_text' => 'Կատեգորիա EULA',
     'eula_text_help' => 'Անհատականացրեք EULA-ները ակտիվների տեսակների համար. Եթե ունեք միայն մեկ EULA, ընտրեք ստորև նշված վանդակը՝ օգտագործելու հիմնականը։',
-    'require_acceptance' => 'Պահանջել օգտատերերի հաստատումը այս կատեգորիայի ակտիվների համար։',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Առաջնային EULA չկա. Ավելացրեք Կարգավորումների միջոցով։',
     'total' => 'Ընդհանուր',
     'remaining' => 'Գործող',

@@ -27,7 +27,7 @@ return [
     'restore' => 'Ripristina Asset',
     'pending' => 'In attesa',
     'undeployable' => 'Non Distribuilbile',
-    'undeployable_tooltip' => 'Questo bene ha una etichetta che lo rende non distribuibile, il check-out non può avvenire.',
+    'undeployable_tooltip' => 'Questo bene ha un\'etichetta che lo indica come non distribuibile, l\'Assegnazione non può avvenire.',
     'view' => 'Vedi Asset',
     'csv_error' => 'C\'è un errore nel file CSV:',
     'import_text' => '<p>Carica un CSV con la cronologia dei beni. I beni e gli utenti DEVONO già esistere nel sistema, o saranno saltati. L\'importazione della cronologia avviene cercando la corrispondenza con il tag (etichetta) del bene. Proveremo a trovare un utente corrispondente in base al nome utente che fornisci e ai criteri selezionati qui sotto. Se non si seleziona alcun criterio qui sotto, verrà cercata la corrispondenza al formato del nome utente configurato in <code>Admin &gt; Impostazioni Generali</code>.</p><p>I campi inclusi nel CSV devono avere intestazioni: <strong>Asset Tag, Name, Checkout Date, Checkin Date</strong>. Eventuali campi aggiuntivi verranno ignorati. </p><p>Checkin Date: le date di restituzione vuote o future assegneranno gli elementi all\'utente associato. Escludendo la colonna Checkin Date verrà creata una data di restituzione ad oggi.</p>

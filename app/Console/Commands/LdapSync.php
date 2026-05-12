@@ -19,7 +19,7 @@ class LdapSync extends Command
      *
      * @var string
      */
-    protected $signature = 'snipeit:ldap-sync {--location=} {--location_id=*} {--base_dn=} {--filter=} {--summary} {--json_summary}';
+    protected $signature = 'snipeit:ldap-sync {--location=} {--location_id=*} {--base_dn=} {--filter=} {--delete} {--summary} {--json_summary}';
 
     /**
      * The console command description.
@@ -94,6 +94,7 @@ class LdapSync extends Command
         }
 
         $summary = [];
+        $seen_ldap_usernames = [];
 
         try {
 
@@ -274,8 +275,14 @@ class LdapSync extends Command
                 'name' => $item['department'],
             ]);
 
-            $user = User::where('username', $item['username'])->first();
+            $user = User::withTrashed()->where('username', $item['username'])->first();
+            if (! empty($item['username'])) {
+                $seen_ldap_usernames[] = $item['username'];
+            }
             if ($user) {
+                if ($user->trashed()) {
+                    $user->restore();
+                }
                 // Updating an existing user.
                 $item['createorupdate'] = 'updated';
             } else {
@@ -490,6 +497,41 @@ class LdapSync extends Command
             array_push($summary, $item);
         }
 
+        // Optionally soft-delete LDAP-imported users that are no longer present in LDAP.
+        // users with assests etc. are not deletable and skipped
+        if ($this->option('delete')) {
+            $missing_ldap_users = User::where('ldap_import', 1);
+            $missing_ldap_users = $missing_ldap_users->whereNotIn('username', $seen_ldap_usernames);
+            $missing_ldap_users = $missing_ldap_users->get();
+
+            foreach ($missing_ldap_users as $missing_user) {
+                $is_deletable = $this->isUserDeletable($missing_user);
+
+                $missing_item = [
+                    'id' => $missing_user->id,
+                    'username' => $missing_user->username,
+                    'firstname' => $missing_user->first_name,
+                    'lastname' => $missing_user->last_name,
+                    'email' => $missing_user->email,
+                    'createorupdate' => 'skipped',
+                    'status' => 'info',
+                    'deletable' => $is_deletable,
+                    'note' => $is_deletable ? 'missing from LDAP' : 'missing from LDAP, but not deletable',
+                ];
+
+                if ($is_deletable) {
+                    $missing_user->delete();
+                    $missing_item['createorupdate'] = 'deleted';
+                    $missing_item['status'] = 'success';
+                    $missing_item['note'] = 'deleted_missing_from_ldap';
+                }
+
+                $summary[] = $missing_item;
+            }
+        }
+
+
+
         if ($this->option('summary')) {
             for ($x = 0; $x < count($summary); $x++) {
                 if ($summary[$x]['status'] == 'error') {
@@ -504,5 +546,24 @@ class LdapSync extends Command
         } else {
             return $summary;
         }
+    }
+
+    /**
+     * Checks if the user is deletable without gate check
+     * 
+     * A user is considered deletable if they have no associated assets, accessories, licenses, consumables, managed users, or managed locations.
+     * 
+     * @param User $user The user to check
+     * 
+     * @return bool True if the user is deletable, false otherwise
+     */
+    private function isUserDeletable(User $user): bool
+    {
+        return (($user->assets_count ?? $user->assets()->count()) === 0)
+            && (($user->accessories_count ?? $user->accessories()->count()) === 0)
+            && (($user->licenses_count ?? $user->licenses()->count()) === 0)
+            && (($user->consumables_count ?? $user->consumables()->count()) === 0)
+            && (($user->manages_users_count ?? $user->managesUsers()->count()) === 0)
+            && (($user->manages_locations_count ?? $user->managedLocations()->count()) === 0);
     }
 }

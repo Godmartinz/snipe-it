@@ -3,6 +3,7 @@
 namespace Tests\Feature\LicenseSeats\Api;
 
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\User;
@@ -441,6 +442,46 @@ class LicenseSeatUpdateTest extends TestCase
             'item_type' => License::class,
             'item_id' => $licenseSeat->license_id,
             'quantity' => 1,
+        ]);
+    }
+
+    public function test_superuser_cannot_assign_a_license_seat_to_a_target_in_another_company_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $licenseInCompanyA = License::factory()->for($companyA)->create();
+        $seatForCompanyA = LicenseSeat::factory()->create([
+            'license_id' => $licenseInCompanyA->id,
+            'assigned_to' => null,
+            'asset_id' => null,
+            'notes' => null,
+        ]);
+        $userInCompanyB = User::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($superuser)
+            ->patchJson($this->route($seatForCompanyA), [
+                'assigned_to' => $userInCompanyB->id,
+                'notes' => 'cross-company assignment attempt',
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $seatForCompanyA->refresh();
+        $this->assertNull($seatForCompanyA->assigned_to);
+        $this->assertNull($seatForCompanyA->asset_id);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'created_by' => $superuser->id,
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $userInCompanyB->id,
+            'item_type' => License::class,
+            'item_id' => $licenseInCompanyA->id,
+            'note' => 'cross-company assignment attempt',
         ]);
     }
 

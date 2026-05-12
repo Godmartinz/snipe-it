@@ -17,6 +17,7 @@ return [
     'name' => 'വിഭാഗത്തിന്റെ പേര്',
     'require_acceptance' => 'Require users to confirm acceptance of assets in this category.',
     'required_acceptance' => 'This user will be emailed with a link to confirm acceptance of this item.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'This user will be emailed a copy of the EULA',
     'no_default_eula' => 'No primary default EULA found. Add one in Settings.',
     'update' => 'Update Category',

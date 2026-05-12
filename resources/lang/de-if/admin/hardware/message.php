@@ -99,6 +99,9 @@ return [
         'success' => 'Asset wurde erfolgreich zurückgenommen.',
         'user_does_not_exist' => 'Dieser Benutzer ist ungültig. Bitte versuche es erneut.',
         'already_checked_in' => 'Dieses Asset ist bereits zurückgenommen.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

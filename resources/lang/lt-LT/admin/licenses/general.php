@@ -27,7 +27,7 @@ return [
             'enabled_tooltip' => 'Paimkite VISAS licencijos vietas – tiek iš naudotojų, tiek iš turto',
             'disabled_tooltip' => 'Išjungta, kadangi šiuo metu nėra išduotų vietų',
             'disabled_tooltip_reassignable' => 'Išjungta, kadangi licencijos negalima perduoti',
-            'success' => 'Licencija paimta sėkmingai! | Visos licencijos paimtos sėkmingai!',
+            'success' => 'Licencija sėkmingai paimta! | Visos licencijos sėkmingai paimtos!',
             'log_msg' => 'Paimta naudojant masinio licencijų paėmimo sąsają',
         ],
 
@@ -36,7 +36,7 @@ return [
             'modal' => 'Atlikus šį veiksmą, pirmam laisvam naudotojui bus priskirta viena vieta. | Atlikus šį veiksmą, bus priskirtos visos :available_seats_count vietos pirmiesiems galimiems naudotojams. Laikoma, kad naudotojas gali gauti vietą, jei jis dar neturi šios licencijos, o jo naudotojo paskyroje yra įgalintas automatinis licencijos priskyrimas.',
             'enabled_tooltip' => 'Priskirti VISAS vietas (arba tiek, kiek yra), VISIEMS naudotojams',
             'disabled_tooltip' => 'Išjungta, kadangi šiuo metu nėra laisvų vietų',
-            'success' => 'Licencija išduota sėkmingai! | :count licencijos išduotos sėkmingai!',
+            'success' => 'Licencija sėkmingai išduota! | :count licencijos sėkmingai išduotos!',
             'error_no_seats' => 'Nėra laisvų licencijos vietų.',
             'warn_not_enough_seats' => ':count naudotojams buvo priskirta ši licencija, bet mums baigėsi laisvos licencijos vietos.',
             'warn_no_avail_users' => 'Nieko daryti nereikia. Nėra naudotojų, kuriems nebūtų priskirta ši licencija.',

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Esta localização contém pelo menos uma sub-localização e não pode ser removida. Por favor, atualize as localizações para não referenciarem mais esta localização e tente novamente. ',
     'assigned_assets' => 'Artigos atribuídos',
     'current_location' => 'Localização atual',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

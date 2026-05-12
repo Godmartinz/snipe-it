@@ -17,6 +17,7 @@ return [
     'name' => 'tên danh mục',
     'require_acceptance' => 'Yêu cầu người dùng xác nhận nhận tài sản trong hạng mục này.',
     'required_acceptance' => 'Người dùng sẽ nhận được email có chứa đường dẫn để xác nhận chấp nhận tài sản này.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Đây là người dùng đã được gửi một email bản sao của EULA',
     'no_default_eula' => 'Không tìm thấy giá trị EULA mặc định. Thêm vào một giá trị trong Cài đặt.',
     'update' => 'Cập nhật hạng mục',

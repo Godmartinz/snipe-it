@@ -17,6 +17,7 @@ return [
     'name' => 'اسم التصنيف',
     'require_acceptance' => 'مطالبة المستخدمين بتأكيد قبولهم للأصول في هذا التصنيف.',
     'required_acceptance' => 'سيتم إرسال رسالة إلكترونية تتضمن رابط إلى هذا المستخدم لتأكيد قبول هذا الأصل.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'سيتم إرسال نسخة إلكترونية من إتفاقية الترخيص الى المستخدم',
     'no_default_eula' => 'لم يتم العثور على (اتفاقية ترخيص المستخدم) الأساسية. قم بإضافة واحدة من الإعدادات.',
     'update' => 'تحديث التصنيف',

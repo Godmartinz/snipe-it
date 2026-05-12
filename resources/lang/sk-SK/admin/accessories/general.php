@@ -9,7 +9,7 @@ return [
     'edit' => 'Upraviť príslušenstvo',
     'eula_text' => 'Kategória EULA',
     'eula_text_help' => 'Toto políčko umožňuje prispôsobiť dokument EULA špecifickému typu majetku. Ak máte iba jeden dokument EULA pre všetky typy majetku, môžete označiť možnosť nižšie, aby sa použil predvolený dokument.',
-    'require_acceptance' => 'Vyžadovať od používateľov, aby potvrdili prijatie majetku v tejto kategórii.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Žiaden predvolený EULA dokument nebol nájdený. Pridajte nový v Nastaveniach.',
     'total' => 'Celkom',
     'remaining' => 'Dostupných',

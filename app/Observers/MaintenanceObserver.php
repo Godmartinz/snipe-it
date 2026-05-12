@@ -13,8 +13,25 @@ class MaintenanceObserver
      *
      * @return void
      */
-    public function updated(Maintenance $maintenance)
+    public function updating(Maintenance $maintenance)
     {
+        $changed = [];
+
+        foreach ($maintenance->getRawOriginal() as $key => $value) {
+            if (array_key_exists($key, $maintenance->getAttributes())
+                && $maintenance->getRawOriginal()[$key] != $maintenance->getAttributes()[$key]
+            ) {
+                $changed[$key] = [
+                    'old' => $maintenance->getRawOriginal()[$key],
+                    'new' => $maintenance->getAttributes()[$key],
+                ];
+            }
+        }
+
+        if (empty($changed)) {
+            return;
+        }
+
         $logAction = new Actionlog;
         $logAction->item_type = Maintenance::class;
         $logAction->item_id = $maintenance->id;
@@ -23,6 +40,7 @@ class MaintenanceObserver
         $logAction->created_at = date('Y-m-d H:i:s');
         $logAction->action_date = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
+        $logAction->log_meta = json_encode($changed);
         if ($maintenance->imported) {
             $logAction->setActionSource('importer');
         }

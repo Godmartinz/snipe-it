@@ -32,6 +32,8 @@ class Maintenance extends SnipeModel implements ICompanyableChild
 
     protected $presenter = MaintenancesPresenter::class;
 
+    protected $with = ['asset', 'asset.company'];
+
     protected $table = 'maintenances';
 
     protected $rules = [

@@ -9,7 +9,7 @@ return [
     'edit' => 'Tartozék szerkesztése',
     'eula_text' => 'Kategória EULA',
     'eula_text_help' => 'Ezzel a mezővel testre szabhatja a különböző eszközök EULA-ját. Ha csak egy EULA van az összes eszközhöz, akkor jelölje be a négyzetet lent, hogy az alapértelmezettet használja.',
-    'require_acceptance' => 'A felhasználónak kötelező elfogadnia az eszköz átvételét ebben a kategóriában.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nincs alapértelmezett EULA. Adjon hozzá egyet a Beállításokban!',
     'total' => 'Összesen',
     'remaining' => 'Maradék',

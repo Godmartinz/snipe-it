@@ -17,6 +17,7 @@ return [
     'name' => 'Názov kategórie',
     'require_acceptance' => 'Vyžadovať od používateľov aby potvrdili prijatie majetku v tejto kategórii.',
     'required_acceptance' => 'Tomuto používateľovi bude zaslaný mailom odkaz na potvrdenie prijatia tejto položky.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Tomuto používateľovi bude zaslaná kópia dokumentu EULA',
     'no_default_eula' => 'Žiaden predvolený EULA dokument nebol nájdený. Pridajte nový v Nastaveniach.',
     'update' => 'Upraviť kategóriu',

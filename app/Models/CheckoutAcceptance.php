@@ -243,13 +243,27 @@ class CheckoutAcceptance extends Model
         if ($data['item_serial'] != null) {
             $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
         }
+        if (!empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
+            foreach ($data['custom_fields'] as $customField) {
+                $label = $customField['label'] ?? null;
+                $value = $customField['value'] ?? null;
+
+                if (($label !== null) && ($value !== null) && ($value !== '')) {
+                    $pdf->writeHTML(e((string) $label) . ': ' . e((string) $value), true, 0, true, 0, '');
+                }
+            }
+        }
+
         if (($data['qty'] != null) && ($data['qty'] > 1)) {
             $pdf->writeHTML(trans('general.qty').': '.e($data['qty']), true, 0, true, 0, '');
         }
+        $pdf->Ln();
+        $pdf->writeHTML('<hr>', true, 0, true, 0, '');
         $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.$data['employee_num'].')' : ''), true, 0, true, 0, '');
         if ($data['email'] != null) {
             $pdf->writeHTML(trans('general.email').': '.e($data['email']), true, 0, true, 0, '');
         }
+
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
 

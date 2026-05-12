@@ -17,6 +17,7 @@ return [
     'name' => 'Magaca Qaanadda',
     'require_acceptance' => 'Isticmaalayaashu waxay u baahanyihiin iney xaqiijiyaan aqbalaadda hantida qaybtan.',
     'required_acceptance' => 'Isticmaalahan waxaa iimayl loogu soo diri doonaa xiriiriye si loo xaqiijiyo aqbalaada shaygan.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Isticmaalahan waxaa iimayl loogu soo diri doonaa koobiga EULA',
     'no_default_eula' => 'Ma jiro EULA aasaasi ah oo la helay. Mid ku dar Settings.',
     'update' => 'Cusbooneysii Qaanadda',

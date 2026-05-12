@@ -74,8 +74,7 @@ class SamlController extends Controller
     public function login(Request $request)
     {
         $auth = $this->saml->getAuth();
-        $ssoUrl = $auth->login(null, [], false, false, false, false);
-
+        $ssoUrl = $auth->login(session()->get('url.intended'), [], false, false, false, false);
         return redirect()->away($ssoUrl);
     }
 
@@ -96,6 +95,7 @@ class SamlController extends Controller
         $saml = $this->saml;
         $auth = $saml->getAuth();
         $saml_exception = false;
+        session()->put('url.intended', $request->post('RelayState'));
         try {
             $auth->processResponse();
         } catch (\Exception $e) {

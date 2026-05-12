@@ -20,7 +20,7 @@ return [
     'cost' => 'खरिद लागत',
     'create' => 'Create Asset',
     'date' => 'खरिद मिति',
-    'depreciation' => 'Depreciation',
+    'depreciation' => 'मूल्यह्रास',
     'depreciates_on' => 'Depreciates On',
     'default_location' => 'Default Location',
     'default_location_phone' => 'Default Location Phone',

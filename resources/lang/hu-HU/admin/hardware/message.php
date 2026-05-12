@@ -99,6 +99,9 @@ return [
         'success' => 'Az Asset sikeresen ellenőrzött.',
         'user_does_not_exist' => 'Ez a felhasználó érvénytelen. Kérlek próbáld újra.',
         'already_checked_in' => 'Ez az eszköz már be van jelölve.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

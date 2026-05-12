@@ -9,8 +9,9 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\Component;
-use App\Models\ComponentAssignment;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
@@ -80,7 +81,7 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('name')) {
-            $components->where('name', '=', $request->input('name'));
+            $components->where('components.name', '=', $request->input('name'));
         }
 
         if ($request->filled('company_id')) {
@@ -92,27 +93,27 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('category_id')) {
-            $components->where('category_id', '=', $request->input('category_id'));
+            $components->where('components.category_id', '=', $request->input('category_id'));
         }
 
         if ($request->filled('supplier_id')) {
-            $components->where('supplier_id', '=', $request->input('supplier_id'));
+            $components->where('components.supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('manufacturer_id')) {
-            $components->where('manufacturer_id', '=', $request->input('manufacturer_id'));
+            $components->where('components.manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
         if ($request->filled('model_number')) {
-            $components->where('model_number', '=', $request->input('model_number'));
+            $components->where('components.model_number', '=', $request->input('model_number'));
         }
 
         if ($request->filled('location_id')) {
-            $components->where('location_id', '=', $request->input('location_id'));
+            $components->where('components.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('notes')) {
-            $components->where('notes', '=', $request->input('notes'));
+            $components->where('components.notes', '=', $request->input('notes'));
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
@@ -166,6 +167,7 @@ class ComponentsController extends Controller
         $this->authorize('create', Component::class);
         $component = new Component;
         $component->fill($request->all());
+        $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $component = $request->handleImages($component);
 
         if ($component->save()) {
@@ -206,6 +208,7 @@ class ComponentsController extends Controller
         $this->authorize('update', Component::class);
         $component = Component::findOrFail($id);
         $component->fill($request->all());
+        $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $component = $request->handleImages($component);
 
         if ($component->save()) {
@@ -252,13 +255,11 @@ class ComponentsController extends Controller
     {
         $this->authorize('view', Asset::class);
 
-        $component_checkouts = ComponentAssignment::where('component_id', $component->id)->with('adminuser')->with('assets');
-
         $offset = request('offset', 0);
         $limit = $request->input('limit', 50);
 
         if ($request->filled('search')) {
-            $assets = $component_checkouts->assets()
+            $assets = $component->assets()
                 ->where(function ($query) use ($request) {
                     $search_str = '%'.$request->input('search').'%';
                     $query->where('name', 'like', $search_str)
@@ -314,20 +315,33 @@ class ComponentsController extends Controller
         }
 
         if ($component->numRemaining() >= $request->input('assigned_qty')) {
+            // Resolve the raw target first, then enforce FMCS explicitly.
+            // Scoped lookup can hide cross-company records and lead to partial writes.
+            $asset = Asset::withoutGlobalScopes()->find($request->input('assigned_to'));
 
-            $asset = Asset::find($request->input('assigned_to'));
-            $component->assigned_to = $request->input('assigned_to');
+            if (! $asset) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')));
+            }
 
-            $component->assets()->attach($component->id, [
-                'component_id' => $component->id,
-                'created_at' => Carbon::now(),
-                'assigned_qty' => $request->input('assigned_qty', 1),
-                'created_by' => auth()->id(),
-                'asset_id' => $request->input('assigned_to'),
-                'note' => $request->input('note'),
-            ]);
+            if ((Setting::getSettings()->full_multiple_companies_support == '1') && ($component->company_id !== $asset->company_id)) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
+            }
 
-            $component->logCheckout($request->input('note'), $asset, null, [], $request->get('assigned_qty', 1));
+            // Keep pivot + action log in one transaction so checkout is all-or-nothing.
+            DB::transaction(function () use ($component, $request, $asset): void {
+                $component->assigned_to = $request->input('assigned_to');
+
+                $component->assets()->attach($component->id, [
+                    'component_id' => $component->id,
+                    'created_at' => Carbon::now(),
+                    'assigned_qty' => $request->input('assigned_qty', 1),
+                    'created_by' => auth()->id(),
+                    'asset_id' => $request->input('assigned_to'),
+                    'note' => $request->input('note'),
+                ]);
+
+                $component->logCheckout($request->input('note'), $asset, null, [], $request->get('assigned_qty', 1));
+            });
 
             return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/components/message.checkout.success')));
         }
@@ -391,11 +405,11 @@ class ComponentsController extends Controller
     public function history(Request $request, Component $component): JsonResponse|array
     {
         $this->authorize('history', $component);
-        $history = $component->getHistory($request);
-        $total = $component->getHistory($request)->count();
+        $historyQuery = $component->getHistory($request);
+        $total = (clone $historyQuery)->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-        $history = $history->skip($offset)->take($limit)->get();
+        $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }

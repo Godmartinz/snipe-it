@@ -99,6 +99,9 @@ return [
         'success' => 'Asset je uspješno prijavio.',
         'user_does_not_exist' => 'Taj je korisnik nevažeći. Molim te pokušaj ponovno.',
         'already_checked_in' => 'Taj je entitet već prijavljen.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

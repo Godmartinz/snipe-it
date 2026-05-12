@@ -7,7 +7,7 @@
 @stop
 
 @section('header_right')
-    <x-button.info-panel-toggle/>
+    <x-button.info-panel-toggle hide-on-xs/>
 @endsection
 
 {{-- Page content --}}
@@ -221,61 +221,41 @@
                         <!-- start side stats column -->
                         <x-page-column class="col-md-4 col-sm-12">
 
-                            @php
-                                // Compute elapsed/total percentage clamped to 0–100
-                                $clampedPercent = fn (float $elapsed, float $total): float =>
-                                    $total > 0 ? min(100, max(0, ($elapsed / $total) * 100)) : 0;
+                            @if ($asset->hasOrphanedAssignment())
+                                <x-well class="well-sm">
+                                    <p class="text-danger" style="line-height: 20px;">
+                                        <x-icon type="warning" class="text-danger"/> {{ trans('general.warning', ['warning' => trans('general.item_target_not_found_hard', ['item_type' => $asset->assignedType(), 'id' => $asset->assigned_to])]) }}
+                                    </p>
 
-                                $now = Carbon::now();
-                                $purchaseCarbon = $asset->purchase_date ? Carbon::parse($asset->purchase_date) : null;
+                                    <form action="{{ route('asset.checkin.force', $asset) }}" method="POST" class="form-inline" style="display: inline;">
+                                        {{ csrf_field() }}
+                                        {{ method_field('POST') }}
+                                        <button class="btn btn-sm btn-danger btn-block hidden-print" type="submit" data-tooltip="true" data-placement="top" data-title="{{ trans('general.force_checkin') }}">
+                                            <x-icon type="checkin" class="fa-fw"/>
+                                            {{ trans('general.force_checkin') }}
+                                        </button>
+                                    </form>
 
-                                // EOL percentage: elapsed since purchase / total EOL period
-                                $eolPercent = 0;
-                                if ($purchaseCarbon && $asset->asset_eol_date) {
-                                    $eolPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths($asset->asset_eol_date)
-                                    );
-                                }
-
-                                // Depreciation percentage: elapsed since purchase / total depreciation period
-                                $deprPercent = 0;
-                                $deprDate = $asset->depreciated_date();
-                                if ($purchaseCarbon && $deprDate) {
-                                    $deprPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths(Carbon::instance($deprDate))
-                                    );
-                                }
-
-                                // Warranty percentage: elapsed since purchase / total warranty period
-                                $warrantyPercent = 0;
-                                if ($purchaseCarbon && $asset->warranty_expires) {
-                                    $warrantyPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths($asset->warranty_expires)
-                                    );
-                                }
-                            @endphp
+                                </x-well>
+                            @endif
 
 
-                            @if($asset->purchase_date || $asset->asset_eol_date || $deprDate || $asset->warranty_expires)
+                            @if(($asset->purchase_date && $asset->asset_eol_date) || $asset->depreciated_date() || $asset->warranty_expires)
                                 <x-well class="well-sm">
                                     @if($asset->purchase_date && $asset->asset_eol_date)
-                                        <x-progressbar use_well="false" columns="12" text="{{ trans('general.device_eol') }}" :percent="$eolPercent">
-                                        <strong>{{ (int) Carbon::now()->diffInMonths($asset->asset_eol_date, true) }}</strong>
-                                            /{{ $asset->model?->eol }} {{ trans('general.months') }}
+                                        <x-progressbar use_well="false" columns="12" text="{{ trans('general.device_eol') }}" :percent="$asset->eolProgressPercent()">
+                                            (<strong>{{ (int) Carbon::now()->diffInMonths($asset->asset_eol_date, true) }}</strong>/{{ $asset->model?->eol }} {{ trans('general.months') }})
                                         </x-progressbar>
                                     @endif
 
-                                    @if($deprDate)
-                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.fully_depreciated')" :percent="$deprPercent">
-                                            {{ Helper::getFormattedDateObject($deprDate->format('Y-m-d'), 'date', false) }}
+                                    @if($asset->depreciated_date())
+                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.fully_depreciated')" :percent="$asset->depreciationProgressPercent()">
+                                            {{ Helper::getFormattedDateObject($asset->depreciated_date()->format('Y-m-d'), 'date', false) }}
                                         </x-progressbar>
                                     @endif
 
                                     @if($asset->warranty_expires)
-                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.warranty_expires')" :percent="$warrantyPercent">
+                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.warranty_expires')" :percent="$asset->warrantyProgressPercent()">
                                         {{ Helper::getFormattedDateObject($asset->warranty_expires, 'date', false) }}
                                         </x-progressbar>
                                     @endif
@@ -442,8 +422,15 @@
             <x-box class="side-box expanded">
                 <x-info-panel :infoPanelObj="$asset" img_path="{{ app('assets_upload_url') }}">
                     <x-slot:buttons>
+
+                        @if (!$asset->assignedTo)
                         <x-button.checkout permission="checkout" :item="$asset" :route="route('hardware.checkout.create', $asset->id)"/>
-                        <x-button.checkin permission="checkin" :item="$asset" :route="route('hardware.checkin.create', $asset->id)"/>
+                        @endif
+
+                        @if (!$asset->hasOrphanedAssignment())
+                            <x-button.checkin permission="checkin" :item="$asset" :route="route('hardware.checkin.create', $asset->id)"/>
+                        @endif
+
                         <x-button.edit :item="$asset" :route="route('hardware.edit', $asset->id)"/>
                         <x-button.clone :item="$asset" :route="route('clone/hardware', $asset->id)"/>
                         <x-button.note :item="$asset" :route="route('clone/hardware', $asset->id)"/>

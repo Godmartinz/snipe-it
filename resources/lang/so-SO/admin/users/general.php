@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Noocyada faylalka la oggol yahay waa png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, iyo rar.',
     'history_user' => 'Taariikhda :name',
     'info' => 'Xog',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Riix halkan si aad u soo celiso.',
     'last_login' => 'Gelidii u dambaysay',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

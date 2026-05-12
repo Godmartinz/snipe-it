@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'asset_maintenances' => 'Asset Maintenances',
+    'asset_maintenances' => 'सम्पत्ति मर्मतसम्भारहरू',
     'edit' => 'Edit Asset Maintenance',
     'delete' => 'Delete Asset Maintenance',
     'view' => 'View Asset Maintenance Details',

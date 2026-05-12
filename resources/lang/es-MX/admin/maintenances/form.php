@@ -2,13 +2,13 @@
 
 return [
     'select_type' => 'Seleccione Tipo de Mantenimiento',
-    'asset_maintenance_type' => 'Tipo de mantenimiento del activo',
+    'asset_maintenance_type' => 'Tipo',
     'title' => 'Cargo',
     'start_date' => 'Fecha de inicio',
     'completion_date' => 'Fecha de finalización',
     'cost' => 'Costo',
     'is_warranty' => 'Mejora de la garantía',
-    'asset_maintenance_time' => 'Duración del mantenimiento (en días)',
+    'asset_maintenance_time' => 'Duration',
     'notes' => 'Notas',
     'update' => 'Actualizar mantenimiento del activo',
     'create' => 'Crear mantenimiento del activo',

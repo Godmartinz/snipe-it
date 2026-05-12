@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Isticmaalahan waa la tirtiray Waa inaad soo celisaa isticmaalahan si aad wax uga beddesho ama ugu meelayso hanti cusub.',
     'ldap_not_configured' => 'Isku dhafka LDAP looma habeynin rakibaaddan.',
     'password_resets_sent' => 'Isticmaalayaasha la doortay ee shaqaysiiyay oo wata ciwaanno iimayl sax ah ayaa loo diray isku xidhka dib u dejinta erayga sirta ah.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Isku xirka dib u dejinta erayga sirta ah ayaa loo diray :email!',
     'user_has_no_email' => 'Isticmaalahaan kuma laha ciwaanka iimaylka profile kooda.',
     'log_record_not_found' => 'Diiwaanka diiwaanka u dhigma ee isticmaalaha waa la heli waayay.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Isticmaalaha si guul leh ayaa loo hakiyay.',
         'restored' => 'Isticmaalaha si guul leh ayaa loo soo celiyay.',
         'import' => 'Isticmaalayaasha si guul leh ayaa loo soo dejiyay.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Waxaa jirtay arrin aan la hakin isticmaaluhu. Fadlan isku day mar kale.',
         'import' => 'Waxaa jirtay arin soo dejinta isticmaalayaasha Fadlan isku day mar kale.',
-        'asset_already_accepted' => 'Hantidan mar hore waa la aqbalay.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Waa inaad aqbashaa ama diiddaa hantidan.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Hantida aad isku dayday inaad aqbasho adiga laguma hubin.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Waa lagu xidhi kari waayay serfarka LDAP Fadlan ka hubi server-kaaga LDAP ee ku jira faylka habaynta LDAP. Khalad ka yimid Server LDAP:',
         'password_ldap' => 'Furaha koontada waxaa maamula LDAP/Hagaha Firfircoon. Fadlan la xidhiidh waaxda IT-ga si aad u bedesho eraygaaga sirta ah. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

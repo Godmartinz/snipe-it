@@ -9,7 +9,7 @@ return [
     'edit' => '编辑配件',
     'eula_text' => '分类的的最终用户许可协议',
     'eula_text_help' => '此字段允许您自定义的EULA（最终用户许可协议）为特定类型的资产。如果您所有资产只有一个EULA（最终用户许可协议），你可以检查下面的框中使用默认设置。',
-    'require_acceptance' => '要求用户确认接受这一类的资产。',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => '没有发现默认的EULA（最终用户许可协议）。请在设置中添加一个。',
     'total' => '共计',
     'remaining' => '可用',

@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Επιτρεπόμενοι τύποι αρχείων είναι png, gif, jpg, jpeg, doc, docx, pdf, txt, zip και rar.',
     'history_user' => 'Ιστορικό: όνομα',
     'info' => 'Πληροφορίες',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Κάντε κλικ εδώ για να τα επαναφέρετε.',
     'last_login' => 'Τελευταία σύνδεση',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

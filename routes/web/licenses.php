@@ -48,6 +48,8 @@ Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
             'getExportLicensesCsv',
         ]
     )->name('licenses.export');
+
+    Route::post('bulk/delete', [Licenses\BulkLicensesController::class, 'destroy'])->name('licenses.bulk.delete');
 });
 
 Route::resource('licenses', Licenses\LicensesController::class, [

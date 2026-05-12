@@ -101,6 +101,9 @@ return [
         'success' => 'دارایی ها با موفقیت در بررسی.',
         'user_does_not_exist' => 'آن کاربر نامعتبر است. لطفا دوباره سعی کنید.',
         'already_checked_in' => 'دارایی ها که در حال حاضر انتخاب شده است.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

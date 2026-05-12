@@ -9,7 +9,7 @@ return [
     'edit' => 'Izmeni atribute pribora',
     'eula_text' => 'Kategorija EULA',
     'eula_text_help' => 'Ovo polje vam omogućava da prilagodite svoje EULA-e za određene vrste opreme. Ako imate samo jedan EULA za svu vašu opremu, možete označiti donji box da bi koristitli osnovne postavke.',
-    'require_acceptance' => 'Od korisnika se zahteva potvrda da oprema pripada ovoj kategoriji.',
+    'require_acceptance' => 'Zahteva da korisnik potvrdi prihvatanje stavke u ovoj kategoriji.',
     'no_default_eula' => 'Nije pronadjena nijedna standardna EULA. Dodaj jednu u Postavke.',
     'total' => 'Ukupno',
     'remaining' => 'Raspoloživo',

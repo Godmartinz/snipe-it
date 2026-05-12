@@ -8,12 +8,12 @@ return [
 
     'create' => [
         'error' => 'Kategorijos sukurti nepavyko, badykite dar kartą.',
-        'success' => 'Kategorija sukurta sėkmingai.',
+        'success' => 'Kategorija sėkmingai sukurta.',
     ],
 
     'update' => [
         'error' => 'Kategorija nebuvo atnaujinta, bandykite dar kartą',
-        'success' => 'Kategorija atnaujinta sėkmingai.',
+        'success' => 'Kategorija sėkmingai atnaujinta.',
         'cannot_change_category_type' => 'Negalite pakeisti kategorijos tipo po to, kai ji jau buvo sukurta',
     ],
 

@@ -8,23 +8,23 @@ return [
 
     'create' => [
         'error' => 'Priedas nebuvo sukurtas, bandykite dar kartą.',
-        'success' => 'Priedas sukurtas sėkmingai.',
+        'success' => 'Priedas sėkmingai sukurtas.',
     ],
 
     'update' => [
         'error' => 'Priedas nebuvo atnaujintas, bandykite dar kartą',
-        'success' => 'Priedas atnaujintas sėkmingai.',
+        'success' => 'Priedas sėkmingai atnaujintas.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šį priedą?',
         'error' => 'Bandant panaikinti priedą įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Priedas panaikintas sėkmingai.',
+        'success' => 'Priedas sėkmingai panaikintas.',
     ],
 
     'checkout' => [
         'error' => 'Priedo nepavyko išduoti, bandykite dar kartą',
-        'success' => 'Priedas išduotas sėkmingai.',
+        'success' => 'Priedas sėkmingai išduotas.',
         'unavailable' => 'Priedo išduoti negalima. Patikrinkite likutį',
         'user_does_not_exist' => 'Neteisingas naudotojas. Bandykite dar kartą.',
         'checkout_qty' => [
@@ -35,7 +35,7 @@ return [
 
     'checkin' => [
         'error' => 'Priedas nebuvo paimtas, bandykite dar kartą',
-        'success' => 'Priedas paimtas sėkmingai.',
+        'success' => 'Priedas sėkmingai paimtas.',
         'user_does_not_exist' => 'Neteisingas naudotojas. Bandykite dar kartą.',
     ],
 

@@ -99,6 +99,9 @@ return [
         'success' => 'Hantida si guul leh ayaa loo hubiyay.',
         'user_does_not_exist' => 'Isticmaalahaasi waa khalad Fadlan isku day mar kale.',
         'already_checked_in' => 'Hantidaas mar horeba waa la hubiyay.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

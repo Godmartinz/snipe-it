@@ -8,18 +8,18 @@ return [
 
     'create' => [
         'error' => 'Būsenos žyma nebuvo sukurta, bandykite dar kartą.',
-        'success' => 'Būsenos žyma sukurta sėkmingai.',
+        'success' => 'Būsenos žyma sėkmingai sukurta.',
     ],
 
     'update' => [
         'error' => 'Būsenos žyma nebuvo atnaujinta, bandykite dar kartą',
-        'success' => 'Būsenos žyma atnaujinta sėkmingai.',
+        'success' => 'Būsenos žyma sėkmingai atnaujinta.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šią būsenos žymą?',
         'error' => 'Bandant panaikinti būsenos žymą įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Būsenos žyma panaikinta sėkmingai.',
+        'success' => 'Būsenos žyma sėkmingai panaikinta.',
     ],
 
     'help' => [

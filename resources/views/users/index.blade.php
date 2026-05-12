@@ -31,13 +31,13 @@
         <x-box>
             <x-table.users :route="route('api.users.index',
                 [
-                    'status' => e(request('status')),
+                    'status' => is_scalar(request('status')) ? request('status') : null,
                     'deleted'=> (request('status')=='deleted') ? 'true' : 'false',
-                    'company_id' => e(request('company_id')),
-                    'manager_id' => e(request('manager_id')),
-                    'admins' => e(request('admins')),
-                    'superadmins' => e(request('superadmins')),
-                    'activated' => e(request('activated')),
+                    'company_id' => is_scalar(request('company_id')) ? request('company_id') : null,
+                    'manager_id' => is_scalar(request('manager_id')) ? request('manager_id') : null,
+                    'admins' => is_scalar(request('admins')) ? request('admins') : null,
+                    'superadmins' => is_scalar(request('superadmins')) ? request('superadmins') : null,
+                    'activated' => is_scalar(request('activated')) ? request('activated') : null,
                ])"/>
         </x-box>
     </x-container>

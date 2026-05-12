@@ -22,7 +22,7 @@ return [
     'requested' => 'Talep edildi',
     'not_requestable' => 'Talep Edilemez',
     'requestable_status_warning' => 'Talep edilebilir durumu değiştirme',
-    'require_serial' => 'Require Serial Number',
+    'require_serial' => 'Seri Numarası Zorunlu',
     'require_serial_help' => 'Seri Numarası Gerekli.',
     'restore' => 'Demirbaşı Geri Getir',
     'pending' => 'Bekliyor',

@@ -17,6 +17,7 @@ return [
     'name' => 'Maqaa Rimiddii',
     'require_acceptance' => 'Itti gaafatamtoota gatii kana keessatti qindeessuu mirkaneessuuf itti gaafatamtoota dirqama qabaachuuf.',
     'required_acceptance' => 'This user will be emailed with a link to confirm acceptance of this item.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'This user will be emailed a copy of the EULA',
     'no_default_eula' => 'EULA duraa sirrii tokko hin argamne. Kaayyoo keessatti tokko dabalata.',
     'update' => 'Update Category',

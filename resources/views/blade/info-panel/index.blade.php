@@ -8,7 +8,7 @@
 <div class="box-header with-border" style="padding-top: 0;">
 
     @if (isset($buttons))
-        <div class="row hidden-print" style="padding-left: 5px">
+        <div class="row hidden-print" style="padding-left: 5px;">
             {{ $buttons }}
         </div>
     @endif
@@ -41,7 +41,7 @@
             @endif
 
                 <a href="{{ $infoPanelObj->getImageUrl($img_path) }}" data-toggle="lightbox" data-type="image">
-                    <img src="{{ $infoPanelObj->getImageUrl($img_path) }}" class="img-responsive img-thumbnail" alt="{{ $infoPanelObj->name }}" style="max-width: 300px !important; width: 100% !important; margin-bottom: 10px;">
+                    <img src="{{ $infoPanelObj->getImageUrl($img_path) }}" class="img-responsive img-thumbnail" alt="{{ $infoPanelObj->name }}" style="max-width: 300px !important; max-height: 300px !important;margin-bottom: 10px;">
             </a>
         </div>
         <br>
@@ -49,10 +49,12 @@
 
 
     @if ($infoPanelObj->present()->displayAddress)
-        <x-copy-to-clipboard class="pull-right" copy_what="address">
-            {!! nl2br($infoPanelObj->present()->displayAddress) !!}
-        </x-copy-to-clipboard>
-        <br><br>
+            <x-copy-to-clipboard class="pull-right" copy_what="address">
+                <div style="word-break: break-word; padding: 0; margin: 0">
+                    {!! nl2br($infoPanelObj->present()->displayAddress) !!}
+                </div>
+            </x-copy-to-clipboard>
+            <br>
     @endif
 
 
@@ -297,18 +299,36 @@
                 ({{ $infoPanelObj->depreciation->months.' '.trans('general.months')}})
             </x-info-element>
 
-            <x-info-element icon_type="depreciation-calendar" title="{{ trans('admin/hardware/form.fully_depreciated') }}">
+            <x-info-element icon_type="depreciation-calendar" class="{{ $infoPanelObj->depreciationProgressPercent() > 90 ? 'text-danger' : '' }}" title="{{ trans('admin/hardware/form.fully_depreciated') }}">
+                {{ trans('admin/hardware/form.fully_depreciated') }}
                 {{ Helper::getFormattedDateObject($infoPanelObj->depreciated_date(), 'date', false) }}
                 -
                 <span class="text-muted">{{ Carbon::parse($infoPanelObj->depreciated_date())->diffForHumans(['parts' => 2]) }}</span>
+                @if (method_exists($infoPanelObj, 'depreciationProgressPercent'))
+                    <span class="text-muted">
+                        ({{ (int) round($infoPanelObj->depreciationProgressPercent()) }}%)
+                    </span>
+                @endif
             </x-info-element>
         @endif
 
+
         @if ($infoPanelObj->eol)
-            <x-info-element icon_type="eol" title="{{ trans('general.eol') }}">
+            <x-info-element icon_type="eol" title="{{ trans('general.device_eol') }}">
                 {{ $infoPanelObj->eol .' '.trans('general.months') }}
             </x-info-element>
         @endif
+
+        @if ($infoPanelObj->asset_eol_date)
+            <x-info-element icon_type="depreciation-calendar" title="{{ trans('general.device_eol') }}">
+                {{ trans('general.device_eol') }}
+                {{ Helper::getFormattedDateObject($infoPanelObj->asset_eol_date, 'date', false) }}
+                -
+                <span class="text-muted">{{ Carbon::parse($infoPanelObj->asset_eol_date)->diffForHumans(['parts' => 2]) }}</span>
+
+            </x-info-element>
+        @endif
+
 
         @if ($infoPanelObj->email)
             <x-info-element icon_type="email" title="{{ trans('general.email') }}">
@@ -354,14 +374,6 @@
                 {{ $infoPanelObj->url }}
             </x-info-element.url>
         </x-info-element>
-
-        @if ($infoPanelObj->manufacturer)
-            <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
-                <x-info-element.url>
-                    {{ $infoPanelObj->present()->dynamicUrl($infoPanelObj->manufacturer->support_url) }}
-                </x-info-element.url>
-            </x-info-element>
-        @endif
 
 
         @if (($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))
@@ -492,7 +504,7 @@
 
         @if (isset($infoPanelObj->alert_on_response))
             <x-info-element>
-                @if ($infoPanelObj->require_acceptance == 1)
+                @if ($infoPanelObj->alert_on_response)
                     <x-icon type="checkmark" class="fa-fw text-success"  title="{{ trans('general.yes') }}"/>
                 @else
                     <x-icon type="x" class="fa-fw text-danger"  title="{{ trans('general.no') }}"/>

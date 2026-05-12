@@ -37,7 +37,7 @@ return [
         'authentication_success' => 'Usuario autenticado contra LDAP con éxito!',
     ],
     'labels' => [
-        'null_template' => 'Label template not found. Please select a template.',
+        'null_template' => 'Plantilla de etiqueta no encontrada. Por favor, seleccione una plantilla.',
     ],
     'webhook' => [
         'sending' => 'Enviando mensaje de prueba :app...',
@@ -53,7 +53,24 @@ return [
         'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
     ],
     'location_scoping' => [
-        'not_saved' => 'Your settings were not saved.',
+        'not_saved' => 'Tus ajustes no han sido guardados.',
         'mismatch' => 'There is 1 item in the database that need your attention before you can enable location scoping.|There are :count items in the database that need your attention before you can enable location scoping.',
+    ],
+    'oauth' => [
+        'token_revoked' => 'Personal access token revoked successfully.',
+        'token_unrevoked' => 'Personal access token reinstated successfully.',
+        'token_not_found' => 'That personal access token could not be found.',
+        'token_revoke_error' => 'An error occurred while revoking the token.',
+        'token_unrevoke_error' => 'Ocurrió un error mientras se restablecía el token.',
+        'client_created' => 'Cliente OAuth creado correctamente.',
+        'client_updated' => 'Cliente OAuth actualizado correctamente.',
+        'client_deleted' => 'Cliente OAuth eliminado correctamente.',
+        'client_revoked' => 'Cliente OAuth revocado correctamente.',
+        'client_unrevoked' => 'Cliente OAuth restablecido con éxito.',
+        'client_not_found' => 'El cliente OAuth no ha podido ser encontrado.',
+        'token_deleted' => 'Token revocado correctamente.',
+        'client_delete_denied' => 'No estás autorizado para eliminar este cliente.',
+        'client_edit_denied' => 'No estás autorizado para editar este cliente.',
+        'token_delete_denied' => 'No estás autorizado a revocar este token.',
     ],
 ];

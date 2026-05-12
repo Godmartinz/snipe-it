@@ -422,6 +422,40 @@ class UpdateAssetTest extends TestCase
         $this->assertEquals($asset->assigned_type, 'App\Models\User');
     }
 
+    public function test_update_rejects_cross_company_checkout_target_with_full_company_support_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $asset = Asset::factory()->for($companyA)->create(['name' => 'Original Name']);
+        $actorInCompanyA = User::factory()->editAssets()->for($companyA)->create();
+        $targetUserInCompanyB = User::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($actorInCompanyA)
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'name' => 'Name That Should Roll Back',
+                'assigned_user' => $targetUserInCompanyB->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $asset->refresh();
+
+        $this->assertEquals('Original Name', $asset->name);
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $targetUserInCompanyB->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+        ]);
+    }
+
     public function test_checkout_to_user_with_assigned_to_and_assigned_type()
     {
         $asset = Asset::factory()->create();

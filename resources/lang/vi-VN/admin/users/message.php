@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Người dùng này đã bị xóa. Bạn sẽ phải phục hồi người dùng này để chỉnh sửa nó hoặc khởi gán nó đến tài sản mới.',
     'ldap_not_configured' => 'Tích hợp LDAP thì chưa được cấu hình cho cài đặt này.',
     'password_resets_sent' => 'Những người dùng với trạng thái kích hoạt đã chọn và có địa chỉ email hợp lệ sẽ nhận được liên kết đặt lại mật khẩu.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Đường đẫn khôi phục mật khẩu được gửi đến :email!',
     'user_has_no_email' => 'Người dùng này không có địa chỉ email trong hồ sơ của họ.',
     'log_record_not_found' => 'Không thể tìm thấy bản ghi nhật ký phù hợp cho người dùng này.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Đã phục hồi người dùng bị tạm ngưng thành công.',
         'restored' => 'Người dùng đã được phục hồi thành công.',
         'import' => 'Nhập danh sách người dùng thành công.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Có vấn đề xảy ra khi phục hồi người dùng bị tạm ngưng. Xin thử lại.',
         'import' => 'Có vấn đề xảy ra khi nhập danh sách người dùng. Xin thử lại.',
-        'asset_already_accepted' => 'Tài sản này đã được chấp thuận.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Bạn phải chấp nhận hoặc từ chối tài sản này.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Nội dung bạn đã cố gắng chấp nhận không được kiểm tra cho bạn.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Không thể lấy các mục từ máy chủ LDAP. Xin vui lòng kiểm tra lại cấu hình máy chủ LDAP của bạn ở trong tập tin cấu hình LDAP. <br>Lỗi từ máy chủ LDAP:',
         'password_ldap' => 'Mật khẩu cho tài khoản này được quản lý bởi LDAP / Active Directory. Vui lòng liên hệ với bộ phận CNTT của bạn để thay đổi mật khẩu.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

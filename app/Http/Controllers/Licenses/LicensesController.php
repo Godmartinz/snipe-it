@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -388,6 +389,8 @@ class LicensesController extends Controller
 
                     fputcsv($handle, $headers);
 
+                    $formatter = new EscapeFormula('`');
+
                     foreach ($licenses as $license) {
                         // Add a new row with data
                         $values = [
@@ -419,7 +422,14 @@ class LicensesController extends Controller
                             $license->created_at,
                         ];
 
-                        fputcsv($handle, $values);
+                        // CSV_ESCAPE_FORMULAS is set to false in the .env
+                        if (config('app.escape_formulas') === false) {
+                            fputcsv($handle, $values);
+
+                            // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
+                        } else {
+                            fputcsv($handle, $formatter->escapeRecord($values));
+                        }
                     }
                 });
 

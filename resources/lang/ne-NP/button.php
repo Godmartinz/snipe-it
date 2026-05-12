@@ -3,7 +3,7 @@
 return [
     'actions' => 'Actions',
     'add' => 'Add New',
-    'cancel' => 'Cancel',
+    'cancel' => 'रद्द गर्नुहोस्',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Delete',
     'edit' => 'Edit',
@@ -18,7 +18,7 @@ return [
     'generate_labels' => '{1} Generate Label|[2,*] Generate Labels',
     'send_password_link' => 'Send Password Reset Link',
     'go' => 'Go',
-    'bulk_actions' => 'Bulk Actions',
+    'bulk_actions' => 'समूह कार्यहरू',
     'add_maintenance' => 'Add Maintenance',
     'append' => 'Append',
     'new' => 'New',

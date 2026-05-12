@@ -9,6 +9,7 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Transformers\DepartmentsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Company;
 use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,23 +51,23 @@ class DepartmentsController extends Controller
         }
 
         if ($request->filled('name')) {
-            $departments->where('name', '=', $request->input('name'));
+            $departments->where('departments.name', '=', $request->input('name'));
         }
 
         if ($request->filled('company_id')) {
-            $departments->where('company_id', '=', $request->input('company_id'));
+            $departments->where('departments.company_id', '=', $request->input('company_id'));
         }
 
         if ($request->filled('manager_id')) {
-            $departments->where('manager_id', '=', $request->input('manager_id'));
+            $departments->where('departments.manager_id', '=', $request->input('manager_id'));
         }
 
         if ($request->filled('location_id')) {
-            $departments->where('location_id', '=', $request->input('location_id'));
+            $departments->where('departments.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('tag_color')) {
-            $departments->where('tag_color', '=', $request->input('departments.tag_color'));
+            $departments->where('departments.tag_color', '=', $request->input('tag_color'));
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
@@ -111,6 +112,7 @@ class DepartmentsController extends Controller
     {
         $department = new Department;
         $department->fill($request->validated());
+        $department->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $department = $request->handleImages($department);
 
         $department->created_by = auth()->id();
@@ -155,6 +157,7 @@ class DepartmentsController extends Controller
         $this->authorize('update', Department::class);
         $department = Department::findOrFail($id);
         $department->fill($request->all());
+        $department->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $department = $request->handleImages($department);
 
         if ($department->save()) {

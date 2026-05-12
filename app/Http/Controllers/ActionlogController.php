@@ -15,6 +15,8 @@ class ActionlogController extends Controller
 {
     public function displaySig($filename): RedirectResponse|Response|bool
     {
+        $filename = basename((string) $filename);
+
         // PHP doesn't let you handle file not found errors well with
         // file_get_contents, so we set the error reporting for just this class
         error_reporting(0);
@@ -44,6 +46,7 @@ class ActionlogController extends Controller
 
     public function getStoredEula($filename): Response|BinaryFileResponse|RedirectResponse
     {
+        $filename = basename((string) $filename);
 
         if ($actionlog = Actionlog::where('filename', $filename)->with('user')->with('target')->firstOrFail()) {
 

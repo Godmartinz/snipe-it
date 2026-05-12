@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
+    'undeployable' => 'Los siguientes activos no se pueden desplegar y se han eliminado del checkout: :asset_tags',
     'does_not_exist' => 'El activo no existe.',
     'does_not_exist_var' => 'Activo con placa :asset_tag no encontrado.',
     'no_tag' => 'No se ha proporcionado ninguna placa de activo.',
@@ -20,9 +20,9 @@ return [
         'multi_success_linked' => 'Activo con etiqueta :links fue creado exitosamente.|:count activos fueron creados correctamente. :links.',
         'partial_failure' => 'No se ha podido crear un activo: Motivo: :failures|No se pudieron crear :count activos. Motivos: :failures',
         'target_not_found' => [
-            'user' => 'The assigned user could not be found.',
-            'asset' => 'The assigned asset could not be found.',
-            'location' => 'The assigned location could not be found.',
+            'user' => 'El usuario asignado no pudo ser encontrado.',
+            'asset' => 'No se ha encontrado el recurso asignado.',
+            'location' => 'No se pudo encontrar la ubicación asignada.',
         ],
     ],
 
@@ -70,7 +70,7 @@ return [
         'file_already_deleted' => 'El archivo seleccionado ya fue eliminado',
         'header_row_has_malformed_characters' => 'Uno o más atributos en la fila del encabezado contienen caracteres UTF-8 mal formados',
         'content_row_has_malformed_characters' => 'Uno o más atributos en la primera fila contienen caracteres UTF-8 mal formados',
-        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
+        'transliterate_failure' => 'La transliteración de :encoding a UTF-8 falló debido a caracteres no válidos en la entrada',
     ],
 
     'delete' => [
@@ -99,13 +99,16 @@ return [
         'success' => 'El activo fue ingresado exitosamente.',
         'user_does_not_exist' => 'Este usuario no es correcto. Por favor, inténtelo de nuevo.',
         'already_checked_in' => 'El equipo ya ha sido recibido.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 
     'requests' => [
-        'error' => 'Request was not successful, please try again.',
-        'success' => 'Request successfully submitted.',
-        'canceled' => 'Request successfully canceled.',
+        'error' => 'La solicitud no se realizó correctamente, por favor inténtelo de nuevo.',
+        'success' => 'Solicitud enviada con éxito.',
+        'canceled' => 'Petición cancelada con éxito.',
         'cancel' => 'Cancelar esta solicitud de elemento',
     ],
 

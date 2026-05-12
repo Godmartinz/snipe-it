@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\CheckoutAcceptance;
+use App\Models\CustomField;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\Group;
@@ -104,6 +105,35 @@ class EmailNotificationsToUserUponCheckoutTest extends TestCase
         $this->fireCheckoutEvent();
 
         $this->assertUserSentEmail();
+    }
+
+    public function test_email_includes_custom_fields_marked_show_in_email_and_not_encrypted()
+    {
+        $customField = CustomField::factory()->create([
+            'name' => 'Cost Center',
+            'show_in_email' => '1',
+            'field_encrypted' => '0',
+        ])->fresh();
+
+        $asset = Asset::factory()->hasMultipleCustomFields([$customField])->create();
+        $asset->{$customField->db_column} = 'ENG-42';
+        $asset->save();
+
+        $this->category = $asset->model->category;
+        $this->asset = $asset;
+        $this->user = User::factory()->create();
+
+        $this->category->update(['checkin_email' => true]);
+
+        $this->fireCheckoutEvent();
+
+        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+            $rendered = $mail->render();
+
+            return $mail->hasTo($this->user->email)
+                && str_contains($rendered, 'Cost Center')
+                && str_contains($rendered, 'ENG-42');
+        });
     }
 
     public function test_handles_user_not_having_email_address_set()

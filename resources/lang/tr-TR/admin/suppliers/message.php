@@ -19,8 +19,8 @@ return [
         'confirm' => 'Tedarikçiyi silmek istediğinize emin misiniz?',
         'error' => 'Tedarikçi silinirken bir hata oluştu. Lütfen tekrar deneyin.',
         'success' => 'Tedarikçi silindi.',
-        'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'not_found' => 'Tedarikçi bulunamadı.',
+        'bulk_success' => 'Tedarikçiler başarıyla silindi.',
         'partial_success' => '.',
     ],
 

@@ -46,6 +46,7 @@ class CheckForTwoFactor
                     return $next($request);
                 }
 
+                redirect()->setIntendedUrl(url()->full()); // save the 'current' URL so we can send the user back to it?
                 // Otherwise make sure they're enrolled and show them the 2FA code screen
                 if ((auth()->user()->two_factor_secret != '') && (auth()->user()->two_factor_enrolled == '1')) {
                     return redirect()->route('two-factor')->with('info', trans('auth/message.two_factor.enter_two_factor_code'));

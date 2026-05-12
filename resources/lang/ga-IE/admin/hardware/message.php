@@ -99,6 +99,9 @@ return [
         'success' => 'Seiceáil seiceáil go rathúil.',
         'user_does_not_exist' => 'Tá an úsáideoir neamhbhailí. Arís, le d\'thoil.',
         'already_checked_in' => 'Déantar an sócmhainn sin a sheiceáil cheana féin.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Amafayela afakiwe avunyelwe yi-png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, ne-rar.',
     'history_user' => 'Umlando wegama: igama',
     'info' => 'Ulwazi',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Chofoza lapha ukuze ubuyisele.',
     'last_login' => 'Ukungena ngemvume kokugcina',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

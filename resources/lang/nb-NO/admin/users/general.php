@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Gyldige filtyper er png, gif, jpg, jpeg, doc docx, pdf, txt, zip og rar.',
     'history_user' => 'Historikk for :name',
     'info' => 'Info',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Klikk her for å gjenopprette dem.',
     'last_login' => 'Siste innlogging',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

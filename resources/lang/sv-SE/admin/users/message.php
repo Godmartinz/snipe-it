@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Den här användaren har raderats. Du måste återställa den här användaren för att redigera eller tilldela nya tillgångar.',
     'ldap_not_configured' => 'LDAP-integrationen har inte konfigurerats för den här uppsättningen.',
     'password_resets_sent' => 'De valda användarna som är aktiverade och har en giltig e-postadress har skickats en länk för lösenordsåterställning.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'En återställningslänk för lösenord har skickats till :email!',
     'user_has_no_email' => 'Den här användaren har ingen e-postadress i sin profil.',
     'log_record_not_found' => 'Det gick inte att hitta en matchande logg för den här användaren.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Användare aktiverad.',
         'restored' => 'Användare återställd.',
         'import' => 'Användare importerades.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Den här användaren hanterar fortfarande en annan användare. Välj en annan ansvarig för den användaren först. Den här användaren hanterar fortfarande :count användare. Välj en annan ansvarig för dem först.',
         'unsuspend' => 'Det gick inte att aktivera användaren. Var god försök igen.',
         'import' => 'Det gick inte att importera användare. Var god försök igen.',
-        'asset_already_accepted' => 'Denna tillgång har redan godkänts.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Du måste antingen godkänna eller avböja den här tillgången.',
         'cannot_delete_yourself' => 'Vi skulle verkligen bli ledsna om du raderade ditt konto. Hoppas att du kan tänka om.',
         'incorrect_user_accepted' => 'Den tillgång du försökte acceptera har inte checkats ut till dig.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Det gick inte att erhålla värden från LDAP-servern. Kontrollera din LDAP-serverkonfiguration i LDAP-konfigurationsfilen. <br>Fel från LDAP-servern:',
         'password_ldap' => 'Lösenordet för det här kontot hanteras av LDAP/Active Directory. Vänligen kontakta din IT-ansvarige för att ändra ditt lösenord. ',
         'multi_company_items_assigned' => 'Denna användare har objekt tilldelade som tillhör ett annat företag. Vänligen checka in dem eller redigera deras företag.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

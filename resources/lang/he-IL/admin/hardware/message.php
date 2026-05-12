@@ -99,6 +99,9 @@ return [
         'success' => 'הנכס נבדק בהצלחה.',
         'user_does_not_exist' => 'משתמש זה אינו חוקי. בבקשה נסה שוב.',
         'already_checked_in' => 'הנכס כבר נבדק.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

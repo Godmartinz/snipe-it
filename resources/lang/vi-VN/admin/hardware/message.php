@@ -99,6 +99,9 @@ return [
         'success' => 'Tài sản đã checkin thành công.',
         'user_does_not_exist' => 'Người dùng này không tồn tại. Bạn hãy thử lại.',
         'already_checked_in' => 'Nội dung đó đã được kiểm tra.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -37,6 +37,9 @@ return [
         'confirm' => '确定删除这条许可信息？',
         'error' => '删除许可信息的过程中出现了一些问题，请重试。',
         'success' => '许可信息已经被成功删除。',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

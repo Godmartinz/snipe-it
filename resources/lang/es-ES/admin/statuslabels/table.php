@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'about' => 'About Status Types',
+    'about' => 'Sobre las Etiquetas de Estado',
     'archived' => 'Archivado',
     'create' => 'Crear etiqueta de estado',
     'color' => 'Color en el gráfico',

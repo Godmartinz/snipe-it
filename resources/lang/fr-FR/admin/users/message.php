@@ -2,11 +2,11 @@
 
 return [
 
-    'accepted' => 'You have successfully accepted this item.',
-    'declined' => 'You have successfully declined this item.',
+    'accepted' => 'Vous avez accepté cet élément avec succès.',
+    'declined' => 'Vous avez refusé cet élément avec succès.',
     'bulk_manager_warn' => 'Vos utilisateurs ont été mis à jour avec succès, mais votre entrée de gestionnaire n\'a pas été enregistrée, car le gestionnaire que vous avez sélectionné était également dans la liste d\'utilisateurs à éditer, et les utilisateurs peuvent ne pas être leur propre gestionnaire. Sélectionnez à nouveau vos utilisateurs, à l\'exclusion du gestionnaire.',
     'user_exists' => 'L\'utilisateur existe déjà !',
-    'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
+    'cannot_delete' => 'L\'utilisateur n\'existe pas ou vous n\'avez pas la permission de les supprimer.',
     'user_not_found' => 'L\'utilisateur n\'existe pas ou vous n\'avez pas la permission de les voir.',
     'user_login_required' => 'Le champ identifiant est obligatoire',
     'user_has_no_assets_assigned' => 'Aucun actif actuellement assigné à l\'utilisateur·trice.',
@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Cet utilisateur a été supprimé. Vous devez le restaurer pour pouvoir l\'éditer ou lui assigner de nouveaux actifs.',
     'ldap_not_configured' => 'L\'intégration LDAP n\'a pas été configuré pour cette installation .',
     'password_resets_sent' => 'Les utilisateurs sélectionnés qui sont activés et ont une adresse e-mail valide ont reçu un lien de réinitialisation du mot de passe.',
+    'not_activated' => 'Cet utilisateur ne peut pas se connecter, il ne peut donc pas accepter d\'actifs par e-mail.',
     'password_reset_sent' => 'Un lien de réinitialisation du mot de passe a été envoyé à :email!',
     'user_has_no_email' => 'Cet utilisateur n\'a pas renseigné d\'adresse e-mail dans son profil.',
     'log_record_not_found' => 'Impossible de trouver un enregistrement de log correspondant à cet utilisateur.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'L’utilisateur a été activé avec succès.',
         'restored' => 'L’utilisateur a été restauré avec succès.',
         'import' => 'Les utilisateurs ont été importés correctement.',
+        'acceptance_reminder_sent' => 'Rappel d\'acceptation envoyé pour :count élément en attente.|Rappel d\'acceptation envoyé pour :count éléments en attente.',
     ],
 
     'error' => [
@@ -53,7 +55,8 @@ return [
         'ldap_could_not_search' => 'Impossible de rechercher le serveur LDAP . S\'il vous plaît vérifier la configuration de votre serveur LDAP dans le fichier de configuration LDAP . <br> Erreur de serveur LDAP :',
         'ldap_could_not_get_entries' => 'Impossible d\'obtenir les entrées du serveur LDAP . S\'il vous plaît vérifier la configuration de votre serveur LDAP dans le fichier de configuration LDAP . <br> Erreur de serveur LDAP :',
         'password_ldap' => 'Le mot de passe de ce compte est géré par LDAP / Active Directory. Veuillez contacter votre service informatique pour changer votre mot de passe.',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'multi_company_items_assigned' => 'Cet utilisateur a des actifs assignés qui appartiennent à une autre société. Veuillez les vérifier ou modifier leur société.',
+        'no_pending_acceptances' => 'Cet utilisateur n\'a pas d\'approbation en attente pour le rappeler.',
     ],
 
     'deletefile' => [

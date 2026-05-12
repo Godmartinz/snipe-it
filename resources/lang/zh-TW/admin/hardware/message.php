@@ -99,6 +99,9 @@ return [
         'success' => '繳回資產成功。',
         'user_does_not_exist' => '無效使用者，請重試。',
         'already_checked_in' => '資產已繳回。',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

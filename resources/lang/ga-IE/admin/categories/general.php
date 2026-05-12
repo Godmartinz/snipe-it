@@ -17,6 +17,7 @@ return [
     'name' => 'Ainm Chatagóir',
     'require_acceptance' => 'A cheangal ar úsáideoirí a chinntiú go nglacfar le sócmhainní sa chatagóir seo.',
     'required_acceptance' => 'Cuirfear nasc chuig an úsáideoir seo le do thoil chun a dheimhniú go nglacfar leis an mír seo.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Cuirfear cóip den EULA ar an ríomhphost chuig an úsáideoir seo',
     'no_default_eula' => 'Níor aimsíodh aon réamhshocraithe EULA. Cuir ceann amháin i Socruithe.',
     'update' => 'Catagóir Nuashonraithe',

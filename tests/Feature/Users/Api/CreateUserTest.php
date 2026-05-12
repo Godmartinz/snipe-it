@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
@@ -64,7 +65,7 @@ class CreateUserTest extends TestCase
     {
         Notification::fake();
 
-        $this->actingAsForApi(User::factory()->createUsers()->create())
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
             ->postJson(route('api.users.store'), [
                 'first_name' => 'Test First Name',
                 'last_name' => 'Test Last Name',
@@ -74,6 +75,7 @@ class CreateUserTest extends TestCase
                 'activated' => '1',
                 'email' => 'foo@example.org',
                 'notes' => 'Test Note',
+                'avatar' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAEsAQMAAADXeXeBAAAABlBMVEX+AAD///+KQee0AAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH5QQbCAoNcoiTQAAAACZJREFUaN7twTEBAAAAwqD1T20JT6AAAAAAAAAAAAAAAAAAAICnATvEAAEnf54JAAAAAElFTkSuQmCC',
             ])
             ->assertStatusMessageIs('success')
             ->assertOk();
@@ -85,10 +87,17 @@ class CreateUserTest extends TestCase
             'activated' => '1',
             'email' => 'foo@example.org',
             'notes' => 'Test Note',
-
         ]);
 
         Notification::assertNothingSent();
+
+        $user = User::findOrFail($response['payload']['id']);
+
+        // assert against resized hash
+        $this->assertEquals(
+            'db2e13ba04318c99058ca429d67777322f48566b',
+            sha1(Storage::disk('public')->get(app('users_upload_path').$user->avatar))
+        );
     }
 
     public function test_can_create_and_notify_user()

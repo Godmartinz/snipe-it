@@ -99,6 +99,9 @@ return [
         'success' => 'Demirbaş girişi yapıldı.',
         'user_does_not_exist' => 'Bu kullanıcı geçersiz. Lütfen tekrar deneyin.',
         'already_checked_in' => 'Bu varlık zaten atanmış.',
+        'force_checkin_orphaned_success' => 'Geçersiz atama başarıyla temizlendi.',
+        'force_checkin_not_orphaned' => 'Öğe geçersiz bir atama durumunda değil.',
+        'force_checkin_error' => 'Geçersiz atama temizlenemedi.',
 
     ],
 

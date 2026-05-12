@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => '用户已经被删除，您需要恢复这个用户才能对其进行编辑或者分配新资产。',
     'ldap_not_configured' => '本次安装过程中未启用LDAP集成。',
     'password_resets_sent' => '密码重置链接已发送给符合以下条件的已选用户：已激活且邮箱地址有效。',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => '密码重置链接已发送至 :email!',
     'user_has_no_email' => '此用户的个人资料中没有电子邮件地址。',
     'log_record_not_found' => '找不到该用户匹配的日志记录。',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => '用户解除停用',
         'restored' => '用户成功被恢复。',
         'import' => '导入用户成功',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => '此用户仍在管理另一个用户，请先为该用户选择另一个经理。 |此用户仍然管理着 :count 个用户。请先为他们选择另一个经理。',
         'unsuspend' => '恢复停用用户的过程中出现了一点儿问题，请重试。',
         'import' => '导入用户出现问题。请再试一次。',
-        'asset_already_accepted' => '资产已被接受',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => '你必须选择接受或者拒绝该资产。',
         'cannot_delete_yourself' => '如果您删除自己，我们会觉得很难过，请您重新考虑。',
         'incorrect_user_accepted' => '您正尝试接受的资产未被分配与您',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => '从LDAP服务器获取信息条目失败，请检查LDAP配置文件中的相关设置。<br>LDAP服务器错误信息:',
         'password_ldap' => '此帐户的密码由LDAP / Active Directory管理。请联系您的IT部门更改您的密码。',
         'multi_company_items_assigned' => '该用户被分配的物品属于另一家公司。请归还它们或编辑它们所在的公司。',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

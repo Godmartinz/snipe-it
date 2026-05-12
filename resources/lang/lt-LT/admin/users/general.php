@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Leidžiami failų tipai yra: png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar.',
     'history_user' => ':name naudotojo istorija',
     'info' => 'Informacija',
+    'send_acceptance_reminder' => 'Siųsti priminimą',
+    'unaccepted_items' => ':count nepriimti daiktai',
     'restore_user' => 'Spustelėkite čia, kad juos atkurtumėte.',
     'last_login' => 'Paskutinis prisijungimas',
     'ldap_config_text' => 'Pasirinkta vieta bus nustatyta VISIEMS importuotiems naudotojams. Kadangi tai perrašys jų esamą vietą, įprastais atvejais tai nėra naudojama, todėl geriausia šį lauką palikti tuščią.',

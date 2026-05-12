@@ -9,8 +9,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
+use App\Mail\UnacceptedAssetReminderMail;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\Group;
 use App\Models\Setting;
@@ -22,7 +24,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -436,6 +440,7 @@ class UsersController extends Controller
             'accessories',
             'licenses',
             'userloc',
+            'groups',
         ])
             ->withTrashed()
             ->find($user->id);
@@ -446,6 +451,7 @@ class UsersController extends Controller
         return view('users/view', [
             'user' => $user,
             'settings' => Setting::getSettings(),
+            'effectivePermissionsBySection' => $user->getEffectivePermissionsBySection(),
         ]);
     }
 
@@ -567,6 +573,8 @@ class UsersController extends Controller
 
                     fputcsv($handle, $headers);
 
+                    $formatter = new EscapeFormula('`');
+
                     foreach ($users as $user) {
                         $user_groups = '';
 
@@ -609,7 +617,14 @@ class UsersController extends Controller
                             $user->created_at,
                         ];
 
-                        fputcsv($handle, $values);
+                        // CSV_ESCAPE_FORMULAS is set to false in the .env
+                        if (config('app.escape_formulas') === false) {
+                            fputcsv($handle, $values);
+
+                            // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
+                        } else {
+                            fputcsv($handle, $formatter->escapeRecord($values));
+                        }
                     }
                 });
 
@@ -634,32 +649,16 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::where('id', $id)
-            ->with([
-                'assets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.defaultLoc',
-                'assets.assignedAssets.location',
-                'assets.assignedAssets.model.category',
-                'assets.defaultLoc',
-                'assets.location',
-                'assets.model.category',
-                'accessories.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'accessories.category',
-                'accessories.manufacturer',
-                'consumables.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'consumables.category',
-                'consumables.manufacturer',
-                'licenses.category',
-            ])
-            ->withTrashed()
-            ->first();
+        $user = User::withInventoryRelations($id)->first();
+
+        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
 
         if ($user) {
             $this->authorize('view', $user);
 
             return view('users.print')
                 ->with('users', [$user])
+                ->with('indirectItemsCount', $indirectItemsCount)
                 ->with('settings', Setting::getSettings());
         }
 
@@ -698,6 +697,48 @@ class UsersController extends Controller
 
         return redirect()->back()->with('error', trans('admin/users/message.user_not_found', ['id' => $id]));
 
+    }
+
+    /**
+     * Resend pending acceptance reminder email for a specific user.
+     */
+    public function resendAcceptanceReminder(User $user): RedirectResponse
+    {
+        $this->authorize('view', $user);
+
+        if (empty($user->email)) {
+            return redirect()->back()->with('error', trans('admin/users/message.user_has_no_email'));
+        }
+
+        if ($user->activated == '0') {
+            return redirect()->back()->with('error', trans('admin/users/message.not_activated'));
+        }
+
+        $pendingItems = $user->getAssignedItemsWithPendingAcceptance();
+
+        if ($pendingItems->isEmpty()) {
+            return redirect()->back()->with('warning', trans('admin/users/message.error.no_pending_acceptances'));
+        }
+
+        $firstAcceptance = CheckoutAcceptance::query()
+            ->forUser($user)
+            ->pending()
+            ->with('assignedTo')
+            ->first();
+
+        if (! $firstAcceptance) {
+            return redirect()->back()->with('warning', trans('admin/users/message.error.no_pending_acceptances'));
+        }
+
+        $mailable = new UnacceptedAssetReminderMail($firstAcceptance, $pendingItems->count());
+
+        if (! empty($user->locale)) {
+            $mailable->locale($user->locale);
+        }
+
+        Mail::to($user->email)->send($mailable);
+
+        return redirect()->back()->with('success', trans_choice('admin/users/message.success.acceptance_reminder_sent', $pendingItems->count(), ['count' => $pendingItems->count()]));
     }
 
     /**

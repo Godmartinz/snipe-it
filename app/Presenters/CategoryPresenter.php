@@ -59,8 +59,16 @@ class CategoryPresenter extends Presenter
             ], [
                 'field' => 'has_eula',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
                 'title' => trans('admin/categories/table.eula_text'),
+                'visible' => false,
+                'formatter' => 'trueFalseFormatter',
+            ],
+            [
+                'field' => 'use_default_eula',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('admin/settings/general.default_eula_text'),
                 'visible' => false,
                 'formatter' => 'trueFalseFormatter',
             ], [
@@ -76,13 +84,6 @@ class CategoryPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/categories/table.require_acceptance'),
-                'visible' => true,
-                'formatter' => 'trueFalseFormatter',
-            ], [
-                'field' => 'use_default_eula',
-                'searchable' => false,
-                'sortable' => true,
-                'title' => trans('admin/categories/general.use_default_eula_column'),
                 'visible' => true,
                 'formatter' => 'trueFalseFormatter',
             ], [

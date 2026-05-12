@@ -99,6 +99,9 @@ return [
         'success' => 'ตรวจสอบเนื้อหาเรียบร้อยแล้ว',
         'user_does_not_exist' => 'ผู้ใช้รายนั้นไม่ถูกต้อง กรุณาลองอีกครั้ง.',
         'already_checked_in' => 'มีการตรวจสอบเนื้อหาดังกล่าวแล้ว',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

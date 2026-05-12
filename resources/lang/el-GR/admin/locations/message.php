@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Αυτή η τοποθεσία είναι αυτήν τη στιγμή γονέας τουλάχιστον μιας τοποθεσίας παιδιού και δεν μπορεί να διαγραφεί. Ενημερώστε τις τοποθεσίες σας ώστε να μην αναφέρονται πλέον σε αυτήν την τοποθεσία και δοκιμάστε ξανά.',
     'assigned_assets' => 'Αντιστοιχισμένα Στοιχεία Ενεργητικού',
     'current_location' => 'Τρέχουσα Τοποθεσία',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

@@ -9,7 +9,7 @@ return [
     'edit' => 'Hlela Ukufinyelela',
     'eula_text' => 'Isigaba EULA',
     'eula_text_help' => 'Le nsimu ikuvumela ukuthi wenze ngezifiso ama-EULA akho ngezinhlobo ezithile zezimpahla. Uma unayo i-EULA eyodwa yezimpahla zakho zonke, ungabheka ibhokisi elingezansi ukuthi usebenzise okuzenzakalelayo okuzenzakalelayo.',
-    'require_acceptance' => 'Idinga ukuthi abasebenzisi baqinisekise ukwamukelwa kwezimpahla kulesi sigaba.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ayikho i-EULA eyimfihlo eyatholakala. Engeza eyodwa kuzilungiselelo.',
     'total' => 'Inani',
     'remaining' => 'Kukhona',

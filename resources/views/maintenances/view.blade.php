@@ -10,7 +10,7 @@ use Carbon\Carbon;
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 {{-- Page content --}}
@@ -22,6 +22,7 @@ use Carbon\Carbon;
                 <x-slot:tabnav>
                     <x-tabs.details-tab/>
                     <x-tabs.files-tab :item="$maintenance" count="{{ $maintenance->uploads()->count() }}"/>
+                    <x-tabs.history-tab count="{{ $maintenance->history()->count() }}" :model="$maintenance"/>
                     <x-tabs.upload-tab :item="$maintenance"/>
                 </x-slot:tabnav>
 
@@ -162,6 +163,10 @@ use Carbon\Carbon;
                         <x-table.files object_type="maintenances" :object="$maintenance"/>
                     </x-tabs.pane>
 
+                    <x-tabs.pane name="history">
+                        <x-table.history :model="$maintenance" :route="route('api.maintenances.history', $maintenance)"/>
+                    </x-tabs.pane>
+
                 </x-slot:tabpanes>
             </x-tabs>
 
@@ -185,7 +190,7 @@ use Carbon\Carbon;
 
 
 @section('moar_scripts')
-    @can('files', $maintenance->asset)
+    @can('files', $maintenance)
         @include ('modals.upload-file', ['item_type' => 'maintenances', 'item_id' => $maintenance->id])
     @endcan
 

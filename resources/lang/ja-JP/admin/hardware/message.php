@@ -99,6 +99,9 @@ return [
         'success' => '資産は正常にチェックインされました。',
         'user_does_not_exist' => 'その利用者は不正です。もう一度、やり直して下さい。',
         'already_checked_in' => 'その資産はすでにチェックインしています。',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

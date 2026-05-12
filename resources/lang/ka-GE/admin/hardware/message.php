@@ -99,6 +99,9 @@ return [
         'success' => 'ინვენტარი გაცემა წარმატებით განხორციელდა.',
         'user_does_not_exist' => 'მომხმარებელი არასწორია. გთხოვთ სცადოთ თავიდან.',
         'already_checked_in' => 'ეს ინვენტარი უკვე ჩაბარებულია.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

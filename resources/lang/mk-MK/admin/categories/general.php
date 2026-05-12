@@ -17,6 +17,7 @@ return [
     'name' => 'Име на категорија',
     'require_acceptance' => 'Барајте корисниците да потврдат прифаќање на основни средства од оваа категорија.',
     'required_acceptance' => 'На корисникот ќе му биде испратена врска по е-пошта за да потврди прифаќање на ова средство.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'На корисникот ќе му бидат испратени Условите за користење по е-пошта',
     'no_default_eula' => 'Не се пронајдени стандардни Услови за користење. Внесете го во Поставки.',
     'update' => 'Уреди категорија',

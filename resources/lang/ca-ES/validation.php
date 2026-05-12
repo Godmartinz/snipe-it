@@ -232,7 +232,7 @@ return [
 
     'attributes' => [
         'serials.*' => 'Serial Number',
-        'asset_tags.*' => 'Etiqueta de Recurs',
+        'asset_tags.*' => 'Etiqueta de recurs',
     ],
 
     /*

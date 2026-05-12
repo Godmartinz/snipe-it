@@ -99,6 +99,9 @@ return [
         'success' => 'Eigninni var skilað.',
         'user_does_not_exist' => 'Þessi notandi er ónothæfur, vinsamlegast reyndu aftur.',
         'already_checked_in' => 'Þessari eign hefur þegar verið skilað.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

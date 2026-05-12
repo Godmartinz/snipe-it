@@ -9,7 +9,7 @@ return [
     'edit' => 'I-edit ang Aksesorya',
     'eula_text' => 'Ang Kategorya ng EULA',
     'eula_text_help' => 'Ang field na. ito ay nagpahintulot sa iyo na mag-customize ng iyong EULA para sa partikular na mga uri ng mga asset. Kapag ikaw ay mayroon lamang isang EULA sa lahat ng iyong mga asset, maaari mong i-check ang kahon o bax sa ibaba para gamitin ang pangunahing default.',
-    'require_acceptance' => 'Nangangailangan sa mga gumagamit o user na i-komperma ang pagtanggap ng mga asset sa kategoryang ito.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Walang nakitang pangunahing default ng EULA. Magdagdag ng isa sa mga setting.',
     'total' => 'Ang kabuuan',
     'remaining' => 'Kumuha',

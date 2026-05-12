@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7ad2fea76ed176b9a86ba5eeb0b07557",
+    "content-hash": "3ad09b8be28e9a805ed3c1cc51c9ffaa",
     "packages": [
         {
             "name": "alek13/slack",
@@ -74,29 +74,30 @@
         },
         {
             "name": "arietimmerman/laravel-scim-server",
-            "version": "dev-bump_to_laravel_12",
+            "version": "dev-scimv2_with_logging",
             "source": {
                 "type": "git",
                 "url": "https://github.com/grokability/laravel-scim-server.git",
-                "reference": "ad5b8a706eeade1c042118c2ec3a4b3a749991e9"
+                "reference": "dfef93c7344be3c3c255d54694e182c5ec784bab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/grokability/laravel-scim-server/zipball/ad5b8a706eeade1c042118c2ec3a4b3a749991e9",
-                "reference": "ad5b8a706eeade1c042118c2ec3a4b3a749991e9",
+                "url": "https://api.github.com/repos/grokability/laravel-scim-server/zipball/dfef93c7344be3c3c255d54694e182c5ec784bab",
+                "reference": "dfef93c7344be3c3c255d54694e182c5ec784bab",
                 "shasum": ""
             },
             "require": {
-                "illuminate/console": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/database": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "php": "^7.0|^8.0",
+                "illuminate/console": "^10.0|^11.0|^12.0",
+                "illuminate/database": "^10.0|^11.0|^12.0",
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "php": "^8.0",
                 "tmilos/scim-filter-parser": "^1.3",
                 "tmilos/scim-schema": "^0.1.0"
             },
             "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.66",
                 "laravel/legacy-factories": "*",
-                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0"
+                "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0"
             },
             "type": "library",
             "extra": {
@@ -130,9 +131,9 @@
             ],
             "description": "Laravel Package for creating a SCIM server",
             "support": {
-                "source": "https://github.com/grokability/laravel-scim-server/tree/bump_to_laravel_12"
+                "source": "https://github.com/grokability/laravel-scim-server/tree/scimv2_with_logging"
             },
-            "time": "2026-03-17T14:09:21+00:00"
+            "time": "2026-05-12T11:17:15+00:00"
         },
         {
             "name": "aws/aws-crt-php",
@@ -1746,12 +1747,12 @@
             "version": "v6.11.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/firebase/php-jwt.git",
+                "url": "https://github.com/googleapis/php-jwt.git",
                 "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
+                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
                 "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
                 "shasum": ""
             },
@@ -6070,30 +6071,31 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "v1.22.0",
+            "version": "v1.26.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "35f1adb388946d92e6edab2aa2cb2b60e132ebd5"
+                "reference": "09c2e5949d676286358a62af818f8407167a9dd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/35f1adb388946d92e6edab2aa2cb2b60e132ebd5",
-                "reference": "35f1adb388946d92e6edab2aa2cb2b60e132ebd5",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/09c2e5949d676286358a62af818f8407167a9dd6",
+                "reference": "09c2e5949d676286358a62af818f8407167a9dd6",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.2 || ^2.0",
-                "php": "^7.4 || 8.0.* || 8.1.* || 8.2.* || 8.3.* || 8.4.*",
-                "phpdocumentor/reflection-docblock": "^5.2",
-                "sebastian/comparator": "^3.0 || ^4.0 || ^5.0 || ^6.0 || ^7.0",
-                "sebastian/recursion-context": "^3.0 || ^4.0 || ^5.0 || ^6.0 || ^7.0"
+                "php": "8.2.* || 8.3.* || 8.4.* || 8.5.*",
+                "phpdocumentor/reflection-docblock": "^5.2 || ^6.0",
+                "sebastian/comparator": "^3.0 || ^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0",
+                "sebastian/recursion-context": "^3.0 || ^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/deprecation-contracts": "^2.5 || ^3.1"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.40",
-                "phpspec/phpspec": "^6.0 || ^7.0",
-                "phpstan/phpstan": "^2.1.13",
-                "phpunit/phpunit": "^8.0 || ^9.0 || ^10.0"
+                "php-cs-fixer/shim": "^3.93.1",
+                "phpspec/phpspec": "^6.0 || ^7.0 || ^8.0",
+                "phpstan/phpstan": "^2.1.13, <2.1.34 || ^2.1.39",
+                "phpunit/phpunit": "^11.0 || ^12.0 || ^13.0"
             },
             "type": "library",
             "extra": {
@@ -6134,9 +6136,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpspec/prophecy/issues",
-                "source": "https://github.com/phpspec/prophecy/tree/v1.22.0"
+                "source": "https://github.com/phpspec/prophecy/tree/v1.26.1"
             },
-            "time": "2025-04-29T14:58:06+00:00"
+            "time": "2026-04-13T14:35:16+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",

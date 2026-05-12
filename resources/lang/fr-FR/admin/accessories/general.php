@@ -9,7 +9,7 @@ return [
     'edit' => 'Modifier l\'accessoire',
     'eula_text' => 'License de catégorie',
     'eula_text_help' => 'Ce champ vous permet de configurer vos licenses d\'utilisation pour chaque type d\'items. Si vous avez seulement une license pour tout vos items, vous pouvez cochez la case ci-dessous pour utiliser celle par défaut.',
-    'require_acceptance' => 'L\'utilisateur doit confirmer qu\'il accepte les items dans cette catégorie.',
+    'require_acceptance' => 'L\'utilisateur·trice doit confirmer l\'acceptation de l\'élément dans cette catégorie.',
     'no_default_eula' => 'Aucune licence d\'utilisation par défaut trouvée. Ajoutez-en une dans la section "Réglages".',
     'total' => 'Total',
     'remaining' => 'Dispo',

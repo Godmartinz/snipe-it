@@ -17,6 +17,7 @@ return [
     'name' => 'ชื่อหมวดหมู่',
     'require_acceptance' => 'กำหนดให้ผู้ใช้ยืนยันยอมรับสินทรัพย์ในหมวดหมู่นี้',
     'required_acceptance' => 'ผู้ใช้นี้จะสามารถส่งอีเมล ด้วยลิงค์เพื่อการยืนยันยอมรับรายการนี้',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'ผู้ใช้นี้จะส่งอีเมลสำเนาของ EULA',
     'no_default_eula' => 'ไม่พบข้อกำหนดการใช้งานหลักใดๆ ในการตั้งค่า',
     'update' => 'ปรับปรุงแก้ไขหมวดหมู่',

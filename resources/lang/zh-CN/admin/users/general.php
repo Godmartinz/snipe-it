@@ -14,6 +14,8 @@ return [
     'filetype_info' => '允许的文件类型有： png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar',
     'history_user' => ':name的历史',
     'info' => '信息',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => '单击此处可将其还原。',
     'last_login' => '上一次登陆',
     'ldap_config_text' => '所选位置将被设置给所有导入的用户，这会覆盖他们已有的位置信息。这是一个不常见的使用场景，因此通常建议将此项留空。',

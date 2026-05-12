@@ -17,6 +17,7 @@ return [
     'name' => 'Nome Categoria',
     'require_acceptance' => 'Richiedi che gli utenti confermino l\'accettazione di Beni di questa Categoria.',
     'required_acceptance' => 'Verrà inviata un\'email all\'utente con un link per confermare l\'accettazione dell\'oggetto.',
+    'global_signature_required_notice' => 'Le firme utente al momento sono richieste globalmente tramite impostazioni admin, perciò le firme verranno ancora richieste a prescindere dall\'impostazione di questa categoria se l\'articolo è assegnato a un utente (piuttosto che a una Sede, ecc...).',
     'required_eula' => 'Verrà inviata all\'utente una copia di questa EULA via email',
     'no_default_eula' => 'Non è stata trovata un\'EULA predefinita. Aggiungine una nelle impostazioni.',
     'update' => 'Aggiorna Categoria',

@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'This user has been deleted. You will have to restore this user to edit them or assign them new assets.',
     'ldap_not_configured' => 'LDAP integration has not been configured for this installation.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'User was successfully unsuspended.',
         'restored' => 'User was successfully restored.',
         'import' => 'Users imported successfully.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'There was an issue unsuspending the user. Please try again.',
         'import' => 'There was an issue importing users. Please try again.',
-        'asset_already_accepted' => 'This asset has already been accepted.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'You must either accept or decline this asset.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'The asset you have attempted to accept was not checked out to you.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Could not get entries from the LDAP server. Please check your LDAP server configuration in the LDAP config file. <br>Error from LDAP Server:',
         'password_ldap' => 'The password for this account is managed by LDAP/Active Directory. Please contact your IT department to change your password. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

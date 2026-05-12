@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Käyttäjä on jo poistettu. Mikäli haluat muokata tai luovuttaa laitteita hänelle sinun tulee palauttaa käyttäjä.',
     'ldap_not_configured' => 'LDAP-integraatiota ei ole määritetty tähän asennukseen.',
     'password_resets_sent' => 'Salasanan resetointilinkki on lähetetty niille käyttäjille, joille on määritetty voimassa oleva sähköpostiosoite.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Salasanan palautuslinkki on lähetetty osoitteeseen :email!',
     'user_has_no_email' => 'Tällä käyttäjällä ei ole sähköpostiosoitetta heidän profiilissaan.',
     'log_record_not_found' => 'Tälle käyttäjälle ei löytynyt vastaavaa lokitietuetta.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Käyttäjän jäädytys poistettiin onnistuneesti.',
         'restored' => 'Käyttäjä palautettiin onnistuneesti.',
         'import' => 'Käyttäjät tuotiin onnistuneesti.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Käyttäjän jäädytyksen poistossa tapahtui virhe. Yritä uudelleen.',
         'import' => 'Käyttäjien tuonnissa tapahtui virhe, Yritä uudelleen.',
-        'asset_already_accepted' => 'Tämä laite on jo hyväksytty.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Sinun on joko hyväksyttävä tai hylättävä tämä laite.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Laitetta jota yritit hyväksyä, ei luovutettu sinulle.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'LDAP-palvelimelta ei palautunut kohteita. Tarkista LDAP-palvelimen määritys. <br>LDAP-palvelimen virhe:',
         'password_ldap' => 'Tätä salasanaa hallinnoi LDAP / Active Directory. Vaihda salasanasi IT-osastolla.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

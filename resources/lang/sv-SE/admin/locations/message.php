@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Denna plats är för närvarande överliggande för minst en annan plats och kan inte tas bort. Vänligen uppdatera dina platser så dom inte längre refererar till denna och försök igen.',
     'assigned_assets' => 'Tilldelade tillgångar',
     'current_location' => 'Nuvarande plats',
-    'open_map' => 'Öppna i :map_provider_icon Kartor',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

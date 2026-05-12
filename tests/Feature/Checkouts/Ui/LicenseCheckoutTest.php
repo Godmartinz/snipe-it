@@ -3,6 +3,7 @@
 namespace Tests\Feature\Checkouts\Ui;
 
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\User;
@@ -123,5 +124,46 @@ class LicenseCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('hardware.show', $asset));
+    }
+
+    public function test_license_checkout_page_post_redirects_to_signature_page_when_sign_in_place_is_checked()
+    {
+        $targetUser = User::factory()->create();
+        $seat = LicenseSeat::factory()->requiringAcceptance()->create();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->from(route('licenses.checkout', $seat->license))
+            ->post(route('licenses.checkout', $seat->license), [
+                'assigned_to' => $targetUser->id,
+                'redirect_option' => 'index',
+                'sign_in_place' => 1,
+            ]);
+
+        $acceptance = CheckoutAcceptance::query()
+            ->where('checkoutable_type', LicenseSeat::class)
+            ->where('assigned_to_id', $targetUser->id)
+            ->pending()
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($acceptance);
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('account.accept.item', $acceptance));
+    }
+
+    public function test_license_checkout_stores_sign_in_place_preference_in_session()
+    {
+        $targetUser = User::factory()->create();
+        $seat = LicenseSeat::factory()->create();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->post(route('licenses.checkout', $seat->license), [
+                'assigned_to' => $targetUser->id,
+                'redirect_option' => 'index',
+                'sign_in_place' => 1,
+            ]);
+
+        $response->assertSessionHas('sign_in_place', true);
     }
 }

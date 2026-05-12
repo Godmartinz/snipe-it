@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Tvarkyti priedų failus',
-        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su priedais susijusius failus.',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su priedais susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Tvarkyti turto failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su turtu susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Tvarkyti naudotojų failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su naudotojais susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Tvarkyti modelių failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su turto modeliais susietus failus tiek modelio rodinyje, tiek turto rodinio ekranuose. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Tvarkyti skyrių failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su skyriais susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Tvarkyti tiekėjų failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su tiekėjais susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Tvarkyti vietų failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su vietomis susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Tvarkyti įmonės failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su įmone susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Tvarkyti eksploatacinių medžiagų failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su eksploatacinėmis medžiagomis susietus failus. (Tai turi prasmę tik tada, kai suteiktos peržiūros ar aukštesnės teisės.)',
+    ],
+
     'consumables' => [
         'name' => 'Eksploatacinės medžiagos',
         'note' => 'Suteikia prieigą prie programos Eksploatacinių medžiagų skilties.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Išduoti eksploatacines medžiagas',
         'note' => 'Priskirti inventoriuje esančias eksploatacines medžiagas, jas išduodant.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Tvarkyti eksploatacinių medžiagų failus',
-        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su eksploatacinėmis medžiagomis susijusius failus.',
-    ],
+
     'licenses' => [
         'name' => 'Licencijos',
         'note' => 'Suteikia prieigą prie programos Licencijų skilties.',
@@ -159,8 +197,13 @@ return [
     ],
     'licensesfiles' => [
         'name' => 'Tvarkyti licencijų failus',
-        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su licencijomis susijusius failus.',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su licencijomis susietus failus.',
     ],
+    'componentsfiles' => [
+        'name' => 'Tvarkyti komponentų failus',
+        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su komponentais susietus failus.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Tvarkyti licencijų raktus',
         'note' => 'Leidžia naudotojui peržiūrėti su licencijomis susietus produkto kodus.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Ištrinti komponentus',
     ],
-    'componentsfiles' => [
-        'name' => 'Tvarkyti komponentų failus',
-        'note' => 'Leidžia naudotojui įkelti, atsisiųsti ir ištrinti su komponentais susijusius failus.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Išduoti komponentus',
         'note' => 'Priskirti inventoriuje esančius komponentus, juos išduodant.',

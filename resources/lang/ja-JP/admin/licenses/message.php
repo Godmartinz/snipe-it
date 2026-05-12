@@ -37,6 +37,9 @@ return [
         'confirm' => 'このライセンスを削除してもよろしいですか？',
         'error' => 'ライセンスを削除する際に問題が発生しました。もう一度、やり直して下さい。',
         'success' => 'ライセンスが削除されました。',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

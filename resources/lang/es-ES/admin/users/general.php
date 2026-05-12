@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Tipos de archivos permitidos son png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, y rar.',
     'history_user' => 'Historial de :name',
     'info' => 'Información',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Haga clic aquí para restaurarlos.',
     'last_login' => 'Último acceso',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',
@@ -55,6 +57,6 @@ return [
     'all_assigned_list_generation' => 'Generado el:',
     'email_user_creds_on_create' => '¿Enviar las credenciales por correo electrónico a este usuario?',
     'department_manager' => 'Department Manager',
-    'generate_password' => 'Generate random password',
+    'generate_password' => 'Generar contraseña aleatoria',
     'individual_override' => 'This user has at least one individual permission set, which may override group permissions.',
 ];

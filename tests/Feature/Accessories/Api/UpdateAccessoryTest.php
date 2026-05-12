@@ -55,6 +55,40 @@ class UpdateAccessoryTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertEquals('New Name', $accessoryC->fresh()->name);
     }
 
+    public function test_prevents_cross_tenant_company_reassignment_when_fmcs_enabled()
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $accessory = Accessory::factory()->for($companyA)->create();
+        $userInCompanyA = User::factory()->for($companyA)->editAccessories()->create();
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $this->actingAsForApi($userInCompanyA)
+            ->patchJson(route('api.accessories.update', $accessory), [
+                'company_id' => $companyB->id,
+            ])
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($companyA->id, $accessory->fresh()->company_id);
+    }
+
+    public function test_allows_superuser_company_reassignment_when_fmcs_enabled()
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $accessory = Accessory::factory()->for($companyA)->create();
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $this->actingAsForApi($superuser)
+            ->patchJson(route('api.accessories.update', $accessory), [
+                'company_id' => $companyB->id,
+            ])
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($companyB->id, $accessory->fresh()->company_id);
+    }
+
     public function test_can_update_accessory_via_patch()
     {
         [$categoryA, $categoryB] = Category::factory()->count(2)->create();

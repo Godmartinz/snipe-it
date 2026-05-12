@@ -5,15 +5,15 @@ return [
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šį turto aptarnavimą?',
         'error' => 'Bandant panaikinti turto aptarnavimą įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Turto aptarnavimas panaikintas sėkmingai.',
+        'success' => 'Turto aptarnavimo įrašas sėkmingai panaikintas.',
     ],
     'create' => [
         'error' => 'Turto aptarnavimas nebuvo sukurtas, bandykite dar kartą.',
-        'success' => 'Turto aptarnavimas sukurtas sėkmingai.',
+        'success' => 'Turto aptarnavimo įrašas sėkmingai sukurtas.',
     ],
     'edit' => [
         'error' => 'Turto aptarnavimas nebuvo pakeistas, bandykite dar kartą.',
-        'success' => 'Turto aptarnavimas redaguotas sėkmingai.',
+        'success' => 'Turto aptarnavimo įrašas sėkmingai redaguotas.',
     ],
     'asset_maintenance_incomplete' => 'Nebaigta',
     'warranty' => 'Garantinis',

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Dieser Ort ist aktuell mindestens einem anderen Ort übergeordnet und kann nicht gelöscht werden. Bitte Orte aktualisieren, so dass dieser Standort nicht mehr verknüpft ist und erneut versuchen. ',
     'assigned_assets' => 'Zugeordnete Assets',
     'current_location' => 'Aktueller Standort',
-    'open_map' => 'Öffnen in :map_provider_icon Karten',
     'deleted_warning' => 'Dieser Standort wurde gelöscht. Bitte stellen Sie ihn wieder her, bevor Sie Änderungen vornehmen.',
 
     'create' => [

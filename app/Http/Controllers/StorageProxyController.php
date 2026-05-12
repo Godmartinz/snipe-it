@@ -17,6 +17,10 @@ class StorageProxyController extends Controller
      */
     public function show(string $path): Response|StreamedResponse
     {
+        if ($this->hasPathTraversalSegments($path)) {
+            abort(404);
+        }
+
         $disk = Storage::disk('public');
 
         // The S3 adapter includes the disk's root prefix in generated URLs,
@@ -70,5 +74,17 @@ class StorageProxyController extends Controller
         }
 
         return false;
+    }
+
+    private function hasPathTraversalSegments(string $path): bool
+    {
+        $normalizedPath = str_replace('\\', '/', $path);
+
+        return str_contains($normalizedPath, "\0")
+            || str_starts_with($normalizedPath, '/')
+            || str_contains($normalizedPath, '../')
+            || str_contains($normalizedPath, '/..')
+            || str_ends_with($normalizedPath, '/..')
+            || $normalizedPath === '..';
     }
 }

@@ -37,6 +37,9 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang lisensyang ito?',
         'error' => 'Mayroong isyu sa pag-delete ng lisensya. Mangyaring subukang muli.',
         'success' => 'Matagumpay na nai-delete ang lisensya.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

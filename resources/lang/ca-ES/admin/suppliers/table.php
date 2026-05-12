@@ -12,7 +12,7 @@ return [
     'email' => 'Email',
     'fax' => 'Fax',
     'id' => 'ID',
-    'licenses' => 'Licenses',
+    'licenses' => 'Llicències',
     'name' => 'Supplier Name',
     'notes' => 'Notes',
     'phone' => 'Phone',

@@ -13,6 +13,7 @@ enum ActionType: string
     // Assets/Accessories/Components/Licenses/Consumables
     case Checkout = 'checkout';
     case CheckinFrom = 'checkin from';
+    case ForceCheckin = 'force checkin';
     case Requested = 'requested';
     case RequestCanceled = 'request canceled';
     case Accepted = 'accepted';

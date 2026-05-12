@@ -5,6 +5,6 @@ return [
     'id' => 'ID',
     'parent' => 'Parent',
     'require_acceptance' => 'Acceptance',
-    'title' => 'Asset Category Name',
+    'title' => 'Nom de categoria d\'actius',
 
 ];

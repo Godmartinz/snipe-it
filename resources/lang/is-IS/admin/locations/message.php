@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'This location is currently the parent of at least one child location and cannot be deleted. Please update your locations to no longer reference this location and try again. ',
     'assigned_assets' => 'Skráðar eignir',
     'current_location' => 'Núverandi staðsetning',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

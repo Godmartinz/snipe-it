@@ -228,6 +228,8 @@ class Asset extends Depreciable
     protected $searchableRelationAliases = [
         'status_label' => 'status',
         'assigned_to' => 'assignedTo',
+        'model_number' => 'model',
+        'rtd_location' => 'defaultLoc',
     ];
 
     protected static function booted(): void
@@ -516,7 +518,7 @@ class Asset extends Depreciable
      *
      * @return bool
      */
-    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null)
+    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null, bool $signInPlace = false)
     {
         if (! $target) {
             return false;
@@ -560,7 +562,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = auth()->user();
             }
-            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues));
+            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues, 1, $signInPlace));
 
             $this->increment('checkout_counter', 1);
 
@@ -1265,6 +1267,38 @@ class Asset extends Depreciable
     public function getComponentCost()
     {
         return (float) $this->components->sum('calculated_purchase_cost');
+    }
+
+    /**
+     * Return EOL progress percentage (0-100), based on elapsed months since
+     * purchase date over the configured EOL window.
+     */
+    public function eolProgressPercent(): float
+    {
+        if (! $this->purchase_date || ! $this->asset_eol_date) {
+            return 0.0;
+        }
+
+        return $this->calculateProgressPercent(
+            start: Carbon::parse($this->purchase_date),
+            end: Carbon::parse($this->asset_eol_date),
+        );
+    }
+
+    /**
+     * Return warranty progress percentage (0-100), based on elapsed months
+     * since purchase date over the warranty window.
+     */
+    public function warrantyProgressPercent(): float
+    {
+        if (! $this->purchase_date || ! $this->warranty_expires) {
+            return 0.0;
+        }
+
+        return $this->calculateProgressPercent(
+            start: Carbon::parse($this->purchase_date),
+            end: $this->warranty_expires,
+        );
     }
 
     public function getAccessoryCost()
@@ -2133,5 +2167,17 @@ class Asset extends Depreciable
         return $query->join('models', 'assets.model_id', '=', 'models.id')
             ->join('depreciations', 'models.depreciation_id', '=', 'depreciations.id')->where('models.depreciation_id', '=', $search);
 
+    }
+
+    /**
+     * Determines if the asset has an orphaned assignment where the assigned target no longer exists.
+     * This occurs when:
+     * 1. assigned_to is set but assigned_type is missing/null
+     * 2. assigned_to and assigned_type are both set, but the relationship cannot be resolved (target was hard-deleted)
+     */
+    public function hasOrphanedAssignment(): bool
+    {
+        return ($this->assigned_to && ! $this->assigned_type)
+            || ($this->assigned_to && $this->assigned_type && ! $this->assignedTo);
     }
 }

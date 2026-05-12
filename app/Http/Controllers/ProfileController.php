@@ -211,14 +211,19 @@ class ProfileController extends Controller
      */
     public function printInventory(): View
     {
-        $show_users = User::where('id', auth()->user()->id)->get();
+        $userId = auth()->id();
 
-        return view('users/print')
-            ->with('assets', auth()->user()->assets())
-            ->with('licenses', auth()->user()->licenses()->get())
-            ->with('accessories', auth()->user()->accessories()->get())
-            ->with('consumables', auth()->user()->consumables()->get())
-            ->with('users', $show_users)
+        $show_user = User::withInventoryRelations($userId)->first();
+
+        $indirectItemsCount =
+            $show_user->assets->flatMap->assignedAssets->count()
+            + $show_user->assets->flatMap->components->count()
+            + $show_user->assets->flatMap->licenses->count()
+            + $show_user->assets->flatMap->assignedAccessories->count();
+
+        return view('users.print')
+            ->with('users', [$show_user])
+            ->with('indirectItemsCount', $indirectItemsCount)
             ->with('settings', Setting::getSettings());
     }
 
@@ -251,6 +256,7 @@ class ProfileController extends Controller
 
     public function getStoredEula($filename): Response|BinaryFileResponse|RedirectResponse
     {
+        $filename = basename((string) $filename);
 
         $logentry = Actionlog::where('filename', $filename)->first();
 

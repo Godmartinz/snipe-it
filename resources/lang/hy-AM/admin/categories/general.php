@@ -17,6 +17,7 @@ return [
     'name' => 'Կատեգորիայի անվանումը',
     'require_acceptance' => 'Պահանջել օգտատերերի հաստատումը այս կատեգորիայի ակտիվների համար։',
     'required_acceptance' => 'Այս օգտատիրոջը կուղարկվի էլ․ նամակ՝ տվյալ տարրի ընդունումը հաստատելու հղումով։',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Այս օգտատիրոջը կուղարկվի EULA-ի պատճենը էլ․ նամակով',
     'no_default_eula' => 'Առաջնային EULA չկա. Ավելացրեք Կարգավորումների միջոցով։',
     'update' => 'Թարմացնել կատեգորիան',

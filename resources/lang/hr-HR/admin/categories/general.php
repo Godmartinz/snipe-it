@@ -17,6 +17,7 @@ return [
     'name' => 'Naziv kategorije',
     'require_acceptance' => 'Tražite korisnike da potvrdite prihvaćanje imovine u ovoj kategoriji.',
     'required_acceptance' => 'Korisniku će se poslati veza za potvrdu prihvaćanja ove stavke.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Ovaj će korisnik biti poslana kopijom EULA',
     'no_default_eula' => 'Nisu pronađeni primarni standardni EULA. Dodajte jednu u Postavke.',
     'update' => 'Kategorija ažuriranja',

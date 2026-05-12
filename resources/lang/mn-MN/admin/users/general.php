@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Зөвшөөрөгдсөн filetypes нь png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, and rar.',
     'history_user' => 'Түүх: нэр',
     'info' => 'Мэдээлэл',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Тэднийг сэргээхийн тулд энд дарна уу.',
     'last_login' => 'Сүүлчийн Нэвтрэх',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

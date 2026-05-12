@@ -9,7 +9,7 @@ return [
     'edit' => 'Lisaseadme muutmine',
     'eula_text' => 'EULA kategooria',
     'eula_text_help' => 'See väli lubab teil oma kindlat liiki varasid EULA-de kohandada. Kui teil on kogu oma vara ainult üks EULA, võite esmase vaikimisi kasutamisel allpool olevat kasti märkida.',
-    'require_acceptance' => 'Nõuavad kasutajatel kinnitada selle kategooria varade vastuvõtmist.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ei leitud esmast vaikimisi EULA-d. Lisage üksus seadetes.',
     'total' => 'Kokku',
     'remaining' => 'Kätt',

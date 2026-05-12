@@ -9,6 +9,7 @@ return [
         'am-ET' => 'crwdns11934:0crwdne11934:0',
         'af-ZA' => 'crwdns11936:0crwdne11936:0',
         'ar-SA' => 'crwdns11938:0crwdne11938:0',
+        'hy-AM' => 'crwdns14740:0crwdne14740:0',
         'bg-BG' => 'crwdns11940:0crwdne11940:0',
         'zh-CN' => 'crwdns10572:0crwdne10572:0',
         'zh-TW' => 'crwdns10574:0crwdne10574:0',

@@ -99,6 +99,9 @@ return [
         'success' => 'Artigo devolvido com sucesso.',
         'user_does_not_exist' => 'O utilizador é inválido. Por favor, tente novamente.',
         'already_checked_in' => 'Este artigo já foi devolvido.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

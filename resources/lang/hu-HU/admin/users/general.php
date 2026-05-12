@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Az engedélyezett fájltípusok png, gif, jpg, jpeg, doc, docx, pdf, txt, zip és rar.',
     'history_user' => 'Előzmények a következőhöz: név',
     'info' => 'Info',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Kattintson ide a visszaállításhoz.',
     'last_login' => 'Utolsó bejelentkezés',
     'ldap_config_text' => 'A kiválasztott helyszín MINDEN importált felhasználóhoz beállításra kerül. Ez felülírja a meglévő helyszínüket, és ez nem tipikus használati eset, ezért általában az a legjobb, ha ezt üresen hagyja.',

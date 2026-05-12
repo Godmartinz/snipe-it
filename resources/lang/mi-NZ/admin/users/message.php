@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Kua mukua tenei kaiwhakamahi. Me whakahou e koe tenei kaiwhakamahi ki te whakatika i aua mea, ki te tuku ranei i nga taonga hou.',
     'ldap_not_configured' => 'Ko te whakaurutanga LDAP kua kore i whirihorahia mo tenei whakauru.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'I tino angitu te Kaiwhakamahi.',
         'restored' => 'I angitu te ora o te Kaiwhakamahi.',
         'import' => 'He pai te kawemai o nga kaiwhakamahi.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'He raruraru kaore i te whakautu i te kaiwhakamahi. Tena ngana ano.',
         'import' => 'He raruraru e kawemai ana i nga kaiwhakamahi. Tena ngana ano.',
-        'asset_already_accepted' => 'Kua whakaaetia tenei taonga.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Me whakaae ranei koe ki te whakakore i tenei taonga.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Ko te taonga i whaia e koe ki te whakaae kihai i tukuna ki a koe.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Kāore i taea te tiki tuhinga mai i te tūmau LDAP. Titiro koa ki te whirihoranga o tō tūmau LDAP i te kōnae whirihora LDAP. <br>Error mai i te Tūmau LDAP:',
         'password_ldap' => 'Ko te kupuhipa mo tenei kaute kei te whakahaeretia e LDAP / Active Directory. Tēnā whakapā atu ki tō tari IT hei huri i tō kupuhipa.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

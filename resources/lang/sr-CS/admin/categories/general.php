@@ -17,6 +17,7 @@ return [
     'name' => 'Naziv kategorije',
     'require_acceptance' => 'Zahteva se od korisnika da potvrdi prpadnost imovine ovoj kategoriji.',
     'required_acceptance' => 'Korisniku će biti poslati email sa linkom za potvrdu prihvatanja ove stavke.',
+    'global_signature_required_notice' => 'Potpisi korisnika su trenutno globalno obavezujući putem administratorskih postavki, tako da će potpisi biti neophodni bez obzira od postavke ove kategorije ako je stavka zadužena korisniku (u odnosu na lokaciju, itd.).',
     'required_eula' => 'Korisniku će biti poslat email sa kopijom EULA',
     'no_default_eula' => 'Nije pronadjena default EULA. Dodajte jednu u Postavkama, (Settings).',
     'update' => 'Ažuriraj Kategoriju',

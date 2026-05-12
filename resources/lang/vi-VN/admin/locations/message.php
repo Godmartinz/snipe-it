@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Địa phương này hiện tại là cấp parent của ít nhật một địa phương con và không thể xóa. Xin vui lòng cập nhật địa phương của bạn để không liên kết đến địa phương này và thử lại. ',
     'assigned_assets' => 'Tài sản được giao',
     'current_location' => 'Vị trí hiện tại',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

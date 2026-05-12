@@ -1629,10 +1629,20 @@ class Helper
 
         // return to assignment target
         if ($redirect_option == 'target') {
+            $userId = $request->assigned_user ?? $checkedInFrom;
+            $locationId = $request->assigned_location ?? $checkedInFrom;
+            $assetId = $request->assigned_asset ?? $checkedInFrom;
+
             return match ($checkout_to_type) {
-                'user' => redirect()->route('users.show', $request->assigned_user ?? $checkedInFrom),
-                'location' => redirect()->route('locations.show', $request->assigned_location ?? $checkedInFrom),
-                'asset' => redirect()->route('hardware.show', $request->assigned_asset ?? $checkedInFrom),
+                'user' => $userId
+                    ? redirect()->route('users.show', $userId)
+                    : redirect()->route('users.index'),
+                'location' => $locationId
+                    ? redirect()->route('locations.show', $locationId)
+                    : redirect()->route('locations.index'),
+                'asset' => $assetId
+                    ? redirect()->route('hardware.show', $assetId)
+                    : redirect()->route('hardware.index'),
             };
         }
 

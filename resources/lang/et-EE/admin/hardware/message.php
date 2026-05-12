@@ -99,6 +99,9 @@ return [
         'success' => 'Vara on edukalt kontrollitud',
         'user_does_not_exist' => 'See kasutaja on kehtetu. Palun proovi uuesti.',
         'already_checked_in' => 'See vara on juba sisse registreeritud.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

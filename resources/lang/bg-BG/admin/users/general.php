@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Позволените типове файлове са png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, и rar.',
     'history_user' => 'История за :name',
     'info' => 'Информация',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Кликнете тук, за да ги възстановите.',
     'last_login' => 'Последен достъп до системата',
     'ldap_config_text' => 'Избраното местоположение ще бъде настроено за вички импортирани потребители. Това ще промени тяхното текущо местоположение, препоръчително е да оставите това поле празно.',

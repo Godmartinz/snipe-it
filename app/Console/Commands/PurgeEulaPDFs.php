@@ -15,7 +15,9 @@ class PurgeEulaPDFs extends Command
      * @var string
      */
     protected $signature = 'snipeit:purge-eula-pdfs  
-                            {--older-than-days= : The number of days we should delete before } 
+                            {--older-than-days= : The number of days we should delete before }
+                            {--company-id= : Only purge acceptances for users in this company}
+                            {--only-deleted-users : Only purge acceptances for deleted users, including soft-deleted or missing users}
                             {--force : Skip the interactive yes/no prompt for confirmation}
                             {--dryrun : Show the records that would be deleted but don\'t update the database or delete files from disk}
                             {--with-output : Display the results in a table in your console}';
@@ -55,7 +57,34 @@ class PurgeEulaPDFs extends Command
             $this->info('This script is being run with the --dryrun option. No files or records will be deleted.');
 
         }
-        $acceptances = CheckoutAcceptance::HasFiles()->where('updated_at', '<', $interval_date)->with('assignedTo')->get();
+        $companyId = $this->option('company-id');
+        $query = CheckoutAcceptance::HasFiles()->where('updated_at', '<', $interval_date)
+            ->with([
+                'assignedTo' => function ($query) {
+                    $query->withTrashed();
+                },
+            ]);
+
+        if ($this->option('only-deleted-users')) {
+            $query->where(function ($query) use ($companyId) {
+                $query->whereHas('assignedTo', function ($q) use ($companyId) {
+                    $q->withTrashed()->whereNotNull('deleted_at');
+
+                    if ($companyId) {
+                        $q->where('company_id', $companyId);
+                    }
+                });
+
+                $query->orWhereDoesntHave('assignedTo');
+            });
+        } else {
+            if ($companyId) {
+                $query->whereHas('assignedTo', function ($query) use ($companyId) {
+                    $query->withTrashed()->where('company_id', $companyId);
+                });
+            }
+        }
+        $acceptances = $query->get();
 
         if (! $this->option('force')) {
             if ($this->confirm("\n****************************************************\nTHIS WILL DELETE ALL OF THE SIGNATURES AND EULA PDF FILES SINCE $interval_date. \nThere is NO undo! \n****************************************************\n\nDo you wish to continue? No backsies! [y|N]")) {

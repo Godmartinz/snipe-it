@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'La Sede contiene almeno un\'altra Sede, pertanto non può essere eliminata. Aggiorna le Sedi in modo che non siano parte di questa Sede e riprova. ',
     'assigned_assets' => 'Beni Assegnati',
     'current_location' => 'Sede attuale',
-    'open_map' => 'Apri con :map_provider_icon Maps',
     'deleted_warning' => 'Questa Sede è stata eliminata. Prima di provare a fare modifiche, ricorda di ripristinarla.',
 
     'create' => [

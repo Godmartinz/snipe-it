@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'crwdns1391:0crwdne1391:0',
     'history_user' => 'crwdns1129:0crwdne1129:0',
     'info' => 'crwdns1848:0crwdne1848:0',
+    'send_acceptance_reminder' => 'crwdns14710:0crwdne14710:0',
+    'unaccepted_items' => 'crwdns14712:0crwdne14712:0',
     'restore_user' => 'crwdns1912:0crwdne1912:0',
     'last_login' => 'crwdns1130:0crwdne1130:0',
     'ldap_config_text' => 'crwdns14248:0crwdne14248:0',

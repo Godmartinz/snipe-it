@@ -17,6 +17,7 @@ return [
     'name' => 'Numele categoriei',
     'require_acceptance' => 'Solicitați utilizatorilor să confirme acceptarea activelor din această categorie.',
     'required_acceptance' => 'Acest utilizator va fi trimis prin e-mail cu un link pentru a confirma acceptarea acestui articol.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Acest utilizator va primi prin e-mail o copie a EULA',
     'no_default_eula' => 'Nu a fost găsit niciun acord EULA implicit primar. Adăugați unul în Setări.',
     'update' => 'Actualizeaza categorie',

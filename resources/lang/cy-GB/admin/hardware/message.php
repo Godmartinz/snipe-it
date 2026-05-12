@@ -99,6 +99,9 @@ return [
         'success' => 'Ased wedi nodi i mewn yn llwyddiannus.',
         'user_does_not_exist' => 'Nid yw\'r defnyddiwr yna yn ddilys. Ceisiwch eto o. g. y. dd.',
         'already_checked_in' => 'Ased wedi nodi i mewn yn gywir.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -17,6 +17,7 @@ return [
     'name' => 'Kategorie Naam',
     'require_acceptance' => 'Vereis gebruikers om die aanvaarding van bates in hierdie kategorie te bevestig.',
     'required_acceptance' => 'Hierdie gebruiker sal per e-pos met \'n skakel gestuur word om die aanvaarding van hierdie item te bevestig.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Hierdie gebruiker sal \'n afskrif van die EULA ontvang',
     'no_default_eula' => 'Geen primêre standaard EULA gevind nie. Voeg een by Instellings.',
     'update' => 'Opdateer kategorie',

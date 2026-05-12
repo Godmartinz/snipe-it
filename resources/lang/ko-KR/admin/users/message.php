@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => '이 사용자는 삭제되었습니다. 그것들을 수정하려면 이 사용자를 복원하던가 새 자산들을 생성하세요.',
     'ldap_not_configured' => '이 설치의 LDAP 통합이 구성이 되지 않았습니다.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => ':email 로 패스워드 재설정 링크가 발송되었습니다.',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => '사용자의 대기를 해제하였습니다.',
         'restored' => '사용자를 복원하였습니다.',
         'import' => '사용자를 내보냈습니다.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => '사용자의 대기 해제 중 문제가 발생했습니다. 다시 시도하세요.',
         'import' => '사용자를 내보내기 할 때 문제가 발생했습니다. 다시 시도하세요.',
-        'asset_already_accepted' => '이 자산은 이미 수락되었습니다.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => '이 자산을 승인 하거나 거부 하셔야 합니다.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => '승인하려는 자산이 체크아웃되지 않았습니다.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'LDAP 서버 목록을 가져올 수 없습니다. LDAP 설정 파일의 LDAP 서버 구성을 확인해 보세요.<br>LDAP 서버 오류:',
         'password_ldap' => '이 계정의 비밀번호는 LDAP/Active 디렉토리에 의해 관리됩니다. 비밀번호를 변경하려면 IT 부서에 문의하세요. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

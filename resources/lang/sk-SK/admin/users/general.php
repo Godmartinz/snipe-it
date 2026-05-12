@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Podporované typy súborov: png, gif, jpg, jpeg, doc, docx, pdf, txt, zip a rar.',
     'history_user' => 'História pre :name',
     'info' => 'Info',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'Kliknite sem pre obnovenie.',
     'last_login' => 'Posledné prihlásenie',
     'ldap_config_text' => 'Vybraná lokalita bude nastavená pre VŠETKÝCH importovaných používateľov. Týmto sa prepíše ich existujúca lokalita a ide o nezvyčajný prípad použitia, preto je zvyčajne najlepšie ponechať toto pole prázdne.',

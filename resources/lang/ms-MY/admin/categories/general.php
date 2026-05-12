@@ -17,6 +17,7 @@ return [
     'name' => 'Nama Kategori',
     'require_acceptance' => 'Memerlukan pengguna untuk mengesahkan penerimaan aset dalam kategori ini.',
     'required_acceptance' => 'Pengguna ini akan diemail dengan pautan untuk mengesahkan penerimaan item ini.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Pengguna ini akan menghantar e-mel salinan EULA',
     'no_default_eula' => 'Tiada EULA lalai utama dijumpai. Tambah satu dalam Tetapan.',
     'update' => 'Kemaskini Kategori',

@@ -99,6 +99,9 @@ return [
         'success' => 'Kua tohua te tahua.',
         'user_does_not_exist' => 'He muhu te kaiwhakamahi. Tena ngana ano.',
         'already_checked_in' => 'Kua tohua taua taonga i roto i.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

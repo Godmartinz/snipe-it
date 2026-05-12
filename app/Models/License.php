@@ -640,11 +640,11 @@ class License extends Depreciable
     /**
      * This is really dumb - needs to be refactored, since we have ~3 diff methods that do almost the same thing
      *
-     * @author A. Gianotto <snipe@snipe.net>
+     * @return int
      *
      * @since  [v2.0]
      *
-     * @return Relation
+     * @author A. Gianotto <snipe@snipe.net>
      */
     public function numRemaining()
     {

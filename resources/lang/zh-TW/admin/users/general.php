@@ -14,6 +14,8 @@ return [
     'filetype_info' => '允許檔案類型：png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar。',
     'history_user' => ':name 的歷史記錄',
     'info' => '資訊',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => '點擊此處可將它們還原。',
     'last_login' => '上次登入',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

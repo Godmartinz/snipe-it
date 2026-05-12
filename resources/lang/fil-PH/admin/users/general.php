@@ -14,6 +14,8 @@ return [
     'filetype_info' => 'Ang mga pinapayagang uri ng file ay png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, at rar.',
     'history_user' => 'Ang kasaysayan para sa :name',
     'info' => 'Impormasyon',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'I-klik dito upang maibalik ang mga ito.',
     'last_login' => 'Ang Huling Pag-login',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',

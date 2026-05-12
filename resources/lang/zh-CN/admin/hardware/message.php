@@ -99,6 +99,9 @@ return [
         'success' => '资产归还成功。',
         'user_does_not_exist' => '无效用户，请重试。',
         'already_checked_in' => '该资产已经归还。',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

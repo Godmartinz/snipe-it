@@ -99,6 +99,9 @@ return [
         'success' => 'Aset berhasil dicek.',
         'user_does_not_exist' => 'Pengguna tidak cocok. Silahkan coba lagi.',
         'already_checked_in' => 'Aset tersebut sudah diperiksa.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

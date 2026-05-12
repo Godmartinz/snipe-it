@@ -37,6 +37,9 @@ return [
         'confirm' => 'Lisansı silmek istediğinize emin misiniz?',
         'error' => 'Lisansı silerken bir hata oluştu. Lütfen tekrar deneyin.',
         'success' => 'Lisans silindi.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [
@@ -45,12 +48,12 @@ return [
         'not_enough_seats' => 'Ödeme için yeterli sayıda lisans yeri yok',
         'mismatch' => 'Girdiğiniz bu lisans türü lisans ile eşleşmiyor',
         'unavailable' => 'Bu varlığı atayamazsınız.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'license_is_inactive' => 'Bu lisansın süresi dolmuş veya sonlandırılmıştır.',
     ],
 
     'checkin' => [
         'error' => 'Lisans girişi yapılırken hata oluştu. Lütfen tekrar deneyin.',
-        'not_reassignable' => 'Seat has been used',
+        'not_reassignable' => 'Lisans zaten kullanılmış',
         'success' => 'Lisans girişi yapıldı',
     ],
 

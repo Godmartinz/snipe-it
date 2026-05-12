@@ -4,6 +4,7 @@ namespace Tests\Feature\Checkouts\Ui;
 
 use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
+use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -171,5 +172,50 @@ class ConsumableCheckoutTest extends TestCase
             'quantity' => 2,
             'created_by' => $admin->id,
         ]);
+    }
+
+    public function test_consumable_checkout_page_post_redirects_to_signature_page_when_sign_in_place_is_checked()
+    {
+        $targetUser = User::factory()->create();
+        $consumable = Consumable::factory()->requiringAcceptance()->create();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->from(route('consumables.checkout.show', $consumable))
+            ->post(route('consumables.checkout.store', $consumable), [
+                'assigned_to' => $targetUser->id,
+                'redirect_option' => 'index',
+                'checkout_qty' => 2,
+                'sign_in_place' => 1,
+            ]);
+
+        $acceptance = CheckoutAcceptance::query()
+            ->where('checkoutable_type', Consumable::class)
+            ->where('checkoutable_id', $consumable->id)
+            ->where('assigned_to_id', $targetUser->id)
+            ->pending()
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($acceptance);
+        $this->assertEquals(2, $acceptance->qty);
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('account.accept.item', $acceptance));
+    }
+
+    public function test_consumable_checkout_stores_sign_in_place_preference_in_session()
+    {
+        $targetUser = User::factory()->create();
+        $consumable = Consumable::factory()->create();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->post(route('consumables.checkout.store', $consumable), [
+                'assigned_to' => $targetUser->id,
+                'redirect_option' => 'index',
+                'checkout_qty' => 1,
+                'sign_in_place' => 1,
+            ]);
+
+        $response->assertSessionHas('sign_in_place', true);
     }
 }

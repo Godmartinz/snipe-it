@@ -67,6 +67,10 @@ Route::group(
             [AssetsController::class, 'auditStore']
         )->name('asset.audit.store');
 
+        Route::post('{asset}/forcecheckin',
+            [AssetCheckinController::class, 'forceCheckin']
+        )->name('asset.checkin.force');
+
         Route::get('history', [AssetsController::class, 'getImportHistory'])
             ->name('asset.import-history')
             ->breadcrumbs(fn (Trail $trail) => $trail->parent('hardware.index')

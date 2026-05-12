@@ -17,6 +17,7 @@ return [
     'name' => 'Име на категория',
     'require_acceptance' => 'Задължаване на потребителите да потвърждават приемането на активи от тази категория.',
     'required_acceptance' => 'Потребителят ще получи email с връзка за потвърждаване получаването на актива.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Потребителят ще получи копие на EULA.',
     'no_default_eula' => 'Няма EULA по подразбиране. Добавете я в Настройки.',
     'update' => 'Обновяване на категория',

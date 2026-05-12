@@ -17,6 +17,7 @@ return [
     'name' => '분류 명',
     'require_acceptance' => '이 분류의 자산 승인을 확인하는 사용자가 필요합니다.',
     'required_acceptance' => '이 사용자에게 이 항목의 승인을 확인하는 링크가 이메일로 전송됩니다.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => '이 사용자에게 사용권 계약서의 사본을 이메일로 전송합니다.',
     'no_default_eula' => '기본 사용권 계약서가 없습니다. 설정에서 추가하세요.',
     'update' => '분류 갱신',

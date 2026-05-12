@@ -632,6 +632,42 @@
               <div class="col-md-9 col-md-offset-3">
                   <label class="form-control">
                       <input
+                          name="assignment_status"
+                          id="assignment_status_all"
+                          type="radio"
+                          value="all"
+                          @checked($template->radioValue('assignment_status', 'all', true))
+                          aria-label="assignment_status"
+                      >
+                      {{ trans('general.all') }} {{ trans('general.assigned') }} / {{ trans('general.unassigned') }}
+                  </label>
+                  <label class="form-control">
+                      <input
+                          name="assignment_status"
+                          id="assignment_status_assigned"
+                          type="radio"
+                          value="assigned"
+                          @checked($template->radioValue('assignment_status', 'assigned'))
+                          aria-label="assignment_status"
+                      >
+                      {{ trans('general.assigned') }}
+                  </label>
+                  <label class="form-control">
+                      <input
+                          name="assignment_status"
+                          id="assignment_status_unassigned"
+                          type="radio"
+                          value="unassigned"
+                          @checked($template->radioValue('assignment_status', 'unassigned'))
+                          aria-label="assignment_status"
+                      >
+                      {{ trans('general.unassigned') }}
+                  </label>
+              </div>
+
+              <div class="col-md-9 col-md-offset-3">
+                  <label class="form-control">
+                      <input
                           name="deleted_assets"
                           id="deleted_assets_exclude_deleted"
                           type="radio"

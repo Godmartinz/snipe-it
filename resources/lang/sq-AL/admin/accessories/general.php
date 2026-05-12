@@ -9,7 +9,7 @@ return [
     'edit' => 'Modifiko Aksesorin',
     'eula_text' => 'Category EULA',
     'eula_text_help' => 'Kjo fushë ju lejon të personalizoni EULA-të tuaja për lloje specifike të aseteve. Nëse keni vetëm një EULA për të gjitha asetet tuaja, mund të shënoni kutinë më poshtë për të përdorur parazgjedhjen kryesore.',
-    'require_acceptance' => 'Kërko që përdoruesit të konfirmojnë pranimin e aseteve në këtë kategori.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nuk u gjet asnjë EULA. Shtoni një te Cilësimet.',
     'total' => 'Total',
     'remaining' => 'Avail',

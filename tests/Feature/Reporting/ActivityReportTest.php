@@ -90,8 +90,10 @@ class ActivityReportTest extends TestCase
 
         // I don't love this, since it doesn't test that we're actually storing the company ID appropriately
         // but it's better than what we had
-        $response = $this->actingAsForApi($userInCompanyA)
-            ->getJson(route('api.activity.index'))
+        $this->actingAsForApi($userInCompanyA)
+            ->getJson(route('api.activity.index', [
+                'action_type' => 'update',
+            ]))
             ->assertOk()
             ->assertJsonStructure([
                 'rows',
@@ -100,7 +102,9 @@ class ActivityReportTest extends TestCase
 
         $this->actingAsForApi($userInCompanyB)
             ->getJson(
-                route('api.activity.index'))
+                route('api.activity.index', [
+                    'action_type' => 'update',
+                ]))
             ->assertOk()
             ->assertJsonStructure([
                 'rows',

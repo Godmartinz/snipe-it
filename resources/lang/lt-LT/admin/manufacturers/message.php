@@ -8,25 +8,25 @@ return [
 
     'create' => [
         'error' => 'Gamintojas nebuvo sukurtas, bandykite dar kartą.',
-        'success' => 'Gamintojas sukurtas sėkmingai.',
+        'success' => 'Gamintojas sėkmingai sukurtas.',
     ],
 
     'update' => [
         'error' => 'Gamintojas nebuvo atnaujintas, bandykite dar kartą',
-        'success' => 'Gamintojas atnaujintas sėkmingai.',
+        'success' => 'Gamintojas sėkmingai atnaujintas.',
     ],
 
     'restore' => [
         'error' => 'Gamintojas nebuvo atkurtas, bandykite dar kartą',
-        'success' => 'Gamintojas atkurtas sėkmingai.',
+        'success' => 'Gamintojas sėkmingai atkurtas.',
     ],
 
     'delete' => [
         'confirm' => 'Ar jūs tikrai norite panaikinti šį gamintoją?',
         'error' => 'Bandant panaikinti gamintoją įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Gamintojas sėkmingai ištrintas.',
-        'bulk_success' => 'Gamintojai sėkmingai ištrinti.',
-        'partial_success' => 'Gamintojas sėkmingai ištrintas. Daugiau informacijos rasite žemiau. | :count gamintojai (-ų) buvo sėkmingai ištrinti. Daugiau informacijos rasite žemiau.',
+        'success' => 'Gamintojas sėkmingai panaikintas.',
+        'bulk_success' => 'Gamintojai sėkmingai panaikinti.',
+        'partial_success' => 'Gamintojas sėkmingai panaikintas. Daugiau informacijos rasite žemiau. | :count gamintojai(-ų) buvo sėkmingai panaikinti. Daugiau informacijos rasite žemiau.',
     ],
 
 ];
