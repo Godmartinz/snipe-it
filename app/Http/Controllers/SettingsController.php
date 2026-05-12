@@ -529,7 +529,6 @@ class SettingsController extends Controller
             ->with('customFields', CustomField::where('field_encrypted', '=', 0)->get());
     }
 
-    
     /**
      * Saves settings from form.
      *

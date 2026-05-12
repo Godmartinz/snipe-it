@@ -27,7 +27,7 @@ function ip_in_range($ip, $range)
     $wildcard_decimal = pow(2, (32 - $netmask)) - 1;
     $netmask_decimal = ~$wildcard_decimal;
 
-    return  ($ip_decimal & $netmask_decimal) == ($range_decimal & $netmask_decimal);
+    return ($ip_decimal & $netmask_decimal) == ($range_decimal & $netmask_decimal);
 }
 // NOTE - this function was shamelessly stolen from this gist: https://gist.github.com/tott/7684443
 

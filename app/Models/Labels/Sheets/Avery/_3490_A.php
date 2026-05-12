@@ -114,6 +114,7 @@ class _3490_A extends _3490
     {
         return true;
     }
+
     protected function getContentEditorConfig(): array
     {
         return [

@@ -71,6 +71,14 @@
         .label-form-footer {
             grid-column: 1 / -1;
         }
+
+        .label-form-header {
+            position: sticky;
+            top: 0;
+            z-index: 15;
+            padding: 10px 0;
+            grid-column: 1 / -1;
+        }
     </style>
 
     <div class="col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1">
@@ -103,7 +111,7 @@
                                 $defaultName = $selectedLabel ? 'Copy of '.$selectedLabel : 'Custom Label';
                             @endphp
 
-                            <div class="form-group" style="margin-left: 0; margin-right: 0;">
+                            <div class="form-group">
                                 <label for="name" style="display:block; margin-bottom:6px;">
                                     Label Name
                                 </label>
@@ -305,17 +313,23 @@
                             </div>
                         @endif
 
-                        <div class="label-form-footer">
-                            <div class="box-footer clearfix" style="padding-left: 0; padding-right: 0;">
-                                <div class="pull-right">
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fa fa-check"></i> Save
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="label-form-footer">
+        <div class="box-footer clearfix" style="padding-left: 0; padding-right: 0;">
+            <div class="pull-right">
+                <button
+                        type="submit"
+                        form="label-customizer-form"
+                        class="btn btn-success"
+                >
+                    <i class="fa fa-check"></i> Save
+                </button>
             </div>
         </div>
     </div>

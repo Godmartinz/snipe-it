@@ -88,7 +88,7 @@ class MaintenancesPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.model_no'),
                 'visible' => true,
-            ],[
+            ], [
                 'field' => 'assigned_to',
                 'searchable' => true,
                 'sortable' => true,

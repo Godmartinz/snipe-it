@@ -738,7 +738,6 @@ abstract class Label
         ];
     }
 
-
     protected function getDimensionsEditorConfig(): array
     {
         return [

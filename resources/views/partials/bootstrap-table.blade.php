@@ -1929,12 +1929,13 @@
             var encodedJson = encodeURIComponent(JSON.stringify(row.config_snapshot || {}, null, 2));
 
             actions += '<button type="button" '
-                + 'class="btn btn-primary btn-sm copy-label-json hidden-print" '
+                + 'class="btn btn-primary btn-sm export-label-json hidden-print" '
                 + 'data-json="' + encodedJson + '" '
-                + 'title="Share Label" '
+                + 'data-name="' + encodeURIComponent(row.name || "label") + '" '
+                + 'title="Export Label" '
                 + 'data-tooltip="true">'
-                + '<i class="fa-solid fa-up-right-from-square"></i>'
-                + '<span class="sr-only">Share Label</span>'
+                + '<i class="fa-solid fa-file-export"></i>'
+                + '<span class="sr-only">Export Label</span>'
                 + '</button>&nbsp;';
 
             // Delete button

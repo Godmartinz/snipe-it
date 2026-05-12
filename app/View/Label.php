@@ -2,6 +2,8 @@
 
 namespace App\View;
 
+use App\Models\Labels\CustomLabels\PreviewLabel;
+use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Field;
 use App\Models\Labels\Label as LabelModel;
 use App\Models\Labels\Sheet;
@@ -10,8 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Traits\Macroable;
 use TCPDF;
-use App\Models\Labels\CustomUserLabel;
-use App\Models\Labels\CustomLabels\PreviewLabel;
+
 class Label implements View
 {
     use Macroable { __call as macroCall; }
@@ -58,7 +59,7 @@ class Label implements View
                         data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
                     );
 
-                    $template = new PreviewLabel();
+                    $template = new PreviewLabel;
 
                     if ($baseLabel) {
                         $template->seedFromTemplate($baseLabel);

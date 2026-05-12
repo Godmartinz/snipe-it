@@ -2,11 +2,11 @@
 
 namespace App\Http\Transformers;
 
+use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use App\Models\Labels\RectangleSheet;
 use App\Models\Labels\Sheet;
 use Illuminate\Support\Collection;
-use App\Models\Labels\CustomUserLabel;
 
 class LabelsTransformer
 {
@@ -93,8 +93,8 @@ class LabelsTransformer
 
             'unit' => 'mm',
 
-            'width' => number_format((float)data_get($snapshot, 'label.width', 0), 2),
-            'height' => number_format((float)data_get($snapshot, 'label.height', 0), 2),
+            'width' => number_format((float) data_get($snapshot, 'label.width', 0), 2),
+            'height' => number_format((float) data_get($snapshot, 'label.height', 0), 2),
 
             'margin_top' => data_get($snapshot, 'label.margin_top'),
             'margin_bottom' => data_get($snapshot, 'label.margin_bottom'),

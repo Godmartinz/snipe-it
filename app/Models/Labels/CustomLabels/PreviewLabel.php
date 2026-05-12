@@ -2,7 +2,4 @@
 
 namespace App\Models\Labels\CustomLabels;
 
-class PreviewLabel extends CustomSheetLabel
-{
-
-}
+class PreviewLabel extends CustomSheetLabel {}

@@ -128,7 +128,7 @@ class ConsumablePresenter extends Presenter
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
-                'title' => '% ' . trans('general.remaining'),
+                'title' => '% '.trans('general.remaining'),
                 'visible' => true,
                 'formatter' => 'progressBarFormatter',
             ], [

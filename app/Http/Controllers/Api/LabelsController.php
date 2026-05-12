@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\LabelsTransformer;
+use App\Models\Labels\CustomLabels\PreviewLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\ItemNotFoundException;
-use App\Models\Labels\CustomLabels\PreviewLabel;
 
 class LabelsController extends Controller
 {
@@ -24,7 +24,7 @@ class LabelsController extends Controller
         $this->authorize('view', Label::class);
 
         $baseLabels = Label::find()
-            ->reject(fn(Label $label) => $label instanceof PreviewLabel)
+            ->reject(fn (Label $label) => $label instanceof PreviewLabel)
             ->map(function (Label $label) {
                 return [
                     'source' => 'base',

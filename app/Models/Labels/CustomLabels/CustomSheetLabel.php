@@ -3,69 +3,105 @@
 namespace App\Models\Labels\CustomLabels;
 
 use App\Helpers\Helper;
-use App\Models\Labels\RectangleSheet;
 
 abstract class CustomSheetLabel extends CustomLabel
 {
     protected string $unit = 'mm';
 
     protected ?float $pageWidth = 210.0;
+
     protected ?float $pageHeight = 297.0;
 
     protected ?float $pageMarginTop = 0.0;
+
     protected ?float $pageMarginRight = 0.0;
+
     protected ?float $pageMarginBottom = 0.0;
+
     protected ?float $pageMarginLeft = 0.0;
 
     protected int $rows = 9;
+
     protected int $columns = 3;
 
     protected ?float $labelWidth = 50.0;
+
     protected ?float $labelHeight = 25.0;
 
     protected float $labelRowSpacing = 0.0;
+
     protected float $labelColumnSpacing = 0.0;
 
     protected float $labelMarginTop = 0.0;
+
     protected float $labelMarginRight = 0.0;
+
     protected float $labelMarginBottom = 0.0;
+
     protected float $labelMarginLeft = 0.0;
 
     protected bool $supportTitle = true;
+
     protected int $supportFields = 4;
+
     protected bool $support1DBarcode = true;
+
     protected bool $support2DBarcode = false;
+
     protected bool $supportLogo = false;
+
     protected bool $supportAssetTag = true;
 
     protected float $barcodeSize = 3;
+
     protected float $barcode2DSize = 20;
+
     protected float $barcodeMargin = .025;
+
     protected float $barcode2Margin = 0.075;
+
     protected float $logoMaxWidth = 12.0;
+
     protected float $logoMargin = 2.0;
+
     protected string $logoHAlign = 'L';
+
     protected string $logoVAlign = 'T';
+
     protected float $tagSize = 6.0;
+
     protected float $titleSize = 8.0;
+
     protected float $labelSize = 6.0;
+
     protected float $fieldSize = 7.0;
 
-
     protected float $titleMargin = 2.0;
+
     protected float $titleOffsetX = 0.0;
+
     protected float $labelMargin = 1.5;
+
     protected float $fieldMargin = 2.0;
 
     protected string $tagAlignment = 'L';
+
     protected string $barcode2DHAlign = 'L';
+
     protected string $barcode2DVAlign = 'T';
+
     protected string $tagHAlign = 'R';
+
     protected string $tagVAlign = 'B';
+
     protected string $tagPositionMode = 'free';
+
     protected ?float $textAreaWidth = null;
+
     protected ?float $textAreaHeight = null;
+
     protected float $tagOffsetX = 0.0;
+
     protected float $tagOffsetY = 0.0;
 
     public function getTagOffsetX(): float
@@ -77,6 +113,7 @@ abstract class CustomSheetLabel extends CustomLabel
     {
         return $this->tagOffsetY;
     }
+
     public function getUnit()
     {
         return $this->unit;
@@ -271,6 +308,7 @@ abstract class CustomSheetLabel extends CustomLabel
     {
         return $this->fieldMargin;
     }
+
     public function getLabelBorder()
     {
         return 0;
@@ -355,7 +393,7 @@ abstract class CustomSheetLabel extends CustomLabel
             }
 
             return $sourceUnit === 'in' && is_numeric($value)
-                ? (float)$value * 25.4
+                ? (float) $value * 25.4
                 : $value;
         };
 
@@ -396,11 +434,11 @@ abstract class CustomSheetLabel extends CustomLabel
         |--------------------------------------------------------------------------
         */
         if (method_exists($template, 'getRows')) {
-            $this->rows = (int)$template->getRows();
+            $this->rows = (int) $template->getRows();
         }
 
         if (method_exists($template, 'getColumns')) {
-            $this->columns = (int)$template->getColumns();
+            $this->columns = (int) $template->getColumns();
         }
 
         /*
@@ -458,7 +496,7 @@ abstract class CustomSheetLabel extends CustomLabel
         | Special legacy fallbacks
         |--------------------------------------------------------------------------
         */
-        if (method_exists($template, 'getLogoSize') && !method_exists($template, 'getLogoMaxWidth')) {
+        if (method_exists($template, 'getLogoSize') && ! method_exists($template, 'getLogoMaxWidth')) {
             $logoSize = $template->getLogoSize();
             $this->logoMaxWidth = isset($logoSize[0])
                 ? $convert($logoSize[0])
@@ -468,19 +506,19 @@ abstract class CustomSheetLabel extends CustomLabel
         if (method_exists($template, 'getTextSize')) {
             $textSize = $convert($template->getTextSize());
 
-            if (!method_exists($template, 'getTagSize')) {
+            if (! method_exists($template, 'getTagSize')) {
                 $this->tagSize = $textSize;
             }
 
-            if (!method_exists($template, 'getTitleSize')) {
+            if (! method_exists($template, 'getTitleSize')) {
                 $this->titleSize = $textSize;
             }
 
-            if (!method_exists($template, 'getLabelSize')) {
+            if (! method_exists($template, 'getLabelSize')) {
                 $this->labelSize = $textSize;
             }
 
-            if (!method_exists($template, 'getFieldSize')) {
+            if (! method_exists($template, 'getFieldSize')) {
                 $this->fieldSize = $textSize;
             }
         }
@@ -488,15 +526,15 @@ abstract class CustomSheetLabel extends CustomLabel
         if (method_exists($template, 'getTextMargin')) {
             $textMargin = $convert($template->getTextMargin());
 
-            if (!method_exists($template, 'getTitleMargin')) {
+            if (! method_exists($template, 'getTitleMargin')) {
                 $this->titleMargin = $textMargin;
             }
 
-            if (!method_exists($template, 'getLabelMargin')) {
+            if (! method_exists($template, 'getLabelMargin')) {
                 $this->labelMargin = $textMargin;
             }
 
-            if (!method_exists($template, 'getFieldMargin')) {
+            if (! method_exists($template, 'getFieldMargin')) {
                 $this->fieldMargin = $textMargin;
             }
         }
@@ -545,7 +583,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
         foreach ($stringContentMap as $key => $property) {
             if (array_key_exists($key, $content)) {
-                $this->{$property} = (string)$content[$key];
+                $this->{$property} = (string) $content[$key];
             }
         }
 
@@ -568,57 +606,58 @@ abstract class CustomSheetLabel extends CustomLabel
         $supports = $config['supports'] ?? [];
         $content = $config['content'] ?? [];
 
-        $this->pageWidth = isset($page['width']) ? (float)$page['width'] : $this->pageWidth;
-        $this->pageHeight = isset($page['height']) ? (float)$page['height'] : $this->pageHeight;
+        $this->pageWidth = isset($page['width']) ? (float) $page['width'] : $this->pageWidth;
+        $this->pageHeight = isset($page['height']) ? (float) $page['height'] : $this->pageHeight;
 
-        $this->pageMarginTop = isset($page['margin_top']) ? (float)$page['margin_top'] : $this->pageMarginTop;
-        $this->pageMarginRight = isset($page['margin_right']) ? (float)$page['margin_right'] : $this->pageMarginRight;
-        $this->pageMarginBottom = isset($page['margin_bottom']) ? (float)$page['margin_bottom'] : $this->pageMarginBottom;
-        $this->pageMarginLeft = isset($page['margin_left']) ? (float)$page['margin_left'] : $this->pageMarginLeft;
+        $this->pageMarginTop = isset($page['margin_top']) ? (float) $page['margin_top'] : $this->pageMarginTop;
+        $this->pageMarginRight = isset($page['margin_right']) ? (float) $page['margin_right'] : $this->pageMarginRight;
+        $this->pageMarginBottom = isset($page['margin_bottom']) ? (float) $page['margin_bottom'] : $this->pageMarginBottom;
+        $this->pageMarginLeft = isset($page['margin_left']) ? (float) $page['margin_left'] : $this->pageMarginLeft;
 
-        $this->rows = isset($grid['rows']) ? (int)$grid['rows'] : $this->rows;
-        $this->columns = isset($grid['columns']) ? (int)$grid['columns'] : $this->columns;
-        $this->labelRowSpacing = isset($grid['row_spacing']) ? (float)$grid['row_spacing'] : $this->labelRowSpacing;
-        $this->labelColumnSpacing = isset($grid['column_spacing']) ? (float)$grid['column_spacing'] : $this->labelColumnSpacing;
+        $this->rows = isset($grid['rows']) ? (int) $grid['rows'] : $this->rows;
+        $this->columns = isset($grid['columns']) ? (int) $grid['columns'] : $this->columns;
+        $this->labelRowSpacing = isset($grid['row_spacing']) ? (float) $grid['row_spacing'] : $this->labelRowSpacing;
+        $this->labelColumnSpacing = isset($grid['column_spacing']) ? (float) $grid['column_spacing'] : $this->labelColumnSpacing;
 
-        $this->labelWidth = isset($label['width']) ? (float)$label['width'] : $this->labelWidth;
-        $this->labelHeight = isset($label['height']) ? (float)$label['height'] : $this->labelHeight;
+        $this->labelWidth = isset($label['width']) ? (float) $label['width'] : $this->labelWidth;
+        $this->labelHeight = isset($label['height']) ? (float) $label['height'] : $this->labelHeight;
 
-        $this->labelMarginTop = isset($label['padding_top']) ? (float)$label['padding_top'] : $this->labelMarginTop;
-        $this->labelMarginRight = isset($label['padding_right']) ? (float)$label['padding_right'] : $this->labelMarginRight;
-        $this->labelMarginBottom = isset($label['padding_bottom']) ? (float)$label['padding_bottom'] : $this->labelMarginBottom;
-        $this->labelMarginLeft = isset($label['padding_left']) ? (float)$label['padding_left'] : $this->labelMarginLeft;
+        $this->labelMarginTop = isset($label['padding_top']) ? (float) $label['padding_top'] : $this->labelMarginTop;
+        $this->labelMarginRight = isset($label['padding_right']) ? (float) $label['padding_right'] : $this->labelMarginRight;
+        $this->labelMarginBottom = isset($label['padding_bottom']) ? (float) $label['padding_bottom'] : $this->labelMarginBottom;
+        $this->labelMarginLeft = isset($label['padding_left']) ? (float) $label['padding_left'] : $this->labelMarginLeft;
 
-        $this->supportFields = isset($supports['fields']) ? (int)$supports['fields'] : $this->supportFields;
-        $this->supportTitle = (bool)($supports['title'] ?? false);
-        $this->support1DBarcode = (bool)($supports['barcode_1d'] ?? false);
-        $this->support2DBarcode = (bool)($supports['barcode_2d'] ?? false);
-        $this->supportLogo = (bool)($supports['logo'] ?? false);
-        $this->supportAssetTag = (bool)($supports['asset_tag'] ?? false);
+        $this->supportFields = isset($supports['fields']) ? (int) $supports['fields'] : $this->supportFields;
+        $this->supportTitle = (bool) ($supports['title'] ?? false);
+        $this->support1DBarcode = (bool) ($supports['barcode_1d'] ?? false);
+        $this->support2DBarcode = (bool) ($supports['barcode_2d'] ?? false);
+        $this->supportLogo = (bool) ($supports['logo'] ?? false);
+        $this->supportAssetTag = (bool) ($supports['asset_tag'] ?? false);
 
-        $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
-        $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
-        $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
-        $this->logoMaxWidth = isset($content['logo_max_width']) ? (float)$content['logo_max_width'] : $this->logoMaxWidth;
-        $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
-        $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
-        $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
+        $this->barcodeSize = isset($content['barcode_size']) ? (float) $content['barcode_size'] : $this->barcodeSize;
+        $this->barcodeMargin = isset($content['barcode_margin']) ? (float) $content['barcode_margin'] : $this->barcodeMargin;
+        $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float) $content['barcode_2d_size'] : $this->barcode2DSize;
+        $this->logoMaxWidth = isset($content['logo_max_width']) ? (float) $content['logo_max_width'] : $this->logoMaxWidth;
+        $this->logoMargin = isset($content['logo_margin']) ? (float) $content['logo_margin'] : $this->logoMargin;
+        $this->logoHAlign = isset($content['logo_h_align']) ? (string) $content['logo_h_align'] : $this->logoHAlign;
+        $this->logoVAlign = isset($content['logo_v_align']) ? (string) $content['logo_v_align'] : $this->logoVAlign;
 
-        $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
-        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float)$content['tag_offset_x'] : $this->tagOffsetX;
-        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float)$content['tag_offset_y'] : $this->tagOffsetY;
-        $this->tagAlignment = isset($content['tag_alignment']) ? (string)$content['tag_alignment'] : $this->tagAlignment;
-        $this->titleSize = isset($content['title_font_size']) ? (float)$content['title_font_size'] : $this->titleSize;
-        $this->labelSize = isset($content['field_label_font_size']) ? (float)$content['field_label_font_size'] : $this->labelSize;
-        $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
-        $this->textAreaWidth = isset($content['text_area_width']) && $content['text_area_width'] !== '' ? (float)$content['text_area_width'] : $this->textAreaWidth;
-        $this->textAreaHeight = isset($content['text_area_height']) && $content['text_area_height'] !== '' ? (float)$content['text_area_height'] : $this->textAreaHeight;
+        $this->tagSize = isset($content['tag_font_size']) ? (float) $content['tag_font_size'] : $this->tagSize;
+        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float) $content['tag_offset_x'] : $this->tagOffsetX;
+        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float) $content['tag_offset_y'] : $this->tagOffsetY;
+        $this->tagAlignment = isset($content['tag_alignment']) ? (string) $content['tag_alignment'] : $this->tagAlignment;
+        $this->titleSize = isset($content['title_font_size']) ? (float) $content['title_font_size'] : $this->titleSize;
+        $this->labelSize = isset($content['field_label_font_size']) ? (float) $content['field_label_font_size'] : $this->labelSize;
+        $this->fieldSize = isset($content['field_value_font_size']) ? (float) $content['field_value_font_size'] : $this->fieldSize;
+        $this->textAreaWidth = isset($content['text_area_width']) && $content['text_area_width'] !== '' ? (float) $content['text_area_width'] : $this->textAreaWidth;
+        $this->textAreaHeight = isset($content['text_area_height']) && $content['text_area_height'] !== '' ? (float) $content['text_area_height'] : $this->textAreaHeight;
 
-        $this->titleMargin = isset($content['title_margin']) ? (float)$content['title_margin'] : $this->titleMargin;
-        $this->titleOffsetX = isset($content['title_offset_x']) ? (float)$content['title_offset_x'] : $this->titleOffsetX;
-        $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
-        $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
+        $this->titleMargin = isset($content['title_margin']) ? (float) $content['title_margin'] : $this->titleMargin;
+        $this->titleOffsetX = isset($content['title_offset_x']) ? (float) $content['title_offset_x'] : $this->titleOffsetX;
+        $this->labelMargin = isset($content['field_label_margin']) ? (float) $content['field_label_margin'] : $this->labelMargin;
+        $this->fieldMargin = isset($content['field_value_margin']) ? (float) $content['field_value_margin'] : $this->fieldMargin;
     }
+
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();
@@ -795,17 +834,18 @@ abstract class CustomSheetLabel extends CustomLabel
 
         return $layout;
     }
+
     protected function boxesOverlap(?array $a, ?array $b): bool
     {
-        if (!$a || !$b) {
+        if (! $a || ! $b) {
             return false;
         }
 
-        return !(
-            $a['x'] + $a['w'] <= $b['x'] ||
-            $b['x'] + $b['w'] <= $a['x'] ||
-            $a['y'] + $a['h'] <= $b['y'] ||
-            $b['y'] + $b['h'] <= $a['y']
+        return ! (
+            $b['x'] >= $a['x'] + $a['w'] ||
+            $a['x'] >= $b['x'] + $b['w'] ||
+            $b['y'] >= $a['y'] + $a['h'] ||
+            $a['y'] >= $b['y'] + $b['h']
         );
     }
 
@@ -847,7 +887,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function resolveLogoBox($record, array $body): ?array
     {
-        if (!$record->has('logo') || !$this->getSupportLogo()) {
+        if (! $record->has('logo') || ! $this->getSupportLogo()) {
             return null;
         }
 
@@ -864,7 +904,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function resolve2DBarcodeBox($record, array $body, ?array $logoBox = null): ?array
     {
-        if (!$record->has('barcode2d') || !$this->getSupport2DBarcode()) {
+        if (! $record->has('barcode2d') || ! $this->getSupport2DBarcode()) {
             return null;
         }
 
@@ -890,7 +930,7 @@ abstract class CustomSheetLabel extends CustomLabel
                 $this->getBarcode2DVAlign()
             );
 
-            if (!$this->boxesOverlap($altBox, $logoBox)) {
+            if (! $this->boxesOverlap($altBox, $logoBox)) {
                 $box = $altBox;
             }
         }
@@ -900,7 +940,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function resolveTagBox($record, array $body, ?array $barcode2dBox = null, ?array $logoBox = null): ?array
     {
-        if (!$record->has('tag') || !$this->getSupportAssetTag()) {
+        if (! $record->has('tag') || ! $this->getSupportAssetTag()) {
             return null;
         }
 
@@ -948,7 +988,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function render1DBarcode($pdf, $record, array $layout): void
     {
-        if (!$layout['barcode1d'] || !$record->has('barcode1d')) {
+        if (! $layout['barcode1d'] || ! $record->has('barcode1d')) {
             return;
         }
 
@@ -965,7 +1005,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function renderLogo($pdf, $record, array $layout): void
     {
-        if (!$layout['logo'] || !$record->has('logo') || !$this->getSupportLogo()) {
+        if (! $layout['logo'] || ! $record->has('logo') || ! $this->getSupportLogo()) {
             return;
         }
 
@@ -987,7 +1027,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function render2DBarcode($pdf, $record, array $layout): void
     {
-        if (!$layout['barcode2d'] || !$record->has('barcode2d') || !$this->getSupport2DBarcode()) {
+        if (! $layout['barcode2d'] || ! $record->has('barcode2d') || ! $this->getSupport2DBarcode()) {
             return;
         }
 
@@ -1004,7 +1044,7 @@ abstract class CustomSheetLabel extends CustomLabel
 
     protected function renderTag($pdf, $record, array $layout): void
     {
-        if (!$layout['tag'] || !$record->has('tag') || !$this->getSupportAssetTag()) {
+        if (! $layout['tag'] || ! $record->has('tag') || ! $this->getSupportAssetTag()) {
             return;
         }
 
@@ -1044,7 +1084,7 @@ abstract class CustomSheetLabel extends CustomLabel
             );
         }
 
-        if (!$layout['fields']) {
+        if (! $layout['fields']) {
             return;
         }
 
@@ -1059,7 +1099,7 @@ abstract class CustomSheetLabel extends CustomLabel
             $value = $field['value'] ?? '';
 
             if (is_string($label) && trim($label) !== '') {
-                $label = rtrim($label, ':') . ':';
+                $label = rtrim($label, ':').':';
             }
 
             if ($label !== '') {
@@ -1113,7 +1153,7 @@ abstract class CustomSheetLabel extends CustomLabel
         $bottomEdge = $y2;
 
         foreach ($boxes as $box) {
-            if (!$box) {
+            if (! $box) {
                 continue;
             }
 

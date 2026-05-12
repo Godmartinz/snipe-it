@@ -3,20 +3,19 @@
 use ArieTimmerman\Laravel\SCIMServer\RouteProvider as SCIMRouteProvider;
 use Illuminate\Support\Facades\Route;
 
-
 /*
 |--------------------------------------------------------------------------
 | SCIM Routes
 |--------------------------------------------------------------------------
 |
-| These are the routes that we have to explicitly inject from the 
+| These are the routes that we have to explicitly inject from the
 | laravel-scim-server project, which gives Snipe-IT SCIM support
 |
 */
 
 SCIMRouteProvider::publicRoutes(); // Make sure to load public routes *FIRST*
 
-Route::middleware(['auth:api','authorize:superadmin'])->group(function () {
+Route::middleware(['auth:api', 'authorize:superadmin'])->group(function () {
     SCIMRouteProvider::routes(
         [
             /*
@@ -30,7 +29,7 @@ Route::middleware(['auth:api','authorize:superadmin'])->group(function () {
              * like 4 hours of your life trying to figure out why the public routes
              * aren't quite working right. Ask me how I know (BMW, 3/19/2022)
              */
-            'public_routes' => false
+            'public_routes' => false,
         ]
     );
 

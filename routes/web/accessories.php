@@ -28,8 +28,8 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
     )->name('accessories.checkin.store');
 
     Route::get('{accessory}/clone',
-            [Accessories\AccessoriesController::class, 'getClone']
-        )->name('clone/accessories');
+        [Accessories\AccessoriesController::class, 'getClone']
+    )->name('clone/accessories');
 
     Route::post('{accessory}/clone',
         [Accessories\AccessoriesController::class, 'postCreate']
@@ -38,5 +38,5 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
 });
 
 Route::resource('accessories', Accessories\AccessoriesController::class, [
-    'middleware' => ['auth']
+    'middleware' => ['auth'],
 ]);

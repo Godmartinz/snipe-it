@@ -165,6 +165,7 @@ class SettingsController extends Controller
 
             if (config('mail.reply_to.address') == '') {
                 Log::debug('MAIL_REPLYTO_ADDR not set in env. Skipping mail test.');
+
                 return response()->json(['message' => trans('admin/settings/general.mail_test_no_email')], 403);
             }
 

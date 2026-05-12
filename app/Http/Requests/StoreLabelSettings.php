@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use App\Models\Labels\CustomUserLabel;
 
 class StoreLabelSettings extends FormRequest
 {
@@ -32,7 +32,7 @@ class StoreLabelSettings extends FormRequest
 
         $customNames = CustomUserLabel::query()
             ->pluck('id')
-            ->map(fn($id) => 'custom:' . $id)
+            ->map(fn ($id) => 'custom:'.$id)
             ->values()
             ->toArray();
 

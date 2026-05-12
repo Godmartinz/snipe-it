@@ -30,7 +30,6 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\UploadedFilesController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Livewire\Importer;
-use App\Mail\CheckoutComponentMail;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
@@ -220,7 +219,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.labels.destroy');
     Route::post('/settings/labels/import', [LabelsController::class, 'import'])
         ->name('settings.labels.import');
-    
+
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')

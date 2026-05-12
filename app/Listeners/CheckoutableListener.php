@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Osama\LaravelTeamsNotification\TeamsNotification;
+
 class CheckoutableListener
 {
     private array $skipNotificationsFor = [

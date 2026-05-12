@@ -22,7 +22,6 @@
         .import-toggle .btn {
             background-color: #f5f5f5; /* light neutral */
             color: #333;
-            border-color: #ccc;
         }
 
         .import-toggle .btn:hover {
@@ -32,7 +31,16 @@
         .import-toggle .btn.active {
             background-color: #337ab7; /* Bootstrap primary */
             color: #fff;
-            border-color: #2e6da4;
+        }
+
+        .import-toggle .btn:focus,
+        .import-toggle .btn:active:focus,
+        .import-toggle .btn.active:focus,
+        .import-toggle .btn.focus,
+        .import-toggle .btn.active.focus {
+            outline: none !important;
+            box-shadow: none !important;
+            -webkit-box-shadow: none !important;
         }
     </style>
 
@@ -69,9 +77,6 @@
                                 <p class="help-block">
                                     {!! trans('admin/settings/general.label2_enable_help') !!}
                                 </p>
-
-
-
                             </div>
                         </div>
 
@@ -85,33 +90,42 @@
                             </div>
 
                             <div class="col-md-7">
-                                <input type="hidden" name="import_method" id="import_method" value="text"
-                                       form="import-label-form">
+                                <input
+                                        type="hidden"
+                                        name="import_method"
+                                        id="import_method"
+                                        value="json"
+                                        form="import-label-form"
+                                >
 
                                 <div class="btn-group import-toggle" role="group">
-                                    <button type="button"
+                                    <button
+                                            type="button"
                                             class="btn btn-primary import-toggle-btn active"
-                                            data-method="json">
+                                            data-method="json"
+                                    >
                                         JSON
                                     </button>
 
-                                    <button type="button"
+                                    <button
+                                            type="button"
                                             class="btn btn-default import-toggle-btn"
-                                            data-method="text">
+                                            data-method="text"
+                                    >
                                         Text
                                     </button>
                                 </div>
 
-                                <div id="text-input-group" style="margin-top:10px;">
+                                <div id="text-input-group" style="display:none; margin-top:10px;">
                                     <div class="import-inline-row">
-                <textarea
-                        name="config_snapshot"
-                        form="import-label-form"
-                        id="config_snapshot"
-                        class="form-control"
-                        rows="4"
-                        placeholder="Paste label config JSON here"
-                >{{ old('config_snapshot') }}</textarea>
+                                        <textarea
+                                                name="config_snapshot"
+                                                form="import-label-form"
+                                                id="config_snapshot"
+                                                class="form-control"
+                                                rows="4"
+                                                placeholder="Paste label config JSON here"
+                                        >{{ old('config_snapshot') }}</textarea>
 
                                         <button
                                                 type="submit"
@@ -127,7 +141,7 @@
                                     <p id="json-validation-message" class="help-block" style="display:none;"></p>
                                 </div>
 
-                                <div id="json-input-group" style="display:none; margin-top:10px;">
+                                <div id="json-input-group" style="margin-top:10px;">
                                     <div class="input-group">
                                         <input
                                                 type="file"
@@ -139,20 +153,32 @@
                                         >
 
                                         <span class="input-group-btn">
-                    <button
-                            type="submit"
-                            form="import-label-form"
-                            id="import-file-button"
-                            class="btn btn-primary"
-                            disabled
-                    >
-                        Import
-                    </button>
-                </span>
+                                            <button
+                                                    type="submit"
+                                                    form="import-label-form"
+                                                    id="import-file-button"
+                                                    class="btn btn-primary"
+                                                    disabled
+                                            >
+                                                Import
+                                            </button>
+                                        </span>
                                     </div>
                                 </div>
 
-                                {!! $errors->first('config_snapshot', '<span class="alert-msg">:message</span>') !!}
+                                @if ($errors->has('config_snapshot'))
+                                    <ul class="alert-msg">
+                                        @foreach ((array) $errors->get('config_snapshot') as $message)
+                                            @if (is_array($message))
+                                                @foreach ($message as $line)
+                                                    <li>{{ $line }}</li>
+                                                @endforeach
+                                            @else
+                                                <li>{{ $message }}</li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                @endif
                             </div>
                         </div>
                         <!-- New Settings -->
@@ -813,6 +839,28 @@
                 }, 1500);
             }
         });
+        $(document).on('click', '.export-label-json', function () {
+
+            const json = decodeURIComponent($(this).data('json'));
+            const name = decodeURIComponent($(this).data('name'));
+
+            const blob = new Blob([json], {
+                type: 'application/json;charset=utf-8'
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const safeName = name.replace(/[^\w\-]+/g, '_');
+
+            a.href = url;
+            a.download = `${safeName}.json`;
+
+            document.body.appendChild(a);
+            a.click();
+
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        });
 
         $('.import-toggle-btn').on('click', function () {
             const method = $(this).data('method');
@@ -830,6 +878,37 @@
             $('#text-input-group').toggle(method === 'text');
             $('#json-input-group').toggle(method === 'json');
         });
+
+        $('#config_file').on('change', function () {
+            const hasFile = this.files && this.files.length > 0;
+
+            $('#import-file-button').prop('disabled', !hasFile);
+        });
+
+        $('#config_snapshot').on('input', function () {
+
+            const value = $(this).val().trim();
+
+            try {
+                JSON.parse(value);
+
+                $('#import-text-button').prop('disabled', false);
+
+                $('#json-validation-message')
+                    .hide()
+                    .text('');
+
+            } catch (e) {
+
+                $('#import-text-button').prop('disabled', true);
+
+                $('#json-validation-message')
+                    .show()
+                    .addClass('text-danger')
+                    .text('Invalid JSON');
+            }
+        });
+
     </script>
     {{-- Can't use @script here because we're not in a livewire component so let's manually load --}}
     @livewireScripts

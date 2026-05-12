@@ -66,6 +66,7 @@ class _5520_B extends _5520
     {
         return self::FIELD_MARGIN;
     }
+
     public function getUnit()
     {
         return 'in';

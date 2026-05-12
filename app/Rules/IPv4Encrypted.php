@@ -5,6 +5,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Validation\Concerns\ValidatesAttributes;
 
 class IPv4Encrypted implements ValidationRule
@@ -14,14 +15,14 @@ class IPv4Encrypted implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         try {
             $attributeName = trim(preg_replace('/_+|snipeit|\d+/', ' ', $attribute));
             $decrypted = Crypt::decrypt($value);
-            if (!$this->validateIpv4($attributeName, $decrypted) && !is_null($decrypted)) {
+            if (! $this->validateIpv4($attributeName, $decrypted) && ! is_null($decrypted)) {
                 $fail(trans('validation.ipv4', ['attribute' => $attributeName]));
             }
         } catch (\Exception $e) {

@@ -43,7 +43,6 @@ class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
             'name' => 'My Awesome Accessory',
         ]);
     }
-    
 
     public function test_can_store_accessory()
     {

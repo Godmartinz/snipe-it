@@ -3,10 +3,11 @@
 namespace App\Models\Labels;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Illuminate\Database\Eloquent\SoftDeletes;
+
 class CustomUserLabel extends Model
 {
     use SoftDeletes;
@@ -21,6 +22,7 @@ class CustomUserLabel extends Model
         'config_snapshot',
         'is_default',
     ];
+
     protected $casts = [
         'overrides' => 'array',
         'config_snapshot' => 'array',
@@ -34,16 +36,15 @@ class CustomUserLabel extends Model
      *     'DefaultLabel' => App\Models\Labels\DefaultLabel::class,
      * ]
      */
-
     public static function availableBaseLabels(): array
     {
         $namespaceRoot = 'App\\Models\\Labels\\';
         $basePath = app_path('Models/Labels');
 
         $allowedRoots = [
-            $basePath . '/Sheets',
-            $basePath . '/Tapes',
-            $basePath . '/DefaultLabel.php',
+            $basePath.'/Sheets',
+            $basePath.'/Tapes',
+            $basePath.'/DefaultLabel.php',
         ];
 
         $labels = [];
@@ -52,26 +53,26 @@ class CustomUserLabel extends Model
             if (is_file($root)) {
                 $files = [new \SplFileInfo($root)];
             } else {
-                $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($root)
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($root)
                 );
             }
 
             foreach ($files as $file) {
-                if (!$file->isFile() || $file->getExtension() !== 'php') {
+                if (! $file->isFile() || $file->getExtension() !== 'php') {
                     continue;
                 }
 
                 $fullPath = $file->getPathname();
-                $relativePath = Str::after($fullPath, $basePath . DIRECTORY_SEPARATOR);
+                $relativePath = Str::after($fullPath, $basePath.DIRECTORY_SEPARATOR);
 
-                $class = $namespaceRoot . str_replace(
-                        [DIRECTORY_SEPARATOR, '.php'],
-                        ['\\', ''],
-                        $relativePath
-                    );
+                $class = $namespaceRoot.str_replace(
+                    [DIRECTORY_SEPARATOR, '.php'],
+                    ['\\', ''],
+                    $relativePath
+                );
 
-                if (!class_exists($class)) {
+                if (! class_exists($class)) {
                     continue;
                 }
 
@@ -86,13 +87,10 @@ class CustomUserLabel extends Model
 
     /**
      * Creates a base label instance from a template.
-     *
-     * @param string|null $template
-     * @return object|null
      */
     public static function makeBaseLabel(?string $template): ?object
     {
-        if (!$template) {
+        if (! $template) {
             return null;
         }
 
@@ -101,11 +99,11 @@ class CustomUserLabel extends Model
 
         $class = $available[$templateKey] ?? null;
 
-        if (!$class || !class_exists($class)) {
+        if (! $class || ! class_exists($class)) {
             return null;
         }
 
-        return new $class();
+        return new $class;
     }
 
     /**
@@ -113,8 +111,8 @@ class CustomUserLabel extends Model
      *
      * Only includes values that have been added or overridden.
      *
-     * @param array<string, mixed> $finalConfig
-     * @param array<string, mixed> $baseConfig
+     * @param  array<string, mixed>  $finalConfig
+     * @param  array<string, mixed>  $baseConfig
      * @return array<string, mixed>
      */
     public static function diffEditorConfig(array $finalConfig, array $baseConfig): array
@@ -128,15 +126,16 @@ class CustomUserLabel extends Model
             if (is_array($value) && is_array($baseValue)) {
                 $nestedDiff = static::diffEditorConfig($value, $baseValue);
 
-                if (!empty($nestedDiff)) {
+                if (! empty($nestedDiff)) {
                     $diff[$key] = $nestedDiff;
                 }
 
                 continue;
             }
 
-            if (!$hasBaseKey) {
+            if (! $hasBaseKey) {
                 $diff[$key] = static::normalizeDiffValue($value);
+
                 continue;
             }
 
@@ -155,11 +154,11 @@ class CustomUserLabel extends Model
     protected static function valuesDiffer($value, $baseValue, float $epsilon = 0.001): bool
     {
         if (is_bool($value) || is_bool($baseValue)) {
-            return (bool)$value !== (bool)$baseValue;
+            return (bool) $value !== (bool) $baseValue;
         }
 
         if (is_numeric($value) && is_numeric($baseValue)) {
-            return abs((float)$value - (float)$baseValue) > $epsilon;
+            return abs((float) $value - (float) $baseValue) > $epsilon;
         }
 
         return $value !== $baseValue;
@@ -172,7 +171,7 @@ class CustomUserLabel extends Model
     protected static function normalizeDiffValue($value)
     {
         if (is_numeric($value)) {
-            return round((float)$value, 3);
+            return round((float) $value, 3);
         }
 
         return $value;

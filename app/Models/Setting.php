@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Models\Labels\CustomUserLabel;
+use App\Models\Labels\Label;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,8 +14,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Watson\Validating\ValidatingTrait;
-use App\Models\Labels\Label;
-use App\Models\Labels\CustomUserLabel;
 
 /**
  * Settings model.
@@ -379,12 +379,12 @@ class Setting extends Model
     {
         $value = $this->label2_template;
 
-        if (!$value) {
+        if (! $value) {
             return 'DefaultLabel';
         }
 
         if (str_starts_with($value, 'custom:')) {
-            $id = (int)str_replace('custom:', '', $value);
+            $id = (int) str_replace('custom:', '', $value);
 
             return CustomUserLabel::find($id)?->name ?? $value;
         }

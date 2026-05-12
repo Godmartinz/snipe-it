@@ -96,7 +96,7 @@ class LabelPresenter extends Presenter
                 'searchable' => false,
                 'sortable' => false,
                 'formatter' => 'labelActionsFormatter',
-            ]
+            ],
         ];
 
         return json_encode($layout);

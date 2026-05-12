@@ -2,27 +2,34 @@
 
 namespace App\Models\Labels\CustomLabels;
 
-use App\Models\Labels\Label;
 use App\Models\Labels\RectangleSheet;
 
 abstract class CustomLabel extends RectangleSheet
 {
     protected array $editorConfig = [];
+
     protected ?float $pageWidth = null;
+
     protected ?float $pageHeight = null;
 
     protected ?float $pageMarginTop = null;
+
     protected ?float $pageMarginRight = null;
+
     protected ?float $pageMarginBottom = null;
+
     protected ?float $pageMarginLeft = null;
 
     protected ?float $labelWidth = null;
+
     protected ?float $labelHeight = null;
 
     protected ?float $columnSpacing = null;
+
     protected ?float $rowSpacing = null;
 
     protected ?int $gridColumns = null;
+
     protected ?int $gridRows = null;
 
     public function applyEditorConfig(array $config): static
