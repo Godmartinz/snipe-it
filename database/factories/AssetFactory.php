@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CustomField;
+use App\Models\Company;
+use App\Models\Manufacturer;
+use App\Models\Category;
 use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
@@ -417,5 +420,63 @@ class AssetFactory extends Factory
         })->afterCreating(function (Asset $asset) {
             $asset->setValidating(true);
         });
+    }
+
+    public function labelPreview()
+    {
+        return $this->afterMaking(function (Asset $asset) {
+
+            $asset->id = 999999;
+            $asset->name = 'JEN-867-5309';
+            $asset->asset_tag = '100001';
+            $asset->serial = 'SN9876543210';
+            $asset->asset_eol_date = '2025-01-01';
+            $asset->order_number = '12345';
+            $asset->purchase_date = '2023-01-01';
+            $asset->status_id = 1;
+            $asset->location_id = 1;
+
+            $asset->company = new Company([
+                'name' => trans('admin/labels/table.example_company'),
+                'phone' => '1-555-555-5555',
+                'email' => 'company@example.com',
+                'logo' => 'label-preview-logo.png',
+            ]);
+
+            $asset->setRelation('assignedTo', new User([
+                'first_name' => 'Luke',
+                'last_name' => 'Skywalker',
+            ]));
+
+            $asset->defaultLoc = new Location([
+                'name' => trans('admin/labels/table.example_defaultloc'),
+                'phone' => '1-555-555-5555',
+            ]);
+
+            $asset->location = new Location([
+                'name' => trans('admin/labels/table.example_location'),
+                'phone' => '1-555-555-5555',
+            ]);
+
+            $asset->model = new AssetModel;
+            $asset->model->id = 999999;
+            $asset->model->name = trans('admin/labels/table.example_model');
+            $asset->model->model_number = 'MDL5678';
+
+            $asset->model->manufacturer = new Manufacturer;
+            $asset->model->manufacturer->id = 999999;
+            $asset->model->manufacturer->name = trans('admin/labels/table.example_manufacturer');
+
+            $asset->supplier = new Supplier([
+                'name' => trans('admin/labels/table.example_company'),
+            ]);
+
+            $asset->model->category = new Category;
+            $asset->model->category->id = 999999;
+            $asset->model->category->name = trans('admin/labels/table.example_category');
+            $asset->is_label_preview = true;
+        });
+
+
     }
 }

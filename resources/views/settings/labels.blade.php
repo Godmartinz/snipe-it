@@ -82,7 +82,8 @@
 
 
                         @if ($setting->label2_enable)
-                        <div class="form-group{{ $errors->has('config_snapshot') ? ' has-error' : '' }}">
+                        <!-- Import Label -->
+                        <div class="form-group">
                             <div class="col-md-3 text-right">
                                 <label for="config_snapshot" class="control-label">
                                     Import Label Config
@@ -167,14 +168,14 @@
                                 </div>
 
                                 @if ($errors->has('config_snapshot'))
-                                    <ul class="alert-msg">
+                                    <ul class="alert-msg list-unstyled" style="margin-top: 10px;">
                                         @foreach ((array) $errors->get('config_snapshot') as $message)
                                             @if (is_array($message))
                                                 @foreach ($message as $line)
-                                                    <li>{{ $line }}</li>
+                                                    <li>{!! $line !!}</li>
                                                 @endforeach
                                             @else
-                                                <li>{{ $message }}</li>
+                                                <li>{!! $message !!}</li>
                                             @endif
                                         @endforeach
                                     </ul>
@@ -199,6 +200,19 @@
                                 </div>
                             </div>
                         </fieldset>
+
+                        <fieldset name="label-preview">
+                            <x-form.legend>
+                                {{ trans('admin/settings/general.label2_label_preview') }}: <code
+                                        id="selected-template-display">{{ $setting->label2_template_display }}</code>
+                            </x-form.legend>
+                            <div class="col-md-12" style="margin-bottom: 10px;">
+                                <input type="hidden" name="label2_template" id="label2_template"
+                                       value="{{ old('label2_template', $setting->label2_template) }}">
+                                @include('partials.label2-preview')
+                            </div>
+                        </fieldset>
+
 
                         <fieldset name="label-settings">
                             <x-form.legend help_text="{{ trans('admin/settings/general.labels_title_help') }}">
@@ -477,17 +491,17 @@
 
                     </fieldset>
 
-                    <fieldset name="label-preview">
-                        <x-form.legend>
-                            {{ trans('admin/settings/general.label2_label_preview') }}: <code
-                                    id="selected-template-display">{{ $setting->label2_template_display }}</code>
-                        </x-form.legend>
-                            <div class="col-md-12" style="margin-bottom: 10px;">
-                                <input type="hidden" name="label2_template" id="label2_template"
-                                       value="{{ old('label2_template', $setting->label2_template) }}">
-                                @include('partials.label2-preview')
-                            </div>
-                    </fieldset>
+                    {{--                    <fieldset name="label-preview">--}}
+                    {{--                        <x-form.legend>--}}
+                    {{--                            {{ trans('admin/settings/general.label2_label_preview') }}: <code--}}
+                    {{--                                    id="selected-template-display">{{ $setting->label2_template_display }}</code>--}}
+                    {{--                        </x-form.legend>--}}
+                    {{--                            <div class="col-md-12" style="margin-bottom: 10px;">--}}
+                    {{--                                <input type="hidden" name="label2_template" id="label2_template"--}}
+                    {{--                                       value="{{ old('label2_template', $setting->label2_template) }}">--}}
+                    {{--                                @include('partials.label2-preview')--}}
+                    {{--                            </div>--}}
+                    {{--                    </fieldset>--}}
 
                             @include('partials.bootstrap-table')
 

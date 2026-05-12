@@ -60,44 +60,7 @@ class LabelsController extends Controller
 
         }
 
-        $exampleAsset = new Asset;
-
-        $exampleAsset->id = 999999;
-        $exampleAsset->name = 'JEN-867-5309';
-        $exampleAsset->asset_tag = '100001';
-        $exampleAsset->serial = 'SN9876543210';
-        $exampleAsset->asset_eol_date = '2025-01-01';
-        $exampleAsset->order_number = '12345';
-        $exampleAsset->purchase_date = '2023-01-01';
-        $exampleAsset->status_id = 1;
-        $exampleAsset->location_id = 1;
-
-        $exampleAsset->company = new Company([
-            'name' => trans('admin/labels/table.example_company'),
-            'phone' => '1-555-555-5555',
-            'email' => 'company@example.com',
-            'logo' => 'label-preview-logo.png',
-        ]);
-        $exampleAsset->is_label_preview = true;
-
-        $exampleAsset->setRelation('assignedTo', new User(['first_name' => 'Luke', 'last_name' => 'Skywalker']));
-        $exampleAsset->defaultLoc = new Location(['name' => trans('admin/labels/table.example_defaultloc'), 'phone' => '1-555-555-5555']);
-        $exampleAsset->location = new Location(['name' => trans('admin/labels/table.example_location'), 'phone' => '1-555-555-5555']);
-
-        $exampleAsset->model = new AssetModel;
-        $exampleAsset->model->id = 999999;
-        $exampleAsset->model->name = trans('admin/labels/table.example_model');
-        $exampleAsset->model->model_number = 'MDL5678';
-        $exampleAsset->model->manufacturer = new Manufacturer;
-        $exampleAsset->model->manufacturer->id = 999999;
-        $exampleAsset->model->manufacturer->name = trans('admin/labels/table.example_manufacturer');
-        $exampleAsset->model->manufacturer->support_email = 'support@test.com';
-        $exampleAsset->model->manufacturer->support_phone = '1-555-555-5555';
-        $exampleAsset->model->manufacturer->support_url = 'https://example.com';
-        $exampleAsset->supplier = new Supplier(['name' => trans('admin/labels/table.example_company')]);
-        $exampleAsset->model->category = new Category;
-        $exampleAsset->model->category->id = 999999;
-        $exampleAsset->model->category->name = trans('admin/labels/table.example_category');
+        $exampleAsset = Asset::factory()->labelPreview()->make();
 
         $customFieldColumns = CustomField::where('field_encrypted', '=', 0)->pluck('db_column');
 
@@ -422,59 +385,7 @@ class LabelsController extends Controller
             $template->applyEditorConfig($editorConfig);
         }
 
-        $exampleAsset = new Asset;
-        $exampleAsset->id = 999999;
-        $exampleAsset->name = 'JEN-867-5309';
-        $exampleAsset->asset_tag = '100001';
-        $exampleAsset->serial = 'SN9876543210';
-        $exampleAsset->asset_eol_date = '2025-01-01';
-        $exampleAsset->order_number = '12345';
-        $exampleAsset->purchase_date = '2023-01-01';
-        $exampleAsset->status_id = 1;
-        $exampleAsset->location_id = 1;
-
-        $exampleAsset->company = new Company([
-            'name' => trans('admin/labels/table.example_company'),
-            'phone' => '1-555-555-5555',
-            'email' => 'company@example.com',
-        ]);
-
-        $exampleAsset->setRelation('assignedTo', new User([
-            'first_name' => 'Luke',
-            'last_name' => 'Skywalker',
-        ]));
-
-        $exampleAsset->defaultLoc = new Location([
-            'name' => trans('admin/labels/table.example_defaultloc'),
-            'phone' => '1-555-555-5555',
-        ]);
-
-        $exampleAsset->location = new Location([
-            'name' => trans('admin/labels/table.example_location'),
-            'phone' => '1-555-555-5555',
-        ]);
-
-        $exampleAsset->model = new AssetModel;
-        $exampleAsset->model->id = 999999;
-        $exampleAsset->model->name = trans('admin/labels/table.example_model');
-        $exampleAsset->model->model_number = 'MDL5678';
-
-        $exampleAsset->model->manufacturer = new Manufacturer;
-        $exampleAsset->model->manufacturer->id = 999999;
-        $exampleAsset->model->manufacturer->name = trans('admin/labels/table.example_manufacturer');
-        $exampleAsset->model->manufacturer->support_email = 'support@test.com';
-        $exampleAsset->model->manufacturer->support_phone = '1-555-555-5555';
-        $exampleAsset->model->manufacturer->support_url = 'https://example.com';
-
-        $exampleAsset->supplier = new Supplier([
-            'name' => trans('admin/labels/table.example_company'),
-        ]);
-
-        $exampleAsset->model->category = new Category;
-        $exampleAsset->model->category->id = 999999;
-        $exampleAsset->model->category->name = trans('admin/labels/table.example_category');
-
-        $exampleAsset->is_label_preview = true;
+        $exampleAsset = Asset::factory()->labelPreview()->make();
 
         $customFieldColumns = CustomField::where('field_encrypted', 0)->pluck('db_column');
 
@@ -709,9 +620,16 @@ class LabelsController extends Controller
         );
 
         if ($configValidator->fails()) {
+
+            $messages = collect($configValidator->errors()->all())
+                ->map(function ($message) {
+                    return '<i class="fa-solid fa-xmark text-danger"></i> ' . $message;
+                })
+                ->toArray();
+
             return back()
                 ->withErrors([
-                    'config_snapshot' => $configValidator->errors()->all(),
+                    'config_snapshot' => $messages,
                 ])
                 ->withInput();
         }
