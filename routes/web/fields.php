@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Route;
 * Custom Fields Routes
 */
 
-
-
-Route::group([ 'prefix' => 'fields','middleware' => ['auth'] ], function () {
+Route::group(['prefix' => 'fields', 'middleware' => ['auth']], function () {
 
     Route::post(
         'required/{fieldset_id}/{field_id}',
@@ -32,15 +30,13 @@ Route::group([ 'prefix' => 'fields','middleware' => ['auth'] ], function () {
         [CustomFieldsetsController::class, 'associate']
     )->name('fieldsets.associate');
 
-
     Route::resource('fieldsets', CustomFieldsetsController::class, [
         'parameters' => [
             'fieldset' => 'fieldset',
-            'field' => 'field_id'
+            'field' => 'field_id',
         ],
-        'except' => ['show', 'view']
+        'except' => ['show', 'view'],
     ]);
-
 
     // This is a shim to handle bootstrap tables
     // @todo: normalize this in the JS
@@ -58,6 +54,5 @@ Route::group([ 'prefix' => 'fields','middleware' => ['auth'] ], function () {
 
 Route::resource('fields', CustomFieldsController::class,
     ['middleware' => ['auth'],
-        'except' => ['show', 'view']
+        'except' => ['show', 'view'],
     ]);
-

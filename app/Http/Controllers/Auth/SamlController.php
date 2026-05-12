@@ -75,6 +75,7 @@ class SamlController extends Controller
     {
         $auth = $this->saml->getAuth();
         $ssoUrl = $auth->login(session()->get('url.intended'), [], false, false, false, false);
+
         return redirect()->away($ssoUrl);
     }
 

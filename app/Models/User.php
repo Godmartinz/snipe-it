@@ -725,9 +725,10 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at');
     }
+
     public function directLicenses()
     {
-        return $this->belongsToMany(\App\Models\License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at')->wherePivotNull('asset_id')->withTrashed();
+        return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at')->wherePivotNull('asset_id')->withTrashed();
     }
 
     /**
@@ -1393,6 +1394,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->orwhereRaw('CONCAT(users.first_name," ",users.last_name) LIKE \''.$search.'%\'');
 
     }
+
     public function scopeWithInventoryRelations($query, int $id)
     {
         return $query->where('id', $id)
@@ -1434,6 +1436,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ])
             ->withTrashed();
     }
+
     /**
      * Get all direct and indirect subordinates for this user.
      *

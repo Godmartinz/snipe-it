@@ -5,6 +5,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Validation\Concerns\ValidatesAttributes;
 
 class BooleanEncrypted implements ValidationRule
@@ -14,7 +15,7 @@ class BooleanEncrypted implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -22,7 +23,7 @@ class BooleanEncrypted implements ValidationRule
             $attributeName = trim(preg_replace('/_+|snipeit|\d+/', ' ', $attribute));
             $decrypted = Crypt::decrypt($value);
 
-            if (!$this->validateBoolean($attributeName, $decrypted) && !is_null($decrypted)) {
+            if (! $this->validateBoolean($attributeName, $decrypted) && ! is_null($decrypted)) {
                 $fail(trans('validation.ipv6', ['attribute' => $attributeName]));
             }
         } catch (\Exception $e) {

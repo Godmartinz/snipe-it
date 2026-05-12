@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('accessories_checkout', function (Blueprint $table) {
-            $table->index(['assigned_to','assigned_type']);
+            $table->index(['assigned_to', 'assigned_type']);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('accessories_checkout', function (Blueprint $table) {
-            $table->dropIndex(['assigned_to','assigned_type']);
+            $table->dropIndex(['assigned_to', 'assigned_type']);
         });
     }
 };

@@ -29,8 +29,6 @@ Route::group(['prefix' => 'components', 'middleware' => ['auth']], function () {
         [Components\ComponentsController::class, 'getClone']
     )->name('components.clone.create');
 
-
-
 });
 
 Route::resource('components', Components\ComponentsController::class, [

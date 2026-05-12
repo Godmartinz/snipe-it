@@ -243,13 +243,13 @@ class CheckoutAcceptance extends Model
         if ($data['item_serial'] != null) {
             $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
         }
-        if (!empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
+        if (! empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
             foreach ($data['custom_fields'] as $customField) {
                 $label = $customField['label'] ?? null;
                 $value = $customField['value'] ?? null;
 
                 if (($label !== null) && ($value !== null) && ($value !== '')) {
-                    $pdf->writeHTML(e((string) $label) . ': ' . e((string) $value), true, 0, true, 0, '');
+                    $pdf->writeHTML(e((string) $label).': '.e((string) $value), true, 0, true, 0, '');
                 }
             }
         }

@@ -18,7 +18,6 @@ class SCIMUser extends User
     // from SCIMUser
     public function groups()
     {
-        return $this->belongsToMany(\App\Models\Group::class, 'users_groups', 'user_id', 'group_id');
+        return $this->belongsToMany(Group::class, 'users_groups', 'user_id', 'group_id');
     }
-
 }

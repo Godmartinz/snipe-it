@@ -530,8 +530,6 @@ class LdapSync extends Command
             }
         }
 
-
-
         if ($this->option('summary')) {
             for ($x = 0; $x < count($summary); $x++) {
                 if ($summary[$x]['status'] == 'error') {
@@ -550,11 +548,10 @@ class LdapSync extends Command
 
     /**
      * Checks if the user is deletable without gate check
-     * 
+     *
      * A user is considered deletable if they have no associated assets, accessories, licenses, consumables, managed users, or managed locations.
-     * 
-     * @param User $user The user to check
-     * 
+     *
+     * @param  User  $user  The user to check
      * @return bool True if the user is deletable, false otherwise
      */
     private function isUserDeletable(User $user): bool

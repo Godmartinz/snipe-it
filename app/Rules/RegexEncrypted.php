@@ -6,6 +6,7 @@ use App\Models\CustomField;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Validation\Concerns\ValidatesAttributes;
 
 class RegexEncrypted implements ValidationRule
@@ -15,7 +16,7 @@ class RegexEncrypted implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -25,7 +26,7 @@ class RegexEncrypted implements ValidationRule
         try {
             $attributeName = trim(preg_replace('/_+|snipeit|\d+/', ' ', $attribute));
             $decrypted = Crypt::decrypt($value);
-            if (!$this->validateRegex($attributeName, $decrypted, [$regex]) && !is_null($decrypted)) {
+            if (! $this->validateRegex($attributeName, $decrypted, [$regex]) && ! is_null($decrypted)) {
                 $fail(trans('validation.regex', ['attribute' => $attributeName]));
             }
         } catch (\Exception $e) {

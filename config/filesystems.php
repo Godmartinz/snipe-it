@@ -102,7 +102,7 @@ $config = [
             'secret' => env('PRIVATE_AWS_SECRET_ACCESS_KEY'),
             'region' => env('PRIVATE_AWS_DEFAULT_REGION'),
             'bucket' => env('PRIVATE_AWS_BUCKET'),
-            'root'   => env('BACKUP_FILESYSTEM_ROOT', storage_path('app')),
+            'root' => env('BACKUP_FILESYSTEM_ROOT', storage_path('app')),
             'visibility' => 'private',
         ],
 
