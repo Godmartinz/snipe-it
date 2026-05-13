@@ -285,11 +285,16 @@ abstract class CustomTapeLabel extends Label
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode1D_v_align' => $this->getBarcode1DVAlign(),
-            'text_size_mod' => $this->getTextSizeMod(),
+            'text_size_mod' => $this->getTextSizeMod(), // needs to be combined with field size
             'tag_font_size' => $this->getTagSize(),
+            'field_label_font_size' => $this->getFieldSize(),
             'field_value_font_size' => $this->getFieldSize(),
             'tag_alignment' => $this->getTagAlignment(),
-            'field_alignment' => $this->getFieldAlignment(),
+//            'field_alignment' => $this->getFieldAlignment(),
+            'logo_max_width' => $this->getLogoMaxWidth(),
+            'logo_margin' => $this->getLogoMargin(),
+            'logo_h_align' => $this->getLogoHAlign(),
+            'logo_v_align' => $this->getLogoVAlign(),
         ];
     }
 
@@ -386,6 +391,19 @@ abstract class CustomTapeLabel extends Label
             }
         }
 
+        $stringContentMap = [
+            'barcode2D_h_align' => 'barcode2DHAlign',
+            'barcode2D_v_align' => 'barcode2DVAlign',
+            'logo_h_align' => 'logoHAlign',
+            'logo_v_align' => 'logoVAlign',
+            'tag_alignment' => 'tagAlignment',
+        ];
+
+        foreach ($stringContentMap as $key => $property) {
+            if (array_key_exists($key, $content)) {
+                $this->{$property} = (string)$content[$key];
+            }
+        }
         return $this;
     }
 
@@ -432,6 +450,9 @@ abstract class CustomTapeLabel extends Label
         $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
         $this->textRenderMode = isset($content['text_render_mode']) ? (string)$content['text_render_mode'] : $this->textRenderMode;
+        $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
+        $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
+        $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
     }
 
     public function write($pdf, $record)
