@@ -58,6 +58,8 @@ abstract class CustomTapeLabel extends Label
     protected ?float $textAreaHeight = null;
 
     protected string $textRenderMode = 'inline';
+    protected string $barcode1DVAlign = 'T';
+
 
     public function getUnit()
     {
@@ -254,6 +256,11 @@ abstract class CustomTapeLabel extends Label
         return $this->textRenderMode;
     }
 
+    public function getBarcode1DVAlign(): string
+    {
+        return $this->barcode1DVAlign;
+    }
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
@@ -277,6 +284,7 @@ abstract class CustomTapeLabel extends Label
         return [
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode1D_v_align' => $this->getBarcode1DVAlign(),
             'text_size_mod' => $this->getTextSizeMod(),
             'tag_font_size' => $this->getTagSize(),
             'field_value_font_size' => $this->getFieldSize(),
@@ -349,6 +357,7 @@ abstract class CustomTapeLabel extends Label
 
         $contentMap = [
             'barcode_size' => 'barcodeSize',
+            'barcode1D_v_align' => $this->getBarcode1DVAlign(),
             'barcode_margin' => 'barcodeMargin',
             'text_size_mod' => 'textSizeMod',
 
@@ -411,6 +420,7 @@ abstract class CustomTapeLabel extends Label
 
         $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
         $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
+        $this->barcode1DVAlign = isset($content['barcode1D_v_align']) ? (string)$content['barcode1D_v_align'] : $this->barcode1DVAlign;
         $this->textSizeMod = isset($content['text_size_mod']) ? (float)$content['text_size_mod'] : $this->textSizeMod;
         $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
         $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
@@ -478,16 +488,32 @@ abstract class CustomTapeLabel extends Label
 
             $barcodeMargin = max(0, $this->getBarcodeMargin());
 
-            $layout['barcode1d'] = [
-                'x' => $layout['body']['x1'],
-                'y' => $layout['body']['y1'],
-                'w' => $layout['body']['w'],
-                'h' => $barcodeHeight,
-            ];
+            if (strtoupper($this->getBarcode1DVAlign()) === 'B') {
+                $layout['barcode1d'] = [
+                    'x' => $layout['body']['x1'],
+                    'y' => $layout['body']['y2'] - $barcodeHeight,
+                    'w' => $layout['body']['w'],
+                    'h' => $barcodeHeight,
+                ];
 
-            $layout['body']['y1'] += ($barcodeHeight + $barcodeMargin);
-            $layout['body']['y1'] = min($layout['body']['y1'], $layout['body']['y2']);
-            $layout['body']['h'] = max(0, $layout['body']['y2'] - $layout['body']['y1']);
+                $layout['body']['y2'] -= ($barcodeHeight + $barcodeMargin);
+                $layout['body']['y2'] = max($layout['body']['y1'], $layout['body']['y2']);
+            } else {
+                $layout['barcode1d'] = [
+                    'x' => $layout['body']['x1'],
+                    'y' => $layout['body']['y1'],
+                    'w' => $layout['body']['w'],
+                    'h' => $barcodeHeight,
+                ];
+
+                $layout['body']['y1'] += ($barcodeHeight + $barcodeMargin);
+                $layout['body']['y1'] = min($layout['body']['y1'], $layout['body']['y2']);
+            }
+
+            $layout['body']['h'] = max(
+                0,
+                $layout['body']['y2'] - $layout['body']['y1']
+            );
         }
 
         /*

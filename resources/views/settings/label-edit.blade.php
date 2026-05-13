@@ -289,6 +289,15 @@
                                                             Bottom
                                                         </option>
                                                     </select>
+                                                @elseif($key === 'barcode1D_v_align')
+                                                    <select name="content[{{ $key }}]" class="form-control">
+                                                        <option value="T" {{ $value === 'T' ? 'selected' : '' }}>
+                                                            Top
+                                                        </option>
+                                                        <option value="B" {{ $value === 'B' ? 'selected' : '' }}>
+                                                            Bottom
+                                                        </option>
+                                                    </select>
                                                 @else
                                                     <input type="number" step="1" name="content[{{ $key }}]"
                                                            value="{{ $value }}" class="form-control">
