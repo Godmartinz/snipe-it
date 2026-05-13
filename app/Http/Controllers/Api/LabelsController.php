@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\LabelsTransformer;
 use App\Models\Labels\CustomLabels\PreviewSheetLabel;
+use App\Models\Labels\CustomLabels\PreviewTapeLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +26,7 @@ class LabelsController extends Controller
 
         $baseLabels = Label::find()
             ->reject(fn(Label $label) => $label instanceof PreviewSheetLabel)
+            ->reject(fn(Label $label) => $label instanceof PreviewTapeLabel)
             ->map(function (Label $label) {
                 return [
                     'source' => 'base',

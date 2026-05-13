@@ -362,7 +362,7 @@ abstract class CustomTapeLabel extends Label
 
         $contentMap = [
             'barcode_size' => 'barcodeSize',
-            'barcode1D_v_align' => $this->getBarcode1DVAlign(),
+            'barcode1D_v_align' => 'barcode1DVAlign',
             'barcode_margin' => 'barcodeMargin',
             'text_size_mod' => 'textSizeMod',
 
