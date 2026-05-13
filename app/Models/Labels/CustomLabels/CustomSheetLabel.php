@@ -672,8 +672,8 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->render1DBarcode($pdf, $record, $layout);
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);
-        $this->renderTag($pdf, $record, $layout);
-        $this->renderTextBlock($pdf, $record, $layout);
+        $this->renderBlockTag($pdf, $record, $layout);
+        $this->renderStackedTextBlock($pdf, $record, $layout);
     }
 
     protected function buildLayout($pdf, $record, $pa): array

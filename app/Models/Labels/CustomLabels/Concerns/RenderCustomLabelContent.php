@@ -122,7 +122,7 @@ trait RenderCustomLabelContent
         );
     }
 
-    protected function renderTag($pdf, $record, array $layout): void
+    protected function renderBlockTag($pdf, $record, array $layout): void
     {
         if (
             empty($layout['tag']) ||
@@ -149,7 +149,7 @@ trait RenderCustomLabelContent
         );
     }
 
-    protected function renderTextBlock($pdf, $record, array $layout): void
+    protected function renderStackedTextBlock($pdf, $record, array $layout): void
     {
         if (!empty($layout['title'])) {
             static::writeText(
