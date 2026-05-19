@@ -392,6 +392,7 @@ abstract class CustomSheetLabel extends RectangleSheet
     {
         $sourceUnit = $template->getUnit();
 
+        //Convert everything to mm for precision
         $convert = function ($value) use ($sourceUnit) {
             if ($value === null || $value === '') {
                 return $value;

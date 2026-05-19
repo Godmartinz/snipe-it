@@ -337,10 +337,8 @@ trait RenderCustomLabelContent
 
         $tagHeight = max(0, $this->getTagSize());
 
-        if (
-            $barcode2dBox &&
-            strtoupper($this->getTagAlignment()) === strtoupper($this->getBarcode2DHAlign())
-        ) {
+        if ($barcode2dBox && ((method_exists($this, 'getTagPositionMode') && $this->getTagPositionMode() === 'under_barcode')
+                || strtoupper($this->getTagAlignment()) === strtoupper($this->getBarcode2DHAlign()))) {
             $box = [
                 'x' => $barcode2dBox['x'],
                 'y' => $barcode2dBox['y'] + $barcode2dBox['h'],
@@ -376,20 +374,21 @@ trait RenderCustomLabelContent
 
     protected function calculate2DBarcodeSize($record, array $container): float
     {
+        $maxHeight = $container['h'];
+
+        if (method_exists($this, 'getTagPositionMode') && $this->getTagPositionMode() === 'under_barcode') {
+            $maxHeight = max(0, ($container['h'] - $this->getTagSize() * .35) - .9);
+        }
         return min(
             $this->get2DBarcodeSize(),
             $container['w'],
-            $container['h']
+            $maxHeight,
         );
     }
 
     protected function calculateTagWidth($record, array $body, ?array $barcode2dBox = null): float
     {
-        if (
-            method_exists($this, 'getTagPositionMode') &&
-            $barcode2dBox &&
-            $this->getTagPositionMode() === 'under_barcode'
-        ) {
+        if (method_exists($this, 'getTagPositionMode') && $barcode2dBox && $this->getTagPositionMode() === 'under_barcode') {
             return $barcode2dBox['w'];
         }
 

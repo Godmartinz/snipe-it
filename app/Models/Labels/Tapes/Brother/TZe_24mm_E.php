@@ -113,9 +113,13 @@ class TZe_24mm_E extends TZe_24mm
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode1D_placement' => 'text_column',
+            'barcode_size' => 2,
+            'barcode2D_h_align' => 'L',
+            'barcode2D_v_align' => 'T',
 
             'tag_font_size' => $this->getTagSize(),
-            
+
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
 
@@ -123,11 +127,14 @@ class TZe_24mm_E extends TZe_24mm
             'field_label_margin' => $this->getLabelMargin(),
 
             'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
+            'field_value_margin' => -1.85,
 
-            'tag_alignment' => 'C',
+            'tag_offset_y' => 2.5,
+            'tag_alignment' => 'L',
+            'tag_position_mode' => 'under_barcode',
             'logo_h_align' => 'R',
             'text_render_mode' => 'block',
+            'text_area_offset_y' => 2.0,
         ];
     }
 

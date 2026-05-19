@@ -43,6 +43,8 @@ abstract class CustomTapeLabel extends Label
     protected float $barcode2DSize = 10.0;
     protected string $barcode2DHAlign = 'L';
     protected string $barcode2DVAlign = 'T';
+    protected float $barcode2DMargin = 0.0;
+    protected ?float $logoMaxHeight = null;
     protected float $tagOffsetX = 0.0;
     protected float $tagOffsetY = 0.0;
     protected string $tagPositionMode = 'free';
@@ -56,10 +58,16 @@ abstract class CustomTapeLabel extends Label
     protected float $fieldMargin = 1.0;
     protected ?float $textAreaWidth = null;
     protected ?float $textAreaHeight = null;
+    protected float $textAreaOffsetY = 0.0;
 
     protected string $textRenderMode = 'inline';
     protected string $barcode1DVAlign = 'T';
+    protected string $barcode1DPlacement = 'full_width';
+    protected string $barcode2D_h_align = 'L';
+    protected string $barcode2D_v_align = 'T';
 
+    protected int $rotation = 0;
+    protected string $orientation = 'L';
 
     public function getUnit()
     {
@@ -136,6 +144,30 @@ abstract class CustomTapeLabel extends Label
         return $this->barcodeMargin;
     }
 
+    public function getBarcode2DHAlign(): string
+    {
+        return $this->barcode2DHAlign;
+    }
+
+    public function getBarcode2DVAlign(): string
+    {
+        return $this->barcode2DVAlign;
+    }
+
+    public function getBarcode1DPlacement(): string
+    {
+        return $this->barcode1DPlacement;
+    }
+
+    public function getBarcode2DMargin(): float
+    {
+        return $this->barcode2DMargin;
+    }
+
+    public function getLogoMaxHeight(): ?float
+    {
+        return $this->logoMaxHeight;
+    }
     public function getTextSizeMod(): float
     {
         return $this->textSizeMod;
@@ -184,16 +216,6 @@ abstract class CustomTapeLabel extends Label
     public function get2DBarcodeSize(): float
     {
         return $this->barcode2DSize;
-    }
-
-    public function getBarcode2DHAlign(): string
-    {
-        return $this->barcode2DHAlign;
-    }
-
-    public function getBarcode2DVAlign(): string
-    {
-        return $this->barcode2DVAlign;
     }
 
     public function getTagOffsetX(): float
@@ -261,6 +283,11 @@ abstract class CustomTapeLabel extends Label
         return $this->barcode1DVAlign;
     }
 
+    public function getTextAreaOffsetY(): float
+    {
+        return $this->textAreaOffsetY;
+    }
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
@@ -285,10 +312,18 @@ abstract class CustomTapeLabel extends Label
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode1D_v_align' => $this->getBarcode1DVAlign(),
+            'barcode1d_placement' => $this->getBarcode1DPlacement(),
+            'barcode_2d_size' => $this->get2DBarcodeSize(),
+            'barcode2D_h_align' => $this->getBarcode2DHAlign(),
+            'barcode2D_v_align' => $this->getBarcode2DVAlign(),
             'text_size_mod' => $this->getTextSizeMod(), // needs to be combined with field size
+            'text_area_offset_y' => $this->getTextAreaOffsetY(),
             'tag_font_size' => $this->getTagSize(),
+            'tag_offset_x' => $this->getTagOffsetX(),
+            'tag_offset_y' => $this->getTagOffsetY(),
             'field_label_font_size' => $this->getFieldSize(),
             'field_value_font_size' => $this->getFieldSize(),
+            'field_value_margin' => $this->getFieldMargin(),
             'tag_alignment' => $this->getTagAlignment(),
 //            'field_alignment' => $this->getFieldAlignment(),
             'logo_max_width' => $this->getLogoMaxWidth(),
@@ -362,11 +397,20 @@ abstract class CustomTapeLabel extends Label
 
         $contentMap = [
             'barcode_size' => 'barcodeSize',
-            'barcode1D_v_align' => 'barcode1DVAlign',
             'barcode_margin' => 'barcodeMargin',
-            'text_size_mod' => 'textSizeMod',
+            'barcode1D_v_align' => 'barcode1DVAlign',
+            'barcode1D_placement' => 'barcode1DPlacement',
+            'barcode_2d_size' => 'barcode2DSize',
+            'barcode_2d_margin' => 'barcode2DMargin',
+            'logo_max_height' => 'logoMaxHeight',
 
+            'text_size_mod' => 'textSizeMod',
+            'text_area_offset_y' => 'textAreaOffsetY',
+
+            'tag_position_mode' => 'tagPositionMode',
             'tag_font_size' => 'tagSize',
+            'tag_offset_x' => 'tagOffsetX',
+            'tag_offset_y' => 'tagOffsetY',
 
             'title_font_size' => 'titleSize',
             'title_margin' => 'titleMargin',
@@ -404,6 +448,21 @@ abstract class CustomTapeLabel extends Label
                 $this->{$property} = (string)$content[$key];
             }
         }
+
+        foreach ($stringContentMap as $key => $property) {
+            if (array_key_exists($key, $content)) {
+                $this->{$property} = (string)$content[$key];
+            }
+        }
+
+        $this->rotation = method_exists($template, 'getRotation')
+            ? (int)$template->getRotation()
+            : $this->rotation;
+
+        $this->rotation = method_exists($template, 'getOrientation')
+            ? (int)$template->getOrientation()
+            : $this->rotation;
+
         return $this;
     }
 
@@ -420,6 +479,7 @@ abstract class CustomTapeLabel extends Label
         $tape = $config['tape'] ?? [];
         $content = $config['content'] ?? [];
         $supports = $config['supports'] ?? [];
+        $meta = $config['meta'] ?? [];
 
         $this->width = isset($tape['width']) ? (float)$tape['width'] : $this->width;
         $this->height = isset($tape['height']) ? (float)$tape['height'] : $this->height;
@@ -439,8 +499,20 @@ abstract class CustomTapeLabel extends Label
         $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
         $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
         $this->barcode1DVAlign = isset($content['barcode1D_v_align']) ? (string)$content['barcode1D_v_align'] : $this->barcode1DVAlign;
+        $this->barcode1DPlacement = isset($content['barcode1D_placement']) ? (string)$content['barcode1D_placement'] : $this->barcode1DPlacement;
+        $this->barcode2DHAlign = isset($content['barcode2D_h_align']) ? (string)$content['barcode2D_h_align'] : $this->barcode2DHAlign;
+        $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
+        $this->barcode2DVAlign = isset($content['barcode2D_v_align']) ? (string)$content['barcode2D_v_align'] : $this->barcode2DVAlign;
+        $this->barcode2DMargin = isset($content['barcode_2d_margin']) ? (float)($content['barcode_2d_margin']) : $this->barcode2DMargin;
+
+        $this->logoMaxHeight = isset($content['logo_max_height']) ? (float)($content['logo_max_height']) : $this->logoMaxHeight;
+
         $this->textSizeMod = isset($content['text_size_mod']) ? (float)$content['text_size_mod'] : $this->textSizeMod;
+        $this->textAreaOffsetY = isset($content['text_area_offset_y']) ? (float)$content['text_area_offset_y'] : $this->textAreaOffsetY;
         $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
+        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float)$content['tag_offset_x'] : $this->tagOffsetX;
+        $this->tagPositionMode = isset($content['tag_position_mode']) ? (string)$content['tag_position_mode'] : $this->tagPositionMode;
+        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float)$content['tag_offset_y'] : $this->tagOffsetY;
         $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
         $this->tagAlignment = isset($content['tag_alignment']) ? (string)$content['tag_alignment'] : $this->tagAlignment;
         $this->fieldAlignment = isset($content['field_alignment']) ? (string)$content['field_alignment'] : $this->fieldAlignment;
@@ -453,6 +525,8 @@ abstract class CustomTapeLabel extends Label
         $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
         $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
+
+        $this->orientation = isset($meta['rotation']) ? (string)$meta['rotation'] : $this->orientation;
     }
 
     public function write($pdf, $record)
@@ -501,7 +575,9 @@ abstract class CustomTapeLabel extends Label
         | Reserve top strip for 1D barcode
         |--------------------------------------------------------------------------
         */
-        if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
+        $useTextColumnBarcode = $this->getBarcode1DPlacement() === 'text_column';
+
+        if (!$useTextColumnBarcode && $record->has('barcode1d') && $this->getSupport1DBarcode()) {
             $barcodeHeight = min(
                 max(0, $this->getBarcodeSize()),
                 $layout['body']['h']
@@ -598,9 +674,34 @@ abstract class CustomTapeLabel extends Label
 
         $layout['text'] = $textBox;
 
+        if ($this->getTextAreaOffsetY() !== 0.0) {
+            $layout['text']['y2'] += $this->getTextAreaOffsetY();
+            $layout['text']['h'] = max(0, $layout['text']['y2'] - $layout['text']['y1']);
+        }
+
+        if (
+            $useTextColumnBarcode &&
+            $record->has('barcode1d') &&
+            $this->getSupport1DBarcode()
+        ) {
+            $barcodeHeight = min(
+                max(0, $this->getBarcodeSize()),
+                $layout['text']['h']
+            );
+
+            $layout['barcode1d'] = [
+                'x' => $layout['text']['x1'],
+                'y' => $layout['text']['y2'] - $barcodeHeight,
+                'w' => $layout['text']['w'],
+                'h' => $barcodeHeight,
+            ];
+
+            $layout['text']['y2'] -= $barcodeHeight;
+            $layout['text']['h'] = max(0, $layout['text']['y2'] - $layout['text']['y1']);
+        }
         $textY = $layout['text']['y1'];
         $bottomLimit = $layout['text']['y2'];
-        $availableHeight = max(0, $bottomLimit - $textY);
+
 
         $hasTitle = $title !== null && $title !== '';
 
