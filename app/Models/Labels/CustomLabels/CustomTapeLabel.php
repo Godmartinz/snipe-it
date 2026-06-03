@@ -39,6 +39,7 @@ abstract class CustomTapeLabel extends Label
     protected float $logoMargin = 2.0;
     protected string $logoHAlign = 'L';
     protected string $logoVAlign = 'T';
+    protected ?string $logoPlacement = null;
 
     protected float $barcode2DSize = 10.0;
     protected string $barcode2DHAlign = 'L';
@@ -213,6 +214,10 @@ abstract class CustomTapeLabel extends Label
         return $this->logoVAlign;
     }
 
+    public function getLogoPlacement(): ?string
+    {
+        return $this->logoPlacement;
+    }
     public function get2DBarcodeSize(): float
     {
         return $this->barcode2DSize;
@@ -336,6 +341,7 @@ abstract class CustomTapeLabel extends Label
             'logo_margin' => $this->getLogoMargin(),
             'logo_h_align' => $this->getLogoHAlign(),
             'logo_v_align' => $this->getLogoVAlign(),
+            'logo_placement' => $this->getLogoPlacement(),
         ];
     }
 
@@ -447,6 +453,7 @@ abstract class CustomTapeLabel extends Label
             'logo_h_align' => 'logoHAlign',
             'logo_v_align' => 'logoVAlign',
             'tag_alignment' => 'tagAlignment',
+            'logo_placement' => 'logoPlacement',
         ];
 
         foreach ($stringContentMap as $key => $property) {
@@ -527,6 +534,7 @@ abstract class CustomTapeLabel extends Label
         $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
         $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
+        $this->logoPlacement = isset($content['logo_placement']) ? (string)$content['logo_placement'] : $this->logoPlacement;
 
         //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
         if (array_key_exists('barcode2D_h_align', $content)) {
@@ -627,27 +635,58 @@ abstract class CustomTapeLabel extends Label
         | Resolve positioned elements
         |--------------------------------------------------------------------------
         */
-        $logoBox = $this->resolveLogoBox($record, $layout['body']);
-        $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], $logoBox);
-        $tagBox = $this->resolveTagBox($record, $layout['body'], $barcode2dBox, $logoBox);
+        if ($this->getLogoPlacement() === 'text_column') {
+            $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], null);
+            $tagBox = $this->resolveTagBox($record, $layout['body'], $barcode2dBox, null);
 
-        $layout['logo'] = $logoBox;
-        $layout['barcode2d'] = $barcode2dBox;
-        $layout['tag'] = $tagBox;
+            $layout['barcode2d'] = $barcode2dBox;
+            $layout['tag'] = $tagBox;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Derive remaining text box
-        |--------------------------------------------------------------------------
-        */
-        $layout['text'] = $this->resolveTextBox(
-            $layout['body'],
-            array_filter([
-                $layout['logo'],
-                $layout['barcode2d'],
-                $layout['tag'],
-            ])
-        );
+            $layout['text'] = $this->resolveTextBox(
+                $layout['body'],
+                array_filter([
+                    $layout['barcode2d'],
+                    $layout['tag'],
+                ])
+            );
+
+            $logoBox = null;
+
+            if ($record->has('logo') && $this->getSupportLogo()) {
+                $logoHeight = $this->getLogoMaxHeight() ?? $this->getLogoMaxWidth();
+
+                $logoBox = $this->anchorBox(
+                    $layout['text'],
+                    $layout['text']['w'],
+                    min($logoHeight, $layout['text']['h']),
+                    $this->getLogoHAlign(),
+                    $this->getLogoVAlign()
+                );
+            }
+            $layout['logo'] = $logoBox;
+
+            if ($logoBox) {
+                $layout['text']['y1'] = $logoBox['y'] + $logoBox['h'] + $this->getLogoMargin();
+                $layout['text']['h'] = max(0, $layout['text']['y2'] - $layout['text']['y1']);
+            }
+        } else {
+            $logoBox = $this->resolveLogoBox($record, $layout['body']);
+            $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], $logoBox);
+            $tagBox = $this->resolveTagBox($record, $layout['body'], $barcode2dBox, $logoBox);
+
+            $layout['logo'] = $logoBox;
+            $layout['barcode2d'] = $barcode2dBox;
+            $layout['tag'] = $tagBox;
+
+            $layout['text'] = $this->resolveTextBox(
+                $layout['body'],
+                array_filter([
+                    $layout['logo'],
+                    $layout['barcode2d'],
+                    $layout['tag'],
+                ])
+            );
+        }
 
         /*
         |--------------------------------------------------------------------------

@@ -162,6 +162,7 @@ class TZe_62mm_Landscape_A extends TZe_62mm_Landscape
             'logo_margin' => $this->getLogoMargin(),
             'logo_h_align' => 'L',
             'logo_v_align' => 'T',
+            "logo_placement" => 'text_column',
 
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
