@@ -78,7 +78,6 @@ class Continuous_53mm_A extends Continuous_53mm
     {
         return [
             'barcode_2d_size' => 44.0,
-            'barcode2D_h_align' => 'C',
             'barcode2D_v_align' => 'T',
             'barcode2D_placement' => 'stacked',
 

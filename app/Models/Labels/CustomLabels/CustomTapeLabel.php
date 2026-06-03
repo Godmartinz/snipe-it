@@ -479,7 +479,12 @@ abstract class CustomTapeLabel extends Label
         $this->rotation = method_exists($template, 'getRotation')
             ? (int)$template->getRotation()
             : $this->rotation;
-
+        logger()->debug('Template dimensions', [
+            'class' => get_class($template),
+            'unit' => $template->getUnit(),
+            'width' => $template->getWidth(),
+            'height' => $template->getHeight(),
+        ]);
         return $this;
     }
 
@@ -560,6 +565,11 @@ abstract class CustomTapeLabel extends Label
         $pa = $this->getPrintableArea();
 
         $layout = $this->buildLayout($pdf, $record, $pa);
+        logger()->debug('Tape dimensions', [
+            'unit' => $this->getUnit(),
+            'width' => $this->getWidth(),
+            'height' => $this->getHeight(),
+        ]);
         $this->render1DBarcode($pdf, $record, $layout);
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);
