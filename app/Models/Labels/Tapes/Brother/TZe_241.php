@@ -54,6 +54,38 @@ class TZe_241 extends TZe_18mm
         return false;
     }
 
+    public function getLabelSize(): float
+    {
+        return self::LABEL_SIZE;
+    }
+
+    public function getLabelMargin(): float
+    {
+        return self::LABEL_MARGIN;
+    }
+
+    public function getFieldSize(): float
+    {
+        return self::FIELD_SIZE;
+    }
+
+    public function getFieldMargin(): float
+    {
+        return self::FIELD_MARGIN;
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'field_label_font_size' => 4,
+            'field_label_margin' => $this->getLabelMargin(),
+
+            'field_value_font_size' => 4,
+            'field_value_margin' => -2.2,
+
+            'text_render_mode' => 'block',
+        ];
+    }
     public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
