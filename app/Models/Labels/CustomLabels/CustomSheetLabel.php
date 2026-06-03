@@ -662,6 +662,13 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->titleOffsetX = isset($content['title_offset_x']) ? (float) $content['title_offset_x'] : $this->titleOffsetX;
         $this->labelMargin = isset($content['field_label_margin']) ? (float) $content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float) $content['field_value_margin'] : $this->fieldMargin;
+
+        //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
+        if (array_key_exists('barcode2D_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('barcode2D_h_align');
+        } elseif (array_key_exists('logo_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('logo_h_align');
+        }
     }
 
     public function write($pdf, $record)

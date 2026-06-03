@@ -288,6 +288,12 @@ abstract class CustomTapeLabel extends Label
         return $this->textAreaOffsetY;
     }
 
+    public function getRotation()
+    {
+        return $this->rotation;
+    }
+
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
@@ -312,7 +318,7 @@ abstract class CustomTapeLabel extends Label
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode1D_v_align' => $this->getBarcode1DVAlign(),
-            'barcode1d_placement' => $this->getBarcode1DPlacement(),
+            'barcode1D_placement' => $this->getBarcode1DPlacement(),
             'barcode_2d_size' => $this->get2DBarcodeSize(),
             'barcode2D_h_align' => $this->getBarcode2DHAlign(),
             'barcode2D_v_align' => $this->getBarcode2DVAlign(),
@@ -321,7 +327,7 @@ abstract class CustomTapeLabel extends Label
             'tag_font_size' => $this->getTagSize(),
             'tag_offset_x' => $this->getTagOffsetX(),
             'tag_offset_y' => $this->getTagOffsetY(),
-            'field_label_font_size' => $this->getFieldSize(),
+            'field_label_font_size' => $this->getLabelSize(),
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
             'tag_alignment' => $this->getTagAlignment(),
@@ -459,10 +465,6 @@ abstract class CustomTapeLabel extends Label
             ? (int)$template->getRotation()
             : $this->rotation;
 
-        $this->rotation = method_exists($template, 'getOrientation')
-            ? (int)$template->getOrientation()
-            : $this->rotation;
-
         return $this;
     }
 
@@ -526,7 +528,14 @@ abstract class CustomTapeLabel extends Label
         $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
 
-        $this->orientation = isset($meta['rotation']) ? (string)$meta['rotation'] : $this->orientation;
+        //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
+        if (array_key_exists('barcode2D_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('barcode2D_h_align');
+        } elseif (array_key_exists('logo_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('logo_h_align');
+        }
+
+        $this->rotation = isset($meta['rotation']) ? (int)$meta['rotation'] : $this->rotation;
     }
 
     public function write($pdf, $record)
@@ -534,11 +543,11 @@ abstract class CustomTapeLabel extends Label
         $pa = $this->getPrintableArea();
 
         $layout = $this->buildLayout($pdf, $record, $pa);
-
         $this->render1DBarcode($pdf, $record, $layout);
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);
         $this->renderTag($pdf, $record, $layout);
+
         $this->renderTextBlock($pdf, $record, $layout);
     }
 

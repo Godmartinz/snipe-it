@@ -175,7 +175,12 @@ trait RenderCustomLabelContent
         $y = $layout['fields']['start_y'];
 
         foreach ($layout['fields']['fields'] as $field) {
-            if ($y + $layout['fields']['row_advance'] > $layout['fields']['bottom_limit']) {
+            $rowHeight = max(
+                $layout['fields']['label_size'],
+                $layout['fields']['field_size']
+            );
+
+            if ($y + $rowHeight > $layout['fields']['bottom_limit']) {
                 break;
             }
 
@@ -393,5 +398,26 @@ trait RenderCustomLabelContent
         }
 
         return min($body['w'] * 0.35, $body['w']);
+    }
+
+    protected function oppositeHAlign(string $align): string
+    {
+        return strtoupper($align) === 'L' ? 'R' : 'L';
+    }
+
+    protected function syncLogoAnd2DBarcodeHAlign(?string $changedKey = null): void
+    {
+        if (!$this->getSupportLogo() || !$this->getSupport2DBarcode()) {
+            return;
+        }
+
+        if ($changedKey === 'barcode2D_h_align') {
+            $this->logoHAlign = $this->oppositeHAlign($this->barcode2DHAlign);
+            return;
+        }
+
+        if ($changedKey === 'logo_h_align') {
+            $this->barcode2DHAlign = $this->oppositeHAlign($this->logoHAlign);
+        }
     }
 }

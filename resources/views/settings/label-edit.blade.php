@@ -269,7 +269,8 @@
                                             <label class="col-md-5 control-label">{{ $key }}</label>
                                             <div class="col-md-7">
                                                 @if($key === 'tag_alignment' || $key === 'logo_h_align' || $key === 'barcode2D_h_align')
-                                                    <select name="content[{{ $key }}]" class="form-control">
+                                                    <select name="content[{{ $key }}]" class="form-control align-sync"
+                                                            data-key="{{ $key }}">
                                                         <option value="L" {{ $value === 'L' ? 'selected' : '' }}>
                                                             Left
                                                         </option>
@@ -357,5 +358,21 @@
     </div>
 @stop
 @push('js')
+    <script>
+        $(document).on('change', '.align-sync', function () {
+            const key = $(this).data('key');
+            const value = $(this).val();
+
+            if (key === 'logo_h_align') {
+                $('select[name="content[barcode2D_h_align]"]')
+                    .val(value === 'L' ? 'R' : 'L');
+            }
+
+            if (key === 'barcode2D_h_align') {
+                $('select[name="content[logo_h_align]"]')
+                    .val(value === 'L' ? 'R' : 'L');
+            }
+        });
+    </script>
     @livewireScripts
 @endpush
