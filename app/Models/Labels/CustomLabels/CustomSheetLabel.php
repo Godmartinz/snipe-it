@@ -634,11 +634,11 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->labelMarginLeft = isset($label['padding_left']) ? (float) $label['padding_left'] : $this->labelMarginLeft;
 
         $this->supportFields = isset($supports['fields']) ? (int) $supports['fields'] : $this->supportFields;
-        $this->supportTitle = (bool) ($supports['title'] ?? false);
-        $this->support1DBarcode = (bool) ($supports['barcode_1d'] ?? false);
-        $this->support2DBarcode = (bool) ($supports['barcode_2d'] ?? false);
-        $this->supportLogo = (bool) ($supports['logo'] ?? false);
-        $this->supportAssetTag = (bool) ($supports['asset_tag'] ?? false);
+        $this->supportTitle = (bool)($supports['title'] ?? $this->supportTitle);
+        $this->support1DBarcode = (bool)($supports['barcode_1d'] ?? $this->support1DBarcode);
+        $this->support2DBarcode = (bool)($supports['barcode_2d'] ?? $this->support2DBarcode);
+        $this->supportLogo = (bool)($supports['logo'] ?? $this->supportLogo);
+        $this->supportAssetTag = (bool)($supports['asset_tag'] ?? $this->supportAssetTag);
 
         $this->barcodeSize = isset($content['barcode_size']) ? (float) $content['barcode_size'] : $this->barcodeSize;
         $this->barcodeMargin = isset($content['barcode_margin']) ? (float) $content['barcode_margin'] : $this->barcodeMargin;
@@ -662,7 +662,13 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->titleOffsetX = isset($content['title_offset_x']) ? (float) $content['title_offset_x'] : $this->titleOffsetX;
         $this->labelMargin = isset($content['field_label_margin']) ? (float) $content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float) $content['field_value_margin'] : $this->fieldMargin;
+        $this->barcode2DHAlign = isset($content['barcode2D_h_align'])
+            ? (string)$content['barcode2D_h_align']
+            : $this->barcode2DHAlign;
 
+        $this->barcode2DVAlign = isset($content['barcode2D_v_align'])
+            ? (string)$content['barcode2D_v_align']
+            : $this->barcode2DVAlign;
         //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
         if (array_key_exists('barcode2D_h_align', $content)) {
             $this->syncLogoAnd2DBarcodeHAlign('barcode2D_h_align');

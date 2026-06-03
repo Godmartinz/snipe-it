@@ -457,7 +457,7 @@ trait RenderCustomLabelContent
 
     protected function syncLogoAnd2DBarcodeHAlign(?string $changedKey = null): void
     {
-        if ($this->getLogoPlacement() === 'text_column') {
+        if (method_exists($this, 'getLogoPlacement') && $this->getLogoPlacement() === 'text_column') {
             return;
         }
 
