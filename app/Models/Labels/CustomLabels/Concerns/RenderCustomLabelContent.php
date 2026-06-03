@@ -229,6 +229,56 @@ trait RenderCustomLabelContent
         }
     }
 
+    protected function renderVerticalStackedTextBlock($pdf, $record, array $layout): void
+    {
+        if (empty($layout['fields'])) {
+            return;
+        }
+
+        $y = $layout['fields']['start_y'];
+
+        foreach ($layout['fields']['fields'] as $field) {
+            $label = $field['label'] ?? '';
+            $value = $field['value'] ?? '';
+
+            if ($label !== '') {
+                static::writeText(
+                    $pdf,
+                    $label,
+                    $layout['text']['x1'],
+                    $y,
+                    'freesans',
+                    '',
+                    $layout['fields']['label_size'],
+                    'L',
+                    $layout['text']['w'],
+                    $layout['fields']['label_size'],
+                    true,
+                    0
+                );
+
+                $y += $layout['fields']['label_size'] + $this->getLabelMargin();
+            }
+
+            static::writeText(
+                $pdf,
+                $value,
+                $layout['text']['x1'],
+                $y,
+                'freemono',
+                'B',
+                $layout['fields']['field_size'],
+                'L',
+                $layout['text']['w'],
+                $layout['fields']['field_size'],
+                true,
+                0,
+                0.01
+            );
+
+            $y += $layout['fields']['field_size'] + $this->getFieldMargin();
+        }
+    }
     protected function resolveTextBox(array $body, array $boxes): array
     {
         $leftEdge = $body['x1'];

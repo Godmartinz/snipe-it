@@ -65,6 +65,7 @@ abstract class CustomTapeLabel extends Label
     protected string $barcode1DVAlign = 'T';
     protected string $barcode1DPlacement = 'full_width';
     protected string $barcode2D_h_align = 'L';
+    protected ?string $barcode2DPlacement = null;
     protected string $barcode2D_v_align = 'T';
 
     protected int $rotation = 0;
@@ -223,6 +224,11 @@ abstract class CustomTapeLabel extends Label
         return $this->barcode2DSize;
     }
 
+    public function getBarcode2DPlacement(): ?string
+    {
+        return $this->barcode2DPlacement;
+    }
+
     public function getTagOffsetX(): float
     {
         return $this->tagOffsetX;
@@ -327,6 +333,7 @@ abstract class CustomTapeLabel extends Label
             'barcode_2d_size' => $this->get2DBarcodeSize(),
             'barcode2D_h_align' => $this->getBarcode2DHAlign(),
             'barcode2D_v_align' => $this->getBarcode2DVAlign(),
+            'barcode2D_placement' => $this->getBarcode2DPlacement(),
             'text_size_mod' => $this->getTextSizeMod(), // needs to be combined with field size
             'text_area_offset_y' => $this->getTextAreaOffsetY(),
             'tag_font_size' => $this->getTagSize(),
@@ -414,6 +421,7 @@ abstract class CustomTapeLabel extends Label
             'barcode1D_placement' => 'barcode1DPlacement',
             'barcode_2d_size' => 'barcode2DSize',
             'barcode_2d_margin' => 'barcode2DMargin',
+            'barcode2D_placement' => 'barcode2DPlacement',
             'logo_max_height' => 'logoMaxHeight',
 
             'text_size_mod' => 'textSizeMod',
@@ -513,6 +521,7 @@ abstract class CustomTapeLabel extends Label
         $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
         $this->barcode2DVAlign = isset($content['barcode2D_v_align']) ? (string)$content['barcode2D_v_align'] : $this->barcode2DVAlign;
         $this->barcode2DMargin = isset($content['barcode_2d_margin']) ? (float)($content['barcode_2d_margin']) : $this->barcode2DMargin;
+        $this->barcode2DPlacement = isset($content['barcode2D_placement']) ? (string)$content['barcode2D_placement'] : $this->barcode2DPlacement;
 
         $this->logoMaxHeight = isset($content['logo_max_height']) ? (float)($content['logo_max_height']) : $this->logoMaxHeight;
 
@@ -555,7 +564,6 @@ abstract class CustomTapeLabel extends Label
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);
         $this->renderTag($pdf, $record, $layout);
-
         $this->renderTextBlock($pdf, $record, $layout);
     }
 
@@ -635,7 +643,23 @@ abstract class CustomTapeLabel extends Label
         | Resolve positioned elements
         |--------------------------------------------------------------------------
         */
-        if ($this->getLogoPlacement() === 'text_column') {
+        if ($this->getBarcode2DPlacement() === 'stacked') {
+            $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], null);
+
+            $barcode2dBox['x'] = $layout['body']['x1']
+                + (($layout['body']['w'] - $barcode2dBox['w']) / 2);
+            
+            $layout['barcode2d'] = $barcode2dBox;
+
+            if ($barcode2dBox) {
+                $layout['body']['y1'] = $barcode2dBox['y'] + $barcode2dBox['h'] + $this->getBarcode2DMargin();
+                $layout['body']['h'] = max(0, $layout['body']['y2'] - $layout['body']['y1']);
+            }
+
+            $layout['text'] = $layout['body'];
+            $layout['logo'] = null;
+            $layout['tag'] = null;
+        } elseif ($this->getLogoPlacement() === 'text_column') {
             $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], null);
             $tagBox = $this->resolveTagBox($record, $layout['body'], $barcode2dBox, null);
 
@@ -831,6 +855,11 @@ abstract class CustomTapeLabel extends Label
 
     protected function renderTextBlock($pdf, $record, array $layout): void
     {
+        if ($this->getTextRenderMode() === 'vertical_stack') {
+            $this->renderVerticalStackedTextBlock($pdf, $record, $layout);
+            return;
+        }
+
         if ($this->getTextRenderMode() === 'block') {
             $this->renderStackedTextBlock($pdf, $record, $layout);
             return;
