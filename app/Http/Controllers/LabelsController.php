@@ -111,18 +111,20 @@ class LabelsController extends Controller
         $type = $request->input('type', $label->type ?? 'sheet');
         $isTape = $type === 'tape';
 
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string'],
-
-            'page' => [$isTape ? 'nullable' : 'required', 'array'],
-            'grid' => [$isTape ? 'nullable' : 'required', 'array'],
-            'label' => [$isTape ? 'nullable' : 'required', 'array'],
-            'tape' => [$isTape ? 'required' : 'nullable', 'array'],
-
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
-        ]);
+        ];
+
+        if (!$isTape) {
+            $rules['page'] = ['required', 'array'];
+            $rules['grid'] = ['required', 'array'];
+            $rules['label'] = ['required', 'array'];
+        }
+
+        $validated = $request->validate($rules);
 
         $supports = collect($validated['supports'])
             ->map(function ($value, $key) {
@@ -141,40 +143,35 @@ class LabelsController extends Controller
                 return is_numeric($value) ? (float)$value : $value;
             })->toArray();
         };
+
         $baseLabel = CustomUserLabel::makeBaseLabel($label->base_label);
 
         if (!$baseLabel) {
-            return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
+            return redirect()->back()
+                ->with('error', trans('admin/labels/labels.base_label_missing'));
         }
 
-        $chosenLabelType = function () use ($isTape) {
+        $makePreviewLabel = function () use ($isTape) {
             return $isTape ? new PreviewTapeLabel : new PreviewSheetLabel;
         };
-        $baseWorkingLabel = $chosenLabelType();
+
+        $baseWorkingLabel = $makePreviewLabel();
         $baseWorkingLabel->seedFromTemplate($baseLabel);
 
-        $baseEditorConfig = $baseWorkingLabel->toEditorConfig();
         $baseConfig = $baseWorkingLabel->getEditorConfigSections();
 
         $content = $castNumeric($validated['content']);
 
         if ($isTape) {
-            $tape = $castNumeric($validated['tape'] ?? []);
-
             $submittedConfig = [
-                'tape' => $tape,
                 'content' => $content,
                 'supports' => $supports,
             ];
         } else {
-            $page = $castNumeric($validated['page']);
-            $grid = $castNumeric($validated['grid']);
-            $labelConfig = $castNumeric($validated['label']);
-
             $submittedConfig = [
-                'page' => $page,
-                'grid' => $grid,
-                'label' => $labelConfig,
+                'page' => $castNumeric($validated['page']),
+                'grid' => $castNumeric($validated['grid']),
+                'label' => $castNumeric($validated['label']),
                 'content' => $content,
                 'supports' => $supports,
             ];
@@ -182,27 +179,17 @@ class LabelsController extends Controller
 
         $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
 
-        $workingLabel = $chosenLabelType();
+        $workingLabel = $makePreviewLabel();
         $workingLabel->seedFromTemplate($baseLabel);
         $workingLabel->applyEditorConfig($mergedConfig);
 
         $finalConfig = $workingLabel->getEditorConfigSections();
 
         $configSnapshot = [
-            'unit' => $baseEditorConfig['unit'] ?? 'mm',
+            'unit' => 'mm',
             'template' => $label->base_label,
             'type' => $type,
             'name' => $validated['name'],
-        ];
-
-        foreach (['printable_area', 'label_printable_area'] as $key) {
-            if (array_key_exists($key, $baseEditorConfig)) {
-                $configSnapshot[$key] = $baseEditorConfig[$key];
-            }
-        }
-
-        $configSnapshot = [
-            ...$configSnapshot,
             ...$finalConfig,
         ];
 
@@ -210,6 +197,7 @@ class LabelsController extends Controller
 
         $label->update([
             'name' => $validated['name'],
+            'type' => $type,
             'overrides' => $overrides,
             'config_snapshot' => $configSnapshot,
         ]);
