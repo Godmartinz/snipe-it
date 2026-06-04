@@ -221,17 +221,22 @@ class LabelsController extends Controller
 
     public function store(Request $request)
     {
+        $type = $request->input('type', 'sheet');
 
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'template' => ['nullable', 'string'],
             'type' => ['nullable', 'string'],
-            'page' => ['required', 'array'],
-            'grid' => ['required', 'array'],
-            'label' => ['required', 'array'],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
-        ]);
+        ];
+        if ($type === 'sheet') {
+            $rules['page'] = ['required', 'array'];
+            $rules['grid'] = ['required', 'array'];
+            $rules['label'] = ['required', 'array'];
+        }
+
+        $validated = $request->validate($rules);
 
         $supports = collect($validated['supports'])
             ->map(function ($value, $key) {
@@ -247,41 +252,45 @@ class LabelsController extends Controller
 
         $castNumeric = function ($array) {
             return collect($array)->map(function ($value) {
-                if (is_numeric($value)) {
-                    return (float)$value;
-                }
-
-                return $value;
+                return is_numeric($value) ? (float)$value : $value;
             })->toArray();
         };
 
-        $page = $castNumeric($validated['page']);
-        $grid = $castNumeric($validated['grid']);
-        $labelConfig = $castNumeric($validated['label']);
         $content = $castNumeric($validated['content']);
 
         $baseLabel = CustomUserLabel::makeBaseLabel($validated['template'] ?? null);
 
         if (!$baseLabel) {
-            return redirect()->back()->with('error', trans('admin/labels/labels.base_label_missing'));
+            return redirect()->back()
+                ->with('error', trans('admin/labels/labels.base_label_missing'));
         }
 
-        // Loading both base and working label in the preview to ensure millimeter-based comparisons for overrides.
-        $baseWorkingLabel = new PreviewSheetLabel;
+        if ($type === 'tape') {
+            $baseWorkingLabel = new PreviewTapeLabel;
+            $workingLabel = new PreviewTapeLabel;
+
+            $submittedConfig = [
+                'content' => $content,
+                'supports' => $supports,
+            ];
+        } else {
+            $baseWorkingLabel = new PreviewSheetLabel;
+            $workingLabel = new PreviewSheetLabel;
+
+            $submittedConfig = [
+                'page' => $castNumeric($validated['page']),
+                'grid' => $castNumeric($validated['grid']),
+                'label' => $castNumeric($validated['label']),
+                'content' => $content,
+                'supports' => $supports,
+            ];
+        }
+
         $baseWorkingLabel->seedFromTemplate($baseLabel);
         $baseConfig = $baseWorkingLabel->getEditorConfigSections();
 
-        $submittedConfig = [
-            'page' => $page,
-            'grid' => $grid,
-            'label' => $labelConfig,
-            'content' => $content,
-            'supports' => $supports,
-        ];
-
         $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
 
-        $workingLabel = new PreviewSheetLabel;
         $workingLabel->seedFromTemplate($baseLabel);
         $workingLabel->applyEditorConfig($mergedConfig);
 
@@ -289,8 +298,8 @@ class LabelsController extends Controller
 
         $configSnapshot = [
             'unit' => 'mm',
-            'template' => $validated['template'],
-            'type' => $validated['type'] ?? 'sheet',
+            'template' => $validated['template'] ?? null,
+            'type' => $type,
             'name' => $validated['name'],
             ...$finalConfig,
         ];
@@ -300,13 +309,13 @@ class LabelsController extends Controller
         $customLabel = CustomUserLabel::create([
             'name' => $validated['name'],
             'base_label' => $validated['template'] ?? null,
-            'type' => $validated['type'] ?? 'sheet',
+            'type' => $type,
             'overrides' => $overrides,
             'config_snapshot' => $configSnapshot,
             'is_default' => false,
         ]);
 
-        return app(SettingsController::class)->getLabels()
+        return redirect()->route('settings.labels.index')
             ->with('success', $customLabel->name . ' created successfully.');
     }
 
@@ -352,7 +361,13 @@ class LabelsController extends Controller
 
         $label = $this->previewLabelForTemplate($template);
         $config = $importedConfig ?: $label->toEditorConfig();
-        $type = str_starts_with($template->getName(), 'Tapes\\') ? 'tape' : 'sheet';
+        $type = data_get($importedConfig, 'type');
+
+        if ($type === null) {
+            $type = str_starts_with($selectedLabel ?? '', 'Tapes\\')
+                ? 'tape'
+                : 'sheet';
+        }
 
         return view('settings.label-edit', [
             'config' => $config,

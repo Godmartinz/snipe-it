@@ -311,18 +311,6 @@ abstract class CustomTapeLabel extends Label
         $pdf->SetAutoPageBreak(false, 0);
     }
 
-    protected function getDimensionsEditorConfig(): array
-    {
-        return [
-            'width' => $this->getWidth(),
-            'height' => $this->getHeight(),
-            'margin_top' => $this->getMarginTop(),
-            'margin_right' => $this->getMarginRight(),
-            'margin_bottom' => $this->getMarginBottom(),
-            'margin_left' => $this->getMarginLeft(),
-        ];
-    }
-
     protected function getContentEditorConfig(): array
     {
         return [
@@ -356,11 +344,9 @@ abstract class CustomTapeLabel extends Label
     {
         return [
             'unit' => 'mm',
-            'tape' => $this->getDimensionsEditorConfig(),
             'printable_area' => $this->getPrintableAreaEditorConfig(),
             'content' => $this->getContentEditorConfig(),
             'supports' => $this->getSupportsEditorConfig(),
-            'meta' => $this->getMetaEditorConfig(),
         ];
     }
 
@@ -476,15 +462,8 @@ abstract class CustomTapeLabel extends Label
             }
         }
 
-        $this->rotation = method_exists($template, 'getRotation')
-            ? (int)$template->getRotation()
-            : $this->rotation;
-        logger()->debug('Template dimensions', [
-            'class' => get_class($template),
-            'unit' => $template->getUnit(),
-            'width' => $template->getWidth(),
-            'height' => $template->getHeight(),
-        ]);
+        $this->rotation = method_exists($template, 'getRotation') ? (int)$template->getRotation() : $this->rotation;
+
         return $this;
     }
 
@@ -498,18 +477,8 @@ abstract class CustomTapeLabel extends Label
 
     protected function hydrateFromEditorConfig(array $config): void
     {
-        $tape = $config['tape'] ?? [];
         $content = $config['content'] ?? [];
         $supports = $config['supports'] ?? [];
-        $meta = $config['meta'] ?? [];
-
-        $this->width = isset($tape['width']) ? (float)$tape['width'] : $this->width;
-        $this->height = isset($tape['height']) ? (float)$tape['height'] : $this->height;
-
-        $this->marginTop = isset($tape['margin_top']) ? (float)$tape['margin_top'] : $this->marginTop;
-        $this->marginRight = isset($tape['margin_right']) ? (float)$tape['margin_right'] : $this->marginRight;
-        $this->marginBottom = isset($tape['margin_bottom']) ? (float)$tape['margin_bottom'] : $this->marginBottom;
-        $this->marginLeft = isset($tape['margin_left']) ? (float)$tape['margin_left'] : $this->marginLeft;
 
         $this->supportFields = isset($supports['fields']) ? (int)$supports['fields'] : $this->supportFields;
         $this->supportAssetTag = (bool)($supports['asset_tag'] ?? $this->supportAssetTag);
@@ -565,11 +534,7 @@ abstract class CustomTapeLabel extends Label
         $pa = $this->getPrintableArea();
 
         $layout = $this->buildLayout($pdf, $record, $pa);
-        logger()->debug('Tape dimensions', [
-            'unit' => $this->getUnit(),
-            'width' => $this->getWidth(),
-            'height' => $this->getHeight(),
-        ]);
+
         $this->render1DBarcode($pdf, $record, $layout);
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);

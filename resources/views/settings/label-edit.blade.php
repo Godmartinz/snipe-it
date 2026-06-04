@@ -265,6 +265,10 @@
                                 </div>
                                 <div id="content-config" class="box-body collapse in">
                                     @foreach($config['content'] as $key => $value)
+                                        @if(in_array($key, ['barcode1D_placement', 'barcode2D_placement', 'logo_placement']))
+                                            <input type="hidden" name="content[{{ $key }}]" value="{{ $value }}">
+                                            @continue
+                                        @endif
                                         <div class="form-group">
                                             <label class="col-md-5 control-label">{{ $key }}</label>
                                             <div class="col-md-7">
