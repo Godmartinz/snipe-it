@@ -88,8 +88,12 @@ class LicenseImporter extends ItemImporter
 
         // This sets an attribute on the Loggable trait for the action log
         $license->setImported(true);
-        if ($license->save()) {
-            $this->log('License '.$this->item['name'].' with serial number '.$this->item['serial'].' was created');
+
+        // For new licenses we need to save, for existing ones update() already saved
+        $licenseWasSaved = $editingLicense || $license->save();
+
+        if ($licenseWasSaved) {
+            $this->log('License '.$this->item['name'].' with serial number '.$this->item['serial'].' was created or updated');
 
             // Lets try to checkout seats if the fields exist and we have seats.
             if ($license->seats > 0) {

@@ -337,7 +337,71 @@ class UpdateUserTest extends TestCase
             'id' => $id,
             'first_name' => 'test',
             'username' => 'test',
+        ]);
+
+        $this->assertDatabaseHas('company_user', [
+            'user_id' => $id,
             'company_id' => $companyB->id,
         ]);
+    }
+
+    public function test_admin_updating_another_admin_without_permission_field_preserves_target_permissions()
+    {
+        $editor = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+
+        $originalPermissions = $target->decodePermissions();
+        $this->assertArrayHasKey('admin', $originalPermissions, 'Target should have admin permission set');
+
+        $this->actingAs($editor)
+            ->put(route('users.update', $target), [
+                'first_name' => $target->first_name,
+                'username' => $target->username,
+                // 'permission' intentionally omitted — the vulnerable path
+            ])
+            ->assertRedirect();
+
+        $this->assertEquals(
+            $originalPermissions,
+            $target->fresh()->decodePermissions(),
+            'Target admin permissions should be unchanged when permission field is absent'
+        );
+    }
+
+    public function test_non_admin_updating_regular_user_without_permission_field_preserves_granular_permissions()
+    {
+        $editor = User::factory()->editUsers()->create();
+        $target = User::factory()->create([
+            'permissions' => json_encode(['hardware.view' => '1', 'reports.view' => '1']),
+        ]);
+
+        $this->actingAs($editor)
+            ->put(route('users.update', $target), [
+                'first_name' => $target->first_name,
+                'username' => $target->username,
+                // 'permission' intentionally omitted
+            ])
+            ->assertRedirect();
+
+        $permissions = $target->fresh()->decodePermissions();
+        $this->assertEquals('1', $permissions['hardware.view'], 'hardware.view should be preserved');
+        $this->assertEquals('1', $permissions['reports.view'], 'reports.view should be preserved');
+    }
+
+    public function test_admin_updating_another_admin_with_permission_field_can_change_permissions()
+    {
+        $editor = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+
+        $this->actingAs($editor)
+            ->put(route('users.update', $target), [
+                'first_name' => $target->first_name,
+                'username' => $target->username,
+                'permission' => ['admin' => '1', 'hardware.view' => '1'],
+            ])
+            ->assertRedirect();
+
+        $permissions = $target->fresh()->decodePermissions();
+        $this->assertEquals('1', $permissions['hardware.view'], 'Explicitly submitted permissions should be applied');
     }
 }

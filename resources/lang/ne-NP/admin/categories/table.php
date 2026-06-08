@@ -5,6 +5,6 @@ return [
     'id' => 'आईडी',
     'parent' => 'Parent',
     'require_acceptance' => 'स्वीकृत',
-    'title' => 'Asset Category Name',
+    'title' => 'Name',
 
 ];

@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'U moet minstens één asset selecteren uit de lijst',
+    ],
+
     'checkin' => [
         'error' => 'Asset is niet ingecheckt, probeer het opnieuw',
         'success' => 'Asset is met succes ingecheckt.',
         'user_does_not_exist' => 'De gebruiker is ongeldig. Probeer het opnieuw.',
         'already_checked_in' => 'Dat asset is al ingecheckt.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

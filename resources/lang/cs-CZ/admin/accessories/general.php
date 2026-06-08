@@ -9,7 +9,7 @@ return [
     'edit' => 'Upravit Příslušenství',
     'eula_text' => 'Kategorie EULA',
     'eula_text_help' => 'Toto pole umožňuje upravit EULA pro různé druhy majetku. Pokud máte pouze jeden typ pro všechen majetek, můžete zaškrtnout položku níže pro použití jako výchozí.',
-    'require_acceptance' => 'Požadovat potvrzení převzetí majetku v této kategorii.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Žádná primární EULA. Přidat novou v Nastavení.',
     'total' => 'CELKEM',
     'remaining' => 'Dostupný',

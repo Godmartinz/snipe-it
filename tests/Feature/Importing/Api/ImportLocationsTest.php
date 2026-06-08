@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Importing\Api;
 
+use App\Models\Actionlog as ActionLog;
 use App\Models\Import;
 use App\Models\Location;
 use App\Models\User;
@@ -128,5 +129,47 @@ class ImportLocationsTest extends ImportDataTestCase implements TestsPermissions
             Arr::except($location->attributesToArray(), array_merge($updatedAttributes, $location->getDates())),
             Arr::except($updatedLocation->attributesToArray(), array_merge($updatedAttributes, $location->getDates())),
         );
+    }
+
+    #[Test]
+    public function update_mode_logs_location_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+        $initialImport = Import::factory()->locations()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $location = Location::query()->where('name', $initialRow['name'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'notes' => 'Importer update notes',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->locations()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $location->refresh();
+        $this->assertEquals($updatedRow['notes'], $location->notes);
+
+        $updateLog = ActionLog::query()
+            ->where('item_type', Location::class)
+            ->where('item_id', $location->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after location importer update mode.');
     }
 }

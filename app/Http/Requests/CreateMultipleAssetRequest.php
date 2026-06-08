@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -25,6 +26,10 @@ class CreateMultipleAssetRequest extends ImageUploadRequest // should I extend f
     protected function prepareForValidation()
     {
         parent::prepareForValidation();
+
+        if ($this->filled('purchase_cost') && ! is_float($this->input('purchase_cost')) && preg_match('/^[\d.,]+$/', (string) $this->input('purchase_cost'))) {
+            $this->merge(['purchase_cost' => Helper::ParseCurrency($this->input('purchase_cost'))]);
+        }
 
         if (Setting::getSettings()->full_multiple_companies_support == '1' && ! $this->user()->isSuperUser()) {
             $this->mergeIfMissing(['company_id' => $this->user()->company_id]);

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Cet emplacement est actuellement le parent d\'au moins un sous emplacement et ne peut pas être supprimé . S\'il vous plaît mettre à jour vos emplacement pour ne plus le référencer et réessayez. ',
     'assigned_assets' => 'Actifs assignés',
     'current_location' => 'Emplacement actuel',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

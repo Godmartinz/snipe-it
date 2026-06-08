@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Pengguna ini telah di hapus. Anda harus kembalikan dahulu pengguna ini jika ingin menyunting atau di berikan hak kelola aset.',
     'ldap_not_configured' => 'Integrasi LDAP belum dikonfigurasi untuk instalasi ini.',
     'password_resets_sent' => 'Pengguna terpilih yang diaktifkan dan memiliki alamat email yang valid telah dikirimi tautan pengaturan ulang kata sandi.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Tautan reset kata sandi telah dikirim ke :email!',
     'user_has_no_email' => 'Pengguna ini tidak memiliki alamat email di profil mereka.',
     'log_record_not_found' => 'Catatan log yang cocok untuk pengguna ini tidak dapat ditemukan.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Pengguna sukses tidak di tangguhkan.',
         'restored' => 'Pengguna sukses di kembalikan.',
         'import' => 'Sukses mengimpor pengguna.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Pengguna ini masih mengelola pengguna lain. Harap pilih pengelola lain untuk pengguna tersebut terlebih dahulu.| Pengguna ini masih mengelola :count pengguna. Harap pilih pengelola lain untuk mereka terlebih dahulu.',
         'unsuspend' => 'Terdapat masalah ketika menangguhkan pengguna. Silahkan coba kembali.',
         'import' => 'Terdapat masalah ketika mengimpor pengguna. Silahkan coba kembali.',
-        'asset_already_accepted' => 'Aset ini telah di terima.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Anda harus menolak atau menerima aset ini.',
         'cannot_delete_yourself' => 'Kami akan sangat kecewa jika Anda menghapus diri Anda sendiri, harap pertimbangkan kembali. ',
         'incorrect_user_accepted' => 'Aset yang akan di berikan ke anda, belum di setujui.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Gagal menerima catatan dari server LDAP. Silahkan cek konfigurasi server LDAP di berkas config LDAP. <br>Eror dari server LDAP:',
         'password_ldap' => 'Kata sandi untuk akun ini dikelola oleh LDAP / Active Directory. Silakan menghubungi departemen TI Anda untuk mengganti kata sandi Anda.',
         'multi_company_items_assigned' => 'Pengguna ini memiliki item yang ditetapkan yang dimiliki oleh company lain. Harap kembalikan item tersebut atau edit entitas mereka.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

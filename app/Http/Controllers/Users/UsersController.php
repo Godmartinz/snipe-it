@@ -9,8 +9,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
+use App\Mail\UnacceptedAssetReminderMail;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\Group;
 use App\Models\Setting;
@@ -22,7 +24,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -119,7 +123,7 @@ class UsersController extends Controller
         $user->mobile = $request->input('mobile');
         $user->location_id = $request->input('location_id', null);
         $user->department_id = $request->input('department_id', null);
-        $user->company_id = Company::getIdForUser($request->input('company_id', null));
+        $companyIds = array_filter(array_map('intval', (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))));
         $user->manager_id = $request->input('manager_id', null);
         $user->notes = $request->input('notes');
         $user->address = $request->input('address', null);
@@ -149,6 +153,7 @@ class UsersController extends Controller
         }
 
         if ($user->save()) {
+            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
 
             if (($user->activated == '1') && ($user->email != '') && ($request->input('send_welcome') == '1')) {
 
@@ -160,7 +165,7 @@ class UsersController extends Controller
 
             }
 
-            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+            if (auth()->user()->isSuperUser() && auth()->user()->can('editableOnDemo')) {
                 $user->groups()->sync($request->input('groups'));
             }
 
@@ -271,7 +276,7 @@ class UsersController extends Controller
         $user->phone = $request->input('phone');
         $user->mobile = $request->input('mobile');
         $user->location_id = $request->input('location_id', null);
-        $user->company_id = Company::getIdForUser($request->input('company_id', null));
+        $companyIds = array_filter(array_map('intval', (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))));
         $user->manager_id = $request->input('manager_id', null);
         $user->notes = $request->input('notes');
         $user->department_id = $request->input('department_id', null);
@@ -307,11 +312,14 @@ class UsersController extends Controller
                 $user->password = bcrypt($request->input('password'));
             }
 
-            $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
-                requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permission')),
-                authenticatedUser: $authenticatedUser,
-                originalPermissions: $orig_permissions_array,
-            ));
+            if ($request->has('permission')) {
+                $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
+                    requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permission')),
+                    authenticatedUser: $authenticatedUser,
+                    originalPermissions: $orig_permissions_array,
+                    targetUser: $user,
+                ));
+            }
 
             // Only save groups if the user is a superuser
             if (auth()->user()->isSuperUser()) {
@@ -329,6 +337,8 @@ class UsersController extends Controller
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
+            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.update'));
@@ -436,6 +446,7 @@ class UsersController extends Controller
             'accessories',
             'licenses',
             'userloc',
+            'groups',
         ])
             ->withTrashed()
             ->find($user->id);
@@ -446,6 +457,7 @@ class UsersController extends Controller
         return view('users/view', [
             'user' => $user,
             'settings' => Setting::getSettings(),
+            'effectivePermissionsBySection' => $user->getEffectivePermissionsBySection(),
         ]);
     }
 
@@ -471,7 +483,7 @@ class UsersController extends Controller
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
-        $user_to_clone = User::with('userloc')->withTrashed()->find($user->id);
+        $user_to_clone = User::with('userloc', 'companies')->withTrashed()->find($user->id);
         // Make sure they can view this particular user
         $this->authorize('view', $user_to_clone);
 
@@ -528,52 +540,76 @@ class UsersController extends Controller
             // Open output stream
             $handle = fopen('php://output', 'w');
 
+            $headers = [
+                // strtolower to prevent Excel from trying to open it as a SYLK file
+                strtolower(trans('general.id')),
+                trans('admin/companies/table.title'),
+                trans('admin/users/table.title'),
+                trans('general.employee_number'),
+                trans('admin/users/table.first_name'),
+                trans('admin/users/table.last_name'),
+                trans('admin/users/table.name'),
+                trans('admin/users/table.display_name'),
+                trans('admin/users/table.username'),
+                trans('admin/users/table.email'),
+                trans('admin/users/table.phone'),
+                trans('admin/users/table.mobile'),
+                trans('general.website'),
+                trans('general.address'),
+                trans('general.city'),
+                trans('general.state'),
+                trans('general.country'),
+                trans('general.zip'),
+                trans('admin/users/table.manager'),
+                trans('admin/users/table.location'),
+                trans('general.department'),
+                trans('general.assets'),
+                trans('general.licenses'),
+                trans('general.accessories'),
+                trans('general.consumables'),
+                trans('general.groups'),
+                trans('general.permissions'),
+                trans('general.notes'),
+                trans('admin/users/table.activated'),
+                trans('general.created_at'),
+                trans('general.importer.vip'),
+                trans('admin/users/general.remote'),
+                trans('general.language'),
+                trans('general.autoassign_licenses'),
+                trans('general.ldap_sync'),
+                trans('admin/users/general.two_factor_enrolled'),
+                trans('admin/users/general.two_factor_active'),
+                trans('admin/users/table.managed_users'),
+                trans('admin/users/table.managed_locations'),
+                trans('admin/users/general.department_manager'),
+                trans('general.created_by'),
+                trans('general.updated_at'),
+                trans('general.start_date'),
+                trans('general.end_date'),
+                trans('admin/users/table.last_login'),
+                trans('admin/licenses/table.deleted_at'),
+            ];
+
+            fputcsv($handle, $headers);
+
             $users = User::with(
                 'assets',
                 'accessories',
                 'consumables',
-                'department',
+                'department.manager',
                 'licenses',
                 'manager',
                 'groups',
                 'userloc',
-                'company'
-            )->orderBy('created_at', 'DESC')
+                'companies',
+                'createdBy'
+            )->withCount(['managesUsers as manages_users_count', 'managedLocations as manages_locations_count'])
+                ->orderBy('created_at', 'DESC')
                 ->chunk(500, function ($users) use ($handle) {
-                    $headers = [
-                        // strtolower to prevent Excel from trying to open it as a SYLK file
-                        strtolower(trans('general.id')),
-                        trans('admin/companies/table.title'),
-                        trans('admin/users/table.title'),
-                        trans('general.employee_number'),
-                        trans('admin/users/table.first_name'),
-                        trans('admin/users/table.last_name'),
-                        trans('admin/users/table.name'),
-                        trans('admin/users/table.username'),
-                        trans('admin/users/table.email'),
-                        trans('admin/users/table.manager'),
-                        trans('admin/users/table.location'),
-                        trans('general.department'),
-                        trans('general.assets'),
-                        trans('general.licenses'),
-                        trans('general.accessories'),
-                        trans('general.consumables'),
-                        trans('general.groups'),
-                        trans('general.permissions'),
-                        trans('general.notes'),
-                        trans('admin/users/table.activated'),
-                        trans('general.created_at'),
-                    ];
 
-                    fputcsv($handle, $headers);
+                    $formatter = new EscapeFormula('`');
 
                     foreach ($users as $user) {
-                        $user_groups = '';
-
-                        foreach ($user->groups as $user_group) {
-                            $user_groups .= $user_group->name.', ';
-                        }
-
                         $permissionstring = '';
 
                         if ($user->isSuperUser()) {
@@ -587,14 +623,23 @@ class UsersController extends Controller
                         // Add a new row with data
                         $values = [
                             $user->id,
-                            ($user->company) ? $user->company->name : '',
+                            $user->companies->pluck('name')->implode('|'),
                             $user->jobtitle,
                             $user->employee_num,
                             $user->first_name,
                             $user->last_name,
-                            $user->display_name,
+                            $user->getFullNameAttribute(),
+                            $user->getRawOriginal('display_name'),
                             $user->username,
                             $user->email,
+                            $user->phone,
+                            $user->mobile,
+                            $user->website,
+                            $user->address,
+                            $user->city,
+                            $user->state,
+                            $user->country,
+                            $user->zip,
                             ($user->manager) ? $user->manager->display_name : '',
                             ($user->userloc) ? $user->userloc->name : '',
                             ($user->department) ? $user->department->name : '',
@@ -602,14 +647,37 @@ class UsersController extends Controller
                             $user->licenses->count(),
                             $user->accessories->count(),
                             $user->consumables->count(),
-                            $user_groups,
+                            $user->groups->pluck('name')->implode(', '),
                             $permissionstring,
                             $user->notes,
                             ($user->activated == '1') ? trans('general.yes') : trans('general.no'),
                             $user->created_at,
+                            ($user->vip == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->remote == '1') ? trans('general.yes') : trans('general.no'),
+                            $user->locale,
+                            ($user->autoassign_licenses == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->ldap_import == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->two_factor_active_and_enrolled()) ? trans('general.yes') : trans('general.no'),
+                            ($user->two_factor_active()) ? trans('general.yes') : trans('general.no'),
+                            $user->manages_users_count,
+                            $user->manages_locations_count,
+                            ($user->department && $user->department->manager) ? $user->department->manager->display_name : '',
+                            ($user->createdBy) ? $user->createdBy->display_name : '',
+                            $user->updated_at,
+                            $user->start_date,
+                            $user->end_date,
+                            $user->last_login,
+                            $user->deleted_at,
                         ];
 
-                        fputcsv($handle, $values);
+                        // CSV_ESCAPE_FORMULAS is set to false in the .env
+                        if (config('app.escape_formulas') === false) {
+                            fputcsv($handle, $values);
+
+                            // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
+                        } else {
+                            fputcsv($handle, $formatter->escapeRecord($values));
+                        }
                     }
                 });
 
@@ -634,32 +702,16 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::where('id', $id)
-            ->with([
-                'assets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.defaultLoc',
-                'assets.assignedAssets.location',
-                'assets.assignedAssets.model.category',
-                'assets.defaultLoc',
-                'assets.location',
-                'assets.model.category',
-                'accessories.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'accessories.category',
-                'accessories.manufacturer',
-                'consumables.log' => fn ($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'consumables.category',
-                'consumables.manufacturer',
-                'licenses.category',
-            ])
-            ->withTrashed()
-            ->first();
+        $user = User::withInventoryRelations($id)->first();
+
+        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
 
         if ($user) {
             $this->authorize('view', $user);
 
             return view('users.print')
                 ->with('users', [$user])
+                ->with('indirectItemsCount', $indirectItemsCount)
                 ->with('settings', Setting::getSettings());
         }
 
@@ -698,6 +750,48 @@ class UsersController extends Controller
 
         return redirect()->back()->with('error', trans('admin/users/message.user_not_found', ['id' => $id]));
 
+    }
+
+    /**
+     * Resend pending acceptance reminder email for a specific user.
+     */
+    public function resendAcceptanceReminder(User $user): RedirectResponse
+    {
+        $this->authorize('view', $user);
+
+        if (empty($user->email)) {
+            return redirect()->back()->with('error', trans('admin/users/message.user_has_no_email'));
+        }
+
+        if ($user->activated == '0') {
+            return redirect()->back()->with('error', trans('admin/users/message.not_activated'));
+        }
+
+        $pendingItems = $user->getAssignedItemsWithPendingAcceptance();
+
+        if ($pendingItems->isEmpty()) {
+            return redirect()->back()->with('warning', trans('admin/users/message.error.no_pending_acceptances'));
+        }
+
+        $firstAcceptance = CheckoutAcceptance::query()
+            ->forUser($user)
+            ->pending()
+            ->with('assignedTo')
+            ->first();
+
+        if (! $firstAcceptance) {
+            return redirect()->back()->with('warning', trans('admin/users/message.error.no_pending_acceptances'));
+        }
+
+        $mailable = new UnacceptedAssetReminderMail($firstAcceptance, $pendingItems->count());
+
+        if (! empty($user->locale)) {
+            $mailable->locale($user->locale);
+        }
+
+        Mail::to($user->email)->send($mailable);
+
+        return redirect()->back()->with('success', trans_choice('admin/users/message.success.acceptance_reminder_sent', $pendingItems->count(), ['count' => $pendingItems->count()]));
     }
 
     /**

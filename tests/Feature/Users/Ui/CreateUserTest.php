@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Users\Ui;
 
+use App\Models\Group;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
 use Illuminate\Support\Facades\Notification;
@@ -122,6 +123,48 @@ class CreateUserTest extends TestCase
         $this->assertArrayNotHasKey('superuser', $decoded, 'Non-admin user should not be able to grant superuser during create');
         $this->assertEquals(1, $decoded['users.view'] ?? null, 'Non-privileged permissions should still be createable');
         $this->followRedirects($response)->assertSee('Success');
+    }
+
+    public function test_non_admin_cannot_assign_groups_when_creating_user_via_ui()
+    {
+        $group = Group::factory()->create(['permissions' => json_encode(['superuser' => '1'])]);
+
+        $this->actingAs(User::factory()->createUsers()->viewUsers()->create())
+            ->from(route('users.index'))
+            ->post(route('users.store'), [
+                'first_name' => 'Group',
+                'last_name' => 'Escalation',
+                'username' => 'group-escalation-ui',
+                'password' => 'testpassword1235!!',
+                'password_confirmation' => 'testpassword1235!!',
+                'groups' => [$group->id],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertStatus(302);
+
+        $createdUser = User::where('username', 'group-escalation-ui')->firstOrFail();
+        $this->assertEmpty($createdUser->groups, 'Non-admin should not be able to assign groups during user create');
+    }
+
+    public function test_superuser_can_assign_groups_when_creating_user_via_ui()
+    {
+        $group = Group::factory()->create(['name' => 'Test Privileged Group']);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('users.index'))
+            ->post(route('users.store'), [
+                'first_name' => 'Group',
+                'last_name' => 'Member',
+                'username' => 'group-member-ui',
+                'password' => 'testpassword1235!!',
+                'password_confirmation' => 'testpassword1235!!',
+                'groups' => [$group->id],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertStatus(302);
+
+        $createdUser = User::where('username', 'group-member-ui')->firstOrFail();
+        $this->assertTrue($createdUser->groups->contains($group->id), 'Superuser should be able to assign groups during user create');
     }
 
     public function test_admin_cannot_grant_superuser_permission_when_creating_user_via_ui()

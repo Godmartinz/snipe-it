@@ -9,7 +9,7 @@ return [
     'edit' => 'Labot piederums',
     'eula_text' => 'EULA kategorija',
     'eula_text_help' => 'Šis lauks ļauj jums pielāgot jūsu EULA konkrētu veidu aktīviem. Ja jums ir tikai viens EULA visiem jūsu aktīviem, varat atzīmēt zemāk esošo lodziņu, lai izmantotu galveno noklusējuma funkciju.',
-    'require_acceptance' => 'Pieprasīt lietotājiem apstiprināt šīs kategorijas aktīvu pieņemšanu.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nav atrasta galvenā noklusējuma EULA. Pievienot vienu sadaļā Iestatījumi.',
     'total' => 'Kopā',
     'remaining' => 'Izmantojams',

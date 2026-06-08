@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Dapat kang pumili ng kahit isang asset mula sa listahan',
+    ],
+
     'checkin' => [
         'error' => 'Ang asset ay hindi nai-check in, mangyaring subukang muli',
         'success' => 'Ang asset ay matagumpay na nai-check in.',
         'user_does_not_exist' => 'Ang user na iyon ay hindi balido. Mangyaring subukang muli.',
         'already_checked_in' => 'Ang asset ay nai-check in na.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

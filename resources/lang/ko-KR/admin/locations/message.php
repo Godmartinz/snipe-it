@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => '이 장소는 현재 하나 이상의 하위 장소를 가지고 있기에 삭제 할 수 없습니다. 이 장소의 참조를 수정하고 다시 시도해 주세요. ',
     'assigned_assets' => '할당된 자산',
     'current_location' => '현재 위치',
-    'open_map' => ':map_provider_icon 지도에서 열기',
     'deleted_warning' => '이 위치는 삭제 되었습니다. 변경하기 전에 이 위치를 복원해 주세요.',
 
     'create' => [

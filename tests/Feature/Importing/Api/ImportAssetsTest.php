@@ -428,6 +428,58 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
     }
 
     #[Test]
+    public function update_mode_logs_asset_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->asset()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $asset = Asset::query()->where('asset_tag', $initialRow['tag'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'itemName' => $initialRow['itemName'].' Updated',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->asset()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $asset->refresh();
+        $this->assertEquals($updatedRow['itemName'], $asset->name);
+
+        $updateLog = ActionLog::query()
+            ->where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after importer update mode.');
+        $this->assertStringContainsString('name', (string) $updateLog->log_meta);
+
+        $checkoutLogsCount = ActionLog::query()
+            ->where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->where('action_type', 'checkout')
+            ->count();
+
+        $this->assertSame(1, $checkoutLogsCount, 'Re-import update should not create a duplicate checkout log for the same assignment.');
+    }
+
+    #[Test]
     public function custom_column_mapping(): void
     {
         $faker = ImportFileBuilder::new()->definition();

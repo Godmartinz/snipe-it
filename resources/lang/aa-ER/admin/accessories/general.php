@@ -9,7 +9,7 @@ return [
     'edit' => 'crwdns1606:0crwdne1606:0',
     'eula_text' => 'crwdns1210:0crwdne1210:0',
     'eula_text_help' => 'crwdns1211:0crwdne1211:0',
-    'require_acceptance' => 'crwdns1212:0crwdne1212:0',
+    'require_acceptance' => 'crwdns14698:0crwdne14698:0',
     'no_default_eula' => 'crwdns1213:0crwdne1213:0',
     'total' => 'crwdns1215:0crwdne1215:0',
     'remaining' => 'crwdns1216:0crwdne1216:0',

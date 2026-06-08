@@ -9,6 +9,7 @@ return [
         'am-ET' => 'Bahasa Amharic',
         'af-ZA' => 'Bahasa Afrikanas',
         'ar-SA' => 'Bahasa Arab',
+        'hy-AM' => 'Armenian',
         'bg-BG' => 'Bahasa Bulgaria',
         'zh-CN' => 'Bahasa Mandarin Sederhana',
         'zh-TW' => 'Bahasa Mandarin Tradisional',

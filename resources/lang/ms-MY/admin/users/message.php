@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Pengguna telah dihapuskan. Anda perlu masukkan semula pengguna ini untuk kemaskini atau untuk serahkan dia harta baru.',
     'ldap_not_configured' => 'Integrasi LDAP belum dikonfigurasi untuk pemasangan ini.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Pengguna berjaya dilepaskan.',
         'restored' => 'Pengguna berjaya dimasukkan semula.',
         'import' => 'Pengguna diimport dengan jayanya.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Ada isu semasa melepakan pengguna. Sila cuba lagi. ',
         'import' => 'Terdapat masalah mengimport pengguna. Sila cuba lagi.',
-        'asset_already_accepted' => 'Aset ini telah diterima.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Anda mesti menerima atau menolak aset ini.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Aset yang anda telah cuba terima tidak diperiksa kepada anda.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Tidak dapat masuk dari pelayan LDAP. Sila periksa konfigurasi pelayan LDAP anda dalam fail konfigurasi LDAP. <br>Error dari LDAP Server:',
         'password_ldap' => 'Kata laluan untuk akaun ini diuruskan oleh LDAP / Active Directory. Sila hubungi jabatan IT anda untuk menukar kata laluan anda.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

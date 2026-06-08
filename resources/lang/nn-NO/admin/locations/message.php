@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Lokasjonen er overordnet til minst en underlokasjon og kan ikke slettes. Oppdater din lokasjoner til å ikke referere til denne lokasjonen, og prøv igjen. ',
     'assigned_assets' => 'Tildelte ressurser',
     'current_location' => 'Gjeldende plassering',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

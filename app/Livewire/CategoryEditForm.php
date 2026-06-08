@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Setting;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -44,5 +45,11 @@ class CategoryEditForm extends Component
     public function eulaTextDisabled()
     {
         return (bool) $this->useDefaultEula;
+    }
+
+    #[Computed]
+    public function isGlobalSignatureRequired(): bool
+    {
+        return (string) Setting::getSettings()->require_accept_signature === '1';
     }
 }

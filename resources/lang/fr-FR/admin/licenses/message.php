@@ -37,6 +37,9 @@ return [
         'confirm' => 'Etes-vous sûr de vouloir supprimer cette catégorie?',
         'error' => 'Il y a eu un problème en supprimant cette catégorie. Veuillez réessayer.',
         'success' => 'Cette catégorie a été supprimée correctement.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

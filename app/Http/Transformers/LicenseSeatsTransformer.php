@@ -38,13 +38,11 @@ class LicenseSeatsTransformer
                             'tag_color' => $seat->user->department->tag_color ? e($seat->user->department->tag_color) : null,
 
                         ] : null,
-                'company' => ($seat->user->company) ?
-                    [
-                        'id' => (int) $seat->user->company->id,
-                        'name' => e($seat->user->company->name),
-                        'tag_color' => $seat->user->company->tag_color ? e($seat->user->company->tag_color) : null,
-
-                    ] : null,
+                'companies' => $seat->user->companies->map(fn ($c) => [
+                    'id' => (int) $c->id,
+                    'name' => e($c->name),
+                    'tag_color' => $c->tag_color ? e($c->tag_color) : null,
+                ])->values(),
                 'created_at' => Helper::getFormattedDateObject($seat->created_at, 'datetime'),
             ] : null,
             'assigned_asset' => ($seat->asset) ? [
@@ -70,6 +68,9 @@ class LicenseSeatsTransformer
             'clone' => Gate::allows('create', License::class),
             'update' => Gate::allows('update', License::class),
             'delete' => Gate::allows('delete', License::class),
+            'bulk_selectable' => [
+                'checkin' => Gate::allows('checkin', License::class) && ($seat->assigned_to || $seat->asset_id),
+            ],
         ];
 
         $array += $permissions_array;

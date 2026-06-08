@@ -2,13 +2,14 @@
 
 return [
 
-    'select_language' => 'Select a Language',
+    'select_language' => 'Bir Dil Seç',
     'languages' => [
         'en-US' => 'İngilizce, US',
         'en-GB' => 'İngilizce, UK',
         'am-ET' => 'Amharca',
         'af-ZA' => 'Akrika dili',
         'ar-SA' => 'Arapça',
+        'hy-AM' => 'Ermenice',
         'bg-BG' => 'Bulgarca',
         'zh-CN' => 'Basitleştirilmiş Çince',
         'zh-TW' => 'Geleneksel Çince',
@@ -40,8 +41,8 @@ return [
         'ms-MY' => 'Malayca',
         'mi-NZ' => 'Maori Dili',
         'mn-MN' => 'Moğolca',
-        'nb-NO' => 'Norwegian Bokmål',
-        'om-ET' => 'Oromo (Ethiopian)',
+        'nb-NO' => 'Norveççe (Bokmål)',
+        'om-ET' => 'Oromo (Etiyopya)',
         // 'nn-NO'=> 'Norwegian Nynorsk',
         'fa-IR' => 'Farsça',
         'pl-PL' => 'Polonyaca',
@@ -68,7 +69,7 @@ return [
         'zu-ZA' => 'Zuluca',
     ],
 
-    'select_country' => 'Select a Country',
+    'select_country' => 'Bir Ülke Seç',
 
     'countries' => [
         'AC' => 'Ascension Adası',
@@ -135,7 +136,7 @@ return [
         'EC' => 'Ekvador',
         'EE' => 'Estonya',
         'EG' => 'Mısır',
-        'GB-ENG' => 'England',
+        'GB-ENG' => 'İngiltere',
         'ER' => 'Eritre',
         'ES' => 'İspanya',
         'ET' => 'Etiyopya',
@@ -234,7 +235,7 @@ return [
         'NG' => 'Nijerya',
         'NI' => 'Nikaragua',
         'NL' => 'Hollanda',
-        'GB-NIR' => 'Northern Ireland',
+        'GB-NIR' => 'Kuzey İrlanda',
         'NO' => 'Norveç',
         'NP' => 'Nepal',
         'NR' => 'Nauru',
@@ -314,7 +315,7 @@ return [
         'VI' => 'Virgin Adaları (Abd)',
         'VN' => 'Vietnam',
         'VU' => 'Vanuatu',
-        'GB-WLS' => 'Wales',
+        'GB-WLS' => 'Galler',
         'WF' => 'Wallis ve Futuna Adaları',
         'WS' => 'Samoa',
         'YE' => 'Yemen',

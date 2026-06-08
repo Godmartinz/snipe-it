@@ -22,6 +22,7 @@ use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\License;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
 use App\Notifications\WelcomeNotification;
@@ -51,7 +52,6 @@ class UsersController extends Controller
             'users.address',
             'users.avatar',
             'users.city',
-            'users.company_id',
             'users.country',
             'users.created_by',
             'users.created_at',
@@ -89,7 +89,7 @@ class UsersController extends Controller
         ])->with('manager')
             ->with('groups')
             ->with('userloc')
-            ->with('company')
+            ->with('companies')
             ->with('department')
             ->with('createdBy')
             ->withCount([
@@ -191,7 +191,7 @@ class UsersController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $users = $users->where('users.company_id', '=', $request->input('company_id'));
+            $users = $users->whereHas('companies', fn ($q) => $q->where('companies.id', $request->input('company_id')));
         }
 
         if ($request->filled('phone')) {
@@ -380,6 +380,8 @@ class UsersController extends Controller
      */
     public function selectlist(Request $request): array
     {
+        $this->authorize('view.selectlists');
+
         $users = User::select(
             [
                 'users.id',
@@ -393,6 +395,22 @@ class UsersController extends Controller
                 'users.email',
             ]
         )->where('show_in_list', '=', '1');
+
+        // When FMCS is enabled, automatically scope to companies the acting user belongs to.
+        // scopeCompanyables is a no-op for superusers and when FMCS is disabled.
+        $users = Company::scopeCompanyables($users, 'company_id', 'users');
+
+        // Allow further narrowing to a specific company passed via data-company-ids on the select.
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && $request->filled('companyId')) {
+            $companyIds = array_values(array_filter(array_map('intval', explode(',', $request->input('companyId')))));
+            if (! empty($companyIds)) {
+                $users->whereHas('companies', fn ($q) => $q->whereIn('companies.id', $companyIds));
+            }
+        }
+
+        if ($request->filled('excludeId')) {
+            $users->where('users.id', '!=', (int) $request->input('excludeId'));
+        }
 
         if ($request->filled('search')) {
             $users = $users->where(function ($query) use ($request) {
@@ -441,7 +459,6 @@ class UsersController extends Controller
         $authenticatedUser = auth()->user();
         $user = new User;
         $user->fill($request->all());
-        $user->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $user->created_by = auth()->id();
 
         if ($request->has('permissions')) {
@@ -485,6 +502,12 @@ class UsersController extends Controller
                 // Sync the groups since the user is a superuser and the groups pass validation
                 $user->groups()->sync($request->input('groups'));
             }
+
+            // Sync company memberships from company_ids[] or fall back to scalar company_id
+            $companyIds = array_filter(
+                (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))
+            );
+            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser(array_map('intval', $companyIds)));
 
             return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.create')));
         }
@@ -569,13 +592,10 @@ class UsersController extends Controller
                     requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permissions')),
                     authenticatedUser: $authenticatedUser,
                     originalPermissions: NormalizePermissionsPayloadAction::run($user->decodePermissions()),
+                    targetUser: $user,
                 ));
             }
 
-        }
-
-        if ($request->filled('company_id')) {
-            $user->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         }
 
         if ($user->id == $request->input('manager_id')) {
@@ -604,6 +624,18 @@ class UsersController extends Controller
 
                 // Sync the groups since the user is a superuser and the groups pass validation
                 $user->groups()->sync($request->input('groups'));
+            }
+
+            // company_ids (new format) = full replacement sync.
+            // Legacy company_id = add without removing other associations.
+            if ($request->has('company_ids')) {
+                $companyIds = array_filter(array_map('intval', (array) $request->input('company_ids')));
+                $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+            } elseif ($request->filled('company_id')) {
+                $filtered = Company::getIdsForCurrentUser([(int) $request->input('company_id')]);
+                if (! empty($filtered)) {
+                    $user->companies()->syncWithoutDetaching($filtered);
+                }
             }
 
             return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.update')));
@@ -808,21 +840,27 @@ class UsersController extends Controller
             try {
                 $user = User::find($request->input('id'));
                 $this->authorize('update', $user);
-                $user->two_factor_secret = null;
-                $user->two_factor_enrolled = 0;
-                $user->saveQuietly();
 
-                // Log the reset
-                $logaction = new Actionlog;
-                $logaction->target_type = User::class;
-                $logaction->target_id = $user->id;
-                $logaction->item_type = User::class;
-                $logaction->item_id = $user->id;
-                $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->created_by = auth()->id();
-                $logaction->logaction('2FA reset');
+                if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
-                return response()->json(['message' => trans('admin/settings/general.two_factor_reset_success')], 200);
+                    $user->two_factor_secret = null;
+                    $user->two_factor_enrolled = 0;
+                    $user->saveQuietly();
+
+                    // Log the reset
+                    $logaction = new Actionlog;
+                    $logaction->target_type = User::class;
+                    $logaction->target_id = $user->id;
+                    $logaction->item_type = User::class;
+                    $logaction->item_id = $user->id;
+                    $logaction->created_at = date('Y-m-d H:i:s');
+                    $logaction->created_by = auth()->id();
+                    $logaction->logaction('2FA reset');
+
+                    return response()->json(['message' => trans('admin/settings/general.two_factor_reset_success')], 200);
+                }
+
+                return response()->json(['message' => trans('general.unauthorized')], 500);
             } catch (\Exception $e) {
                 return response()->json(['message' => trans('admin/settings/general.two_factor_reset_error')], 500);
             }
@@ -939,11 +977,11 @@ class UsersController extends Controller
     public function history(Request $request, User $user): JsonResponse|array
     {
         $this->authorize('history', $user);
-        $history = $user->getHistory($request);
-        $total = $user->getHistory($request)->count();
+        $historyQuery = $user->getHistory($request);
+        $total = (clone $historyQuery)->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-        $history = $history->skip($offset)->take($limit)->get();
+        $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }

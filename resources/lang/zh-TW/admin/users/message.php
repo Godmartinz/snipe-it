@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => '此使用者已被刪除。您必須先還原此使用者才能進行編輯或分配新的資產。',
     'ldap_not_configured' => 'LDAP 整合尚未設定',
     'password_resets_sent' => '已向選定的已啟動且擁有有效電子郵件地址的使用者傳送了密碼重設連結。',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => '密碼重置連結已傳送至 :email',
     'user_has_no_email' => '該使用者的個人資料尚未填寫電子郵件。',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => '解除停用使用者成功。',
         'restored' => '恢復使用者成功。',
         'import' => '匯入使用者成功。',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => '解除停用使用者失敗，請重試。',
         'import' => '匯入使用者失敗，請重試。',
-        'asset_already_accepted' => '資產已被接受',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => '您必須選擇接受或拒絕該資產。',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => '您正嘗試接受的資產未分配給您',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => ' LDAP 伺服器取得資訊條目失敗，請檢查 LDAP 設定文件中的相關設定。<br>LDAP 伺服器錯誤訊息：',
         'password_ldap' => '此帳戶的密碼由 LDAP/AD 管理。若要更改您的密碼，請聯繫您的 IT 部門。 ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

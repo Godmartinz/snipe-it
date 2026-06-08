@@ -2,20 +2,25 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutablesCheckedOutInBulk;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\LicenseSeat;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Models\User;
 use App\View\Label;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +32,7 @@ use Illuminate\Support\Facades\Log;
 
 class BulkAssetsController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Display the bulk edit page.
@@ -71,6 +76,16 @@ class BulkAssetsController extends Controller
             $request->session()->flashInput(['selected_assets' => $asset_ids]);
 
             return redirect()->route('hardware.bulkcheckout.show');
+        }
+
+        if ($request->input('bulk_actions') === 'checkin') {
+            $referer = request()->headers->get('referer');
+            if ($referer && parse_url($referer, PHP_URL_HOST) === parse_url(config('app.url'), PHP_URL_HOST)) {
+                redirect()->setIntendedUrl($referer);
+            }
+            $request->session()->flashInput(['selected_assets' => $asset_ids]);
+
+            return redirect()->route('hardware.bulkcheckin.show');
         }
 
         if ($request->input('bulk_actions') === 'maintenance') {
@@ -673,18 +688,25 @@ class BulkAssetsController extends Controller
                     ->with('error', trans('general.error_assets_already_checked_out'));
             }
 
-            // Prevent checking out assets across companies if FMCS enabled
-            if (Setting::getSettings()->full_multiple_companies_support && $target->company_id) {
-                $company_ids = $assets->pluck('company_id')->unique();
+            // Prevent checking out assets across companies if FMCS enabled.
+            // For users with multiple companies, check all their associated companies via the pivot.
+            if (Setting::getSettings()->full_multiple_companies_support) {
+                $company_ids = $assets->pluck('company_id')->filter()->unique();
 
-                // if there is more than one unique company id or the singular company id does not match
-                // then the checkout is invalid
-                if ($company_ids->count() > 1 || $company_ids->first() != $target->company_id) {
-                    // re-add the asset ids so the assets select is re-populated
-                    $request->session()->flashInput(['selected_assets' => $asset_ids]);
+                if ($company_ids->isNotEmpty()) {
+                    $assetCompanyId = (int) $company_ids->first();
 
-                    return redirect(route('hardware.bulkcheckout.show'))
-                        ->with('error', trans('general.error_user_company_multiple'));
+                    $mismatch = $company_ids->count() > 1
+                        || ($target instanceof User
+                            ? ! $target->canReceiveFromCompany($assetCompanyId)
+                            : (! is_null($target->company_id) && (int) $target->company_id !== $assetCompanyId));
+
+                    if ($mismatch) {
+                        $request->session()->flashInput(['selected_assets' => $asset_ids]);
+
+                        return redirect(route('hardware.bulkcheckout.show'))
+                            ->with('error', trans('general.error_user_company_multiple'));
+                    }
                 }
             }
 
@@ -714,6 +736,10 @@ class BulkAssetsController extends Controller
                     // See if there is a status label passed
                     if ($request->filled('status_id')) {
                         $asset->status_id = $request->input('status_id');
+                    }
+
+                    if ($request->boolean('set_not_requestable')) {
+                        $asset->requestable = false;
                     }
 
                     $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);
@@ -753,6 +779,112 @@ class BulkAssetsController extends Controller
             return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
         }
 
+    }
+
+    /**
+     * Show Bulk Checkin Page
+     */
+    public function showCheckin(): View
+    {
+        $this->authorize('checkin', Asset::class);
+
+        $notAssigned = collect();
+
+        if (old('selected_assets') && is_array(old('selected_assets'))) {
+            $assets = Asset::withTrashed()->findMany(old('selected_assets'));
+
+            [$assigned, $notAssigned] = $assets->partition(function (Asset $asset) {
+                return $asset->assigned_to;
+            });
+
+            session()->flashInput(['selected_assets' => $assigned->pluck('id')->values()->toArray()]);
+        }
+
+        $do_not_change = ['' => trans('general.do_not_change')];
+        $status_label_list = $do_not_change + Helper::statusLabelList();
+
+        return view('hardware/bulk-checkin', [
+            'statusLabel_list' => $status_label_list,
+            'removed_assets' => $notAssigned,
+        ]);
+    }
+
+    /**
+     * Process Multiple Checkin Request
+     */
+    public function storeCheckin(Request $request): RedirectResponse
+    {
+        $this->authorize('checkin', Asset::class);
+
+        if (! is_array($request->input('selected_assets'))) {
+            return redirect()->route('hardware.bulkcheckin.show')->withInput()->with('error', trans('admin/hardware/message.multi-checkin.no_assets_selected'));
+        }
+
+        $asset_ids = array_filter($request->input('selected_assets'));
+
+        $assets = Asset::withTrashed()->findOrFail($asset_ids);
+
+        $checkin_at = date('Y-m-d H:i:s');
+        if ($request->filled('checkin_at') && $request->input('checkin_at') != date('Y-m-d')) {
+            $checkin_at = $request->input('checkin_at');
+        }
+
+        $errors = [];
+        $admin = auth()->user();
+
+        DB::transaction(function () use ($assets, $admin, $checkin_at, $request, &$errors) {
+            foreach ($assets as $asset) {
+                $this->authorize('checkin', $asset);
+
+                if (is_null($asset->assignedTo)) {
+                    continue;
+                }
+
+                $target = $asset->assignedTo;
+                $originalValues = $asset->getRawOriginal();
+
+                $asset->expected_checkin = null;
+                $asset->assignedTo()->disassociate($asset);
+                $asset->accepted = null;
+
+                if ($request->filled('status_id')) {
+                    $asset->status_id = $request->input('status_id');
+                }
+
+                $asset->location_id = $asset->rtd_location_id;
+                $asset->last_checkin = $checkin_at;
+
+                if ($request->boolean('checkin_licenses')) {
+                    $asset->licenseseats->each(function (LicenseSeat $seat) {
+                        $seat->update(['assigned_to' => null]);
+                    });
+                }
+
+                CheckoutAcceptance::pending()->whereHasMorph('checkoutable', [Asset::class], function (Builder $query) use ($asset) {
+                    $query->where('id', $asset->id);
+                })->get()->each->delete();
+
+                if ($asset->save()) {
+                    if ($request->boolean('checkin_child_assets')) {
+                        Asset::where('assigned_type', Asset::class)
+                            ->where('assigned_to', $asset->id)
+                            ->update(['location_id' => $asset->location_id]);
+                    }
+
+                    event(new CheckoutableCheckedIn($asset, $target, $admin, $request->input('note'), $checkin_at, $originalValues));
+                } else {
+                    $errors = array_merge_recursive($errors, $asset->getErrors()->toArray());
+                }
+            }
+        });
+
+        if (! $errors) {
+            return redirect()->intended(route('hardware.index'))->with('success', trans_choice('admin/hardware/message.multi-checkin.success', count($asset_ids)));
+        }
+
+        return redirect()->route('hardware.bulkcheckin.show')->withInput()
+            ->with('error', trans_choice('admin/hardware/message.multi-checkin.error', count($asset_ids)))
+            ->withErrors($errors);
     }
 
     public function restore(Request $request): RedirectResponse

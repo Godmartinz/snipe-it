@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Lokasi ini adalah ibu bapa sekurang-kurangnya satu lokasi kanak-kanak dan tidak boleh dipadamkan. Sila kemas kini lokasi anda untuk tidak merujuk lokasi ini lagi dan cuba lagi.',
     'assigned_assets' => 'Aset yang Ditetapkan',
     'current_location' => 'Lokasi Semasa',
-    'open_map' => 'Buka dalam :map_provider_icon Peta',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

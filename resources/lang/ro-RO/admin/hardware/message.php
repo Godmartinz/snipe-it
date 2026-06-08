@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Trebuie să selectați cel puțin un articol din lista',
+    ],
+
     'checkin' => [
         'error' => 'Activul nu a fost primit, va rugam incercati iar',
         'success' => 'Activul a fost primit.',
         'user_does_not_exist' => 'Utilizatorul este invalid. Va rugam incercati iar.',
         'already_checked_in' => 'Activul respectiv este deja înregistrat.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

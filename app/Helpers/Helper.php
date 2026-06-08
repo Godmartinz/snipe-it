@@ -1268,6 +1268,7 @@ class Helper
         $allowedExtensionMap = [
             // Images
             'jpg' => 'far fa-image',
+            'jfif' => 'far fa-image',
             'jpeg' => 'far fa-image',
             'gif' => 'far fa-image',
             'png' => 'far fa-image',
@@ -1596,7 +1597,17 @@ class Helper
         $checkout_to_type = session('checkout_to_type') ?? null;
         $checkedInFrom = session('checkedInFrom');
         $other_redirect = session('other_redirect');
-        $backUrl = session()->pull('url.intended', 'home');
+        $backUrl = str_replace(["\r", "\n"], '', session()->pull('url.intended', 'home'));
+
+        // Reject any stored back-URL that points off-site. redirect()->intended() performs
+        // no host validation, and url.intended can be written from the SAML RelayState POST
+        // parameter (SamlController), which an attacker-controlled IdP could set to an
+        // off-site URL.
+        $backHost = parse_url($backUrl, PHP_URL_HOST);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        if ($backHost && $backHost !== $appHost) {
+            $backUrl = route('home');
+        }
 
         // return to previous page
         if ($redirect_option == 'back') {
@@ -1629,10 +1640,20 @@ class Helper
 
         // return to assignment target
         if ($redirect_option == 'target') {
+            $userId = $request->assigned_user ?? $checkedInFrom;
+            $locationId = $request->assigned_location ?? $checkedInFrom;
+            $assetId = $request->assigned_asset ?? $checkedInFrom;
+
             return match ($checkout_to_type) {
-                'user' => redirect()->route('users.show', $request->assigned_user ?? $checkedInFrom),
-                'location' => redirect()->route('locations.show', $request->assigned_location ?? $checkedInFrom),
-                'asset' => redirect()->route('hardware.show', $request->assigned_asset ?? $checkedInFrom),
+                'user' => $userId
+                    ? redirect()->route('users.show', $userId)
+                    : redirect()->route('users.index'),
+                'location' => $locationId
+                    ? redirect()->route('locations.show', $locationId)
+                    : redirect()->route('locations.index'),
+                'asset' => $assetId
+                    ? redirect()->route('hardware.show', $assetId)
+                    : redirect()->route('hardware.index'),
             };
         }
 
@@ -1713,6 +1734,11 @@ class Helper
                 foreach ($keywords as $keyword) {
                     if ($relation == 'many') {
                         $items = $location->{$keyword}->all();
+                        // assignedAccessories returns AccessoryCheckout records (no company_id);
+                        // resolve each to its parent Accessory so the comparison is valid.
+                        if ($keyword === 'assignedAccessories') {
+                            $items = collect($items)->map(fn ($checkout) => $checkout->accessory)->filter()->values()->all();
+                        }
                     } else {
                         $items = collect([])->push($location->$keyword);
                     }
@@ -1845,5 +1871,44 @@ class Helper
 
         return 'App\\Models\\'.ucwords($model);
 
+    }
+
+    /**
+     * Render a markdown-textarea value as HTML.
+     *
+     * Soft line breaks (single newlines) are rendered as <br> so that line
+     * breaks typed in the textarea are preserved in the output.
+     *
+     * When $inline is true, block-level elements are suppressed and hard
+     * breaks are pre-processed manually — used for the encrypted reveal span
+     * where block HTML cannot be placed inside a font-size-toggled <span>.
+     */
+    public static function renderMarkdown(?string $text, bool $inline = false): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        if ($inline) {
+            // Convert newlines to CommonMark hard breaks for inline rendering
+            $text = preg_replace('/(?<! {2})\n/', "  \n", $text);
+
+            return Str::inlineMarkdown($text, ['html_input' => 'escape', 'allow_unsafe_links' => false]);
+        }
+
+        $html = trim(Str::markdown($text, [
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+            'renderer' => ['soft_break' => "<br>\n"],
+        ]));
+
+        // If the entire output is a single <p> block, unwrap it so the content
+        // renders inline-ish without the <p> adding unwanted top spacing in the
+        // compact detail-view layout.
+        if (str_starts_with($html, '<p>') && str_ends_with($html, '</p>') && substr_count($html, '<p>') === 1) {
+            return substr($html, 3, -4);
+        }
+
+        return $html;
     }
 }

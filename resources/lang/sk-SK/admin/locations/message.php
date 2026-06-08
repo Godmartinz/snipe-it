@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Táto lokalita je nadradenou minimálne jednej podradenej lokalite, preto nemôže byť odstránená. Prosím odstráňte referenciu s príslušnej lokality a skúste znovu. ',
     'assigned_assets' => 'Priradené položky majetku',
     'current_location' => 'Aktuálna lokalita',
-    'open_map' => 'Otvoriť v :map_provider_icon mapách',
     'deleted_warning' => 'Táto lokalita bolo odstránené. Pred vykonaním akýchkoľvek zmien ju obnovte.',
 
     'create' => [

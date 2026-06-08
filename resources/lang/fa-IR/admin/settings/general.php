@@ -399,7 +399,7 @@ return [
     'two_factor_enabled_edit_not_allowed' => 'سرپرست شما اجازه نمی دهد که این تنظیم را ویرایش کنید.',
     'two_factor_enrollment_text' => 'احراز هویت دو عامل لازم است، اما دستگاه شما هنوز ثبت نشده است. برنامه Google Authenticator خود را باز کنید و کد QR زیر را برای ثبت نام دستگاه خود اسکن کنید. هنگامی که دستگاه خود را ثبت نام کردید، کد زیر را وارد کنید',
     'require_accept_signature' => 'امضا لازم است',
-    'require_accept_signature_help_text' => 'فعال کردن این ویژگی، کاربران را مجبور به فیزیکی در پذیرش یک دارایی می کند.',
+    'require_accept_signature_help_text' => 'Enabling this feature will require users to physically sign off on accepting items. This will override any category-specific signature requirements.',
     'require_checkinout_notes' => 'Require Notes on Checkin/Checkout',
     'require_checkinout_notes_help_text' => 'Enabling this feature will require the note fields to be populated when checking in or checking out an asset.',
     'left' => 'چپ',
@@ -418,17 +418,30 @@ return [
     'oauth_title' => 'تنظیمات API OAuth
 ',
     'oauth_clients' => 'OAuth Clients',
-    'oauth' => 'OAuth
-',
-    'oauth_help' => 'تنظیمات نقطه پایانی Oauth
-',
+    'oauth' => 'OAuth & API',
+    'oauth_help' => 'Oauth Endpoint Settings and API tokens',
     'oauth_no_clients' => 'You have not created any OAuth clients yet.',
+    'oauth_no_applications' => 'You have not created any Authorized Applications yet.',
     'oauth_secret' => 'Secret',
     'oauth_authorized_apps' => 'Authorized Applications',
     'oauth_redirect_url' => 'Redirect URL',
     'oauth_name_help' => ' Something your users will recognize and trust.',
     'oauth_scopes' => 'Scopes',
+    'oauth_client_type' => 'Client Type',
+    'oauth_client_type_oauth' => 'OAuth Client',
+    'oauth_client_type_personal_access' => 'Personal Access Client',
+    'oauth_client_type_password_grant' => 'Password Grant Client',
+    'oauth_associated_token_count' => 'Token Count',
     'oauth_callback_url' => 'Your application authorization callback URL.',
+    'oauth_personal_access_tokens' => 'User API Tokens (Personal Access Tokens)',
+    'oauth_personal_access_tokens_none' => 'No personal access tokens found.',
+    'oauth_client' => 'Client',
+    'oauth_deleted_user' => 'Deleted user (ID: :id)',
+    'oauth_token_status_revoked' => 'Revoked',
+    'oauth_token_status_expired' => 'Expired',
+    'oauth_token_status_active' => 'فعال کردن',
+    'oauth_revoke' => 'Revoke',
+    'oauth_unrevoke' => 'Unrevoke',
     'create_client' => 'Create Client',
     'no_scopes' => 'No scopes',
     'asset_tag_title' => 'تنظیمات برچسب دارایی را به روز کنید
@@ -453,6 +466,7 @@ return [
 ',
     'mail_test_help' => 'با این کار یک ایمیل آزمایشی به :replyto ارسال می شود.
 ',
+    'mail_test_no_email' => 'MAIL_REPLYTO_ADDR not set or has no value .env config file. Cannot send test email. Please update this value in your configuration file with a valid email address.',
     'filter_by_keyword' => 'با این کار یک ایمیل آزمایشی به :replyto ارسال می شود.
 ',
     'security' => 'امنیت',
@@ -548,7 +562,7 @@ return [
     'timezone' => 'Timezone',
     'test_mail' => 'Test Mail',
     'profile_edit' => 'Edit Profile',
-    'profile_edit_help' => 'Allow users to edit their own profiles.',
+    'profile_edit_help' => 'Allow users to edit their own profiles. (This does not include accessibility settings like light/dark mode, audio feedback, or link colors.)',
     'default_avatar' => 'Custom Default Avatar',
     'default_avatar_help' => 'This image will be displayed as a profile if a user does not have a profile photo.',
     'restore_default_avatar' => 'Restore <a href=":default_avatar" data-toggle="lightbox" data-type="image">original system default avatar</a>',
@@ -659,6 +673,7 @@ return [
         'security' => 'رمز عبور، رمزهای عبور، الزامات، دو عاملی، دو عاملی، رمزهای عبور رایج، ورود از راه دور، خروج از سیستم، احراز هویت
 ',
         'notifications' => 'alerts, email, notifications, audit, threshold, email alerts, cc',
+        'oauth' => 'oauth, oath, api, personal access keys, tokens',
     ],
 
 ];

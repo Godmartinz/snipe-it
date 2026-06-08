@@ -78,6 +78,7 @@ class IconHelper
             case 'angle-right':
                 return 'fas fa-angle-right';
             case 'warning':
+            case 'alert':
                 return 'fas fa-exclamation-triangle';
             case 'kits':
                 return 'fas fa-object-group';
@@ -126,6 +127,7 @@ class IconHelper
             case 'dashboard':
                 return 'fas fa-tachometer-alt';
             case 'info-circle':
+            case 'info':
                 return 'fas fa-info-circle';
             case 'caret-right':
                 return 'fa fa-caret-right';
@@ -156,6 +158,7 @@ class IconHelper
             case 'remote':
                 return 'fa-solid fa-house-laptop';
             case 'more-info':
+            case 'help':
             case 'support':
                 return 'far fa-life-ring';
             case 'plus':

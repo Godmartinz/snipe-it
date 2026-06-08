@@ -577,6 +577,43 @@ class StoreAssetTest extends TestCase
         $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
+    public function test_store_rejects_cross_company_checkout_target_with_full_company_support_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $actorInCompanyA = User::factory()->createAssets()->for($companyA)->create();
+        $targetUserInCompanyB = User::factory()->for($companyB)->create();
+
+        $model = AssetModel::factory()->create();
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+        $assetTag = 'fmcs-store-rollback-asset';
+
+        $this->actingAsForApi($actorInCompanyA)
+            ->postJson(route('api.assets.store'), [
+                'asset_tag' => $assetTag,
+                'model_id' => $model->id,
+                'status_id' => $status->id,
+                'company_id' => $companyA->id,
+                'assigned_user' => $targetUserInCompanyB->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $this->assertDatabaseMissing('assets', [
+            'asset_tag' => $assetTag,
+        ]);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $targetUserInCompanyB->id,
+            'item_type' => Asset::class,
+        ]);
+    }
+
     public static function checkoutTargets()
     {
         yield 'Users' => [

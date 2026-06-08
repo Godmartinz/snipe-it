@@ -2,56 +2,59 @@
 
 return [
 
-    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
-    'user_does_not_exist' => 'User does not exist or you do not have permission to view them.',
-    'asset_does_not_exist' => 'The asset you are trying to associate with this license does not exist.',
-    'owner_doesnt_match_asset' => 'The asset you are trying to associate with this license is owned by somene other than the person selected in the assigned to dropdown.',
-    'assoc_users' => 'This license is currently checked out to a user and cannot be deleted. Please check the license in first, and then try deleting again. ',
-    'select_asset_or_person' => 'You must select an asset or a user, but not both.',
-    'not_found' => 'License not found',
-    'seats_available' => ':seat_count seats available',
+    'does_not_exist' => 'Լիցենզիան գոյություն չունի կամ դուք թույլտվություն չունեք այն դիտելու։',
+    'user_does_not_exist' => 'Օգտատերը գոյություն չունի կամ դուք թույլտվություն չունեք նրան դիտելու։',
+    'asset_does_not_exist' => 'Ակտիվը, որը դուք փորձում եք կապել այս լիցենզիայի հետ, գոյություն չունի։',
+    'owner_doesnt_match_asset' => 'Ակտիվը, որը դուք փորձում եք կապել այս լիցենզիայի հետ, պատկանում է «Հատկացված» ցանկում ընտրված անձից տարբեր անձի։',
+    'assoc_users' => 'Այս լիցենզիան ներկայումս տրամադրված է օգտատիրոջը և հնարավոր չէ ջնջել։ Խնդրում ենք նախ վերադարձնել լիցենզիան, ապա կրկին փորձել ջնջել։',
+    'select_asset_or_person' => 'Դուք պետք է ընտրեք ակտիվ կամ օգտատեր, բայց ոչ երկուսն էլ։',
+    'not_found' => 'Լիցենզիան չի գտնվել',
+    'seats_available' => 'Հասանելի է :seat_count տեղ',
 
     'create' => [
-        'error' => 'License was not created, please try again.',
-        'success' => 'License created successfully.',
+        'error' => 'Լիցենզիան չի ստեղծվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Լիցենզիան հաջողությամբ ստեղծվեց։',
     ],
 
     'deletefile' => [
-        'error' => 'File not deleted. Please try again.',
-        'success' => 'File successfully deleted.',
+        'error' => 'Ֆայլը չի ջնջվել։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Ֆայլը հաջողությամբ ջնջվեց։',
     ],
 
     'upload' => [
-        'error' => 'File(s) not uploaded. Please try again.',
-        'success' => 'File(s) successfully uploaded.',
-        'nofiles' => 'You did not select any files for upload, or the file you are trying to upload is too large',
-        'invalidfiles' => 'One or more of your files is too large or is a filetype that is not allowed. Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar, rtf, xml, and lic.',
+        'error' => 'Ֆայլ(եր)ը չեն վերբեռնվել։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Ֆայլ(եր)ը հաջողությամբ վերբեռնվեցին։',
+        'nofiles' => 'Դուք չեք ընտրել որևէ ֆայլ վերբեռնելու համար, կամ վերբեռնել փորձող ֆայլը չափազանց մեծ է',
+        'invalidfiles' => 'Ձեր ֆայլերից մեկը կամ մի քանիսը չափազանց մեծ են կամ թույլատրված տեսակի չեն։ Թույլատրված տեսակներն են՝ png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar, rtf, xml և lic։',
     ],
 
     'update' => [
-        'error' => 'License was not updated, please try again',
-        'success' => 'License updated successfully.',
+        'error' => 'Լիցենզիան չի թարմացվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Լիցենզիան հաջողությամբ թարմացվեց։',
     ],
 
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this license?',
-        'error' => 'There was an issue deleting the license. Please try again.',
-        'success' => 'The license was deleted successfully.',
+        'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս լիցենզիան։',
+        'error' => 'Լիցենզիան ջնջելիս սխալ առաջացավ։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Լիցենզիան հաջողությամբ ջնջվեց։',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [
-        'error' => 'There was an issue checking out the license. Please try again.',
-        'success' => 'The license was checked out successfully',
-        'not_enough_seats' => 'Not enough license seats available for checkout',
-        'mismatch' => 'The license seat provided does not match the license',
-        'unavailable' => 'This seat is not available for checkout.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'error' => 'Լիցենզիան տրամադրելիս սխալ առաջացավ։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Լիցենզիան հաջողությամբ տրամադրվեց։',
+        'not_enough_seats' => 'Տրամադրման համար բավարար լիցենզիայի տեղեր չկան։',
+        'mismatch' => 'Տրամադրված լիցենզիայի տեղը չի համապատասխանում լիցենզիային։',
+        'unavailable' => 'Այս տեղը հասանելի չէ տրամադրման համար։',
+        'license_is_inactive' => 'Այս լիցենզիան սպառված է կամ դադարեցված։',
     ],
 
     'checkin' => [
-        'error' => 'There was an issue checking in the license. Please try again.',
-        'not_reassignable' => 'Seat has been used',
-        'success' => 'The license was checked in successfully',
+        'error' => 'Լիցենզիան վերադարձնելիս սխալ առաջացավ։ Խնդրում ենք կրկին փորձել։',
+        'not_reassignable' => 'Տեղն արդեն օգտագործվել է։',
+        'success' => 'Լիցենզիան հաջողությամբ վերադարձվեց։',
     ],
 
 ];

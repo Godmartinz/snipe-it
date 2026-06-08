@@ -19,6 +19,7 @@ use Illuminate\Validation\ValidationException;
 use Intervention\Image\Exception\NotSupportedException;
 use JsonException;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use Livewire\Exceptions\PublicPropertyNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
@@ -41,6 +42,7 @@ class Handler extends ExceptionHandler
         JsonException::class,
         SCIMException::class, // these generally don't need to be reported
         InvalidFormatException::class,
+        PublicPropertyNotFoundException::class,
     ];
 
     /**
@@ -70,6 +72,11 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
+
+        // Livewire tried to set a property that doesn't exist (e.g. stale browser state sending a bare "0" as a property name)
+        if ($e instanceof PublicPropertyNotFoundException) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         // CSRF token mismatch error
         if ($e instanceof TokenMismatchException) {
@@ -201,7 +208,7 @@ class Handler extends ExceptionHandler
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthorized or unauthenticated.'], 401);
+            return response()->json(['error' => trans('general.unauthorized')], 401);
         }
 
         return redirect()->guest('login');

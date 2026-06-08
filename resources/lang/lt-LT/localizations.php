@@ -9,6 +9,7 @@ return [
         'am-ET' => 'Amharų',
         'af-ZA' => 'Afrikanų',
         'ar-SA' => 'Arabų',
+        'hy-AM' => 'Armėnų',
         'bg-BG' => 'Bulgarų',
         'zh-CN' => 'Kinų (supaprastinta)',
         'zh-TW' => 'Kinų (tradicinė)',

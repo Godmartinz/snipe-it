@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Оваа локација моментално е родител на најмалку една локација и не може да се избрише. Ве молиме да ги ажурирате вашите локации повеќе да не ја користат оваа локација како родител и обидете се повторно. ',
     'assigned_assets' => 'Доделени средства',
     'current_location' => 'Моментална локација',
-    'open_map' => 'Отвори во :map_provider_icon мапи',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

@@ -38,4 +38,17 @@ class PrintUserInventoryTest extends TestCase
             ->get(route('users.print', $user))
             ->assertStatus(302);
     }
+
+    public function test_bulk_print_user_inventory_does_not_error_on_missing_indirect_items_count()
+    {
+        $actor = User::factory()->viewUsers()->create();
+        [$userA, $userB] = User::factory()->count(2)->create();
+
+        $this->actingAs($actor)
+            ->post(route('users/bulkedit'), [
+                'ids' => [$userA->id, $userB->id],
+                'bulk_actions' => 'print',
+            ])
+            ->assertOk();
+    }
 }

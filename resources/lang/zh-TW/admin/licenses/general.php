@@ -32,6 +32,11 @@ return [
             'log_msg' => 'Checked in via bulk license checkin in license GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => '借出所有座位',
             'modal' => '此操作將借出一個名額給第一個可用的使用者。| 此操作將借出所有 :available_seats_count 名額給第一個可用的使用者。如果他們尚未借出此授權，並且他們的使用者帳戶上已啟用自動分配授權屬性，則將使用者視為此名額的可用。',

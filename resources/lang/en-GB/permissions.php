@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Manage Accessory Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with accessories.',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Manage Asset Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Manage User Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Manage Model Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Manage Department Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Manage Supplier Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Manage Location Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Manage Company Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with companies. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Manage Consumable Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => 'Consumables',
         'note' => 'Grants access to the Consumables section of the application.',
@@ -129,41 +170,43 @@ return [
         'name' => 'Check Out Consumables',
         'note' => 'Assign consumables in inventory by checking them out.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Manage Consumable Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with consumables.',
-    ],
+
     'licenses' => [
         'name' => 'Licenses',
-        'note' => 'Grants access to the Licenses section of the application.',
+        'note' => 'Grants access to the Licences section of the application.',
     ],
     'licensesview' => [
-        'name' => 'View Licenses',
+        'name' => 'View Licences',
     ],
     'licensescreate' => [
-        'name' => 'Create New Licenses',
+        'name' => 'Create New Licences',
     ],
     'licensesedit' => [
-        'name' => 'Edit Licenses',
+        'name' => 'Edit Licences',
     ],
     'licensesdelete' => [
-        'name' => 'Delete Licenses',
+        'name' => 'Delete Licences',
     ],
     'licensescheckout' => [
-        'name' => 'Assign Licenses',
-        'note' => 'Allows the user to assign licenses to assets or users.',
+        'name' => 'Assign Licences',
+        'note' => 'Allows the user to assign licences to assets or users.',
     ],
     'licensescheckin' => [
-        'name' => 'Unassign Licenses',
-        'note' => 'Allows the user to unassign licenses from assets or users.',
+        'name' => 'Unassign Licences',
+        'note' => 'Allows the user to unassign licences from assets or users.',
     ],
     'licensesfiles' => [
-        'name' => 'Manage License Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with licenses.',
+        'name' => 'Manage Licence Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with licences.',
     ],
+    'componentsfiles' => [
+        'name' => 'Manage Component Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with components.',
+    ],
+
     'licenseskeys' => [
-        'name' => 'Manage License Keys',
-        'note' => 'Allows the user to view product keys associated with licenses.',
+        'name' => 'Manage Licence Keys',
+        'note' => 'Allows the user to view product keys associated with licences.',
     ],
     'components' => [
         'name' => 'Components',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Delete Components',
     ],
-    'componentsfiles' => [
-        'name' => 'Manage Component Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with components.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Check Out Components',
         'note' => 'Assign components in inventory by checking them out.',

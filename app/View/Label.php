@@ -110,7 +110,7 @@ class Label implements View
                         $logo = Storage::disk('public')->path('companies/'.e($asset->company->image));
                     } elseif (! empty($settings->label_logo)) {
                         // Use the general site label logo, if available
-                        $logo = Storage::disk('public')->path('/'.e($settings->label_logo));
+                        $logo = Storage::disk('public')->path('/'.e(basename($settings->label_logo)));
                     } elseif (! empty($asset->is_label_preview)) {
                         $logo = public_path('img/label-preview-logo.png');
                     }

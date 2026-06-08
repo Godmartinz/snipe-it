@@ -205,16 +205,9 @@ class ComponentPresenter extends Presenter
     public static function checkedOut()
     {
         $layout = [
+
             [
-                'field' => 'id',
-                'searchable' => false,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.id'),
-                'visible' => false,
-            ],
-            [
-                'field' => 'assigned_to',
+                'field' => 'name',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.name'),
@@ -222,12 +215,13 @@ class ComponentPresenter extends Presenter
                 'formatter' => 'polymorphicItemFormatter',
             ],
             [
-                'field' => 'qty',
+                'field' => 'assigned_qty',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.qty'),
                 'visible' => true,
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'note',
@@ -244,12 +238,20 @@ class ComponentPresenter extends Presenter
                 'title' => trans('general.created_at'),
                 'formatter' => 'dateDisplayFormatter',
             ],
-            $layout[] = [
+            [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
+            ],
+            [
                 'field' => 'available_actions',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
-                'title' => trans('general.checkin').'/'.trans('general.checkout'),
+                'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'componentsInOutFormatter',
                 'printIgnore' => true,

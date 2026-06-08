@@ -7,7 +7,7 @@ return [
     'assets' => 'Assets',
     'city' => 'City',
     'contact' => 'Contact Name',
-    'country' => 'Country',
+    'country' => 'Vend',
     'create' => 'Create Supplier',
     'email' => 'Email',
     'fax' => 'Fax',

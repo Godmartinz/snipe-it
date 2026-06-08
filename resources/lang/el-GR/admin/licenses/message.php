@@ -37,6 +37,9 @@ return [
         'confirm' => 'Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την άδεια;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας την άδεια. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Η άδεια διαγράφηκε επιτυχώς.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

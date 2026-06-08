@@ -94,11 +94,20 @@ return [
         'success' => 'El activo fue asignado correctamente|Los activos fueron asignados correctamente.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Debe seleccionar al menos un activo de la lista',
+    ],
+
     'checkin' => [
         'error' => 'El activo no se pudo ingresar, por favor inténtelo de nuevo',
         'success' => 'El activo fue ingresado exitosamente.',
         'user_does_not_exist' => 'Este usuario no es correcto. Por favor, inténtelo de nuevo.',
         'already_checked_in' => 'El equipo ya ha sido recibido.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

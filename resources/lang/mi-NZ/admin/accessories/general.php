@@ -9,7 +9,7 @@ return [
     'edit' => 'Whakatikahia te Uru',
     'eula_text' => 'EULA Utu',
     'eula_text_help' => 'Mā tēnei mara e āhei ki a koe te whakarite i ō EULA mō ētahi momo rawa. Mena kei a koe tetahi EULA mo o rawa katoa, ka taea e koe te tirotiro i te pouaka i raro nei hei whakamahi i te taunoa tuatahi.',
-    'require_acceptance' => 'Me tono nga kaiwhakamahi ki te whakauru i nga hua o tenei waahanga.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Karekau he taunga tuatahi taunoa EULA. Tāpirihia tetahi i te Tautuhinga.',
     'total' => 'Te tapeke',
     'remaining' => 'Waea',

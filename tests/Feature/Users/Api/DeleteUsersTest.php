@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
@@ -151,6 +152,102 @@ class DeleteUsersTest extends TestCase implements TestsFullMultipleCompaniesSupp
             ->assertStatusMessageIs('success');
 
         $this->assertSoftDeleted($user);
+    }
+
+    public function test_deleting_user_revokes_associated_passport_tokens()
+    {
+        $user = User::factory()->create();
+
+        $clientId = DB::table('oauth_clients')->insertGetId([
+            'user_id' => null,
+            'name' => 'Test Personal Client',
+            'secret' => 'secret',
+            'redirect' => 'http://localhost/callback',
+            'personal_access_client' => 1,
+            'password_client' => 0,
+            'revoked' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('oauth_access_tokens')->insert([
+            'id' => 'soft-delete-token-'.$user->id,
+            'user_id' => $user->id,
+            'client_id' => $clientId,
+            'name' => 'Soft Delete Token',
+            'scopes' => '[]',
+            'revoked' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => now()->addDay(),
+        ]);
+
+        DB::table('oauth_refresh_tokens')->insert([
+            'id' => 'soft-delete-refresh-'.$user->id,
+            'access_token_id' => 'soft-delete-token-'.$user->id,
+            'revoked' => 0,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        $this->actingAsForApi(User::factory()->deleteUsers()->create())
+            ->deleteJson(route('api.users.destroy', $user))
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->assertSoftDeleted($user);
+        $this->assertDatabaseHas('oauth_access_tokens', [
+            'id' => 'soft-delete-token-'.$user->id,
+            'revoked' => 1,
+        ]);
+        $this->assertDatabaseHas('oauth_refresh_tokens', [
+            'id' => 'soft-delete-refresh-'.$user->id,
+            'revoked' => 1,
+        ]);
+    }
+
+    public function test_force_deleting_user_hard_deletes_associated_passport_tokens()
+    {
+        $user = User::factory()->create();
+
+        $clientId = DB::table('oauth_clients')->insertGetId([
+            'user_id' => null,
+            'name' => 'Test Personal Client',
+            'secret' => 'secret',
+            'redirect' => 'http://localhost/callback',
+            'personal_access_client' => 1,
+            'password_client' => 0,
+            'revoked' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('oauth_access_tokens')->insert([
+            'id' => 'force-delete-token-'.$user->id,
+            'user_id' => $user->id,
+            'client_id' => $clientId,
+            'name' => 'Force Delete Token',
+            'scopes' => '[]',
+            'revoked' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => now()->addDay(),
+        ]);
+
+        DB::table('oauth_refresh_tokens')->insert([
+            'id' => 'force-delete-refresh-'.$user->id,
+            'access_token_id' => 'force-delete-token-'.$user->id,
+            'revoked' => 0,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        $user->forceDelete();
+
+        $this->assertDatabaseMissing('oauth_access_tokens', [
+            'id' => 'force-delete-token-'.$user->id,
+        ]);
+        $this->assertDatabaseMissing('oauth_refresh_tokens', [
+            'id' => 'force-delete-refresh-'.$user->id,
+        ]);
     }
 
     public function test_admin_cannot_delete_super_user()

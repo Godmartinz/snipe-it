@@ -21,7 +21,7 @@
 @section('content')
 
 <div class="row">
-  <div class="col-md-9">
+    <div class="col-md-6 col-md-offset-3">
     @if ($item->id)
       <form class="form-horizontal" method="post" action="{{ route('maintenances.update', $item->id) }}" autocomplete="off" enctype="multipart/form-data">
       {{ method_field('PUT') }}
@@ -106,7 +106,36 @@
 
         @include ('partials.forms.edit.maintenance_type')
 
-        <!-- Start Date -->
+          <!-- Responsible Party -->
+          <div class="form-group {{ $errors->has('responsible_party_id') ? ' has-error' : '' }}">
+              <label for="responsible_party_id" class="col-md-3 control-label">
+                  {{ trans('admin/maintenances/form.responsible_party') }}
+              </label>
+              <div class="col-md-7">
+                  <select
+                      class="js-data-ajax select2"
+                      data-endpoint="users"
+                      name="responsible_party_id"
+                      id="responsible_party_id"
+                      data-placeholder="{{ trans('general.select_user') }}"
+                      aria-label="responsible_party_id"
+                      style="width: 100%;"
+                  >
+                      @if ($item->responsibleParty)
+                          <option value="{{ $item->responsibleParty->id }}" selected="selected">
+                              {{ $item->responsibleParty->display_name }}
+                          </option>
+                      @elseif (! $item->id)
+                          <option value="{{ auth()->id() }}" selected="selected">
+                              {{ auth()->user()->display_name }}
+                          </option>
+                      @endif
+                  </select>
+                  {!! $errors->first('responsible_party_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              </div>
+          </div>
+
+          <!-- Start Date -->
         <div class="form-group {{ $errors->has('start_date') ? ' has-error' : '' }}">
           <label for="start_date" class="col-md-3 control-label">
             {{ trans('admin/maintenances/form.start_date') }}
@@ -157,17 +186,20 @@
         <!-- Asset Maintenance Cost -->
         <div class="form-group {{ $errors->has('cost') ? ' has-error' : '' }}">
           <label for="cost" class="col-md-3 control-label">{{ trans('admin/maintenances/form.cost') }}</label>
-          <div class="col-md-3 text-right">
-            <div class="input-group">
+            <div class="col-md-9">
+                <div class="input-group col-md-5" style="padding-left: 0px;">
+                    <input class="form-control" type="text" inputmode="decimal" pattern="[\d.,]+" name="cost" aria-label="cost" id="cost" value="{{ old('cost', \App\Helpers\Helper::formatCurrencyOutput($item->cost)) }}" maxlength="25" data-msg-pattern="{{ trans('general.purchase_cost_invalid') }}"/>
               <span class="input-group-addon">
-                @if (($item->asset) && ($item->asset->location) && ($item->asset->location->currency!=''))
+                @if (($item->asset) && ($item->asset->location) && ($item->asset->location->currency != ''))
                   {{ $item->asset->location->currency }}
                 @else
                   {{ $snipeSettings->default_currency }}
                 @endif
               </span>
-              <input class="form-control" type="number" name="cost" min="0.00" max="99999999999999999.000" step="0.001" aria-label="cost" id="cost" value="{{ old('cost', $item->cost) }}" maxlength="25" />
+                </div>
+                <div class="col-md-9" style="padding-left: 0px;">
               {!! $errors->first('cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <p class="help-block">{{ trans('general.purchase_cost_format_help', ['format' => $snipeSettings->digit_separator]) }}</p>
             </div>
           </div>
         </div>
@@ -182,6 +214,7 @@
 
 
         @include ('partials.forms.edit.image-upload', ['image_path' => app('maintenances_path')])
+        @include ('partials.forms.edit.file-upload', ['input_id' => 'maintenanceFileUpload'])
 
 
         <!-- Notes -->

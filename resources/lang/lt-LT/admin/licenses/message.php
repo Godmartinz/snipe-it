@@ -13,35 +13,38 @@ return [
 
     'create' => [
         'error' => 'Licencija nesukurta, bandykite dar kartą.',
-        'success' => 'Licencija sukurta sėkmingai.',
+        'success' => 'Licencija sėkmingai sukurta.',
     ],
 
     'deletefile' => [
         'error' => 'Failas nebuvo panaikintas. Bandykite dar kartą.',
-        'success' => 'Failas panaikintas sėkmingai.',
+        'success' => 'Failas sėkmingai panaikintas.',
     ],
 
     'upload' => [
         'error' => 'Failo (-ų) įkelti nepavyko. Bandykite dar kartą.',
-        'success' => 'Failas (-ai) įkelti sėkmingai.',
+        'success' => 'Failas(-ai) sėkmingai įkelti.',
         'nofiles' => 'Nepasirinkote jokio failo įkėlimui arba failas, kurį bandote įkelti, yra per didelis',
         'invalidfiles' => 'Vienas ar keli failai yra per dideli arba neleistino failų formato. Leidžiami failų tipai yra: png, gif, jpg, jpeg, doc, docx, pdf, txt, zip, rar, rtf, xml, lic.',
     ],
 
     'update' => [
         'error' => 'Licencija nebuvo atnaujinta, bandykite dar kartą',
-        'success' => 'Licencija atnaujinta sėkmingai.',
+        'success' => 'Licencija sėkmingai atnaujinta.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šią licenciją?',
         'error' => 'Bandant panaikinti licenciją įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Licencija panaikinta sėkmingai.',
+        'success' => 'Licencija sėkmingai panaikinta.',
+        'bulk_success' => 'Pasirinktos licencijos sėkmingai panaikintos.',
+        'partial_success' => 'Licencija sėkmingai panaikinta. Daugiau informacijos rasite žemiau. | Licencijos (:count) buvo sėkmingai panaikintos. Daugiau informacijos rasite žemiau.',
+        'bulk_checkout_warning' => ':license_name turi vietų, kurios šiuo metu yra išduotos ir negali būti panaikintos. Tam, kad panaikintumėte, turite paimti šias vietas.',
     ],
 
     'checkout' => [
         'error' => 'Bandant išduoti licenciją įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Licencija išduota sėkmingai',
+        'success' => 'Licencija sėkmingai išduota',
         'not_enough_seats' => 'Turimų laisvų vietų nepakanka licencijos išdavimui',
         'mismatch' => 'Pateikta licencijos vieta nesutampa su licencija',
         'unavailable' => 'Šios licencijos negalima išduoti.',
@@ -51,7 +54,7 @@ return [
     'checkin' => [
         'error' => 'Bandant paimti licenciją įvyko klaida. Bandykite dar kartą.',
         'not_reassignable' => 'Vieta buvo panadota',
-        'success' => 'Licencija paimta sėkmingai',
+        'success' => 'Licencija sėkmingai paimta',
     ],
 
 ];

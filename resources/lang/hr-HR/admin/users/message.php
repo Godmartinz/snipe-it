@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ovaj je korisnik izbrisan. Morat ćete vratiti tog korisnika da biste ih uredili ili dodijelili novu imovinu.',
     'ldap_not_configured' => 'LDAP integracija nije konfigurirana za ovu instalaciju.',
     'password_resets_sent' => 'Označenim korisnicima koji su aktivni i imaju važeće email adrese je poslan link za ponovno postavljanje vjerodajnica.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Link za resetiranje vjerodajnica poslan je na :email!',
     'user_has_no_email' => 'Ovaj korisnik ne posjeduje email adresu na njihovom profilu.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Korisnik je uspješno suspendiran.',
         'restored' => 'Korisnik je uspješno obnovljen.',
         'import' => 'Korisnici su uspješno uvezeni.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Došlo je do problema s obustavom korisnika. Molim te pokušaj ponovno.',
         'import' => 'Došlo je do problema s uvozom korisnika. Molim te pokušaj ponovno.',
-        'asset_already_accepted' => 'Ova je imovina već prihvaćena.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Morate prihvatiti ili odbiti ovaj materijal.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Predmete koje ste pokušali prihvatiti nisu provjereni.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nije bilo moguće dobiti unose s LDAP poslužitelja. Provjerite konfiguraciju LDAP poslužitelja u LDAP konfiguracijskoj datoteci. <br>Preku s LDAP poslužitelja:',
         'password_ldap' => 'Lozinku za ovaj račun upravlja LDAP / Active Directory. Obratite se IT odjelu za promjenu zaporke.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

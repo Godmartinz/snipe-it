@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'This location is currently the parent of at least one child location and cannot be deleted. Please update your locations to no longer reference this location and try again. ',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Current Location',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

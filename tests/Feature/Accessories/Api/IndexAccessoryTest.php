@@ -4,7 +4,11 @@ namespace Tests\Feature\Accessories\Api;
 
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
+use App\Models\Category;
 use App\Models\Company;
+use App\Models\Location;
+use App\Models\Manufacturer;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
@@ -95,5 +99,61 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
                 'rows',
             ])
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->where('rows.0.name', 'Accessory With Two Checkouts')->etc());
+    }
+
+    public function test_can_filter_accessories_by_all_supported_exact_fields()
+    {
+        $user = User::factory()->superuser()->create();
+
+        $targetCompany = Company::factory()->create();
+        $otherCompany = Company::factory()->create();
+        $targetCategory = Category::factory()->forAccessories()->create();
+        $otherCategory = Category::factory()->forAccessories()->create();
+        $targetManufacturer = Manufacturer::factory()->create();
+        $otherManufacturer = Manufacturer::factory()->create();
+        $targetSupplier = Supplier::factory()->create();
+        $otherSupplier = Supplier::factory()->create();
+        $targetLocation = Location::factory()->create();
+        $otherLocation = Location::factory()->create();
+
+        $targetAccessory = Accessory::factory()->create([
+            'name' => 'Target Accessory',
+            'company_id' => $targetCompany->id,
+            'order_number' => 'ORDER-A',
+            'category_id' => $targetCategory->id,
+            'manufacturer_id' => $targetManufacturer->id,
+            'supplier_id' => $targetSupplier->id,
+            'location_id' => $targetLocation->id,
+            'notes' => 'NOTE-A',
+        ]);
+
+        $otherAccessory = Accessory::factory()->create([
+            'name' => 'Other Accessory',
+            'company_id' => $otherCompany->id,
+            'order_number' => 'ORDER-B',
+            'category_id' => $otherCategory->id,
+            'manufacturer_id' => $otherManufacturer->id,
+            'supplier_id' => $otherSupplier->id,
+            'location_id' => $otherLocation->id,
+            'notes' => 'NOTE-B',
+        ]);
+
+        $filters = [
+            'company_id' => $targetCompany->id,
+            'order_number' => 'ORDER-A',
+            'category_id' => $targetCategory->id,
+            'manufacturer_id' => $targetManufacturer->id,
+            'supplier_id' => $targetSupplier->id,
+            'location_id' => $targetLocation->id,
+            'notes' => 'NOTE-A',
+        ];
+
+        foreach ($filters as $filterKey => $filterValue) {
+            $this->actingAsForApi($user)
+                ->getJson(route('api.accessories.index', [$filterKey => $filterValue]))
+                ->assertOk()
+                ->assertResponseContainsInRows($targetAccessory)
+                ->assertResponseDoesNotContainInRows($otherAccessory);
+        }
     }
 }

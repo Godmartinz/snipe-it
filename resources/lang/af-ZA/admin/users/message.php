@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Hierdie gebruiker is verwyder. Jy sal hierdie gebruiker moet herstel om hulle te wysig of nuwe bates toe te ken.',
     'ldap_not_configured' => 'LDAP-integrasie is nie vir hierdie installasie gekonfigureer nie.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Gebruiker is suksesvol ingetrek.',
         'restored' => 'Gebruiker is suksesvol herstel.',
         'import' => 'Gebruikers suksesvol ingevoer.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Daar was \'n probleem wat die gebruiker onttrek het. Probeer asseblief weer.',
         'import' => 'Kon nie gebruikers invoer nie. Probeer asseblief weer.',
-        'asset_already_accepted' => 'Hierdie bate is reeds aanvaar.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'U moet hierdie bate aanvaar of afkeur.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Die bate wat u probeer aanvaar het, is nie na u gekontroleer nie.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Kon nie inskrywings van die LDAP-bediener kry nie. Gaan asseblief die LDAP-bediener opstelling in die LDAP-konfigurasie lêer. <br>Error van LDAP-bediener:',
         'password_ldap' => 'Die wagwoord vir hierdie rekening word bestuur deur LDAP / Active Directory. Kontak asseblief u IT-afdeling om u wagwoord te verander.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

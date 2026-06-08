@@ -94,11 +94,20 @@ return [
         'success' => 'Utcheckning av tillgången lyckades.|Utcheckning av tillgångarna lyckades.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Du måste välja minst en tillgång från listan',
+    ],
+
     'checkin' => [
         'error' => 'Tillgången kunde inte checkas in, försök igen',
         'success' => 'Tillgången har checkats in.',
         'user_does_not_exist' => 'Användaren är ogiltig. Var god försök igen.',
         'already_checked_in' => 'Tillgången är redan incheckad.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -94,11 +94,20 @@ return [
         'success' => 'Ativo registrado com sucesso. | Ativos registrados com sucesso.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Você deve selecionar pelo menos um recurso da lista',
+    ],
+
     'checkin' => [
         'error' => 'Ativo não foi retornado, favor tentar novamente',
         'success' => 'Ativo retornado com sucesso.',
         'user_does_not_exist' => 'Este usuário é inválido. Tente novamente.',
         'already_checked_in' => 'Este ativo já foi devolvido.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

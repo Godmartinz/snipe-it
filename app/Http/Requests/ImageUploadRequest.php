@@ -57,6 +57,7 @@ class ImageUploadRequest extends Request
          * had it once to allow encoded image uploads.
          */
         return [
+            'avatar' => 'auto',
             'image' => 'auto',
             'image_source' => 'auto',
         ];

@@ -34,6 +34,7 @@ class AcceptanceItemAcceptedToUserNotification extends Notification
         $this->settings = Setting::getSettings();
         $this->file = $params['file'] ?? null;
         $this->qty = $params['qty'] ?? null;
+        $this->custom_fields = $params['custom_fields'] ?? [];
     }
 
     /**
@@ -72,6 +73,7 @@ class AcceptanceItemAcceptedToUserNotification extends Notification
                 'assigned_to' => $this->assigned_to,
                 'company_name' => $this->company_name,
                 'qty' => $this->qty,
+                'custom_fields' => $this->custom_fields,
                 'intro_text' => trans_choice('mail.acceptance_asset_accepted_to_user', $this->qty, ['qty' => $this->qty, 'site_name' => $this->settings->site_name]),
             ])
             ->attach($pdf_path)

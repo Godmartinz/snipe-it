@@ -9,7 +9,7 @@ return [
     'edit' => 'Redaguoti priedą',
     'eula_text' => 'Kategorijos licencinis sutikimas (EULA)',
     'eula_text_help' => 'Šis laukas leidžia pritaikyti licencinius sutikimus (EULA) skirtingoms turto grupėms. Jei jūs turite vieną EULA visam turtui, tuomet galite pažymėti žemiau esantį langelį, kad visuomet būtų naudojamas pirminis numatytasis.',
-    'require_acceptance' => 'Reikalauti, kad naudotojai patvirtintų šios kategorijos turto gavimą.',
+    'require_acceptance' => 'Reikalauti, kad naudotojai patvirtintų šios kategorijos daiktų gavimą.',
     'no_default_eula' => 'Nerastas pirminis numatytasis licencinis sutikimas (EULA). Pridėkite jį nustatymuose.',
     'total' => 'Iš viso',
     'remaining' => 'Laisva',

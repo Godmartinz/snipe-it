@@ -53,12 +53,15 @@ trait Searchable
      */
     public function scopeTextSearch($query, $search)
     {
-        $preparedSearch = $this->prepareSearchInput((string) $search);
+        $preparedSearch = $this->prepareSearchInput(is_array($search) ? implode(' ', $search) : (string) $search);
         $terms = $preparedSearch['terms'];
         $filters = $preparedSearch['filters'];
+        $filterOperator = $preparedSearch['filter_operator'];
 
         if (! empty($filters)) {
-            return $this->applySearchFilters($query, $filters);
+            // Structured advanced-search filters are mutually exclusive with free-text terms.
+            // Once we detect structured payloads, we avoid the broad OR-based free-text path.
+            return $this->applySearchFilters($query, $filters, $filterOperator);
         }
 
         /**
@@ -101,13 +104,25 @@ trait Searchable
             return [
                 'terms' => [],
                 'filters' => $parsedFilters,
+                'filter_operator' => $this->resolveStructuredFilterOperator(),
             ];
         }
 
         return [
             'terms' => $this->prepeareSearchTerms($search),
             'filters' => [],
+            'filter_operator' => 'and',
         ];
+    }
+
+    /**
+     * Resolve the structured advanced-search operator from the current request.
+     */
+    private function resolveStructuredFilterOperator(): string
+    {
+        $operator = strtolower((string) request()->input('filter_operator', 'and'));
+
+        return $operator === 'or' ? 'or' : 'and';
     }
 
     /**
@@ -122,6 +137,7 @@ trait Searchable
         $payload = $search;
 
         if (str_starts_with($search, 'filter:')) {
+            // Some callers send filter payloads with an explicit "filter:" prefix.
             $payload = substr($search, 7);
         } elseif (! (str_starts_with($search, '{') && str_ends_with($search, '}'))) {
             return null;
@@ -147,6 +163,7 @@ trait Searchable
             $normalizedValue = trim((string) ($value ?? ''));
 
             if ($normalizedValue === '') {
+                // Ignore empty fields so clearing an input does not create noisy no-op filters.
                 continue;
             }
 
@@ -174,82 +191,304 @@ trait Searchable
      *
      * @param  array<string, string>  $filters
      */
-    private function applySearchFilters(Builder $query, array $filters): Builder
+    private function applySearchFilters(Builder $query, array $filters, string $filterOperator = 'and'): Builder
     {
+        if ($filterOperator === 'or') {
+            $query->where(function (Builder $filterQuery) use ($filters) {
+                foreach ($filters as $filterKey => $filterValue) {
+                    $this->applySingleSearchFilter($filterQuery, $filterKey, $filterValue, 'or');
+                }
+            });
+
+            return $query;
+        }
+
+        foreach ($filters as $filterKey => $filterValue) {
+            $this->applySingleSearchFilter($query, $filterKey, $filterValue);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Parse a raw filter value for an optional negation, null-check, or exact-match prefix.
+     *
+     * Supported syntax:
+     *   - "!flarb"      → operator = not_like,    value = "flarb"
+     *   - "not:flarb"   → operator = not_like,    value = "flarb"
+     *   - "is:null"     → operator = is_null,      value = ""   (reserved token)
+     *   - "is:not_null" → operator = is_not_null,  value = ""   (reserved token)
+     *   - "is:flarb"    → operator = exact,        value = "flarb"  (exact equality)
+     *   - "is_not:flarb"→ operator = exact_not,    value = "flarb"  (exact inequality)
+     *
+     * `is:null` and `is:not_null` are checked before the generic `is:` prefix so they always
+     * resolve to their dedicated null-check operators regardless of casing.
+     *
+     * The legacy `negate` boolean is preserved alongside `operator` so that
+     * existing callers that only check `negate` still work correctly.
+     *
+     * @return array{value: string, negate: bool, operator: string}
+     */
+    private function parseFilterValue(string $raw): array
+    {
+        $lower = strtolower($raw);
+
+        if ($lower === 'is:null') {
+            // Reserved token: interpreted as null-check operator, not exact match string.
+            return ['value' => '', 'negate' => false, 'operator' => 'is_null'];
+        }
+
+        if ($lower === 'is:not_null') {
+            // Reserved token: interpreted as non-null check operator.
+            return ['value' => '', 'negate' => false, 'operator' => 'is_not_null'];
+        }
+
+        if (str_starts_with($lower, 'is:')) {
+            // Generic exact-match prefix. This is checked after reserved is:null/is:not_null tokens.
+            $exactValue = ltrim(substr($raw, 3));
+
+            return ['value' => $exactValue, 'negate' => false, 'operator' => 'exact'];
+        }
+
+        if (str_starts_with($lower, 'is_not:')) {
+            $exactNotValue = ltrim(substr($raw, 7));
+
+            return ['value' => $exactNotValue, 'negate' => true, 'operator' => 'exact_not'];
+        }
+
+        if (str_starts_with($raw, '!')) {
+            return ['value' => substr($raw, 1), 'negate' => true, 'operator' => 'not_like'];
+        }
+
+        if (str_starts_with($lower, 'not:')) {
+            return ['value' => substr($raw, 4), 'negate' => true, 'operator' => 'not_like'];
+        }
+
+        return ['value' => $raw, 'negate' => false, 'operator' => 'like'];
+    }
+
+    /**
+     * Apply a single structured filter using the provided boolean operator.
+     *
+     * Negation: if the filter value is prefixed with "!" or "not:", the filter
+     * uses NOT LIKE (for attributes/custom fields) or whereDoesntHave (for
+     * relations), effectively excluding records matching the value.
+     *
+     * For relation filters, negation uses NOT LIKE inside whereHas, meaning
+     * "has a related record where the column does NOT contain the value".
+     * Records with no related record (e.g. unassigned assets) are excluded;
+     * use a plain empty-string filter if you need to match NULLs.
+     */
+    private function applySingleSearchFilter(Builder $query, string $filterKey, string $filterValue, string $boolean = 'and'): Builder
+    {
+        $parsed = $this->parseFilterValue($filterValue);
+        $value = $parsed['value'];
+        $negate = $parsed['negate'];
+        $operator = $parsed['operator'];
+
+        // IS NULL / IS NOT NULL are handled before value-based filtering,
+        // because there is no meaningful value to pass to LIKE for them.
+        if ($operator === 'is_null' || $operator === 'is_not_null') {
+            return $this->applyNullFilter($query, $filterKey, $operator === 'is_null', $boolean);
+        }
+
+        // Skip gracefully if stripping the prefix leaves an empty value.
+        if ($value === '') {
+            return $query;
+        }
+
         $searchableAttributes = $this->getSearchableAttributes();
         $searchableCounts = $this->getSearchableCounts();
         $searchableRelations = $this->getSearchableRelations();
         $table = $this->getTable();
+        $whereMethod = $boolean === 'or' ? 'orWhere' : 'where';
+        $likeOperator = $negate ? 'NOT LIKE' : 'LIKE';
+        $isExactOperator = in_array($operator, ['exact', 'exact_not'], true);
+        $exactComparisonOperator = $operator === 'exact_not' ? '!=' : '=';
 
-        foreach ($filters as $filterKey => $filterValue) {
-            if (in_array($filterKey, $searchableAttributes, true)) {
-                $query->where($table.'.'.$filterKey, 'LIKE', '%'.$filterValue.'%');
-
-                continue;
+        if (in_array($filterKey, $searchableAttributes, true)) {
+            if ($isExactOperator) {
+                $query->{$whereMethod}($table.'.'.$filterKey, $exactComparisonOperator, $value);
+            } else {
+                $query->{$whereMethod}($table.'.'.$filterKey, $likeOperator, '%'.$value.'%');
             }
 
-            if (in_array($filterKey, $searchableCounts, true)) {
-                $query = $this->applyCountAliasFilter($query, $filterKey, $filterValue);
+            return $query;
+        }
 
-                continue;
-            }
+        // Handle virtual columns — keys that are not real DB columns but map to a set
+        // of real columns searched via CONCAT (e.g. "name" → first_name + last_name on User).
+        $virtualColumns = $this->getSearchableVirtualColumns();
 
-            // Check if this is a custom field (only for Assets - for *now*).
-            // Only db_column keys (e.g. "_snipeit_cpu_4") are accepted to avoid
-            // collisions with standard attributes or relation filter keys.
-            if ($this instanceof Asset) {
-                $dbColumn = $this->resolveCustomFieldDbColumn($filterKey);
+        if (array_key_exists($filterKey, $virtualColumns)) {
+            $qualifiedColumns = array_map(
+                fn ($col) => $table.'.'.$col,
+                $virtualColumns[$filterKey]
+            );
 
-                if ($dbColumn !== null) {
-                    $query->where($table.'.'.$dbColumn, 'LIKE', '%'.$filterValue.'%');
+            if ($isExactOperator) {
+                // Exact match on the full CONCAT'd value, e.g. "John Smith" matches only
+                // users whose first_name + ' ' + last_name equals exactly "John Smith".
+                $concatSql = $this->buildMultipleColumnSearch($qualifiedColumns);
+                // buildMultipleColumnSearch intentionally returns a fragment ending in "LIKE ?";
+                // for exact matches we rewrite only the operator and keep the same SQL scaffold.
+                $concatSql = str_replace(' LIKE ?', $operator === 'exact_not' ? ' <> ?' : ' = ?', $concatSql);
+                $rawMethod = $boolean === 'or' ? 'orWhereRaw' : 'whereRaw';
+                $query->{$rawMethod}($concatSql, [$value]);
+            } else {
+                $concatSql = $this->buildMultipleColumnSearch($qualifiedColumns);
 
-                    continue;
-                }
-            }
-
-            $resolvedRelationKey = $this->resolveSearchableRelationKey($filterKey, $searchableRelations);
-
-            if ($resolvedRelationKey === null) {
-                continue;
-            }
-
-            if ($this->isAssignedToRelationKey($resolvedRelationKey)) {
-                $query = $this->applyAssignedToRelationFilter($query, $resolvedRelationKey, $filterValue);
-
-                continue;
-            }
-
-            $relationColumns = (array) $searchableRelations[$resolvedRelationKey];
-
-            $query->whereHas($resolvedRelationKey, function (Builder $relationQuery) use ($resolvedRelationKey, $relationColumns, $filterValue) {
-                $relationTable = $this->getRelationTable($resolvedRelationKey);
-                $firstConditionAdded = false;
-
-                foreach ($relationColumns as $relationColumn) {
-                    if (! $firstConditionAdded) {
-                        $relationQuery->where($relationTable.'.'.$relationColumn, 'LIKE', '%'.$filterValue.'%');
-                        $firstConditionAdded = true;
-
-                        continue;
-                    }
-
-                    $relationQuery->orWhere($relationTable.'.'.$relationColumn, 'LIKE', '%'.$filterValue.'%');
+                if ($negate) {
+                    $concatSql = str_replace(' LIKE ?', ' NOT LIKE ?', $concatSql);
                 }
 
-                if (($resolvedRelationKey === 'adminuser') || ($resolvedRelationKey === 'user')) {
-                    $relationQuery->orWhereRaw(
-                        $this->buildMultipleColumnSearch(
-                            [
+                $rawMethod = $boolean === 'or' ? 'orWhereRaw' : 'whereRaw';
+                $query->{$rawMethod}($concatSql, ['%'.$value.'%']);
+            }
+
+            return $query;
+        }
+
+        if (in_array($filterKey, $searchableCounts, true)) {
+            return $this->applyCountAliasFilter($query, $filterKey, $value, $boolean, $negate, $isExactOperator);
+        }
+
+        // Check if this is a custom field (only for Assets - for *now*).
+        // Only db_column keys (e.g. "_snipeit_cpu_4") are accepted to avoid
+        // collisions with standard attributes or relation filter keys.
+        if ($this instanceof Asset) {
+            $dbColumn = $this->resolveCustomFieldDbColumn($filterKey);
+
+            if ($dbColumn !== null) {
+                if ($isExactOperator) {
+                    $query->{$whereMethod}($table.'.'.$dbColumn, $exactComparisonOperator, $value);
+                } else {
+                    $query->{$whereMethod}($table.'.'.$dbColumn, $likeOperator, '%'.$value.'%');
+                }
+
+                return $query;
+            }
+        }
+
+        $resolvedRelationKey = $this->resolveSearchableRelationKey($filterKey, $searchableRelations);
+
+        if ($resolvedRelationKey === null) {
+            return $query;
+        }
+
+        if ($this->isAssignedToRelationKey($resolvedRelationKey)) {
+            return $this->applyAssignedToRelationFilter($query, $resolvedRelationKey, $value, $boolean, $negate, $operator);
+        }
+
+        $relationColumns = $this->getStructuredFilterRelationColumns(
+            filterKey: $filterKey,
+            resolvedRelationKey: $resolvedRelationKey,
+            searchableRelations: $searchableRelations,
+        );
+
+        // For negated relation filters (e.g. location: !dam), include rows with
+        // no related record as well as rows with related records that do not match.
+        // This aligns advanced-search behavior with user expectation for "not X".
+        if ($operator === 'not_like' || $operator === 'exact_not') {
+            $compoundMethod = $boolean === 'or' ? 'orWhere' : 'where';
+
+            $query->{$compoundMethod}(function (Builder $compoundQuery) use ($resolvedRelationKey, $relationColumns, $value, $operator): void {
+                // Critical behavior: "not X" on relations should include records with no relation.
+                // Example: location=!dam should include users without a location.
+                $compoundQuery->doesntHave($resolvedRelationKey)
+                    ->orWhereHas($resolvedRelationKey, function (Builder $relationQuery) use ($resolvedRelationKey, $relationColumns, $value, $operator): void {
+                        $relationTable = $this->getRelationTable($resolvedRelationKey);
+                        $firstConditionAdded = false;
+                        $relationComparisonOperator = $operator === 'exact_not' ? '!=' : 'NOT LIKE';
+                        $relationComparisonValue = $operator === 'exact_not' ? $value : '%'.$value.'%';
+
+                        foreach ($relationColumns as $relationColumn) {
+                            if (! $firstConditionAdded) {
+                                $relationQuery->where($relationTable.'.'.$relationColumn, $relationComparisonOperator, $relationComparisonValue);
+                                $firstConditionAdded = true;
+
+                                continue;
+                            }
+
+                            // For negation we AND the NOT LIKE conditions so all columns must not match.
+                            $relationQuery->where($relationTable.'.'.$relationColumn, $relationComparisonOperator, $relationComparisonValue);
+                        }
+
+                        if (($resolvedRelationKey === 'adminuser') || ($resolvedRelationKey === 'user')) {
+                            $concatSql = $this->buildMultipleColumnSearch([
                                 'users.first_name',
                                 'users.last_name',
                                 'users.display_name',
-                            ]
-                        ),
-                        ["%{$filterValue}%"]
-                    );
-                }
+                            ]);
+
+                            if ($operator === 'exact_not') {
+                                $relationQuery->whereRaw(str_replace(' LIKE ?', ' <> ?', $concatSql), [$value]);
+                            } else {
+                                $relationQuery->whereRaw(str_replace('LIKE', 'NOT LIKE', $concatSql), ["%{$value}%"]);
+                            }
+                        }
+                    });
             });
+
+            return $query;
         }
+
+        $relationMethod = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$relationMethod}($resolvedRelationKey, function (Builder $relationQuery) use ($resolvedRelationKey, $relationColumns, $value, $likeOperator, $operator) {
+            $relationTable = $this->getRelationTable($resolvedRelationKey);
+            $firstConditionAdded = false;
+
+            foreach ($relationColumns as $relationColumn) {
+                if (! $firstConditionAdded) {
+                    if ($operator === 'exact') {
+                        $relationQuery->where($relationTable.'.'.$relationColumn, '=', $value);
+                    } elseif ($operator === 'exact_not') {
+                        $relationQuery->where($relationTable.'.'.$relationColumn, '!=', $value);
+                    } else {
+                        $relationQuery->where($relationTable.'.'.$relationColumn, $likeOperator, '%'.$value.'%');
+                    }
+                    $firstConditionAdded = true;
+
+                    continue;
+                }
+
+                if ($operator === 'exact') {
+                    // For exact matches across multiple columns, OR them — any column matching
+                    // the exact value is sufficient (e.g. name OR slug).
+                    $relationQuery->orWhere($relationTable.'.'.$relationColumn, '=', $value);
+                } elseif ($operator === 'exact_not') {
+                    // For exact exclusions we AND the conditions so no column can equal the value.
+                    $relationQuery->where($relationTable.'.'.$relationColumn, '!=', $value);
+                } elseif ($likeOperator === 'NOT LIKE') {
+                    // For negation we AND the NOT LIKE conditions so all columns must not match.
+                    $relationQuery->where($relationTable.'.'.$relationColumn, $likeOperator, '%'.$value.'%');
+                } else {
+                    // For normal LIKE we OR them so any column matching is sufficient.
+                    $relationQuery->orWhere($relationTable.'.'.$relationColumn, $likeOperator, '%'.$value.'%');
+                }
+            }
+
+            if (($resolvedRelationKey === 'adminuser') || ($resolvedRelationKey === 'user')) {
+                $concatSql = $this->buildMultipleColumnSearch([
+                    'users.first_name',
+                    'users.last_name',
+                    'users.display_name',
+                ]);
+
+                if ($operator === 'exact') {
+                    $concatSql = str_replace(' LIKE ?', ' = ?', $concatSql);
+                    $relationQuery->orWhereRaw($concatSql, [$value]);
+                } elseif ($operator === 'exact_not') {
+                    $concatSql = str_replace(' LIKE ?', ' <> ?', $concatSql);
+                    $relationQuery->whereRaw($concatSql, [$value]);
+                } elseif ($likeOperator === 'NOT LIKE') {
+                    $relationQuery->whereRaw(str_replace('LIKE', 'NOT LIKE', $concatSql), ["%{$value}%"]);
+                } else {
+                    $relationQuery->orWhereRaw($concatSql, ["%{$value}%"]);
+                }
+            }
+        });
 
         return $query;
     }
@@ -302,8 +541,13 @@ trait Searchable
 
     /**
      * Apply filters for assignees with type-specific searchable columns.
+     *
+     * When $negate is true, NOT LIKE is used inside whereHasMorph, so results
+     * are records that have an assignee whose columns do NOT contain $filterValue.
+     * (Records with no assignee are excluded; they do not satisfy "has an assignee
+     * where column NOT LIKE '%value%'".)
      */
-    private function applyAssignedToRelationFilter(Builder $query, string $relationKey, string $filterValue): Builder
+    private function applyAssignedToRelationFilter(Builder $query, string $relationKey, string $filterValue, string $boolean = 'and', bool $negate = false, string $operator = 'like'): Builder
     {
         $relationName = $this->resolveAssignedToRelationName();
 
@@ -311,10 +555,15 @@ trait Searchable
             return $query;
         }
 
-        return $query->whereHasMorph(
+        $likeOperator = $negate ? 'NOT LIKE' : 'LIKE';
+        $isExactOperator = in_array($operator, ['exact', 'exact_not'], true);
+        $exactComparisonOperator = $operator === 'exact_not' ? '!=' : '=';
+        $relationMethod = $boolean === 'or' ? 'orWhereHasMorph' : 'whereHasMorph';
+
+        return $query->{$relationMethod}(
             $relationName,
             [User::class, Asset::class, Location::class],
-            function (Builder $assigneeQuery, string $assigneeType) use ($filterValue) {
+            function (Builder $assigneeQuery, string $assigneeType) use ($filterValue, $likeOperator, $negate, $operator, $isExactOperator, $exactComparisonOperator) {
                 $columns = $this->getAssigneeColumnsByType($assigneeType);
 
                 if (empty($columns)) {
@@ -326,20 +575,41 @@ trait Searchable
 
                 foreach ($columns as $column) {
                     if (! $firstConditionAdded) {
-                        $assigneeQuery->where($table.'.'.$column, 'LIKE', '%'.$filterValue.'%');
+                        if ($isExactOperator) {
+                            $assigneeQuery->where($table.'.'.$column, $exactComparisonOperator, $filterValue);
+                        } else {
+                            $assigneeQuery->where($table.'.'.$column, $likeOperator, '%'.$filterValue.'%');
+                        }
                         $firstConditionAdded = true;
 
                         continue;
                     }
 
-                    $assigneeQuery->orWhere($table.'.'.$column, 'LIKE', '%'.$filterValue.'%');
+                    // For negation, AND the conditions (all columns must not match).
+                    // For normal LIKE, OR them (any column matching is sufficient).
+                    if ($operator === 'exact') {
+                        $assigneeQuery->orWhere($table.'.'.$column, '=', $filterValue);
+                    } elseif ($operator === 'exact_not') {
+                        $assigneeQuery->where($table.'.'.$column, '!=', $filterValue);
+                    } else {
+                        $negate
+                            ? $assigneeQuery->where($table.'.'.$column, $likeOperator, '%'.$filterValue.'%')
+                            : $assigneeQuery->orWhere($table.'.'.$column, $likeOperator, '%'.$filterValue.'%');
+                    }
                 }
 
                 if ($assigneeType === User::class) {
-                    $assigneeQuery->orWhereRaw(
-                        $this->buildMultipleColumnSearch(['users.first_name', 'users.last_name']),
-                        ["%{$filterValue}%"]
-                    );
+                    $concatSql = $this->buildMultipleColumnSearch(['users.first_name', 'users.last_name']);
+
+                    if ($operator === 'exact') {
+                        $assigneeQuery->orWhereRaw(str_replace(' LIKE ?', ' = ?', $concatSql), [$filterValue]);
+                    } elseif ($operator === 'exact_not') {
+                        $assigneeQuery->whereRaw(str_replace(' LIKE ?', ' <> ?', $concatSql), [$filterValue]);
+                    } else {
+                        $negate
+                            ? $assigneeQuery->whereRaw(str_replace('LIKE', 'NOT LIKE', $concatSql), ["%{$filterValue}%"])
+                            : $assigneeQuery->orWhereRaw($concatSql, ["%{$filterValue}%"]);
+                    }
                 }
             }
         );
@@ -384,13 +654,154 @@ trait Searchable
     /**
      * Apply filtering on computed count aliases (for example withCount aliases).
      */
-    private function applyCountAliasFilter(Builder $query, string $countAlias, string $filterValue): Builder
+    private function applyCountAliasFilter(Builder $query, string $countAlias, string $filterValue, string $boolean = 'and', bool $negate = false, bool $exact = false): Builder
     {
+        $havingMethod = $boolean === 'or' ? 'orHaving' : 'having';
+
         if (is_numeric($filterValue)) {
-            return $query->having($countAlias, '=', (int) $filterValue);
+            $operator = $negate ? '!=' : '=';
+
+            return $query->{$havingMethod}($countAlias, $operator, (int) $filterValue);
         }
 
-        return $query->having($countAlias, 'LIKE', '%'.$filterValue.'%');
+        if ($exact) {
+            $operator = $negate ? '!=' : '=';
+
+            return $query->{$havingMethod}($countAlias, $operator, $filterValue);
+        }
+
+        $likeOperator = $negate ? 'NOT LIKE' : 'LIKE';
+
+        return $query->{$havingMethod}($countAlias, $likeOperator, '%'.$filterValue.'%');
+    }
+
+    /**
+     * Apply an IS NULL / IS NOT NULL filter for the given filter key.
+     *
+     * Supported targets:
+     *
+     *   Direct attributes  → WHERE col IS [NOT] NULL
+     *
+     *   Virtual columns    → IS NULL:     all constituent columns must be null
+     *                        IS NOT NULL: at least one constituent column must not be null
+     *
+     *   Relation keys      → IS NULL:     doesntHave (no related record)
+     *                        IS NOT NULL: whereHas   (has a related record)
+     *
+     * Any unrecognised key is silently ignored.
+     */
+    private function applyNullFilter(Builder $query, string $filterKey, bool $isNull, string $boolean = 'and'): Builder
+    {
+        $table = $this->getTable();
+        $searchableAttributes = $this->getSearchableAttributes();
+
+        // Custom field db_column key (Asset only).
+        if ($this instanceof Asset) {
+            $dbColumn = $this->resolveCustomFieldDbColumn($filterKey);
+
+            if ($dbColumn !== null) {
+                $column = $table.'.'.$dbColumn;
+
+                $method = $boolean === 'or' ? 'orWhere' : 'where';
+
+                $query->{$method}(function (Builder $subQuery) use ($column, $isNull): void {
+                    if ($isNull) {
+                        $subQuery->whereNull($column)
+                            ->orWhere($column, '=', '');
+
+                        return;
+                    }
+
+                    $subQuery->whereNotNull($column)
+                        ->where($column, '!=', '');
+                });
+
+                return $query;
+            }
+        }
+
+        // Direct attribute column.
+        if (in_array($filterKey, $searchableAttributes, true)) {
+            $column = $table.'.'.$filterKey;
+            $method = $boolean === 'or' ? 'orWhere' : 'where';
+
+            $query->{$method}(function (Builder $subQuery) use ($column, $isNull): void {
+                if ($isNull) {
+                    $subQuery->whereNull($column)
+                        ->orWhere($column, '=', '');
+
+                    return;
+                }
+
+                $subQuery->whereNotNull($column)
+                    ->where($column, '!=', '');
+            });
+
+            return $query;
+        }
+
+        // Virtual columns (e.g. 'name' → ['first_name', 'last_name'] on User).
+        $virtualColumns = $this->getSearchableVirtualColumns();
+
+        if (array_key_exists($filterKey, $virtualColumns)) {
+            $qualifiedColumns = array_map(
+                fn ($col) => $table.'.'.$col,
+                $virtualColumns[$filterKey]
+            );
+
+            if ($isNull) {
+                // All constituent columns must be null (= no name at all).
+                foreach ($qualifiedColumns as $col) {
+                    $query->whereNull($col);
+                }
+            } else {
+                // At least one constituent column must have a value.
+                $query->where(function (Builder $sub) use ($qualifiedColumns): void {
+                    foreach ($qualifiedColumns as $col) {
+                        $sub->orWhereNotNull($col);
+                    }
+                });
+            }
+
+            return $query;
+        }
+
+        // Relation key: no related record = "null", has a related record = "not null".
+        $searchableRelations = $this->getSearchableRelations();
+        $resolvedRelationKey = $this->resolveSearchableRelationKey($filterKey, $searchableRelations);
+
+        if ($resolvedRelationKey !== null && $this->isAssignedToRelationKey($resolvedRelationKey)) {
+            $method = $boolean === 'or' ? 'orWhere' : 'where';
+            // Polymorphic assignment is present only when both columns are set; null matches either side missing.
+
+            if ($isNull) {
+                $query->{$method}(function (Builder $assigneeNullQuery) use ($table): void {
+                    $assigneeNullQuery->whereNull($table.'.assigned_to')
+                        ->orWhereNull($table.'.assigned_type');
+                });
+            } else {
+                $query->{$method}(function (Builder $assigneeNotNullQuery) use ($table): void {
+                    $assigneeNotNullQuery->whereNotNull($table.'.assigned_to')
+                        ->whereNotNull($table.'.assigned_type');
+                });
+            }
+
+            return $query;
+        }
+
+        if ($resolvedRelationKey !== null) {
+            if ($isNull) {
+                $method = $boolean === 'or' ? 'orDoesntHave' : 'doesntHave';
+                $query->{$method}($resolvedRelationKey);
+            } else {
+                $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+                $query->{$method}($resolvedRelationKey);
+            }
+
+            return $query;
+        }
+
+        return $query;
     }
 
     /**
@@ -456,23 +867,32 @@ trait Searchable
         }
 
         // Only pull unencrypted fields, since encrypted fields cannot be searched on
-        $customFields = CustomField::where('field_encrypted', 0)->get();
-        $firstConditionAdded = false;
+        $customFields = CustomField::query()
+            ->whereNotNull('db_column')
+            ->where('field_encrypted', 0)
+            ->get(['db_column']);
 
-        foreach ($customFields as $field) {
-            foreach ($terms as $term) {
-                if (! $firstConditionAdded) {
-                    $query = $query->where($this->getTable().'.'.$field->db_column_name(), 'LIKE', '%'.$term.'%');
-                    $firstConditionAdded = true;
-
-                    continue;
-                }
-
-                $query = $query->orWhere($this->getTable().'.'.$field->db_column_name(), 'LIKE', '%'.$term.'%');
-            }
+        if ($customFields->isEmpty()) {
+            return $query;
         }
 
-        return $query;
+        // Group custom-fields so all custom fields behave consistently as OR conditions.
+        return $query->orWhere(function (Builder $customFieldQuery) use ($customFields, $terms): void {
+            $firstConditionAdded = false;
+
+            foreach ($customFields as $field) {
+                foreach ($terms as $term) {
+                    if (! $firstConditionAdded) {
+                        $customFieldQuery->where($this->getTable().'.'.$field->db_column_name(), 'LIKE', '%'.$term.'%');
+                        $firstConditionAdded = true;
+
+                        continue;
+                    }
+
+                    $customFieldQuery->orWhere($this->getTable().'.'.$field->db_column_name(), 'LIKE', '%'.$term.'%');
+                }
+            }
+        });
     }
 
     /**
@@ -645,6 +1065,20 @@ trait Searchable
     }
 
     /**
+     * Get virtual column aliases defined on the model.
+     *
+     * These are filter keys that map to a set of real columns searched via
+     * CONCAT — for example, "name" → ['first_name', 'last_name'] on User,
+     * because "name" is not a real database column on that table.
+     *
+     * @return array<string, list<string>>
+     */
+    private function getSearchableVirtualColumns(): array
+    {
+        return $this->searchableVirtualColumns ?? [];
+    }
+
+    /**
      * Get the relation aliases defined on the model.
      *
      * Maps the field names that the API / transformers expose to the actual
@@ -661,6 +1095,36 @@ trait Searchable
     protected function getSearchableRelationAliases(): array
     {
         return $this->searchableRelationAliases ?? [];
+    }
+
+    /**
+     * Get structured-filter relation columns for a given filter key.
+     *
+     * By default, this uses all configured searchable relation columns for the
+     * resolved relation key. Models can narrow specific advanced-search fields
+     * via $searchableRelationFilterColumns, keyed by the incoming filter key
+     * shown in the UI/API (for example: 'location' => ['name']).
+     *
+     * @param  array<string, array<int, string>>  $searchableRelations
+     * @return array<int, string>
+     */
+    private function getStructuredFilterRelationColumns(string $filterKey, string $resolvedRelationKey, array $searchableRelations): array
+    {
+        $defaultColumns = (array) ($searchableRelations[$resolvedRelationKey] ?? []);
+
+        $overrides = $this->searchableRelationFilterColumns ?? [];
+
+        if (! array_key_exists($filterKey, $overrides)) {
+            return $defaultColumns;
+        }
+
+        $overrideColumns = array_values(array_filter((array) $overrides[$filterKey], 'is_string'));
+
+        // Keep only columns that are actually searchable on the resolved relation,
+        // so model-level overrides cannot accidentally reference unknown columns.
+        $validColumns = array_values(array_intersect($overrideColumns, $defaultColumns));
+
+        return $validColumns !== [] ? $validColumns : $defaultColumns;
     }
 
     /**
@@ -720,6 +1184,9 @@ trait Searchable
      */
     private function buildMultipleColumnSearch(array $columns): string
     {
+        // This method deliberately returns only an SQL fragment ending with "LIKE ?"
+        // so callers can reuse it and swap operators (NOT LIKE / =) without duplicating
+        // driver-specific CONCAT syntax.
         $mappedColumns = collect($columns)->map(fn ($column) => DB::getTablePrefix().$column)->toArray();
 
         $driver = config('database.connections.'.config('database.default').'.driver');

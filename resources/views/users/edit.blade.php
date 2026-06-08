@@ -52,10 +52,14 @@
         <!-- Custom Tabs -->
       <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-          <li class="active"><a href="#info" data-toggle="tab">{{ trans('general.information') }} </a></li>
-            @can('admin')
-                <li><a href="#permissions" data-toggle="tab">{{ trans('general.permissions') }} </a></li>
-            @endcan
+            <li class="active">
+                <a href="#info" data-toggle="tab">{{ trans('general.information') }} </a>
+            </li>
+
+            <li>
+                <a href="#permissions" data-toggle="tab">{{ trans('general.permissions') }} </a>
+            </li>
+
         </ul>
 
         <div class="tab-content">
@@ -126,8 +130,13 @@
 
                   <div class="col-md-6">
                         @if ($user->ldap_import!='1' || str_contains(Route::currentRouteName(), 'clone') )
-                          <input type="password" name="password" class="form-control{{ (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo') && ($user->id))) ? ' form-control--disabled' : '' }}" id="password" value="" maxlength="500" autocomplete="off" onfocus="this.removeAttribute('readonly');" readonly {{  ((Helper::checkIfRequired($user, 'password')) && (!$user->id)) ? ' required' : '' }}{!! (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo')) && ($user->id)) ? ' style="cursor: not-allowed" disabled ' : '' !!}>
-                              <span id="generated-password"></span>
+                          <div class="input-group">
+                            <input type="password" name="password" class="form-control{{ (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo') && ($user->id))) ? ' form-control--disabled' : '' }}" id="password" value="" maxlength="500" autocomplete="off" onfocus="this.removeAttribute('readonly');" readonly {{  ((Helper::checkIfRequired($user, 'password')) && (!$user->id)) ? ' required' : '' }}{!! (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo')) && ($user->id)) ? ' style="cursor: not-allowed" disabled ' : '' !!}>
+                            <span class="input-group-addon">
+                              <i data-toggle="#password" class="fa fa-fw fa-eye toggle-password" aria-hidden="true"></i>
+                              <span class="sr-only">{{ trans('general.toggle_password_visibility') }}</span>
+                            </span>
+                          </div>
                               {!! $errors->first('password', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                         @else
                               <p class="form-control-static">
@@ -168,7 +177,13 @@
                         {{ trans('admin/users/table.password_confirm') }}
                       </label>
                       <div class="col-md-6">
-                        <input type="password" name="password_confirmation" id="password_confirm" class="form-control" value="" maxlength="500" autocomplete="off" aria-label="password_confirmation" {{  (!$user->id) ? ' required' : '' }} onfocus="this.removeAttribute('readonly');" readonly {!! (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo')) && ($user->id)) ? ' style="cursor: not-allowed" disabled ' : '' !!}>
+                        <div class="input-group">
+                          <input type="password" name="password_confirmation" id="password_confirm" class="form-control" value="" maxlength="500" autocomplete="off" aria-label="password_confirmation" {{  (!$user->id) ? ' required' : '' }} onfocus="this.removeAttribute('readonly');" readonly {!! (!Gate::allows('canEditAuthFields', $user)) || ((!Gate::allows('editableOnDemo')) && ($user->id)) ? ' style="cursor: not-allowed" disabled ' : '' !!}>
+                          <span class="input-group-addon">
+                            <i data-toggle="#password_confirm" class="fa fa-fw fa-eye toggle-password" aria-hidden="true"></i>
+                            <span class="sr-only">{{ trans('general.toggle_password_visibility') }}</span>
+                          </span>
+                        </div>
 
                       @cannot('canEditAuthFields', $user)
                           <p class="help-block">
@@ -330,14 +345,22 @@
 
                               <!-- Company -->
                               @if ((Gate::allows('canEditAuthFields', $user)) && (\App\Models\Company::canManageUsersCompanies()))
-                                  @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+                                  @include ('partials.forms.edit.company-select', [
+                                      'translated_name' => trans('general.company'),
+                                      'fieldname' => 'company_ids',
+                                      'multiple' => 'true',
+                                      'selected' => old('company_ids', $user->companies->isNotEmpty() ? $user->companies->pluck('id')->toArray() : ($user->company_id ? [$user->company_id] : [])),
+                                  ])
                               @else
-                                  @if ($user->company)
+                                  @if ($user->companies->isNotEmpty())
                                       <div class="form-group">
                                           <label class="col-md-3 control-label" for="locale">{{ trans('general.company') }}</label>
                                           <div class="col-md-6">
                                               <p class="form-control-static">
-                                                  {{ $user->company ? $user->company->name : '' }}
+                                                  @foreach ($user->companies as $company)
+                                                      <span class="label label-light">{!! $company->present()->formattedNameLink !!}</span>
+                                                  @endforeach
+
                                               </p>
                                           </div>
                                       </div>
@@ -390,7 +413,7 @@
 
 
                               <!-- Manager -->
-                              @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id'])
+                              @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id', 'exclude_id' => isset($item) ? $item->id : null])
 
                               <!--  Department -->
                               @include ('partials.forms.edit.department-select', ['translated_name' => trans('general.department'), 'fieldname' => 'department_id'])
@@ -612,7 +635,7 @@
 
                                                     @foreach ($groups as $id => $group)
                                                         <option value="{{ $id }}"
-                                                                {{ ($userGroups->keys()->contains($id) ? ' selected="selected"' : '') }}>
+                                                                {{ ($userGroups->keys()->contains($id) ? ' selected' : '') }}>
                                                             {{ $group }}
                                                         </option>
                                                     @endforeach
@@ -641,28 +664,35 @@
             </div>
           </div><!-- /.tab-pane -->
 
-          @can('admin')
+
           <div class="tab-pane" id="permissions">
-                  @if (!Auth::user()->isSuperUser())
-                    <p class="alert alert-warning">{{ trans('admin/users/general.superadmin_permission_warning') }}</p>
-                  @endif
 
-                  @if (!Auth::user()->hasAccess('admin'))
-                    <p class="alert alert-warning">{{ trans('admin/users/general.admin_permission_warning') }}</p>
-                  @endif
+              <x-form.legend help_text="{{ trans('permissions.use_groups') }}"/>
 
+              @if (auth()->user()->isAdmin() && !auth()->user()->isSuperUser())
                   <p class="alert alert-info">
-                      {{ trans('permissions.use_groups') }}
+                      <x-icon type="info"/>
+                      {{ trans('admin/users/general.superadmin_permission_warning') }}
                   </p>
+              @elseif (!auth()->user()->isAdmin() && !auth()->user()->isSuperUser() && auth()->id() === $user->id)
+                  <p class="alert alert-danger">
+                      <x-icon type="alert"/>
+                      {{ trans('admin/users/general.self_permission_warning') }}
+                  </p>
+              @elseif (!auth()->user()->isAdmin() && !auth()->user()->isSuperUser() && auth()->id() !== $user->id)
+                  <p class="alert alert-danger">
+                      <x-icon type="warning"/>
+                      {{ trans('admin/users/general.admin_permission_warning') }}
+                  </p>
+              @endif
 
+              @if (auth()->user()->isSuperUser() || auth()->user()->isAdmin() || (auth()->id() !== $user->id && !$user->isSuperUser()))
                   <div class="col-md-12">
-                    @include('partials.forms.edit.permissions-base', ['use_inherit' => true, 'groupPermissions' => $userPermissions])
+                      @include('partials.forms.edit.permissions-base', ['use_inherit' => true, 'groupPermissions' => $userPermissions])
                   </div>
-
-
+              @endif
 
           </div><!-- /.tab-pane -->
-          @endcan
         </div><!-- /.tab-content -->
           <x-redirect_submit_options
                   index_route="users.index"
@@ -715,7 +745,6 @@ $(document).ready(function() {
     $('#genPassword').pGenerator({
         'bind': 'click',
         'passwordElement': '#password',
-        'displayElement': '#generated-password',
         'passwordLength': {{ ($settings->pwd_secure_min + 9) }},
         'uppercase': true,
         'lowercase': true,

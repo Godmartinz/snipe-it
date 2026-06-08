@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'จัดการไฟล์อุปกรณ์เสริม',
-        'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับอุปกรณ์เสริมได้',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Manage Asset Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Manage User Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Manage Model Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Manage Department Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Manage Supplier Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Manage Location Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Manage Company Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with companies. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'จัดการไฟล์วัสดุสิ้นเปลือง',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => 'วัสดุสิ้นเปลือง',
         'note' => 'อนุญาตให้เข้าถึงส่วนวัสดุสิ้นเปลืองของแอปพลิเคชันได้',
@@ -129,10 +170,7 @@ return [
         'name' => 'เบิกจ่ายวัสดุสิ้นเปลือง',
         'note' => 'บันทึกรายการวัสดุสิ้นเปลืองในคลังสินค้าโดยการเบิกจ่าย',
     ],
-    'consumablesfiles' => [
-        'name' => 'จัดการไฟล์วัสดุสิ้นเปลือง',
-        'note' => 'อนุญาตให้ผู้ใช้สามารถอัปโหลด ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับวัสดุสิ้นเปลืองได้',
-    ],
+
     'licenses' => [
         'name' => 'ลิขสิทธิ์',
         'note' => 'Grants access to the Licenses section of the application.',
@@ -161,6 +199,11 @@ return [
         'name' => 'จัดการไฟล์ License',
         'note' => 'อนุญาตให้ผู้ใช้อัพโหลด, ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับ License',
     ],
+    'componentsfiles' => [
+        'name' => 'จัดการไฟล์ส่วนประกอบ',
+        'note' => 'อนุญาตให้ผู้ใช้อัพโหลด, ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับส่วนประกอบ',
+    ],
+
     'licenseskeys' => [
         'name' => 'จัดการ License Keys',
         'note' => 'Allows the user to view product keys associated with licenses.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'ลบส่วนประกอบ',
     ],
-    'componentsfiles' => [
-        'name' => 'จัดการไฟล์ส่วนประกอบ',
-        'note' => 'อนุญาตให้ผู้ใช้อัพโหลด, ดาวน์โหลด และลบไฟล์ที่เกี่ยวข้องกับส่วนประกอบ',
-    ],
+
     'componentscheckout' => [
         'name' => 'Check Out Components',
         'note' => 'Assign components in inventory by checking them out.',

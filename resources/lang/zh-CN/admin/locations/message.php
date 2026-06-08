@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => '删除失败，该位置是一个或多个子位置的上层节点。请更新地理位置信息以取消关联，然后重试。 ',
     'assigned_assets' => '已分配的资产',
     'current_location' => '当前位置',
-    'open_map' => '在 :map_provider_icon 地图中打开',
     'deleted_warning' => '此位置已被删除。请在尝试做更改之前将其还原。',
 
     'create' => [

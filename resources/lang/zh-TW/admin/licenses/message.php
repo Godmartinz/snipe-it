@@ -37,6 +37,9 @@ return [
         'confirm' => '您確定要刪除此授權嗎？',
         'error' => '刪除授權時發生問題，請重試。',
         'success' => '刪除授權成功。',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

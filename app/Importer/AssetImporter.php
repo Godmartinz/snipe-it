@@ -111,7 +111,7 @@ class AssetImporter extends ItemImporter
         }
 
         $this->item['notes'] = trim($this->findCsvMatch($row, 'asset_notes'));
-        $this->item['image'] = trim($this->findCsvMatch($row, 'image'));
+        $this->item['image'] = basename(trim($this->findCsvMatch($row, 'image')));
         $this->item['requestable'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'requestable'))) == 1) ? '1' : 0;
         $asset->requestable = $this->item['requestable'];
         $this->item['warranty_months'] = intval(trim($this->findCsvMatch($row, 'warranty_months')));
@@ -176,35 +176,55 @@ class AssetImporter extends ItemImporter
 
         if ($editingAsset) {
             $asset->update($item);
+            $asset->setImported(true);
         } else {
             $asset->fill($item);
+            $asset->setImported(true);
         }
 
         // If we're updating, we don't want to overwrite old fields.
+        // Apply custom fields to asset attributes if they exist
+        $customFieldsToSave = [];
         if (array_key_exists('custom_fields', $this->item)) {
             foreach ($this->item['custom_fields'] as $custom_field => $val) {
                 $asset->{$custom_field} = $val;
+                $customFieldsToSave[$custom_field] = $val;
             }
         }
 
-        // This sets an attribute on the Loggable trait for the action log
-        $asset->setImported(true);
+        // For existing assets that have custom fields, update them.
+        // This avoids the issue of calling save() twice with Model::unguard() active.
+        if ($editingAsset && ! empty($customFieldsToSave)) {
+            $asset->update($customFieldsToSave);
+            $success = true;
+        } elseif (! $editingAsset) {
+            // For new assets, save with all changes (custom fields included via direct attribute assignment above)
+            $success = $asset->save();
+        } else {
+            // For existing assets without custom fields, update() already saved everything
+            $success = true;
+        }
 
-        if ($asset->save()) {
+        if ($success) {
 
-            $this->log('Asset '.$this->item['name'].' with serial number '.$this->item['serial'].' was created');
+            $this->log('Asset '.$this->item['name'].' with serial number '.$this->item['serial'].' created or updated');
 
             // If we have a target to checkout to, lets do so.
             // -- created_by is a property of the abstract class Importer, which this class inherits from and it's set by
             // -- the class that needs to use it (command importer or GUI importer inside the project).
             if (isset($target) && ($target !== false)) {
-                if (! is_null($asset->assigned_to)) {
-                    if ($asset->assigned_to != $target->id) {
+                $asset = $asset->fresh();
+                $targetType = get_class($target);
+                $alreadyCheckedOutToTarget = ($asset->assigned_to == $target->id) && ($asset->assigned_type === $targetType);
+
+                // Skip duplicate checkout noise when update mode keeps the same assignment target.
+                if (! $alreadyCheckedOutToTarget) {
+                    if (! is_null($asset->assigned_to)) {
                         event(new CheckoutableCheckedIn($asset, $asset->assigned, auth()->user(), 'Checkin from CSV Importer', $checkin_date));
                     }
-                }
 
-                $asset->fresh()->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer', $asset->name);
+                    $asset->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer', $asset->name);
+                }
             }
 
             return;

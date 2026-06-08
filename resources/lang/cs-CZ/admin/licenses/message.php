@@ -37,6 +37,9 @@ return [
         'confirm' => 'Jste si jisti, že chcete odstranit tuto licenci?',
         'error' => 'Vyskytl se problém při mazání licence. Zkuste to znovu prosím.',
         'success' => 'Licence byla úspěšně smazána.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

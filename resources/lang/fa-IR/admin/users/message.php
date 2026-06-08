@@ -16,6 +16,7 @@ return [
     'ldap_not_configured' => 'LDAPبرای این نصب و راه اندازی پیکربندی نشده است.',
     'password_resets_sent' => 'برای کاربران منتخبی که فعال شده اند و آدرس ایمیل معتبری دارند، پیوند بازنشانی رمز عبور ارسال شده است.
 ',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'پیوند بازنشانی رمز عبور به :email ارسال شده است!
 ',
     'user_has_no_email' => 'این کاربر آدرس ایمیلی در نمایه خود ندارد.
@@ -33,6 +34,7 @@ return [
         'unsuspend' => 'تعلیق کاربر با موفقیت متوقف شد.',
         'restored' => 'کابر با موفقیت بازگردانی شد.',
         'import' => 'کاربران با موفقیت وارد شدند.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -47,7 +49,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'اشکال در به رفع تعلیق کاربر.لطفا دوباره تلاش کنید.',
         'import' => 'اشکال در به وارد کردن کاربران.لطفا دوباره تلاش کنید.',
-        'asset_already_accepted' => 'دارایی پذیرفته شده است.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'شما باید این دارایی را قبول یا رد کنید.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'دارایی که میخواهید قبول یا رد کنید به شما محول نشده.',
@@ -57,6 +59,7 @@ return [
         'ldap_could_not_get_entries' => 'مجوز از سرور LDPA گرفته نشد.لطفا پیکربندی LDPA سرور را در فایل LDPA config بررسی کنید.<br>اشکال از سرور LDPA:',
         'password_ldap' => 'رمز عبور این حساب توسط LDAP / Active Directory مدیریت می شود. برای تغییر رمز عبور خود، لطفا با بخش IT خود تماس بگیرید.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

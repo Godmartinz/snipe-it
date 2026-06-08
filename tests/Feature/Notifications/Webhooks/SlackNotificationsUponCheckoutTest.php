@@ -18,6 +18,7 @@ use App\Notifications\CheckoutComponentNotification;
 use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -157,6 +158,28 @@ class SlackNotificationsUponCheckoutTest extends TestCase
         );
 
         $this->assertSlackNotificationSent(CheckoutAssetNotification::class);
+    }
+
+    public function test_asset_checkout_slack_notification_uses_updated_asset_location()
+    {
+        $this->settings->enableSlackWebhook();
+
+        $previousLocation = Location::factory()->create(['name' => 'Office A']);
+        $newLocation = Location::factory()->create(['name' => 'Region B']);
+        $target = User::factory()->create(['location_id' => $newLocation->id, 'email' => null]);
+        $asset = Asset::factory()->create(['location_id' => $previousLocation->id]);
+
+        // Simulate post-checkout state while keeping a stale in-memory relation loaded.
+        $asset->location_id = $newLocation->id;
+        $asset->save();
+
+        $this->fireCheckOutEvent($asset, $target);
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            CheckoutAssetNotification::class,
+            fn (CheckoutAssetNotification $notification): bool => $notification->item->location?->is($newLocation)
+        );
     }
 
     public function test_consumable_checkout_sends_slack_notification_when_setting_enabled()

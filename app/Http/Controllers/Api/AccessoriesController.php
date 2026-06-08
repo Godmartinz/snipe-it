@@ -4,25 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccessoryCheckoutRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAccessoryRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Http\Transformers\AccessoriesTransformer;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
+use App\Models\Company;
+use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class AccessoriesController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Display a listing of the resource.
@@ -84,27 +87,27 @@ class AccessoriesController extends Controller
         }
 
         if ($request->filled('category_id')) {
-            $accessories->where('category_id', '=', $request->input('category_id'));
+            $accessories->where('accessories.category_id', '=', $request->input('category_id'));
         }
 
         if ($request->filled('manufacturer_id')) {
-            $accessories->where('manufacturer_id', '=', $request->input('manufacturer_id'));
+            $accessories->where('accessories.manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
         if ($request->filled('supplier_id')) {
-            $accessories->where('supplier_id', '=', $request->input('supplier_id'));
+            $accessories->where('accessories.supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('location_id')) {
-            $accessories->where('location_id', '=', $request->input('location_id'));
+            $accessories->where('accessories.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('notes')) {
-            $accessories->where('notes', '=', $request->input('notes'));
+            $accessories->where('accessories.notes', '=', $request->input('notes'));
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : abs($request->input('offset'));
+        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -155,6 +158,7 @@ class AccessoriesController extends Controller
     {
         $accessory = new Accessory;
         $accessory->fill($request->all());
+        $accessory->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $accessory = $request->handleImages($accessory);
 
         if ($accessory->save()) {
@@ -230,6 +234,10 @@ class AccessoriesController extends Controller
         $total = $accessory_checkouts->count();
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
 
+        $accessory_checkouts->loadMorph('assignedTo', [
+            User::class => ['companies'],
+        ]);
+
         return (new AccessoriesTransformer)->transformCheckedoutAccessory($accessory_checkouts, $total);
     }
 
@@ -248,6 +256,7 @@ class AccessoriesController extends Controller
         $this->authorize('update', Accessory::class);
         $accessory = Accessory::findOrFail($id);
         $accessory->fill($request->all());
+        $accessory->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $accessory = $request->handleImages($accessory);
 
         if ($accessory->save()) {
@@ -297,40 +306,49 @@ class AccessoriesController extends Controller
     {
         $this->authorize('checkout', $accessory);
         $target = $this->determineCheckoutTarget();
-        $accessory->checkout_qty = $request->input('checkout_qty', 1);
 
-        for ($i = 0; $i < $accessory->checkout_qty; $i++) {
-
-            $accessory_checkout = new AccessoryCheckout([
-                'accessory_id' => $accessory->id,
-                'created_at' => Carbon::now(),
-                'assigned_to' => $target->id,
-                'assigned_type' => $target::class,
-                'note' => $request->input('note'),
-            ]);
-
-            $accessory_checkout->created_by = auth()->id();
-            $accessory_checkout->save();
-
-            $payload = [
-                'accessory_id' => $accessory->id,
-                'assigned_to' => $target->id,
-                'assigned_type' => $target::class,
-                'note' => $request->input('note'),
-                'created_by' => auth()->id(),
-                'pivot' => $accessory_checkout->id,
-            ];
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $target->companies()->where('companies.id', $accessory->company_id)->exists())) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 
-        // Set this value to be able to pass the qty through to the event
-        event(new CheckoutableCheckedOut(
-            $accessory,
-            $target,
-            auth()->user(),
-            $request->input('note'),
-            [],
-            $accessory->checkout_qty,
-        ));
+        $accessory->checkout_qty = $request->input('checkout_qty', 1);
+        $payload = null;
+
+        // Keep checkout rows and checkout log/event atomic to avoid ghost assignments.
+        DB::transaction(function () use ($accessory, $request, $target, &$payload): void {
+            for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+
+                $accessory_checkout = new AccessoryCheckout([
+                    'accessory_id' => $accessory->id,
+                    'created_at' => Carbon::now(),
+                    'assigned_to' => $target->id,
+                    'assigned_type' => $target::class,
+                    'note' => $request->input('note'),
+                ]);
+
+                $accessory_checkout->created_by = auth()->id();
+                $accessory_checkout->save();
+
+                $payload = [
+                    'accessory_id' => $accessory->id,
+                    'assigned_to' => $target->id,
+                    'assigned_type' => $target::class,
+                    'note' => $request->input('note'),
+                    'created_by' => auth()->id(),
+                    'pivot' => $accessory_checkout->id,
+                ];
+            }
+
+            // Set this value to be able to pass the qty through to the event.
+            event(new CheckoutableCheckedOut(
+                $accessory,
+                $target,
+                auth()->user(),
+                $request->input('note'),
+                [],
+                $accessory->checkout_qty,
+            ));
+        });
 
         return response()->json(Helper::formatStandardApiResponse('success', $payload, trans('admin/accessories/message.checkout.success')));
 
@@ -387,6 +405,7 @@ class AccessoriesController extends Controller
      */
     public function selectlist(Request $request)
     {
+        $this->authorize('view.selectlists');
 
         $accessories = Accessory::select([
             'accessories.id',
@@ -405,11 +424,11 @@ class AccessoriesController extends Controller
     public function history(Request $request, Accessory $accessory): JsonResponse|array
     {
         $this->authorize('history', $accessory);
-        $history = $accessory->getHistory($request);
-        $total = $accessory->getHistory($request)->count();
+        $historyQuery = $accessory->getHistory($request);
+        $total = (clone $historyQuery)->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-        $history = $history->skip($offset)->take($limit)->get();
+        $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }

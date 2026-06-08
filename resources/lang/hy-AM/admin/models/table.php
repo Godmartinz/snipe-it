@@ -2,15 +2,15 @@
 
 return [
 
-    'create' => 'Create Asset Model',
+    'create' => 'Ստեղծել նոր մոդել',
     'created_at' => 'Ստեղծման ամսաթիվ',
     'eol' => 'EOL',
-    'modelnumber' => 'Model No.',
-    'name' => 'Asset Model Name',
-    'numassets' => 'Assets',
-    'title' => 'Asset Models',
-    'update' => 'Update Asset Model',
-    'view' => 'View Asset Model',
-    'clone' => 'Clone Model',
-    'edit' => 'Edit Model',
+    'modelnumber' => 'Մոդելի համար։',
+    'name' => 'Մոդելի անուն',
+    'numassets' => 'Ակտիվներ',
+    'title' => 'Ակտիվի մոդելներ',
+    'update' => 'Թարմացնել մոդելը',
+    'view' => 'Տեսնել մոդելը',
+    'clone' => 'Կրկնօրինակել մոդելը',
+    'edit' => 'Խմբագրել մոդելը',
 ];

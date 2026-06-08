@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'משתמש זה נמחק. יהיה עליך לשחזר משתמש זה כדי לערוך אותם או להקצות להם נכסים חדשים.',
     'ldap_not_configured' => 'שילוב LDAP לא הוגדר עבור התקנה זו.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'המשתמש בוטל בהצלחה.',
         'restored' => 'המשתמש שוחזר בהצלחה.',
         'import' => 'המשתמשים יובאו בהצלחה.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'היתה בעיה בהתעלמות מהמשתמש. בבקשה נסה שוב.',
         'import' => 'היתה בעיה בייבוא ​​משתמשים. בבקשה נסה שוב.',
-        'asset_already_accepted' => 'הנכס כבר התקבל.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'עליך לקבל או לדחות את הנכס.',
         'cannot_delete_yourself' => 'אנחנו נרגיש רע מאוד אם תמחק את עצמך, בבקשה שקול זאת מחדש.',
         'incorrect_user_accepted' => 'הנכס שניסית לקבל לא נבדק לך.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'לא ניתן לקבל רשומות משרת LDAP. בדוק את תצורת שרת LDAP בקובץ תצורת LDAP. <br> שגיאה משרת LDAP:',
         'password_ldap' => 'הסיסמה עבור חשבון זה מנוהלת על ידי LDAP / Active Directory. צור קשר עם מחלקת ה- IT כדי לשנות את הסיסמה שלך.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

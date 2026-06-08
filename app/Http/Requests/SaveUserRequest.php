@@ -34,6 +34,8 @@ class SaveUserRequest extends FormRequest
             'department_id' => 'nullable|integer|exists:departments,id',
             'manager_id' => 'nullable|integer|exists:users,id',
             'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+            'company_ids' => 'nullable|array',
+            'company_ids.*' => 'integer|exists:companies,id',
         ];
 
         switch ($this->method()) {
@@ -52,13 +54,13 @@ class SaveUserRequest extends FormRequest
                 $rules['first_name'] = 'required|string|min:1';
                 $rules['username'] = 'required_unless:ldap_import,1|string|min:1';
                 $rules['password'] = Setting::passwordComplexityRulesSaving('update').'|confirmed';
-                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned];
+                $rules['company_id'] = ['nullable', 'integer', 'exists:companies,id', new UserCannotSwitchCompaniesIfItemsAssigned];
                 break;
 
                 // Save only what's passed
             case 'PATCH':
                 $rules['password'] = Setting::passwordComplexityRulesSaving('update');
-                $rules['company_id'] = [new UserCannotSwitchCompaniesIfItemsAssigned];
+                $rules['company_id'] = ['nullable', 'integer', 'exists:companies,id', new UserCannotSwitchCompaniesIfItemsAssigned];
                 break;
 
             default:

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Assets\Ui;
 
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\User;
 use Tests\TestCase;
@@ -22,6 +23,22 @@ class ShowAssetTest extends TestCase
         $this->actingAs(User::factory()->viewAssets()->create())
             ->get(route('hardware.show', $asset))
             ->assertSeeText($asset->asset_tag)
+            ->assertOk();
+    }
+
+    public function test_page_renders_when_journal_note_has_no_author()
+    {
+        $asset = Asset::factory()->create();
+
+        Actionlog::factory()->for($asset, 'item')->create([
+            'action_type' => 'note added',
+            'item_type' => Asset::class,
+            'note' => 'A note with no author',
+            'created_by' => null,
+        ]);
+
+        $this->actingAs(User::factory()->viewAssets()->create())
+            ->get(route('hardware.show', $asset))
             ->assertOk();
     }
 

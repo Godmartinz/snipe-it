@@ -2,46 +2,52 @@
 
 return [
 
-    'deleted' => 'Deleted asset model',
-    'does_not_exist' => 'Model does not exist.',
-    'no_association' => 'WARNING! The asset model for this item is invalid or missing!',
-    'no_association_fix' => 'This will break things in weird and horrible ways. Edit this asset now to assign it a model.',
-    'assoc_users' => 'This model is currently associated with one or more assets and cannot be deleted. Please delete the assets, and then try deleting again. ',
-    'invalid_category_type' => 'This category must be an asset category.',
+    'deleted' => 'Ջնջված ակտիվի մոդել
+',
+    'does_not_exist' => 'Մոդելը գոյություն չունի։',
+    'no_association' => 'ԶԳՈՒՇԱՑՈՒՄ։ Այս տարրի ակտիվի մոդելն անվավեր է կամ բացակայում է։
+',
+    'no_association_fix' => 'Սա կհանգեցնի տարօրինակ և լուրջ խնդիրների։ Խնդրում ենք հիմա խմբագրել այս ակտիվը՝ մոդել հանձնարարելու համար։
+',
+    'assoc_users' => 'Այս մոդելը ներկայումս կապված է մեկ կամ մի քանի ակտիվի հետ և հնարավոր չէ ջնջել։ Խնդրում ենք նախ ջնջել ակտիվները, ապա կրկին փորձել ջնջել։',
+    'invalid_category_type' => 'Այս կատեգորիան պետք է լինի ակտիվի կատեգորիա։
+',
 
     'create' => [
-        'error' => 'Model was not created, please try again.',
-        'success' => 'Model created successfully.',
-        'duplicate_set' => 'An asset model with that name, manufacturer and model number already exists.',
+        'error' => 'Մոդելը չի ստեղծվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Մոդելը հաջողությամբ ստեղծվել է։',
+        'duplicate_set' => 'Նման անունով, արտադրողով և մոդելի համարով ակտիվի մոդելն արդեն գոյություն ունի։',
     ],
 
     'update' => [
-        'error' => 'Model was not updated, please try again',
-        'success' => 'Model updated successfully.',
+        'error' => 'Մոդելը չի թարմացվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Մոդելը հաջողությամբ թարմացվել է։',
     ],
 
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this asset model?',
-        'error' => 'There was an issue deleting the model. Please try again.',
-        'success' => 'The model was deleted successfully.',
+        'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս ակտիվի մոդելը։',
+        'error' => 'Մոդելի ջնջման ժամանակ խնդիր է առաջացել։ Խնդրում ենք կրկին փորձել։',
+        'success' => 'Մոդելը հաջողությամբ ջնջվել է։',
     ],
 
     'restore' => [
-        'error' => 'Model was not restored, please try again',
-        'success' => 'Model restored successfully.',
+        'error' => 'Մոդելը չի վերականգնվել, խնդրում ենք կրկին փորձել։',
+        'success' => 'Մոդելը հաջողությամբ վերականգնվել է։',
     ],
 
     'bulkedit' => [
-        'error' => 'No fields were changed, so nothing was updated.',
-        'success' => 'Model successfully updated. |:model_count models successfully updated.',
-        'warn' => 'You are about to update the properties of the following model:|You are about to edit the properties of the following :model_count models:',
+        'error' => 'Դաշտեր չեն փոփոխվել, ուստի ոչինչ չի թարմացվել։',
+        'success' => 'Մոդելը հաջողությամբ թարմացվել է։|:model_count մոդել հաջողությամբ թարմացվել է։',
+        'warn' => 'Դուք պատրաստվում եք թարմացնել հետևյալ մոդելի հատկությունները։|Դուք պատրաստվում եք խմբագրել հետևյալ :model_count մոդելների հատկությունները։
+',
 
     ],
 
     'bulkdelete' => [
-        'error' => 'No models were selected, so nothing was deleted.',
-        'success' => 'Model deleted!|:success_count models deleted!',
-        'success_partial' => ':success_count model(s) were deleted, however :fail_count were unable to be deleted because they still have assets associated with them.',
+        'error' => 'Մոդելներ չեն ընտրվել, ուստի ոչինչ չի ջնջվել։',
+        'success' => 'Մոդելը ջնջվել է։|:success_count մոդել ջնջվել է։
+',
+        'success_partial' => ':success_count մոդել(ներ) ջնջվել է(են), սակայն :fail_count մոդել հնարավոր չեղավ ջնջել, քանի որ դրանց հետ կապված ակտիվներ կան։',
     ],
 
 ];

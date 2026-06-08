@@ -9,7 +9,7 @@ return [
     'edit' => 'Edycja Akcesoriów',
     'eula_text' => 'Kategoria EULA',
     'eula_text_help' => 'To pole pozwala dostosować EULA dla określonych rodzajów aktywów. Jeśli masz tylko jeden EULA dla wszystkich swoich aktywów, można zaznaczyć poniższe pole, aby korzystać z podstawowej domyślnej.',
-    'require_acceptance' => 'Wymaga od użytkowników, aby potwierdzić akceptację aktywów w tej kategorii.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nie znaleziono domyślnego EULA. Dodaj jeden w Ustawieniach.',
     'total' => 'Suma',
     'remaining' => 'Dostępne',

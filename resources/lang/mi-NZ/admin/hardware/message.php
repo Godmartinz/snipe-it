@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'You must select at least one asset from the list',
+    ],
+
     'checkin' => [
         'error' => 'Kaore i whakauruhia te taketake, me ngana ano',
         'success' => 'Kua tohua te tahua.',
         'user_does_not_exist' => 'He muhu te kaiwhakamahi. Tena ngana ano.',
         'already_checked_in' => 'Kua tohua taua taonga i roto i.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

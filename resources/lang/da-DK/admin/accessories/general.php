@@ -9,7 +9,7 @@ return [
     'edit' => 'Rediger tilbehør',
     'eula_text' => 'Slutbrugerlicenskategori',
     'eula_text_help' => 'Dette felt tillader dig at tilpasse din slutbrugerlicens til specifikke typer af tilbehør. Hvis du kun har en slutbrugerlicens for alle dine tilbehør, kan du afkrydse boksen nedenfor for at bruge den primære standardlicens.',
-    'require_acceptance' => 'Kræver brugere at bekræfte accept af tilbehør i denne kategori.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ingen primær standard slutbrugerlicens blev fundet. Tilføj en under Indstillinger.',
     'total' => 'I alt',
     'remaining' => 'Tilgængelig',

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Deze locatie is momenteen de ouder van ten minste één kind locatie en kan hierdoor niet worden verwijderd. Update je locaties bij die niet meer naar deze locatie verwijzen en probeer het opnieuw. ',
     'assigned_assets' => 'Toegewezen activa',
     'current_location' => 'Huidige locatie',
-    'open_map' => 'Open in :map_provider_icon kaarten',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

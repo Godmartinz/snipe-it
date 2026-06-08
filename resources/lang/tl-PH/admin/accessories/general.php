@@ -9,7 +9,7 @@ return [
     'edit' => 'Edit Accessory',
     'eula_text' => 'Category EULA',
     'eula_text_help' => 'This field allows you to customize your EULAs for specific types of assets. If you only have one EULA for all of your assets, you can check the box below to use the primary default.',
-    'require_acceptance' => 'Require users to confirm acceptance of assets in this category.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'No primary default EULA found. Add one in Settings.',
     'total' => 'Total',
     'remaining' => 'Avail',

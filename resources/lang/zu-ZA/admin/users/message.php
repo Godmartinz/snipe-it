@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Lo msebenzisi ususiwe. Kuzodingeka ubuyisele lo msebenzisi ukuwahlela noma ubanikeze amafa amasha.',
     'ldap_not_configured' => 'Ukuhlanganiswa kwe-LDAP akulungiselelwe lokhu kufakwa.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Umsebenzisi uphumelelwanga ngempumelelo.',
         'restored' => 'Umsebenzisi ubuyiselwe ngempumelelo.',
         'import' => 'Abasebenzisi bangeniswe ngempumelelo.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Kube nenkinga engalindeleki umsebenzisi. Ngicela uzame futhi.',
         'import' => 'Kube nenkinga yokungenisa abasebenzisi. Ngicela uzame futhi.',
-        'asset_already_accepted' => 'Lelifa selivele lamukelwe.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Kufanele wamukele noma unqabe le mali.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Impahla oyizame ukwamukela ayizange ihlolwe kuwe.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Ayikwazanga ukungena okuvela kuseva ye-LDAP. Sicela uhlole ukumisa kweseva yakho ye-LDAP kufayili ye-LDAP config. <br>Iphutha kusuka kwiseva ye-LDAP:',
         'password_ldap' => 'Iphasiwedi yale akhawunti ilawulwa yi-LDAP / Active Directory. Sicela uxhumane nomnyango wakho we-IT ukushintsha iphasiwedi yakho.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

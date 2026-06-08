@@ -9,7 +9,7 @@ return [
     'edit' => 'ویرایش وسیله',
     'eula_text' => 'دسته بندی EULA',
     'eula_text_help' => 'این فید به امکان این را میدهد که EULA های خود را با توجه به دارایی سفارشی سازی کنید. اگر شما فقط یک EULA برای تمام دارایی خود دارید،میتوانید گزینه زیر را فعال کنید تا از پیشفرض اولیه استفاده کنید.',
-    'require_acceptance' => 'نیاز به کاربرانی جهت تایید پذیرش دارایی ها در این دسته بندی.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'هیچ EULA اولیه پیشفرضی یافت نشد.در تنظیمات اضافه کنید',
     'total' => 'مجموع',
     'remaining' => 'سود',

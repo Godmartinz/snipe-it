@@ -8,12 +8,12 @@ return [
 
     'create' => [
         'error' => 'Kategorijos sukurti nepavyko, badykite dar kartą.',
-        'success' => 'Kategorija sukurta sėkmingai.',
+        'success' => 'Kategorija sėkmingai sukurta.',
     ],
 
     'update' => [
         'error' => 'Kategorija nebuvo atnaujinta, bandykite dar kartą',
-        'success' => 'Kategorija atnaujinta sėkmingai.',
+        'success' => 'Kategorija sėkmingai atnaujinta.',
         'cannot_change_category_type' => 'Negalite pakeisti kategorijos tipo po to, kai ji jau buvo sukurta',
     ],
 
@@ -22,7 +22,7 @@ return [
         'error' => 'Bandant panaikinti kategoriją įvyko klaida. Bandykite dar kartą.',
         'success' => 'Kategorija sėkmingai ištrinta.',
         'bulk_success' => 'Kategorijos sėkmingai ištrintos.',
-        'partial_success' => 'Kategorija sėkmingai ištrinta. Daugiau informacijos rasite žemiau. | :count kategorijos (-ų) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
+        'partial_success' => 'Kategorija sėkmingai ištrinta. Daugiau informacijos rasite žemiau. | Kategorijos (:count) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
     ],
 
 ];

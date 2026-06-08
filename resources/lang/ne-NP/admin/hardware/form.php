@@ -20,7 +20,7 @@ return [
     'cost' => 'खरिद लागत',
     'create' => 'Create Asset',
     'date' => 'खरिद मिति',
-    'depreciation' => 'Depreciation',
+    'depreciation' => 'मूल्यह्रास',
     'depreciates_on' => 'Depreciates On',
     'default_location' => 'Default Location',
     'default_location_phone' => 'Default Location Phone',
@@ -64,4 +64,6 @@ return [
     'optional_infos' => 'Optional Information',
     'order_details' => 'Order Related Information',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

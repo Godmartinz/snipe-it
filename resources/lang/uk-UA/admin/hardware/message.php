@@ -94,11 +94,20 @@ return [
         'success' => 'Актив успішно перевірено. | Активи успішно перевірені.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Ви повинні вибрати хоча б один медіафайл зі списку',
+    ],
+
     'checkin' => [
         'error' => 'Актив не був перевірений, будь ласка, спробуйте ще раз',
         'success' => 'Актив успішно перевірено.',
         'user_does_not_exist' => 'Вказаного користувача не існує. Спробуйте ще раз.',
         'already_checked_in' => 'Цей актив вже перевіряється.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

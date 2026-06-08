@@ -9,12 +9,19 @@ use Tests\TestCase;
 
 class AssetsForSelectListTest extends TestCase
 {
+    public function test_requires_view_selectlists_permission(): void
+    {
+        $this->actingAsForApi(User::factory()->create())
+            ->getJson(route('assets.selectlist'))
+            ->assertForbidden();
+    }
+
     public function test_assets_can_be_searched_for_by_asset_tag()
     {
         Asset::factory()->create(['asset_tag' => '0001']);
         Asset::factory()->create(['asset_tag' => '0002']);
 
-        $response = $this->actingAsForApi(User::factory()->create())
+        $response = $this->actingAsForApi(User::factory()->createAssets()->create())
             ->getJson(route('assets.selectlist', ['search' => '000']))
             ->assertOk();
 
@@ -33,8 +40,8 @@ class AssetsForSelectListTest extends TestCase
         $assetB = Asset::factory()->for($companyB)->create(['asset_tag' => '0002']);
 
         $superUser = $companyA->users()->save(User::factory()->superuser()->make());
-        $userInCompanyA = $companyA->users()->save(User::factory()->viewAssets()->make());
-        $userInCompanyB = $companyB->users()->save(User::factory()->viewAssets()->make());
+        $userInCompanyA = $companyA->users()->save(User::factory()->createAssets()->make());
+        $userInCompanyB = $companyB->users()->save(User::factory()->createAssets()->make());
 
         $this->settings->disableMultipleFullCompanySupport();
 
@@ -69,5 +76,36 @@ class AssetsForSelectListTest extends TestCase
             ->getJson(route('assets.selectlist', ['search' => '000']))
             ->assertResponseDoesNotContainInResults($assetA)
             ->assertResponseContainsInResults($assetB);
+    }
+
+    public function test_asset_is_excluded_from_selectlist_when_exclude_id_matches()
+    {
+        [$assetA, $assetB] = Asset::factory()->count(2)->create();
+
+        $actor = User::factory()->createAssets()->create();
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('assets.selectlist', ['excludeId' => $assetA->id]))
+            ->assertResponseDoesNotContainInResults($assetA)
+            ->assertResponseContainsInResults($assetB);
+    }
+
+    public function test_assets_are_filtered_by_multiple_comma_separated_company_ids_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB, $companyC] = Company::factory()->count(3)->create();
+
+        $assetA = Asset::factory()->for($companyA)->create(['asset_tag' => 'A001']);
+        $assetB = Asset::factory()->for($companyB)->create(['asset_tag' => 'B001']);
+        $assetC = Asset::factory()->for($companyC)->create(['asset_tag' => 'C001']);
+
+        $actor = User::factory()->superuser()->create();
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('assets.selectlist', ['companyId' => $companyA->id.','.$companyB->id]))
+            ->assertResponseContainsInResults($assetA)
+            ->assertResponseContainsInResults($assetB)
+            ->assertResponseDoesNotContainInResults($assetC);
     }
 }

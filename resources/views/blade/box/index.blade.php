@@ -1,7 +1,6 @@
 @props([
     'box_style' => 'default',
     'header' => false,
-    'footer' => false,
 ])
 @aware(['name', 'route'])
 
@@ -38,7 +37,9 @@
 
     </div>
 
-    @if ($route)
+    @if (isset($customfooter))
+        {{ $customfooter }}
+    @elseif ($route)
         <x-box.footer />
     @endif
 </div>

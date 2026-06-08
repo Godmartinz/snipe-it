@@ -278,6 +278,52 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
     }
 
     #[Test]
+    public function update_mode_logs_license_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->license()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $license = License::query()
+            ->where('name', $initialRow['licenseName'])
+            ->where('serial', $initialRow['serialNumber'])
+            ->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->license()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $license->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $license->order_number);
+
+        $updateLog = ActivityLog::query()
+            ->where('item_type', License::class)
+            ->where('item_id', $license->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after license importer update mode.');
+    }
+
+    #[Test]
     public function custom_column_mapping(): void
     {
         $faker = ImportFileBuilder::times()->definition();

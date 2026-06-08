@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Restituzione effettuata tramite la restituzione massiva nell\'interfaccia delle Licenze',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Assegna tutti gli slot',
             'modal' => 'Questa azione assegnerà uno slot al primo utente disponibile. | Questa azione assegnerà :available_seats_count slot ai primi utenti disponibili. Un utente è considerato disponibile per questo slot se non ha già questa Licenza assegnata e se l\'Auto Assegnazione Licenza è attiva sul suo account utente.',

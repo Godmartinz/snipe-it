@@ -206,4 +206,33 @@ class AccessoryAcceptanceTest extends TestCase
 
         $this->assertEquals($originalAccessoryCheckoutCount - 3, AccessoryCheckout::count());
     }
+
+    public function test_admin_can_complete_sign_in_place_accessory_acceptance_and_is_redirected_to_selected_destination()
+    {
+        $assignee = User::factory()->create();
+        $admin = User::factory()->admin()->create();
+        $accessory = Accessory::factory()->create();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->pending()
+            ->for($assignee, 'assignedTo')
+            ->for($accessory, 'checkoutable')
+            ->create();
+
+        $this->actingAs($admin)
+            ->withSession([
+                'sign_in_place_acceptance_id' => $checkoutAcceptance->id,
+                'sign_in_place_item_id' => $accessory->id,
+                'sign_in_place_resource_type' => 'Accessories',
+                'redirect_option' => 'target',
+                'checkout_to_type' => 'user',
+            ])
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+                'note' => 'signed in person',
+            ])
+            ->assertRedirect(route('users.show', $assignee));
+
+        $this->assertNotNull($checkoutAcceptance->refresh()->accepted_at);
+    }
 }

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Le ndawo okwamanje ungumzali okungenani indawo eyodwa yengane futhi ayikwazi ukususwa. Sicela ubuyekeze izindawo zakho ukuze ungasaphinde ubhekisele kule ndawo bese uyazama futhi.',
     'assigned_assets' => 'Assigned Assets',
     'current_location' => 'Current Location',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

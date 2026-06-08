@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
+use App\Rules\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +64,12 @@ class ProfileController extends Controller
 
         $user->enable_sounds = $request->input('enable_sounds', false);
         $user->enable_confetti = $request->input('enable_confetti', false);
+        $request->validate([
+            'link_light_color' => ['nullable', new CssColor],
+            'link_dark_color' => ['nullable', new CssColor],
+            'nav_link_color' => ['nullable', new CssColor],
+        ]);
+
         $user->link_light_color = $request->input('link_light_color', '#296282');
         $user->link_dark_color = $request->input('link_dark_color', '#296282');
         $user->nav_link_color = $request->input('nav_link_color', '#FFFFFF');
@@ -211,14 +218,19 @@ class ProfileController extends Controller
      */
     public function printInventory(): View
     {
-        $show_users = User::where('id', auth()->user()->id)->get();
+        $userId = auth()->id();
 
-        return view('users/print')
-            ->with('assets', auth()->user()->assets())
-            ->with('licenses', auth()->user()->licenses()->get())
-            ->with('accessories', auth()->user()->accessories()->get())
-            ->with('consumables', auth()->user()->consumables()->get())
-            ->with('users', $show_users)
+        $show_user = User::withInventoryRelations($userId)->first();
+
+        $indirectItemsCount =
+            $show_user->assets->flatMap->assignedAssets->count()
+            + $show_user->assets->flatMap->components->count()
+            + $show_user->assets->flatMap->licenses->count()
+            + $show_user->assets->flatMap->assignedAccessories->count();
+
+        return view('users.print')
+            ->with('users', [$show_user])
+            ->with('indirectItemsCount', $indirectItemsCount)
             ->with('settings', Setting::getSettings());
     }
 
@@ -251,6 +263,7 @@ class ProfileController extends Controller
 
     public function getStoredEula($filename): Response|BinaryFileResponse|RedirectResponse
     {
+        $filename = basename((string) $filename);
 
         $logentry = Actionlog::where('filename', $filename)->first();
 

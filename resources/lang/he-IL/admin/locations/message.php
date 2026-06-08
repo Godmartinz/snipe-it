@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'למיקום זה מוגדרים תתי-מיקומים ולכן לא ניתן למחוק אותו. אנא עדכן את המיקומים כך שלא שמיקום זה לא יכיל תתי מיקומים ונסה שנית. ',
     'assigned_assets' => 'פריטים מוקצים',
     'current_location' => 'מיקום נוכחי',
-    'open_map' => 'פתיחה במפות :map_provider_icon',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

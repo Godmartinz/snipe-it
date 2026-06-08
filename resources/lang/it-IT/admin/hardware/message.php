@@ -94,11 +94,20 @@ return [
         'success' => 'Bene assegnato correttamente.|Beni assegnati correttamente.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Devi selezionare almeno un Bene dall\'elenco',
+    ],
+
     'checkin' => [
         'error' => 'Il Bene non è stato restituito, riprova',
         'success' => 'Bene restituito con successo.',
         'user_does_not_exist' => 'Questo utente non è valido. Riprova.',
         'already_checked_in' => 'Il prodotto è già rientrato.',
+        'force_checkin_orphaned_success' => 'Assegnazione non valida annullata con successo.',
+        'force_checkin_not_orphaned' => 'L\'articolo non è in uno stato di assegnazione non valido.',
+        'force_checkin_error' => 'Impossibile cancellare l\'assegnazione non valida.',
 
     ],
 

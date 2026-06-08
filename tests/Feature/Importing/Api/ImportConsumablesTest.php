@@ -244,6 +244,49 @@ class ImportConsumablesTest extends ImportDataTestCase implements TestsPermissio
     }
 
     #[Test]
+    public function update_mode_logs_consumable_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->consumable()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $consumable = Consumable::query()->where('name', $initialRow['itemName'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->consumable()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $consumable->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $consumable->order_number);
+
+        $updateLog = ActivityLog::query()
+            ->where('item_type', Consumable::class)
+            ->where('item_id', $consumable->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after consumable importer update mode.');
+    }
+
+    #[Test]
     public function custom_column_mapping(): void
     {
         $faker = ImportFileBuilder::new()->definition();

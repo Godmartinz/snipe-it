@@ -94,11 +94,20 @@ return [
         'success' => 'Imovina je uspešno zadužena.|Imovine su uspešno zadužene.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Imovina nije razdužena, molim vas pokušajte ponovo|Imovine nisu razdužene, molim vas pokušajte ponovo',
+        'success' => 'Imovina je uspešno razdužena.|Imovine su uspešno razdužene.',
+        'no_assets_selected' => 'Morate odabrati barem jednu imovinu s popisa',
+    ],
+
     'checkin' => [
         'error' => 'Imovina nije prijavljena. Pokušajte ponovo',
         'success' => 'Imovina je uspešno prijavljena.',
         'user_does_not_exist' => 'Taj je korisnik nevažeći. Molim pokušajte ponovo.',
         'already_checked_in' => 'Imovina je već prijavljena.',
+        'force_checkin_orphaned_success' => 'Neispravna dodela je uspešno očišćena.',
+        'force_checkin_not_orphaned' => 'Stavka nije u statusu neispravne dodele.',
+        'force_checkin_error' => 'Nije se mogla očistiti neispravna dodela.',
 
     ],
 

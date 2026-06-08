@@ -58,10 +58,26 @@ class CheckinAssetMail extends BaseMailable
     {
         $this->item->load('status');
         $fields = [];
+        $customFields = [];
 
         // Check if the item has custom fields associated with it
         if (($this->item->model) && ($this->item->model->fieldset)) {
             $fields = $this->item->model->fieldset->fields;
+
+            foreach ($fields as $field) {
+                if (! $field->show_in_email || $field->field_encrypted == '1') {
+                    continue;
+                }
+
+                $value = $this->item->{$field->db_column_name()};
+
+                if (! is_null($value) && $value !== '') {
+                    $customFields[] = [
+                        'label' => $field->name,
+                        'value' => $value,
+                    ];
+                }
+            }
         }
 
         return new Content(
@@ -73,6 +89,7 @@ class CheckinAssetMail extends BaseMailable
                 'note' => $this->note,
                 'target' => $this->target,
                 'fields' => $fields,
+                'custom_fields' => $customFields,
                 'expected_checkin' => $this->expected_checkin,
             ],
         );

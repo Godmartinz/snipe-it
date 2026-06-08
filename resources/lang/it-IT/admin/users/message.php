@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Questo utente è stato eliminato. Si dovrà ripristinare questo utente per modificare o assegnare nuovi beni.',
     'ldap_not_configured' => 'L\'integrazione con LDAP non è stata configurata per questa installazione.',
     'password_resets_sent' => 'È stato inviato un link agli utenti selezionati che sono attivati e hanno un indirizzo email valido, per reimpostare la password.',
+    'not_activated' => 'Questo utente non può fare login, per cui non può accettare questo Bene via email.',
     'password_reset_sent' => 'Un link per reimpostare la password è stato inviato a :email!',
     'user_has_no_email' => 'Questo utente non ha un indirizzo email nel suo profilo.',
     'log_record_not_found' => 'Non ho trovato nessun log per questo utente.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Utente riabilitato con successo.',
         'restored' => 'Utente ripristinato con successo.',
         'import' => 'Utenti importati con successo.',
+        'acceptance_reminder_sent' => 'Promemoria di accettazione inviato per :count articolo in attesa.|Promemoria di accettazione inviato per :count articoli in attesa.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Questo utente è ancora responsabile di un altro utente. Si prega di scegliere un altro responsabile prima di procedere.|Questo utente è ancora responsabile di :count utenti. Si prega di scegliere un altro responsabile prima di procedere.',
         'unsuspend' => 'C\'è stato un problema durante la riabilitazione dell\'utente. Riprova per favore.',
         'import' => 'C\'è stato un problema durante l\'importazione degli utenti. Riprova per favore.',
-        'asset_already_accepted' => 'Questo bene è già stato accettato.',
+        'asset_already_accepted' => 'Questo articolo è già stato accettato.',
         'accept_or_decline' => 'Devi accettare o rifiutare questo prodotto.',
         'cannot_delete_yourself' => 'Ci dispiacerebbe davvero tanto se cancellassi te stesso, per favore ripensaci.',
         'incorrect_user_accepted' => 'L\'asset che hai tentato di accettare non è stato verificato.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Impossibile ottenere voci dal server LDAP. Controlla la configurazione del tuo server LDAP nel file di configurazione LDAP.<br>Errori dal server LDAP:',
         'password_ldap' => 'La password per questo account è gestita da LDAP / Active Directory. Per cambiare la tua password, contatta il tuo reparto IT.',
         'multi_company_items_assigned' => 'A questo utente sono assegnati oggetti appartenenti a un\'altra azienda. Si prega di farli restituire o modificarne l\'azienda.',
+        'no_pending_acceptances' => 'Questo utente non ha accettazioni in sospeso da notificare.',
     ],
 
     'deletefile' => [

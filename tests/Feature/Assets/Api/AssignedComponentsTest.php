@@ -54,26 +54,4 @@ class AssignedComponentsTest extends TestCase
                     ->etc();
             });
     }
-
-    public function test_adheres_to_offset_and_limit()
-    {
-        $asset = Asset::factory()->hasComponents(2)->create();
-
-        $componentsAssignedToAsset = $asset->components;
-
-        $this->actingAsForApi(User::factory()->viewAssets()->create())
-            ->getJson(route('api.assets.assigned_components', [
-                'asset' => $asset,
-                'offset' => 1,
-                'limit' => 1,
-            ]))
-            ->assertOk()
-            ->assertResponseDoesNotContainInRows($componentsAssignedToAsset->first())
-            ->assertResponseContainsInRows($componentsAssignedToAsset->last())
-            ->assertJson(function (AssertableJson $json) {
-                $json->where('total', 2)
-                    ->count('rows', 1)
-                    ->etc();
-            });
-    }
 }

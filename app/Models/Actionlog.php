@@ -9,8 +9,11 @@ use App\Presenters\ActionlogPresenter;
 use App\Presenters\Presentable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -51,6 +54,13 @@ class Actionlog extends SnipeModel
     ];
 
     use Searchable;
+
+    /**
+     * Cache whether a model table has a company_id column.
+     *
+     * @var array<string, bool>
+     */
+    protected static array $companyColumnCache = [];
 
     /**
      * The attributes that should be included when searching the model.
@@ -115,25 +125,81 @@ class Actionlog extends SnipeModel
     public static function boot()
     {
         parent::boot();
-        static::creating(
-            function (self $actionlog) {
-                // If the admin is a superadmin, let's see if the target instead has a company.
-                if (auth()->user() && auth()->user()->isSuperUser()) {
-                    if ($actionlog->target) {
-                        $actionlog->company_id = $actionlog->target->company_id;
-                    } elseif ($actionlog->item) {
-                        $actionlog->company_id = $actionlog->item->company_id;
-                    }
-                } elseif (auth()->user() && auth()->user()->company) {
-                    $actionlog->company_id = auth()->user()->company_id;
-                }
-
-                if ($actionlog->action_date == '') {
-                    $actionlog->action_date = Carbon::now();
-                }
-
+        static::creating(function (self $actionlog): void {
+            // Only resolve company_id if it was never explicitly set by the caller.
+            // Using array_key_exists on getRawOriginal() / getAttributes() lets us
+            // distinguish "was set to null intentionally" from "was never set at all".
+            if (! array_key_exists('company_id', $actionlog->getAttributes())) {
+                $actionlog->company_id = static::resolveCompanyIdFromAttributes(
+                    $actionlog->target_type,
+                    $actionlog->target_id,
+                    $actionlog->item_type,
+                    $actionlog->item_id,
+                );
             }
-        );
+
+            if ($actionlog->action_date == '') {
+                $actionlog->action_date = Carbon::now();
+            }
+        });
+    }
+
+    /**
+     * Resolve the company_id for a new action log by querying the item model
+     * directly, bypassing all global scopes to avoid FMCS filtering issues.
+     *
+     * We intentionally prefer the item (asset, license, etc.) over the target
+     * (user, location) because FMCS visibility is based on who *owns* the item,
+     * not who it was checked out to.  If the item has no company_id we fall back
+     * to the target so that logs on unowned items still get a company stamp where
+     * possible.
+     *
+     * This has to include an exception for the asset models table, since they are
+     * not company-constrained (on purpose.)
+     */
+    protected static function resolveCompanyIdFromAttributes(
+        ?string $targetType,
+        ?int $targetId,
+        ?string $itemType,
+        ?int $itemId,
+    ): ?int {
+        // Prefer the item (the thing being acted upon) for FMCS ownership.
+        $companyId = static::resolveCompanyIdFromModelClass($itemType, $itemId);
+
+        if ($companyId !== null) {
+            return $companyId;
+        }
+
+        // Fall back to target only when the item has no company_id.
+        return static::resolveCompanyIdFromModelClass($targetType, $targetId);
+
+    }
+
+    /**
+     * Resolve company_id from a model class and ID, but only if that model's
+     * table has a company_id column.
+     */
+    protected static function resolveCompanyIdFromModelClass(?string $modelClass, ?int $id): ?int
+    {
+        if (! $modelClass || ! $id || ! class_exists($modelClass) || ! is_subclass_of($modelClass, Model::class)) {
+            return null;
+        }
+
+        /** @var Model $instance */
+        $instance = app($modelClass);
+        $table = $instance->getTable();
+
+        $hasCompanyColumn = static::$companyColumnCache[$table]
+            ??= Schema::hasColumn($table, 'company_id');
+
+        if (! $hasCompanyColumn) {
+            return null;
+        }
+
+        return $modelClass::withoutGlobalScopes()
+            ->whereKey($id)
+            ->value('company_id');
+
     }
 
     /**
@@ -326,6 +392,27 @@ class Actionlog extends SnipeModel
     public function target()
     {
         return $this->morphTo('target')->withTrashed();
+    }
+
+    /**
+     * Eager load history relations used by the API transformer to avoid N+1 queries.
+     */
+    public function scopeForApiHistory($query)
+    {
+        return $query->with([
+            'adminuser',
+            'location',
+            'item' => function (MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    Asset::class => ['model'],
+                ]);
+            },
+            'target' => function (MorphTo $morphTo) {
+                $morphTo->morphWith([
+                    Asset::class => ['model'],
+                ]);
+            },
+        ]);
     }
 
     /**

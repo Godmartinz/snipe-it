@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Este utilizador foi removido. Terá que restaurar este utilizador para os editar ou alocar-lhe novos artigos.',
     'ldap_not_configured' => 'A integração com LDAP não foi configurada para este instalação.',
     'password_resets_sent' => 'Os usuários selecionados que são ativados e têm um endereço de e-mail válido receberam um link de redefinição de senha.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Um link para redefinição de senha foi enviado para :email!',
     'user_has_no_email' => 'Esse utilizador não tem um endereço de endereço eletrónico no seu perfil.',
     'log_record_not_found' => 'Não foi possível encontrar um registro de registro correspondente para este usuário.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'A suspensão do Utilizador foi removida com sucesso.',
         'restored' => 'Utilizador restaurado com sucesso.',
         'import' => 'Utilizadores importados com sucesso.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Ocorreu um problema ao retirar a suspensão ao utilizador. Por favor, tente novamente.',
         'import' => 'Ocorreu um problema ao importar os utilizadores. Por favor, tente novamente.',
-        'asset_already_accepted' => 'Este artigo já foi aceite.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Tem que aceitar ou recusar este artigo.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'O ativo que tentou aceitar não foi solicitado por si.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Não foi possível obter registos do servidor LDAP. Por favor, verifique a configuração de servidor no ficheiro de configuração. <br>Error do Servidor LDAP:',
         'password_ldap' => 'A senha desta conta é gerenciada pelo LDAP / Active Directory. Entre em contato com seu departamento de TI para alterar sua senha.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

@@ -9,6 +9,7 @@ return [
         'am-ET' => 'Amharic',
         'af-ZA' => 'Afrikaans',
         'ar-SA' => 'Arabisch',
+        'hy-AM' => 'Armenian',
         'bg-BG' => 'Bulgaars',
         'zh-CN' => 'Chinees, vereenvoudigd',
         'zh-TW' => 'Chinese, traditioneel',

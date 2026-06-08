@@ -37,7 +37,8 @@ class AccessoryImporter extends ItemImporter
             $this->log('Updating Accessory');
             $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
             $accessory->update($this->sanitizeItemForUpdating($accessory));
-            $accessory->save();
+            // update() already saves the model, no need to call save() again while Model::unguard() is active
+            $accessory->setImported(true);
 
             return;
         }

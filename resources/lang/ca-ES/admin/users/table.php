@@ -5,7 +5,7 @@ return [
     'allow' => 'Allow',
     'checkedout' => 'Recursos',
     'created_at' => 'Created',
-    'createuser' => 'Create User',
+    'createuser' => 'Creació d\'usuari',
     'deny' => 'Deny',
     'email' => 'Email',
     'employee_num' => 'Employee No.',

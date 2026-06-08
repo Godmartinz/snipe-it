@@ -180,6 +180,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.view.requestable' => '1']);
     }
 
+    public function viewEncryptedCustomFields()
+    {
+        return $this->appendPermission(['assets.view.encrypted_custom_fields' => '1']);
+    }
+
     public function deleteAssetModels()
     {
         return $this->appendPermission(['models.delete' => '1']);
@@ -283,6 +288,11 @@ class UserFactory extends Factory
     public function checkoutLicenses()
     {
         return $this->appendPermission(['licenses.checkout' => '1']);
+    }
+
+    public function checkinLicenses()
+    {
+        return $this->appendPermission(['licenses.checkin' => '1']);
     }
 
     public function viewKeysLicenses()
@@ -438,6 +448,26 @@ class UserFactory extends Factory
     public function auditAssets()
     {
         return $this->appendPermission(['assets.audit' => '1']);
+    }
+
+    public function manageModelFiles()
+    {
+        return $this->appendPermission(['models.files' => '1']);
+    }
+
+    public function manageLocationFiles()
+    {
+        return $this->appendPermission(['locations.files' => '1']);
+    }
+
+    public function manageCompanyFiles()
+    {
+        return $this->appendPermission(['companies.files' => '1']);
+    }
+
+    public function manageSupplierFiles()
+    {
+        return $this->appendPermission(['suppliers.files' => '1']);
     }
 
     private function appendPermission(array $permission)

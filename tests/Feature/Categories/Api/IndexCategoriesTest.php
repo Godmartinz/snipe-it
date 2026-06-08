@@ -63,4 +63,66 @@ class IndexCategoriesTest extends TestCase
             ]);
 
     }
+
+    public function test_category_index_can_sort_by_has_eula_ascending()
+    {
+        $searchPrefix = 'has-eula-asc-'.uniqid();
+
+        $withoutEula = Category::factory()->forAssets()->create([
+            'name' => $searchPrefix.'-without',
+            'eula_text' => '',
+        ]);
+
+        $withEula = Category::factory()->forAssets()->create([
+            'name' => $searchPrefix.'-with',
+            'eula_text' => 'This category has a EULA.',
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(
+                route('api.categories.index', [
+                    'search' => $searchPrefix,
+                    'sort' => 'has_eula',
+                    'order' => 'asc',
+                    'offset' => '0',
+                    'limit' => '20',
+                ]))
+            ->assertOk()
+            ->assertJson([
+                'total' => 2,
+            ])
+            ->assertJsonPath('rows.0.id', $withoutEula->id)
+            ->assertJsonPath('rows.1.id', $withEula->id);
+    }
+
+    public function test_category_index_can_sort_by_has_eula_descending()
+    {
+        $searchPrefix = 'has-eula-desc-'.uniqid();
+
+        $withoutEula = Category::factory()->forAssets()->create([
+            'name' => $searchPrefix.'-without',
+            'eula_text' => '',
+        ]);
+
+        $withEula = Category::factory()->forAssets()->create([
+            'name' => $searchPrefix.'-with',
+            'eula_text' => 'This category has a EULA.',
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(
+                route('api.categories.index', [
+                    'search' => $searchPrefix,
+                    'sort' => 'has_eula',
+                    'order' => 'desc',
+                    'offset' => '0',
+                    'limit' => '20',
+                ]))
+            ->assertOk()
+            ->assertJson([
+                'total' => 2,
+            ])
+            ->assertJsonPath('rows.0.id', $withEula->id)
+            ->assertJsonPath('rows.1.id', $withoutEula->id);
+    }
 }

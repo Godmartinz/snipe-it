@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Anda harus memilih setidaknya satu aset dari daftar',
+    ],
+
     'checkin' => [
         'error' => 'Aset tidak dicek, coba lagi',
         'success' => 'Aset berhasil dicek.',
         'user_does_not_exist' => 'Pengguna tidak cocok. Silahkan coba lagi.',
         'already_checked_in' => 'Aset tersebut sudah diperiksa.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

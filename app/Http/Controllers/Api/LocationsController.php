@@ -67,7 +67,18 @@ class LocationsController extends Controller
             'notes',
         ];
 
-        $locations = Location::with('parent', 'manager', 'children')->select([
+        $locations = Location::with([
+            'parent',
+            'children',
+            'manager' => fn ($q) => $q->withCount([
+                'assets as assets_count',
+                'accessories as accessories_count',
+                'licenses as licenses_count',
+                'consumables as consumables_count',
+                'managesUsers as manages_users_count',
+                'managedLocations as manages_locations_count',
+            ]),
+        ])->select([
             'locations.id',
             'locations.name',
             'locations.address',
@@ -103,7 +114,9 @@ class LocationsController extends Controller
             ->withCount('components as components_count')
             ->with('adminuser');
 
-        // Only scope locations if the setting is enabled
+        // scope_locations_fmcs is required for location-level company scoping (locations may not
+        // have company_id assigned unless the compatibility check has been completed in Settings).
+        // Without it, locations are visible to all authenticated users regardless of FMCS state.
         if (Setting::getSettings()->scope_locations_fmcs) {
             $locations = Company::scopeCompanyables($locations);
         }
@@ -157,8 +170,6 @@ class LocationsController extends Controller
             $locations->where('tag_color', '=', $request->input('locations.tag_color'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $locations->count()) ? $locations->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -180,6 +191,7 @@ class LocationsController extends Controller
         }
 
         $total = $locations->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $locations = $locations->skip($offset)->take($limit)->get();
 
         return (new LocationsTransformer)->transformLocations($locations, $total);
@@ -204,7 +216,7 @@ class LocationsController extends Controller
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
             // check if parent is set and has a different company
             if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
             }
         }
 
@@ -227,7 +239,19 @@ class LocationsController extends Controller
     public function show($id): JsonResponse|array
     {
         $this->authorize('view', Location::class);
-        $location = Location::with('parent', 'manager', 'children', 'company')
+        $location = Location::with([
+            'parent',
+            'children',
+            'company',
+            'manager' => fn ($q) => $q->withCount([
+                'assets as assets_count',
+                'accessories as accessories_count',
+                'licenses as licenses_count',
+                'consumables as consumables_count',
+                'managesUsers as manages_users_count',
+                'managedLocations as manages_locations_count',
+            ]),
+        ])
             ->select([
                 'locations.id',
                 'locations.name',
@@ -285,6 +309,10 @@ class LocationsController extends Controller
                 // check if there are related objects with different company
                 if (Helper::test_locations_fmcs(false, $id, $location->company_id)) {
                     return response()->json(Helper::formatStandardApiResponse('error', null, 'error scoped locations'));
+                }
+                // check if parent is set and has a different company
+                if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
+                    return response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
                 }
             } else {
                 $location->company_id = $request->input('company_id');
@@ -422,11 +450,6 @@ class LocationsController extends Controller
             'locations.tag_color',
         ]);
 
-        // Only scope locations if the setting is enabled
-        if (Setting::getSettings()->scope_locations_fmcs) {
-            $locations = Company::scopeCompanyables($locations);
-        }
-
         $page = 1;
         if ($request->filled('page')) {
             $page = $request->input('page');
@@ -434,6 +457,10 @@ class LocationsController extends Controller
 
         if ($request->filled('search')) {
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
+        }
+
+        if ($request->filled('excludeId')) {
+            $locations->where('locations.id', '!=', (int) $request->input('excludeId'));
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();
@@ -462,11 +489,11 @@ class LocationsController extends Controller
     public function history(Request $request, Location $location): JsonResponse|array
     {
         $this->authorize('history', $location);
-        $history = $location->getHistory($request);
-        $total = $location->getHistory($request)->count();
+        $historyQuery = $location->getHistory($request);
+        $total = (clone $historyQuery)->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-        $history = $history->skip($offset)->take($limit)->get();
+        $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }

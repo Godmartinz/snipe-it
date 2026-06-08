@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\Asset;
+use App\Models\Component;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Setting;
@@ -143,7 +144,7 @@ class AssetsTransformer
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea' && Gate::allows('assets.view.encrypted_custom_fields')) ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -157,7 +158,7 @@ class AssetsTransformer
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -191,8 +192,8 @@ class AssetsTransformer
                         'pivot_id' => $component->pivot->id,
                         'name' => e($component->name),
                         'qty' => $component->pivot->assigned_qty,
-                        'price_cost' => $component->purchase_cost,
-                        'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
+                        'purchase_cost' => $component->purchase_cost,
+                        'purchase_total' => $component->calculated_purchase_cost,
                         'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
 
                     ];
@@ -273,7 +274,7 @@ class AssetsTransformer
                         $value = Helper::getFormattedDateObject($value, 'date', false);
                     }
 
-                    $fields_array[$field->db_column] = e($value);
+                    $fields_array[$field->db_column] = ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value);
                 }
 
                 $array['custom_fields'] = $fields_array;
@@ -387,6 +388,9 @@ class AssetsTransformer
         $permissions_array['available_actions'] = [
             'checkout' => false,
             'checkin' => Gate::allows('checkin', License::class),
+            'bulk_selectable' => [
+                'checkin' => Gate::allows('checkin', License::class),
+            ],
         ];
 
         $array += $permissions_array;
@@ -398,16 +402,26 @@ class AssetsTransformer
     public function transformCheckedoutComponents(Collection $components_assets, $total)
     {
         $array = [];
-        foreach ($components_assets as $component) {
+        foreach ($components_assets as $component_checkout) {
             $array[] = [
-                'assigned_pivot_id' => $component->pivot->id,
-                'id' => (int) $component->id,
-                'name' => e($component->display_name),
-                'qty' => $component->pivot->assigned_qty,
-                'note' => ($component->pivot->note) ? e($component->pivot->note) : null,
-                'type' => 'asset',
-                'created_at' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
-                'available_actions' => ['checkin' => true],
+                'assigned_pivot_id' => $component_checkout->id,
+                'name' => [
+                    'id' => $component_checkout->component?->id,
+                    'name' => e($component_checkout->component?->display_name),
+                    'type' => 'component',
+                    'deleted_at' => $component_checkout->component?->deleted_at,
+                ],
+                'assigned_qty' => $component_checkout->assigned_qty,
+                'note' => ($component_checkout->note) ? e($component_checkout->note) : null,
+                'created_at' => Helper::getFormattedDateObject($component_checkout->created_at, 'datetime'),
+                'created_by' => $component_checkout->adminuser ? [
+                    'id' => (int) $component_checkout->adminuser->id,
+                    'name' => e($component_checkout->adminuser->display_name),
+                ] : null,
+                'available_actions' => [
+                    'checkin' => (($component_checkout->component?->deleted_at == '') && Gate::allows('checkin', Component::class)),
+                    'view' => (($component_checkout->component?->deleted_at == '') && Gate::allows('view', Component::class)),
+                ],
             ];
         }
 

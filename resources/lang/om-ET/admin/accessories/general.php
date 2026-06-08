@@ -9,7 +9,7 @@ return [
     'edit' => 'Gabaadaa Haaromsuu',
     'eula_text' => 'Kaatagarii EULA',
     'eula_text_help' => 'Kuni bakka siif kenna EULAs kee gosa qabeenyaa addaa addaa irratti akka fooyyessuuf. Yoo EULA tokko qabeenyaa hundaa irratti qofa qabdu ta\'e, bitaa gadi jiru irratti sanduuqa cuqaasuu dandeessa EULA duraa fayyadamuuf.',
-    'require_acceptance' => 'Itti gaafatamtoota gatii kana keessatti qindeessuu mirkaneessuuf itti gaafatamtoota dirqama qabaachuuf.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'EULA duraa sirrii tokko hin argamne. Kaayyoo keessatti tokko dabalata.',
     'total' => 'Ida\'am Walii galaa',
     'remaining' => 'Ka jiru',

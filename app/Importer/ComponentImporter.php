@@ -42,7 +42,8 @@ class ComponentImporter extends ItemImporter
             }
             $this->log('Updating Component');
             $component->update($this->sanitizeItemForUpdating($component));
-            $component->save();
+            // update() already saves the model, no need to call save() again while Model::unguard() is active
+            $component->setImported(true);
 
             return;
         }

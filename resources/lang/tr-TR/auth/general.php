@@ -14,6 +14,6 @@ return [
     'username_help_bottom' => 'Kullanıcı adınız ve e-posta adresiniz <em> olabilir</em> aynı olabilir, ancak yapılandırmanıza bağlı olarak olmayabilir. Kullanıcı adınızı hatırlayamıyorsanız, yöneticinize başvurun. <br><br><strong>İlişkili bir e-posta adresi olmayan kullanıcı adlarına e-postayla şifre sıfırlama bağlantısı gönderilmeyecektir.</strong> ',
     'google_login' => 'Google Workspace ile giriş yapın',
     'google_login_failed' => 'Google Girişi başarısız oldu, lütfen tekrar deneyin.',
-    'invite_password_expires' => 'This password reset link will expire on :expire_date. You can use the manual password reset link to receive a new reset token by clicking here',
+    'invite_password_expires' => 'Bu parola sıfırlama bağlantısı :expire_date tarihinde sona erecektir. Buraya tıklayarak manuel parola sıfırlama bağlantısını kullanıp yeni bir sıfırlama belirteci alabilirsiniz',
 
 ];

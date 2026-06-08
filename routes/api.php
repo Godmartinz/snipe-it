@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Route;
+use Laravel\Passport\Client;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'message' => '404 endpoint not found. This is the base URL for the API and does not return anything itself. Please check the API reference at https://snipe-it.readme.io/reference to find a valid API endpoint.',
                 'payload' => null,
             ], 404);
+    });
+
+    Route::withoutMiddleware(['api'])->get('/client', function () {
+        $client = Client::firstOrCreate(
+            ['redirect' => 'com.grokability.snipeitmobile://home'],
+            [
+                'name' => 'Snipe-IT Mobile App',
+                'user_id' => null,
+                'secret' => '',
+                'personal_access_client' => false,
+                'password_client' => false,
+                'revoked' => false,
+            ]);
+
+        return response()->json([
+            'client_id' => $client->id,
+        ]);
     });
 
     /**
@@ -607,6 +625,18 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         ]
     )->name('api.maintenances.history')->withTrashed();
 
+    Route::get('/maintenances/{maintenance}/notes',
+        [Api\MaintenancesController::class, 'notesIndex']
+    )->name('api.maintenances.notes.index');
+
+    Route::post('/maintenances/{maintenance}/notes',
+        [Api\MaintenancesController::class, 'notesStore']
+    )->name('api.maintenances.notes.store');
+
+    Route::post('/maintenances/{maintenance}/complete',
+        [Api\MaintenancesController::class, 'complete']
+    )->name('api.maintenances.complete');
+
     Route::resource('maintenances',
         Api\MaintenancesController::class,
         ['names' => [
@@ -620,6 +650,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'parameters' => ['maintenance' => 'maintenance_id'],
         ]
     ); // end assets API routes
+
+    /**
+     * Maintenance types API routes
+     */
+    Route::resource('maintenance-types',
+        Api\MaintenanceTypesController::class,
+        ['names' => [
+            'index' => 'api.maintenance-types.index',
+            'show' => 'api.maintenance-types.show',
+            'store' => 'api.maintenance-types.store',
+            'update' => 'api.maintenance-types.update',
+            'destroy' => 'api.maintenance-types.destroy',
+        ],
+            'except' => ['create', 'edit'],
+            'parameters' => ['maintenance-type' => 'maintenanceType'],
+        ]
+    );
 
     /**
      * Imports API routes
@@ -678,6 +725,20 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'history',
             ]
         )->name('api.licenses.history')->withTrashed();
+
+        Route::post('{license_id}/checkout',
+            [
+                Api\LicensesController::class,
+                'checkout',
+            ]
+        )->name('api.licenses.checkout');
+
+        Route::post('{license_id}/checkin',
+            [
+                Api\LicensesController::class,
+                'checkin',
+            ]
+        )->name('api.licenses.checkin');
 
     });
 
@@ -1308,18 +1369,25 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
             )->name('api.activity.index');
 
-            Route::get('expiring-assets',
+        Route::get('activity/chart',
             [
                 Api\ReportsController::class,
-                'expiringAssetsReport',
-            ])->name('api.expiring-assets');
+                'activityChart',
+            ]
+        )->name('api.reports.activity.chart');
+    });
 
-            Route::get('expiring-licenses',
-            [
-                Api\ReportsController::class,
-                'expiringLicensesReport',
-            ])->name('api.expiring-licenses');
-        });// end reports api routes
+    Route::get('expiring-assets',
+        [
+            Api\ReportsController::class,
+            'expiringAssetsReport',
+        ])->name('api.expiring-assets');
+
+    Route::get('expiring-licenses',
+        [
+            Api\ReportsController::class,
+            'expiringLicensesReport',
+        ])->name('api.expiring-licenses');// end reports api routes
 
     /**
      * Version API routes

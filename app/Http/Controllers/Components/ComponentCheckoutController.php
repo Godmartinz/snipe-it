@@ -46,7 +46,8 @@ class ComponentCheckoutController extends Controller
                 }
 
                 // Return the checkout view
-                return view('components/checkout', compact('component'));
+                return view('components/checkout', compact('component'))
+                    ->with('snipe_component', $component);
             }
 
             // Invalid category

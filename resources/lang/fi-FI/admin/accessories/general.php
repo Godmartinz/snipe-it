@@ -9,7 +9,7 @@ return [
     'edit' => 'Muokkaa oheistarviketta',
     'eula_text' => 'Kategorian käyttöehdot',
     'eula_text_help' => 'Tässä kentässä voit muokata käyttöehtojasi tietyn tyyppisille laitteille. Jos sinulla on vain yksi käyttöoikeussopimus kaikille laitteillesi, voit valita yleisen käyttöehdon valitsemalla alla olevan ruudun.',
-    'require_acceptance' => 'Vaadi käyttäjiä hyväksymään tämän kategorian kohteet.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Yleisiä käyttöehtoja ei löytynyt. Voit lisätä ne asetuksista.',
     'total' => 'Yhteensä',
     'remaining' => 'Saatavilla',

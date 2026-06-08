@@ -100,6 +100,42 @@ class BulkAssetCheckoutTest extends TestCase
         }
     }
 
+    public function test_bulk_checkout_can_set_assets_to_not_requestable()
+    {
+        $assets = Asset::factory()->count(2)->create(['requestable' => 1]);
+        $targetUser = User::factory()->create();
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.bulkcheckout.store'), [
+                'selected_assets' => $assets->pluck('id')->toArray(),
+                'checkout_to_type' => 'user',
+                'assigned_user' => $targetUser->id,
+                'set_not_requestable' => 1,
+            ]);
+
+        $assets->each(function (Asset $asset) {
+            $this->assertFalse((bool) $asset->fresh()->requestable);
+        });
+    }
+
+    public function test_bulk_checkout_leaves_requestable_unchanged_when_not_selected()
+    {
+        $requestableAsset = Asset::factory()->create(['requestable' => 1]);
+        $nonRequestableAsset = Asset::factory()->create(['requestable' => 0]);
+        $targetUser = User::factory()->create();
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.bulkcheckout.store'), [
+                'selected_assets' => [$requestableAsset->id, $nonRequestableAsset->id],
+                'checkout_to_type' => 'user',
+                'assigned_user' => $targetUser->id,
+                // Intentionally omitted: set_not_requestable
+            ]);
+
+        $this->assertTrue((bool) $requestableAsset->fresh()->requestable);
+        $this->assertFalse((bool) $nonRequestableAsset->fresh()->requestable);
+    }
+
     public static function checkoutTargets()
     {
         yield 'Checkout to user' => [

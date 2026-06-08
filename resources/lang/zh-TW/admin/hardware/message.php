@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => '你必須至少選擇一項資產。',
+    ],
+
     'checkin' => [
         'error' => '繳回資產失敗，請重試。',
         'success' => '繳回資產成功。',
         'user_does_not_exist' => '無效使用者，請重試。',
         'already_checked_in' => '資產已繳回。',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -94,11 +94,20 @@ return [
         'success' => 'crwdns12770:0crwdne12770:0',
     ],
 
+    'multi-checkin' => [
+        'error' => 'crwdns14885:0crwdne14885:0',
+        'success' => 'crwdns14887:0crwdne14887:0',
+        'no_assets_selected' => 'crwdns14889:0crwdne14889:0',
+    ],
+
     'checkin' => [
         'error' => 'crwdns752:0crwdne752:0',
         'success' => 'crwdns753:0crwdne753:0',
         'user_does_not_exist' => 'crwdns754:0crwdne754:0',
         'already_checked_in' => 'crwdns1603:0crwdne1603:0',
+        'force_checkin_orphaned_success' => 'crwdns14742:0crwdne14742:0',
+        'force_checkin_not_orphaned' => 'crwdns14744:0crwdne14744:0',
+        'force_checkin_error' => 'crwdns14746:0crwdne14746:0',
 
     ],
 

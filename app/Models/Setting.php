@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Rules\CssColor;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -173,6 +175,34 @@ class Setting extends Model
      *
      * @author A. Gianotto <snipe@snipe.net>
      */
+    protected function headerColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#3c8dbc'),
+        );
+    }
+
+    protected function linkLightColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#296282'),
+        );
+    }
+
+    protected function linkDarkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#5fa4cc'),
+        );
+    }
+
+    protected function navLinkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#ffffff'),
+        );
+    }
+
     public function show_custom_css(): string
     {
         $custom_css = self::getSettings()->custom_css;

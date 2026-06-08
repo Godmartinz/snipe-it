@@ -6,6 +6,7 @@ use App\Mail\CheckoutAccessoryMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -173,7 +174,7 @@ class AccessoryCheckoutTest extends TestCase
     {
         Mail::fake();
 
-        $accessory = Accessory::factory()->requiringAcceptance()->create();
+        $accessory = Accessory::factory()->requiringAcceptance()->create(['qty' => 5]);
         $user = User::factory()->create();
 
         $this->actingAs(User::factory()->checkoutAccessories()->create())
@@ -266,5 +267,51 @@ class AccessoryCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('users.show', $user));
+    }
+
+    public function test_accessory_checkout_page_post_redirects_to_signature_page_when_sign_in_place_is_checked()
+    {
+        $targetUser = User::factory()->create();
+        $accessory = Accessory::factory()->requiringAcceptance()->create(['qty' => 5]);
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->from(route('accessories.checkout.show', $accessory))
+            ->post(route('accessories.checkout.store', $accessory), [
+                'assigned_user' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'redirect_option' => 'index',
+                'checkout_qty' => 2,
+                'sign_in_place' => 1,
+            ]);
+
+        $acceptance = CheckoutAcceptance::query()
+            ->where('checkoutable_type', Accessory::class)
+            ->where('checkoutable_id', $accessory->id)
+            ->where('assigned_to_id', $targetUser->id)
+            ->pending()
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($acceptance);
+        $this->assertEquals(2, $acceptance->qty);
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('account.accept.item', $acceptance));
+    }
+
+    public function test_accessory_checkout_stores_sign_in_place_preference_in_session()
+    {
+        $targetUser = User::factory()->create();
+        $accessory = Accessory::factory()->create();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->post(route('accessories.checkout.store', $accessory), [
+                'assigned_user' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'redirect_option' => 'index',
+                'sign_in_place' => 1,
+            ]);
+
+        $response->assertSessionHas('sign_in_place', true);
     }
 }

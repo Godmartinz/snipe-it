@@ -9,7 +9,7 @@ return [
     'edit' => 'Uređivanje dodatne opreme',
     'eula_text' => 'Kategorija EULA',
     'eula_text_help' => 'Ovo polje omogućuje vam da prilagodite svoje EULA-e za određene vrste sredstava. Ako imate samo jedan EULA za sve vaše imovine, možete označiti donji okvir kako biste upotrijebili primarnu postavku.',
-    'require_acceptance' => 'Tražite korisnike da potvrdite prihvaćanje imovine u ovoj kategoriji.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Nisu pronađeni primarni standardni EULA. Dodajte jednu u Postavke.',
     'total' => 'ukupno',
     'remaining' => 'Dobitak',

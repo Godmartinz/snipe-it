@@ -3,9 +3,13 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\Assets\BulkAssetsController;
+use App\Models\Accessory;
+use App\Models\AccessoryCheckout;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
+use App\Models\Component;
+use App\Models\Depreciation;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -192,6 +196,55 @@ class AssetTest extends TestCase
 
     }
 
+    public function test_eol_progress_percent_returns_expected_value(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 1, 1, 0, 0, 0));
+
+        try {
+            $asset = Asset::factory()->create([
+                'purchase_date' => '2025-01-01',
+                'eol_explicit' => 1,
+            ]);
+
+            $asset->asset_eol_date = '2027-01-01';
+            $asset->save();
+            $asset->refresh();
+
+            $this->assertSame(50.0, $asset->eolProgressPercent());
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_depreciation_progress_percent_returns_expected_value(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 1, 1, 0, 0, 0));
+
+        try {
+            $depreciation = Depreciation::factory()->create(['months' => 24]);
+            $model = AssetModel::factory()->create(['depreciation_id' => $depreciation->id]);
+
+            $asset = Asset::factory()->create([
+                'model_id' => $model->id,
+                'purchase_date' => '2025-01-01',
+            ]);
+
+            $this->assertSame(50.0, $asset->depreciationProgressPercent());
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_warranty_progress_percent_returns_zero_without_required_dates(): void
+    {
+        $asset = Asset::factory()->create([
+            'purchase_date' => null,
+            'warranty_months' => 24,
+        ]);
+
+        $this->assertSame(0.0, $asset->warrantyProgressPercent());
+    }
+
     public function test_assigned_type_without_assign_to()
     {
         $user = User::factory()->create();
@@ -288,5 +341,83 @@ class AssetTest extends TestCase
         $filtered = array_diff([$deployable->id, $undeployable->id], $undeployableIds);
 
         $this->assertEquals([$deployable->id], array_values($filtered));
+    }
+
+    public function test_asset_accessories_relationship_uses_accessory_checkout_rows(): void
+    {
+        $asset = Asset::factory()->create();
+        $otherAsset = Asset::factory()->create();
+
+        $primaryAccessory = Accessory::factory()->create(['purchase_cost' => 10]);
+        $secondaryAccessory = Accessory::factory()->create(['purchase_cost' => 15]);
+
+        AccessoryCheckout::factory()->create([
+            'accessory_id' => $primaryAccessory->id,
+            'assigned_to' => $asset->id,
+            'assigned_type' => Asset::class,
+        ]);
+        AccessoryCheckout::factory()->create([
+            'accessory_id' => $primaryAccessory->id,
+            'assigned_to' => $asset->id,
+            'assigned_type' => Asset::class,
+        ]);
+        AccessoryCheckout::factory()->create([
+            'accessory_id' => $secondaryAccessory->id,
+            'assigned_to' => $asset->id,
+            'assigned_type' => Asset::class,
+        ]);
+        AccessoryCheckout::factory()->create([
+            'accessory_id' => $primaryAccessory->id,
+            'assigned_to' => $otherAsset->id,
+            'assigned_type' => Asset::class,
+        ]);
+
+        $this->assertCount(3, $asset->accessories()->get());
+        $this->assertSame(35.0, $asset->getAccessoryCost());
+    }
+
+    public function test_asset_components_calculated_total_uses_assigned_quantity(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $firstComponent = Component::factory()->create(['purchase_cost' => 10]);
+        $secondComponent = Component::factory()->create(['purchase_cost' => 25]);
+
+        $asset->components()->attach($firstComponent->id, [
+            'assigned_qty' => 3,
+            'created_by' => User::factory()->create()->id,
+            'created_at' => now(),
+        ]);
+
+        $asset->components()->attach($secondComponent->id, [
+            'assigned_qty' => 2,
+            'created_by' => User::factory()->create()->id,
+            'created_at' => now(),
+        ]);
+
+        $freshAsset = $asset->fresh();
+
+        $this->assertEquals(35, $freshAsset->components->sum('purchase_cost'));
+        $this->assertEquals(80, $freshAsset->components->sum('calculated_purchase_cost'));
+        $this->assertSame(80.0, $freshAsset->getComponentCost());
+    }
+
+    public function test_asset_components_calculated_total_treats_null_purchase_cost_as_zero(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $componentWithoutCost = Component::factory()->create(['purchase_cost' => null]);
+
+        $asset->components()->attach($componentWithoutCost->id, [
+            'assigned_qty' => 4,
+            'created_by' => User::factory()->create()->id,
+            'created_at' => now(),
+        ]);
+
+        $freshAsset = $asset->fresh();
+
+        $this->assertSame(0.0, $freshAsset->components->first()->calculated_purchase_cost);
+        $this->assertEquals(0, $freshAsset->components->sum('calculated_purchase_cost'));
+        $this->assertSame(0.0, $freshAsset->getComponentCost());
     }
 }

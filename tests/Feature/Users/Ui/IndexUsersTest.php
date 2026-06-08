@@ -20,4 +20,15 @@ class IndexUsersTest extends TestCase
             ->get(route('users.index'))
             ->assertOk();
     }
+
+    public function test_page_renders_with_array_query_inputs()
+    {
+        $this->actingAs(User::factory()->viewUsers()->create())
+            ->get(route('users.index', [
+                'manager_id' => [1],
+                'company_id' => [1],
+                'status' => ['deleted'],
+            ]))
+            ->assertOk();
+    }
 }

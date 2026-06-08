@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Importing\Api;
 
+use App\Models\Actionlog as ActionLog;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Import;
@@ -130,5 +131,47 @@ class ImportAssetModelsTest extends ImportDataTestCase implements TestsPermissio
         $this->assertEquals($row['model_number'], $updatedAssetmodel->model_number);
         $this->assertEquals($row['name'], $updatedAssetmodel->name);
 
+    }
+
+    #[Test]
+    public function update_mode_logs_asset_model_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+        $initialImport = Import::factory()->assetmodel()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $assetModel = AssetModel::query()->where('name', $initialRow['name'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'model_number' => Str::random(),
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->assetmodel()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $assetModel->refresh();
+        $this->assertEquals($updatedRow['model_number'], $assetModel->model_number);
+
+        $updateLog = ActionLog::query()
+            ->where('item_type', AssetModel::class)
+            ->where('item_id', $assetModel->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after asset model importer update mode.');
     }
 }

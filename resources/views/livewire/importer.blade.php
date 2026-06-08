@@ -245,7 +245,7 @@
                                                                     <h3>
                                                                         <i class="{{ \App\Helpers\IconHelper::icon($typeOfImport) }}">
                                                                         </i>
-                                                                        {{ trans('general.map_fields', ['item_type' => ucwords($typeOfImport)]) }}
+                                                                        {{ trans('general.map_fields', ['item_type' => $importTypes[$typeOfImport]]) }}
                                                                        </h3>
                                                                     <hr style="border-top: 1px solid lightgray">
                                                                 </div>
@@ -276,7 +276,7 @@
                                                                                     class="mappings"
                                                                                     style="min-width: 100%;"
                                                                                 >
-                                                                                    <option selected="selected" value="">Do Not Import</option>
+                                                                                    <option selected="selected" value="">{{ trans('general.importer.do_not_import') }}</option>
                                                                                     @foreach($columnOptions[$typeOfImport] as $key => $value)
                                                                                         <option
                                                                                             value="{{ $key }}"

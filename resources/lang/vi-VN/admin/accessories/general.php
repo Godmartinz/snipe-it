@@ -9,7 +9,7 @@ return [
     'edit' => 'Sửa Phụ kiện',
     'eula_text' => 'Hạng mục điều khoản sử dụng',
     'eula_text_help' => 'Trường này cho phép bạn thay đổi các điều khoản sử dụng (EULAs) cho từng loại tài sản cụ thể. Nếu chỉ có một EULA cho tất cả các tài sản, bạn có thể chọn ô vuông bên dưới để sử dụng làm mặc định.',
-    'require_acceptance' => 'Yêu cầu người dùng xác nhận đã nhận thiết bị trong hạng mục này.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Điều khoản sử dụng mặc định chưa được thiết lập. Hãy thêm một cái vào trong phần Settings.',
     'total' => 'Tổng số',
     'remaining' => 'Sẵn có',

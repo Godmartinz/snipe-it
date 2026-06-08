@@ -37,6 +37,9 @@ return [
         'confirm' => 'இந்த உரிமத்தை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'உரிமத்தை நீக்குவதில் ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'உரிமம் வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

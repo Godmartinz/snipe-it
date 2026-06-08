@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Denne brukeren er slettet. Du vil må gjenopprette denne brukeren for å redigere, eller tildele nye eiendeler.',
     'ldap_not_configured' => 'LDAP integrasjonen er ikke konfigurert i denne installasjonen.',
     'password_resets_sent' => 'De valgte brukerne som er aktivert og har en gyldig e-postadresse har blitt sendt en tilbakestillingslenke.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'En lenke for tilbakestilling av passord har blitt sendt til :email!',
     'user_has_no_email' => 'Denne brukeren har ingen e-postadresse i sin profil.',
     'log_record_not_found' => 'Finner ikke et samsvarende loggelement for denne brukeren.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Vellykket aktivering av bruker.',
         'restored' => 'Vellykket gjenopprettelse av bruker.',
         'import' => 'Vellykket import av brukere.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Det oppstod et problem under aktivering av bruker. Prøv igjen.',
         'import' => 'Det oppstod et problem under import av brukere. Prøv igjen.',
-        'asset_already_accepted' => 'Denne eiendelen er allerede akseptert.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Du må enten akseptere eller avvise denne eiendelen.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Eiendelen du prøvde å akseptere ble ikke sjekket ut til deg.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Fikk ingen oppføringer fra LDAP-serveren. Sjekk LDAP-innstillingene i konfigurasjonsfilen. <br>Feil fra LDAP-server:',
         'password_ldap' => 'Passordet for denne kontoen administreres av LDAP/Active Directory. Kontakt IT-avdelingen for å endre passordet. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

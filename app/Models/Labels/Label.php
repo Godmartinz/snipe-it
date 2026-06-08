@@ -690,7 +690,7 @@ abstract class Label
         // Find one
         if ($name !== null) {
             return static::find()
-                ->sole(
+                ->first(
                     function ($label) use ($name) {
                         return $label->getName() == $name;
                     }

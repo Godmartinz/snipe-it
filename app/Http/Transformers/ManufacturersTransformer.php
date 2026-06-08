@@ -52,6 +52,9 @@ class ManufacturersTransformer
                 'update' => (($manufacturer->deleted_at == '') && (Gate::allows('update', Manufacturer::class))),
                 'restore' => (($manufacturer->deleted_at != '') && (Gate::allows('create', Manufacturer::class))),
                 'delete' => $manufacturer->isDeletable(),
+                'bulk_selectable' => [
+                    'delete' => $manufacturer->isDeletable(),
+                ],
             ];
 
             $array += $permissions_array;

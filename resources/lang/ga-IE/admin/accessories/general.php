@@ -9,7 +9,7 @@ return [
     'edit' => 'Cuir Cúlpháirtí in eagar',
     'eula_text' => 'Catagóir EULA',
     'eula_text_help' => 'Ceadaíonn an réimse seo duit do chuid EULA a shaincheapadh le haghaidh cineálacha sonracha sócmhainní. Mura bhfuil EULA amháin agat ar do chuid sócmhainní go léir, is féidir leat an bosca thíos a sheiceáil chun an réamhshocraithe a úsáid.',
-    'require_acceptance' => 'A cheangal ar úsáideoirí a chinntiú go nglacfar le sócmhainní sa chatagóir seo.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Níor aimsíodh aon réamhshocraithe EULA. Cuir ceann amháin i Socruithe.',
     'total' => 'Iomlán',
     'remaining' => 'Bain úsáid as',

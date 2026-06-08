@@ -94,11 +94,20 @@ return [
         'success' => '资产签出成功。 |资产签出成功。',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => '您必须在这个列表中选择至少一项资产',
+    ],
+
     'checkin' => [
         'error' => '资产还没有归还，请重试。',
         'success' => '资产归还成功。',
         'user_does_not_exist' => '无效用户，请重试。',
         'already_checked_in' => '该资产已经归还。',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

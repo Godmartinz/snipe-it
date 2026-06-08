@@ -18,17 +18,17 @@ return [
 
     'signin' => [
         'error' => 'Bandant prisijungti įvyko klaida, bandykite dar kartą.',
-        'success' => 'Jūs prisijungėte sėkmingai.',
+        'success' => 'Jūs sėkmingai prisijungėte.',
     ],
 
     'logout' => [
         'error' => 'Bandant atsijungti įvyko klaida, bandykite dar kartą.',
-        'success' => 'Jūs atsijungėte sėkmingai.',
+        'success' => 'Jūs sėkmingai atsijungėte.',
     ],
 
     'signup' => [
         'error' => 'Bandant sukurti paskyrą įvyko klaidą, bandykite dar kartą.',
-        'success' => 'Paskyra sukurta sėkmingai.',
+        'success' => 'Paskyra sėkmingai sukurta.',
     ],
 
     'forgot-password' => [
@@ -38,7 +38,7 @@ return [
 
     'forgot-password-confirm' => [
         'error' => 'Bandant pakeisti slaptažodį įvyko klaidą, bandykite dar kartą.',
-        'success' => 'Jūsų slaptaždis buvo pakeistas sėkmingai.',
+        'success' => 'Jūsų slaptaždis buvo sėkmingai pakeistas.',
     ],
 
 ];

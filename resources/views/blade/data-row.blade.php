@@ -13,7 +13,7 @@
         @endif
         {{ $label }}
     </dt>
-    <dd style="text-align: {{ $align }} !important">
+    <dd {{ $attributes->merge(['style' => 'text-align: '.$align.' !important;']) }}>
         @if ((!$slot->isEmpty()) && ($copy_what!=''))
             <x-copy-to-clipboard copy_what="{{ $copy_what }}">{{ $slot }}</x-copy-to-clipboard>
         @elseif (!$slot->isEmpty())

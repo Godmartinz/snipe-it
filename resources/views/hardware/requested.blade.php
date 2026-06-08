@@ -96,7 +96,7 @@
                                             $request->itemType(),
                                             $request->requestable->id,
                                             true,
-                                            $request->requestingUser()->id
+                                            $request->requestingUser()?->id
                                             ]) }}"
                                             accept-charset="UTF-8"
                                             >

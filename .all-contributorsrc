@@ -4262,6 +4262,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Husky-Devel",
+      "name": "Peter Gallwas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75509373?v=4",
+      "profile": "https://www.husky.nz",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "CybotTM",
+      "name": "Sebastian Mendel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/326348?v=4",
+      "profile": "https://github.com/CybotTM",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

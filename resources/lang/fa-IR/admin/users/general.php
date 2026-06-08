@@ -16,6 +16,8 @@ return [
     'filetype_info' => 'پسوند های مجاز:png, gif, jpg, jpeg, doc, docx, pdf, txt, zip,Rar',
     'history_user' => 'تاریخچه برای:',
     'info' => 'اطلاعات',
+    'send_acceptance_reminder' => 'Send Reminder',
+    'unaccepted_items' => ':count Unaccepted Items',
     'restore_user' => 'برای بازسازی آنها اینجا کلیک کنید.',
     'last_login' => 'آخرین ورود',
     'ldap_config_text' => 'The selected location will be set for ALL imported users. This will overwrite their existing location, and is an unusual use-case, so leaving this blank is typically best.',
@@ -43,10 +45,9 @@ return [
 ',
     'group_memberships_helpblock' => 'فقط سوپرادمین ها می توانند عضویت های گروه را ویرایش کنند.
 ',
-    'superadmin_permission_warning' => 'فقط superadmin ها می توانند به کاربر اجازه دسترسی superadmin را بدهند.
-',
-    'admin_permission_warning' => 'فقط کاربران با حقوق سرپرست یا بیشتر می توانند به کاربر اجازه دسترسی سرپرست بدهند.
-',
+    'superadmin_permission_warning' => 'Only superadmins may grant or revoke superadmin access.',
+    'self_permission_warning' => 'Only superadmins may edit their own permissions.',
+    'admin_permission_warning' => 'Only users with admins rights or greater may grant or revoke admin access.',
     'remove_group_memberships' => 'حذف عضویت در گروه
 ',
     'warning_deletion_information' => 'You are about to checkin ALL items from the :count user(s) listed below.',

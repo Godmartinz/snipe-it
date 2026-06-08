@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => '至少還有一個子項目與此位置關聯，目前不能被删除，請檢查後重試。 ',
     'assigned_assets' => '已分配資產',
     'current_location' => '目前位置',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

@@ -13,7 +13,7 @@
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 {{-- Page content --}}

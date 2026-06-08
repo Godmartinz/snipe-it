@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Þú verður að velja að lágmarki eina eign úr listanum',
+    ],
+
     'checkin' => [
         'error' => 'Eigninni var ekki skilað, vinsamlegast reyndu aftur',
         'success' => 'Eigninni var skilað.',
         'user_does_not_exist' => 'Þessi notandi er ónothæfur, vinsamlegast reyndu aftur.',
         'already_checked_in' => 'Þessari eign hefur þegar verið skilað.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

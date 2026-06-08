@@ -64,4 +64,6 @@ return [
     'optional_infos' => '選填資訊',
     'order_details' => '訂單相關資訊',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

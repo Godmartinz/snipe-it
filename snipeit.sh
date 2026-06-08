@@ -34,6 +34,7 @@
 # * Moved OS check to start of script                #
 # * Fixed timezone awk                               #
 # * Minor display and logging improvements           #
+# * Add Redhat 10.x support                          #
 ######################################################
 
 # Parse arguments
@@ -961,6 +962,53 @@ EOL
         progress
         log "rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el9"
         log "dnf -y module enable php:remi-8.2" & pid=$!
+        progress
+
+        echo "* Installing Apache httpd, PHP, MariaDB, and other requirements."
+        PACKAGES="httpd mariadb-server git unzip php-mysqlnd php-bcmath php-cli php-embedded php-gd php-mbstring php-ldap php-simplexml php-process php-sodium php-pecl-zip php-fpm"
+        install_packages
+
+        echo "* Configuring Apache."
+        create_virtualhost
+
+        set_hosts
+
+        echo "* Setting MariaDB to start on boot and starting MariaDB."
+        log "systemctl enable mariadb.service"
+        log "systemctl start mariadb.service"
+
+        install_snipeit
+
+        set_firewall & pid=$!
+        progress
+
+        echo "* Setting Apache httpd to start on boot and starting service."
+        log "systemctl enable httpd.service"
+        log "systemctl restart httpd.service"
+
+        echo "* Setting php-fpm to start on boot and starting service."
+        log "systemctl enable php-fpm.service"
+        log "systemctl restart php-fpm.service"
+
+        echo "* Clearing cache and setting final permissions."
+        chmod 777 -R $APP_PATH/storage/framework/cache/
+        log "run_as_app_user php $APP_PATH/artisan cache:clear"
+        chmod 775 -R $APP_PATH/storage/
+
+        set_selinux
+      elif [[ "$version" =~ ^10 ]]; then
+        # Install for CentOS/Alma/Redhat 10
+        set_fqdn
+        set_dbpass
+        tzone=$(timedatectl | grep "Time zone" | awk 'BEGIN { FS"("}; {print $3}');
+
+        echo "* Adding EPEL-release repository."
+        log "dnf -y install wget epel-release" & pid=$!
+        progress
+        log "yum -y install https://rpms.remirepo.net/enterprise/remi-release-10.rpm" & pid=$!
+        progress
+        log "rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi.el10"
+        log "dnf -y module enable php:remi-10" & pid=$!
         progress
 
         echo "* Installing Apache httpd, PHP, MariaDB, and other requirements."

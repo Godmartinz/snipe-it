@@ -170,14 +170,18 @@ class Location extends SnipeModel
      */
     public function assets()
     {
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::where(function ($q) {
+            $q->where('deployable', 1)->orWhere('pending', 1)->orWhere('archived', 0);
+        })->whereNull('deleted_at')->pluck('id');
+
         return $this->hasMany(Asset::class, 'location_id')
-            ->whereHas(
-                'status', function ($query) {
-                    $query->where('status_labels.deployable', '=', 1)
-                        ->orWhere('status_labels.pending', '=', 1)
-                        ->orWhere('status_labels.archived', '=', 0);
-                }
-            );
+            ->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
+    }
+
+    public function countAllTheThings()
+    {
+        return $this->assets()->count() + $this->consumables()->count() + $this->components()->count() + $this->users()->count() + $this->assignedAccessories()->count() + $this->assignedAssets()->count() + $this->accessories()->count();
     }
 
     /**

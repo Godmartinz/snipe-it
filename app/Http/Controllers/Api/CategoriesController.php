@@ -129,6 +129,11 @@ class CategoriesController extends Controller
             case 'created_by':
                 $categories = $categories->OrderByCreatedBy($order);
                 break;
+                // This is annoying, since it's not a real relationship, which is what we usually use these switches for, but
+                // we call the field has_eula, not eula_text, so there won't be a matching field
+            case 'has_eula':
+                $categories = $categories->orderBy('eula_text', $order);
+                break;
             default:
                 $categories = $categories->orderBy($column_sort, $order);
                 break;

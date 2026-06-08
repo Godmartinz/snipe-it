@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'crwdns13980:0crwdne13980:0',
-        'note' => 'crwdns13982:0crwdne13982:0',
+        'note' => 'crwdns14590:0crwdne14590:0',
     ],
+
+    'assetsfiles' => [
+        'name' => 'crwdns14592:0crwdne14592:0',
+        'note' => 'crwdns14594:0crwdne14594:0',
+    ],
+
+    'usersfiles' => [
+        'name' => 'crwdns14596:0crwdne14596:0',
+        'note' => 'crwdns14598:0crwdne14598:0',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'crwdns14600:0crwdne14600:0',
+        'note' => 'crwdns14602:0crwdne14602:0',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'crwdns14604:0crwdne14604:0',
+        'note' => 'crwdns14606:0crwdne14606:0',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'crwdns14608:0crwdne14608:0',
+        'note' => 'crwdns14610:0crwdne14610:0',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'crwdns14612:0crwdne14612:0',
+        'note' => 'crwdns14614:0crwdne14614:0',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'crwdns14616:0crwdne14616:0',
+        'note' => 'crwdns14618:0crwdne14618:0',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'crwdns14000:0crwdne14000:0',
+        'note' => 'crwdns14620:0crwdne14620:0',
+    ],
+
     'consumables' => [
         'name' => 'crwdns13984:0crwdne13984:0',
         'note' => 'crwdns13986:0crwdne13986:0',
@@ -129,10 +170,7 @@ return [
         'name' => 'crwdns13996:0crwdne13996:0',
         'note' => 'crwdns13998:0crwdne13998:0',
     ],
-    'consumablesfiles' => [
-        'name' => 'crwdns14000:0crwdne14000:0',
-        'note' => 'crwdns14002:0crwdne14002:0',
-    ],
+
     'licenses' => [
         'name' => 'crwdns14004:0crwdne14004:0',
         'note' => 'crwdns14006:0crwdne14006:0',
@@ -161,6 +199,11 @@ return [
         'name' => 'crwdns14024:0crwdne14024:0',
         'note' => 'crwdns14026:0crwdne14026:0',
     ],
+    'componentsfiles' => [
+        'name' => 'crwdns14044:0crwdne14044:0',
+        'note' => 'crwdns14046:0crwdne14046:0',
+    ],
+
     'licenseskeys' => [
         'name' => 'crwdns14028:0crwdne14028:0',
         'note' => 'crwdns14030:0crwdne14030:0',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'crwdns14042:0crwdne14042:0',
     ],
-    'componentsfiles' => [
-        'name' => 'crwdns14044:0crwdne14044:0',
-        'note' => 'crwdns14046:0crwdne14046:0',
-    ],
+
     'componentscheckout' => [
         'name' => 'crwdns14048:0crwdne14048:0',
         'note' => 'crwdns14050:0crwdne14050:0',

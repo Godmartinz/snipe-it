@@ -9,7 +9,7 @@ return [
     'edit' => 'Rediger tilbehør',
     'eula_text' => 'EULA-kategori',
     'eula_text_help' => 'Dette feltet lar deg tilpasse dine EULA for spesifikke typer eiendeler. Hvis du har kun en EULA for alle eiendeler kan du krysse av nedenfor for å bruke standard.',
-    'require_acceptance' => 'Krev at brukere bekrefter aksept av eiendeler i denne kategorien.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ingen standard EULA funnet. Legg til en i Innstillinger.',
     'total' => 'Total',
     'remaining' => 'Tilgjengelig',

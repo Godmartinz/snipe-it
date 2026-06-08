@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Vous devez sélectionner au moins un élément de la liste',
+    ],
+
     'checkin' => [
         'error' => 'Ce bien n\'a pas été retourné, veuillez réessayer',
         'success' => 'Ce bien a été retourné correctement.',
         'user_does_not_exist' => 'Cet utilisateur est invalide. Veuillez réessayer.',
         'already_checked_in' => 'Ce bien est déjà dissocié.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

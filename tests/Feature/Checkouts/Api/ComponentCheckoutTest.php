@@ -126,6 +126,7 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
 
     public function test_adheres_to_full_multiple_companies_support_scoping()
     {
+
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $userForCompanyA = User::factory()->for($companyA)->create();
@@ -138,5 +139,77 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
                 'assigned_qty' => 1,
             ])
             ->assertForbidden();
+    }
+
+    public function test_cannot_checkout_component_to_an_asset_in_another_company_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $userInCompanyA = User::factory()->checkoutComponents()->for($companyA)->create();
+        $componentInCompanyA = Component::factory()->for($companyA)->create(['qty' => 1]);
+        $assetInCompanyB = Asset::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($userInCompanyA)
+            ->postJson(route('api.components.checkout', $componentInCompanyA->id), [
+                'assigned_to' => $assetInCompanyB->id,
+                'assigned_qty' => 1,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $this->assertDatabaseMissing('components_assets', [
+            'component_id' => $componentInCompanyA->id,
+            'asset_id' => $assetInCompanyB->id,
+        ]);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'created_by' => $userInCompanyA->id,
+            'action_type' => 'checkout',
+            'target_type' => Asset::class,
+            'target_id' => $assetInCompanyB->id,
+            'item_type' => Component::class,
+            'item_id' => $componentInCompanyA->id,
+        ]);
+
+        $this->assertEquals(1, $componentInCompanyA->fresh()->numRemaining());
+    }
+
+    public function test_superuser_cannot_checkout_component_to_an_asset_in_another_company_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $componentInCompanyA = Component::factory()->for($companyA)->create(['qty' => 1]);
+        $assetInCompanyB = Asset::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($superuser)
+            ->postJson(route('api.components.checkout', $componentInCompanyA->id), [
+                'assigned_to' => $assetInCompanyB->id,
+                'assigned_qty' => 1,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $this->assertDatabaseMissing('components_assets', [
+            'component_id' => $componentInCompanyA->id,
+            'asset_id' => $assetInCompanyB->id,
+        ]);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'created_by' => $superuser->id,
+            'action_type' => 'checkout',
+            'target_type' => Asset::class,
+            'target_id' => $assetInCompanyB->id,
+            'item_type' => Component::class,
+            'item_id' => $componentInCompanyA->id,
+        ]);
+
+        $this->assertEquals(1, $componentInCompanyA->fresh()->numRemaining());
     }
 }

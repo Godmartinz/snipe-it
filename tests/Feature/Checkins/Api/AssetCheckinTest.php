@@ -120,6 +120,35 @@ class AssetCheckinTest extends TestCase
         $this->assertNull($asset->refresh()->licenseseats->first()->assigned_to);
     }
 
+    public function test_checking_in_asset_updates_location_of_assets_assigned_to_it()
+    {
+        $originalLocation = Location::factory()->create();
+        $checkedOutLocation = Location::factory()->create();
+
+        $parentAsset = Asset::factory()->assignedToLocation($checkedOutLocation)->create([
+            'location_id' => $checkedOutLocation->id,
+            'rtd_location_id' => $originalLocation->id,
+        ]);
+
+        $childAsset = Asset::factory()->create([
+            'assigned_to' => $parentAsset->id,
+            'assigned_type' => Asset::class,
+            'location_id' => $checkedOutLocation->id,
+            'rtd_location_id' => $originalLocation->id,
+        ]);
+
+        $this->actingAsForApi(User::factory()->checkinAssets()->create())
+            ->postJson(route('api.asset.checkin', $parentAsset), [
+                'location_id' => $originalLocation->id,
+            ])
+            ->assertOk();
+
+        $this->assertEquals($originalLocation->id, $parentAsset->fresh()->location_id);
+        $this->assertEquals($originalLocation->id, $childAsset->fresh()->location_id);
+        $this->assertEquals($parentAsset->id, $childAsset->fresh()->assigned_to);
+        $this->assertEquals(Asset::class, $childAsset->fresh()->assigned_type);
+    }
+
     public function test_legacy_location_values_set_to_zero_are_updated()
     {
         $asset = Asset::factory()->canBeInvalidUponCreation()->assignedToUser()->create([
@@ -161,5 +190,29 @@ class AssetCheckinTest extends TestCase
             return Carbon::parse('2023-01-02')->isSameDay(Carbon::parse($event->action_date))
                 && $event->note === 'hi there';
         }, 1);
+    }
+
+    public function test_asset_name_is_cleared_on_checkin_when_clear_name_is_set()
+    {
+        $asset = Asset::factory()->assignedToUser()->create(['name' => 'My Asset Name']);
+
+        $this->actingAsForApi(User::factory()->checkinAssets()->create())
+            ->postJson(route('api.asset.checkin', $asset), ['clear_name' => '1'])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->assertNull($asset->refresh()->name);
+    }
+
+    public function test_asset_name_is_not_cleared_on_checkin_when_clear_name_is_not_set()
+    {
+        $asset = Asset::factory()->assignedToUser()->create(['name' => 'My Asset Name']);
+
+        $this->actingAsForApi(User::factory()->checkinAssets()->create())
+            ->postJson(route('api.asset.checkin', $asset))
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->assertEquals('My Asset Name', $asset->refresh()->name);
     }
 }

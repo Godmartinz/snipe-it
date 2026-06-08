@@ -8,28 +8,27 @@ return [
     'assoc_child_loc' => 'Ši vieta šiuo metu yra kaip pagrindinė bent vienai žemesnio lygio vietai ir negali būti panaikinta. Atnaujinkite savo žemesnio lygio vietas, kad nebebūtų sąsajos su šia vieta, ir bandykite dar kartą. ',
     'assigned_assets' => 'Priskirtas turtas',
     'current_location' => 'Dabartinė vieta',
-    'open_map' => 'Atidaryti :map_provider_icon žemėlapiuose',
     'deleted_warning' => 'Ši vieta buvo ištrinta. Prieš bandydami atlikti bet kokius pakeitimus, turite ją atkurti.',
 
     'create' => [
         'error' => 'Vieta nebuvo sukurta. Bandykite dar kartą.',
-        'success' => 'Vieta sukurta sėkmingai.',
+        'success' => 'Vieta sėkmingai sukurta.',
     ],
 
     'update' => [
         'error' => 'Vieta nebuvo atnaujinta. Bandykite dar kartą',
-        'success' => 'Vieta atnaujinta sėkmingai.',
+        'success' => 'Vieta sėkmingai atnaujinta.',
     ],
 
     'restore' => [
         'error' => 'Vieta nebuvo atkurta. Bandykite dar kartą',
-        'success' => 'Vieta atkurta sėkmingai.',
+        'success' => 'Vieta sėkmingai atkurta.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šią vietą?',
         'error' => 'Bandant panaikinti vietą įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Vieta panaikinta sėkmingai.',
+        'success' => 'Vieta sėkmingai panaikinta.',
     ],
 
 ];

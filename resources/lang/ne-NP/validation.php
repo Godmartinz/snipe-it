@@ -231,7 +231,7 @@ return [
     */
 
     'attributes' => [
-        'serials.*' => 'Serial Number',
+        'serials.*' => 'सिरियल नम्बर',
         'asset_tags.*' => 'Asset Tag',
     ],
 

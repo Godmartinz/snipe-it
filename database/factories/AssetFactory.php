@@ -59,7 +59,7 @@ class AssetFactory extends Factory
             // the explicit boolean gets set in the saving() method on the observer
             $asset->asset_eol_date = $this->faker->boolean(5)
                 ? CarbonImmutable::parse($asset->purchase_date)->addMonths(rand(0, 20))->format('Y-m-d')
-                : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model->eol)->format('Y-m-d');
+                : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model?->eol ?? rand(12, 60))->format('Y-m-d');
         });
     }
 
@@ -314,7 +314,7 @@ class AssetFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'model_id' => 1,
+                'model_id' => AssetModel::factory(),
                 'assigned_to' => Asset::factory(),
                 'assigned_type' => Asset::class,
             ];

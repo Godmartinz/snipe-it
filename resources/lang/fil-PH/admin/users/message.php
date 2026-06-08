@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ang user na ito ay nai-delete na. Kailangang ibalik ang user na ito upang i-edit o mag-assign ng bagong mga asset.',
     'ldap_not_configured' => 'Ang integrasyon ng LDAP ay hindi nai-configure sa pag-install na ito.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Ang user ay matagumpay na hindi na sinuspende.',
         'restored' => 'Ang user ay matagumpay na naibalik sa dati.',
         'import' => 'Ang mga user ay matagumpay nang na-import.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Mayroong isyu sa pagtanggal ng suspenso sa user. Mangyaring subukang muli.',
         'import' => 'Mayroong isyu sa pag-import ng mga user. Mangyaring subukang muli.',
-        'asset_already_accepted' => 'Ang asset na ito ay tinanggap na.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Dapat mong tanggapin o kaya tanggihan ang asset na ito.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Ang asset na tinangka mong tanggapin ay hindi nai-check out sa iyo.',
@@ -55,6 +57,7 @@ return [
         'ldap_could_not_get_entries' => 'Hindi makakuha ng entry mula sa serber ng LDAP. Mangyaring surrin ang iyong konpigurasyon ng serber ng LDAP sa LDAP config file. <br>May-error mula sa Serber ng LDAP:',
         'password_ldap' => 'Ang password sa account na ito ay pinamahalaan ng LDAP/Actibong Direktorya. Mangyaring komontak sa iyong IT department para baguhin ang iyong password. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

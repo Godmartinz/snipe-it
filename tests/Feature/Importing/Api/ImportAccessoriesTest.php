@@ -306,6 +306,49 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
     }
 
     #[Test]
+    public function update_mode_logs_accessory_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->accessory()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $accessory = Accessory::query()->where('name', $initialRow['itemName'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->accessory()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $accessory->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $accessory->order_number);
+
+        $updateLog = Actionlog::query()
+            ->where('item_type', Accessory::class)
+            ->where('item_id', $accessory->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after accessory importer update mode.');
+    }
+
+    #[Test]
     public function when_import_file_contains_empty_values(): void
     {
         $accessory = Accessory::factory()->create(['name' => Str::random()]);

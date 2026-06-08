@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Tento uživatel byl smazán. Budete muset uživatele obnovit, aby jste ho mohli upravil nebo přidělil nové majetky.',
     'ldap_not_configured' => 'Integrace LDAP nebyla pro tuto instalaci nakonfigurována.',
     'password_resets_sent' => 'Vybraným uživatelům, kteří jsou aktivováni a mají platné e-mailové adresy, byl zaslán odkaz pro obnovení hesla.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Odkaz pro obnovení hesla byl odeslán na :email!',
     'user_has_no_email' => 'Tento uživatel nemá e-mailovou adresu ve svém profilu.',
     'log_record_not_found' => 'Pro tohoto uživatele se nepodařilo nalézt odpovídající záznam z logu.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Uživatel byl úspěšně zrušen.',
         'restored' => 'Uživatel byl úspěšně obnoven.',
         'import' => 'Uživatelé úspěšně naimportování.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Tento uživatel stále spravuje jiného uživatele. Nejprve prosím vyberte jiného správce pro tohoto uživatele.|Tento uživatel stále spravuje :count uživatelů. Nejprve prosím vyberte jiné správce pro tyto uživatele.',
         'unsuspend' => 'Vyskytl se problém při rušení uživatele. Zkuste to znovu.',
         'import' => 'Vyskytl se problém při importu uživatelů. Zkuste to znovu.',
-        'asset_already_accepted' => 'Tento majetek již byl odsouhlasen.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Musíte přijmout nebo odmítnout tento majetek.',
         'cannot_delete_yourself' => 'Bylo by nám to opravdu líto, kdybyste smazal sám sebe. Zvažte to ještě jednou. ',
         'incorrect_user_accepted' => 'Majetek, který jste se pokoušeli přijmout, nebyl vydán pro vás.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nelze získat záznamy ze serveru LDAP. Zkontrolujte prosím konfiguraci serveru LDAP v konfiguračním souboru LDAP. <br>Chyba serveru LDAP:',
         'password_ldap' => 'Heslo pro tento účet je spravováno serverem LDAP / Active Directory. Obraťte se na oddělení IT a změňte heslo.',
         'multi_company_items_assigned' => 'Tento uživatel má přiřazené položky, které patří jiné společnosti. Zkontrolujte je nebo upravte jejich společnost.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

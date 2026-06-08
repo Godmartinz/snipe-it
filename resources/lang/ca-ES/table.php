@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => 'Actions',
+    'actions' => 'Accions',
     'action' => 'Acció',
     'by' => 'By',
     'item' => 'Item',

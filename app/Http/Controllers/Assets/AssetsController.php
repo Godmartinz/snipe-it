@@ -66,7 +66,8 @@ class AssetsController extends Controller
     public function index(Request $request): View
     {
         $this->authorize('index', Asset::class);
-        $company = Company::find($request->input('company_id'));
+        $companyId = $request->input('company_id');
+        $company = is_scalar($companyId) ? Company::find($companyId) : null;
 
         return view('hardware/index')->with('company', $company);
     }
@@ -360,8 +361,23 @@ class AssetsController extends Controller
                 'url' => route('qr_code/hardware', $asset),
             ];
 
+            $total_maintenance_cost = $asset->maintenances?->sum('cost');
+            $total_asset_cost = ($asset->assignedAssets()?->AssetsForShow()) ? $asset->assignedAssets()?->AssetsForShow()?->sum('purchase_cost') : 0;
+            $total_license_cost = ($asset->licenses) ? $asset->licenses->sum('purchase_cost') : 0;
+            $total_accessory_cost = ($asset->accessories) ? $asset->accessories()->sum('purchase_cost') : 0;
+            $total_component_cost = ($asset->components) ? $asset->components->sum('calculated_purchase_cost') : 0;
+
+            $total_cost_for_asset = $asset->purchase_cost + $total_maintenance_cost + $total_asset_cost + $total_license_cost + $total_accessory_cost + $total_component_cost;
+
             return view('hardware/view', compact('asset', 'qr_code', 'settings'))
-                ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
+                ->with('total_maintenance_cost', $total_maintenance_cost)
+                ->with('total_asset_cost', $total_asset_cost)
+                ->with('total_license_cost', $total_license_cost)
+                ->with('total_accessory_cost', $total_accessory_cost)
+                ->with('total_component_cost', $total_component_cost)
+                ->with('total_cost_for_asset', $total_cost_for_asset)
+                ->with('use_currency', $use_currency)
+                ->with('audit_log', $audit_log);
         }
 
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -427,7 +443,7 @@ class AssetsController extends Controller
 
         if ($request->filled('image_delete')) {
             try {
-                unlink(public_path().'/uploads/assets/'.$asset->image);
+                unlink(public_path().'/uploads/assets/'.basename($asset->image));
                 $asset->image = '';
             } catch (\Exception $e) {
                 Log::info($e);
@@ -495,7 +511,7 @@ class AssetsController extends Controller
 
         // Validate required serial based on model setting
         if ($model && $model->require_serial === 1 && empty($serial[1])) {
-            return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))
+            return Helper::getRedirectOption($request, $asset->id, 'Assets')
                 ->with('warning', trans('admin/hardware/form.serial_required_post_model_update', [
                     'asset_model' => $model->name,
                 ]));
@@ -533,7 +549,7 @@ class AssetsController extends Controller
 
         if ($asset->image) {
             try {
-                Storage::disk('public')->delete('assets'.'/'.$asset->image);
+                Storage::disk('public')->delete('assets/'.basename($asset->image));
             } catch (\Exception $e) {
                 Log::debug($e);
             }
@@ -551,11 +567,12 @@ class AssetsController extends Controller
      *
      * @since [v3.0]
      */
-    public function getAssetBySerial(Request $request): RedirectResponse
+    public function getAssetBySerial(Request $request, $serial = null): RedirectResponse
     {
+        $serial = $serial ?: $request->input('serial');
         $topsearch = ($request->input('topsearch') == 'true');
 
-        if (! $asset = Asset::where('serial', '=', $request->input('serial'))->first()) {
+        if (! $asset = Asset::where('serial', '=', $serial)->first()) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
         $this->authorize('view', $asset);

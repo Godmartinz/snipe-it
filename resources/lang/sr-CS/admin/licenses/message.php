@@ -37,6 +37,9 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovu licencu?',
         'error' => 'Došlo je do problema sa brisanjem licence. Molim pokušajte ponovo.',
         'success' => 'Licenca je uspešno obrisana.',
+        'bulk_success' => 'Izabrane licence su uspešno izbrisane.',
+        'partial_success' => 'Licenca je uspešno izbrisana. Pogledajte dodatne informacije ispod. | :count licenci je uspešno izbrisano. Pogledajte dodatne informacije ispod.',
+        'bulk_checkout_warning' => ':license_name ima sedišta koja su trenutno zadužena i ne može biti izbrisana. Molim vas razdužite sva sedišta pre brisanja.',
     ],
 
     'checkout' => [

@@ -37,6 +37,9 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an ceadúnas seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an ceadúnas. Arís, le d\'thoil.',
         'success' => 'Scriosadh an ceadúnas go rathúil.',
+        'bulk_success' => 'The selected licenses were deleted successfully.',
+        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

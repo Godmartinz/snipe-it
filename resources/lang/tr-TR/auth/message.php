@@ -12,8 +12,8 @@ return [
         'success' => 'Başarıyla giriş yaptınız.',
         'code_required' => 'İki faktörlü kod gereklidir.',
         'invalid_code' => 'İki faktörlü kod geçersiz.',
-        'enter_two_factor_code' => 'Please enter your two-factor authentication code.',
-        'please_enroll' => 'Please enroll a device in two-factor authentication.',
+        'enter_two_factor_code' => 'Lütfen iki faktörlü kimlik doğrulama kodunuzu girin.',
+        'please_enroll' => 'Lütfen iki faktörlü kimlik doğrulamaya bir cihaz kaydedin.',
     ],
 
     'signin' => [

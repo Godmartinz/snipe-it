@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Goobtan waxay xarun rasmi ah u tahay farac kale ugu yaraan suuragalna maahan in la tir-tiro. Fadlan cusbooneysii goobtaada si aaney markale usoo tilmaamin mowqican iskuna day markale. ',
     'assigned_assets' => 'Hantida la qoondeeyay',
     'current_location' => 'Goobta xilligan',
-    'open_map' => 'Open in :map_provider_icon Maps',
     'deleted_warning' => 'This location has been deleted. Please restore it before attempting to make any changes.',
 
     'create' => [

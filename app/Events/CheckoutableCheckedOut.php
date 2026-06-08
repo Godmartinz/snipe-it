@@ -22,12 +22,14 @@ class CheckoutableCheckedOut
 
     public int $quantity;
 
+    public bool $signInPlace;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($checkoutable, $checkedOutTo, User $checkedOutBy, $note, $originalValues = [], $quantity = 1)
+    public function __construct($checkoutable, $checkedOutTo, User $checkedOutBy, $note, $originalValues = [], $quantity = 1, bool $signInPlace = false)
     {
         $this->checkoutable = $checkoutable;
         $this->checkedOutTo = $checkedOutTo;
@@ -35,5 +37,6 @@ class CheckoutableCheckedOut
         $this->note = $note;
         $this->originalValues = $originalValues;
         $this->quantity = $quantity;
+        $this->signInPlace = $signInPlace;
     }
 }

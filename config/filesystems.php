@@ -97,8 +97,13 @@ $config = [
         ],
 
         'backup' => [
-            'driver' => env('PRIVATE_FILESYSTEM_DISK', 'local'),
-            'root' => storage_path('app'),
+            'driver' => env('BACKUP_FILESYSTEM_DRIVER', 'local'),
+            'key' => env('PRIVATE_AWS_ACCESS_KEY_ID'),
+            'secret' => env('PRIVATE_AWS_SECRET_ACCESS_KEY'),
+            'region' => env('PRIVATE_AWS_DEFAULT_REGION'),
+            'bucket' => env('PRIVATE_AWS_BUCKET'),
+            'root'   => env('BACKUP_FILESYSTEM_ROOT', storage_path('app')),
+            'visibility' => 'private',
         ],
 
     ],
@@ -126,6 +131,7 @@ $config['allowed_upload_extensions_array'] = [
     'docx',
     'gif',
     'ico',
+    'jfif',
     'jpeg',
     'jpg',
     'json',

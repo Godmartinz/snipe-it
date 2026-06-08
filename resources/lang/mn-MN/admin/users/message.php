@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Энэ хэрэглэгч устгагдсан. Та энэ хэрэглэгчийг засварлах, шинэ актив үүсгэх эрхтэй.',
     'ldap_not_configured' => 'LDAP интеграци нь энэ суулгацыг тохируулаагүй байна.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Хэрэглэгч амжилтанд хүрсэнгүй.',
         'restored' => 'Хэрэглэгч амжилттай сэргээгдсэн байна.',
         'import' => 'Хэрэглэгчид амжилттай импортолсон.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Хэрэглэгчийг түдгэлзүүлэхэд асуудал үүссэн. Дахин оролдоно уу.',
         'import' => 'Хэрэглэгч импортлох асуудал гарсан. Дахин оролдоно уу.',
-        'asset_already_accepted' => 'Энэ хөрөнгийг аль хэдийн хүлээн авлаа.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Та энэ хөрөнгийг хүлээн зөвшөөрөх эсвэл хасах ёстой.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Таны хүлээн авахыг оролдсон хөрөнгө таныг шалгаагүй байна.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'LDAP серверээс бичилтийг авч чадсангүй. LDAP серверийн тохиргоог LDAP тохиргооны файлдаа шалгана уу. <br> LDAP серверийн алдаа:',
         'password_ldap' => 'Энэ акаунтын нууц үгийг LDAP / Active Directory удирддаг. Нууц үгээ солихын тулд өөрийн IT хэлтэст хандана уу.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

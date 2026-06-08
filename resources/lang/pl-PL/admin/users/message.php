@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ten użytkownik został usunięty. Musisz przywrócić tego użytkownika aby je wyedytować lub przypisać je do nowych aktywów.',
     'ldap_not_configured' => 'Integracja z LDAP nie została skonfigurowana dla tej instalacji.',
     'password_resets_sent' => 'Wybrani użytkownicy, którzy są aktywni i mają prawidłowe adresy e-mail, otrzymali link do resetowania hasła.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Link umożliwiający zresetowanie hasła został wysłany na :email!',
     'user_has_no_email' => 'Ten użytkownik nie ma adresu e-mail w swoim profilu.',
     'log_record_not_found' => 'Nie można znaleźć pasującego rekordu dziennika dla tego użytkownika.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Konto użytkownika zostało włączone.',
         'restored' => 'Użytkownik został przywrócony pomyślnie.',
         'import' => 'Import użytkowników zakończony sukcesem.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Ten użytkownik nadal zarządza innym użytkownikiem. Proszę najpierw wybrać innego menedżera dla tego użytkownika. Ten użytkownik nadal zarządza :count użytkowników. Najpierw wybierz innego menedżera.',
         'unsuspend' => 'Wystąpił problem podczas odblokowania użytkownika. Spróbuj ponownie.',
         'import' => 'Podczas importowania użytkowników wystąpił błąd. Spróbuj ponownie.',
-        'asset_already_accepted' => 'Aktywo zostało już zaakceptowane.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Musisz zaakceptować lub odrzucić to aktywo.',
         'cannot_delete_yourself' => 'Czujemy się naprawdę źle, jeśli usuniesz siebie, prosimy o ponowne rozważenie.',
         'incorrect_user_accepted' => 'Zasób, który próbowano zaakceptować nie został wyewidencjonowany dla użytkownika.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nie udało się pobrać pozycji z serwera LDAP. Sprawdź proszę konfigurację serwera LDAP w pliku konfiguracji. <br>Błąd z serwera LDAP:',
         'password_ldap' => 'Hasło dla tego konta jest zarządzane przez usługę LDAP, Active Directory. Skontaktuj się z działem IT, aby zmienić swoje hasło. ',
         'multi_company_items_assigned' => 'Ten użytkownik ma elementy przypisane do innej firmy. Sprawdź je lub edytuj swoją firmę.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

@@ -9,6 +9,7 @@ use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use App\Presenters\UserPresenter;
+use App\Rules\CssColor;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -18,12 +19,14 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
@@ -57,6 +60,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected $table = 'users';
 
     protected $injectUniqueIdentifier = true;
+
+    /**
+     * Transient (non-persisted) ID of the Actionlog entry written by UserObserver::updating()
+     * during the current request. syncCompaniesWithLogging() merges company changes into this
+     * entry instead of creating a separate one, so a single edit session produces one log row.
+     */
+    public ?int $currentUpdateLogId = null;
 
     protected $fillable = [
         'activated',
@@ -165,7 +175,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'userloc' => ['name', 'address', 'address2', 'city', 'state', 'zip'],
         'department' => ['name'],
         'groups' => ['name'],
-        'company' => ['name'],
+        'companies' => ['name'],
         'manager' => ['first_name', 'last_name', 'username', 'display_name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
@@ -178,6 +188,44 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'accessories_count',
         'manages_users_count',
         'manages_locations_count',
+    ];
+
+    /**
+     * Virtual column aliases that map a single filter key to a set of real columns
+     * searched via CONCAT (SQL) so that, for example, filtering by "name" searches
+     * across both first_name and last_name together.
+     *
+     * Because "name" is not a real column on the users table we cannot add it to
+     * $searchableAttributes; this map bridges that gap for structured filter queries.
+     *
+     * @var array<string, list<string>>
+     */
+    protected $searchableVirtualColumns = [
+        'name' => ['first_name', 'last_name'],
+    ];
+
+    /**
+     * Maps filter/API keys to the actual Eloquent relation names used in
+     * $searchableRelations.  The User model uses "userloc" as its location
+     * relation name (to avoid a collision with the framework's own "location"
+     * magic), but every consumer — UI and API alike — sends the key "location".
+     *
+     * @var array<string, string>
+     */
+    protected $searchableRelationAliases = [
+        'location' => 'userloc',
+    ];
+
+    /**
+     * Narrow structured-filter relation columns for specific UI/API filter keys.
+     *
+     * The advanced-search "location" field represents the location name, so
+     * structured filters should target only userloc.name (not address/city/etc).
+     *
+     * @var array<string, list<string>>
+     */
+    protected $searchableRelationFilterColumns = [
+        'location' => ['name'],
     ];
 
     /**
@@ -205,13 +253,66 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     protected static function booted(): void
     {
+        // Bridge for factories/seeders that still set company_id directly: ensure
+        // that company appears in the pivot so FMCS scoping works correctly.
+        // Application code (controllers, importers) writes only to the pivot.
+        static::created(function (User $user) {
+            if ($user->company_id) {
+                $user->companies()->syncWithoutDetaching([$user->company_id]);
+            }
+        });
+
         static::forceDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->forceDelete();
+            $user->purgeAssociatedPassportTokens();
         });
 
         static::softDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->delete();
+            $user->revokeAssociatedPassportTokens();
         });
+    }
+
+    /**
+     * Revoke all Passport access/refresh tokens associated with this user.
+     */
+    private function revokeAssociatedPassportTokens(): void
+    {
+        $accessTokenIds = DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->pluck('id');
+
+        if ($accessTokenIds->isEmpty()) {
+            return;
+        }
+
+        DB::table('oauth_access_tokens')
+            ->whereIn('id', $accessTokenIds)
+            ->update(['revoked' => true]);
+
+        DB::table('oauth_refresh_tokens')
+            ->whereIn('access_token_id', $accessTokenIds)
+            ->update(['revoked' => true]);
+    }
+
+    /**
+     * Hard-delete all Passport access/refresh tokens associated with this user.
+     */
+    private function purgeAssociatedPassportTokens(): void
+    {
+        $accessTokenIds = DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->pluck('id');
+
+        if ($accessTokenIds->isNotEmpty()) {
+            DB::table('oauth_refresh_tokens')
+                ->whereIn('access_token_id', $accessTokenIds)
+                ->delete();
+        }
+
+        DB::table('oauth_access_tokens')
+            ->where('user_id', $this->id)
+            ->delete();
     }
 
     /**
@@ -222,7 +323,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => $value ?? $this->getFullNameAttribute(),
+            get: fn (mixed $value) => ($value !== null && $value !== '') ? $value : $this->getFullNameAttribute(),
         );
     }
 
@@ -257,6 +358,120 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
 
         return false;
+    }
+
+    /**
+     * Build a list of effective user permissions grouped by permission section.
+     *
+     * Includes explicit denials from user or group permissions so the UI can
+     * show both allowed and denied entries.
+     *
+     * This is kind of duplicative from the other permission-checking methods, but it allows us to build a
+     * list of permissions for display purposes without having to do a lot of super-confusing and
+     * redundant checks in the UI layer.
+     *
+     * This will likely go away once we refactor the permissions to be in a database table instead of the
+     * stupiud config file.
+     */
+    public function getEffectivePermissionsBySection(): array
+    {
+        $displayablePermissions = collect(config('permissions'))
+            ->map(static fn (array $permissions): array => array_values(array_filter($permissions, static fn (array $permission): bool => ($permission['display'] ?? false) === true)))
+            ->all();
+
+        $configuredPermissions = collect($displayablePermissions)
+            ->flatMap(static function (array $permissions, string $section) {
+                return collect($permissions)->map(static function (array $permission) use ($section): array {
+                    return [
+                        'section' => $section,
+                        'permission' => $permission['permission'],
+                    ];
+                });
+            })
+            ->unique('permission')
+            ->values();
+
+        $directPermissions = $this->decodePermissions();
+        $directPermissions = is_array($directPermissions) ? $directPermissions : [];
+
+        $groupGrantsByPermission = [];
+        $groupDenialsByPermission = [];
+        foreach ($this->groups as $group) {
+            $groupPermissions = $group->decodePermissions();
+            if (! is_array($groupPermissions)) {
+                continue;
+            }
+
+            foreach ($groupPermissions as $permissionKey => $permissionValue) {
+                if ((int) $permissionValue === 1) {
+                    $groupGrantsByPermission[$permissionKey][] = $group->name;
+                } elseif ((int) $permissionValue === -1) {
+                    $groupDenialsByPermission[$permissionKey][] = $group->name;
+                }
+            }
+        }
+
+        $effectiveBySection = [];
+        foreach ($configuredPermissions as $permissionConfig) {
+            $permissionKey = $permissionConfig['permission'];
+            $directPermissionValue = (int) ($directPermissions[$permissionKey] ?? 0);
+            $isAllowed = $this->hasAccess($permissionKey);
+            $isDenied = ($directPermissionValue === -1) || ((count($groupDenialsByPermission[$permissionKey] ?? []) > 0) && ! $isAllowed);
+
+            if (! $isAllowed && ! $isDenied) {
+                continue;
+            }
+
+            $status = $isDenied ? 'denied' : 'allowed';
+            $source = 'group';
+            $sourceGroups = $isDenied
+                ? ($groupDenialsByPermission[$permissionKey] ?? [])
+                : ($groupGrantsByPermission[$permissionKey] ?? []);
+
+            if ($isDenied && $directPermissionValue === -1) {
+                $source = 'individual';
+                $sourceGroups = [];
+            } elseif ($this->isSuperUser()) {
+                $source = 'superuser';
+                $sourceGroups = [];
+            } elseif (! $isDenied && $directPermissionValue === 1) {
+                $source = 'individual';
+                $sourceGroups = [];
+            }
+
+            $effectiveBySection[$permissionConfig['section']][] = [
+                'permission' => $permissionKey,
+                'status' => $status,
+                'source' => $source,
+                'groups' => array_values(array_unique($sourceGroups)),
+                'source_label' => $this->buildPermissionSourceLabel(
+                    status: $status,
+                    source: $source,
+                    sourceGroups: $sourceGroups
+                ),
+            ];
+        }
+
+        return $effectiveBySection;
+    }
+
+    /**
+     * Build a compact source label for a permission entry.
+     */
+    private function buildPermissionSourceLabel(string $status, string $source, array $sourceGroups = []): string
+    {
+        $statusLabel = $status === 'denied' ? 'Denied' : 'Allowed';
+        $sourceLabel = match ($source) {
+            'individual' => 'Individual',
+            'superuser' => 'Superuser',
+            default => 'Group',
+        };
+
+        if ($sourceGroups === []) {
+            return $statusLabel.' ('.$sourceLabel.')';
+        }
+
+        return $statusLabel.' ('.$sourceLabel.'): '.implode(', ', array_values(array_unique($sourceGroups)));
     }
 
     /**
@@ -386,7 +601,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             && (($this->accessories_count ?? $this->accessories()->count()) === 0)
             && (($this->licenses_count ?? $this->licenses()->count()) === 0)
             && (($this->consumables_count ?? $this->consumables()->count()) === 0)
-            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
             && (($this->manages_users_count ?? $this->managesUsers()->count()) === 0)
             && (($this->manages_locations_count ?? $this->managedLocations()->count()) === 0)
             && ($this->deleted_at == '');
@@ -404,6 +618,88 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'company_user');
+    }
+
+    /**
+     * Returns whether an FMCS company check should allow this user to receive
+     * an asset that belongs to the given company.
+     *
+     * - If the user has no company associations at all: returns true (no restriction).
+     * - If the user has associations: returns true only when $companyId is among them.
+     */
+    public function canReceiveFromCompany(int $companyId): bool
+    {
+        // Query the pivot directly to avoid the Company model's FMCS global scope,
+        // which would restrict results to the current actor's visible companies.
+        $userCompanyIds = DB::table('company_user')
+            ->where('user_id', $this->id)
+            ->pluck('company_id');
+
+        if ($userCompanyIds->contains($companyId)) {
+            return true;
+        }
+
+        // User has no company associations — don't enforce.
+        if ($userCompanyIds->isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns all companies this user belongs to — union of the primary company_id
+     * column and the many-to-many pivot — as a deduplicated Collection.
+     * Used to scope FMCS dropdowns to companies the user is allowed to work with.
+     */
+    public function allCompanies(): Collection
+    {
+        return $this->companies->unique('id')->values();
+    }
+
+    /**
+     * Sync company pivot membership and log the change if the set of companies changed.
+     *
+     * When called after $user->save() in the same request, UserObserver::updating() will
+     * have already written an Actionlog row and stored its ID in $this->currentUpdateLogId.
+     * In that case we merge the company change into that existing entry so that a single
+     * edit session (field changes + company changes) produces one log row, not two.
+     */
+    public function syncCompaniesWithLogging(array $companyIds): void
+    {
+        $oldIds = $this->companies()->orderBy('companies.id')->pluck('companies.id')->toArray();
+        $this->companies()->sync($companyIds);
+        $newIds = $this->companies()->orderBy('companies.id')->pluck('companies.id')->toArray();
+
+        if ($oldIds === $newIds) {
+            return;
+        }
+
+        $companyChange = ['companies' => ['old' => $oldIds, 'new' => $newIds]];
+
+        if ($this->currentUpdateLogId && ($existing = Actionlog::find($this->currentUpdateLogId))) {
+            $meta = json_decode($existing->log_meta ?? '{}', true) ?: [];
+            $existing->log_meta = json_encode(array_merge($meta, $companyChange));
+            $existing->save();
+            $this->currentUpdateLogId = null;
+
+            return;
+        }
+
+        $logAction = new Actionlog;
+        $logAction->item_type = static::class;
+        $logAction->item_id = $this->id;
+        $logAction->target_type = static::class;
+        $logAction->target_id = $this->id;
+        $logAction->created_at = date('Y-m-d H:i:s');
+        $logAction->created_by = auth()->id();
+        $logAction->log_meta = json_encode($companyChange);
+        $logAction->logaction('update');
     }
 
     /**
@@ -452,6 +748,27 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
 
         return $this->last_name ? $this->first_name.' '.$this->last_name : $this->first_name;
+    }
+
+    protected function linkLightColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#296282'),
+        );
+    }
+
+    protected function linkDarkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#5fa4cc'),
+        );
+    }
+
+    protected function navLinkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#ffffff'),
+        );
     }
 
     /**
@@ -527,6 +844,11 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function licenses()
     {
         return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at');
+    }
+
+    public function directLicenses()
+    {
+        return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at')->wherePivotNull('asset_id')->withTrashed();
     }
 
     /**
@@ -695,6 +1017,22 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->where('target_type', self::class)
             ->where('action_type', '=', 'accepted')
             ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get all assigned items that still have a pending acceptance for this user.
+     */
+    public function getAssignedItemsWithPendingAcceptance(): Collection
+    {
+        return CheckoutAcceptance::query()
+            ->forUser($this)
+            ->pending()
+            ->with('checkoutable')
+            ->get()
+            ->map(fn (CheckoutAcceptance $acceptance) => $acceptance->checkoutable)
+            ->filter()
+            ->unique(fn ($item) => $item::class.':'.$item->getKey())
+            ->values();
     }
 
     /**
@@ -1121,7 +1459,14 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function scopeOrderCompany($query, $order)
     {
-        return $query->leftJoin('companies as companies_user', 'users.company_id', '=', 'companies_user.id')->orderBy('companies_user.name', $order);
+        $sub = DB::table('company_user')
+            ->join('companies', 'companies.id', '=', 'company_user.company_id')
+            ->select('company_user.user_id', DB::raw('MIN(companies.name) as min_company_name'))
+            ->groupBy('company_user.user_id');
+
+        return $query
+            ->leftJoinSub($sub, 'companies_sort', 'companies_sort.user_id', '=', 'users.id')
+            ->orderBy('companies_sort.min_company_name', $order);
     }
 
     /**
@@ -1175,6 +1520,48 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             ->orWhere('users.display_name', 'LIKE', '%'.$search.'%')
             ->orwhereRaw('CONCAT(users.first_name," ",users.last_name) LIKE \''.$search.'%\'');
 
+    }
+
+    public function scopeWithInventoryRelations($query, int $id)
+    {
+        return $query->where('id', $id)
+            ->with([
+                'assets.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'assets.defaultLoc',
+                'assets.location',
+                'assets.model.category',
+                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'assets.assignedAssets.assignedTo',
+                'assets.assignedAssets.defaultLoc',
+                'assets.assignedAssets.location',
+                'assets.assignedAssets.model.category',
+                'assets.components.category',
+                'assets.licenses',
+                'assets.licenses.category',
+                'assets.assignedAccessories',
+                'assets.assignedAccessories.accessory.category',
+                'accessories.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'accessories.category',
+                'accessories.manufacturer',
+                'consumables.log' => fn ($query) => $query->withTrashed()
+                    ->where('target_type', User::class)
+                    ->where('target_id', $id)
+                    ->where('action_type', 'accepted'),
+                'consumables.category',
+                'consumables.manufacturer',
+                'directLicenses.category',
+                'licenses.category',
+            ])
+            ->withTrashed();
     }
 
     /**

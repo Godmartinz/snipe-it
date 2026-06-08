@@ -37,6 +37,9 @@ return [
         'confirm' => 'crwdns943:0crwdne943:0',
         'error' => 'crwdns944:0crwdne944:0',
         'success' => 'crwdns945:0crwdne945:0',
+        'bulk_success' => 'crwdns14793:0crwdne14793:0',
+        'partial_success' => 'crwdns14795:0crwdne14795:0',
+        'bulk_checkout_warning' => 'crwdns14797:0crwdne14797:0',
     ],
 
     'checkout' => [

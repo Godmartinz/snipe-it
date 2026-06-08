@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ovaj je korisnik izbrisan. Morate vratiti tog korisnika da biste ga uredili ili mu dodeliti novi resurs.',
     'ldap_not_configured' => 'LDAP integracija nije konfigurisana za ovu instalaciju.',
     'password_resets_sent' => 'Odabranim korisnicima koji su aktivirani i imaju važeće adrese e-pošte poslat je link za resetovanje lozinke.',
+    'not_activated' => 'Ovaj korisnik ne može da se prijavi, pa samim tim ne može da prihvati imovinu putem e-poruke.',
     'password_reset_sent' => 'Link za resetovanje lozinke je poslat na :email!',
     'user_has_no_email' => 'Ovaj korisnik nema adresu e-pošte u svom profilu.',
     'log_record_not_found' => 'Nije bilo moguće pronaći odgovarajući zapis u dnevniku za ovog korisnika.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'User was successfully unsuspended.',
         'restored' => 'Korisnik je uspešno obnovljen.',
         'import' => 'Korisnici su uspješno importovani.',
+        'acceptance_reminder_sent' => 'Podsetnik za prihvatanje je poslat za :count stavku na čekanju.|Podsetnik za prihvatanje je poslat za :count stavke na čekanju.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Ovaj korisnik još uvek upravlja drugim korisnikom. Molim vas prvo izaberite drugog rukovodioca tom korisniku.|Ovaj korisnik još uvek upravlja :count korisnicima. Molim vas prvo im izaberite drugog rukovodioca.',
         'unsuspend' => 'There was an issue unsuspending the user. Please try again.',
         'import' => 'Došlo je do problema s importom korisnika. Molim pokušajte ponovo.',
-        'asset_already_accepted' => 'Ova je imovina već prihvaćena.',
+        'asset_already_accepted' => 'Ova stavka je već prihvaćena.',
         'accept_or_decline' => 'Morate prihvatiti ili odbaciti ovaj resurs, imovinu.',
         'cannot_delete_yourself' => 'Osećali bi smo se veoma loše kada bi ste obrisali samog sebe. Razmotrite šta pokušavate.',
         'incorrect_user_accepted' => 'The asset you have attempted to accept was not checked out to you.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nije bilo moguće dobiti zapise sa LDAP servera. Proverite konfiguraciju LDAP servera. <br>Greška sa LDAP servera:',
         'password_ldap' => 'Lozinku za ovaj nalog kontroliše LDAP / Active Directory. Obratite se IT centru za promenu lozinke. ',
         'multi_company_items_assigned' => 'Ovaj korisnik poseduje zadužene stavke koje pripadaju drugoj kompaniji. Molim vas razdužite ih ili promenite njihovu kompaniju.',
+        'no_pending_acceptances' => 'Ovaj korisnik nema prihvatanja na čekanju za koja bi ih podsetili.',
     ],
 
     'deletefile' => [

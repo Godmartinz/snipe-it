@@ -9,7 +9,7 @@ return [
     'edit' => 'Redigera tillbehör',
     'eula_text' => 'EULA-kategori',
     'eula_text_help' => 'Det här fältet tillåter att du ändrar din EULA för specifika typer av tillgångar. Om du endast har en EULA för samtliga tillgångar så kan du kryssa i rutan nedan för att använda den.',
-    'require_acceptance' => 'Kräv att användare bekräftar mottagande av tillgångar i denna kategori.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Ingen EULA funnen. Lägg till en i inställningarna.',
     'total' => 'Totalt',
     'remaining' => 'Kvarvarande',

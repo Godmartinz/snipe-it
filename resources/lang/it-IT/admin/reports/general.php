@@ -10,7 +10,7 @@ return [
     'acceptance_request' => 'Richiesta di accettazione',
     'custom_export' => [
         'user_address' => 'Indirizzo Utente',
-        'user_company' => 'User Company',
+        'user_company' => 'Azienda Utente',
         'user_city' => 'Città Utente',
         'user_state' => 'Provincia Utente',
         'user_country' => 'Nazione Utente',

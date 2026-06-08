@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Upravljanje datotekama dodatne opreme',
-        'note' => 'Dozvoljava korisniku da postavlja, preuzima i briše datoteke povezane sa dodatnom opremom.',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa dodatnom opremom. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Upravlja datotekama imovine',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa imovinom. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Upravlja datotekama korisnika',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa korisnicima. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Upravlja datotekama modela',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa modelima imovine na ekranima pregleda modela i pregleda imovine. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Upravlja datotekama sektora',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa sektorima. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Upravlja datotekama dobavljača',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa dobavljačima. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Upravlja datotekama lokacije',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa lokacijama. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Upravlja datotekama kompanije',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa kompanijama. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Upravljanje datotekama potrošne opreme',
+        'note' => 'Omogućava korisniku da šalje, preuzima i briše datoteke povezane sa potrošnom opremom. (Ovo ima smisla sa dozvolama pregledanja ili višim.)',
+    ],
+
     'consumables' => [
         'name' => 'Potrošni materijal',
         'note' => 'Dozvoljava pristup sekciji potrošne opreme aplikacije.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Zaduživanje potrošne opreme',
         'note' => 'Dodeljivanje potrošne opreme u magacinu zaduživanjem.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Upravljanje datotekama potrošne opreme',
-        'note' => 'Dozvoljava korisniku da postavlja, preuzima i briše datoteke povezane sa potrošnom opremom.',
-    ],
+
     'licenses' => [
         'name' => 'Licence',
         'note' => 'Omogućava pristup sekciji sa licencama aplikacije.',
@@ -161,6 +199,11 @@ return [
         'name' => 'Upravljanje datotekama licenci',
         'note' => 'Dozvoljava korisniku da postavlja, preuzima i briše datoteke povezane sa licencama.',
     ],
+    'componentsfiles' => [
+        'name' => 'Upravljanje datotekama komponenti',
+        'note' => 'Dozvoljava korisniku da postavlja, preuzima i briše datoteke povezane sa komponentama.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Upravljanje licencnim ključevima',
         'note' => 'Omogućava korisniku da pregleda ključeve proizvoda povezanih sa licencama.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Brisanje komponenti',
     ],
-    'componentsfiles' => [
-        'name' => 'Upravljanje datotekama komponenti',
-        'note' => 'Dozvoljava korisniku da postavlja, preuzima i briše datoteke povezane sa komponentama.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Zaduživanje komponenti',
         'note' => 'Dodeljivanje komponenti zaduživanjem iz magacina.',

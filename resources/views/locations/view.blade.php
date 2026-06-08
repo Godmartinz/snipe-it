@@ -10,7 +10,7 @@
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 
@@ -221,11 +221,13 @@
                     <x-slot:buttons>
                         <x-button.edit :item="$location" :route="route('locations.edit', $location->id)" />
                         <x-button.clone :item="$location" :route="route('clone/location', $location->id)" />
-                        <x-button.delete :item="$location" />
                         <x-button.restore :item="$location" :route="route('locations.restore', ['location' => $location->id])" />
+                        <x-button.print :count="$location->countAllTheThings()" :tooltip="trans('admin/locations/table.print_inventory')" :item="$location" :route="route('locations.print_assigned', ['locationId' => $location->id])"/>
+                        <x-button.print :count="$location->assignedAssets()->AssetsForShow()->count()" :item="$location" :route="route('locations.print_all_assigned', ['locationId' => $location->id])"/>
+                        <x-button.delete :item="$location"/>
                     </x-slot:buttons>
 
-                @if ($location->ldap_ou)
+                    @if ($location->ldap_ou)
                         <x-info-element icon_type="ldap">
                             {{ $location->ldap_ou }}
                         </x-info-element>

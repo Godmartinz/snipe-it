@@ -720,6 +720,12 @@ class Importer extends Component
         $this->message_type = 'danger';
     }
 
+    public function process(): void
+    {
+        $this->message = trans('general.token_expired');
+        $this->message_type = 'danger';
+    }
+
     public function clearMessage()
     {
         $this->message = null;

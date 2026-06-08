@@ -11,6 +11,7 @@ use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -94,7 +95,26 @@ final class Company extends SnipeModel
         'notes',
     ];
 
-    private static function isFullMultipleCompanySupportEnabled()
+    /**
+     * Return the current user's company IDs by querying the pivot table directly.
+     *
+     * We deliberately bypass the Eloquent companies() relationship here because
+     * loading that relationship triggers CompanyableScope on the Company model,
+     * which calls this method again — infinite recursion.
+     */
+    private static function getCurrentUserCompanyIds(): array
+    {
+        if (! Auth::hasUser()) {
+            return [];
+        }
+
+        return DB::table('company_user')
+            ->where('user_id', auth()->id())
+            ->pluck('company_id')
+            ->toArray();
+    }
+
+    public static function isFullMultipleCompanySupportEnabled()
     {
         $settings = Setting::getSettings();
 
@@ -179,20 +199,65 @@ final class Company extends SnipeModel
         }
 
         if (auth()->user()) {
-            // Log::warning('Companyable is '.$companyable);
-            $current_user_company_id = auth()->user()->company_id;
-            $companyable_company_id = $companyable->company_id;
-
-            // Set this to check companyable on company
-            if ($companyable instanceof Company) {
-                $companyable_company_id = $companyable->id;
+            if (auth()->user()->isSuperUser()) {
+                return true;
             }
 
-            return ($current_user_company_id == null) || ($current_user_company_id == $companyable_company_id) || auth()->user()->isSuperUser();
+            $userCompanyIds = self::getCurrentUserCompanyIds();
+
+            // Empty pivot = unrestricted only for true legacy "no-company" users
+            // (those whose scalar company_id is also null). Users who had their
+            // pivot cleared via the API retain their scalar company_id, so they
+            // do NOT qualify for this bypass.
+            if (empty($userCompanyIds) && is_null(auth()->user()->company_id)) {
+                return true;
+            }
+
+            // Users are scoped by pivot membership, not company_id, so check the pivot directly.
+            if ($companyable instanceof User) {
+                $companyableCompanyIds = DB::table('company_user')
+                    ->where('user_id', $companyable->id)
+                    ->pluck('company_id')
+                    ->toArray();
+
+                // A user with no pivot rows is a null-company user; no intersection is possible.
+                if (empty($companyableCompanyIds)) {
+                    return false;
+                }
+
+                return ! empty(array_intersect($userCompanyIds, $companyableCompanyIds));
+            }
+
+            $companyable_company_id = ($companyable instanceof Company)
+                ? $companyable->id
+                : $companyable->company_id;
+
+            return in_array($companyable_company_id, $userCompanyIds);
         }
 
         return false;
+    }
 
+    /**
+     * Filter an array of requested company IDs to only those the current user
+     * belongs to. Superusers may assign any company; non-superusers are limited
+     * to their own pivot memberships when FMCS is enabled.
+     */
+    public static function getIdsForCurrentUser(array $requestedIds): array
+    {
+        if (! self::isFullMultipleCompanySupportEnabled()) {
+            return $requestedIds;
+        }
+
+        $current_user = auth()->user();
+
+        if ($current_user->isSuperUser()) {
+            return $requestedIds;
+        }
+
+        $allowedIds = self::getCurrentUserCompanyIds();
+
+        return array_values(array_intersect($requestedIds, $allowedIds));
     }
 
     public static function isCurrentUserAuthorized()
@@ -202,8 +267,9 @@ final class Company extends SnipeModel
 
     public static function canManageUsersCompanies()
     {
-        return ! self::isFullMultipleCompanySupportEnabled() || auth()->user()->isSuperUser() ||
-                auth()->user()->company_id == null;
+        return ! self::isFullMultipleCompanySupportEnabled()
+            || auth()->user()->isSuperUser()
+            || ! empty(self::getCurrentUserCompanyIds());
     }
 
     /**
@@ -242,7 +308,7 @@ final class Company extends SnipeModel
 
     public function users()
     {
-        return $this->hasMany(User::class, 'company_id');
+        return $this->belongsToMany(User::class, 'company_user');
     }
 
     public function assets()
@@ -304,27 +370,53 @@ final class Company extends SnipeModel
      */
     private static function scopeCompanyablesDirectly($query, $column = 'company_id', $table_name = null)
     {
-
-        $company_id = null;
-        // Get the company ID of the logged-in user, or set it to null if there is no company associated with the user
-        if (Auth::hasUser()) {
-            $company_id = auth()->user()->company_id;
-        }
+        $companyIds = self::getCurrentUserCompanyIds();
 
         // If we are scoping the companies table itself, look for the company.id
         if ($query->getModel()->getTable() == 'companies') {
-            return $query->where('companies.id', '=', $company_id);
+            if (empty($companyIds)) {
+                return $query->whereNull('companies.id');
+            }
+
+            return $query->whereIn('companies.id', $companyIds);
+        }
+
+        // Users are scoped by pivot membership (company_user), not by company_id column,
+        // since a user may belong to multiple companies and company_id alone is insufficient.
+        if ($query->getModel()->getTable() == 'users') {
+            if (empty($companyIds)) {
+                // No pivot memberships: mirror old null-company behavior — show only users
+                // who are also not in any company via the pivot.
+                return $query->whereNotIn('users.id', function ($sub) {
+                    $sub->select('user_id')->from('company_user');
+                });
+            }
+
+            return $query->whereIn('users.id', function ($sub) use ($companyIds) {
+                $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+            });
         }
 
         // If the column exists in the table, use it to scope the query
-        if ((($query) && ($query->getModel()) && (Schema::hasColumn($query->getModel()->getTable(), $column)))) {
-
-            // Dynamically get the table name if it's not passed in, based on the model we're querying against
+        if ($query && $query->getModel() && Schema::hasColumn($query->getModel()->getTable(), $column)) {
             $table = ($table_name) ? $table_name.'.' : $query->getModel()->getTable().'.';
 
-            return $query->where($table.$column, '=', $company_id);
-        }
+            if (empty($companyIds)) {
+                return $query->whereNull($table.$column);
+            }
 
+            // action_logs: a NULL company_id means the logged object (AssetModel, Company, etc.)
+            // has no company_id column of its own. Those are global objects, visible to all users,
+            // so their log entries should not be hidden by the company filter.
+            if ($query->getModel()->getTable() === 'action_logs') {
+                return $query->where(function ($q) use ($table, $column, $companyIds) {
+                    $q->whereIn($table.$column, $companyIds)
+                        ->orWhereNull($table.$column);
+                });
+            }
+
+            return $query->whereIn($table.$column, $companyIds);
+        }
     }
 
     /**

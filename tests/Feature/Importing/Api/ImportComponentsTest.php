@@ -250,6 +250,52 @@ class ImportComponentsTest extends ImportDataTestCase implements TestsPermission
     }
 
     #[Test]
+    public function update_mode_logs_component_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->component()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $component = Component::query()
+            ->where('name', $initialRow['itemName'])
+            ->where('serial', $initialRow['serialNumber'])
+            ->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->component()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $component->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $component->order_number);
+
+        $updateLog = ActionLog::query()
+            ->where('item_type', Component::class)
+            ->where('item_id', $component->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after component importer update mode.');
+    }
+
+    #[Test]
     public function custom_column_mapping(): void
     {
         $faker = ImportFileBuilder::new()->definition();

@@ -96,11 +96,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'شما حداقل باید یک دارایی از لیست انتخاب کنید',
+    ],
+
     'checkin' => [
         'error' => 'دارایی در بررسی نیست، لطفا دوباره امتحان کنید',
         'success' => 'دارایی ها با موفقیت در بررسی.',
         'user_does_not_exist' => 'آن کاربر نامعتبر است. لطفا دوباره سعی کنید.',
         'already_checked_in' => 'دارایی ها که در حال حاضر انتخاب شده است.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

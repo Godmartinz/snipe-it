@@ -38,6 +38,7 @@
                         :$item
                         name="support_url"
                         type="url"
+                        help_text="{!! trans('admin/manufacturers/message.support_url_help') !!}"
                         input_icon="link"
                         input_group_addon="left"
                         placeholder="https://example.com"

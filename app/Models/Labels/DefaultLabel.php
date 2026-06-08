@@ -68,17 +68,8 @@ class DefaultLabel extends RectangleSheet
         $usableWidth = $this->pageWidth - $this->pageMarginLeft - $this->pageMarginRight;
         $usableHeight = $this->pageHeight - $this->pageMarginTop - $this->pageMarginBottom;
 
-        $this->columns = ($usableWidth + $this->labelSpacingH) / ($this->labelWidth + $this->labelSpacingH);
-        $this->rows = ($usableHeight + $this->labelSpacingV) / ($this->labelHeight + $this->labelSpacingV);
-
-        // Make sure the columns and rows are never zero, since that scenario should never happen
-        if ($this->columns == 0) {
-            $this->columns = 1;
-        }
-
-        if ($this->rows == 0) {
-            $this->rows = 1;
-        }
+        $this->columns = $this->calculateGridCount($usableWidth, $this->labelWidth, $this->labelSpacingH);
+        $this->rows = $this->calculateGridCount($usableHeight, $this->labelHeight, $this->labelSpacingV);
 
     }
 
@@ -298,5 +289,18 @@ class DefaultLabel extends RectangleSheet
         }
 
         return $labelHeight;
+    }
+
+    private function calculateGridCount(float $usableSize, float $labelSize, float $spacing): int
+    {
+        $denominator = $labelSize + $spacing;
+
+        if ($denominator <= 0.0) {
+            return 1;
+        }
+
+        $count = (int) floor(($usableSize + $spacing) / $denominator);
+
+        return max(1, $count);
     }
 }

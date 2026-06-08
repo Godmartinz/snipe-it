@@ -7,6 +7,7 @@ use App\Mail\CheckinAssetMail;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\Consumable;
+use App\Models\CustomField;
 use App\Models\LicenseSeat;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -97,6 +98,32 @@ class EmailNotificationsToUserUponCheckinTest extends TestCase
         $this->fireCheckInEvent($asset, $user);
 
         Mail::assertNothingSent();
+    }
+
+    public function test_checkin_email_includes_custom_fields_marked_show_in_email_and_not_encrypted()
+    {
+        $customField = CustomField::factory()->create([
+            'name' => 'Cost Center',
+            'show_in_email' => '1',
+            'field_encrypted' => '0',
+        ])->fresh();
+
+        $user = User::factory()->create();
+        $asset = Asset::factory()->hasMultipleCustomFields([$customField])->assignedToUser($user)->create();
+        $asset->{$customField->db_column} = 'ENG-42';
+        $asset->save();
+
+        $asset->model->category->update(['checkin_email' => true]);
+
+        $this->fireCheckInEvent($asset, $user);
+
+        Mail::assertSent(CheckinAssetMail::class, function (CheckinAssetMail $mail) use ($user) {
+            $rendered = $mail->render();
+
+            return $mail->hasTo($user->email)
+                && str_contains($rendered, 'Cost Center')
+                && str_contains($rendered, 'ENG-42');
+        });
     }
 
     private function fireCheckInEvent($asset, $user): void

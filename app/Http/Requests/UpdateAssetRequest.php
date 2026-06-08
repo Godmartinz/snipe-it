@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\Setting;
@@ -20,6 +21,13 @@ class UpdateAssetRequest extends ImageUploadRequest
     public function authorize()
     {
         return Gate::allows('update', $this->asset);
+    }
+
+    public function prepareForValidation(): void
+    {
+        if ($this->filled('purchase_cost') && ! is_float($this->input('purchase_cost')) && preg_match('/^[\d.,]+$/', (string) $this->input('purchase_cost'))) {
+            $this->merge(['purchase_cost' => Helper::ParseCurrency($this->input('purchase_cost'))]);
+        }
     }
 
     /**
@@ -50,12 +58,6 @@ class UpdateAssetRequest extends ImageUploadRequest
                 ],
             ],
         );
-
-        // if the purchase cost is passed in as a string **and** the digit_separator is ',' (as is common in the EU)
-        // then we tweak the purchase_cost rule to make it a string
-        if ($setting->digit_separator === '1.234,56' && is_string($this->input('purchase_cost'))) {
-            $rules['purchase_cost'] = ['nullable', 'string'];
-        }
 
         return $rules;
     }

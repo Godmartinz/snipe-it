@@ -94,11 +94,20 @@ return [
         'success' => 'Środek wydany pomyślnie.|Środki wydane pomyślnie.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Musisz wybrać co najmniej jeden środek z listy',
+    ],
+
     'checkin' => [
         'error' => 'Środek nie został przyjęty, proszę spróbować ponownie',
         'success' => 'Pomyślnie przyjęto środek.',
         'user_does_not_exist' => 'Nieprawidłowy użytkownik. Proszę spróbować ponownie.',
         'already_checked_in' => 'Środek jest już przyjęty.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

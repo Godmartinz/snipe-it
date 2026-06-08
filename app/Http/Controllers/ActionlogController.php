@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\Actionlog;
-use App\Models\Asset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +14,11 @@ class ActionlogController extends Controller
 {
     public function displaySig($filename): RedirectResponse|Response|bool
     {
+        $filename = basename((string) $filename);
+
+        $actionlog = Actionlog::where('accept_signature', $filename)->with('item')->firstOrFail();
+        $this->authorize('view', $actionlog->item);
+
         // PHP doesn't let you handle file not found errors well with
         // file_get_contents, so we set the error reporting for just this class
         error_reporting(0);
@@ -27,7 +31,6 @@ class ActionlogController extends Controller
 
                 return redirect()->away(Storage::disk($disk)->temporaryUrl($file, now()->addMinutes(5)));
             default:
-                $this->authorize('view', Asset::class);
                 $file = config('app.private_uploads').'/signatures/'.$filename;
                 $filetype = Helper::checkUploadIsImage($file);
 
@@ -44,6 +47,7 @@ class ActionlogController extends Controller
 
     public function getStoredEula($filename): Response|BinaryFileResponse|RedirectResponse
     {
+        $filename = basename((string) $filename);
 
         if ($actionlog = Actionlog::where('filename', $filename)->with('user')->with('target')->firstOrFail()) {
 

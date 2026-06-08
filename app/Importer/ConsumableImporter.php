@@ -38,7 +38,8 @@ class ConsumableImporter extends ItemImporter
             }
             $this->log('Updating Consumable');
             $consumable->update($this->sanitizeItemForUpdating($consumable));
-            $consumable->save();
+            // update() already saves the model, no need to call save() again while Model::unguard() is active
+            $consumable->setImported(true);
 
             return;
         }

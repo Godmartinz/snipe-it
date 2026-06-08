@@ -48,7 +48,7 @@ class Consumable extends SnipeModel
         'name' => 'required|max:255',
         'qty' => 'required|integer|min:0|max:99999',
         'category_id' => 'required|integer',
-        'company_id' => 'integer|nullable',
+        'company_id' => 'integer|nullable|exists:companies,id',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
         'min_amt' => 'integer|min:0|max:99999|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
@@ -168,6 +168,10 @@ class Consumable extends SnipeModel
     {
         if ($this->consumables_users_count == 0) {
             return 100;
+        }
+
+        if (($this->qty == '') || ($this->qty == 0)) {
+            return 0;
         }
 
         return ($this->qty - $this->consumables_users_count) / $this->qty * 100;
@@ -318,7 +322,7 @@ class Consumable extends SnipeModel
      */
     public function requireAcceptance()
     {
-        return $this->category->require_acceptance;
+        return $this->category?->require_acceptance ?? false;
     }
 
     /**

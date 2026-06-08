@@ -9,7 +9,7 @@ return [
     'edit' => 'Actualizare Accesoriu',
     'eula_text' => 'Categorie EULA',
     'eula_text_help' => 'Acest câmp vă permite să particularizaţi acordurile dumneavoastră EULA specifice pentru tipuri de bunuri. Dacă ai doar un acord EULA pentru toate bunurile dumneavoastră, puteţi bifa căsuța de mai jos pentru a utiliza implicit acordul.',
-    'require_acceptance' => 'Solicita utilizatorilor confirmarea adaugarii produselor in aceasta categorie.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'EULA implicita nu a fost setata. Adaugati una in Setari.',
     'total' => 'Total',
     'remaining' => 'Disponibil',

@@ -16,6 +16,13 @@ class LicensePresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ], [
                 'field' => 'id',
                 'searchable' => false,
                 'sortable' => true,
@@ -115,7 +122,7 @@ class LicensePresenter extends Presenter
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
-                'title' => '% ' . trans('general.remaining'),
+                'title' => '% '.trans('general.remaining'),
                 'visible' => true,
                 'formatter' => 'progressBarFormatter',
             ], [
@@ -233,41 +240,53 @@ class LicensePresenter extends Presenter
      *
      * @return string
      */
-    public static function dataTableLayoutSeats()
+    public static function dataTableLayoutSeats(bool $withCheckbox = true)
     {
-        $layout = [
+        $layout = [];
+
+        if ($withCheckbox) {
+            $layout[] = [
+                'field' => 'checkbox',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ];
+        }
+
+        $layout = array_merge($layout, [[
+            'field' => 'id',
+            'searchable' => false,
+            'sortable' => true,
+            'switchable' => true,
+            'title' => trans('general.id'),
+            'visible' => false,
+        ], [
+            'field' => 'assigned_user',
+            'searchable' => false,
+            'sortable' => false,
+            'switchable' => true,
+            'title' => trans('admin/licenses/general.user'),
+            'visible' => true,
+            'formatter' => 'usersLinkObjFormatter',
+        ], [
+            'field' => 'assigned_user.email',
+            'searchable' => false,
+            'sortable' => false,
+            'switchable' => true,
+            'title' => trans('admin/users/table.email'),
+            'visible' => true,
+            'formatter' => 'emailFormatter',
+        ],
             [
-                'field' => 'id',
-                'searchable' => false,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.id'),
-                'visible' => false,
-            ], [
-                'field' => 'assigned_user',
+                'field' => 'assigned_user.companies',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
-                'title' => trans('admin/licenses/general.user'),
+                'title' => trans('general.companies'),
                 'visible' => true,
-                'formatter' => 'usersLinkObjFormatter',
-            ], [
-                'field' => 'assigned_user.email',
-                'searchable' => false,
-                'sortable' => false,
-                'switchable' => true,
-                'title' => trans('admin/users/table.email'),
-                'visible' => true,
-                'formatter' => 'emailFormatter',
-            ],
-            [
-                'field' => 'assigned_user.company',
-                'searchable' => false,
-                'sortable' => false,
-                'switchable' => true,
-                'title' => trans('general.company'),
-                'visible' => true,
-                'formatter' => 'companiesLinkObjFormatter',
+                'formatter' => 'companiesArrayLinkFormatter',
             ],
             [
                 'field' => 'assigned_user.department',
@@ -321,14 +340,27 @@ class LicensePresenter extends Presenter
                 'printIgnore' => true,
                 'class' => 'hidden-print',
             ],
-        ];
+        ]);
 
         return json_encode($layout);
     }
 
-    public static function dataTableLayoutSeatsCheckedOutToAssets()
+    public static function dataTableLayoutSeatsCheckedOutToAssets($hide_fields = [])
     {
-        $layout = [
+        $layout = [];
+
+        if (! in_array('checkbox', $hide_fields)) {
+            $layout[] = [
+                'field' => 'checkbox',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ];
+        }
+
+        $layout = array_merge($layout, [
             [
                 'field' => 'id',
                 'searchable' => false,
@@ -379,7 +411,7 @@ class LicensePresenter extends Presenter
                 'printIgnore' => true,
                 'class' => 'hidden-print',
             ],
-        ];
+        ]);
 
         return json_encode($layout);
     }

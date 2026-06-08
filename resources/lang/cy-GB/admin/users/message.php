@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Defnyddiwr wedi\'i dileu. Rhaid adfer y defnyddiwr I newid eu manylion neu clustnodi ased iddynt.',
     'ldap_not_configured' => 'Nid ywr gosodiadau I dilysu trwy LDAP wedi gosod ar y system.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Wedi llwyddo i anwahardd defnyddiwr.',
         'restored' => 'Wedi adfer y defnyddiwr yn llwyddiannus.',
         'import' => 'Defnyddwyr wedi mewnforio\'n llwyddiannus.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Roedd problem wrth ceisio alluogi\'r defnyddiwr. Ceisiwch eto o. g. y. dd.',
         'import' => 'Roedd problem wrth ceisio mewnforio defnyddwyr. Ceisiwch eto o. g. y. dd.',
-        'asset_already_accepted' => 'Ased wedi\'i dderbyn yn barod.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Rhaid i chi unai derbyn neu gwrthod yr ased yma.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Rydych wedi ceisio derbyn ased sydd ddim wedi nodi yn erbyn eich cyfrif.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Wedi methu llwytho data trwy LDAP. Gwiriwch eich gosodiadau LDAP. <br>Error from LDAP Server:',
         'password_ldap' => 'Mae eich cyfrinair wedi\'i rheoli trwy LDAP/Active Directory. Cysylltwch a\'r Adran TGCh i\'w newid. ',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

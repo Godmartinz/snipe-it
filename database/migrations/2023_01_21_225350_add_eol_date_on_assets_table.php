@@ -22,6 +22,14 @@ class AddEolDateOnAssetsTable extends Migration
                 $table->date('asset_eol_date')->after('purchase_date')->nullable()->default(null);
             }
 
+            // This is a back in time migration to fix restores from very old versions of Snipe-IT where
+            // companies were not soft-deletable.
+            Schema::table('companies', function (Blueprint $table) {
+                if (! Schema::hasColumn('companies', 'deleted_at')) {
+                    $table->softDeletes();
+                }
+            });
+
             // This is a temporary shim so we don't have to modify the asset observer for migrations where
             // there is a large version difference. (See the AssetObserver notes). This column gets created
             // later in 2023_07_13_052204_denormalized_eol_and_add_column_for_explicit_date_to_assets.php

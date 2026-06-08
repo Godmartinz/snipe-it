@@ -12,7 +12,6 @@ use App\Providers\RouteServiceProvider;
 use App\Providers\SamlServiceProvider;
 use App\Providers\SettingsServiceProvider;
 use App\Providers\SnipeTranslationServiceProvider;
-use Elibyy\TCPDF\Facades\TCPDF;
 use Illuminate\Auth\AuthServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
@@ -234,6 +233,21 @@ return [
     'allow_iframing' => env('ALLOW_IFRAMING', false),
 
     /*
+   |--------------------------------------------------------------------------
+   | LOG AUTHED USER HEADER
+   |--------------------------------------------------------------------------
+   |
+   | This is an additional header that can be enabled to include the authenticated user's ID
+   | in the response headers of each request. This can be useful for debugging and auditing purposes,
+   | but it may also expose sensitive information if not used carefully.
+   | It should normally be set to false unless you have a specific need for it and
+   | understand the security implications.
+   |
+   */
+
+    'authorized_user_header' => env('INCLUDE_AUTHED_USER_HEADER', false),
+
+    /*
     |--------------------------------------------------------------------------
     | ENABLE HTTP Strict Transport Security (HSTS)
     |--------------------------------------------------------------------------
@@ -385,8 +399,6 @@ return [
         DumbPasswordServiceProvider::class,
         Eduardokum\LaravelMailAutoEmbed\ServiceProvider::class,
         SocialiteServiceProvider::class,
-        Elibyy\TCPDF\ServiceProvider::class,
-
         /*
         * Application Service Providers...
         */
@@ -441,7 +453,6 @@ return [
         'Mail' => Mail::class,
         'Notification' => Notification::class,
         'Password' => Password::class,
-        'PDF' => TCPDF::class,
         'Queue' => Queue::class,
         'Redirect' => Redirect::class,
         'Redis' => Redis::class,

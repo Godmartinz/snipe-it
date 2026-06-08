@@ -422,6 +422,40 @@ class UpdateAssetTest extends TestCase
         $this->assertEquals($asset->assigned_type, 'App\Models\User');
     }
 
+    public function test_update_rejects_cross_company_checkout_target_with_full_company_support_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $asset = Asset::factory()->for($companyA)->create(['name' => 'Original Name']);
+        $actorInCompanyA = User::factory()->editAssets()->for($companyA)->create();
+        $targetUserInCompanyB = User::factory()->for($companyB)->create();
+
+        $this->actingAsForApi($actorInCompanyA)
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'name' => 'Name That Should Roll Back',
+                'assigned_user' => $targetUserInCompanyB->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertMessagesAre(trans('general.error_user_company'));
+
+        $asset->refresh();
+
+        $this->assertEquals('Original Name', $asset->name);
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
+
+        $this->assertDatabaseMissing('action_logs', [
+            'action_type' => 'checkout',
+            'target_type' => User::class,
+            'target_id' => $targetUserInCompanyB->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+        ]);
+    }
+
     public function test_checkout_to_user_with_assigned_to_and_assigned_type()
     {
         $asset = Asset::factory()->create();
@@ -653,5 +687,42 @@ class UpdateAssetTest extends TestCase
         $this->actingAsForApi($user)->patchJson(route('api.assets.update', $asset->id), [
             '_snipeit_non_existent_custom_field_50' => 'test attribute',
         ])->assertStatusMessageIs('error');
+    }
+
+    public function test_updating_next_audit_date_creates_update_log_entry(): void
+    {
+        $asset = Asset::factory()->create(['next_audit_date' => now()->addMonths(3)->toDateString()]);
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset), [
+                'next_audit_date' => now()->addMonths(6)->toDateString(),
+            ])
+            ->assertOk();
+
+        $this->assertHasTheseActionLogs($asset, ['create', 'update']);
+    }
+
+    public function test_updating_next_audit_date_with_other_fields_logs_all_changes(): void
+    {
+        $asset = Asset::factory()->create([
+            'name' => 'Old Name',
+            'next_audit_date' => now()->addMonths(3)->toDateString(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset), [
+                'name' => 'New Name',
+                'next_audit_date' => now()->addMonths(6)->toDateString(),
+            ])
+            ->assertOk();
+
+        // One update log — not suppressed by the presence of next_audit_date
+        $this->assertHasTheseActionLogs($asset, ['create', 'update']);
+
+        $logMeta = json_decode($asset->assetlog()->where('action_type', 'update')->first()->log_meta, true);
+        $this->assertArrayHasKey('name', $logMeta);
+        $this->assertArrayHasKey('next_audit_date', $logMeta);
+        $this->assertEquals('Old Name', $logMeta['name']['old']);
+        $this->assertEquals('New Name', $logMeta['name']['new']);
     }
 }

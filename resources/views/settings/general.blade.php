@@ -263,7 +263,7 @@
                                <label for="login_note" class="col-md-3 control-label">{{trans('admin/settings/general.test_mail')}}</label>
 
                                <div class="col-md-8" id="mailtestrow">
-                                   <a class="btn btn-default btn-sm pull-left" id="mailtest" style="margin-right: 10px;">
+                                   <a class="btn btn-default btn-sm pull-left{{ (config('mail.reply_to.address') == '') ? ' disabled': '' }}" id="mailtest" style="margin-right: 10px;">
                                        {{ trans('admin/settings/general.mail_test') }}</a>
                                    <span id="mailtesticon"></span>
                                    <span id="mailtestresult"></span>
@@ -274,7 +274,15 @@
                                </div>
                                <div class="col-md-8 col-md-offset-3">
                                    <div class="help-block">
-                                       <p>{{ trans('admin/settings/general.mail_test_help', array('replyto' => config('mail.reply_to.address'))) }}</p>
+
+                                       @if (config('mail.reply_to.address') == '')
+                                           <p class="text-warning">
+                                               <x-icon type="warning"/> {{ trans('admin/settings/general.mail_test_no_email') }}
+                                           </p>
+                                       @else
+                                           <p>{{ trans('admin/settings/general.mail_test_help', array('replyto' => config('mail.reply_to.address'))) }}</p>
+                                       @endif
+
                                    </div>
                                </div>
 
@@ -296,7 +304,7 @@
                        </fieldset>
 
 
-                       <fieldset name="checkin-preferences"">
+                       <fieldset name="checkin-preferences">
                            <x-form.legend>
                                {{ trans('admin/settings/general.legends.checkin') }}
                            </x-form.legend>
@@ -373,7 +381,8 @@
                                        @endif
                                        <p class="help-block">
                                            {{ trans('admin/settings/general.dashboard_message_help') }}
-                                           {!!  trans('general.github_markdown') !!}</p>
+                                           <i class="fab fa-markdown" aria-hidden="true"></i> {!!  trans('general.github_markdown') !!}
+                                       </p>
                                    </div>
                                </div>
                        </fieldset>

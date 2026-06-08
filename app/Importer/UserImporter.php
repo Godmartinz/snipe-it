@@ -3,6 +3,7 @@
 namespace App\Importer;
 
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\Department;
 use App\Models\Setting;
 use App\Models\User;
@@ -36,6 +37,31 @@ class UserImporter extends ItemImporter
     }
 
     /**
+     * Parse a pipe-separated company column value into an array of company IDs,
+     * creating companies that do not yet exist. Returns an empty array when the
+     * raw value is blank (so callers can treat that as "don't change").
+     *
+     * @param  string  $raw  Raw cell value, e.g. "Acme Corp|Widget Inc"
+     * @return int[]
+     */
+    private function resolveCompanyIds(string $raw): array
+    {
+        if ($raw === '') {
+            return [];
+        }
+
+        $ids = [];
+        foreach (array_filter(array_map('trim', explode('|', $raw))) as $name) {
+            $id = $this->createOrFetchCompany($name);
+            if ($id) {
+                $ids[] = (int) $id;
+            }
+        }
+
+        return Company::getIdsForCurrentUser($ids);
+    }
+
+    /**
      * Create a user if a duplicate does not exist.
      *
      * @todo Investigate how this should interact with Importer::createOrFetchUser
@@ -49,7 +75,7 @@ class UserImporter extends ItemImporter
         // Pull the records from the CSV to determine their values
         $this->item['id'] = trim($this->findCsvMatch($row, 'id'));
         $this->item['username'] = trim($this->findCsvMatch($row, 'username'));
-        $this->item['display_name'] = trim($this->findCsvMatch($row, 'display_name'));
+        $this->item['display_name'] = trim($this->findCsvMatch($row, 'display_name')) ?: null;
         $this->item['first_name'] = trim($this->findCsvMatch($row, 'first_name'));
         $this->item['last_name'] = trim($this->findCsvMatch($row, 'last_name'));
         $this->item['email'] = trim($this->findCsvMatch($row, 'email'));
@@ -80,6 +106,13 @@ class UserImporter extends ItemImporter
             $this->item['department_id'] = $this->createOrFetchDepartment($user_department);
         }
 
+        // Resolve pipe-separated company names (e.g. "Acme Corp|Widget Inc") into IDs.
+        // company_id is a legacy column — company membership is managed via the pivot.
+        // Unset whatever the parent set so it is not written to the DB.
+        $companyRaw = trim($this->findCsvMatch($row, 'company'));
+        $companyIds = $this->resolveCompanyIds($companyRaw);
+        unset($this->item['company_id']);
+
         if (is_null($this->item['username']) || $this->item['username'] == '') {
             $user_full_name = $this->item['first_name'].' '.$this->item['last_name'];
             $user_formatted_array = User::generateFormattedNameFromFullName($user_full_name, Setting::getSettings()->username_format);
@@ -104,17 +137,24 @@ class UserImporter extends ItemImporter
 
             $this->log('Updating User');
 
-            if (Auth::check() && (! Gate::allows('canEditAuthFields', $user))) {
-                unset($user->username);
-                unset($user->email);
-                unset($user->password);
-                unset($user->activated);
+            // CLI imports run unauthenticated and are fully trusted; only restrict web-initiated imports.
+            // Note: unset must target $this->item, not the model — sanitizeItemForUpdating() reads from $this->item.
+            if (Auth::check() && (! Auth::user()->hasAccess('users.edit') || ! Gate::allows('canEditAuthFields', $user))) {
+                unset($this->item['username']);
+                unset($this->item['email']);
+                unset($this->item['password']);
+                unset($this->item['activated']);
             }
 
             $user->update($this->sanitizeItemForUpdating($user));
 
             // Why do we have to do this twice? Update should
             $user->save();
+
+            // Sync company pivot when companies were specified in this row.
+            if (! empty($companyIds)) {
+                $user->companies()->sync($companyIds);
+            }
 
             // Update the location of any assets checked out to this user
             Asset::where('assigned_type', User::class)
@@ -123,6 +163,17 @@ class UserImporter extends ItemImporter
 
             // Log::debug('UserImporter.php Updated User ' . print_r($user, true));
             return;
+        }
+
+        // With FMCS enabled, the scoped lookup above only sees users in the current user's companies.
+        // If the username exists in another company it would appear as "not found" and fall through
+        // to create — but usernames are unique system-wide, so we must skip instead.
+        if (Auth::check() && Company::isFullMultipleCompanySupportEnabled()) {
+            if (User::withoutGlobalScopes()->where('username', $this->item['username'])->exists()) {
+                $this->log('Skipping '.$this->item['username'].': username belongs to a user outside your company scope.');
+
+                return;
+            }
         }
 
         // This needs to be applied after the update logic, otherwise we'll overwrite user passwords
@@ -139,6 +190,13 @@ class UserImporter extends ItemImporter
 
         if ($user->save()) {
             $this->log('User '.$this->item['name'].' was created');
+
+            // Sync all resolved companies to the pivot. For single-company rows the
+            // User::created event already added company_id; sync() here is idempotent
+            // for that case and adds any additional companies for multi-company rows.
+            if (! empty($companyIds)) {
+                $user->companies()->sync($companyIds);
+            }
 
             if (($user->email) && ($user->activated == '1')) {
 

@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Ta je lokacija trenutno roditelj najmanje jednoj podredjenoj lokaciji i ne može se izbrisati. Ažurirajte svoje lokacije da se više ne referenciraju na ovu lokaciju i pokušajte ponovo. ',
     'assigned_assets' => 'Dodeljena imovina',
     'current_location' => 'Trenutna lokacija',
-    'open_map' => 'Otvori u :map_provider_icon mapama',
     'deleted_warning' => 'Lokacija je obrisana. Molim vas prvo je povratite pre pokušaja vršenja bilo kakvih izmena.',
 
     'create' => [

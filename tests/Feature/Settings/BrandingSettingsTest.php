@@ -6,10 +6,96 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class BrandingSettingsTest extends TestCase
 {
+    public static function validColorProvider(): array
+    {
+        return [
+            'hex 6-digit' => ['#3c8dbc'],
+            'hex 3-digit' => ['#fff'],
+            'rgb' => ['rgb(10,20,30)'],
+            'rgba' => ['rgba(10,20,30,0.5)'],
+            'hsl' => ['hsl(120,50%,50%)'],
+            'hsla' => ['hsla(120,50%,50%,0.8)'],
+        ];
+    }
+
+    public static function invalidColorProvider(): array
+    {
+        return [
+            'named color' => ['red'],
+            'css injection payload' => ['red; }body{background:url(//evil.com)} .x{color: #'],
+            'url()' => ['url(http://evil.com)'],
+            'value with semicolon' => ['#3c8dbc; color: red'],
+        ];
+    }
+
+    #[DataProvider('validColorProvider')]
+    public function test_valid_header_color_can_be_saved(string $color): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('settings.branding.save'), ['header_color' => $color])
+            ->assertValid('header_color')
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('settings', ['header_color' => $color]);
+    }
+
+    #[DataProvider('invalidColorProvider')]
+    public function test_invalid_header_color_is_rejected(string $color): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('settings.branding.index'))
+            ->post(route('settings.branding.save'), ['header_color' => $color])
+            ->assertInvalid(['header_color'])
+            ->assertSessionHasErrors(['header_color']);
+    }
+
+    #[DataProvider('validColorProvider')]
+    public function test_valid_link_colors_can_be_saved(string $color): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('settings.branding.save'), [
+                'link_light_color' => $color,
+                'link_dark_color' => $color,
+                'nav_link_color' => $color,
+            ])
+            ->assertValid(['link_light_color', 'link_dark_color', 'nav_link_color'])
+            ->assertSessionHasNoErrors();
+    }
+
+    #[DataProvider('invalidColorProvider')]
+    public function test_invalid_link_colors_are_rejected(string $color): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('settings.branding.index'))
+            ->post(route('settings.branding.save'), [
+                'link_light_color' => $color,
+                'link_dark_color' => $color,
+                'nav_link_color' => $color,
+            ])
+            ->assertInvalid(['link_light_color', 'link_dark_color', 'nav_link_color'])
+            ->assertSessionHasErrors(['link_light_color', 'link_dark_color', 'nav_link_color']);
+    }
+
+    public function test_setting_model_sanitizes_corrupt_header_color(): void
+    {
+        $setting = Setting::factory()->create();
+        $setting->setRawAttributes(['header_color' => 'red; }body{color:red}']);
+
+        $this->assertSame('#3c8dbc', $setting->header_color);
+    }
+
+    public function test_setting_model_passes_through_valid_header_color(): void
+    {
+        $setting = Setting::factory()->create(['header_color' => '#5fa4cc']);
+
+        $this->assertSame('#5fa4cc', $setting->header_color);
+    }
+
     public function test_site_name_is_required()
     {
         $response = $this->actingAs(User::factory()->superuser()->create())

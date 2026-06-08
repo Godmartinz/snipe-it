@@ -8,7 +8,6 @@ return [
     'assoc_child_loc' => 'Ez a hely jelenleg legalább egy gyermek helye szülője, és nem törölhető. Frissítse tartózkodási helyeit, hogy ne hivatkozzon erre a helyre, és próbálja újra.',
     'assigned_assets' => 'Hozzárendelt eszközök',
     'current_location' => 'Jelenlegi hely',
-    'open_map' => 'Megnyitás a :map_provider_icon térképen',
     'deleted_warning' => 'Ez a helyszín törlésre került. Kérjük, állítsa vissza, mielőtt bármilyen módosítást végezne.',
 
     'create' => [

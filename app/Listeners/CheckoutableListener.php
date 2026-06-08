@@ -34,12 +34,14 @@ use App\Notifications\CheckoutLicenseSeatNotification;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Osama\LaravelTeamsNotification\TeamsNotification;
+
 class CheckoutableListener
 {
     private array $skipNotificationsFor = [
@@ -79,6 +81,11 @@ class CheckoutableListener
         $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($event->checkoutable);
         $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($acceptance);
         $shouldSendWebhookNotification = $this->shouldSendWebhookNotification();
+
+        if ($this->shouldSkipInitialAcceptanceEmail($event, $acceptance)) {
+            $shouldSendEmailToUser = false;
+            $shouldSendEmailToAlertAddress = false;
+        }
 
         if (! $shouldSendEmailToUser && ! $shouldSendEmailToAlertAddress && ! $shouldSendWebhookNotification) {
             return;
@@ -120,12 +127,12 @@ class CheckoutableListener
         if ($shouldSendWebhookNotification) {
             try {
                 if ($this->newMicrosoftTeamsWebhookEnabled()) {
-                    $message = $this->getCheckoutNotification($event)->toMicrosoftTeams();
+                    $message = $this->getCheckoutNotification($event, $acceptance, true)->toMicrosoftTeams();
                     $notification = new TeamsNotification(Setting::getSettings()->webhook_endpoint);
                     $notification->success()->sendMessage($message[0], $message[1]);  // Send the message to Microsoft Teams
                 } else {
                     Notification::route($this->webhookSelected(), Setting::getSettings()->webhook_endpoint)
-                        ->notify($this->getCheckoutNotification($event, $acceptance));
+                        ->notify($this->getCheckoutNotification($event, $acceptance, true));
                 }
             } catch (ClientException $e) {
                 $status = $e->getResponse()->getStatusCode();
@@ -227,12 +234,12 @@ class CheckoutableListener
             // Send Webhook notification
             try {
                 if ($this->newMicrosoftTeamsWebhookEnabled()) {
-                    $message = $this->getCheckinNotification($event)->toMicrosoftTeams();
+                    $message = $this->getCheckinNotification($event, true)->toMicrosoftTeams();
                     $notification = new TeamsNotification(Setting::getSettings()->webhook_endpoint);
                     $notification->success()->sendMessage($message[0], $message[1]); // Send the message to Microsoft Teams
                 } else {
                     Notification::route($this->webhookSelected(), Setting::getSettings()->webhook_endpoint)
-                        ->notify($this->getCheckinNotification($event));
+                        ->notify($this->getCheckinNotification($event, true));
                 }
             } catch (ClientException $e) {
                 $status = $e->getResponse()->getStatusCode();
@@ -306,12 +313,12 @@ class CheckoutableListener
      * @param  CheckoutableCheckedIn  $event
      * @return Notification
      */
-    private function getCheckinNotification($event)
+    private function getCheckinNotification($event, bool $refreshCheckoutable = false): BaseNotification
     {
-
         $notificationClass = null;
+        $checkoutable = $this->getCheckoutableForNotification($event->checkoutable, $refreshCheckoutable);
 
-        switch (get_class($event->checkoutable)) {
+        switch (get_class($checkoutable)) {
             case Accessory::class:
                 $notificationClass = CheckinAccessoryNotification::class;
                 break;
@@ -328,7 +335,7 @@ class CheckoutableListener
 
         Log::debug('Notification class: '.$notificationClass);
 
-        return new $notificationClass($event->checkoutable, $event->checkedOutTo, $event->checkedInBy, $event->note);
+        return new $notificationClass($checkoutable, $event->checkedOutTo, $event->checkedInBy, $event->note);
     }
 
     /**
@@ -338,11 +345,12 @@ class CheckoutableListener
      * @param  CheckoutAcceptance|null  $acceptance
      * @return Notification
      */
-    private function getCheckoutNotification($event, $acceptance = null)
+    private function getCheckoutNotification($event, $acceptance = null, bool $refreshCheckoutable = false): BaseNotification
     {
         $notificationClass = null;
+        $checkoutable = $this->getCheckoutableForNotification($event->checkoutable, $refreshCheckoutable);
 
-        switch (get_class($event->checkoutable)) {
+        switch (get_class($checkoutable)) {
             case Accessory::class:
                 $notificationClass = CheckoutAccessoryNotification::class;
                 break;
@@ -360,7 +368,16 @@ class CheckoutableListener
                 break;
         }
 
-        return new $notificationClass($event->checkoutable, $event->checkedOutTo, $event->checkedOutBy, $acceptance, $event->note);
+        return new $notificationClass($checkoutable, $event->checkedOutTo, $event->checkedOutBy, $acceptance, $event->note);
+    }
+
+    private function getCheckoutableForNotification(Model $checkoutable, bool $shouldRefresh): Model
+    {
+        if (! $shouldRefresh) {
+            return $checkoutable;
+        }
+
+        return $checkoutable->fresh() ?? $checkoutable;
     }
 
     private function getCheckoutMailType($event, $acceptance)
@@ -478,6 +495,15 @@ class CheckoutableListener
         }
 
         return false;
+    }
+
+    private function shouldSkipInitialAcceptanceEmail(CheckoutableCheckedOut $event, ?CheckoutAcceptance $acceptance): bool
+    {
+        if (! $event->signInPlace) {
+            return false;
+        }
+
+        return ($acceptance instanceof CheckoutAcceptance) || ! empty($event->checkoutable->getEula());
     }
 
     private function shouldSendEmailToAlertAddress($acceptance = null): bool

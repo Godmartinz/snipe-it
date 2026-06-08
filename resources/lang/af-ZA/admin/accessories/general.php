@@ -9,7 +9,7 @@ return [
     'edit' => 'Wysig bykomstighede',
     'eula_text' => 'Kategorie EULA',
     'eula_text_help' => 'Hierdie veld laat u toe om u EULA\'s vir spesifieke soorte bates aan te pas. As u slegs een EULA vir al u bates het, kan u die onderstaande boks selekteer om die primêre standaard te gebruik.',
-    'require_acceptance' => 'Vereis gebruikers om die aanvaarding van bates in hierdie kategorie te bevestig.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'Geen primêre standaard EULA gevind nie. Voeg een by Instellings.',
     'total' => 'totale',
     'remaining' => 'opgelewer',

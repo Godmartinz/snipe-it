@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Šis lietotājs ir izdzēsts. Jums būs jāatjauno šis lietotājs, lai tos rediģētu vai piešķirtu tiem jaunus aktīvus.',
     'ldap_not_configured' => 'LDAP integrācija nav konfigurēta šai instalācijai.',
     'password_resets_sent' => 'The selected users who are activated and have a valid email addresses have been sent a password reset link.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'This user does not have an email address in their profile.',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Lietotājs tika veiksmīgi atcelts.',
         'restored' => 'Lietotājs tika veiksmīgi atjaunots.',
         'import' => 'Lietotāji veiksmīgi importēti.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
         'unsuspend' => 'Nebija saistīta problēma, kas saistītu ar lietotāju. Lūdzu mēģiniet vēlreiz.',
         'import' => 'Bija problēma importēt lietotājus. Lūdzu mēģiniet vēlreiz.',
-        'asset_already_accepted' => 'Šis aktīvs jau ir pieņemts.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Jums ir vai nu jāpieņem vai jāatsakās no šī īpašuma.',
         'cannot_delete_yourself' => 'We would feel really bad if you deleted yourself, please reconsider.',
         'incorrect_user_accepted' => 'Aktīvs, kuru jūs mēģinājāt pieņemt, netika izrakstīts jums.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Nevarēja iegūt ierakstus no LDAP servera. Lūdzu, pārbaudiet LDAP servera konfigurāciju LDAP konfigurācijas failā. <br>Par LDAP servera kļūda:',
         'password_ldap' => 'Šī konta paroli pārvalda LDAP / Active Directory. Lai mainītu savu paroli, lūdzu, sazinieties ar IT nodaļu.',
         'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

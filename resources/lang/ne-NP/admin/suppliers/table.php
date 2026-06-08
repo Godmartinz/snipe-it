@@ -12,7 +12,7 @@ return [
     'email' => 'Email',
     'fax' => 'Fax',
     'id' => 'आईडी',
-    'licenses' => 'Licenses',
+    'licenses' => 'इजाजतपत्रहरू',
     'name' => 'Supplier Name',
     'notes' => 'Notes',
     'phone' => 'Phone',

@@ -8,9 +8,11 @@ use App\Http\Transformers\LicenseSeatsTransformer;
 use App\Models\Asset;
 use App\Models\License;
 use App\Models\LicenseSeat;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LicenseSeatsController extends Controller
 {
@@ -25,7 +27,7 @@ class LicenseSeatsController extends Controller
         if ($license = License::find($licenseId)) {
             $this->authorize('view', $license);
 
-            $seats = LicenseSeat::with('license', 'user', 'asset', 'user.department', 'user.company', 'asset.company')
+            $seats = LicenseSeat::with('license', 'user', 'asset', 'user.department', 'user.companies', 'asset.company')
                 ->where('license_seats.license_id', $licenseId);
 
             if ($request->input('status') == 'available') {
@@ -106,7 +108,8 @@ class LicenseSeatsController extends Controller
                 'prohibits:asset_id',
                 // must be a valid user or null to unassign
                 function ($attribute, $value, $fail) {
-                    if (! is_null($value) && ! User::where('id', $value)->whereNull('deleted_at')->exists()) {
+                    // Validate existence without company scopes; FMCS checks happen explicitly below.
+                    if (! is_null($value) && ! User::withoutGlobalScopes()->where('id', $value)->whereNull('deleted_at')->exists()) {
                         $fail('The selected assigned_to is invalid.');
                     }
                 },
@@ -118,7 +121,8 @@ class LicenseSeatsController extends Controller
                 'prohibits:assigned_to',
                 // must be a valid asset or null to unassign
                 function ($attribute, $value, $fail) {
-                    if (! is_null($value) && ! Asset::where('id', $value)->whereNull('deleted_at')->exists()) {
+                    // Validate existence without company scopes; FMCS checks happen explicitly below.
+                    if (! is_null($value) && ! Asset::withoutGlobalScopes()->where('id', $value)->whereNull('deleted_at')->exists()) {
                         $fail('The selected asset_id is invalid.');
                     }
                 },
@@ -128,77 +132,141 @@ class LicenseSeatsController extends Controller
 
         $this->authorize('checkout', License::class);
 
-        $licenseSeat = LicenseSeat::with(['license', 'asset', 'user'])->find($seatId);
+        $errorResponse = null;
+        $updatedSeat = null;
 
-        if (! $licenseSeat) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat not found'));
-        }
+        // Fetch the seat with a pessimistic lock inside a transaction so concurrent requests
+        // on the same seat serialise rather than racing to overwrite each other's assignment.
+        DB::transaction(function () use ($request, $licenseId, $seatId, $validated, &$errorResponse, &$updatedSeat): void {
+            $licenseSeat = LicenseSeat::with(['license', 'asset', 'user'])
+                ->lockForUpdate()
+                ->find($seatId);
 
-        $license = $licenseSeat->license;
-        if (! $license || $license->id != intval($licenseId)) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat does not belong to the specified license'));
-        }
+            if (! $licenseSeat) {
+                $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, 'Seat not found'));
 
-        $oldUser = $licenseSeat->user;
-        $oldAsset = $licenseSeat->asset;
-
-        // attempt to update the license seat
-        $licenseSeat->fill($validated);
-
-        // check if this update is a checkin operation
-        // 1. are relevant fields touched at all?
-        $assignmentTouched = $licenseSeat->isDirty('assigned_to') || $licenseSeat->isDirty('asset_id');
-        $anythingTouched = $licenseSeat->isDirty();
-
-        if (! $anythingTouched) {
-            return response()->json(
-                Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success'))
-            );
-        }
-        if ($assignmentTouched && $licenseSeat->unreassignable_seat) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/licenses/message.checkout.unavailable')));
-        }
-
-        // 2. are they cleared? if yes then this is a checkin operation
-        $is_checkin = ($assignmentTouched && $licenseSeat->assigned_to === null && $licenseSeat->asset_id === null);
-        $target = null;
-
-        // the logging functions expect only one "target". if both asset and user are present in the request,
-        // we simply let assets take precedence over users...
-        if ($licenseSeat->isDirty('assigned_to')) {
-            $target = $is_checkin ? $oldUser : User::find($licenseSeat->assigned_to);
-        }
-
-        if ($licenseSeat->isDirty('asset_id')) {
-            $target = $is_checkin ? $oldAsset : Asset::find($licenseSeat->asset_id);
-        }
-
-        if ($assignmentTouched && is_null($target)) {
-            // if both asset_id and assigned_to are null then we are "checking-in"
-            // a related model that does not exist (possible purged or bad data).
-            if (! is_null($request->input('asset_id')) || ! is_null($request->input('assigned_to'))) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
+                return;
             }
-        }
 
-        if ($licenseSeat->save()) {
+            $license = $licenseSeat->license;
+            if (! $license || $license->id != intval($licenseId)) {
+                $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, 'Seat does not belong to the specified license'));
+
+                return;
+            }
+
+            $targetUser = null;
+            if (! is_null($request->input('assigned_to'))) {
+                // Resolve unscoped target so we can return a clean cross-company error instead of a hidden-not-found.
+                $targetUser = User::withoutGlobalScopes()->find($request->input('assigned_to'));
+
+                if (! $targetUser) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
+
+                    return;
+                }
+
+                if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $targetUser->companies()->where('companies.id', $license->company_id)->exists())) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
+
+                    return;
+                }
+            }
+
+            $targetAsset = null;
+            if (! is_null($request->input('asset_id'))) {
+                // Resolve unscoped target so FMCS company mismatch can be enforced explicitly.
+                $targetAsset = Asset::withoutGlobalScopes()->find($request->input('asset_id'));
+
+                if (! $targetAsset) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
+
+                    return;
+                }
+
+                if ((Setting::getSettings()->full_multiple_companies_support == '1') && ($license->company_id !== $targetAsset->company_id)) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
+
+                    return;
+                }
+            }
+
+            $oldUser = $licenseSeat->user;
+            $oldAsset = $licenseSeat->asset;
+
+            $licenseSeat->fill($validated);
+
+            $assignmentTouched = $licenseSeat->isDirty('assigned_to') || $licenseSeat->isDirty('asset_id');
+            $anythingTouched = $licenseSeat->isDirty();
+
+            if (! $anythingTouched) {
+                $updatedSeat = $licenseSeat;
+
+                return;
+            }
+
+            if ($assignmentTouched && $licenseSeat->unreassignable_seat) {
+                $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/licenses/message.checkout.unavailable')));
+
+                return;
+            }
+
+            // Are the assignment fields cleared? If yes, this is a checkin operation.
+            $is_checkin = ($assignmentTouched && $licenseSeat->assigned_to === null && $licenseSeat->asset_id === null);
+
+            // The logging functions expect only one "target"; assets take precedence over users.
+            $target = null;
+            if ($licenseSeat->isDirty('assigned_to')) {
+                $target = $is_checkin ? $oldUser : $targetUser;
+            }
+            if ($licenseSeat->isDirty('asset_id')) {
+                $target = $is_checkin ? $oldAsset : $targetAsset;
+            }
+
+            if ($assignmentTouched && is_null($target)) {
+                // Both fields are null but one was provided — the related model is purged or bad data.
+                if (! is_null($request->input('asset_id')) || ! is_null($request->input('assigned_to'))) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
+
+                    return;
+                }
+            }
+
+            if (! $licenseSeat->save()) {
+                $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, $licenseSeat->getErrors()));
+
+                return;
+            }
+
             if ($assignmentTouched) {
                 if ($is_checkin) {
                     if (! $licenseSeat->license->reassignable) {
                         $licenseSeat->unreassignable_seat = true;
-                        $licenseSeat->save();
+
+                        if (! $licenseSeat->save()) {
+                            $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, $licenseSeat->getErrors()));
+
+                            return;
+                        }
                     }
-                    // todo: skip if target is null?
+
                     $licenseSeat->logCheckin($target, $licenseSeat->notes);
                 } else {
-                    // in this case, relevant fields are touched but it's not a checkin operation. so it must be a checkout operation.
                     $licenseSeat->logCheckout($request->input('notes'), $target);
                 }
             }
 
-            return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
+            $updatedSeat = $licenseSeat;
+        });
+
+        if ($errorResponse) {
+            return $errorResponse;
         }
 
-        return Helper::formatStandardApiResponse('error', null, $licenseSeat->getErrors());
+        if ($updatedSeat) {
+            return response()->json(Helper::formatStandardApiResponse('success', $updatedSeat, trans('admin/licenses/message.update.success')));
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, 'An unexpected error occurred'), 500);
     }
 }

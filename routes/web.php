@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Breadcrumbs\BuildAcceptanceBreadcrumbs;
 use App\Http\Controllers\Account;
 use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\DepreciationsController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LabelsController;
+use App\Http\Controllers\MaintenanceTypesController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\NotesController;
@@ -85,6 +87,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('suppliers', SuppliersController::class);
 
     Route::post('suppliers/bulk/delete', [BulkSuppliersController::class, 'destroy'])->name('suppliers.bulk.delete');
+
+    /*
+    * Maintenance Types
+    */
+    Route::resource('maintenance-types', MaintenanceTypesController::class);
 
     /*
     * Depreciations
@@ -228,6 +235,18 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.oauth.index')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.oauth'), route('settings.oauth.index')));
+
+    Route::post('oauth/tokens/{token}/revoke', [SettingsController::class, 'revokePersonalAccessToken'])
+        ->name('settings.oauth.tokens.revoke');
+
+    Route::post('oauth/tokens/{token}/unrevoke', [SettingsController::class, 'unrevokePersonalAccessToken'])
+        ->name('settings.oauth.tokens.unrevoke');
+
+    Route::post('oauth/clients/{client}/revoke', [SettingsController::class, 'revokeOAuthClient'])
+        ->name('settings.oauth.clients.revoke');
+
+    Route::post('oauth/clients/{client}/unrevoke', [SettingsController::class, 'unrevokeOAuthClient'])
+        ->name('settings.oauth.clients.unrevoke');
 
     Route::get('google', [SettingsController::class, 'getGoogleLoginSettings'])
         ->name('settings.google.index')
@@ -413,13 +432,11 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
             ->push(trans('general.profile'), route('account'))
             ->push(trans('general.accept_items'), route('account.accept')));
 
-    Route::get('accept/{id}', [Account\AcceptanceController::class, 'create'])
+    Route::get('accept/{acceptance}', [Account\AcceptanceController::class, 'create'])
         ->name('account.accept.item')
-        ->breadcrumbs(fn (Trail $trail, $id) => $trail->parent('home')
-            ->push(trans('general.profile'), route('account'))
-            ->push(trans('general.accept_item'), route('account.accept.item', $id)));
+        ->breadcrumbs(fn (Trail $trail, mixed $acceptance) => BuildAcceptanceBreadcrumbs::forAcceptance($trail, $acceptance));
 
-    Route::post('accept/{id}', [Account\AcceptanceController::class, 'store'])
+    Route::post('accept/{acceptance}', [Account\AcceptanceController::class, 'store'])
         ->name('account.store-acceptance');
 
     Route::get(
@@ -446,15 +463,22 @@ Route::group(['middleware' => ['auth']], function () {
 
 Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
+    Route::get('/', [ReportsController::class, 'index'])
+        ->name('reports.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index')));
+
     Route::get('audit', [ReportsController::class, 'audit'])
         ->name('reports.audit')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.audit_report'), route('reports.audit')));
 
     Route::get(
         'depreciation', [ReportsController::class, 'getDeprecationReport'])
         ->name('reports/depreciation')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.depreciation_report'), route('reports/depreciation')));
 
     Route::get(
@@ -468,30 +492,38 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
         'export/depreciation', [ReportsController::class, 'exportDeprecationReport'])
         ->name('reports/export/depreciation')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.depreciation_report'), route('reports.audit')));
 
     Route::get(
         'maintenances', [ReportsController::class, 'getMaintenancesReport'])
         ->name('ui.reports.maintenances')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.asset_maintenance_report'), route('ui.reports.maintenances')));
 
     // Is this still used?
     Route::get('export/maintenances', [ReportsController::class, 'exportMaintenancesReport'])
         ->name('reports/export/maintenances')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.asset_maintenance_report'), route('reports/export/maintenances')));
 
     Route::get('licenses', [ReportsController::class, 'getLicenseReport'])
         ->name('reports/licenses')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.license_report'), route('reports/licenses')));
 
+    // @TODO this should be a GET?
     Route::get('export/licenses', [ReportsController::class, 'exportLicenseReport'])
         ->name('reports/export/licenses');
 
     Route::get('accessories', [ReportsController::class, 'getAccessoryReport'])
-        ->name('reports/accessories');
+        ->name('reports/accessories')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
+            ->push(trans('general.accessory_report'), route('reports/accessories')));
 
     Route::get('export/accessories', [ReportsController::class, 'exportAccessoryReport'])
         ->name('reports/export/accessories');
@@ -499,6 +531,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
     Route::get('custom', [ReportsController::class, 'getCustomReport'])
         ->name('reports/custom')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.custom_report'), route('reports/custom')));
 
     Route::post('custom', [ReportsController::class, 'postCustom'])
@@ -534,6 +567,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
         'activity', [ReportsController::class, 'getActivityReport'])
         ->name('reports.activity')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.activity_report'), route('reports.activity')));
 
     Route::post('activity', [ReportsController::class, 'postActivityReport'])
@@ -542,6 +576,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
     Route::get('unaccepted_assets/{deleted?}', [ReportsController::class, 'getAssetAcceptanceReport'])
         ->name('reports/unaccepted_assets')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.reports'), route('reports.index'))
             ->push(trans('general.unaccepted_asset_report'), route('reports/unaccepted_assets')));
 
     Route::post('unaccepted_assets/sent_reminder', [ReportsController::class, 'sentAssetAcceptanceReminder'])
@@ -626,7 +661,7 @@ Route::group(['middleware' => 'web'], function () {
     Route::post(
         'two-factor',
         [LoginController::class, 'postTwoFactorAuth']
-    );
+    )->middleware('throttle:two_factor');
 
     Route::post(
         'password/email',

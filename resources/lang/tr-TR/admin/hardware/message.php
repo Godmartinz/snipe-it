@@ -94,11 +94,20 @@ return [
         'success' => 'Varlık başarıyla çıkış yapıldı.|Varlıklar başarıyla çıkış yaptı.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Listeden en az bir varlık seçmelisiniz',
+    ],
+
     'checkin' => [
         'error' => 'Demirbaş girişi yapılamadı. Lütfen tekrar deneyin',
         'success' => 'Demirbaş girişi yapıldı.',
         'user_does_not_exist' => 'Bu kullanıcı geçersiz. Lütfen tekrar deneyin.',
         'already_checked_in' => 'Bu varlık zaten atanmış.',
+        'force_checkin_orphaned_success' => 'Geçersiz atama başarıyla temizlendi.',
+        'force_checkin_not_orphaned' => 'Öğe geçersiz bir atama durumunda değil.',
+        'force_checkin_error' => 'Geçersiz atama temizlenemedi.',
 
     ],
 

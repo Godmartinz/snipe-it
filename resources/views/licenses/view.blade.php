@@ -8,7 +8,7 @@
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 {{-- Page content --}}
@@ -46,6 +46,17 @@
                             {{ trans('general.assigned') }}
                         </x-slot:table_header>
 
+                        @can('checkin', $license)
+                        <x-slot:bulkactions>
+                            <x-table.bulk-actions
+                                action_route="{{ route('licenses.bulkcheckin.selected') }}"
+                                model_name="seat"
+                            >
+                                <option value="checkin">{{ trans('general.checkin') }}</option>
+                            </x-table.bulk-actions>
+                        </x-slot:bulkactions>
+                        @endcan
+
                         <x-table
                             fixed_right_number="1"
                             fixed_number="1"
@@ -66,7 +77,7 @@
                         <x-table
                             show_search="false"
                             api_url="{{ route('api.licenses.seats.index', [$license->id, 'status' => 'available']) }}"
-                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats()"
+                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats(false)"
                             export_filename="export-{{ str_slug($license->name) }}-available-{{ date('Y-m-d') }}"
                         />
 

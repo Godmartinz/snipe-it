@@ -17,7 +17,9 @@ return [
     'name' => 'Kategori Navn',
     'require_acceptance' => 'Kræver brugere at bekræfte accept af aktiver i denne kategori.',
     'required_acceptance' => 'Denne bruger vil modtage en e-mail med et link til bekræftelse af accept af dette emne.',
+    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Denne bruger vil blive sendt en kopi af slutbrugerlicensen',
+    'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
     'no_default_eula' => 'Ingen primær standard slutbrugerlicens blev fundet. Tilføj en under Indstillinger.',
     'update' => 'Opdater kategori',
     'use_default_eula' => 'Brug den <a href="#" data-toggle="modal" data-target="#eulaModal">primære standard slutbrugerlicens</a> i stedet for.',
@@ -27,6 +29,6 @@ return [
     'import_checkin_email' => 'Send indtjekningsmail',
     'import_eula_text' => 'Slutbrugerlicensaftaletekst',
     'import_category_type' => 'Kategoritype',
-    'import_alert_on_response' => 'Alert on Response',
+    'import_alert_on_response' => 'Advarsel om svar',
 
 ];

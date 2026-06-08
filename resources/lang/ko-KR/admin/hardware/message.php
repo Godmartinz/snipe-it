@@ -94,11 +94,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => '목록에서 자산을 하나 이상 선택해야 합니다.',
+    ],
+
     'checkin' => [
         'error' => '자산이 반입되지 않았습니다. 다시 시도해 주세요.',
         'success' => '자산이 반입되었습니다.',
         'user_does_not_exist' => '잘못된 사용자 입니다. 다시 시도해 주세요.',
         'already_checked_in' => '그 자산은 이미 반입되었습니다.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

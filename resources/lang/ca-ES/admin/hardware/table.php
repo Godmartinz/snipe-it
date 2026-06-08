@@ -2,7 +2,7 @@
 
 return [
 
-    'asset_tag' => 'Etiqueta de Recurs',
+    'asset_tag' => 'Etiqueta de recurs',
     'asset_model' => 'Model',
     'assigned_to' => 'Assigned To',
     'book_value' => 'Current Value',
@@ -19,10 +19,10 @@ return [
     'location' => 'Location',
     'purchase_cost' => 'Cost',
     'purchase_date' => 'Purchased',
-    'serial' => 'Serial',
-    'status' => 'Status',
+    'serial' => 'Número de sèrie',
+    'status' => 'Estat',
     'title' => 'Recurs ',
-    'image' => 'Device Image',
+    'image' => 'Imatge del dispositiu',
     'days_without_acceptance' => 'Days Without Acceptance',
     'monthly_depreciation' => 'Monthly Depreciation',
     'requesting_user' => 'Requesting User',

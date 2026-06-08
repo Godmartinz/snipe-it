@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Deze gebruiker is verwijderd. Je zult deze gebruiker moeten herstellen om hem te bewerken of om nieuwe assets toe te wijzen.',
     'ldap_not_configured' => 'LDAP integratie is niet geconfigureerd voor deze installatie.',
     'password_resets_sent' => 'De geselecteerde gebruikers die zijn geactiveerd en die een geldig e-mailadres hebben, hebben een wachtwoord reset link ontvangen.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Een link om het wachtwoord te resetten is verstuurd naar :email!',
     'user_has_no_email' => 'Deze gebruiker heeft geen e-mailadres in zijn profiel.',
     'log_record_not_found' => 'Een overeenkomende logboekrecord voor deze gebruiker kon niet worden gevonden.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Gebruiker werd succesvol ingeschakeld.',
         'restored' => 'Gebruiker werd succesvol opnieuw geactiveerd.',
         'import' => 'Gebruikers met succes geïmporteerd.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Deze gebruiker beheert nog een andere gebruiker. Selecteer eerst een andere manager.|Deze gebruiker beheert nog steeds :count gebruikers. Selecteer eerst een andere manager.',
         'unsuspend' => 'Er was een probleem tijdens het opnieuw inschakelen van de gebruiker. Probeer opnieuw, aub.',
         'import' => 'Er was een probleem met het importeren van de gebruikers. Probeer het opnieuw.',
-        'asset_already_accepted' => 'Dit asset is al geaccepteerd.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'Je moet dit asset accepteren of weigeren.',
         'cannot_delete_yourself' => 'We zouden het heel erg vinden als je jezelf zou verwijderen, overweeg alsjeblieft opnieuw.',
         'incorrect_user_accepted' => 'Het asset dat je probeerde te accepteren is niet uitgecheckt aan jou.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Kan geen gegeven van de LDAP server krijgen. Controleer je LDAP server configuratie in de LDAP configuratie bestand. <br>Fout van LDAP server:',
         'password_ldap' => 'Het wachtwoord voor deze account wordt beheerd door LDAP/Active Directory. Neem contact op met uw IT-afdeling om uw wachtwoord te wijzigen. ',
         'multi_company_items_assigned' => 'Deze gebruiker heeft items toegewezen welke tot een andere organisatie behoren. Check deze alstublieft in of bewerk het bedrijf van de gebruiker.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

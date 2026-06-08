@@ -15,6 +15,7 @@ return [
     'user_deleted_warning' => 'Ta uporabnik je bil izbrisan. Tega uporabnika boste morali obnoviti, da ga uredite ali dodelite nova sredstva.',
     'ldap_not_configured' => 'Integracija LDAP za to namestitev ni bila konfigurirana.',
     'password_resets_sent' => 'Izbranim aktiviranim uporabnikom z veljavnim e-poštnim računom je bila poslana povezava za ponastavitev gesla.',
+    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
     'password_reset_sent' => 'Povezava za ponastavitev gesla je bila poslana na :email!',
     'user_has_no_email' => 'Ta uporabnik nima e-poštnega naslova v svojem profilu.',
     'log_record_not_found' => 'Ujemajočega se zapisa dnevnika za tega uporabnika ni bilo mogoče najti.',
@@ -30,6 +31,7 @@ return [
         'unsuspend' => 'Uporabnik je bil uspešno od-suspendiran.',
         'restored' => 'Uporabnik je bil uspešno obnovljen.',
         'import' => 'Uporabniki so bili uvoženi uspešno.',
+        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
     ],
 
     'error' => [
@@ -44,7 +46,7 @@ return [
         'delete_has_users_var' => 'Ta uporabnik še vedno upravlja drugega uporabnika. Prosimo, da najprej izberete drugega upravitelja za tega uporabnika.|Ta uporabnik še vedno upravlja :seštevek uporabnikov. Prosimo, da najprej izberete drugega menedžerja zanje.',
         'unsuspend' => 'Prišlo je do težave pri od-suspendiranju uporabnika. Prosim poskusite ponovno.',
         'import' => 'Pri uvozu uporabnikov je prišlo do težave. Prosim poskusite ponovno.',
-        'asset_already_accepted' => 'To sredstvo je bilo že sprejeto.',
+        'asset_already_accepted' => 'This item has already been accepted.',
         'accept_or_decline' => 'To sredstev morate sprejeti ali zavrniti.',
         'cannot_delete_yourself' => 'Počutili bi se zelo slabo, če bi se izbrisali, zato razmislite o tem.',
         'incorrect_user_accepted' => 'Sredstev, ki ste ga poskušali sprejeti, ni bilo izdano za vas.',
@@ -54,6 +56,7 @@ return [
         'ldap_could_not_get_entries' => 'Vnose iz strežnika LDAP ni bilo mogoče pridobiti. Preverite konfiguracijo strežnika LDAP v konfiguracijski datoteki LDAP. <br>Napaka strežnika LDAP:',
         'password_ldap' => 'Geslo za ta račun upravlja LDAP / Active Directory. Za spremembo gesla se obrnite na oddelek IT. ',
         'multi_company_items_assigned' => 'Ta uporabnik ima dodeljene elemente, ki pripadajo drugemu podjetju. Prosimo, da jih shranite ali uredite njihovo podjetje.',
+        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
     ],
 
     'deletefile' => [

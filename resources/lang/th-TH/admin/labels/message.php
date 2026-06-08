@@ -7,5 +7,6 @@ return [
     'invalid_return_value' => 'ได้รับค่าที่ไม่ถูกต้องจาก :name ค่าที่คาดหวังคือ :expected แต่ได้ค่า :actual',
 
     'does_not_exist' => 'ไม่มีป้ายกำกับ',
-
+    'use_new_label_engine_for_api' => 'Enable the New Label Engine to load labels via the API',
+    'label_not_created' => 'Label object could not be created',
 ];

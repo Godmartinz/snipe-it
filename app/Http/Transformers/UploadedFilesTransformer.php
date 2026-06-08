@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Helpers\StorageHelper;
 use App\Models\Actionlog;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,6 +25,17 @@ class UploadedFilesTransformer
     public function transformFile(Actionlog $file)
     {
         $snipeModel = $file->item_type;
+        $item = null;
+
+        if (is_string($snipeModel) && class_exists($snipeModel)) {
+            $itemQuery = $snipeModel::query();
+
+            if (in_array(SoftDeletes::class, class_uses_recursive($snipeModel), true)) {
+                $itemQuery->withTrashed();
+            }
+
+            $item = $itemQuery->find($file->item_id);
+        }
 
         $array = [
             'id' => (int) $file->id,
@@ -49,7 +61,7 @@ class UploadedFilesTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'delete' => (Gate::allows('update', $snipeModel) && ($file->deleted_at == '')),
+            'delete' => (Gate::allows('update', $item ?? $snipeModel) && ($file->deleted_at == '')),
         ];
 
         $array += $permissions_array;

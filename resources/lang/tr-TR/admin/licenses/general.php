@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Lisans arayüzündeki toplu lisans iade işlemiyle geri alındı',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Tüm koltukları incele',
             'modal' => 'Bu işlem, müsait olan ilk kullanıcıya bir koltuğun ödemesini yapacaktır. | Bu işlem, tüm :available_seats_count koltukları ilk müsait kullanıcılara teslim edecektir. Bir kullanıcı, bu lisansı henüz kendisine teslim etmemişse ve kullanıcı hesabında Otomatik Lisans Atama özelliği etkinleştirilmişse, bu koltuk için uygun kabul edilir.',

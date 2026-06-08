@@ -9,7 +9,7 @@ return [
     'edit' => 'ערוך עזר',
     'eula_text' => 'תנאי שימוש של הקטגוריה',
     'eula_text_help' => 'שדה זה מאפשר לך להתאים את תנאי השימוש עבור סוגים מסוימים של פריטים. במידה ותנאי השימוש שלך זהים לכלל הפריטים - תוכל לסמן את התיבה שלמטה לשימוש בברירת המחדל.',
-    'require_acceptance' => 'דרוש מהמשתמש לאשר קבלה של פריט בקטגוריה זו.',
+    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'לא נמצאה ברירת מחדל לתנאי השימוש. הוסף ברירת מחדל בהגדרות.',
     'total' => 'סה"כ',
     'remaining' => 'נותר',

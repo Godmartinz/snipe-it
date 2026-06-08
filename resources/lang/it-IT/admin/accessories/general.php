@@ -9,7 +9,7 @@ return [
     'edit' => 'Modifica accessorio',
     'eula_text' => 'Categoria EULA',
     'eula_text_help' => 'Questo campo consente di personalizzare le EULA per specifici tipi di Beni. Se avete solo un EULA per tutti i vostri Beni, è possibile spuntare la casella seguente per utilizzare il valore predefinito.',
-    'require_acceptance' => 'Richiedere agli utenti di confermare l\'accettazione dei Beni appartenenti a questa categoria.',
+    'require_acceptance' => 'Richiedi agli utenti di confermare l\'accettazione di articoli di questa categoria.',
     'no_default_eula' => 'Non è stata trovata EULA predefinita. Aggiungine una nelle impostazioni.',
     'total' => 'Totale',
     'remaining' => 'Disponibili',

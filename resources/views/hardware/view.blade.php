@@ -7,7 +7,7 @@
 @stop
 
 @section('header_right')
-    <x-button.info-panel-toggle/>
+    <x-button.info-panel-toggle hide-on-xs/>
 @endsection
 
 {{-- Page content --}}
@@ -58,7 +58,7 @@
                 <x-slot:tabnav>
                     <x-tabs.details-tab/>
                     <x-tabs.license-tab count="{{ $asset->licenses->count() }}"/>
-                    <x-tabs.component-tab count="{{ $asset->components->count() }}"/>
+                    <x-tabs.component-tab count="{{ $asset->components()->sum('assigned_qty') }}"/>
                     <x-tabs.asset-tab count="{{ $asset->assignedAssets()->AssetsForShow()->count() }}"/>
                     <x-tabs.accessory-tab count="{{ $asset->assignedAccessories()->count() }}"/>
                     <x-tabs.maintenance-tab count="{{ $asset->maintenances->count() }}"/>
@@ -206,7 +206,7 @@
                                         {{ $asset->journal->last()->note }}
                                         <i class="fa-solid fa-quote-right"></i>
                                         <span class="text-muted">
-                                            - {!!  $asset->journal->last()->adminuser->present()->formattedNameLink !!}
+                                            - {!!  $asset->journal->last()->adminuser?->present()->formattedNameLink !!}
                                             ({{ Helper::getFormattedDateObject($asset->journal->last()->created_at, 'datetime', false) }})
                                         </span>
                                     </x-data-row>
@@ -221,61 +221,41 @@
                         <!-- start side stats column -->
                         <x-page-column class="col-md-4 col-sm-12">
 
-                            @php
-                                // Compute elapsed/total percentage clamped to 0–100
-                                $clampedPercent = fn (float $elapsed, float $total): float =>
-                                    $total > 0 ? min(100, max(0, ($elapsed / $total) * 100)) : 0;
+                            @if ($asset->hasOrphanedAssignment())
+                                <x-well class="well-sm">
+                                    <p class="text-danger" style="line-height: 20px;">
+                                        <x-icon type="warning" class="text-danger"/> {{ trans('general.warning', ['warning' => trans('general.item_target_not_found_hard', ['item_type' => $asset->assignedType(), 'id' => $asset->assigned_to])]) }}
+                                    </p>
 
-                                $now = Carbon::now();
-                                $purchaseCarbon = $asset->purchase_date ? Carbon::parse($asset->purchase_date) : null;
+                                    <form action="{{ route('asset.checkin.force', $asset) }}" method="POST" class="form-inline" style="display: inline;">
+                                        {{ csrf_field() }}
+                                        {{ method_field('POST') }}
+                                        <button class="btn btn-sm btn-danger btn-block hidden-print" type="submit" data-tooltip="true" data-placement="top" data-title="{{ trans('general.force_checkin') }}">
+                                            <x-icon type="checkin" class="fa-fw"/>
+                                            {{ trans('general.force_checkin') }}
+                                        </button>
+                                    </form>
 
-                                // EOL percentage: elapsed since purchase / total EOL period
-                                $eolPercent = 0;
-                                if ($purchaseCarbon && $asset->asset_eol_date) {
-                                    $eolPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths($asset->asset_eol_date)
-                                    );
-                                }
-
-                                // Depreciation percentage: elapsed since purchase / total depreciation period
-                                $deprPercent = 0;
-                                $deprDate = $asset->depreciated_date();
-                                if ($purchaseCarbon && $deprDate) {
-                                    $deprPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths(Carbon::instance($deprDate))
-                                    );
-                                }
-
-                                // Warranty percentage: elapsed since purchase / total warranty period
-                                $warrantyPercent = 0;
-                                if ($purchaseCarbon && $asset->warranty_expires) {
-                                    $warrantyPercent = $clampedPercent(
-                                        $purchaseCarbon->diffInMonths($now),
-                                        $purchaseCarbon->diffInMonths($asset->warranty_expires)
-                                    );
-                                }
-                            @endphp
+                                </x-well>
+                            @endif
 
 
-                            @if($asset->purchase_date || $asset->asset_eol_date || $deprDate || $asset->warranty_expires)
+                            @if(($asset->purchase_date && $asset->asset_eol_date) || $asset->depreciated_date() || $asset->warranty_expires)
                                 <x-well class="well-sm">
                                     @if($asset->purchase_date && $asset->asset_eol_date)
-                                        <x-progressbar use_well="false" columns="12" text="{{ trans('general.device_eol') }}" :percent="$eolPercent">
-                                        <strong>{{ (int) Carbon::now()->diffInMonths($asset->asset_eol_date, true) }}</strong>
-                                            /{{ $asset->model?->eol }} {{ trans('general.months') }}
+                                        <x-progressbar use_well="false" columns="12" text="{{ trans('general.device_eol') }}" :percent="$asset->eolProgressPercent()">
+                                            (<strong>{{ (int) Carbon::now()->diffInMonths($asset->asset_eol_date, true) }}</strong>/{{ $asset->model?->eol }} {{ trans('general.months') }})
                                         </x-progressbar>
                                     @endif
 
-                                    @if($deprDate)
-                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.fully_depreciated')" :percent="$deprPercent">
-                                            {{ Helper::getFormattedDateObject($deprDate->format('Y-m-d'), 'date', false) }}
+                                    @if($asset->depreciated_date())
+                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.fully_depreciated')" :percent="$asset->depreciationProgressPercent()">
+                                            {{ Helper::getFormattedDateObject($asset->depreciated_date()->format('Y-m-d'), 'date', false) }}
                                         </x-progressbar>
                                     @endif
 
                                     @if($asset->warranty_expires)
-                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.warranty_expires')" :percent="$warrantyPercent">
+                                        <x-progressbar use_well="false" columns="12" :text="trans('admin/hardware/form.warranty_expires')" :percent="$asset->warrantyProgressPercent()">
                                         {{ Helper::getFormattedDateObject($asset->warranty_expires, 'date', false) }}
                                         </x-progressbar>
                                     @endif
@@ -285,23 +265,57 @@
 
                             <x-well class="well-sm">
                                 <div class="well-display">
-                                    <x-data-row icon_type="maintenances" label="Active Maintenances">
-                                        {{ $asset->maintenances->whereNull('completion_date')->count() }}
+                                    <x-data-row icon_type="money" :label="trans('general.purchase_cost')" align="right">
+                                        {{ Helper::formatCurrencyOutput($asset->purchase_cost) }}
                                     </x-data-row>
 
-                                    <x-data-row icon_type="checkout" :label="trans('general.checkouts_count')">
+                                    <x-data-row icon_type="maintenances" :label="trans('general.maintenances')" align="right">
+                                        {{ Helper::formatCurrencyOutput($total_maintenance_cost) }}
+                                    </x-data-row>
+
+                                    <x-data-row icon_type="accessories" :label="trans('general.accessories')" align="right">
+                                        {{ Helper::formatCurrencyOutput($total_accessory_cost) }}
+                                    </x-data-row>
+
+                                    <x-data-row icon_type="licenses" :label="trans('general.licenses')" align="right">
+                                        {{ Helper::formatCurrencyOutput($total_license_cost) }}
+                                    </x-data-row>
+
+                                    <x-data-row icon_type="components" :label="trans('general.components')" align="right">
+                                        {{ Helper::formatCurrencyOutput($total_component_cost) }}
+                                    </x-data-row>
+
+                                    <x-data-row icon_type="assets" :label="trans('general.assets')" align="right">
+                                        {{ Helper::formatCurrencyOutput($total_asset_cost) }}
+                                    </x-data-row>
+
+                                    <x-data-row :label="trans('general.total_cost')" align="right" style="border-top: 1px solid var(--box-header-top-border-color) !important;">
+                                        {{ Helper::formatCurrencyOutput($total_cost_for_asset) }}
+                                    </x-data-row>
+
+                                </div>
+                            </x-well>
+
+                            <x-well class="well-sm">
+                                <div class="well-display">
+                                    <x-data-row icon_type="maintenances" label="Active Maintenances" align="right">
+                                        {{ $asset->maintenances()->active()->count() }}
+                                    </x-data-row>
+
+                                    <x-data-row icon_type="checkout" :label="trans('general.checkouts_count')" align="right">
                                         {{ ($asset->checkouts) ? (int) $asset->checkouts->count() : '0' }}
                                     </x-data-row>
 
-                                    <x-data-row icon_type="checkin" :label="trans('general.checkins_count')">
+                                    <x-data-row icon_type="checkin" :label="trans('general.checkins_count')" align="right">
                                         {{ ($asset->checkins) ? (int) $asset->checkins->count() : '0' }}
                                     </x-data-row>
 
-                                    <x-data-row icon_type="request" :label="trans('general.user_requests_count')">
+                                    <x-data-row icon_type="request" :label="trans('general.user_requests_count')" align="right">
                                         {{ ($asset->userRequests) ? (int) $asset->userRequests->count() : '0' }}
                                     </x-data-row>
                                 </div>
                             </x-well>
+
 
 
                             @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
@@ -316,10 +330,32 @@
                     </x-tabs.pane>
 
                     <x-tabs.pane name="licenses" :count="$asset->licenses->count()">
-                        <x-table.licenses show_search="false" :route="route('api.assets.licenselist', $asset)" :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeatsCheckedOutToAssets()"/>
+                        @can('view', \App\Models\License::class)
+                        <x-slot:table_header>{{ trans('general.licenses') }}</x-slot:table_header>
+                        @endcan
+
+                        @can('checkin', \App\Models\License::class)
+                        <x-slot:bulkactions>
+                            <x-table.bulk-actions
+                                action_route="{{ route('licenses.bulkcheckin.selected') }}"
+                                model_name="seat"
+                            >
+                                <option value="checkin">{{ trans('general.checkin') }}</option>
+                            </x-table.bulk-actions>
+                        </x-slot:bulkactions>
+                        @endcan
+
+                        @can('view', \App\Models\License::class)
+                        <x-table
+                            show_search="false"
+                            api_url="{{ route('api.assets.licenselist', $asset) }}"
+                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeatsCheckedOutToAssets()"
+                            export_filename="export-licenses-{{ str_slug($asset->asset_tag) }}-{{ date('Y-m-d') }}"
+                        />
+                        @endcan
                     </x-tabs.pane>
 
-                    <x-tabs.pane name="components" :count="$asset->components->count()">
+                    <x-tabs.pane name="components" :count="$asset->components->sum('assigned_qty')">
                         <x-table.components :table_header="trans('general.components')" :presenter="\App\Presenters\ComponentPresenter::checkedOut()" :route="route('api.assets.assigned_components', $asset)"/>
                     </x-tabs.pane>
 
@@ -408,8 +444,15 @@
             <x-box class="side-box expanded">
                 <x-info-panel :infoPanelObj="$asset" img_path="{{ app('assets_upload_url') }}">
                     <x-slot:buttons>
+
+                        @if (!$asset->assignedTo)
                         <x-button.checkout permission="checkout" :item="$asset" :route="route('hardware.checkout.create', $asset->id)"/>
-                        <x-button.checkin permission="checkin" :item="$asset" :route="route('hardware.checkin.create', $asset->id)"/>
+                        @endif
+
+                        @if (!$asset->hasOrphanedAssignment())
+                            <x-button.checkin permission="checkin" :item="$asset" :route="route('hardware.checkin.create', $asset->id)"/>
+                        @endif
+
                         <x-button.edit :item="$asset" :route="route('hardware.edit', $asset->id)"/>
                         <x-button.clone :item="$asset" :route="route('clone/hardware', $asset->id)"/>
                         <x-button.note :item="$asset" :route="route('clone/hardware', $asset->id)"/>

@@ -8,6 +8,7 @@ return [
     'bulk_checkout' => '批次借出',
     'bulk_checkin' => 'Bulk Checkin',
     'checkin' => '資產繳回',
+    'checkin_assets' => '資產繳回',
     'checkout' => '借出資產',
     'clear' => 'Clear',
     'clone' => '複製資產',

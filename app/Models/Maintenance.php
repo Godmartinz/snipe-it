@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Models\Builders\MaintenanceQueryBuilder;
 use App\Models\Traits\CompanyableChildTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
@@ -12,7 +13,6 @@ use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
 
@@ -32,12 +32,14 @@ class Maintenance extends SnipeModel implements ICompanyableChild
 
     protected $presenter = MaintenancesPresenter::class;
 
+    protected $with = ['asset', 'asset.company'];
+
     protected $table = 'maintenances';
 
     protected $rules = [
         'asset_id' => 'required|integer',
         'supplier_id' => 'nullable|integer',
-        'asset_maintenance_type' => 'required',
+        'maintenance_type_id' => 'required|integer|exists:maintenance_types,id',
         'name' => 'required|max:100',
         'is_warranty' => 'boolean',
         'start_date' => 'required|date_format:Y-m-d',
@@ -45,6 +47,8 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'notes' => 'string|nullable',
         'cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
         'url' => 'nullable|url|max:255',
+        'responsible_party_id' => 'nullable|integer|exists:users,id',
+        'completed_by' => 'nullable|integer|exists:users,id',
     ];
 
     /**
@@ -57,6 +61,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'asset_id',
         'supplier_id',
         'asset_maintenance_type',
+        'maintenance_type_id',
         'is_warranty',
         'start_date',
         'completion_date',
@@ -64,6 +69,11 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'notes',
         'cost',
         'url',
+        'checked_out_to_id',
+        'checked_out_to_type',
+        'responsible_party_id',
+        'completed_at',
+        'completed_by',
     ];
 
     use Searchable;
@@ -77,7 +87,6 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         [
             'name',
             'notes',
-            'asset_maintenance_type',
             'cost',
             'start_date',
             'completion_date',
@@ -95,6 +104,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'asset.status' => ['name'],
         'supplier' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
+        'maintenanceType' => ['name'],
     ];
 
     public function getCompanyableParents()
@@ -202,116 +212,40 @@ class Maintenance extends SnipeModel implements ICompanyableChild
             ->withTrashed();
     }
 
+    public function maintenanceType()
+    {
+        return $this->belongsTo(MaintenanceType::class, 'maintenance_type_id');
+    }
+
+    public function responsibleParty()
+    {
+        return $this->belongsTo(User::class, 'responsible_party_id')
+            ->withTrashed();
+    }
+
+    public function completedByUser()
+    {
+        return $this->belongsTo(User::class, 'completed_by')
+            ->withTrashed();
+    }
+
+    public function checkedOutTo()
+    {
+        return $this->morphTo('checked_out_to');
+    }
+
+    public function journal()
+    {
+        return $this->assetlog()->where('action_type', '=', 'note added');
+    }
+
     public function getDisplayNameAttribute()
     {
         return $this->name;
     }
 
-    /**
-     * -----------------------------------------------
-     * BEGIN QUERY SCOPES
-     * -----------------------------------------------
-     **/
-
-    /**
-     * Query builder scope to order on a supplier
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  string  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderBySupplier($query, $order)
+    public function newEloquentBuilder($query): MaintenanceQueryBuilder
     {
-        return $query->leftJoin('suppliers as suppliers_maintenances', 'maintenances.supplier_id', '=', 'suppliers_maintenances.id')
-            ->orderBy('suppliers_maintenances.name', $order);
-    }
-
-    /**
-     * Query builder scope to order on asset tag
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  string  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderByTag($query, $order)
-    {
-        return $query->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
-            ->orderBy('assets.asset_tag', $order);
-    }
-
-    /**
-     * Query builder scope to order on asset tag
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  string  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderByAssetName($query, $order)
-    {
-        return $query->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
-            ->orderBy('assets.name', $order);
-    }
-
-    /**
-     * Query builder scope to order on serial
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  string  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderByAssetSerial($query, $order)
-    {
-        return $query->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
-            ->orderBy('assets.serial', $order);
-    }
-
-    /**
-     * Query builder scope to order on status label name
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  text  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderStatusName($query, $order)
-    {
-        return $query->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
-            ->leftjoin('status_labels as maintained_asset_status', 'maintained_asset_status.id', '=', 'maintained_asset.status_id')
-            ->orderBy('maintained_asset_status.name', $order);
-    }
-
-    /**
-     * Query builder scope to order on status label name
-     *
-     * @param  Builder  $query  Query builder instance
-     * @param  text  $order  Order
-     * @return Builder Modified query builder
-     */
-    public function scopeOrderLocationName($query, $order)
-    {
-        return $query->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
-            ->leftjoin('locations as maintained_asset_location', 'maintained_asset_location.id', '=', 'maintained_asset.location_id')
-            ->orderBy('maintained_asset_location.name', $order);
-    }
-
-    /**
-     * Query builder scope to order on the user that created it
-     */
-    public function scopeOrderByCreatedBy($query, $order)
-    {
-        return $query->leftJoin('users as admin_sort', 'maintenances.created_by', '=', 'admin_sort.id')->select('maintenances.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
-    }
-
-    public function scopeOrderByAssetModelName($query, $order)
-    {
-        return $query->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
-            ->leftjoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
-            ->orderBy('maintained_asset_model.name', $order);
-    }
-
-    public function scopeOrderByAssetModelNumber($query, $order)
-    {
-        return $query->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
-            ->leftjoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
-            ->orderBy('maintained_asset_model.model_number', $order);
+        return new MaintenanceQueryBuilder($query);
     }
 }

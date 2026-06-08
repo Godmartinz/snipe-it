@@ -29,6 +29,7 @@ class CustomAssetReportRequest extends Request
     public function rules()
     {
         return [
+            'assignment_status' => 'nullable|in:all,assigned,unassigned',
             'purchase_start' => 'date|date_format:Y-m-d|nullable',
             'purchase_end' => 'date|date_format:Y-m-d|nullable',
             'purchase_cost_end' => 'numeric|nullable|gte:purchase_cost_start',

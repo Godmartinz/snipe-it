@@ -6,28 +6,35 @@ return [
 ID',
     'asset_model' => 'Մոդել',
     'assigned_to' => 'Տրամադրված է',
-    'book_value' => 'Current Value',
-    'change' => 'In/Out',
-    'checkout_date' => 'Checkout Date',
+    'book_value' => 'Ընթացիկ արժեք
+',
+    'change' => 'Մուտք/Ելք
+',
+    'checkout_date' => 'Հանձնման ամսաթիվ
+',
     'checkoutto' => 'Տրամադրված է',
-    'components_cost' => 'Total Components Cost',
-    'current_value' => 'Current Value',
+    'components_cost' => 'Բաղադրիչների ընդհանուր արժեք
+',
+    'current_value' => 'Ընթացիկ արժեք
+',
     'diff' => 'Տարբերություն',
-    'dl_csv' => 'Download CSV',
+    'dl_csv' => 'Ներբեռնել CSV
+',
     'eol' => 'EOL',
     'id' => 'Նույնացուցիչ (ID)',
-    'last_checkin_date' => 'Last Checkin Date',
+    'last_checkin_date' => 'Վերջին վերադարձի ամսաթիվ
+',
     'location' => 'Տեղադիրք',
     'purchase_cost' => 'Արժեք',
     'purchase_date' => 'Գնված է',
     'serial' => 'Սերիական համար',
     'status' => 'Կարգավիճակ',
-    'title' => 'Asset ',
+    'title' => 'Ակտիվ',
     'image' => 'Սարքի նկարը',
-    'days_without_acceptance' => 'Days Without Acceptance',
-    'monthly_depreciation' => 'Monthly Depreciation',
-    'requesting_user' => 'Requesting User',
+    'days_without_acceptance' => 'Օրեր առանց ընդունման',
+    'monthly_depreciation' => 'Ամսական մաշվածություն',
+    'requesting_user' => 'Հայցող օգտատեր',
     'requested_date' => 'Պահանջման ամսաթիվ',
     'changed' => 'Փոխված',
-    'icon' => 'Icon',
+    'icon' => 'Պատկերակ',
 ];

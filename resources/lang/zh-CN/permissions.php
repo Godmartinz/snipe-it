@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => '管理配件文件',
-        'note' => '允许用户上传、下载和删除与配件相关的文件。',
+        'note' => 'Allows the user to upload, download, and delete files associated with accessories. (This only makes sense with view privileges or higher.)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Manage Asset Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with assets. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Manage User Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Manage Model Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with asset models on both the model view and the asset view screens. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Manage Department Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with departments. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Manage Supplier Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with suppliers. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Manage Location Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with locations.(This only makes sense with view privileges or higher.)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Manage Company Files',
+        'note' => 'Allows the user to upload, download, and delete files associated with companies. (This only makes sense with view privileges or higher.)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => '管理耗材文件',
+        'note' => 'Allows the user to upload, download, and delete files associated with consumables. (This only makes sense with view privileges or higher.)',
+    ],
+
     'consumables' => [
         'name' => '耗材',
         'note' => '授予访问应用消耗品部分的权限。',
@@ -129,10 +170,7 @@ return [
         'name' => '签出耗材',
         'note' => '通过签出流程分配库存中的消耗品。',
     ],
-    'consumablesfiles' => [
-        'name' => '管理耗材文件',
-        'note' => '允许用户上传、下载和删除与消耗品相关的文件。',
-    ],
+
     'licenses' => [
         'name' => '许可证',
         'note' => '授予访问应用许可证部分的权限。',
@@ -161,6 +199,11 @@ return [
         'name' => '管理许可文件',
         'note' => '允许用户上传、下载和删除与许可证相关的文件。',
     ],
+    'componentsfiles' => [
+        'name' => '管理组件文件',
+        'note' => '允许用户上传、下载和删除与组件相关的文件。',
+    ],
+
     'licenseskeys' => [
         'name' => '管理许可证密钥',
         'note' => '允许用户查看与许可证相关联的产品密钥。',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => '删除组件',
     ],
-    'componentsfiles' => [
-        'name' => '管理组件文件',
-        'note' => '允许用户上传、下载和删除与组件相关的文件。',
-    ],
+
     'componentscheckout' => [
         'name' => '签出组件',
         'note' => '通过签出流程分配库存中的组件。',

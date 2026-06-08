@@ -9,6 +9,7 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\CompaniesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Company;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -205,6 +206,16 @@ class CompaniesController extends Controller
             'companies.image',
             'companies.tag_color',
         ]);
+
+        // When FMCS is enabled and the user is not a superuser, restrict the list to
+        // companies they belong to (primary company_id + pivot companies). This lets
+        // non-superusers select a company from their own set when creating assets, etc.
+        if (Setting::getSettings()->full_multiple_companies_support == '1' && ! auth()->user()->isSuperUser()) {
+            $userCompanyIds = auth()->user()->allCompanies()->pluck('id');
+            if ($userCompanyIds->isNotEmpty()) {
+                $companies->whereIn('companies.id', $userCompanyIds);
+            }
+        }
 
         if ($request->filled('search')) {
             $companies = $companies->where('companies.name', 'LIKE', '%'.$request->input('search').'%');

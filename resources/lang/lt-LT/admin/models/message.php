@@ -11,29 +11,29 @@ return [
 
     'create' => [
         'error' => 'Modelis nebuvo panaikintas, bandykite dar kartą.',
-        'success' => 'Modelis sukurtas sėkmingai.',
+        'success' => 'Modelis sėkmingai sukurtas.',
         'duplicate_set' => 'Turto modelis su tokiu pavadinimu, gamintoju ir modelio numeriu jau yra.',
     ],
 
     'update' => [
         'error' => 'Modelis nebuvo atnaujintas, bandykite dar kartą',
-        'success' => 'Modelis atnaujintas sėkmingai.',
+        'success' => 'Modelis sėkmingai atnaujintas.',
     ],
 
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šį turto modelį?',
         'error' => 'Bandant panaikinti modelį įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Modelis panaikintas sėkmingai.',
+        'success' => 'Modelis sėkmingai panaikintas.',
     ],
 
     'restore' => [
         'error' => 'Modelis nebuvo atkurtas, bandykite dar kartą',
-        'success' => 'Modelis atkurtas sėkmingai.',
+        'success' => 'Modelis sėkmingai atkurtas.',
     ],
 
     'bulkedit' => [
         'error' => 'Jokie laukai nebuvo pakeisti, todėl niekas nebuvo atnaujinta.',
-        'success' => 'Modelis atnaujintas sėkmingai. |:model_count modeliai atnaujinti sėkmingai.',
+        'success' => 'Modelis sėkmingai atnaujintas. |:model_count modeliai sėkmingai atnaujinti.',
         'warn' => 'Ketinate atnaujinti šio modelio ypatybes:|Ketinate redaguoti šių :model_count modelių ypatybes:',
 
     ],

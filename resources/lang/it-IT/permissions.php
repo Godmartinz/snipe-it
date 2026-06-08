@@ -107,8 +107,49 @@ return [
     ],
     'accessoriesfiles' => [
         'name' => 'Gestisce File Accessori',
-        'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati agli accessori.',
+        'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati agli accessori. (Ha senso solo con privilegi di visualizzazione o superiori)',
     ],
+
+    'assetsfiles' => [
+        'name' => 'Gestione File del Bene',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati ai Beni. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'usersfiles' => [
+        'name' => 'Gestione File Utente',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati agli utenti. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'modelsfiles' => [
+        'name' => 'Gestione File del Modello',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati ai Modelli dei Beni, sia sulla vista Modello che su quella del Bene. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'departmentsfiles' => [
+        'name' => 'Gestione File del Reparto',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati ai Reparti. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'suppliersfiles' => [
+        'name' => 'Gestione File del Fornitore',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati ai Fornitori. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'locationsfiles' => [
+        'name' => 'Gestione File della Sede',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati alle Sedi. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'companiesfiles' => [
+        'name' => 'Gestione File dell\'Azienda',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati alle Aziende. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
+    'consumablesfiles' => [
+        'name' => 'Gestisci file consumabili',
+        'note' => 'Permette all\'utente di caricare, scaricare ed eliminare i file associati ai Consumabili. (Ha senso solo con privilegi di visualizzazione o superiori)',
+    ],
+
     'consumables' => [
         'name' => 'Consumabili',
         'note' => 'Concede l\'accesso alla sezione Consumabili dell\'applicazione.',
@@ -129,10 +170,7 @@ return [
         'name' => 'Check Out Consumabili',
         'note' => 'Assegnare i materiali di consumo nell\'inventario verificandoli.',
     ],
-    'consumablesfiles' => [
-        'name' => 'Gestisci file consumabili',
-        'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati ai materiali di consumo.',
-    ],
+
     'licenses' => [
         'name' => 'Licenze',
         'note' => 'Concede l\'accesso alla sezione Licenze dell\'applicazione.',
@@ -161,6 +199,11 @@ return [
         'name' => 'Gestisci File Licenza',
         'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati alle licenze.',
     ],
+    'componentsfiles' => [
+        'name' => 'Gestisci File Componenti',
+        'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati ai componenti.',
+    ],
+
     'licenseskeys' => [
         'name' => 'Gestisci Chiavi Licenza',
         'note' => 'Consente all\'utente di visualizzare le chiavi del prodotto associate alle licenze.',
@@ -181,10 +224,7 @@ return [
     'componentsdelete' => [
         'name' => 'Elimina Componenti',
     ],
-    'componentsfiles' => [
-        'name' => 'Gestisci File Componenti',
-        'note' => 'Consente all\'utente di caricare, scaricare ed eliminare i file associati ai componenti.',
-    ],
+
     'componentscheckout' => [
         'name' => 'Check Out Componenti',
         'note' => 'Assegna componenti nell\'inventario controllandoli.',

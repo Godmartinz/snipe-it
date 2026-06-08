@@ -6,15 +6,15 @@ return [
     'assoc_users' => 'Šiuo metu ši įmonė yra susieta su mažiausiai vienu modeliu ir negali būti panaikinta. Atnaujinkite savo modelius, kad nebebūtų ryšio su šią įmone, ir bandykite dar kartą. ',
     'create' => [
         'error' => 'Įmonė nebuvo sukurta, bandykite dar kartą.',
-        'success' => 'Įmonė sukurta sėkmingai.',
+        'success' => 'Įmonė sėkmingai sukurta.',
     ],
     'update' => [
         'error' => 'Įmonė nebuvo atnaujinta, bandykite dar kartą',
-        'success' => 'Įmonė atnaujinta sėkmingai.',
+        'success' => 'Įmonė sėkmingai atnaujinta.',
     ],
     'delete' => [
         'confirm' => 'Ar tikrai norite panaikinti šią įmonę?',
         'error' => 'Bandant panaikinti įmonę įvyko klaida. Bandykite dar kartą.',
-        'success' => 'Įmonė panaikinta sėkmingai.',
+        'success' => 'Įmonė sėkmingai panaikinta.',
     ],
 ];

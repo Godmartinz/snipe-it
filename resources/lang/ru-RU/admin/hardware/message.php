@@ -94,11 +94,20 @@ return [
         'success' => 'Актив успешно выдан.|Активы успешно выданы.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'Вы должны выбрать хотя бы один актив из списка',
+    ],
+
     'checkin' => [
         'error' => 'Актив не был отвязан, пожалуйста попробуйте снова',
         'success' => 'Актив успешно отвязан.',
         'user_does_not_exist' => 'Этот пользователь является недопустимым. Пожалуйста, попробуйте еще раз.',
         'already_checked_in' => 'Этот актив уже привязан.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Components;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ImageUploadRequest;
+use App\Http\Requests\StoreComponentRequest;
+use App\Http\Requests\UpdateComponentRequest;
 use App\Models\Company;
 use App\Models\Component;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -12,7 +13,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * This class controls all actions related to Components for
@@ -74,7 +74,7 @@ class ComponentsController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function store(ImageUploadRequest $request)
+    public function store(StoreComponentRequest $request)
     {
         $this->authorize('create', Component::class);
         $component = new Component;
@@ -148,21 +148,10 @@ class ComponentsController extends Controller
      *
      * @since [v3.0]
      */
-    public function update(ImageUploadRequest $request, Component $component)
+    public function update(UpdateComponentRequest $request, Component $component)
     {
-        $min = $component->numCheckedOut();
-        $validator = Validator::make($request->all(), [
-            'qty' => "required|numeric|min:$min",
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
         $this->authorize('update', $component);
-
+        
         // Update the component data
         $component->name = $request->input('name');
         $component->category_id = $request->input('category_id');
