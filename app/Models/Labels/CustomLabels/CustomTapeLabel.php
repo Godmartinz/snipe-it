@@ -337,37 +337,78 @@ abstract class CustomTapeLabel extends Label
     protected function getContentEditorConfig(): array
     {
         return [
+            /*
+            |--------------------------------------------------------------------------
+            | Barcode 1D
+            |--------------------------------------------------------------------------
+            */
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode1D_v_align' => $this->getBarcode1DVAlign(),
             'barcode1D_placement' => $this->getBarcode1DPlacement(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Barcode 2D
+            |--------------------------------------------------------------------------
+            */
             'barcode_2d_size' => $this->get2DBarcodeSize(),
             'barcode2D_h_align' => $this->getBarcode2DHAlign(),
             'barcode2D_v_align' => $this->getBarcode2DVAlign(),
             'barcode2D_placement' => $this->getBarcode2DPlacement(),
-            'text_size_mod' => $this->getTextSizeMod(), // needs to be combined with field size
-            'text_area_offset_y' => $this->getTextAreaOffsetY(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Tag
+            |--------------------------------------------------------------------------
+            */
+            'tag_font' => $this->getTagFont(),
             'tag_font_size' => $this->getTagSize(),
+            'tag_alignment' => $this->getTagAlignment(),
             'tag_offset_x' => $this->getTagOffsetX(),
             'tag_offset_y' => $this->getTagOffsetY(),
-            'field_label_font_size' => $this->getLabelSize(),
-            'field_label_margin' => $this->getLabelMargin(),
-            'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Title
+            |--------------------------------------------------------------------------
+            */
+            'title_font' => $this->getTitleFont(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
             'title_offset_x' => $this->getTitleOffsetX(),
-            'tag_alignment' => $this->getTagAlignment(),
-//            'field_alignment' => $this->getFieldAlignment(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Fields
+            |--------------------------------------------------------------------------
+            */
+            'field_label_font' => $this->getFieldLabelFont(),
+            'field_label_font_size' => $this->getLabelSize(),
+            'field_label_margin' => $this->getLabelMargin(),
+
+            'field_value_font' => $this->getFieldValueFont(),
+            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_margin' => $this->getFieldMargin(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Logo
+            |--------------------------------------------------------------------------
+            */
             'logo_max_width' => $this->getLogoMaxWidth(),
             'logo_margin' => $this->getLogoMargin(),
             'logo_h_align' => $this->getLogoHAlign(),
             'logo_v_align' => $this->getLogoVAlign(),
             'logo_placement' => $this->getLogoPlacement(),
-            'tag_font' => $this->getTagFont(),
-            'title_font' => $this->getTitleFont(),
-            'field_label_font' => $this->getFieldLabelFont(),
-            'field_value_font' => $this->getFieldValueFont(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Text Area
+            |--------------------------------------------------------------------------
+            */
+            'text_size_mod' => $this->getTextSizeMod(),
+            'text_area_offset_y' => $this->getTextAreaOffsetY(),
         ];
     }
 
@@ -432,35 +473,72 @@ abstract class CustomTapeLabel extends Label
             : [];
 
         $contentMap = [
+
+            /*
+            |--------------------------------------------------------------------------
+            | Barcode 1D
+            |--------------------------------------------------------------------------
+            */
             'barcode_size' => 'barcodeSize',
             'barcode_margin' => 'barcodeMargin',
             'barcode1D_v_align' => 'barcode1DVAlign',
             'barcode1D_placement' => 'barcode1DPlacement',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Barcode 2D
+            |--------------------------------------------------------------------------
+            */
             'barcode_2d_size' => 'barcode2DSize',
             'barcode_2d_margin' => 'barcode2DMargin',
             'barcode2D_placement' => 'barcode2DPlacement',
-            'logo_max_height' => 'logoMaxHeight',
 
-            'text_size_mod' => 'textSizeMod',
-            'text_area_offset_y' => 'textAreaOffsetY',
-
+            /*
+            |--------------------------------------------------------------------------
+            | Tag
+            |--------------------------------------------------------------------------
+            */
             'tag_position_mode' => 'tagPositionMode',
             'tag_font_size' => 'tagSize',
             'tag_offset_x' => 'tagOffsetX',
             'tag_offset_y' => 'tagOffsetY',
+            'tag_alignment' => 'tagAlignment',
 
+            /*
+            |--------------------------------------------------------------------------
+            | Title
+            |--------------------------------------------------------------------------
+            */
             'title_font_size' => 'titleSize',
             'title_margin' => 'titleMargin',
 
+            /*
+            |--------------------------------------------------------------------------
+            | Fields
+            |--------------------------------------------------------------------------
+            */
             'field_label_font_size' => 'labelSize',
             'field_label_margin' => 'labelMargin',
 
             'field_value_font_size' => 'fieldSize',
             'field_value_margin' => 'fieldMargin',
 
-            'tag_alignment' => 'tagAlignment',
             'field_alignment' => 'fieldAlignment',
 
+            /*
+            |--------------------------------------------------------------------------
+            | Logo
+            |--------------------------------------------------------------------------
+            */
+            'logo_max_height' => 'logoMaxHeight',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Text Area
+            |--------------------------------------------------------------------------
+            */
+            'text_size_mod' => 'textSizeMod',
+            'text_area_offset_y' => 'textAreaOffsetY',
             'text_render_mode' => 'textRenderMode',
         ];
 
@@ -473,12 +551,29 @@ abstract class CustomTapeLabel extends Label
         }
 
         $stringContentMap = [
+
+            /*
+            |--------------------------------------------------------------------------
+            | Barcode 2D
+            |--------------------------------------------------------------------------
+            */
             'barcode2D_h_align' => 'barcode2DHAlign',
             'barcode2D_v_align' => 'barcode2DVAlign',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Logo
+            |--------------------------------------------------------------------------
+            */
             'logo_h_align' => 'logoHAlign',
             'logo_v_align' => 'logoVAlign',
-            'tag_alignment' => 'tagAlignment',
             'logo_placement' => 'logoPlacement',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Fonts
+            |--------------------------------------------------------------------------
+            */
             'tag_font' => 'tagFont',
             'title_font' => 'titleFont',
             'field_label_font' => 'fieldLabelFont',
@@ -515,6 +610,11 @@ abstract class CustomTapeLabel extends Label
         $content = $config['content'] ?? [];
         $supports = $config['supports'] ?? [];
 
+        /*
+        |--------------------------------------------------------------------------
+        | Supports
+        |--------------------------------------------------------------------------
+        */
         $this->supportFields = isset($supports['fields']) ? (int)$supports['fields'] : $this->supportFields;
         $this->supportAssetTag = (bool)($supports['asset_tag'] ?? $this->supportAssetTag);
         $this->support1DBarcode = (bool)($supports['barcode_1d'] ?? $this->support1DBarcode);
@@ -522,41 +622,83 @@ abstract class CustomTapeLabel extends Label
         $this->supportLogo = (bool)($supports['logo'] ?? $this->supportLogo);
         $this->supportTitle = (bool)($supports['title'] ?? $this->supportTitle);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Barcode 1D
+        |--------------------------------------------------------------------------
+        */
         $this->barcodeSize = isset($content['barcode_size']) ? (float)$content['barcode_size'] : $this->barcodeSize;
         $this->barcodeMargin = isset($content['barcode_margin']) ? (float)$content['barcode_margin'] : $this->barcodeMargin;
         $this->barcode1DVAlign = isset($content['barcode1D_v_align']) ? (string)$content['barcode1D_v_align'] : $this->barcode1DVAlign;
         $this->barcode1DPlacement = isset($content['barcode1D_placement']) ? (string)$content['barcode1D_placement'] : $this->barcode1DPlacement;
-        $this->barcode2DHAlign = isset($content['barcode2D_h_align']) ? (string)$content['barcode2D_h_align'] : $this->barcode2DHAlign;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Barcode 2D
+        |--------------------------------------------------------------------------
+        */
         $this->barcode2DSize = isset($content['barcode_2d_size']) ? (float)$content['barcode_2d_size'] : $this->barcode2DSize;
+        $this->barcode2DMargin = isset($content['barcode_2d_margin']) ? (float)$content['barcode_2d_margin'] : $this->barcode2DMargin;
+        $this->barcode2DHAlign = isset($content['barcode2D_h_align']) ? (string)$content['barcode2D_h_align'] : $this->barcode2DHAlign;
         $this->barcode2DVAlign = isset($content['barcode2D_v_align']) ? (string)$content['barcode2D_v_align'] : $this->barcode2DVAlign;
-        $this->barcode2DMargin = isset($content['barcode_2d_margin']) ? (float)($content['barcode_2d_margin']) : $this->barcode2DMargin;
         $this->barcode2DPlacement = isset($content['barcode2D_placement']) ? (string)$content['barcode2D_placement'] : $this->barcode2DPlacement;
 
-        $this->logoMaxHeight = isset($content['logo_max_height']) ? (float)($content['logo_max_height']) : $this->logoMaxHeight;
-
-        $this->textSizeMod = isset($content['text_size_mod']) ? (float)$content['text_size_mod'] : $this->textSizeMod;
-        $this->textAreaOffsetY = isset($content['text_area_offset_y']) ? (float)$content['text_area_offset_y'] : $this->textAreaOffsetY;
+        /*
+        |--------------------------------------------------------------------------
+        | Tag
+        |--------------------------------------------------------------------------
+        */
+        $this->tagFont = isset($content['tag_font']) ? (string)$content['tag_font'] : $this->tagFont;
         $this->tagSize = isset($content['tag_font_size']) ? (float)$content['tag_font_size'] : $this->tagSize;
-        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float)$content['tag_offset_x'] : $this->tagOffsetX;
-        $this->tagPositionMode = isset($content['tag_position_mode']) ? (string)$content['tag_position_mode'] : $this->tagPositionMode;
-        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float)$content['tag_offset_y'] : $this->tagOffsetY;
-        $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
         $this->tagAlignment = isset($content['tag_alignment']) ? (string)$content['tag_alignment'] : $this->tagAlignment;
-        $this->fieldAlignment = isset($content['field_alignment']) ? (string)$content['field_alignment'] : $this->fieldAlignment;
+        $this->tagPositionMode = isset($content['tag_position_mode']) ? (string)$content['tag_position_mode'] : $this->tagPositionMode;
+        $this->tagOffsetX = isset($content['tag_offset_x']) ? (float)$content['tag_offset_x'] : $this->tagOffsetX;
+        $this->tagOffsetY = isset($content['tag_offset_y']) ? (float)$content['tag_offset_y'] : $this->tagOffsetY;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Title
+        |--------------------------------------------------------------------------
+        */
+        $this->titleFont = isset($content['title_font']) ? (string)$content['title_font'] : $this->titleFont;
         $this->titleSize = isset($content['title_font_size']) ? (float)$content['title_font_size'] : $this->titleSize;
         $this->titleMargin = isset($content['title_margin']) ? (float)$content['title_margin'] : $this->titleMargin;
+        $this->titleOffsetX = isset($content['title_offset_x']) ? (float)$content['title_offset_x'] : $this->titleOffsetX;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fields
+        |--------------------------------------------------------------------------
+        */
+        $this->fieldLabelFont = isset($content['field_label_font']) ? (string)$content['field_label_font'] : $this->fieldLabelFont;
         $this->labelSize = isset($content['field_label_font_size']) ? (float)$content['field_label_font_size'] : $this->labelSize;
         $this->labelMargin = isset($content['field_label_margin']) ? (float)$content['field_label_margin'] : $this->labelMargin;
+
+        $this->fieldValueFont = isset($content['field_value_font']) ? (string)$content['field_value_font'] : $this->fieldValueFont;
+        $this->fieldSize = isset($content['field_value_font_size']) ? (float)$content['field_value_font_size'] : $this->fieldSize;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float)$content['field_value_margin'] : $this->fieldMargin;
-        $this->textRenderMode = isset($content['text_render_mode']) ? (string)$content['text_render_mode'] : $this->textRenderMode;
+
+        $this->fieldAlignment = isset($content['field_alignment']) ? (string)$content['field_alignment'] : $this->fieldAlignment;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logo
+        |--------------------------------------------------------------------------
+        */
+        $this->logoMaxHeight = isset($content['logo_max_height']) ? (float)$content['logo_max_height'] : $this->logoMaxHeight;
         $this->logoMargin = isset($content['logo_margin']) ? (float)$content['logo_margin'] : $this->logoMargin;
         $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
         $this->logoPlacement = isset($content['logo_placement']) ? (string)$content['logo_placement'] : $this->logoPlacement;
-        $this->tagFont = isset($content['tag_font']) ? (string)$content['tag_font'] : $this->tagFont;
-        $this->titleFont = isset($content['title_font']) ? (string)$content['title_font'] : $this->titleFont;
-        $this->fieldLabelFont = isset($content['field_label_font']) ? (string)$content['field_label_font'] : $this->fieldLabelFont;
-        $this->fieldValueFont = isset($content['field_value_font']) ? (string)$content['field_value_font'] : $this->fieldValueFont;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Text Area
+        |--------------------------------------------------------------------------
+        */
+        $this->textSizeMod = isset($content['text_size_mod']) ? (float)$content['text_size_mod'] : $this->textSizeMod;
+        $this->textAreaOffsetY = isset($content['text_area_offset_y']) ? (float)$content['text_area_offset_y'] : $this->textAreaOffsetY;
+        $this->textRenderMode = isset($content['text_render_mode']) ? (string)$content['text_render_mode'] : $this->textRenderMode;
 
         //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
         if (array_key_exists('barcode2D_h_align', $content)) {
