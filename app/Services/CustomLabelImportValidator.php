@@ -99,6 +99,11 @@ class CustomLabelImportValidator
             'content.field_label_margin' => ['required', 'numeric'],
             'content.field_value_font_size' => ['required', 'numeric'],
             'content.field_value_margin' => ['required', 'numeric'],
+
+            'content.tag_font' => ['nullable', 'string'],
+            'content.title_font' => ['nullable', 'string'],
+            'content.field_label_font' => ['nullable', 'string'],
+            'content.field_value_font' => ['nullable', 'string'],
         ];
     }
 
@@ -280,6 +285,16 @@ class CustomLabelImportValidator
             'content.text_area_height' => 'text area height',
             'content.text_area_offset_y' => 'text area vertical offset',
             'content.text_render_mode' => 'text render mode',
+
+            /*
+             |--------------------------------------------------------------------------
+             | Fonts
+             |--------------------------------------------------------------------------
+             */
+            'content.tag_font' => 'tag font',
+            'content.title_font' => 'title font',
+            'content.field_label_font' => 'field label font',
+            'content.field_value_font' => 'field value font',
 
             /*
             |--------------------------------------------------------------------------

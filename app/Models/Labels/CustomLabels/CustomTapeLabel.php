@@ -71,6 +71,10 @@ abstract class CustomTapeLabel extends Label
     protected int $rotation = 0;
     protected string $orientation = 'L';
 
+    protected string $tagFont = 'freemono';
+    protected string $fieldLabelFont = 'freesans';
+    protected string $fieldValueFont = 'freemono';
+    protected string $titleFont = 'freesans';
     public function getUnit()
     {
         return $this->unit;
@@ -249,6 +253,25 @@ abstract class CustomTapeLabel extends Label
         return $this->titleSize;
     }
 
+    public function getTagFont(): string
+    {
+        return $this->tagFont;
+    }
+
+    public function getFieldLabelFont(): string
+    {
+        return $this->fieldLabelFont;
+    }
+
+    public function getFieldValueFont(): string
+    {
+        return $this->fieldValueFont;
+    }
+
+    public function getTitleFont(): string
+    {
+        return $this->titleFont;
+    }
     public function getTitleMargin(): float
     {
         return $this->titleMargin;
@@ -341,6 +364,10 @@ abstract class CustomTapeLabel extends Label
             'logo_h_align' => $this->getLogoHAlign(),
             'logo_v_align' => $this->getLogoVAlign(),
             'logo_placement' => $this->getLogoPlacement(),
+            'tag_font' => $this->getTagFont(),
+            'title_font' => $this->getTitleFont(),
+            'field_label_font' => $this->getFieldLabelFont(),
+            'field_value_font' => $this->getFieldValueFont(),
         ];
     }
 
@@ -452,6 +479,10 @@ abstract class CustomTapeLabel extends Label
             'logo_v_align' => 'logoVAlign',
             'tag_alignment' => 'tagAlignment',
             'logo_placement' => 'logoPlacement',
+            'tag_font' => 'tagFont',
+            'title_font' => 'titleFont',
+            'field_label_font' => 'fieldLabelFont',
+            'field_value_font' => 'fieldValueFont',
         ];
 
         foreach ($stringContentMap as $key => $property) {
@@ -522,6 +553,10 @@ abstract class CustomTapeLabel extends Label
         $this->logoHAlign = isset($content['logo_h_align']) ? (string)$content['logo_h_align'] : $this->logoHAlign;
         $this->logoVAlign = isset($content['logo_v_align']) ? (string)$content['logo_v_align'] : $this->logoVAlign;
         $this->logoPlacement = isset($content['logo_placement']) ? (string)$content['logo_placement'] : $this->logoPlacement;
+        $this->tagFont = isset($content['tag_font']) ? (string)$content['tag_font'] : $this->tagFont;
+        $this->titleFont = isset($content['title_font']) ? (string)$content['title_font'] : $this->titleFont;
+        $this->fieldLabelFont = isset($content['field_label_font']) ? (string)$content['field_label_font'] : $this->fieldLabelFont;
+        $this->fieldValueFont = isset($content['field_value_font']) ? (string)$content['field_value_font'] : $this->fieldValueFont;
 
         //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
         if (array_key_exists('barcode2D_h_align', $content)) {
@@ -810,7 +845,7 @@ abstract class CustomTapeLabel extends Label
             $record->get('tag'),
             $layout['tag']['x'],
             $layout['text']['y1'],
-            'freemono',
+            $this->getTagFont(),
             'B',
             $layout['text']['h'] + $this->getTextSizeMod(),
             $this->getTagAlignment(),
@@ -864,7 +899,7 @@ abstract class CustomTapeLabel extends Label
             $field['value'] ?? '',
             $layout['text']['x1'],
             $layout['text']['y1'],
-            'freemono',
+            $this->getFieldValueFont(),
             'B',
             $layout['text']['h'] + $this->getTextSizeMod(),
             $this->getFieldAlignment(),

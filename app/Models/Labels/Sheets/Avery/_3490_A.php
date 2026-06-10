@@ -19,6 +19,9 @@ class _3490_A extends _3490
     private const FIELD_SIZE = 0.150;
 
     private const FIELD_MARGIN = 0.012;
+    protected string $titleFont = 'freesans';
+    protected string $fieldLabelFont = 'freesans';
+    protected string $fieldValueFont = 'freemono';
 
     public function getBarcodeMargin()
     {
@@ -115,6 +118,21 @@ class _3490_A extends _3490
         return true;
     }
 
+    public function getTitleFont(): string
+    {
+        return $this->titleFont;
+    }
+
+    public function getFieldLabelFont(): string
+    {
+        return $this->fieldLabelFont;
+    }
+
+    public function getFieldValueFont(): string
+    {
+        return $this->fieldValueFont;
+    }
+
     protected function getContentEditorConfig(): array
     {
         return [
@@ -126,6 +144,9 @@ class _3490_A extends _3490
             'field_label_margin' => $this->getLabelMargin(),
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
+            'title_font' => $this->getTitleFont(),
+            'field_label_font' => $this->getFieldLabelFont(),
+            'field_value_font' => $this->getFieldValueFont(),
         ];
     }
 

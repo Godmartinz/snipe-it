@@ -108,6 +108,10 @@ abstract class CustomSheetLabel extends RectangleSheet
     protected float $tagOffsetX = 0.0;
 
     protected float $tagOffsetY = 0.0;
+    protected string $tagFont = 'freemono';
+    protected string $fieldLabelFont = 'freesans';
+    protected string $fieldValueFont = 'freemono';
+    protected string $titleFont = 'freesans';
 
     public function getTagOffsetX(): float
     {
@@ -274,6 +278,26 @@ abstract class CustomSheetLabel extends RectangleSheet
         return $this->tagSize;
     }
 
+    public function getTagFont(): string
+    {
+        return $this->tagFont;
+    }
+
+    public function getFieldLabelFont(): string
+    {
+        return $this->fieldLabelFont;
+    }
+
+    public function getFieldValueFont(): string
+    {
+        return $this->fieldValueFont;
+    }
+
+    public function getTitleFont(): string
+    {
+        return $this->titleFont;
+    }
+
     public function getTagAlignment(): string
     {
         return $this->tagAlignment;
@@ -385,6 +409,10 @@ abstract class CustomSheetLabel extends RectangleSheet
             'field_value_margin' => $this->getFieldMargin(),
             'text_area_width' => $this->getTextAreaWidth(),
             'text_area_height' => $this->getTextAreaHeight(),
+            'tag_font' => $this->getTagFont(),
+            'title_font' => $this->getTitleFont(),
+            'field_label_font' => $this->getFieldLabelFont(),
+            'field_value_font' => $this->getFieldValueFont(),
         ];
     }
 
@@ -585,6 +613,10 @@ abstract class CustomSheetLabel extends RectangleSheet
             'logo_h_align' => 'logoHAlign',
             'logo_v_align' => 'logoVAlign',
             'tag_alignment' => 'tagAlignment',
+            'tag_font' => 'tagFont',
+            'title_font' => 'titleFont',
+            'field_label_font' => 'fieldLabelFont',
+            'field_value_font' => 'fieldValueFont',
         ];
 
         foreach ($stringContentMap as $key => $property) {
@@ -662,6 +694,10 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->titleOffsetX = isset($content['title_offset_x']) ? (float) $content['title_offset_x'] : $this->titleOffsetX;
         $this->labelMargin = isset($content['field_label_margin']) ? (float) $content['field_label_margin'] : $this->labelMargin;
         $this->fieldMargin = isset($content['field_value_margin']) ? (float) $content['field_value_margin'] : $this->fieldMargin;
+        $this->tagFont = isset($content['tag_font']) ? (string)$content['tag_font'] : $this->tagFont;
+        $this->titleFont = isset($content['title_font']) ? (string)$content['title_font'] : $this->titleFont;
+        $this->fieldLabelFont = isset($content['field_label_font']) ? (string)$content['field_label_font'] : $this->fieldLabelFont;
+        $this->fieldValueFont = isset($content['field_value_font']) ? (string)$content['field_value_font'] : $this->fieldValueFont;
         $this->barcode2DHAlign = isset($content['barcode2D_h_align'])
             ? (string)$content['barcode2D_h_align']
             : $this->barcode2DHAlign;
