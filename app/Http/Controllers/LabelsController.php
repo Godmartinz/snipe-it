@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImportCustomLabelRequest;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
@@ -20,7 +21,7 @@ use App\Models\User;
 use App\View\Label as LabelView;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-
+use App\Services\CustomLabelImportValidator;
 class LabelsController extends Controller
 {
     /**
@@ -462,205 +463,13 @@ class LabelsController extends Controller
     }
 
 
-    public function import(Request $request)
+    public function import(ImportCustomLabelRequest $request, CustomLabelImportValidator $importValidator)
     {
-        $request->validate([
-            'import_method' => ['required', 'in:json,text'],
-            'config_file' => ['required_if:import_method,json', 'file', 'mimes:json,txt'],
-            'config_snapshot' => ['required_if:import_method,text', 'nullable', 'string'],
-        ]);
-
-        $rawJson = $request->input('import_method') === 'json'
-            ? file_get_contents($request->file('config_file')->getRealPath())
-            : $request->input('config_snapshot');
-
-        $config = json_decode($rawJson, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE || !is_array($config)) {
-            return back()
-                ->withErrors(['config_snapshot' => 'The imported label config must be valid JSON.'])
-                ->withInput();
-        }
-
-        $configValidator = validator(
-            $config,
-            [
-                'unit' => ['required', 'string', 'in:mm'],
-                'template' => ['required', 'string'],
-                'type' => ['required', 'string', 'in:sheet'],
-                'name' => ['required', 'string'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Page
-                |--------------------------------------------------------------------------
-                */
-                'page' => ['required', 'array'],
-                'page.width' => ['required', 'numeric'],
-                'page.height' => ['required', 'numeric'],
-                'page.margin_top' => ['required', 'numeric'],
-                'page.margin_right' => ['required', 'numeric'],
-                'page.margin_bottom' => ['required', 'numeric'],
-                'page.margin_left' => ['required', 'numeric'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Grid
-                |--------------------------------------------------------------------------
-                */
-                'grid' => ['required', 'array'],
-                'grid.columns' => ['required', 'integer'],
-                'grid.rows' => ['required', 'integer'],
-                'grid.column_spacing' => ['required', 'numeric'],
-                'grid.row_spacing' => ['required', 'numeric'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Printable Area
-                |--------------------------------------------------------------------------
-                */
-                'printable_area' => ['required', 'array'],
-                'printable_area.x1' => ['required', 'numeric'],
-                'printable_area.y1' => ['required', 'numeric'],
-                'printable_area.x2' => ['required', 'numeric'],
-                'printable_area.y2' => ['required', 'numeric'],
-                'printable_area.width' => ['required', 'numeric'],
-                'printable_area.height' => ['required', 'numeric'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Label
-                |--------------------------------------------------------------------------
-                */
-                'label' => ['required', 'array'],
-                'label.width' => ['required', 'numeric'],
-                'label.height' => ['required', 'numeric'],
-                'label.border' => ['required', 'numeric'],
-                'label.padding_top' => ['required', 'numeric'],
-                'label.padding_right' => ['required', 'numeric'],
-                'label.padding_bottom' => ['required', 'numeric'],
-                'label.padding_left' => ['required', 'numeric'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Content
-                |--------------------------------------------------------------------------
-                */
-                'content' => ['required', 'array'],
-
-                'content.barcode_size' => ['required', 'numeric'],
-                'content.barcode_margin' => ['required', 'numeric'],
-
-                'content.barcode2D_h_align' => ['required', 'string', 'in:L,C,R'],
-                'content.barcode2D_v_align' => ['required', 'string', 'in:T,C,B'],
-
-                'content.tag_alignment' => ['required', 'string', 'in:L,C,R'],
-
-                'content.barcode_2d_size' => ['required', 'numeric'],
-
-                'content.logo_max_width' => ['required', 'numeric'],
-                'content.logo_margin' => ['required', 'numeric'],
-
-                'content.logo_h_align' => ['required', 'string', 'in:L,C,R'],
-                'content.logo_v_align' => ['required', 'string', 'in:T,C,B'],
-
-                'content.tag_font_size' => ['required', 'numeric'],
-                'content.tag_offset_x' => ['required', 'numeric'],
-                'content.tag_offset_y' => ['required', 'numeric'],
-
-                'content.title_font_size' => ['required', 'numeric'],
-                'content.title_margin' => ['required', 'numeric'],
-                'content.title_offset_x' => ['required', 'numeric'],
-
-                'content.field_label_font_size' => ['required', 'numeric'],
-                'content.field_label_margin' => ['required', 'numeric'],
-
-                'content.field_value_font_size' => ['required', 'numeric'],
-                'content.field_value_margin' => ['required', 'numeric'],
-
-                'content.text_area_width' => ['nullable', 'numeric'],
-                'content.text_area_height' => ['nullable', 'numeric'],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Supports
-                |--------------------------------------------------------------------------
-                */
-                'supports' => ['required', 'array'],
-                'supports.asset_tag' => ['required', 'boolean'],
-                'supports.barcode_1d' => ['required', 'boolean'],
-                'supports.barcode_2d' => ['required', 'boolean'],
-                'supports.fields' => ['required', 'integer'],
-                'supports.logo' => ['required', 'boolean'],
-                'supports.title' => ['required', 'boolean'],
-            ],
-            [],
-            [
-                'page.width' => 'page width',
-                'page.height' => 'page height',
-                'page.margin_top' => 'page top margin',
-                'page.margin_right' => 'page right margin',
-                'page.margin_bottom' => 'page bottom margin',
-                'page.margin_left' => 'page left margin',
-
-                'grid.columns' => 'grid columns',
-                'grid.rows' => 'grid rows',
-                'grid.column_spacing' => 'grid column spacing',
-                'grid.row_spacing' => 'grid row spacing',
-
-                'printable_area.x1' => 'printable area x1',
-                'printable_area.y1' => 'printable area y1',
-                'printable_area.x2' => 'printable area x2',
-                'printable_area.y2' => 'printable area y2',
-                'printable_area.width' => 'printable area width',
-                'printable_area.height' => 'printable area height',
-
-                'label.width' => 'label width',
-                'label.height' => 'label height',
-                'label.border' => 'label border',
-                'label.padding_top' => 'label top padding',
-                'label.padding_right' => 'label right padding',
-                'label.padding_bottom' => 'label bottom padding',
-                'label.padding_left' => 'label left padding',
-
-                'content.barcode_size' => 'barcode size',
-                'content.barcode_margin' => 'barcode margin',
-                'content.barcode2D_h_align' => '2D barcode horizontal alignment',
-                'content.barcode2D_v_align' => '2D barcode vertical alignment',
-                'content.tag_alignment' => 'tag alignment',
-                'content.barcode_2d_size' => '2D barcode size',
-                'content.logo_max_width' => 'logo max width',
-                'content.logo_margin' => 'logo margin',
-                'content.logo_h_align' => 'logo horizontal alignment',
-                'content.logo_v_align' => 'logo vertical alignment',
-                'content.tag_font_size' => 'tag font size',
-                'content.tag_offset_x' => 'tag horizontal offset',
-                'content.tag_offset_y' => 'tag vertical offset',
-                'content.title_font_size' => 'title font size',
-                'content.title_margin' => 'title margin',
-                'content.title_offset_x' => 'title horizontal offset',
-                'content.field_label_font_size' => 'field label font size',
-                'content.field_label_margin' => 'field label margin',
-                'content.field_value_font_size' => 'field value font size',
-                'content.field_value_margin' => 'field value margin',
-                'content.text_area_width' => 'text area width',
-                'content.text_area_height' => 'text area height',
-
-                'supports.asset_tag' => 'supports asset tag',
-                'supports.barcode_1d' => 'supports 1D barcode',
-                'supports.barcode_2d' => 'supports 2D barcode',
-                'supports.fields' => 'supports fields',
-                'supports.logo' => 'supports logo',
-                'supports.title' => 'supports title',
-            ]
-        );
-
-        if ($configValidator->fails()) {
-
-            $messages = collect($configValidator->errors()->all())
-                ->map(function ($message) {
-                    return '<i class="fa-solid fa-xmark text-danger"></i> ' . $message;
-                })
+        try {
+            $config = $importValidator->validate($request->rawConfigJson());
+        } catch (ValidationException $e) {
+            $messages = collect($e->validator->errors()->all())
+                ->map(fn($message) => '<i class="fa-solid fa-xmark text-danger"></i> ' . $message)
                 ->toArray();
 
             return back()
@@ -670,9 +479,10 @@ class LabelsController extends Controller
                 ->withInput();
         }
 
-        return redirect()
-            ->route('settings.labels.create')
-            ->with('imported_label_config', $config);
+        return redirect()->route('settings.labels.create', [
+            'label' => $config['template'] ?? null,
+        ])->with('imported_label_config', $config);
+
     }
 
     protected function previewLabelForTemplate($template)
