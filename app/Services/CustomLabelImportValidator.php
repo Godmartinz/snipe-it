@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Validation\ValidationException;
 class CustomLabelImportValidator
 {
     public function validate(?string $rawJson): array
