@@ -165,4 +165,70 @@ trait HasCustomLabelContentProperties
     {
         return $this->textAreaHeight;
     }
+
+    protected function hydrateSheetPage(array $page): void
+    {
+        $this->pageWidth = isset($page['width']) ? (float)$page['width'] : $this->pageWidth;
+        $this->pageHeight = isset($page['height']) ? (float)$page['height'] : $this->pageHeight;
+        $this->pageMarginTop = isset($page['margin_top']) ? (float)$page['margin_top'] : $this->pageMarginTop;
+        $this->pageMarginRight = isset($page['margin_right']) ? (float)$page['margin_right'] : $this->pageMarginRight;
+        $this->pageMarginBottom = isset($page['margin_bottom']) ? (float)$page['margin_bottom'] : $this->pageMarginBottom;
+        $this->pageMarginLeft = isset($page['margin_left']) ? (float)$page['margin_left'] : $this->pageMarginLeft;
+    }
+
+    protected function hydrateSheetGrid(array $grid): void
+    {
+        $this->rows = isset($grid['rows']) ? (int)$grid['rows'] : $this->rows;
+        $this->columns = isset($grid['columns']) ? (int)$grid['columns'] : $this->columns;
+        $this->labelRowSpacing = isset($grid['row_spacing']) ? (float)$grid['row_spacing'] : $this->labelRowSpacing;
+        $this->labelColumnSpacing = isset($grid['column_spacing']) ? (float)$grid['column_spacing'] : $this->labelColumnSpacing;
+    }
+
+    protected function hydrateSheetLabel(array $label): void
+    {
+        $this->labelWidth = isset($label['width']) ? (float)$label['width'] : $this->labelWidth;
+        $this->labelHeight = isset($label['height']) ? (float)$label['height'] : $this->labelHeight;
+        $this->labelMarginTop = isset($label['padding_top']) ? (float)$label['padding_top'] : $this->labelMarginTop;
+        $this->labelMarginRight = isset($label['padding_right']) ? (float)$label['padding_right'] : $this->labelMarginRight;
+        $this->labelMarginBottom = isset($label['padding_bottom']) ? (float)$label['padding_bottom'] : $this->labelMarginBottom;
+        $this->labelMarginLeft = isset($label['padding_left']) ? (float)$label['padding_left'] : $this->labelMarginLeft;
+    }
+
+    protected function hydrateContent(array $content): void
+    {
+        $this->hydrateNumericContent($content);
+        $this->hydrateStringContent($content);
+
+        if (array_key_exists('barcode2D_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('barcode2D_h_align');
+        } elseif (array_key_exists('logo_h_align', $content)) {
+            $this->syncLogoAnd2DBarcodeHAlign('logo_h_align');
+        }
+    }
+
+    protected function hydrateNumericContent(array $content): void
+    {
+        foreach ($this->editorNumericContentMap() as $key => $property) {
+            if (
+                array_key_exists($key, $content)
+                && $content[$key] !== ''
+                && $content[$key] !== null
+            ) {
+                $this->{$property} = (float)$content[$key];
+            }
+        }
+    }
+
+    protected function hydrateStringContent(array $content): void
+    {
+        foreach ($this->editorStringContentMap() as $key => $property) {
+            if (
+                array_key_exists($key, $content)
+                && $content[$key] !== ''
+                && $content[$key] !== null
+            ) {
+                $this->{$property} = (string)$content[$key];
+            }
+        }
+    }
 }
