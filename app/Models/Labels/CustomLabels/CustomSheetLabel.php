@@ -3,126 +3,65 @@
 namespace App\Models\Labels\CustomLabels;
 
 use App\Helpers\Helper;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelContentProperties;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorConfig;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
 use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
+use App\Models\Labels\CustomLabels\Concerns\SeedsCustomLabelFromTemplate;
 use App\Models\Labels\RectangleSheet;
 
 abstract class CustomSheetLabel extends RectangleSheet
 {
     use RenderCustomLabelContent;
+    use HasCustomLabelEditorConfig;
+    use HasCustomLabelSupports;
+    use HasCustomLabelContentProperties;
+    use SeedsCustomLabelFromTemplate;
     protected array $editorConfig = [];
 
     protected string $unit = 'mm';
 
+    /*
+|--------------------------------------------------------------------------
+| Page
+|--------------------------------------------------------------------------
+*/
     protected ?float $pageWidth = 210.0;
-
     protected ?float $pageHeight = 297.0;
-
     protected ?float $pageMarginTop = 0.0;
-
     protected ?float $pageMarginRight = 0.0;
-
     protected ?float $pageMarginBottom = 0.0;
-
     protected ?float $pageMarginLeft = 0.0;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Grid
+    |--------------------------------------------------------------------------
+    */
     protected int $rows = 9;
-
     protected int $columns = 3;
-
-    protected ?float $labelWidth = 50.0;
-
-    protected ?float $labelHeight = 25.0;
-
     protected float $labelRowSpacing = 0.0;
-
     protected float $labelColumnSpacing = 0.0;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Label
+    |--------------------------------------------------------------------------
+    */
+    protected ?float $labelWidth = 50.0;
+    protected ?float $labelHeight = 25.0;
     protected float $labelMarginTop = 0.0;
-
     protected float $labelMarginRight = 0.0;
-
     protected float $labelMarginBottom = 0.0;
-
     protected float $labelMarginLeft = 0.0;
 
-    protected bool $supportTitle = true;
-
-    protected int $supportFields = 4;
-
-    protected bool $support1DBarcode = true;
-
-    protected bool $support2DBarcode = false;
-
-    protected bool $supportLogo = false;
-
-    protected bool $supportAssetTag = true;
-
-    protected float $barcodeSize = 3;
-
-    protected float $barcode2DSize = 20;
-
-    protected float $barcodeMargin = .025;
-
-    protected float $barcode2Margin = 0.075;
-
-    protected float $logoMaxWidth = 12.0;
-
-    protected float $logoMargin = 2.0;
-
-    protected string $logoHAlign = 'L';
-
-    protected string $logoVAlign = 'T';
-
-    protected float $tagSize = 6.0;
-
-    protected float $titleSize = 8.0;
-
-    protected float $labelSize = 6.0;
-
-    protected float $fieldSize = 7.0;
-
-    protected float $titleMargin = 2.0;
-
-    protected float $titleOffsetX = 0.0;
-
-    protected float $labelMargin = 1.5;
-
-    protected float $fieldMargin = 2.0;
-
-    protected string $tagAlignment = 'L';
-
-    protected string $barcode2DHAlign = 'L';
-
-    protected string $barcode2DVAlign = 'T';
-
+    /*
+    |--------------------------------------------------------------------------
+    | Sheet-only tag positioning
+    |--------------------------------------------------------------------------
+    */
     protected string $tagHAlign = 'R';
-
     protected string $tagVAlign = 'B';
-
-    protected string $tagPositionMode = 'free';
-
-    protected ?float $textAreaWidth = null;
-
-    protected ?float $textAreaHeight = null;
-
-    protected float $tagOffsetX = 0.0;
-
-    protected float $tagOffsetY = 0.0;
-    protected string $tagFont = 'freemono';
-    protected string $fieldLabelFont = 'freesans';
-    protected string $fieldValueFont = 'freemono';
-    protected string $titleFont = 'freesans';
-
-    public function getTagOffsetX(): float
-    {
-        return $this->tagOffsetX;
-    }
-
-    public function getTagOffsetY(): float
-    {
-        return $this->tagOffsetY;
-    }
-
     public function getUnit()
     {
         return $this->unit;
@@ -208,149 +147,9 @@ abstract class CustomSheetLabel extends RectangleSheet
         return $this->labelMarginLeft;
     }
 
-    public function getSupportTitle(): bool
-    {
-        return $this->supportTitle;
-    }
-
-    public function getSupportFields(): int
-    {
-        return $this->supportFields;
-    }
-
-    public function getSupport1DBarcode(): bool
-    {
-        return $this->support1DBarcode;
-    }
-
-    public function getSupport2DBarcode(): bool
-    {
-        return $this->support2DBarcode;
-    }
-
-    public function getSupportLogo(): bool
-    {
-        return $this->supportLogo;
-    }
-
-    public function getSupportAssetTag(): bool
-    {
-        return $this->supportAssetTag;
-    }
-
-    public function getBarcodeSize(): float
-    {
-        return $this->barcodeSize;
-    }
-
-    public function get2DBarcodeSize(): float
-    {
-        return $this->barcode2DSize;
-    }
-
-    public function getBarcodeMargin(): float
-    {
-        return $this->barcodeMargin;
-    }
-
-    public function getLogoMaxWidth(): float
-    {
-        return $this->logoMaxWidth;
-    }
-
-    public function getLogoMargin(): float
-    {
-        return $this->logoMargin;
-    }
-
-    public function getLogoHAlign(): string
-    {
-        return $this->logoHAlign;
-    }
-
-    public function getLogoVAlign(): string
-    {
-        return $this->logoVAlign;
-    }
-
-    public function getTagSize(): float
-    {
-        return $this->tagSize;
-    }
-
-    public function getTagFont(): string
-    {
-        return $this->tagFont;
-    }
-
-    public function getFieldLabelFont(): string
-    {
-        return $this->fieldLabelFont;
-    }
-
-    public function getFieldValueFont(): string
-    {
-        return $this->fieldValueFont;
-    }
-
-    public function getTitleFont(): string
-    {
-        return $this->titleFont;
-    }
-
-    public function getTagAlignment(): string
-    {
-        return $this->tagAlignment;
-    }
-
-    public function getTitleSize(): float
-    {
-        return $this->titleSize;
-    }
-
-    public function getTitleOffsetX(): float
-    {
-        return $this->titleOffsetX;
-    }
-
-    public function getLabelSize(): float
-    {
-        return $this->labelSize;
-    }
-
-    public function getFieldSize(): float
-    {
-        return $this->fieldSize;
-    }
-
-    public function getTitleMargin(): float
-    {
-        return $this->titleMargin;
-    }
-
-    public function getLabelMargin(): float
-    {
-        return $this->labelMargin;
-    }
-
-    public function getFieldMargin(): float
-    {
-        return $this->fieldMargin;
-    }
-
     public function getLabelBorder()
     {
         return 0;
-    }
-
-    public function getBarcode2DHAlign(): string
-    {
-        return $this->barcode2DHAlign;
-    }
-
-    public function getBarcode2DVAlign(): string
-    {
-        return $this->barcode2DVAlign;
     }
 
     public function getTagHAlign(): string
@@ -363,383 +162,25 @@ abstract class CustomSheetLabel extends RectangleSheet
         return $this->tagVAlign;
     }
 
-    public function getTagPositionMode(): string
-    {
-        return $this->tagPositionMode;
-    }
-
-    public function getTextAreaWidth(): ?float
-    {
-        return $this->textAreaWidth;
-    }
-
-    public function getTextAreaHeight(): ?float
-    {
-        return $this->textAreaHeight;
-    }
-
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false, 0);
     }
 
-    protected function getContentEditorConfig(): array
-    {
-        return [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 1D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_size' => $this->getBarcodeSize(),
-            'barcode_margin' => $this->getBarcodeMargin(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_2d_size' => $this->get2DBarcodeSize(),
-            'barcode2D_h_align' => $this->getBarcode2DHAlign(),
-            'barcode2D_v_align' => $this->getBarcode2DVAlign(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Tag
-            |--------------------------------------------------------------------------
-            */
-            'tag_font' => $this->getTagFont(),
-            'tag_font_size' => $this->getTagSize(),
-            'tag_alignment' => $this->getTagAlignment(),
-            'tag_offset_x' => $this->getTagOffsetX(),
-            'tag_offset_y' => $this->getTagOffsetY(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Title
-            |--------------------------------------------------------------------------
-            */
-            'title_font' => $this->getTitleFont(),
-            'title_font_size' => $this->getTitleSize(),
-            'title_margin' => $this->getTitleMargin(),
-            'title_offset_x' => $this->getTitleOffsetX(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fields
-            |--------------------------------------------------------------------------
-            */
-            'field_label_font' => $this->getFieldLabelFont(),
-            'field_label_font_size' => $this->getLabelSize(),
-            'field_label_margin' => $this->getLabelMargin(),
-
-            'field_value_font' => $this->getFieldValueFont(),
-            'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_max_width' => $this->getLogoMaxWidth(),
-            'logo_margin' => $this->getLogoMargin(),
-            'logo_h_align' => $this->getLogoHAlign(),
-            'logo_v_align' => $this->getLogoVAlign(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Text Area
-            |--------------------------------------------------------------------------
-            */
-            'text_area_width' => $this->getTextAreaWidth(),
-            'text_area_height' => $this->getTextAreaHeight(),
-        ];
-    }
 
     public function seedFromTemplate($template): static
     {
-        $sourceUnit = $template->getUnit();
-
-        //Convert everything to mm for precision
-        $convert = function ($value) use ($sourceUnit) {
-            if ($value === null || $value === '') {
-                return $value;
-            }
-
-            return $sourceUnit === 'in' && is_numeric($value)
-                ? (float) $value * 25.4
-                : $value;
-        };
+        $convert = $this->unitConverterFor($template);
 
         $this->unit = 'mm';
 
-        /*
-        |--------------------------------------------------------------------------
-        | Page / label measurements
-        |--------------------------------------------------------------------------
-        */
-        $measurementMap = [
-            'pageWidth' => 'getPageWidth',
-            'pageHeight' => 'getPageHeight',
-            'pageMarginTop' => 'getPageMarginTop',
-            'pageMarginRight' => 'getPageMarginRight',
-            'pageMarginBottom' => 'getPageMarginBottom',
-            'pageMarginLeft' => 'getPageMarginLeft',
+        $this->seedSheetMeasurements($template, $convert);
+        $this->seedSheetGrid($template);
 
-            'labelWidth' => 'getLabelWidth',
-            'labelHeight' => 'getLabelHeight',
-            'labelRowSpacing' => 'getLabelRowSpacing',
-            'labelColumnSpacing' => 'getLabelColumnSpacing',
-            'labelMarginTop' => 'getLabelMarginTop',
-            'labelMarginRight' => 'getLabelMarginRight',
-            'labelMarginBottom' => 'getLabelMarginBottom',
-            'labelMarginLeft' => 'getLabelMarginLeft',
-        ];
-
-        foreach ($measurementMap as $property => $method) {
-            if (method_exists($template, $method)) {
-                $this->{$property} = $convert($template->{$method}());
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Grid
-        |--------------------------------------------------------------------------
-        */
-        if (method_exists($template, 'getRows')) {
-            $this->rows = (int) $template->getRows();
-        }
-
-        if (method_exists($template, 'getColumns')) {
-            $this->columns = (int) $template->getColumns();
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Supports
-        |--------------------------------------------------------------------------
-        */
-        $supportMap = [
-            'supportAssetTag' => 'getSupportAssetTag',
-            'support1DBarcode' => 'getSupport1DBarcode',
-            'support2DBarcode' => 'getSupport2DBarcode',
-            'supportFields' => 'getSupportFields',
-            'supportLogo' => 'getSupportLogo',
-            'supportTitle' => 'getSupportTitle',
-        ];
-
-        foreach ($supportMap as $property => $method) {
-            if (method_exists($template, $method)) {
-                $this->{$property} = $template->{$method}();
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Legacy getter fallbacks
-        |--------------------------------------------------------------------------
-        */
-        $legacyContentMap = [
-            'barcodeSize' => ['getBarcodeSize', 'getBarcode1DSize'],
-            'barcode2DSize' => ['get2DBarcodeSize', 'getBarcode2DSize'],
-            'barcodeMargin' => ['getBarcodeMargin'],
-            'barcode2Margin' => ['getBarcode2DMargin'],
-            'logoMaxWidth' => ['getLogoMaxWidth'],
-            'logoMargin' => ['getLogoMargin'],
-            'tagSize' => ['getTagSize'],
-            'titleSize' => ['getTitleSize'],
-            'labelSize' => ['getLabelSize'],
-            'fieldSize' => ['getFieldSize'],
-            'titleMargin' => ['getTitleMargin'],
-            'labelMargin' => ['getLabelMargin'],
-            'fieldMargin' => ['getFieldMargin'],
-        ];
-
-        foreach ($legacyContentMap as $property => $methods) {
-            foreach ($methods as $method) {
-                if (method_exists($template, $method)) {
-                    $this->{$property} = $convert($template->{$method}());
-                    break;
-                }
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Special legacy fallbacks
-        |--------------------------------------------------------------------------
-        */
-        if (method_exists($template, 'getLogoSize') && ! method_exists($template, 'getLogoMaxWidth')) {
-            $logoSize = $template->getLogoSize();
-            $this->logoMaxWidth = isset($logoSize[0])
-                ? $convert($logoSize[0])
-                : $this->logoMaxWidth;
-        }
-
-        if (method_exists($template, 'getTextSize')) {
-            $textSize = $convert($template->getTextSize());
-
-            if (! method_exists($template, 'getTagSize')) {
-                $this->tagSize = $textSize;
-            }
-
-            if (! method_exists($template, 'getTitleSize')) {
-                $this->titleSize = $textSize;
-            }
-
-            if (! method_exists($template, 'getLabelSize')) {
-                $this->labelSize = $textSize;
-            }
-
-            if (! method_exists($template, 'getFieldSize')) {
-                $this->fieldSize = $textSize;
-            }
-        }
-
-        if (method_exists($template, 'getTextMargin')) {
-            $textMargin = $convert($template->getTextMargin());
-
-            if (! method_exists($template, 'getTitleMargin')) {
-                $this->titleMargin = $textMargin;
-            }
-
-            if (! method_exists($template, 'getLabelMargin')) {
-                $this->labelMargin = $textMargin;
-            }
-
-            if (! method_exists($template, 'getFieldMargin')) {
-                $this->fieldMargin = $textMargin;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Editor config overrides
-        |--------------------------------------------------------------------------
-        |
-        | These are applied last so editor-specific values win over legacy getters.
-        */
-        $content = method_exists($template, 'getEditorConfigSections')
-            ? ($template->getEditorConfigSections()['content'] ?? [])
-            : [];
-
-        $contentMap = [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 1D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_size' => 'barcodeSize',
-            'barcode_margin' => 'barcodeMargin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_2d_size' => 'barcode2DSize',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Tag
-            |--------------------------------------------------------------------------
-            */
-            'tag_font_size' => 'tagSize',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Title
-            |--------------------------------------------------------------------------
-            */
-            'title_font_size' => 'titleSize',
-            'title_margin' => 'titleMargin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fields
-            |--------------------------------------------------------------------------
-            */
-            'field_label_font_size' => 'labelSize',
-            'field_label_margin' => 'labelMargin',
-
-            'field_value_font_size' => 'fieldSize',
-            'field_value_margin' => 'fieldMargin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_max_width' => 'logoMaxWidth',
-            'logo_margin' => 'logoMargin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Text Area
-            |--------------------------------------------------------------------------
-            */
-            'text_area_width' => 'textAreaWidth',
-            'text_area_height' => 'textAreaHeight',
-        ];
-
-        foreach ($contentMap as $key => $property) {
-            if (array_key_exists($key, $content)) {
-                $this->{$property} = $convert($content[$key]);
-            }
-        }
-
-        $stringContentMap = [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode2D_h_align' => 'barcode2DHAlign',
-            'barcode2D_v_align' => 'barcode2DVAlign',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Tag
-            |--------------------------------------------------------------------------
-            */
-            'tag_alignment' => 'tagAlignment',
-            'tag_font' => 'tagFont',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Title
-            |--------------------------------------------------------------------------
-            */
-            'title_font' => 'titleFont',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fields
-            |--------------------------------------------------------------------------
-            */
-            'field_label_font' => 'fieldLabelFont',
-            'field_value_font' => 'fieldValueFont',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_h_align' => 'logoHAlign',
-            'logo_v_align' => 'logoVAlign',
-        ];
-
-        foreach ($stringContentMap as $key => $property) {
-            if (array_key_exists($key, $content)) {
-                $this->{$property} = (string) $content[$key];
-            }
-        }
+        $this->seedSupportsFromTemplate($template);
+        $this->seedLegacyContentFromTemplate($template, $convert);
+        $this->seedEditorContentFromTemplate($template, $convert);
 
         return $this;
     }
@@ -879,7 +320,7 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->textAreaHeight = isset($content['text_area_height']) && $content['text_area_height'] !== ''
             ? (float)$content['text_area_height']
             : $this->textAreaHeight;
-        //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions.
+        //If the logo and 2D barcode are both present, and one is moved to the other side, they will flip positions in the gui input.
         if (array_key_exists('barcode2D_h_align', $content)) {
             $this->syncLogoAnd2DBarcodeHAlign('barcode2D_h_align');
         } elseif (array_key_exists('logo_h_align', $content)) {
