@@ -12,10 +12,12 @@ use App\Models\Labels\RectangleSheet;
 
 abstract class CustomSheetLabel extends RectangleSheet
 {
-    use RenderCustomLabelContent;
-    use HasCustomLabelEditorConfig;
-    use HasCustomLabelSupports;
     use HasCustomLabelContentProperties;
+    use RenderCustomLabelContent;
+    use HasCustomLabelEditorConfig {
+        getContentEditorConfig as getBaseContentEditorConfig;
+    }
+    use HasCustomLabelSupports;
     use SeedsCustomLabelFromTemplate;
     protected array $editorConfig = [];
 
@@ -168,6 +170,11 @@ abstract class CustomSheetLabel extends RectangleSheet
         $pdf->SetAutoPageBreak(false, 0);
     }
 
+    // The getContenEditorConfig trait shares a lot of common variables, but if sheet specific adjustments are required in the future they can be array_merged here.
+    protected function getContentEditorConfig(): array
+    {
+        return $this->getBaseContentEditorConfig();
+    }
 
     public function seedFromTemplate($template): static
     {

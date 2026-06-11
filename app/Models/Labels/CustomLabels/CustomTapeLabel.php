@@ -2,13 +2,23 @@
 
 namespace App\Models\Labels\CustomLabels;
 
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelContentProperties;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorConfig;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
 use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
+use App\Models\Labels\CustomLabels\Concerns\SeedsCustomLabelFromTemplate;
 use App\Models\Labels\Label;
 use App\Helpers\Helper;
 
 abstract class CustomTapeLabel extends Label
 {
     use RenderCustomLabelContent;
+    use HasCustomLabelEditorConfig {
+        getContentEditorConfig as getBaseContentEditorConfig;
+    }
+    use HasCustomLabelSupports;
+    use HasCustomLabelContentProperties;
+    use SeedsCustomLabelFromTemplate;
     protected array $editorConfig = [];
 
     protected string $unit = 'mm';
@@ -20,66 +30,30 @@ abstract class CustomTapeLabel extends Label
     protected float $marginRight = 3.2;
     protected float $marginBottom = 3.2;
     protected float $marginLeft = 3.2;
-
-    protected bool $supportAssetTag = true;
-    protected bool $support1DBarcode = true;
-    protected bool $support2DBarcode = false;
-    protected int $supportFields = 1;
-    protected bool $supportLogo = false;
-    protected bool $supportTitle = false;
-
-    protected float $barcodeSize = 3.2;
-    protected float $barcodeMargin = 0.3;
-    protected float $textSizeMod = 1.0;
-    protected float $tagSize = 5.5;
-    protected float $fieldSize = 5.5;
-    protected string $tagAlignment = 'L';
     protected string $fieldAlignment = 'R';
-    protected float $logoMaxWidth = 12.0;
-    protected float $logoMargin = 2.0;
-    protected string $logoHAlign = 'L';
-    protected string $logoVAlign = 'T';
+
+    protected float $barcode2DMargin = 0.0;
+    protected ?string $barcode2DPlacement = null;
+
+    protected ?float $logoMaxHeight = null;
     protected ?string $logoPlacement = null;
 
-    protected float $barcode2DSize = 10.0;
-    protected string $barcode2DHAlign = 'L';
-    protected string $barcode2DVAlign = 'T';
-    protected float $barcode2DMargin = 0.0;
-    protected ?float $logoMaxHeight = null;
-    protected float $tagOffsetX = 0.0;
-    protected float $tagOffsetY = 0.0;
     protected string $tagPositionMode = 'free';
 
-    protected float $titleSize = 8.0;
-    protected float $titleMargin = 1.0;
-    protected float $titleOffsetX = 0.0;
-
-    protected float $labelSize = 5.0;
-    protected float $labelMargin = 1.0;
-    protected float $fieldMargin = 1.0;
-    protected ?float $textAreaWidth = null;
-    protected ?float $textAreaHeight = null;
+    protected float $textSizeMod = 1.0;
     protected float $textAreaOffsetY = 0.0;
-
     protected string $textRenderMode = 'inline';
+
     protected string $barcode1DVAlign = 'T';
     protected string $barcode1DPlacement = 'full_width';
-    protected string $barcode2D_h_align = 'L';
-    protected ?string $barcode2DPlacement = null;
-    protected string $barcode2D_v_align = 'T';
 
     protected int $rotation = 0;
     protected string $orientation = 'L';
 
-    protected string $tagFont = 'freemono';
-    protected string $fieldLabelFont = 'freesans';
-    protected string $fieldValueFont = 'freemono';
-    protected string $titleFont = 'freesans';
-    public function getUnit()
+    public function getUnit(): string
     {
         return $this->unit;
     }
-
     public function getWidth()
     {
         return $this->width;
@@ -110,59 +84,9 @@ abstract class CustomTapeLabel extends Label
         return $this->marginLeft;
     }
 
-    public function getSupportAssetTag()
+    public function getFieldAlignment(): string
     {
-        return $this->supportAssetTag;
-    }
-
-    public function getSupport1DBarcode()
-    {
-        return $this->support1DBarcode;
-    }
-
-    public function getSupport2DBarcode()
-    {
-        return $this->support2DBarcode;
-    }
-
-    public function getSupportFields()
-    {
-        return $this->supportFields;
-    }
-
-    public function getSupportLogo()
-    {
-        return $this->supportLogo;
-    }
-
-    public function getSupportTitle()
-    {
-        return $this->supportTitle;
-    }
-
-    public function getBarcodeSize(): float
-    {
-        return $this->barcodeSize;
-    }
-
-    public function getBarcodeMargin(): float
-    {
-        return $this->barcodeMargin;
-    }
-
-    public function getBarcode2DHAlign(): string
-    {
-        return $this->barcode2DHAlign;
-    }
-
-    public function getBarcode2DVAlign(): string
-    {
-        return $this->barcode2DVAlign;
-    }
-
-    public function getBarcode1DPlacement(): string
-    {
-        return $this->barcode1DPlacement;
+        return $this->fieldAlignment;
     }
 
     public function getBarcode2DMargin(): float
@@ -170,77 +94,19 @@ abstract class CustomTapeLabel extends Label
         return $this->barcode2DMargin;
     }
 
-    public function getLogoMaxHeight(): ?float
-    {
-        return $this->logoMaxHeight;
-    }
-    public function getTextSizeMod(): float
-    {
-        return $this->textSizeMod;
-    }
-
-    public function getTagSize(): float
-    {
-        return $this->tagSize;
-    }
-
-    public function getFieldSize(): float
-    {
-        return $this->fieldSize;
-    }
-
-    public function getTagAlignment(): string
-    {
-        return $this->tagAlignment;
-    }
-
-    public function getFieldAlignment(): string
-    {
-        return $this->fieldAlignment;
-    }
-
-    public function getLogoMaxWidth(): float
-    {
-        return $this->logoMaxWidth;
-    }
-
-    public function getLogoMargin(): float
-    {
-        return $this->logoMargin;
-    }
-
-    public function getLogoHAlign(): string
-    {
-        return $this->logoHAlign;
-    }
-
-    public function getLogoVAlign(): string
-    {
-        return $this->logoVAlign;
-    }
-
-    public function getLogoPlacement(): ?string
-    {
-        return $this->logoPlacement;
-    }
-    public function get2DBarcodeSize(): float
-    {
-        return $this->barcode2DSize;
-    }
-
     public function getBarcode2DPlacement(): ?string
     {
         return $this->barcode2DPlacement;
     }
 
-    public function getTagOffsetX(): float
+    public function getLogoMaxHeight(): ?float
     {
-        return $this->tagOffsetX;
+        return $this->logoMaxHeight;
     }
 
-    public function getTagOffsetY(): float
+    public function getLogoPlacement(): ?string
     {
-        return $this->tagOffsetY;
+        return $this->logoPlacement;
     }
 
     public function getTagPositionMode(): string
@@ -248,63 +114,14 @@ abstract class CustomTapeLabel extends Label
         return $this->tagPositionMode;
     }
 
-    public function getTitleSize(): float
+    public function getTextSizeMod(): float
     {
-        return $this->titleSize;
+        return $this->textSizeMod;
     }
 
-    public function getTagFont(): string
+    public function getTextAreaOffsetY(): float
     {
-        return $this->tagFont;
-    }
-
-    public function getFieldLabelFont(): string
-    {
-        return $this->fieldLabelFont;
-    }
-
-    public function getFieldValueFont(): string
-    {
-        return $this->fieldValueFont;
-    }
-
-    public function getTitleFont(): string
-    {
-        return $this->titleFont;
-    }
-    public function getTitleMargin(): float
-    {
-        return $this->titleMargin;
-    }
-
-    public function getTitleOffsetX(): float
-    {
-        return $this->titleOffsetX;
-    }
-
-    public function getLabelSize(): float
-    {
-        return $this->labelSize;
-    }
-
-    public function getLabelMargin(): float
-    {
-        return $this->labelMargin;
-    }
-
-    public function getFieldMargin(): float
-    {
-        return $this->fieldMargin;
-    }
-
-    public function getTextAreaWidth(): ?float
-    {
-        return $this->textAreaWidth;
-    }
-
-    public function getTextAreaHeight(): ?float
-    {
-        return $this->textAreaHeight;
+        return $this->textAreaOffsetY;
     }
 
     public function getTextRenderMode(): string
@@ -317,9 +134,9 @@ abstract class CustomTapeLabel extends Label
         return $this->barcode1DVAlign;
     }
 
-    public function getTextAreaOffsetY(): float
+    public function getBarcode1DPlacement(): string
     {
-        return $this->textAreaOffsetY;
+        return $this->barcode1DPlacement;
     }
 
     public function getRotation()
@@ -336,80 +153,20 @@ abstract class CustomTapeLabel extends Label
 
     protected function getContentEditorConfig(): array
     {
-        return [
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 1D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_size' => $this->getBarcodeSize(),
-            'barcode_margin' => $this->getBarcodeMargin(),
-            'barcode1D_v_align' => $this->getBarcode1DVAlign(),
-            'barcode1D_placement' => $this->getBarcode1DPlacement(),
+        return array_merge(
+            $this->getBaseContentEditorConfig(),
+            [
+                'barcode1D_v_align' => $this->getBarcode1DVAlign(),
+                'barcode1D_placement' => $this->getBarcode1DPlacement(),
 
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_2d_size' => $this->get2DBarcodeSize(),
-            'barcode2D_h_align' => $this->getBarcode2DHAlign(),
-            'barcode2D_v_align' => $this->getBarcode2DVAlign(),
-            'barcode2D_placement' => $this->getBarcode2DPlacement(),
+                'barcode2D_placement' => $this->getBarcode2DPlacement(),
 
-            /*
-            |--------------------------------------------------------------------------
-            | Tag
-            |--------------------------------------------------------------------------
-            */
-            'tag_font' => $this->getTagFont(),
-            'tag_font_size' => $this->getTagSize(),
-            'tag_alignment' => $this->getTagAlignment(),
-            'tag_offset_x' => $this->getTagOffsetX(),
-            'tag_offset_y' => $this->getTagOffsetY(),
+                'logo_placement' => $this->getLogoPlacement(),
 
-            /*
-            |--------------------------------------------------------------------------
-            | Title
-            |--------------------------------------------------------------------------
-            */
-            'title_font' => $this->getTitleFont(),
-            'title_font_size' => $this->getTitleSize(),
-            'title_margin' => $this->getTitleMargin(),
-            'title_offset_x' => $this->getTitleOffsetX(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fields
-            |--------------------------------------------------------------------------
-            */
-            'field_label_font' => $this->getFieldLabelFont(),
-            'field_label_font_size' => $this->getLabelSize(),
-            'field_label_margin' => $this->getLabelMargin(),
-
-            'field_value_font' => $this->getFieldValueFont(),
-            'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_max_width' => $this->getLogoMaxWidth(),
-            'logo_margin' => $this->getLogoMargin(),
-            'logo_h_align' => $this->getLogoHAlign(),
-            'logo_v_align' => $this->getLogoVAlign(),
-            'logo_placement' => $this->getLogoPlacement(),
-
-            /*
-            |--------------------------------------------------------------------------
-            | Text Area
-            |--------------------------------------------------------------------------
-            */
-            'text_size_mod' => $this->getTextSizeMod(),
-            'text_area_offset_y' => $this->getTextAreaOffsetY(),
-        ];
+                'text_size_mod' => $this->getTextSizeMod(),
+                'text_area_offset_y' => $this->getTextAreaOffsetY(),
+            ]
+        );
     }
 
     public function getEditorConfigSections(): array
@@ -424,177 +181,191 @@ abstract class CustomTapeLabel extends Label
 
     public function seedFromTemplate($template): static
     {
-        $sourceUnit = $template->getUnit();
-
-        $convert = function ($value) use ($sourceUnit) {
-            if ($value === null || $value === '') {
-                return $value;
-            }
-
-            return $sourceUnit === 'in' && is_numeric($value)
-                ? (float)$value * 25.4
-                : $value;
-        };
+        $convert = $this->unitConverterFor($template);
 
         $this->unit = 'mm';
 
-        $map = [
-            'width' => 'getWidth',
-            'height' => 'getHeight',
-            'marginTop' => 'getMarginTop',
-            'marginRight' => 'getMarginRight',
-            'marginBottom' => 'getMarginBottom',
-            'marginLeft' => 'getMarginLeft',
-        ];
+        $this->seedTapeMeasurements($template, $convert);
 
-        foreach ($map as $property => $method) {
-            if (method_exists($template, $method)) {
-                $this->{$property} = (float)$convert($template->{$method}());
-            }
-        }
+        $this->seedSupportsFromTemplate($template);
+        $this->seedEditorContentFromTemplate($template, $convert);
 
-        $supportMap = [
-            'supportAssetTag' => 'getSupportAssetTag',
-            'support1DBarcode' => 'getSupport1DBarcode',
-            'support2DBarcode' => 'getSupport2DBarcode',
-            'supportFields' => 'getSupportFields',
-            'supportLogo' => 'getSupportLogo',
-            'supportTitle' => 'getSupportTitle',
-        ];
-
-        foreach ($supportMap as $property => $method) {
-            if (method_exists($template, $method)) {
-                $this->{$property} = $template->{$method}();
-            }
-        }
-
-        $content = method_exists($template, 'getEditorConfigSections')
-            ? ($template->getEditorConfigSections()['content'] ?? [])
-            : [];
-
-        $contentMap = [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 1D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_size' => 'barcodeSize',
-            'barcode_margin' => 'barcodeMargin',
-            'barcode1D_v_align' => 'barcode1DVAlign',
-            'barcode1D_placement' => 'barcode1DPlacement',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode_2d_size' => 'barcode2DSize',
-            'barcode_2d_margin' => 'barcode2DMargin',
-            'barcode2D_placement' => 'barcode2DPlacement',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Tag
-            |--------------------------------------------------------------------------
-            */
-            'tag_position_mode' => 'tagPositionMode',
-            'tag_font_size' => 'tagSize',
-            'tag_offset_x' => 'tagOffsetX',
-            'tag_offset_y' => 'tagOffsetY',
-            'tag_alignment' => 'tagAlignment',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Title
-            |--------------------------------------------------------------------------
-            */
-            'title_font_size' => 'titleSize',
-            'title_margin' => 'titleMargin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fields
-            |--------------------------------------------------------------------------
-            */
-            'field_label_font_size' => 'labelSize',
-            'field_label_margin' => 'labelMargin',
-
-            'field_value_font_size' => 'fieldSize',
-            'field_value_margin' => 'fieldMargin',
-
-            'field_alignment' => 'fieldAlignment',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_max_height' => 'logoMaxHeight',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Text Area
-            |--------------------------------------------------------------------------
-            */
-            'text_size_mod' => 'textSizeMod',
-            'text_area_offset_y' => 'textAreaOffsetY',
-            'text_render_mode' => 'textRenderMode',
-        ];
-
-        foreach ($contentMap as $key => $property) {
-            if (array_key_exists($key, $content)) {
-                $this->{$property} = is_numeric($content[$key])
-                    ? (float)$convert($content[$key])
-                    : (string)$content[$key];
-            }
-        }
-
-        $stringContentMap = [
-
-            /*
-            |--------------------------------------------------------------------------
-            | Barcode 2D
-            |--------------------------------------------------------------------------
-            */
-            'barcode2D_h_align' => 'barcode2DHAlign',
-            'barcode2D_v_align' => 'barcode2DVAlign',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Logo
-            |--------------------------------------------------------------------------
-            */
-            'logo_h_align' => 'logoHAlign',
-            'logo_v_align' => 'logoVAlign',
-            'logo_placement' => 'logoPlacement',
-
-            /*
-            |--------------------------------------------------------------------------
-            | Fonts
-            |--------------------------------------------------------------------------
-            */
-            'tag_font' => 'tagFont',
-            'title_font' => 'titleFont',
-            'field_label_font' => 'fieldLabelFont',
-            'field_value_font' => 'fieldValueFont',
-        ];
-
-        foreach ($stringContentMap as $key => $property) {
-            if (array_key_exists($key, $content)) {
-                $this->{$property} = (string)$content[$key];
-            }
-        }
-
-        foreach ($stringContentMap as $key => $property) {
-            if (array_key_exists($key, $content)) {
-                $this->{$property} = (string)$content[$key];
-            }
-        }
-
-        $this->rotation = method_exists($template, 'getRotation') ? (int)$template->getRotation() : $this->rotation;
+        $this->rotation = method_exists($template, 'getRotation')
+            ? (int)$template->getRotation()
+            : $this->rotation;
 
         return $this;
+//        $sourceUnit = $template->getUnit();
+//
+//        $convert = function ($value) use ($sourceUnit) {
+//            if ($value === null || $value === '') {
+//                return $value;
+//            }
+//
+//            return $sourceUnit === 'in' && is_numeric($value)
+//                ? (float)$value * 25.4
+//                : $value;
+//        };
+//
+//        $this->unit = 'mm';
+//
+//        $map = [
+//            'width' => 'getWidth',
+//            'height' => 'getHeight',
+//            'marginTop' => 'getMarginTop',
+//            'marginRight' => 'getMarginRight',
+//            'marginBottom' => 'getMarginBottom',
+//            'marginLeft' => 'getMarginLeft',
+//        ];
+//
+//        foreach ($map as $property => $method) {
+//            if (method_exists($template, $method)) {
+//                $this->{$property} = (float)$convert($template->{$method}());
+//            }
+//        }
+//
+//        $supportMap = [
+//            'supportAssetTag' => 'getSupportAssetTag',
+//            'support1DBarcode' => 'getSupport1DBarcode',
+//            'support2DBarcode' => 'getSupport2DBarcode',
+//            'supportFields' => 'getSupportFields',
+//            'supportLogo' => 'getSupportLogo',
+//            'supportTitle' => 'getSupportTitle',
+//        ];
+//
+//        foreach ($supportMap as $property => $method) {
+//            if (method_exists($template, $method)) {
+//                $this->{$property} = $template->{$method}();
+//            }
+//        }
+//
+//        $content = method_exists($template, 'getEditorConfigSections')
+//            ? ($template->getEditorConfigSections()['content'] ?? [])
+//            : [];
+//
+//        $contentMap = [
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Barcode 1D
+//            |--------------------------------------------------------------------------
+//            */
+//            'barcode_size' => 'barcodeSize',
+//            'barcode_margin' => 'barcodeMargin',
+//            'barcode1D_v_align' => 'barcode1DVAlign',
+//            'barcode1D_placement' => 'barcode1DPlacement',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Barcode 2D
+//            |--------------------------------------------------------------------------
+//            */
+//            'barcode_2d_size' => 'barcode2DSize',
+//            'barcode_2d_margin' => 'barcode2DMargin',
+//            'barcode2D_placement' => 'barcode2DPlacement',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Tag
+//            |--------------------------------------------------------------------------
+//            */
+//            'tag_position_mode' => 'tagPositionMode',
+//            'tag_font_size' => 'tagSize',
+//            'tag_offset_x' => 'tagOffsetX',
+//            'tag_offset_y' => 'tagOffsetY',
+//            'tag_alignment' => 'tagAlignment',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Title
+//            |--------------------------------------------------------------------------
+//            */
+//            'title_font_size' => 'titleSize',
+//            'title_margin' => 'titleMargin',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Fields
+//            |--------------------------------------------------------------------------
+//            */
+//            'field_label_font_size' => 'labelSize',
+//            'field_label_margin' => 'labelMargin',
+//
+//            'field_value_font_size' => 'fieldSize',
+//            'field_value_margin' => 'fieldMargin',
+//
+//            'field_alignment' => 'fieldAlignment',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Logo
+//            |--------------------------------------------------------------------------
+//            */
+//            'logo_max_height' => 'logoMaxHeight',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Text Area
+//            |--------------------------------------------------------------------------
+//            */
+//            'text_size_mod' => 'textSizeMod',
+//            'text_area_offset_y' => 'textAreaOffsetY',
+//            'text_render_mode' => 'textRenderMode',
+//        ];
+//
+//        foreach ($contentMap as $key => $property) {
+//            if (array_key_exists($key, $content)) {
+//                $this->{$property} = is_numeric($content[$key])
+//                    ? (float)$convert($content[$key])
+//                    : (string)$content[$key];
+//            }
+//        }
+//
+//        $stringContentMap = [
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Barcode 2D
+//            |--------------------------------------------------------------------------
+//            */
+//            'barcode2D_h_align' => 'barcode2DHAlign',
+//            'barcode2D_v_align' => 'barcode2DVAlign',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Logo
+//            |--------------------------------------------------------------------------
+//            */
+//            'logo_h_align' => 'logoHAlign',
+//            'logo_v_align' => 'logoVAlign',
+//            'logo_placement' => 'logoPlacement',
+//
+//            /*
+//            |--------------------------------------------------------------------------
+//            | Fonts
+//            |--------------------------------------------------------------------------
+//            */
+//            'tag_font' => 'tagFont',
+//            'title_font' => 'titleFont',
+//            'field_label_font' => 'fieldLabelFont',
+//            'field_value_font' => 'fieldValueFont',
+//        ];
+//
+//        foreach ($stringContentMap as $key => $property) {
+//            if (array_key_exists($key, $content)) {
+//                $this->{$property} = (string)$content[$key];
+//            }
+//        }
+//
+//        foreach ($stringContentMap as $key => $property) {
+//            if (array_key_exists($key, $content)) {
+//                $this->{$property} = (string)$content[$key];
+//            }
+//        }
+//
+//        $this->rotation = method_exists($template, 'getRotation') ? (int)$template->getRotation() : $this->rotation;
+//
+//        return $this;
     }
 
     public function applyEditorConfig(array $config): static

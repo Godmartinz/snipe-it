@@ -46,6 +46,24 @@ trait SeedsCustomLabelFromTemplate
         }
     }
 
+    protected function seedTapeMeasurements($template, callable $convert): void
+    {
+        $measurementMap = [
+            'width' => 'getWidth',
+            'height' => 'getHeight',
+            'marginTop' => 'getMarginTop',
+            'marginRight' => 'getMarginRight',
+            'marginBottom' => 'getMarginBottom',
+            'marginLeft' => 'getMarginLeft',
+        ];
+
+        foreach ($measurementMap as $property => $method) {
+            if (method_exists($template, $method)) {
+                $this->{$property} = (float)$convert($template->{$method}());
+            }
+        }
+    }
+
     protected function seedSheetGrid($template): void
     {
         if (method_exists($template, 'getRows')) {
@@ -165,6 +183,7 @@ trait SeedsCustomLabelFromTemplate
             'barcode_size' => 'barcodeSize',
             'barcode_margin' => 'barcodeMargin',
             'barcode_2d_size' => 'barcode2DSize',
+            'barcode_2d_margin' => 'barcode2DMargin', //Tape only
 
             'tag_font_size' => 'tagSize',
             'tag_offset_x' => 'tagOffsetX',
@@ -180,10 +199,13 @@ trait SeedsCustomLabelFromTemplate
             'field_value_margin' => 'fieldMargin',
 
             'logo_max_width' => 'logoMaxWidth',
+            'logo_max_height' => 'logoMaxHeight', // Tape only
             'logo_margin' => 'logoMargin',
 
             'text_area_width' => 'textAreaWidth',
             'text_area_height' => 'textAreaHeight',
+            'text_size_mod' => 'textSizeMod', // Tape only
+            'text_area_offset_y' => 'textAreaOffsetY', // Tape only
         ];
     }
 
@@ -193,16 +215,26 @@ trait SeedsCustomLabelFromTemplate
             'barcode2D_h_align' => 'barcode2DHAlign',
             'barcode2D_v_align' => 'barcode2DVAlign',
 
+            'barcode1D_v_align' => 'barcode1DVAlign',
+            'barcode1D_placement' => 'barcode1DPlacement', // Tape only
+            'barcode2D_placement' => 'barcode2DPlacement', // Tape only
+
             'tag_alignment' => 'tagAlignment',
+            'tag_position_mode' => 'tagPositionMode', // Tape only
             'tag_font' => 'tagFont',
 
             'title_font' => 'titleFont',
 
+            'field_alignment' => 'fieldAlignment', // Tape only
             'field_label_font' => 'fieldLabelFont',
             'field_value_font' => 'fieldValueFont',
 
             'logo_h_align' => 'logoHAlign',
             'logo_v_align' => 'logoVAlign',
+            'logo_placement' => 'logoPlacement', // Tape only
+
+            'text_render_mode' => 'textRenderMode', // Tape only
+
         ];
     }
 }
