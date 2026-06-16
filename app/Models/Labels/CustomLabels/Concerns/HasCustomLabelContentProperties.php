@@ -33,6 +33,24 @@ trait HasCustomLabelContentProperties
     protected string $logoHAlign = 'L';
     protected string $logoVAlign = 'T';
 
+    //Tape only properities
+    protected string $barcode1DVAlign = 'M';
+    protected string $barcode1DPlacement = 'inline';
+
+    protected float $barcode2DMargin = 0.0;
+    protected string $barcode2DPlacement = 'inline';
+
+    protected string $tagPositionMode = 'inline';
+
+    protected string $fieldAlignment = 'L';
+
+    protected float $logoMaxHeight = 12.0;
+    protected string $logoPlacement = 'inline';
+
+    protected float $textSizeMod = 1.0;
+    protected float $textAreaOffsetY = 0.0;
+    protected string $textRenderMode = 'normal';
+
     protected ?float $textAreaWidth = null;
     protected ?float $textAreaHeight = null;
 
