@@ -2,6 +2,7 @@
 
 namespace App\Models\Labels\CustomLabels;
 
+use App\Models\Labels\CustomLabels\Concerns\BuildsCustomLabelLayout;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelContentProperties;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorConfig;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
@@ -19,6 +20,7 @@ abstract class CustomTapeLabel extends Label
     use HasCustomLabelSupports;
     use HasCustomLabelContentProperties;
     use SeedsCustomLabelFromTemplate;
+    use BuildsCustomLabelLayout;
     protected array $editorConfig = [];
 
     protected string $unit = 'mm';
@@ -205,7 +207,6 @@ abstract class CustomTapeLabel extends Label
     public function write($pdf, $record)
     {
         $pa = $this->getPrintableArea();
-
         $layout = $this->buildLayout($pdf, $record, $pa);
 
         $this->render1DBarcode($pdf, $record, $layout);
@@ -217,31 +218,7 @@ abstract class CustomTapeLabel extends Label
 
     protected function buildLayout($pdf, $record, $pa): array
     {
-        $layout = [
-            'printable' => [
-                'x1' => $pa->x1,
-                'y1' => $pa->y1,
-                'x2' => $pa->x2,
-                'y2' => $pa->y2,
-                'w' => $pa->w,
-                'h' => $pa->h,
-            ],
-            'body' => [
-                'x1' => $pa->x1,
-                'y1' => $pa->y1,
-                'x2' => $pa->x2,
-                'y2' => $pa->y2,
-                'w' => $pa->w,
-                'h' => $pa->h,
-            ],
-            'barcode1d' => null,
-            'barcode2d' => null,
-            'logo' => null,
-            'tag' => null,
-            'text' => null,
-            'title' => null,
-            'fields' => null,
-        ];
+        $layout = $this->baseLayout($pa);
 
         /*
         |--------------------------------------------------------------------------
@@ -365,45 +342,17 @@ abstract class CustomTapeLabel extends Label
         | Title + fields
         |--------------------------------------------------------------------------
         */
-        $title = null;
+        $title = $this->resolveLayoutTitle($record);
+        $fields = $this->resolveLayoutFields($record);
 
-        if ($record->has('title') && $this->getSupportTitle()) {
-            $title = $record->get('title');
-        }
-
-        $fields = [];
-
-        if ($record->has('fields') && $this->getSupportFields()) {
-            $fields = collect($record->get('fields'))
-                ->take($this->getSupportFields())
-                ->values()
-                ->all();
-        }
-
-        $textBox = $layout['text'];
-
-        if ($this->getTextAreaWidth() !== null) {
-            $textBox['w'] = min($this->getTextAreaWidth(), $textBox['w']);
-            $textBox['x2'] = $textBox['x1'] + $textBox['w'];
-        }
-
-        if ($this->getTextAreaHeight() !== null) {
-            $textBox['h'] = min($this->getTextAreaHeight(), $textBox['h']);
-            $textBox['y2'] = $textBox['y1'] + $textBox['h'];
-        }
-
-        $layout['text'] = $textBox;
+        $layout['text'] = $this->applyTextAreaConstraints($layout['text']);
 
         if ($this->getTextAreaOffsetY() !== 0.0) {
             $layout['text']['y2'] += $this->getTextAreaOffsetY();
             $layout['text']['h'] = max(0, $layout['text']['y2'] - $layout['text']['y1']);
         }
 
-        if (
-            $useTextColumnBarcode &&
-            $record->has('barcode1d') &&
-            $this->getSupport1DBarcode()
-        ) {
+        if ($useTextColumnBarcode && $record->has('barcode1d') && $this->getSupport1DBarcode()) {
             $barcodeHeight = min(
                 max(0, $this->getBarcodeSize()),
                 $layout['text']['h']
@@ -419,51 +368,31 @@ abstract class CustomTapeLabel extends Label
             $layout['text']['y2'] -= $barcodeHeight;
             $layout['text']['h'] = max(0, $layout['text']['y2'] - $layout['text']['y1']);
         }
+
         $textY = $layout['text']['y1'];
         $bottomLimit = $layout['text']['y2'];
 
-
-        $hasTitle = $title !== null && $title !== '';
-
-        if ($hasTitle) {
-            $x = $layout['text']['x1'] + $this->getTitleOffsetX();
-
-            $layout['title'] = [
-                'x' => $x,
-                'y' => $textY,
-                'w' => max(0, $layout['text']['x2'] - $x),
-                'h' => $this->getTitleSize(),
-                'font_size' => $this->getTitleSize(),
-                'advance' => $this->getTitleSize() + $this->getTitleMargin(),
-            ];
-
-            $textY += $layout['title']['advance'];
-        }
+        $layout = $this->applySimpleTitleLayout($layout, $title, $textY);
 
         $labelWidth = min(
             $this->measureTapeLabelWidth($pdf, $fields),
             $layout['text']['w'] * 0.45
         );
 
-        $gap = max(0, $this->getFieldMargin());
-        $valueX = $layout['text']['x1'] + $labelWidth + $gap;
-        $valueWidth = max(0, $layout['text']['x2'] - $valueX);
-
-        $layout['fields'] = [
-            'start_x' => $layout['text']['x1'],
-            'start_y' => $textY,
-            'bottom_limit' => $bottomLimit,
-            'label_width' => $labelWidth,
-            'value_x' => $valueX,
-            'value_width' => $valueWidth,
-            'label_size' => $this->getLabelSize(),
-            'field_size' => $this->getFieldSize(),
-            'row_advance' => $this->getLabelSize()
-                + $this->getLabelMargin()
-                + $this->getFieldSize()
-                + $this->getFieldMargin(),
-            'fields' => $fields,
-        ];
+        $layout['fields'] = $this->makeFieldsLayout(
+            $layout['text'],
+            $fields,
+            $textY,
+            $bottomLimit,
+            $labelWidth,
+            max(0, $this->getFieldMargin()),
+            $this->getLabelSize(),
+            $this->getFieldSize(),
+            $this->getLabelSize()
+            + $this->getLabelMargin()
+            + $this->getFieldSize()
+            + $this->getFieldMargin(),
+        );
 
         return $layout;
     }

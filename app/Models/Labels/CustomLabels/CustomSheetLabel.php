@@ -3,6 +3,7 @@
 namespace App\Models\Labels\CustomLabels;
 
 use App\Helpers\Helper;
+use App\Models\Labels\CustomLabels\Concerns\BuildsCustomLabelLayout;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelContentProperties;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorConfig;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
@@ -19,6 +20,7 @@ abstract class CustomSheetLabel extends RectangleSheet
     }
     use HasCustomLabelSupports;
     use SeedsCustomLabelFromTemplate;
+    use BuildsCustomLabelLayout;
     protected array $editorConfig = [];
 
     protected string $unit = 'mm';
@@ -218,7 +220,6 @@ abstract class CustomSheetLabel extends RectangleSheet
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();
-
         $layout = $this->buildLayout($pdf, $record, $pa);
 
         $this->render1DBarcode($pdf, $record, $layout);
@@ -230,31 +231,7 @@ abstract class CustomSheetLabel extends RectangleSheet
 
     protected function buildLayout($pdf, $record, $pa): array
     {
-        $layout = [
-            'printable' => [
-                'x1' => $pa->x1,
-                'y1' => $pa->y1,
-                'x2' => $pa->x2,
-                'y2' => $pa->y2,
-                'w' => $pa->w,
-                'h' => $pa->h,
-            ],
-            'body' => [
-                'x1' => $pa->x1,
-                'y1' => $pa->y1,
-                'x2' => $pa->x2,
-                'y2' => $pa->y2,
-                'w' => $pa->w,
-                'h' => $pa->h,
-            ],
-            'barcode1d' => null,
-            'barcode2d' => null,
-            'logo' => null,
-            'tag' => null,
-            'text' => null,
-            'title' => null,
-            'fields' => null,
-        ];
+        $layout = $this->baseLayout($pa);
 
         /*
         |--------------------------------------------------------------------------
@@ -311,32 +288,10 @@ abstract class CustomSheetLabel extends RectangleSheet
         | Title + fields inside text box
         |--------------------------------------------------------------------------
         */
-        $title = null;
-        if ($record->has('title') && $this->getSupportTitle()) {
-            $title = $record->get('title');
-        }
+        $title = $this->resolveLayoutTitle($record);
+        $fields = $this->resolveLayoutFields($record);
 
-        $fields = [];
-        if ($record->has('fields') && $this->getSupportFields()) {
-            $fields = collect($record->get('fields'))
-                ->take($this->getSupportFields())
-                ->values()
-                ->all();
-        }
-
-        $textBox = $layout['text'];
-
-        if ($this->getTextAreaWidth() !== null) {
-            $textBox['w'] = min($this->getTextAreaWidth(), $textBox['w']);
-            $textBox['x2'] = $textBox['x1'] + $textBox['w'];
-        }
-
-        if ($this->getTextAreaHeight() !== null) {
-            $textBox['h'] = min($this->getTextAreaHeight(), $textBox['h']);
-            $textBox['y2'] = $textBox['y1'] + $textBox['h'];
-        }
-
-        $layout['text'] = $textBox;
+        $layout['text'] = $this->applyTextAreaConstraints($layout['text']);
         $textY = $layout['text']['y1'];
         $bottomLimit = $layout['text']['y2'];
         $availableHeight = max(0, $bottomLimit - $textY);
@@ -359,6 +314,7 @@ abstract class CustomSheetLabel extends RectangleSheet
 
         if ($fieldLayout['hasTitle']) {
             $x = $layout['text']['x1'] + $this->getTitleOffsetX();
+
             $layout['title'] = [
                 'x' => $x,
                 'y' => $textY,
@@ -373,21 +329,18 @@ abstract class CustomSheetLabel extends RectangleSheet
 
         $labelWidth = min($fieldLayout['labelWidth'], $layout['text']['w'] * 0.45);
         $gap = max(0.8, $this->getFieldMargin() * max($fieldLayout['scale'], 0.5));
-        $valueX = $layout['text']['x1'] + $labelWidth + $gap;
-        $valueWidth = max(0, $layout['text']['x2'] - $valueX);
 
-        $layout['fields'] = [
-            'start_x' => $layout['text']['x1'],
-            'start_y' => $textY,
-            'bottom_limit' => $bottomLimit,
-            'label_width' => $labelWidth,
-            'value_x' => $valueX,
-            'value_width' => $valueWidth,
-            'label_size' => $fieldLayout['labelSize'],
-            'field_size' => $fieldLayout['fieldSize'],
-            'row_advance' => $fieldLayout['rowAdvance'],
-            'fields' => $fields,
-        ];
+        $layout['fields'] = $this->makeFieldsLayout(
+            $layout['text'],
+            $fields,
+            $textY,
+            $bottomLimit,
+            $labelWidth,
+            $gap,
+            $fieldLayout['labelSize'],
+            $fieldLayout['fieldSize'],
+            $fieldLayout['rowAdvance'],
+        );
 
         return $layout;
     }
