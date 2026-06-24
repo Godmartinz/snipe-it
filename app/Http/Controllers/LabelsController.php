@@ -407,6 +407,7 @@ class LabelsController extends Controller
 
         return view('settings.label-edit', [
             'config' => $label->toEditorConfig(),
+            'sections' => $label->getEditorSections(),
             'selectedLabel' => null,
             'selectedType' => $validated['type'],
             'importedConfig' => null,
@@ -542,6 +543,7 @@ class LabelsController extends Controller
 
             return view('settings.label-edit', [
                 'config' => $config,
+                'sections' => $customLabel->getEditorSections(),
                 'selectedLabel' => $customLabel->base_label,
                 'selectedType' => $customLabel->type,
                 'importedConfig' => null,
@@ -587,6 +589,7 @@ class LabelsController extends Controller
 
         return view('settings.label-edit', [
             'config' => $config,
+            'sections' => $label->getEditorSections(),
             'selectedLabel' => $selectedLabel,
             'selectedType' => $type,
             'importedConfig' => $importedConfig,

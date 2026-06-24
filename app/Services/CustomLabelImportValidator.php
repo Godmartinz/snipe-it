@@ -113,16 +113,16 @@ class CustomLabelImportValidator
             'printable_area' => ['required', 'array'],
 
             'content.barcode1D_v_align' => ['nullable', 'string', 'in:T,C,B'],
-            'content.barcode1D_placement' => ['nullable', 'string', 'in:full_width,text_column'],
+            'content.barcode1D_placement' => ['nullable', 'string', 'in:full_width,text_column,inline'],
 
-            'content.barcode2D_placement' => ['nullable', 'string', 'in:stacked,text_column'],
+            'content.barcode2D_placement' => ['nullable', 'string', 'in:stacked,inline,text_column'],
             'content.barcode_2d_margin' => ['nullable', 'numeric'],
 
             'content.text_size_mod' => ['nullable', 'numeric'],
             'content.text_area_offset_y' => ['nullable', 'numeric'],
 
             'content.logo_max_height' => ['nullable', 'numeric'],
-            'content.logo_placement' => ['nullable', 'string', 'in:text_column'],
+            'content.logo_placement' => ['nullable', 'string', 'in:inline,text_column'],
 
             'content.tag_position_mode' => ['nullable', 'string', 'in:free,inline'],
             'content.field_alignment' => ['nullable', 'string', 'in:L,C,R'],

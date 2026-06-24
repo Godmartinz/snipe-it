@@ -134,221 +134,173 @@
                                 Unit: {{ $config['unit'] }} (applies to all dimensions)
                             </p>
                         </div>
+                        <div class="row">
+                            @foreach ($sections as $sectionKey => $section)
+                                @continue(empty($section))
 
-                        @if(!empty($config['page']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Page</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#page-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="page-config" class="box-body collapse in">
-                                    @foreach($config['page'] as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                <input type="number" step="0.001" name="page[{{ $key }}]"
-                                                       value="{{ $value }}" class="form-control">
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                        @if(!empty($config['tape']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Tape</h3>
-                                </div>
-                                <div id="tape-config" class="box-body collapse in">
-                                    @foreach($config['tape'] as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                <input type="number" step="0.001" name="tape[{{ $key }}]"
-                                                       value="{{ $value }}" class="form-control">
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                        @if(!empty($config['grid']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Grid</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#grid-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="grid-config" class="box-body collapse in">
-                                    @foreach($config['grid'] as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                <input type="number" step="0.001" name="grid[{{ $key }}]"
-                                                       value="{{ $value }}" class="form-control">
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                @php
+                                    $isFullWidth = ($section['column_span'] ?? 1) === 2;
 
-                        @if(!empty($config['label']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Label</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#label-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="label-config" class="box-body collapse in">
-                                    @foreach($config['label'] as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                <input type="number" step="0.001" name="label[{{ $key }}]"
-                                                       value="{{ $value }}" class="form-control">
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                    $sectionClass = ($section['column_span'] ?? 1) === 2
+                                        ? 'col-md-12'
+                                        : 'col-md-6';
 
-                        @if(!empty($printable))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Printable Area</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#printable-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="printable-config" class="box-body collapse in">
-                                    @foreach($printable as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                <input type="number" step="0.001" value="{{ $value }}"
-                                                       class="form-control" disabled>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                    $inlineFields = ($section['display'] ?? null) === 'inline';
+                                @endphp
+                                @if ($isFullWidth)
+                        </div>
+                        <div class="row">
+                            @endif
 
-                        @if(!empty($config['content']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Content</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#content-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
+                            <div class="{{ $sectionClass }}">
+                                <div class="box box-default">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">{{ trans($section['label']) }}</h3>
                                     </div>
-                                </div>
-                                <div id="content-config" class="box-body collapse in">
-                                    @foreach($config['content'] as $key => $value)
-                                        @if(in_array($key, ['barcode1D_placement', 'barcode2D_placement', 'logo_placement']))
-                                            <input type="hidden" name="content[{{ $key }}]" value="{{ $value }}">
-                                            @continue
-                                        @endif
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                @if($key === 'tag_alignment' || $key === 'logo_h_align' || $key === 'barcode2D_h_align')
-                                                    <select name="content[{{ $key }}]" class="form-control align-sync"
-                                                            data-key="{{ $key }}">
-                                                        <option value="L" {{ $value === 'L' ? 'selected' : '' }}>
-                                                            Left
-                                                        </option>
-                                                        <option value="R" {{ $value === 'R' ? 'selected' : '' }}>
-                                                            Right
-                                                        </option>
-                                                    </select>
-                                                @elseif($key === 'logo_v_align' || $key === 'barcode2D_v_align')
-                                                    <select name="content[{{ $key }}]" class="form-control">
-                                                        <option value="T" {{ $value === 'T' ? 'selected' : '' }}>
-                                                            Top
-                                                        </option>
-                                                        <option value="C" {{ $value === 'C' ? 'selected' : '' }}>
-                                                            Center
-                                                        </option>
-                                                        <option value="B" {{ $value === 'B' ? 'selected' : '' }}>
-                                                            Bottom
-                                                        </option>
-                                                    </select>
-                                                @elseif($key === 'barcode1D_v_align')
-                                                    <select name="content[{{ $key }}]" class="form-control">
-                                                        <option value="T" {{ $value === 'T' ? 'selected' : '' }}>
-                                                            Top
-                                                        </option>
-                                                        <option value="B" {{ $value === 'B' ? 'selected' : '' }}>
-                                                            Bottom
-                                                        </option>
-                                                    </select>
-                                                @else
-                                                    <input type="number" step="1" name="content[{{ $key }}]"
-                                                           value="{{ $value }}" class="form-control">
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
 
-                        @if(!empty($config['supports']))
-                            <div class="panel box box-default label-config-panel">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Supports</h3>
-                                    <div class="box-tools pull-right">
-                                        <button type="button" class="btn btn-box-tool" data-toggle="collapse"
-                                                data-target="#supports-config">
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="supports-config" class="box-body collapse in">
-                                    @foreach($config['supports'] as $key => $value)
-                                        <div class="form-group">
-                                            <label class="col-md-5 control-label">{{ $key }}</label>
-                                            <div class="col-md-7">
-                                                @if(is_bool($value))
-                                                    <input type="hidden" name="supports[{{ $key }}]" value="0">
-                                                    <label class="form-control" style="height:auto; min-height:34px;">
-                                                        <input type="checkbox" name="supports[{{ $key }}]"
-                                                               value="1" {{ $value ? 'checked' : '' }}>
-                                                        {{ $key }}
+                                    <div class="box-body">
+                                        @if ($inlineFields)
+                                            <div class="row">
+                                                @foreach ($section['fields'] as $fieldKey => $field)
+                                                    @php
+                                                        $name = "{$sectionKey}[{$fieldKey}]";
+                                                        $value = data_get($config, "{$sectionKey}.{$fieldKey}");
+                                                    @endphp
+
+                                                    <div class="col-md-2">
+                                                        @if ($field['type'] === 'checkbox')
+                                                            <input type="hidden" name="{{ $name }}" value="0">
+
+                                                            <label>
+                                                                <input
+                                                                        type="checkbox"
+                                                                        name="{{ $name }}"
+                                                                        value="1"
+                                                                        @checked((bool) $value)
+                                                                >
+                                                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                                            </label>
+                                                        @else
+                                                            <label>
+                                                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                                            </label>
+
+                                                            <input
+                                                                    type="{{ $field['type'] }}"
+                                                                    name="{{ $name }}"
+                                                                    value="{{ $value }}"
+                                                                    class="form-control"
+                                                            >
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif (isset($section['groups']))
+                                            @foreach ($section['groups'] as $groupKey => $group)
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <strong>{{ trans($group['label']) }}</strong>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        @foreach ($group['fields'] as $fieldKey => $field)
+                                                            @php
+                                                                $name = "{$sectionKey}[{$fieldKey}]";
+                                                                $value = data_get($config, "{$sectionKey}.{$fieldKey}");
+                                                            @endphp
+
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">
+                                                                    {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                                                </label>
+
+                                                                <div class="col-md-4">
+                                                                    @if ($field['type'] === 'checkbox')
+                                                                        <input type="hidden" name="{{ $name }}"
+                                                                               value="0">
+
+                                                                        <input
+                                                                                type="checkbox"
+                                                                                name="{{ $name }}"
+                                                                                value="1"
+                                                                                @checked((bool) $value)
+                                                                        >
+                                                                    @elseif ($field['type'] === 'select')
+                                                                        <select name="{{ $name }}"
+                                                                                class="form-control">
+                                                                            @foreach ($field['options'] as $optionValue => $optionLabel)
+                                                                                <option
+                                                                                        value="{{ $optionValue }}"
+                                                                                        @selected($value == $optionValue)
+                                                                                >
+                                                                                    {{ trans($optionLabel) }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    @else
+                                                                        <input
+                                                                                type="{{ $field['type'] }}"
+                                                                                name="{{ $name }}"
+                                                                                value="{{ $value }}"
+                                                                                class="form-control"
+                                                                        >
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            @foreach ($section['fields'] as $fieldKey => $field)
+                                                @php
+                                                    $name = "{$sectionKey}[{$fieldKey}]";
+                                                    $value = data_get($config, "{$sectionKey}.{$fieldKey}");
+                                                @endphp
+
+                                                <div class="form-group">
+                                                    <label class="col-md-4 control-label">
+                                                        {{ trans("admin/labels/general.fields.{$fieldKey}") }}
                                                     </label>
-                                                @else
-                                                    <input type="number" step="1" name="supports[{{ $key }}]"
-                                                           value="{{ $value }}" class="form-control">
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
+
+                                                    <div class="col-md-4">
+                                                        @if ($field['type'] === 'checkbox')
+                                                            <input type="hidden" name="{{ $name }}" value="0">
+
+                                                            <input
+                                                                    type="checkbox"
+                                                                    name="{{ $name }}"
+                                                                    value="1"
+                                                                    @checked((bool) $value)
+                                                            >
+                                                        @elseif ($field['type'] === 'select')
+                                                            <select name="{{ $name }}" class="form-control">
+                                                                @foreach ($field['options'] as $optionValue => $optionLabel)
+                                                                    <option
+                                                                            value="{{ $optionValue }}"
+                                                                            @selected($value == $optionValue)
+                                                                    >
+                                                                        {{ trans($optionLabel) }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        @else
+                                                            <input
+                                                                    type="{{ $field['type'] }}"
+                                                                    name="{{ $name }}"
+                                                                    value="{{ $value }}"
+                                                                    class="form-control"
+                                                            >
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        @endif
-
-
+                            @endforeach
+                        </div>
                     </div>
                 </form>
 

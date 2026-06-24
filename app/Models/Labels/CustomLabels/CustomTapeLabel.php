@@ -5,6 +5,7 @@ namespace App\Models\Labels\CustomLabels;
 use App\Models\Labels\CustomLabels\Concerns\BuildsCustomLabelLayout;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelContentProperties;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorConfig;
+use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelEditorSections;
 use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
 use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
 use App\Models\Labels\CustomLabels\Concerns\SeedsCustomLabelFromTemplate;
@@ -17,6 +18,7 @@ abstract class CustomTapeLabel extends Label
     use HasCustomLabelEditorConfig {
         getContentEditorConfig as getBaseContentEditorConfig;
     }
+    use HasCustomLabelEditorSections;
     use HasCustomLabelSupports;
     use HasCustomLabelContentProperties;
     use SeedsCustomLabelFromTemplate;
