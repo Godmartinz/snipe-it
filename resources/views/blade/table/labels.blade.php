@@ -24,6 +24,6 @@
         data-pagination="true"
         data-page-size="50"
         data-height="600"
-        buttons="labelButtons"
+        data-buttons="labelButtons"
         class="table table-striped snipe-table"
 ></table>

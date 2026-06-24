@@ -1235,6 +1235,22 @@
         },
     });
     @endcan
+        window.labelButtons = () => ({
+        btnAdd: {
+            icon: 'fa fa-plus',
+            text: 'Create New Label',
+            title: 'Create New Label',
+            event() {
+                console.log('create label clicked');
+                $('#new-label-modal').modal('show');
+
+            },
+            attributes: {
+                class: 'btn-info',
+                title: 'Create New Label'
+            }
+        }
+    });
 
     @can('create', \App\Models\Statuslabel::class)
     // Status label table buttons

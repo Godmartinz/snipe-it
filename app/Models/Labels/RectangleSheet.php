@@ -77,4 +77,27 @@ abstract class RectangleSheet extends Sheet
             'supports' => $this->getSupportsEditorConfig(),
         ];
     }
+
+    public static function supportedPageSizes(): array
+    {
+        return [
+            'letter' => [
+                'name' => 'Letter',
+                'width' => 215.9,
+                'height' => 279.4,
+                'unit' => 'mm',
+            ],
+            'a4' => [
+                'name' => 'A4',
+                'width' => 210.0,
+                'height' => 297.0,
+                'unit' => 'mm',
+            ],
+        ];
+    }
+
+    public static function supportedPageSize(string $key): ?array
+    {
+        return static::supportedPageSizes()[$key] ?? null;
+    }
 }

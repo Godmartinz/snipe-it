@@ -22,6 +22,8 @@ use App\View\Label as LabelView;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\CustomLabelImportValidator;
+use Illuminate\Validation\Rule;
+use App\Models\Labels\RectangleSheet;
 class LabelsController extends Controller
 {
     /**
@@ -310,59 +312,104 @@ class LabelsController extends Controller
 
     public function create(Request $request)
     {
-        $customLabelId = $request->get('custom_label_id');
-
-        if ($customLabelId) {
-            // creating a custom label from another custom label
-            $customLabel = CustomUserLabel::findOrFail($customLabelId);
-
-            $config = $customLabel->config_snapshot;
-            $config['name'] = 'Copy of ' . $customLabel->name;
-
-            return view('settings.label-edit', [
-                'config' => $config,
-                'selectedLabel' => $customLabel->base_label,
-                'selectedType' => $customLabel->type,
-                'importedConfig' => null,
-                'customLabel' => null,
-                'formMethod' => 'POST',
-                'formAction' => route('settings.labels.store'),
-            ]);
-        }
-        $selectedLabel = $request->get('label');
-
-        if ($selectedLabel) {
-            $selectedLabel = str_replace('/', '\\', $selectedLabel);
-        }
-        $importedConfig = session('imported_label_config');
-
-        if ($importedConfig) {
-            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
-        }
-        try {
-            $template = $selectedLabel
-                ? Label::find(str_replace('/', '\\', $selectedLabel))
-                : new DefaultLabel;
-        } catch (\Throwable $e) {
-            $template = new DefaultLabel;
-            $selectedLabel = 'DefaultLabel';
+        if ($request->filled('custom_label_id') || $request->filled('label') || session()->has('imported_label_config')) {
+            return $this->createFromExisting($request);
         }
 
-        $label = $this->previewLabelForTemplate($template);
-        $config = $importedConfig ?: $label->toEditorConfig();
-        $type = data_get($importedConfig, 'type');
+        $validated = $request->validate([
+            'type' => ['required', 'in:sheet,tape'],
+            'page_size' => ['required_if:type,sheet', 'nullable',
+                Rule::in(array_keys(RectangleSheet::supportedPageSizes())),
+            ],
+            'label_width' => ['required', 'numeric', 'gt:0'],
+            'label_height' => ['required', 'numeric', 'gt:0'],
+        ]);
 
-        if ($type === null) {
-            $type = str_starts_with($selectedLabel ?? '', 'Tapes\\')
-                ? 'tape'
-                : 'sheet';
+        if ($validated['type'] === 'sheet') {
+            $page = RectangleSheet::supportedPageSize($validated['page_size']);
+
+            if ($page === null) {
+                throw ValidationException::withMessages([
+                    'page_size' => trans('validation.in', [
+                        'attribute' => 'page size',
+                    ]),
+                ]);
+            }
+
+            $label = new CustomSheetLabel(
+                pageWidth: $page['width'],
+                pageHeight: $page['height'],
+                labelWidth: (float)$validated['label_width'],
+                labelHeight: (float)$validated['label_height'],
+            );
+        } else {
+            $label = new CustomTapeLabel(
+                width: (float)$validated['label_width'],
+                height: (float)$validated['label_height'],
+            );
         }
+//        $customLabelId = $request->get('custom_label_id');
+//
+//        if ($customLabelId) {
+//            // creating a custom label from another custom label
+//            $customLabel = CustomUserLabel::findOrFail($customLabelId);
+//
+//            $config = $customLabel->config_snapshot;
+//            $config['name'] = 'Copy of ' . $customLabel->name;
+//
+//            return view('settings.label-edit', [
+//                'config' => $config,
+//                'selectedLabel' => $customLabel->base_label,
+//                'selectedType' => $customLabel->type,
+//                'importedConfig' => null,
+//                'customLabel' => null,
+//                'formMethod' => 'POST',
+//                'formAction' => route('settings.labels.store'),
+//            ]);
+//        }
+//        $selectedLabel = $request->get('label');
+//
+//        if ($selectedLabel) {
+//            $selectedLabel = str_replace('/', '\\', $selectedLabel);
+//        }
+//        $importedConfig = session('imported_label_config');
+//
+//        if ($importedConfig) {
+//            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
+//        }
+//        try {
+//            $template = $selectedLabel
+//                ? Label::find(str_replace('/', '\\', $selectedLabel))
+//                : new DefaultLabel;
+//        } catch (\Throwable $e) {
+//            $template = new DefaultLabel;
+//            $selectedLabel = 'DefaultLabel';
+//        }
+//
+//        $label = $this->previewLabelForTemplate($template);
+//        $config = $importedConfig ?: $label->toEditorConfig();
+//        $type = data_get($importedConfig, 'type');
+//
+//        if ($type === null) {
+//            $type = str_starts_with($selectedLabel ?? '', 'Tapes\\')
+//                ? 'tape'
+//                : 'sheet';
+//        }
+//        $page = RectangleSheet::supportedPageSize($validated['page_size']);
+//
+//        if ($page === null) {
+//            throw ValidationException::withMessages([
+//                'page_size' => trans('validation.in', [
+//                    'attribute' => 'page size',
+//                ]),
+//            ]);
+//        }
 
         return view('settings.label-edit', [
-            'config' => $config,
-            'selectedLabel' => $selectedLabel,
-            'selectedType' => $type,
-            'importedConfig' => $importedConfig,
+            'config' => $label->toEditorConfig(),
+            'selectedLabel' => null,
+            'selectedType' => $validated['type'],
+            'importedConfig' => null,
             'customLabel' => null,
             'formMethod' => 'POST',
             'formAction' => route('settings.labels.store'),
@@ -485,6 +532,69 @@ class LabelsController extends Controller
 
     }
 
+    public function createFromExisting(Request $request)
+    {
+        if ($request->filled('custom_label_id')) {
+            $customLabel = CustomUserLabel::findOrFail($request->get('custom_label_id'));
+
+            $config = $customLabel->config_snapshot;
+            $config['name'] = 'Copy of ' . $customLabel->name;
+
+            return view('settings.label-edit', [
+                'config' => $config,
+                'selectedLabel' => $customLabel->base_label,
+                'selectedType' => $customLabel->type,
+                'importedConfig' => null,
+                'customLabel' => null,
+                'formMethod' => 'POST',
+                'formAction' => route('settings.labels.store'),
+            ]);
+        }
+
+        $selectedLabel = $request->get('label');
+
+        if ($selectedLabel) {
+            $selectedLabel = str_replace('/', '\\', $selectedLabel);
+        }
+
+        $importedConfig = session('imported_label_config');
+
+        if ($importedConfig) {
+            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
+        }
+
+        try {
+            $template = $selectedLabel
+                ? Label::find($selectedLabel)
+                : new DefaultLabel;
+        } catch (\Throwable $e) {
+            $template = new DefaultLabel;
+            $selectedLabel = 'DefaultLabel';
+        }
+
+        $label = $this->previewLabelForTemplate($template);
+        $config = $importedConfig ?: $label->toEditorConfig();
+
+        $type = data_get($config, 'type');
+
+        if ($type === null) {
+            $type = str_starts_with($selectedLabel ?? '', 'Tapes\\')
+                ? 'tape'
+                : 'sheet';
+        }
+
+        $config['name'] = data_get($config, 'name', 'Copy of ' . class_basename($selectedLabel));
+
+        return view('settings.label-edit', [
+            'config' => $config,
+            'selectedLabel' => $selectedLabel,
+            'selectedType' => $type,
+            'importedConfig' => $importedConfig,
+            'customLabel' => null,
+            'formMethod' => 'POST',
+            'formAction' => route('settings.labels.store'),
+        ]);
+    }
     protected function previewLabelForTemplate($template)
     {
         $name = $template->getName();

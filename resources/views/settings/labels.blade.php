@@ -707,6 +707,7 @@
     </div> <!-- /.row-->
 
     </form>
+    @include('modals.new-label-setup')
     <form id="delete-custom-label-form" method="POST" style="display:none;">
         @csrf
         @method('DELETE')
