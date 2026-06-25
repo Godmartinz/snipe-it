@@ -704,10 +704,10 @@
                 </div>
             </div> <!-- /box -->
         </div> <!-- /.col-md-8-->
-    </div> <!-- /.row-->
 
+        </div> <!-- /.row-->
     </form>
-    @include('modals.new-label-setup')
+    <livewire:labels.new-label-setup/>
     <form id="delete-custom-label-form" method="POST" style="display:none;">
         @csrf
         @method('DELETE')
@@ -923,19 +923,6 @@
                     .text('Invalid JSON');
             }
         });
-        $(document).on('click', '.label-type-card', function () {
-            $('.label-type-card').removeClass('active');
-            $(this)
-                .addClass('active')
-                .find('input[type="radio"]')
-                .prop('checked', true)
-                .trigger('change');
-        });
-        $(document).on('change', 'input[name="type"]', function () {
-            $('#sheet-options').toggle(this.value === 'sheet');
-        });
-        $('#sheet-summary').toggle(this.value === 'sheet');
-        $('#labels-per-sheet').text(total);
 
     </script>
     {{-- Can't use @script here because we're not in a livewire component so let's manually load --}}

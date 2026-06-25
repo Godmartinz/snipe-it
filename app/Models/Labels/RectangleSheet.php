@@ -96,6 +96,18 @@ abstract class RectangleSheet extends Sheet
         ];
     }
 
+    public static function calculateGridCount(float $usableSize, float $labelSize, float $spacing): int
+    {
+        $denominator = $labelSize + $spacing;
+
+        if ($denominator <= 0.0) {
+            return 1;
+        }
+
+        $count = (int)floor(($usableSize + $spacing) / $denominator);
+
+        return max(1, $count);
+    }
     public static function supportedPageSize(string $key): ?array
     {
         return static::supportedPageSizes()[$key] ?? null;

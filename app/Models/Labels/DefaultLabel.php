@@ -351,17 +351,4 @@ class DefaultLabel extends RectangleSheet
 
         return $labelHeight;
     }
-
-    private function calculateGridCount(float $usableSize, float $labelSize, float $spacing): int
-    {
-        $denominator = $labelSize + $spacing;
-
-        if ($denominator <= 0.0) {
-            return 1;
-        }
-
-        $count = (int) floor(($usableSize + $spacing) / $denominator);
-
-        return max(1, $count);
-    }
 }

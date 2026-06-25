@@ -68,6 +68,36 @@ abstract class CustomSheetLabel extends RectangleSheet
     */
     protected string $tagHAlign = 'R';
     protected string $tagVAlign = 'B';
+
+    public function getSupportAssetTag(): bool
+    {
+        return true;
+    }
+
+    public function getSupport1DBarcode(): bool
+    {
+        return true;
+    }
+
+    public function getSupport2DBarcode(): bool
+    {
+        return true;
+    }
+
+    public function getSupportLogo(): bool
+    {
+        return true;
+    }
+
+    public function getSupportTitle(): bool
+    {
+        return true;
+    }
+
+    public function getSupportFields(): int
+    {
+        return 5;
+    }
     public function getUnit()
     {
         return $this->unit;

@@ -20,8 +20,8 @@ return [
     ],
 
     'fields' => [
-        'width' => 'Width',
-        'height' => 'Height',
+        'width' => 'Label Width',
+        'height' => 'Label Height',
         'margin_top' => 'Top Margin',
         'margin_right' => 'Right Margin',
         'margin_bottom' => 'Bottom Margin',
@@ -80,6 +80,8 @@ return [
     'tape_labels' => 'Tape Labels',
     'sheet_labels' => 'Sheet Labels',
     'page_size' => 'Page Size',
+    'labels_per_sheet' => 'Labels Per Sheet',
+    'label_count_help' => 'Adjust the row and column count if this doesn’t match the number of labels on your sheet',
 
 
 ];

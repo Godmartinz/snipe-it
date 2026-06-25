@@ -24,6 +24,10 @@ use Illuminate\Validation\ValidationException;
 use App\Services\CustomLabelImportValidator;
 use Illuminate\Validation\Rule;
 use App\Models\Labels\RectangleSheet;
+
+use App\Models\Labels\CustomLabels\CustomSheetLabel;
+
+//use App\Models\Labels\CustomLabels\CustomTapeLabel;
 class LabelsController extends Controller
 {
     /**
@@ -321,6 +325,8 @@ class LabelsController extends Controller
             'page_size' => ['required_if:type,sheet', 'nullable',
                 Rule::in(array_keys(RectangleSheet::supportedPageSizes())),
             ],
+            'rows' => ['required', 'numeric', 'min:1'],
+            'columns' => ['required', 'numeric', 'min:1'],
             'label_width' => ['required', 'numeric', 'gt:0'],
             'label_height' => ['required', 'numeric', 'gt:0'],
         ]);
@@ -336,14 +342,16 @@ class LabelsController extends Controller
                 ]);
             }
 
-            $label = new CustomSheetLabel(
+            $label = new PreviewSheetLabel(
                 pageWidth: $page['width'],
                 pageHeight: $page['height'],
                 labelWidth: (float)$validated['label_width'],
                 labelHeight: (float)$validated['label_height'],
+                rows: $validated['rows'],
+                columns: $validated['columns'],
             );
         } else {
-            $label = new CustomTapeLabel(
+            $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
                 height: (float)$validated['label_height'],
             );
