@@ -19,18 +19,22 @@
                     <div class="form-group">
                         <label>Label Type</label>
 
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="type" value="sheet" checked>
-                                Sheet Label
-                            </label>
-                        </div>
+                        <div class="row label-type-selector">
+                            <div class="col-xs-6">
+                                <label class="label-type-card active">
+                                    <input type="radio" name="type" value="sheet" checked>
+                                    <i class="fa-regular fa-file-lines"></i>
+                                    <span>Sheet Labels</span>
+                                </label>
+                            </div>
 
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="type" value="tape">
-                                Tape Label
-                            </label>
+                            <div class="col-xs-6">
+                                <label class="label-type-card">
+                                    <input type="radio" name="type" value="tape">
+                                    <i class="fa-solid fa-tape"></i>
+                                    <span>Tape Labels</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -91,3 +95,14 @@
         </div>
     </div>
 </div>
+<script>
+    $('.label-type-card').on('click', function () {
+        $('.label-type-card').removeClass('active');
+
+        $(this)
+            .addClass('active')
+            .find('input')
+            .prop('checked', true)
+            .trigger('change');
+    });
+</script>
