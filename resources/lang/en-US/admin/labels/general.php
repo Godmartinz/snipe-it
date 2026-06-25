@@ -75,4 +75,11 @@ return [
         'middle' => 'Middle',
         'bottom' => 'Bottom',
     ],
+    'create_label' => 'Create Label',
+    'label_type' => 'Label Type',
+    'tape_labels' => 'Tape Labels',
+    'sheet_labels' => 'Sheet Labels',
+    'page_size' => 'Page Size',
+
+
 ];

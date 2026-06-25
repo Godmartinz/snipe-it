@@ -91,6 +91,7 @@ return [
     'complete' => 'Complete',
     'consumable' => 'Consumable',
     'consumables' => 'Consumables',
+    'continue' => 'Continue',
     'country' => 'Country',
     'could_not_restore' => 'Error restoring :item_type: :error',
     'not_deleted' => 'The :item_type was not deleted and therefore cannot be restored',
