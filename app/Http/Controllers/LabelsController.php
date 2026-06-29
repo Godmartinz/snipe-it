@@ -103,8 +103,15 @@ class LabelsController extends Controller
 
     public function edit(CustomUserLabel $label)
     {
+        $config = $label->config_snapshot;
+
+        $selectedType = $label->type
+            ?? data_get($config, 'type')
+            ?? 'sheet';
+
         return view('settings.label-edit', [
-            'config' => $label->config_snapshot,
+            'config' => $config,
+            'sections' => ($selectedType === 'tape' ? new PreviewTapeLabel() : new PreviewSheetLabel())->applyEditorConfig($config)->getEditorSections(),
             'selectedLabel' => $label->base_label,
             'importedConfig' => null,
             'customLabel' => $label,
@@ -322,96 +329,32 @@ class LabelsController extends Controller
 
         $validated = $request->validate([
             'type' => ['required', 'in:sheet,tape'],
-            'page_size' => ['required_if:type,sheet', 'nullable',
-                Rule::in(array_keys(RectangleSheet::supportedPageSizes())),
-            ],
+            'page_size' => ['required_if:type,sheet', 'nullable', Rule::in(array_keys(RectangleSheet::supportedPageSizes())),],
             'rows' => ['required', 'numeric', 'min:1'],
             'columns' => ['required', 'numeric', 'min:1'],
             'label_width' => ['required', 'numeric', 'gt:0'],
             'label_height' => ['required', 'numeric', 'gt:0'],
         ]);
-
+        //A new label will seed the DefaultLabel values
         if ($validated['type'] === 'sheet') {
             $page = RectangleSheet::supportedPageSize($validated['page_size']);
+            $label = (new PreviewSheetLabel())->seedFromTemplate(new DefaultLabel());
+            $config = $label->toEditorConfig();
 
-            if ($page === null) {
-                throw ValidationException::withMessages([
-                    'page_size' => trans('validation.in', [
-                        'attribute' => 'page size',
-                    ]),
-                ]);
-            }
+            $config['page']['width'] = $page['width'];
+            $config['page']['height'] = $page['height'];
+            $config['label']['width'] = (float)$validated['label_width'];
+            $config['label']['height'] = (float)$validated['label_height'];
+            $config['grid']['rows'] = (int)$validated['rows'];
+            $config['grid']['columns'] = (int)$validated['columns'];
 
-            $label = new PreviewSheetLabel(
-                pageWidth: $page['width'],
-                pageHeight: $page['height'],
-                labelWidth: (float)$validated['label_width'],
-                labelHeight: (float)$validated['label_height'],
-                rows: $validated['rows'],
-                columns: $validated['columns'],
-            );
+            $label->applyEditorConfig($config);
         } else {
             $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
                 height: (float)$validated['label_height'],
             );
         }
-//        $customLabelId = $request->get('custom_label_id');
-//
-//        if ($customLabelId) {
-//            // creating a custom label from another custom label
-//            $customLabel = CustomUserLabel::findOrFail($customLabelId);
-//
-//            $config = $customLabel->config_snapshot;
-//            $config['name'] = 'Copy of ' . $customLabel->name;
-//
-//            return view('settings.label-edit', [
-//                'config' => $config,
-//                'selectedLabel' => $customLabel->base_label,
-//                'selectedType' => $customLabel->type,
-//                'importedConfig' => null,
-//                'customLabel' => null,
-//                'formMethod' => 'POST',
-//                'formAction' => route('settings.labels.store'),
-//            ]);
-//        }
-//        $selectedLabel = $request->get('label');
-//
-//        if ($selectedLabel) {
-//            $selectedLabel = str_replace('/', '\\', $selectedLabel);
-//        }
-//        $importedConfig = session('imported_label_config');
-//
-//        if ($importedConfig) {
-//            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
-//        }
-//        try {
-//            $template = $selectedLabel
-//                ? Label::find(str_replace('/', '\\', $selectedLabel))
-//                : new DefaultLabel;
-//        } catch (\Throwable $e) {
-//            $template = new DefaultLabel;
-//            $selectedLabel = 'DefaultLabel';
-//        }
-//
-//        $label = $this->previewLabelForTemplate($template);
-//        $config = $importedConfig ?: $label->toEditorConfig();
-//        $type = data_get($importedConfig, 'type');
-//
-//        if ($type === null) {
-//            $type = str_starts_with($selectedLabel ?? '', 'Tapes\\')
-//                ? 'tape'
-//                : 'sheet';
-//        }
-//        $page = RectangleSheet::supportedPageSize($validated['page_size']);
-//
-//        if ($page === null) {
-//            throw ValidationException::withMessages([
-//                'page_size' => trans('validation.in', [
-//                    'attribute' => 'page size',
-//                ]),
-//            ]);
-//        }
 
         return view('settings.label-edit', [
             'config' => $label->toEditorConfig(),

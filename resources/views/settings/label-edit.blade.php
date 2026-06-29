@@ -45,38 +45,64 @@
         }
 
         .label-config-grid {
+            display: block;
+        }
+
+        .label-form-header,
+        .label-supports-row,
+        .label-content-row,
+        .label-dimensions-row {
+            max-width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .label-content-row {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .label-content-groups {
             display: grid;
-            grid-template-columns: repeat(1, minmax(320px, 1fr));
+            grid-template-columns: repeat(3, minmax(260px, 1fr));
             gap: 16px;
             align-items: start;
         }
 
-        @media (min-width: 992px) {
-            .label-config-grid {
-                grid-template-columns: repeat(2, minmax(320px, 1fr));
-            }
+        .label-dimensions-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .label-layout-row {
+            width: 100%;
+            margin-bottom: 16px;
         }
 
         .label-config-panel {
             margin-bottom: 0;
-        }
-
-        .label-config-panel .box-body {
-            padding-right: 15px;
-        }
-
-        .label-config-panel .form-group:last-child {
-            margin-bottom: 0;
+            box-shadow: none;
         }
 
         .label-config-panel .form-control {
-            width: 120px;
-            max-width: 120px;
+            width: 160px;
+            max-width: 160px;
         }
 
-        .label-form-header,
-        .label-form-footer {
-            grid-column: 1 / -1;
+        .label-supports-row .col-md-2 {
+            text-align: center;
+        }
+
+        .label-supports-row .number-field label {
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .label-supports-row .col-md-2 label {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0;
         }
     </style>
 
@@ -130,177 +156,46 @@
                                         style="max-width: 320px;"
                                 >
                             </div>
+
                             <p class="text-muted">
                                 Unit: {{ $config['unit'] }} (applies to all dimensions)
                             </p>
                         </div>
-                        <div class="row">
-                            @foreach ($sections as $sectionKey => $section)
-                                @continue(empty($section))
 
-                                @php
-                                    $isFullWidth = ($section['column_span'] ?? 1) === 2;
-
-                                    $sectionClass = ($section['column_span'] ?? 1) === 2
-                                        ? 'col-md-12'
-                                        : 'col-md-6';
-
-                                    $inlineFields = ($section['display'] ?? null) === 'inline';
-                                @endphp
-                                @if ($isFullWidth)
-                        </div>
-                        <div class="row">
-                            @endif
-
-                            <div class="{{ $sectionClass }}">
-                                <div class="box box-default">
-                                    <div class="box-header with-border">
-                                        <h3 class="box-title">{{ trans($section['label']) }}</h3>
-                                    </div>
-
-                                    <div class="box-body">
-                                        @if ($inlineFields)
-                                            <div class="row">
-                                                @foreach ($section['fields'] as $fieldKey => $field)
-                                                    @php
-                                                        $name = "{$sectionKey}[{$fieldKey}]";
-                                                        $value = data_get($config, "{$sectionKey}.{$fieldKey}");
-                                                    @endphp
-
-                                                    <div class="col-md-2">
-                                                        @if ($field['type'] === 'checkbox')
-                                                            <input type="hidden" name="{{ $name }}" value="0">
-
-                                                            <label>
-                                                                <input
-                                                                        type="checkbox"
-                                                                        name="{{ $name }}"
-                                                                        value="1"
-                                                                        @checked((bool) $value)
-                                                                >
-                                                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
-                                                            </label>
-                                                        @else
-                                                            <label>
-                                                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
-                                                            </label>
-
-                                                            <input
-                                                                    type="{{ $field['type'] }}"
-                                                                    name="{{ $name }}"
-                                                                    value="{{ $value }}"
-                                                                    class="form-control"
-                                                            >
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @elseif (isset($section['groups']))
-                                            @foreach ($section['groups'] as $groupKey => $group)
-                                                <div class="panel panel-default">
-                                                    <div class="panel-heading">
-                                                        <strong>{{ trans($group['label']) }}</strong>
-                                                    </div>
-
-                                                    <div class="panel-body">
-                                                        @foreach ($group['fields'] as $fieldKey => $field)
-                                                            @php
-                                                                $name = "{$sectionKey}[{$fieldKey}]";
-                                                                $value = data_get($config, "{$sectionKey}.{$fieldKey}");
-                                                            @endphp
-
-                                                            <div class="form-group">
-                                                                <label class="col-md-4 control-label">
-                                                                    {{ trans("admin/labels/general.fields.{$fieldKey}") }}
-                                                                </label>
-
-                                                                <div class="col-md-4">
-                                                                    @if ($field['type'] === 'checkbox')
-                                                                        <input type="hidden" name="{{ $name }}"
-                                                                               value="0">
-
-                                                                        <input
-                                                                                type="checkbox"
-                                                                                name="{{ $name }}"
-                                                                                value="1"
-                                                                                @checked((bool) $value)
-                                                                        >
-                                                                    @elseif ($field['type'] === 'select')
-                                                                        <select name="{{ $name }}"
-                                                                                class="form-control">
-                                                                            @foreach ($field['options'] as $optionValue => $optionLabel)
-                                                                                <option
-                                                                                        value="{{ $optionValue }}"
-                                                                                        @selected($value == $optionValue)
-                                                                                >
-                                                                                    {{ trans($optionLabel) }}
-                                                                                </option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    @else
-                                                                        <input
-                                                                                type="{{ $field['type'] }}"
-                                                                                name="{{ $name }}"
-                                                                                value="{{ $value }}"
-                                                                                class="form-control"
-                                                                        >
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            @foreach ($section['fields'] as $fieldKey => $field)
-                                                @php
-                                                    $name = "{$sectionKey}[{$fieldKey}]";
-                                                    $value = data_get($config, "{$sectionKey}.{$fieldKey}");
-                                                @endphp
-
-                                                <div class="form-group">
-                                                    <label class="col-md-4 control-label">
-                                                        {{ trans("admin/labels/general.fields.{$fieldKey}") }}
-                                                    </label>
-
-                                                    <div class="col-md-4">
-                                                        @if ($field['type'] === 'checkbox')
-                                                            <input type="hidden" name="{{ $name }}" value="0">
-
-                                                            <input
-                                                                    type="checkbox"
-                                                                    name="{{ $name }}"
-                                                                    value="1"
-                                                                    @checked((bool) $value)
-                                                            >
-                                                        @elseif ($field['type'] === 'select')
-                                                            <select name="{{ $name }}" class="form-control">
-                                                                @foreach ($field['options'] as $optionValue => $optionLabel)
-                                                                    <option
-                                                                            value="{{ $optionValue }}"
-                                                                            @selected($value == $optionValue)
-                                                                    >
-                                                                        {{ trans($optionLabel) }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        @else
-                                                            <input
-                                                                    type="{{ $field['type'] }}"
-                                                                    name="{{ $name }}"
-                                                                    value="{{ $value }}"
-                                                                    class="form-control"
-                                                            >
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                </div>
+                        @if(isset($sections['supports']))
+                            <div class="label-supports-row">
+                                @include('partials.label-editor-section', [
+                                    'sectionKey' => 'supports',
+                                    'section' => $sections['supports'],
+                                    'config' => $config,
+                                    'inlineFields' => true,
+                                    'showLegend' => true,
+                                ])
                             </div>
-                            @endforeach
-                        </div>
+                        @endif
+
+                        @if(isset($sections['content']))
+                            <div class="label-content-row">
+                                @include('partials.label-editor-section', [
+                                    'sectionKey' => 'content',
+                                    'section' => $sections['content'],
+                                    'config' => $config,
+                                    'inlineFields' => false,
+                                    'showLegend' => true,
+                                ])
+                            </div>
+                        @endif
+
+                        @if(isset($sections['layout']))
+                            <div class="label-layout-row">
+                                @include('partials.label-editor-section', [
+                                    'sectionKey' => 'layout',
+                                    'section' => $sections['layout'],
+                                    'config' => $config,
+                                    'inlineFields' => false,
+                                ])
+                            </div>
+                        @endif
                     </div>
                 </form>
 

@@ -4,21 +4,25 @@ namespace App\Models\Labels\CustomLabels;
 
 class PreviewSheetLabel extends CustomSheetLabel
 {
+    protected bool $supportAssetTag = true;
+    protected bool $support1DBarcode = true;
+    protected bool $support2DBarcode = true;
+    protected int $supportFields = 5;
+    protected bool $supportLogo = true;
+    protected bool $supportTitle = true;
     public function __construct(
         float $pageWidth = 210.0,
         float $pageHeight = 297.0,
         float $labelWidth = 50.0,
         float $labelHeight = 25.0,
-        int   $rows = 9,
-        int   $columns = 3,
+        int $rows = 9,
+        int $columns = 3,
     )
     {
         $this->pageWidth = $pageWidth;
         $this->pageHeight = $pageHeight;
-
         $this->labelWidth = $labelWidth;
         $this->labelHeight = $labelHeight;
-
         $this->rows = $rows;
         $this->columns = $columns;
     }

@@ -17,10 +17,10 @@ trait HasCustomLabelEditorSections
                 'column_span' => 2,
                 'display' => 'inline',
                 'fields' => [
+                    'fields' => ['type' => 'number'],
                     'asset_tag' => ['type' => 'checkbox'],
                     'barcode_1d' => ['type' => 'checkbox'],
                     'barcode_2d' => ['type' => 'checkbox'],
-                    'fields' => ['type' => 'number'],
                     'logo' => ['type' => 'checkbox'],
                     'title' => ['type' => 'checkbox'],
                 ],
@@ -138,38 +138,47 @@ trait HasCustomLabelEditorSections
                     ],
                 ],
             ],
-            'page' => [
-                'label' => 'admin/labels/general.sections.page',
-                'fields' => [
-                    'width' => ['type' => 'number'],
-                    'height' => ['type' => 'number'],
-                    'margin_top' => ['type' => 'number'],
-                    'margin_right' => ['type' => 'number'],
-                    'margin_bottom' => ['type' => 'number'],
-                    'margin_left' => ['type' => 'number'],
-                ],
-            ],
+            'layout' => [
+                'label' => 'admin/labels/general.sections.layout',
+                'column_span' => 2,
+                'groups' => [
+                    'page' => [
+                        'label' => 'admin/labels/general.sections.page',
+                        'section_key' => 'page',
+                        'fields' => [
+                            'width' => ['type' => 'number'],
+                            'height' => ['type' => 'number'],
+                            'margin_top' => ['type' => 'number'],
+                            'margin_right' => ['type' => 'number'],
+                            'margin_bottom' => ['type' => 'number'],
+                            'margin_left' => ['type' => 'number'],
+                        ],
+                    ],
 
-            'grid' => [
-                'label' => 'admin/labels/general.sections.grid',
-                'fields' => [
-                    'columns' => ['type' => 'number'],
-                    'rows' => ['type' => 'number'],
-                    'column_spacing' => ['type' => 'number'],
-                    'row_spacing' => ['type' => 'number'],
-                ],
-            ],
+                    'grid' => [
+                        'label' => 'admin/labels/general.sections.grid',
+                        'section_key' => 'grid',
+                        'fields' => [
+                            'columns' => ['type' => 'number'],
+                            'rows' => ['type' => 'number'],
+                            'column_spacing' => ['type' => 'number'],
+                            'row_spacing' => ['type' => 'number'],
+                        ],
+                    ],
 
-            'label' => [
-                'label' => 'admin/labels/general.sections.label',
-                'fields' => [
-                    'width' => ['type' => 'number'],
-                    'height' => ['type' => 'number'],
-                    'border' => ['type' => 'number'],
-                    'padding_top' => ['type' => 'number'],
-                    'padding_right' => ['type' => 'number'],
-                    'padding_bottom' => ['type' => 'number'],
-                    'padding_left' => ['type' => 'number'],
+                    'label' => [
+                        'label' => 'admin/labels/general.sections.label',
+                        'section_key' => 'label',
+                        'fields' => [
+                            'width' => ['type' => 'number'],
+                            'height' => ['type' => 'number'],
+                            'border' => ['type' => 'number'],
+                            'padding_top' => ['type' => 'number'],
+                            'padding_right' => ['type' => 'number'],
+                            'padding_bottom' => ['type' => 'number'],
+                            'padding_left' => ['type' => 'number'],
+                        ],
+                    ],
                 ],
             ],
         ];

@@ -7,6 +7,7 @@ return [
         'label' => 'Label',
         'content' => 'Content',
         'supports' => 'Supports',
+        'layout' => 'Layout',
     ],
 
     'groups' => [
