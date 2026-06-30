@@ -71,7 +71,7 @@
                         <div class="panel-body">
                             @foreach ($group['fields'] as $fieldKey => $field)
                                 @include('partials.label-editor-field', [
-                                    'sectionKey' => $group['section_key'] ?? $groupKey,
+                                    'sectionKey' => $group['section_key'] ?? $sectionKey,
                                     'fieldKey' => $fieldKey,
                                     'field' => $field,
                                     'config' => $config,
