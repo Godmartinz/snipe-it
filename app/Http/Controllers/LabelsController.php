@@ -51,7 +51,9 @@ class LabelsController extends Controller
                     data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
                 );
 
-                $template = new PreviewSheetLabel;
+                $template = ($customLabel->type === 'tape')
+                    ? new PreviewTapeLabel
+                    : new PreviewSheetLabel;
 
                 if ($baseLabel) {
                     $template->seedFromTemplate($baseLabel);
@@ -113,6 +115,7 @@ class LabelsController extends Controller
             'config' => $config,
             'sections' => ($selectedType === 'tape' ? new PreviewTapeLabel() : new PreviewSheetLabel())->applyEditorConfig($config)->getEditorSections(),
             'selectedLabel' => $label->base_label,
+            'selectedType' => $selectedType,
             'importedConfig' => null,
             'customLabel' => $label,
             'formMethod' => 'PUT',
