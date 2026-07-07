@@ -80,6 +80,20 @@
                             >
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>{{trans('admin/labels/general.fields.label_gap')}}</label>
+                            <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0.1"
+                                    name="label_gap"
+                                    class="form-control"
+                                    value="0"
+                            >
+                        </div>
+                    </div>
+
 
                 </div>
                 <div id="sheet-summary" class="text-center">

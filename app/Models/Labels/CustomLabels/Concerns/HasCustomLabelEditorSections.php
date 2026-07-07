@@ -2,14 +2,18 @@
 
 namespace App\Models\Labels\CustomLabels\Concerns;
 
+
 trait HasCustomLabelEditorSections
 {
     public function getEditorSections(): array
     {
-        return $this->editorSections();
+        return array_replace_recursive(
+            $this->baseEditorSections(),
+            $this->layoutEditorSections()
+        );
     }
 
-    protected function editorSections(): array
+    protected function baseEditorSections(): array
     {
         return [
             'supports' => [
@@ -138,6 +142,28 @@ trait HasCustomLabelEditorSections
                     ],
                 ],
             ],
+        ];
+    }
+
+    protected function layoutEditorSections(): array
+    {
+        if ($this->isTapeLabel()) {
+            return $this->tapeLayoutEditorSections();
+        }
+
+        return $this->sheetLayoutEditorSections();
+    }
+
+    protected function isTapeLabel(): bool
+    {
+        return str_contains(static::class, 'Tape')
+            || method_exists($this, 'getTapeWidth')
+            || method_exists($this, 'getTapeHeight');
+    }
+
+    protected function sheetLayoutEditorSections(): array
+    {
+        return [
             'layout' => [
                 'label' => 'admin/labels/general.sections.layout',
                 'column_span' => 2,
@@ -177,6 +203,27 @@ trait HasCustomLabelEditorSections
                             'padding_right' => ['type' => 'number'],
                             'padding_bottom' => ['type' => 'number'],
                             'padding_left' => ['type' => 'number'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    protected function tapeLayoutEditorSections(): array
+    {
+        return [
+            'layout' => [
+                'label' => 'admin/labels/general.sections.layout',
+                'column_span' => 2,
+                'groups' => [
+                    'label' => [
+                        'label' => 'admin/labels/general.sections.label',
+                        'section_key' => 'dimensions',
+                        'fields' => [
+                            'width' => ['type' => 'number'],
+                            'height' => ['type' => 'number'],
+                            'label_gap' => ['type' => 'number'],
                         ],
                     ],
                 ],

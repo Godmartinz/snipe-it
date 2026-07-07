@@ -3,6 +3,7 @@
 namespace App\View;
 
 use App\Models\Labels\CustomLabels\PreviewSheetLabel;
+use App\Models\Labels\CustomLabels\PreviewTapeLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Field;
 use App\Models\Labels\Label as LabelModel;
@@ -59,7 +60,9 @@ class Label implements View
                         data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
                     );
 
-                    $template = new PreviewSheetLabel;
+                    $template = data_get($customLabel->config_snapshot, 'type') === 'tape'
+                        ? new PreviewTapeLabel
+                        : new PreviewSheetLabel;
 
                     if ($baseLabel) {
                         $template->seedFromTemplate($baseLabel);
@@ -90,10 +93,14 @@ class Label implements View
 
         $template->validate();
 
+        $labelGap = method_exists($template, 'getLabelGap')
+            ? (float)$template->getLabelGap()
+            : 0.0;
+        
         $pdf = new TCPDF(
             $template->getOrientation(),
             $template->getUnit(),
-            [0 => $template->getWidth(), 1 => $template->getHeight(), 'Rotate' => $template->getRotation()]
+            [0 => $template->getWidth() + $labelGap, 1 => $template->getHeight(), 'Rotate' => $template->getRotation()]
         );
 
         // Required for CJK languages, otherwise the embedded font can get too massive

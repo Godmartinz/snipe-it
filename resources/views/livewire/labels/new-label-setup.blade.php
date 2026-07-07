@@ -94,7 +94,7 @@
                             </div>
                         @endif
 
-                        <div class="row">
+                        <div class="row" style="margin-top: 15px;">
                             <div class="col-md-6">
                                 <label>{{ trans('admin/labels/general.fields.width') }}</label>
 
@@ -123,6 +123,23 @@
                                 >
                             </div>
                         </div>
+                        @if ($type === 'tape')
+                            <div class="row" style="margin-top: 15px;">
+                                <div class="col-md-6">
+                                    <label>{{ trans('admin/labels/general.fields.label_gap') }}</label>
+                                    <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0"
+                                            name="label_gap"
+                                            class="form-control"
+                                            placeholder="0"
+                                            wire:model.live.debounce.300ms="labelGap"
+                                            value="0"
+                                    >
+                                </div>
+                            </div>
+                        @endif
 
                         @if ($type === 'sheet')
                             <hr>

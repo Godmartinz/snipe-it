@@ -333,8 +333,9 @@ class LabelsController extends Controller
         $validated = $request->validate([
             'type' => ['required', 'in:sheet,tape'],
             'page_size' => ['required_if:type,sheet', 'nullable', Rule::in(array_keys(RectangleSheet::supportedPageSizes())),],
-            'rows' => ['required', 'numeric', 'min:1'],
-            'columns' => ['required', 'numeric', 'min:1'],
+            'label_gap' => ['nullable', 'numeric', 'min:0'],
+            'rows' => ['required_if:type,sheet', 'numeric', 'min:1'],
+            'columns' => ['required_if:type,sheet', 'numeric', 'min:1'],
             'label_width' => ['required', 'numeric', 'gt:0'],
             'label_height' => ['required', 'numeric', 'gt:0'],
         ]);
@@ -353,9 +354,11 @@ class LabelsController extends Controller
 
             $label->applyEditorConfig($config);
         } else {
+
             $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
                 height: (float)$validated['label_height'],
+                gap: (float)$validated['label_gap'] ?? 0,
             );
         }
 

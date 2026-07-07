@@ -23,6 +23,7 @@ return [
     'fields' => [
         'width' => 'Label Width',
         'height' => 'Label Height',
+        'label_gap' => 'Label Gap',
         'margin_top' => 'Top Margin',
         'margin_right' => 'Right Margin',
         'margin_bottom' => 'Bottom Margin',

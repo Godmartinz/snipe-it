@@ -29,7 +29,7 @@ abstract class CustomTapeLabel extends Label
 
     protected float $width = 50.0;
     protected float $height = 12.0;
-
+    protected float $labelGap = 0.0;
     protected float $marginTop = 3.2;
     protected float $marginRight = 3.2;
     protected float $marginBottom = 3.2;
@@ -52,6 +52,10 @@ abstract class CustomTapeLabel extends Label
         return $this->height;
     }
 
+    public function getLabelGap()
+    {
+        return $this->labelGap;
+    }
     public function getMarginTop()
     {
         return $this->marginTop;
@@ -157,6 +161,16 @@ abstract class CustomTapeLabel extends Label
         );
     }
 
+    public function toEditorConfig(): array
+    {
+        return array_merge(parent::toEditorConfig(), [
+            'dimensions' => [
+                'width' => $this->getWidth(),
+                'height' => $this->getHeight(),
+                'label_gap' => $this->getLabelGap(),
+            ],
+        ]);
+    }
     public function getEditorConfigSections(): array
     {
         return [
@@ -199,11 +213,11 @@ abstract class CustomTapeLabel extends Label
         $this->hydrateSupports($config['supports'] ?? []);
         $this->hydrateContent($config['content'] ?? []);
 
+        $dimensions = $config['dimensions'] ?? [];
+        $this->labelGap = isset($dimensions['label_gap']) ? (float)$dimensions['label_gap'] : $this->labelGap;
         $meta = $config['meta'] ?? [];
 
-        $this->rotation = isset($meta['rotation'])
-            ? (int)$meta['rotation']
-            : $this->rotation;
+        $this->rotation = isset($meta['rotation']) ? (int)$meta['rotation'] : $this->rotation;
     }
 
     public function write($pdf, $record)

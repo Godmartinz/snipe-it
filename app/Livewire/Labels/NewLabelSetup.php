@@ -11,6 +11,7 @@ class NewLabelSetup extends Component
     public string $pageSize = 'letter';
     public ?float $labelWidth = null;
     public ?float $labelHeight = null;
+    public ?float $labelGap = null;
     public ?int $columns = null;
     public ?int $rows = null;
 
