@@ -82,8 +82,6 @@
                     this.previewURL = '{{ route("labels.customizer-preview", ["labelName" => ":label"]) }}'
                         .replace(':label', template.replaceAll('\\', '/'))
                         .concat('?' + $.param(payload) + '#toolbar=0');
-
-                    console.log('custom_label_preview url:', this.previewURL);
                 },
 
                 _previewURL: '',

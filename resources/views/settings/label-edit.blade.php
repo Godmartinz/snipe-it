@@ -129,7 +129,9 @@
                     @php
                         $printable = $config['label_printable_area'] ?? $config['printable_area'] ?? null;
                     @endphp
-                    <input type="hidden" name="template" value="{{ $selectedLabel ?: 'DefaultLabel' }}">
+                    <input type="hidden"
+                           name="template"
+                           value="{{ $selectedLabel ?: (($selectedType ?? null) === 'tape' ? 'StandardTape' : 'DefaultLabel') }}">
                     <input
                             type="hidden"
                             name="type"

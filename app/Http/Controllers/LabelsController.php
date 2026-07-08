@@ -111,9 +111,21 @@ class LabelsController extends Controller
             ?? data_get($config, 'type')
             ?? 'sheet';
 
+        if ($selectedType === 'tape') {
+            $previewLabel = (new PreviewTapeLabel())->applyEditorConfig($config);
+
+            $config['dimensions'] = [
+                'width' => $previewLabel->getWidth(),
+                'height' => $previewLabel->getHeight(),
+                'label_gap' => $previewLabel->getLabelGap(),
+            ];
+        } else {
+            $previewLabel = (new PreviewSheetLabel())->applyEditorConfig($config);
+        }
+
         return view('settings.label-edit', [
             'config' => $config,
-            'sections' => ($selectedType === 'tape' ? new PreviewTapeLabel() : new PreviewSheetLabel())->applyEditorConfig($config)->getEditorSections(),
+            'sections' => $previewLabel->getEditorSections(),
             'selectedLabel' => $label->base_label,
             'selectedType' => $selectedType,
             'importedConfig' => null,
@@ -240,6 +252,9 @@ class LabelsController extends Controller
             $rules['grid'] = ['required', 'array'];
             $rules['label'] = ['required', 'array'];
         }
+        if ($type === 'tape') {
+            $rules['dimensions'] = ['required', 'array'];
+        }
 
         $validated = $request->validate($rules);
 
@@ -263,7 +278,13 @@ class LabelsController extends Controller
 
         $content = $castNumeric($validated['content']);
 
-        $baseLabel = CustomUserLabel::makeBaseLabel($validated['template'] ?? null);
+        $template = $validated['template'] ?? null;
+
+        if ($type === 'tape' && $template === 'StandardTape') {
+            $baseLabel = new PreviewTapeLabel;
+        } else {
+            $baseLabel = CustomUserLabel::makeBaseLabel($template);
+        }
 
         if (!$baseLabel) {
             return redirect()->back()
@@ -275,6 +296,7 @@ class LabelsController extends Controller
             $workingLabel = new PreviewTapeLabel;
 
             $submittedConfig = [
+                'dimensions' => $castNumeric($validated['dimensions']),
                 'content' => $content,
                 'supports' => $supports,
             ];
@@ -303,7 +325,7 @@ class LabelsController extends Controller
 
         $configSnapshot = [
             'unit' => 'mm',
-            'template' => $validated['template'] ?? null,
+            'template' => $template,
             'type' => $type,
             'name' => $validated['name'],
             ...$finalConfig,
@@ -313,7 +335,7 @@ class LabelsController extends Controller
 
         $customLabel = CustomUserLabel::create([
             'name' => $validated['name'],
-            'base_label' => $validated['template'] ?? null,
+            'base_label' => $template,
             'type' => $type,
             'overrides' => $overrides,
             'config_snapshot' => $configSnapshot,
@@ -358,7 +380,7 @@ class LabelsController extends Controller
             $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
                 height: (float)$validated['label_height'],
-                gap: (float)$validated['label_gap'] ?? 0,
+                labelGap: (float)$validated['label_gap'] ?? 0,
             );
         }
 
@@ -395,11 +417,13 @@ class LabelsController extends Controller
     {
         $labelName = str_replace('/', '\\', $labelName);
 
-        $baseTemplate = $labelName === 'DefaultLabel'
-            ? new DefaultLabel
-            : Label::find($labelName);
+        $baseTemplate = match (true) {
+            $labelName === 'DefaultLabel' => new DefaultLabel,
+            $labelName === 'StandardTape' => null,
+            default => Label::find($labelName),
+        };
 
-        $isTape = str_starts_with($labelName, 'Tapes\\');
+        $isTape = str_starts_with($labelName, 'Tapes\\') || $labelName === 'StandardTape';
 
         $editorConfig = [
             'content' => $request->input('content', []),
@@ -407,7 +431,7 @@ class LabelsController extends Controller
         ];
 
         if ($isTape) {
-            $editorConfig['tape'] = $request->input('tape', []);
+            $editorConfig['dimensions'] = $request->input('dimensions', []);
             $template = new PreviewTapeLabel;
         } else {
             $editorConfig['page'] = $request->input('page', []);
@@ -416,16 +440,11 @@ class LabelsController extends Controller
             $template = new PreviewSheetLabel;
         }
 
-        $template->seedFromTemplate($baseTemplate);
-        $template->applyEditorConfig($editorConfig);
-
-        if (method_exists($template, 'seedFromTemplate')) {
+        if ($baseTemplate) {
             $template->seedFromTemplate($baseTemplate);
         }
 
-        if (method_exists($template, 'applyEditorConfig')) {
-            $template->applyEditorConfig($editorConfig);
-        }
+        $template->applyEditorConfig($editorConfig);
 
         $exampleAsset = Asset::factory()->labelPreview()->make();
 

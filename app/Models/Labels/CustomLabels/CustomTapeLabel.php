@@ -214,6 +214,8 @@ abstract class CustomTapeLabel extends Label
         $this->hydrateContent($config['content'] ?? []);
 
         $dimensions = $config['dimensions'] ?? [];
+        $this->width = isset($dimensions['width']) ? (float)$dimensions['width'] : $this->width;
+        $this->height = isset($dimensions['height']) ? (float)$dimensions['height'] : $this->height;
         $this->labelGap = isset($dimensions['label_gap']) ? (float)$dimensions['label_gap'] : $this->labelGap;
         $meta = $config['meta'] ?? [];
 
@@ -404,10 +406,8 @@ abstract class CustomTapeLabel extends Label
             max(0, $this->getFieldMargin()),
             $this->getLabelSize(),
             $this->getFieldSize(),
-            $this->getLabelSize()
-            + $this->getLabelMargin()
-            + $this->getFieldSize()
-            + $this->getFieldMargin(),
+            max($this->getLabelSize(), $this->getFieldSize())
+            + max($this->getFieldMargin(), $this->getLabelMargin(), 0)
         );
 
         return $layout;

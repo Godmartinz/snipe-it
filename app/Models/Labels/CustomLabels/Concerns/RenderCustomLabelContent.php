@@ -285,7 +285,9 @@ trait RenderCustomLabelContent
         $rightEdge = $body['x2'];
         $topEdge = $body['y1'];
         $bottomEdge = $body['y2'];
-
+        $barcode2DMargin = method_exists($this, 'getBarcode2DMargin')
+            ? $this->getBarcode2DMargin()
+            : 0;
         foreach ($boxes as $box) {
             if (!$box) {
                 continue;
@@ -296,12 +298,19 @@ trait RenderCustomLabelContent
             $isTopAnchored = abs($box['y'] - $body['y1']) < 0.01;
             $isBottomAnchored = abs(($box['y'] + $box['h']) - $body['y2']) < 0.01;
 
+            // Reserve enough spacing for either a logo or a QR code.
+            $sideMargin = max(
+                $this->getLogoMargin(),
+                $barcode2DMargin
+            );
+
+
             if ($isLeftAnchored) {
-                $leftEdge = max($leftEdge, $box['x'] + $box['w'] + $this->getLogoMargin());
+                $leftEdge = max($leftEdge, $box['x'] + $box['w'] + $sideMargin);
             }
 
             if ($isRightAnchored) {
-                $rightEdge = min($rightEdge, $box['x'] - $this->getLogoMargin());
+                $rightEdge = min($rightEdge, $box['x'] - $sideMargin);
             }
 
             if ($isTopAnchored && $box['w'] > ($body['w'] * 0.6)) {
@@ -313,13 +322,8 @@ trait RenderCustomLabelContent
             }
         }
 
-        if ($rightEdge < $leftEdge) {
-            $rightEdge = $leftEdge;
-        }
-
-        if ($bottomEdge < $topEdge) {
-            $bottomEdge = $topEdge;
-        }
+        $rightEdge = max($rightEdge, $leftEdge);
+        $bottomEdge = max($bottomEdge, $topEdge);
 
         return [
             'x1' => $leftEdge,
