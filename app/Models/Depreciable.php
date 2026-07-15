@@ -57,7 +57,9 @@ class Depreciable extends SnipeModel
             case 'half_2':
                 $depreciation = $this->getHalfYearDepreciatedValue(false);
                 break;
-
+            case 'diminish':
+                $depreciation = $this->getDiminishingDepreciationValue();
+                break;
             default:
                 $depreciation = $this->getLinearDepreciatedValue();
         }
@@ -132,6 +134,33 @@ class Depreciable extends SnipeModel
         return $this->purchase_cost - round($yearsPast / $deprecationYears * $this->purchase_cost, 2);
     }
 
+    public function getDiminishingDepreciationValue()
+    {
+        $depreciation = $this->get_depreciation();
+
+        if (!$depreciation || !$this->purchase_date) {
+            return null;
+        }
+
+        if ($depreciation->months <= 0) {
+            return $this->purchase_cost;
+        }
+
+        $purchaseDate = $this->purcahse_date->copy()->startOfDay();
+        $currentDate = now()->startOfDay();
+
+        if ($currentDate->lessThaOrEqualTo($purchaseDate)) {
+            return $this->purchase_cost;
+        }
+
+        $baseValue = $this->purchase_cost;
+        $effectiveLife = $depreciation->months / 12;
+        $diminishingRate = 2 / $effectiveLife;
+
+        $periodStart = $purchaseDate->copy();
+
+
+    }
     /**
      * @param  \DateTime  $date
      * @return int

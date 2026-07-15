@@ -6,6 +6,7 @@ use App\Models\Depreciation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\Setting;
 
 /**
  * This controller handles all actions related to Depreciations for
@@ -44,7 +45,7 @@ class DepreciationsController extends Controller
         $this->authorize('create', Depreciation::class);
 
         // Show the page
-        return view('depreciations/edit')->with('item', new Depreciation);
+        return view('depreciations/edit')->with('item', new Depreciation)->with('depreciation_method', Setting::getSettings()->depreciation_method);
     }
 
     /**
@@ -106,7 +107,7 @@ class DepreciationsController extends Controller
 
         $this->authorize('update', $depreciation);
 
-        return view('depreciations/edit')->with('item', $depreciation);
+        return view('depreciations/edit')->with('item', $depreciation)->with('depreciation_method', Setting::getSettings()->depreciation_method);
     }
 
     /**

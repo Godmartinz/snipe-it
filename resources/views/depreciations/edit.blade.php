@@ -53,7 +53,9 @@
                         <div style="display: flex;">
                             <input class="form-control" name="depreciation_min" id="depreciation_min" required type="number" value="{{ old('depreciation_min', $item->depreciation_min) }}" style="width: 90px; margin-right: 15px; display: inline-block;" />
                             <select class="form-control select2" name="depreciation_type" id="depreciation_type" data-minimum-results-for-search="Infinity" style="width: 150px; display: inline-block;">
-                                <option value="amount" {{ old('depreciation_type', $item->depreciation_type) == 'amount' ? 'selected' : '' }}>{{ trans('general.depreciation_options.amount') }}</option>
+                                @if($depreciation_method !== 'diminish')
+                                    <option value="amount" {{ old('depreciation_type', $item->depreciation_type) == 'amount' ? 'selected' : '' }}>{{ trans('general.depreciation_options.amount') }}</option>
+                                @endif
                                 <option value="percent" {{ old('depreciation_type', $item->depreciation_type) == 'percent' ? 'selected' : '' }}>{{ trans('general.depreciation_options.percent') }}</option>
                             </select>
                         </div>
