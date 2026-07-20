@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Setting;
+use Illuminate\Validation\Rule;
 
 /**
  * This controller handles all actions related to Depreciations for
@@ -66,18 +67,31 @@ class DepreciationsController extends Controller
         $depreciation->name = $request->input('name');
         $depreciation->months = $request->input('months');
         $depreciation->created_by = auth()->id();
+        $isDiminishing = $depreciation->depreciation_method === 'diminish';
 
         $request->validate([
             'depreciation_min' => [
-                'required',
+                Rule::requiredIf($isDiminishing),
                 'numeric',
+                'nullable',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->input('depreciation_type') == 'percent' && ($value < 0 || $value > 100)) {
                         $fail(trans('validation.percent'));
                     }
                 },
             ],
-            'depreciation_type' => 'required|in:amount,percent',
+            'depreciation_type' => Rule::requiredIf($isDiminishing),
+            'nullable|in:amount,percent',
+            'rate_multiplier' => [
+                Rule::requiredIf($isDiminishing),
+                'nullable',
+                'numeric',
+            ],
+            'fiscal_year_start_month' => [
+                Rule::requiredIf($isDiminishing),
+                'nullable',
+                'numeric',
+            ],
         ]);
         $depreciation->depreciation_type = $request->input('depreciation_type');
         $depreciation->depreciation_min = $request->input('depreciation_min');
@@ -129,18 +143,31 @@ class DepreciationsController extends Controller
         $this->authorize('update', $depreciation);
         $depreciation->name = $request->input('name');
         $depreciation->months = $request->input('months');
+        $isDiminishing = $depreciation->depreciation_method === 'diminish';
 
         $request->validate([
             'depreciation_min' => [
-                'required',
+                Rule::requiredIf($isDiminishing),
                 'numeric',
+                'nullable',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->input('depreciation_type') == 'percent' && ($value < 0 || $value > 100)) {
                         $fail(trans('validation.percent'));
                     }
                 },
             ],
-            'depreciation_type' => 'required|in:amount,percent',
+            'depreciation_type' => Rule::requiredIf($isDiminishing),
+            'nullable|in:amount,percent',
+            'rate_multiplier' => [
+                Rule::requiredIf($isDiminishing),
+                'nullable',
+                'numeric',
+            ],
+            'fiscal_year_start_month' => [
+                Rule::requiredIf($isDiminishing),
+                'nullable',
+                'numeric',
+            ],
         ]);
         $depreciation->depreciation_type = $request->input('depreciation_type');
         $depreciation->depreciation_min = $request->input('depreciation_min');

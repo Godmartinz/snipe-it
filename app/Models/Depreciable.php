@@ -98,6 +98,10 @@ class Depreciable extends SnipeModel
 
     public function getMonthlyDepreciation()
     {
+        $setting = Setting::getSettings();
+        if ($setting->depreciation_method === 'diminish') {
+            return null;
+        }
 
         return ($this->purchase_cost - $this->calculateDepreciation()) / $this->get_depreciation()->months;
 
@@ -164,16 +168,8 @@ class Depreciable extends SnipeModel
 
         while ($periodStart->lessThanOrEqualTo($currentDate) && $baseValue > 0) {
             $fiscalYearStart = $periodStart->month >= $fiscalYearStartMonth
-                ? $periodStart->copy()->setDate(
-                    $periodStart->year,
-                    $fiscalYearStartMonth,
-                    1
-                )
-                : $periodStart->copy()->setDate(
-                    $periodStart->year - 1,
-                    $fiscalYearStartMonth,
-                    1
-                );
+                ? $periodStart->copy()->setDate($periodStart->year, $fiscalYearStartMonth, 1)
+                : $periodStart->copy()->setDate($periodStart->year - 1, $fiscalYearStartMonth, 1);
 
             $fiscalYearEnd = $fiscalYearStart->copy()->addYear()->subDay();
 
