@@ -23,13 +23,49 @@
         <x-form :$item route="{{ (isset($item->id)) ? route('depreciations.update', ['depreciation' => $item->id]) : route('depreciations.store') }}">
 
             <x-box>
-
                 <x-form.row
                     :label="trans('admin/depreciations/general.depreciation_name')"
                     :$item
                     name="name"
                 />
+                @if($depreciation_method === 'diminish')
+                    <x-form.row
+                            :label="trans('admin/depreciations/general.fiscal_year_start_month')"
+                            :$item
+                            name="fiscal_year_start_month"
+                            type="number"
+                            :min="1"
+                            :max="12"
+                            input_div_class="col-md-2"
+                    />
+                    <x-form.row
+                            :label="trans('admin/depreciations/general.rate_multiplier')"
+                            :$item
+                            name="rate_multiplier"
+                            input_div_class="col-md-2"
+                    >
+                        <x-slot:input>
+                            <select
+                                    class="form-control select2"
+                                    name="rate_multiplier"
+                                    id="rate_multiplier"
+                                    data-minimum-results-for-search="Infinity"
+                            >
+                                <option value="1.00" {{ old('rate_multiplier', $item->rate_multiplier) == 1.00 ? 'selected' : '' }}>
+                                    100%
+                                </option>
 
+                                <option value="1.50" {{ old('rate_multiplier', $item->rate_multiplier) == 1.50 ? 'selected' : '' }}>
+                                    150%
+                                </option>
+
+                                <option value="2.00" {{ old('rate_multiplier', $item->rate_multiplier) == 2.00 ? 'selected' : '' }}>
+                                    200%
+                                </option>
+                            </select>
+                        </x-slot:input>
+                    </x-form.row>
+                @endif
                 <x-form.row
                     :label="trans('admin/depreciations/general.number_of_months')"
                     :$item

@@ -146,20 +146,54 @@ class Depreciable extends SnipeModel
             return $this->purchase_cost;
         }
 
-        $purchaseDate = $this->purcahse_date->copy()->startOfDay();
+        $purchaseDate = $this->purchase_date->copy()->startOfDay();
         $currentDate = now()->startOfDay();
 
-        if ($currentDate->lessThaOrEqualTo($purchaseDate)) {
+        if ($currentDate->lessThanOrEqualTo($purchaseDate)) {
             return $this->purchase_cost;
         }
 
         $baseValue = $this->purchase_cost;
         $effectiveLife = $depreciation->months / 12;
-        $diminishingRate = 2 / $effectiveLife;
+
+        $rateMultiplier = (float)($depreciation->rate_multiplier ?? 2);
+        $fiscalYearStartMonth = (int)($depreciation->fiscal_year_start_month ?? 1);
+        $diminishingRate = $rateMultiplier / $effectiveLife;
 
         $periodStart = $purchaseDate->copy();
 
+        while ($periodStart->lessThanOrEqualTo($currentDate) && $baseValue > 0) {
+            $fiscalYearStart = $periodStart->month >= $fiscalYearStartMonth
+                ? $periodStart->copy()->setDate(
+                    $periodStart->year,
+                    $fiscalYearStartMonth,
+                    1
+                )
+                : $periodStart->copy()->setDate(
+                    $periodStart->year - 1,
+                    $fiscalYearStartMonth,
+                    1
+                );
 
+            $fiscalYearEnd = $fiscalYearStart->copy()->addYear()->subDay();
+
+            $periodEnd = $currentDate->lessThan($fiscalYearEnd)
+                ? $currentDate->copy()
+                : $fiscalYearEnd;
+
+            // Both the starting and ending dates count as days held.
+            $daysHeld = $periodStart->diffInDays($periodEnd) + 1;
+
+            $declineInValue = $baseValue
+                * ($daysHeld / 365)
+                * $diminishingRate;
+
+            $baseValue -= min($declineInValue, $baseValue);
+
+            $periodStart = $periodEnd->copy()->addDay();
+        }
+
+        return round(max($baseValue, 0), 2);
     }
     /**
      * @param  \DateTime  $date

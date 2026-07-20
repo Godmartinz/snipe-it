@@ -81,6 +81,8 @@ class DepreciationsController extends Controller
         ]);
         $depreciation->depreciation_type = $request->input('depreciation_type');
         $depreciation->depreciation_min = $request->input('depreciation_min');
+        $depreciation->rate_multiplier = $request->input('rate_multiplier');
+        $depreciation->fiscal_year_start_month = $request->input('fiscal_year_start_month');
 
         // Was the asset created?
         if ($depreciation->save()) {
@@ -142,6 +144,8 @@ class DepreciationsController extends Controller
         ]);
         $depreciation->depreciation_type = $request->input('depreciation_type');
         $depreciation->depreciation_min = $request->input('depreciation_min');
+        $depreciation->rate_multiplier = $request->input('rate_multiplier');
+        $depreciation->fiscal_year_start_month = $request->input('fiscal_year_start_month');
 
         // Was the asset created?
         if ($depreciation->save()) {
