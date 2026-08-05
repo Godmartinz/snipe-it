@@ -89,7 +89,7 @@ class L6009_A extends L6009
 
     public function getSupportAssetTag()
     {
-        return true;
+        return false;
     }
 
     public function getSupport1DBarcode()
@@ -121,12 +121,16 @@ class L6009_A extends L6009
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->getLabelPrintableArea()->h - (self::TITLE_SIZE + self::TITLE_MARGIN),
             'tag_font_size' => $this->getTagSize(),
+            'title_font' => 'freesans',
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
+            'field_label_font' => 'freesans',
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
-            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_font' => 'freemono',
+            'field_value_font_size' => $this->getLabelSize(),
             'field_value_margin' => $this->getFieldMargin(),
         ];
     }

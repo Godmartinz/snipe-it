@@ -1,50 +1,168 @@
+<!-- Import Label -->
+<div class="form-group">
+    <div class="col-md-3 text-right">
+        <label for="config_snapshot" class="control-label">
+            Import Label Config
+        </label>
+    </div>
+
+    <div class="col-md-7">
+        <input
+                type="hidden"
+                name="import_method"
+                id="import_method"
+                value="json"
+                form="import-label-form"
+        >
+
+        <div class="btn-group import-toggle" role="group">
+            <button
+                    type="button"
+                    class="btn btn-primary import-toggle-btn active"
+                    data-method="json"
+            >
+                JSON
+            </button>
+
+            <button
+                    type="button"
+                    class="btn btn-default import-toggle-btn"
+                    data-method="text"
+            >
+                Text
+            </button>
+        </div>
+
+        <div id="text-input-group" style="display:none; margin-top:10px;">
+            <div class="import-inline-row">
+                                        <textarea
+                                                name="config_snapshot"
+                                                form="import-label-form"
+                                                id="config_snapshot"
+                                                class="form-control"
+                                                rows="4"
+                                                placeholder="Paste label config JSON here"
+                                        >{{ old('config_snapshot') }}</textarea>
+
+                <button
+                        type="submit"
+                        form="import-label-form"
+                        id="import-text-button"
+                        class="btn btn-primary"
+                        disabled
+                >
+                    Import
+                </button>
+            </div>
+
+            <p id="json-validation-message" class="help-block" style="display:none;"></p>
+        </div>
+
+        <div id="json-input-group" style="margin-top:10px; margin-bottom:15px;">
+            <div class="input-group">
+                <input
+                        type="file"
+                        name="config_file"
+                        form="import-label-form"
+                        id="config_file"
+                        class="form-control"
+                        accept=".json,application/json"
+                >
+
+                <span class="input-group-btn">
+                                            <button
+                                                    type="submit"
+                                                    form="import-label-form"
+                                                    id="import-file-button"
+                                                    class="btn btn-primary"
+                                                    disabled
+                                            >
+                                                Import
+                                            </button>
+                                        </span>
+            </div>
+        </div>
+
+        @if ($errors->has('config_snapshot'))
+            <ul class="alert-msg list-unstyled" style="margin-top: 10px;">
+                @foreach ((array) $errors->get('config_snapshot') as $message)
+                    @if (is_array($message))
+                        @foreach ($message as $line)
+                            <li>{!! $line !!}</li>
+                        @endforeach
+                    @else
+                        <li>{!! $message !!}</li>
+                    @endif
+                @endforeach
+            </ul>
+        @endif
+    </div>
+</div>
+<!-- New Settings -->
 <fieldset name="select-template">
     <x-form.legend>
         {{ trans('admin/settings/general.select_template') }}
     </x-form.legend>
 
+    <!-- Template -->
     <div class="form-group{{ $errors->has('label2_template') ? ' has-error' : '' }}">
+
         <div class="col-md-12">
-            <table
-                data-columns="{{ \App\Presenters\LabelPresenter::dataTableLayout() }}"
-                data-cookie="true"
-                data-cookie-id-table="label2TemplateTable"
-                data-id-table="label2TemplateTable"
-                data-select-item-name="label2_template"
-                data-id-field="name"
-                data-side-pagination="server"
-                data-sort-name="name"
-                data-fixed-columns="false"
-                data-sort-order="asc"
-                data-url="{{ route('api.labels.index') }}"
-                id="label2TemplateTable"
-                class="table table-striped snipe-table"
-            ></table>
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const chosenLabel = "{{ old('label2_template', $chosenLabel ?? '') }}";
-                    $('#label2TemplateTable').on('load-success.bs.table', () => {
-                        if (chosenLabel) {
-                            $('input[name="label2_template"][value="' + chosenLabel + '"]').prop('checked', true);
-                        }
-
-                        const form = document.getElementById('settingsForm');
-                        form?.dispatchEvent(new Event('change'));
-
-                        // Attach event listeners for template selection changes
-                        document.querySelectorAll('input[name="label2_template"]').forEach(radio => {
-                            radio.addEventListener('change', function() {
-                                if (this.checked) {
-                                    document.getElementById('label2_preview_template').textContent = this.value;
-                                }
-                            });
-                        });
-                    });
-                });
-            </script>
+            <x-container>
+                <x-box name="label-templates">
+                    <x-table.labels/>
+                </x-box>
+            </x-container>
         </div>
     </div>
 </fieldset>
+{{--<fieldset name="select-template">--}}
+{{--    <x-form.legend>--}}
+{{--        {{ trans('admin/settings/general.select_template') }}--}}
+{{--    </x-form.legend>--}}
+
+{{--    <div class="form-group{{ $errors->has('label2_template') ? ' has-error' : '' }}">--}}
+{{--        <div class="col-md-12">--}}
+{{--            <table--}}
+{{--                data-columns="{{ \App\Presenters\LabelPresenter::dataTableLayout() }}"--}}
+{{--                data-cookie="true"--}}
+{{--                data-cookie-id-table="label2TemplateTable"--}}
+{{--                data-id-table="label2TemplateTable"--}}
+{{--                data-select-item-name="label2_template"--}}
+{{--                data-id-field="name"--}}
+{{--                data-side-pagination="server"--}}
+{{--                data-sort-name="name"--}}
+{{--                data-fixed-columns="false"--}}
+{{--                data-sort-order="asc"--}}
+{{--                data-url="{{ route('api.labels.index') }}"--}}
+{{--                id="label2TemplateTable"--}}
+{{--                class="table table-striped snipe-table"--}}
+{{--            ></table>--}}
+{{--            <script>--}}
+{{--                document.addEventListener('DOMContentLoaded', () => {--}}
+{{--                    const chosenLabel = "{{ old('label2_template', $chosenLabel ?? '') }}";--}}
+{{--                    $('#label2TemplateTable').on('load-success.bs.table', () => {--}}
+{{--                        if (chosenLabel) {--}}
+{{--                            $('input[name="label2_template"][value="' + chosenLabel + '"]').prop('checked', true);--}}
+{{--                        }--}}
+
+{{--                        const form = document.getElementById('settingsForm');--}}
+{{--                        form?.dispatchEvent(new Event('change'));--}}
+
+{{--                        // Attach event listeners for template selection changes--}}
+{{--                        document.querySelectorAll('input[name="label2_template"]').forEach(radio => {--}}
+{{--                            radio.addEventListener('change', function() {--}}
+{{--                                if (this.checked) {--}}
+{{--                                    document.getElementById('label2_preview_template').textContent = this.value;--}}
+{{--                                }--}}
+{{--                            });--}}
+{{--                        });--}}
+{{--                    });--}}
+{{--                });--}}
+{{--            </script>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+{{--</fieldset>--}}
 
 <fieldset name="label-settings">
     <x-form.legend help_text="{{ trans('admin/settings/general.labels_title_help') }}">
