@@ -231,6 +231,23 @@ trait RenderCustomLabelContent
 
     protected function renderVerticalStackedTextBlock($pdf, $record, array $layout): void
     {
+        if (!empty($layout['title'])) {
+            static::writeText(
+                $pdf,
+                $record->get('title'),
+                $layout['title']['x'],
+                $layout['title']['y'],
+                $this->getTitleFont(),
+                'B',
+                $layout['title']['font_size'],
+                'L',
+                $layout['title']['w'],
+                $layout['title']['h'],
+                true,
+                0
+            );
+        }
+        
         if (empty($layout['fields'])) {
             return;
         }

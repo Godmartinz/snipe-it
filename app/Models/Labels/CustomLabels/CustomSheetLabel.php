@@ -169,6 +169,11 @@ abstract class CustomSheetLabel extends RectangleSheet
         return $this->tagVAlign;
     }
 
+    public function getTextRenderMode(): string
+    {
+        return $this->textRenderMode;
+    }
+
     public function preparePDF($pdf)
     {
         $pdf->SetMargins(0, 0, 0);
@@ -229,7 +234,7 @@ abstract class CustomSheetLabel extends RectangleSheet
         $this->renderLogo($pdf, $record, $layout);
         $this->render2DBarcode($pdf, $record, $layout);
         $this->renderBlockTag($pdf, $record, $layout);
-        $this->renderStackedTextBlock($pdf, $record, $layout);
+        $this->renderTextBlock($pdf, $record, $layout);
     }
 
     protected function buildLayout($pdf, $record, $pa): array
@@ -346,5 +351,15 @@ abstract class CustomSheetLabel extends RectangleSheet
         );
 
         return $layout;
+    }
+
+    protected function renderTextBlock($pdf, $record, array $layout): void
+    {
+        if ($this->getTextRenderMode() === 'vertical_stack') {
+            $this->renderVerticalStackedTextBlock($pdf, $record, $layout);
+            return;
+        }
+
+        $this->renderStackedTextBlock($pdf, $record, $layout);
     }
 }

@@ -115,18 +115,30 @@ class L7162_A extends L7162
         return true;
     }
 
+    public function getTextRenderMode(): string
+    {
+        return 'vertical_stack';
+    }
+
     protected function getContentEditorConfig(): array
     {
-        return [
+        return array(
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->getLabelPrintableArea()->h - (self::TITLE_SIZE + self::TITLE_MARGIN),
+            'tag_font' => 'freemono',
             'tag_font_size' => $this->getTagSize(),
-            'title_font_size' => $this->getTitleSize(),
-            'title_margin' => $this->getTitleMargin(),
+            'tag_offset_x' => 4,
+            'title_font' => 'freesans',
+            'title_font_size' => 3.2,
+            'title_margin' => .4,
+            'field_label_font' => 'freesans',
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
-            'field_value_font_size' => $this->getFieldSize(),
+            'field_label_value_font' => 'freemono',
+            'field_value_font_size' => 3.6,
             'field_value_margin' => $this->getFieldMargin(),
-        ];
+            'text_render_mode' => $this->getTextRenderMode(),
+        );
     }
 
     protected function getSupportsEditorConfig(): array
