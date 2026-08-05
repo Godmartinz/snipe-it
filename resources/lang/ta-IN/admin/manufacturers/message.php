@@ -25,7 +25,7 @@ return [
         'confirm' => 'இந்த உற்பத்தியாளரை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'தயாரிப்பாளரை நீக்குவதில் ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

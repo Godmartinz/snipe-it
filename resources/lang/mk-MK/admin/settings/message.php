@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'Таа резервна копија не може да се најде на серверот.',
         'restore_warning' => 'Да, врати. Потврдувам дека ова ќе ги презапише сите постоечки податоци во моментот во базата на податоци. Ова исто така ќе ги одјави сите постоечки корисници This will also log out all of your existing users (вклучително и тебе).',
         'restore_confirm' => 'Дали сте сигурни дека сакате да ја вратите вашата база на податоци од :filename?',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => 'Резервната копија на вашиот систем е обновена. Повторно најавете се.',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Се случи грешка при трајното бришење. ',

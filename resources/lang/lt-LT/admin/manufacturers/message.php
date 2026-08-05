@@ -25,8 +25,8 @@ return [
         'confirm' => 'Ar jūs tikrai norite panaikinti šį gamintoją?',
         'error' => 'Bandant panaikinti gamintoją įvyko klaida. Bandykite dar kartą.',
         'success' => 'Gamintojas sėkmingai panaikintas.',
-        'bulk_success' => 'Gamintojai sėkmingai panaikinti.',
-        'partial_success' => 'Gamintojas sėkmingai panaikintas. Daugiau informacijos rasite žemiau. | :count gamintojai(-ų) buvo sėkmingai panaikinti. Daugiau informacijos rasite žemiau.',
+        'bulk_success' => 'Gamintojas sėkmingai ištrintas.|Gamintojai (:count) sėkmingai ištrinti.',
+        'partial_success' => 'Gamintojas sėkmingai panaikintas. Daugiau informacijos rasite žemiau. | Gamintojai (:count) buvo sėkmingai panaikinti. Daugiau informacijos rasite žemiau.',
     ],
 
 ];

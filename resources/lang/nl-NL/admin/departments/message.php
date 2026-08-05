@@ -17,6 +17,8 @@ return [
         'confirm' => 'Weet je zeker dat je deze afdeling wil verwijderen?',
         'error' => 'Er was een probleem tijdens het verwijderen van de afdeling, probeer het nogmaals.',
         'success' => 'De afdeling is succesvol verwijderd.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

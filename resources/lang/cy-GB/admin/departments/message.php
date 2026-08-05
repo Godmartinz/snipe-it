@@ -17,6 +17,8 @@ return [
         'confirm' => 'Ydych chi\'n sicr eich bod eisiau dileu\'r adran yma?',
         'error' => 'Nid oedd yn bosib dileu\'r adran. Ceisiwch eto o. g. y. dd.',
         'success' => 'Adran wedi dileu\'n llwyddiannus.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

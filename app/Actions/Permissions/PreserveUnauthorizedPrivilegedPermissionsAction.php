@@ -13,8 +13,13 @@ final class PreserveUnauthorizedPrivilegedPermissionsAction
      * @param  array<string, mixed>  $originalPermissions
      * @return array<string, mixed>
      */
-    public static function run(array $requestedPermissions, User $authenticatedUser, array $originalPermissions = []): array
+    public static function run(array $requestedPermissions, User $authenticatedUser, array $originalPermissions = [], ?User $targetUser = null): array
     {
+        // Disallow non-admin/superuser users from modifying their own permissions, but allow them to modify other users' permissions (except for admin/superuser keys).
+        if ($targetUser && ! $authenticatedUser->isSuperUser() && $authenticatedUser->id === $targetUser->id) {
+            return $originalPermissions;
+        }
+
         if (! $authenticatedUser->isSuperUser()) {
             if (array_key_exists('superuser', $originalPermissions)) {
                 $requestedPermissions['superuser'] = $originalPermissions['superuser'];

@@ -30,6 +30,7 @@ class ModalController extends Controller
             'kit-consumable',
             'kit-accessory',
             'location',
+            'maintenance-type',
             'manufacturer',
             'model',
             'statuslabel',

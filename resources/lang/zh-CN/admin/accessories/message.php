@@ -20,6 +20,8 @@ return [
         'confirm' => '你确定要删除此配件？',
         'error' => '删除配件出错，请重试。',
         'success' => '删除配件成功',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

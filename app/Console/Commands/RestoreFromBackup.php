@@ -233,19 +233,20 @@ class RestoreFromBackup extends Command
 
         $errcode = $za->open($filename/* , ZipArchive::RDONLY */); // that constant only exists in PHP 7.4 and higher
         if ($errcode !== true) {
-            $errors = [
+            $error_msg = match ($errcode) {
                 ZipArchive::ER_EXISTS => 'File already exists.',
                 ZipArchive::ER_INCONS => 'Zip archive inconsistent.',
                 ZipArchive::ER_INVAL => 'Invalid argument.',
                 ZipArchive::ER_MEMORY => 'Malloc failure.',
-                ZipArchive::ER_NOENT => 'No such file ('.$filename.') in directory '.$dir.'.',
+                ZipArchive::ER_NOENT => 'No such file (' . $filename . ') in directory ' . $dir . '.',
                 ZipArchive::ER_NOZIP => 'Not a zip archive.',
                 ZipArchive::ER_OPEN => "Can't open file.",
                 ZipArchive::ER_READ => 'Read error.',
                 ZipArchive::ER_SEEK => 'Seek error.',
-            ];
+                default => "Unknown reason: $errcode",
+            };
 
-            return $this->error('Could not access file: '.$filename.' - '.array_key_exists($errcode, $errors) ? $errors[$errcode] : " Unknown reason: $errcode");
+            return $this->error('Could not access file: ' . $filename . ' - ' . $error_msg);
         }
 
         $private_dirs = [
@@ -421,11 +422,17 @@ class RestoreFromBackup extends Command
         if (strpos($sqlfiles[0], 'db-dumps') === false) {
             // return $this->error("SQL backup file is missing 'db-dumps' component of full pathname: ".$sqlfiles[0]);
             // older Snipe-IT installs don't have the db-dumps subdirectory component
+            $this->warn("Did not find the 'db-dumps' directory - is this really a Snipe-IT backup file? Continuing anyways...");
         }
 
         $sql_stat = $za->statIndex($sqlfile_indices[0]);
         // $this->info("SQL Stat is: ".print_r($sql_stat,true));
         $sql_contents = $za->getStream($sql_stat['name']); // maybe copy *THIS* thing?
+
+        if ($sql_contents === false) {
+            $this->error("Unable to open SQL file: " . $sql_stat['name']);
+            return -1;
+        }
 
         // OKAY, now that we *found* the sql file if we're doing just the guess-prefix thing, we can do that *HERE* I think?
         if ($this->option('sanitize-guess-prefix')) {
@@ -456,10 +463,12 @@ class RestoreFromBackup extends Command
         if (! file_exists($mysql_binary)) {
             return $this->error("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
         }
-        $proc_results = proc_open("$mysql_binary -h ".
-            escapeshellarg(config('database.connections.mysql.host')).
-            ' -u '.escapeshellarg(config('database.connections.mysql.username')).' '.
-            ' -P '.escapeshellarg(config('database.connections.mysql.port')).' '.
+        $proc_results = proc_open("$mysql_binary -h " .
+            escapeshellarg(config('database.connections.mysql.host')) .
+            ' --batch ' .
+            ' --binary-mode ' .
+            ' -u ' . escapeshellarg(config('database.connections.mysql.username')) . ' ' .
+            ' -P ' . escapeshellarg(config('database.connections.mysql.port')) . ' ' .
             escapeshellarg(config('database.connections.mysql.database')), // yanked -p since we pass via ENV
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
@@ -467,29 +476,6 @@ class RestoreFromBackup extends Command
             $env_vars); // this is not super-duper awesome-secure, but definitely more secure than showing it on the CLI, or dropping temporary files with passwords in them.
         if ($proc_results === false) {
             return $this->error('Unable to invoke mysql via CLI');
-        }
-
-        // I'm not sure about these?
-        stream_set_blocking($pipes[1], false); // use non-blocking reads for stdout
-        stream_set_blocking($pipes[2], false); // use non-blocking reads for stderr
-
-        // $this->info("Stdout says? ".fgets($pipes[1])); //FIXME: I think we might need to set non-blocking mode to use this properly?
-        // $this->info("Stderr says? ".fgets($pipes[2])); //FIXME: ditto, same.
-        // should we read stdout?
-        // fwrite($pipes[0],config("database.connections.mysql.password")."\n"); //this doesn't work :(
-
-        // $sql_contents = fopen($sqlfiles[0], "r"); //NOPE! This isn't a real file yet, silly-billy!
-
-        // FIXME - this feels like it wants to go somewhere else?
-        // and it doesn't seem 'right' - if you can't get a stream to the .sql file,
-        // why do we care what's happening with pipes and stdout and stderr?!
-        if ($sql_contents === false) {
-            $stdout = fgets($pipes[1]);
-            $this->info($stdout);
-            $stderr = fgets($pipes[2]);
-            $this->info($stderr);
-
-            return false;
         }
 
         try {
@@ -521,7 +507,8 @@ class RestoreFromBackup extends Command
             throw $e;
         }
         if (! feof($sql_contents) || $bytes_read == 0) {
-            return $this->error('Not at end of file for sql file, or zero bytes read. aborting!');
+            $this->error('Not at end of file for sql file, or zero bytes read. aborting!');
+            return -1;
         }
 
         fclose($pipes[0]);

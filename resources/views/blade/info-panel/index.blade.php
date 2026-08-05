@@ -1,6 +1,7 @@
 @props([
     'infoPanelObj' => null,
     'img_path' => null,
+    'qr_code_url' => null,
     'snipeSettings' => \App\Models\Setting::getSettings()
 ])
 
@@ -221,10 +222,30 @@
         @endif
 
 
-        @if ($infoPanelObj->company)
+        @if ($infoPanelObj->companies)
+            @if ($infoPanelObj->companies->count() > 1)
+                <x-info-element icon_type="company" title="{{ trans('general.companies') }}">
+                    {{ trans('general.companies') }}
+                    <x-info-element class="subitem">
+                        <x-copy-to-clipboard class="pull-right" copy_what="companies">
+                            @foreach ($infoPanelObj->companies as $company)
+                                {!!  $company->present()->formattedNameLink !!}<br>
+                            @endforeach
+                        </x-copy-to-clipboard>
+                    </x-info-element>
+                </x-info-element>
+            @elseif ($infoPanelObj->companies->isNotEmpty())
+                <x-info-element icon_type="company" icon_color="{{ $infoPanelObj->companies->first()->tag_color }}" title="{{ trans('general.company') }}">
+                    <x-copy-to-clipboard class="pull-right" copy_what="company">
+                        {!!  $infoPanelObj->companies->first()->present()->nameUrl !!}
+                    </x-copy-to-clipboard>
+                </x-info-element>
+            @endif
+
+        @elseif ($infoPanelObj->company)
             <x-info-element icon_type="company" icon_color="{{ $infoPanelObj->company->tag_color }}" title="{{ trans('general.company') }}">
                 <x-copy-to-clipboard class="pull-right" copy_what="company">
-                {!!  $infoPanelObj->company->present()->nameUrl !!}
+                    {!!  $infoPanelObj->company->present()->nameUrl !!}
                 </x-copy-to-clipboard>
             </x-info-element>
         @endif
@@ -274,9 +295,9 @@
 
 
         <x-info-panel.supplier :infoPanelObj="$infoPanelObj"/>
-        <x-info-panel.manufacturer :asset="$infoPanelObj" :manufacturer="($infoPanelObj->manufacturer ?? $infoPanelObj->model?->manufacturer)"/>
+        <x-info-panel.manufacturer :infoPanelObj="$infoPanelObj" :manufacturer="($infoPanelObj->manufacturer ?? $infoPanelObj->model?->manufacturer)"/>
 
-        @if ((isset($infoPanelObj->parent)) && ($infoPanelObj->parent))
+        @if (($infoPanelObj instanceof \App\Models\Location) && (isset($infoPanelObj->parent)) && ($infoPanelObj->parent))
             @php
                 $locationAncestors = [];
                 $ancestorCursor = $infoPanelObj->parent;
@@ -340,12 +361,32 @@
             </x-info-element>
         @endif
 
+        @if (isset($infoPanelObj->support_email) && $infoPanelObj->support_email)
+            <x-info-element icon_type="email" title="{{ trans('admin/manufacturers/table.support_email') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="support_email">
+                    <x-info-element.email>
+                        {{ $infoPanelObj->support_email }}
+                    </x-info-element.email>
+                </x-copy-to-clipboard>
+            </x-info-element>
+        @endif
+
 
         @if ($infoPanelObj->phone)
             <x-info-element icon_type="phone" title="{{ trans('general.phone') }}">
                 <x-copy-to-clipboard class="pull-right" copy_what="phone">
                     <x-info-element.phone>
                     {{ $infoPanelObj->phone }}
+                    </x-info-element.phone>
+                </x-copy-to-clipboard>
+            </x-info-element>
+        @endif
+
+        @if (isset($infoPanelObj->support_phone) && $infoPanelObj->support_phone)
+            <x-info-element icon_type="phone" title="{{ trans('admin/manufacturers/table.support_phone') }}">
+                <x-copy-to-clipboard class="pull-right" copy_what="support_phone">
+                    <x-info-element.phone>
+                        {{ $infoPanelObj->support_phone }}
                     </x-info-element.phone>
                 </x-copy-to-clipboard>
             </x-info-element>
@@ -369,11 +410,37 @@
             </x-info-element>
         @endif
 
-        <x-info-element icon_type="external-link" title="{{ trans('general.url') }}">
-            <x-info-element.url>
-                {{ $infoPanelObj->url }}
-            </x-info-element.url>
-        </x-info-element>
+        @if ($infoPanelObj->url)
+            <x-info-element icon_type="external-link" title="{{ trans('general.url') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->url }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
+
+        @if (isset($infoPanelObj->support_url) && $infoPanelObj->support_url)
+            <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->support_url }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
+
+        @if (isset($infoPanelObj->warranty_lookup_url) && $infoPanelObj->warranty_lookup_url)
+            <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.warranty_lookup_url') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->warranty_lookup_url }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
+
+        @if (isset($infoPanelObj->website) && $infoPanelObj->website)
+            <x-info-element icon_type="external-link" title="{{ trans('general.website') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->website }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
 
 
         @if (($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))
@@ -567,6 +634,12 @@
     </ul>
         @if (isset($after_list))
             {{ $after_list }}
+        @endif
+
+        @if ($qr_code_url && $snipeSettings->isQrEnabled())
+            <div class="col-md-12 text-center asset-qr-img" style="padding-top: 15px;">
+                <img src="{{ $qr_code_url }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $infoPanelObj->name }}">
+            </div>
         @endif
 
 </div>

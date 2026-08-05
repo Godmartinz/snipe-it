@@ -10,8 +10,10 @@
                 :disabled="$this->eulaTextDisabled"
             />
             <p class="help-block">{!! trans('admin/categories/general.eula_text_help') !!} </p>
-            <p class="help-block">{!! trans('admin/settings/general.eula_markdown') !!} </p>
-            {!! $errors->first('eula_text', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+            <x-form.help name="eula_text" icon="markdown">
+                {{ trans('general.markdown') }}
+            </x-form.help>
+            <x-form.error name="eula_text" />
         </div>
         @if ($this->eulaTextDisabled)
             <input type="hidden" name="eula_text" wire:model.live="eulaText" />
@@ -105,10 +107,10 @@
                 @endif
             </label>
             @if ($this->emailWillBeSendDueToEula)
-                <div class="callout callout-info">
-                    <i class="far fa-envelope"></i>
+                <x-callout type="info" role="status">
+                    <i class="far fa-envelope" aria-hidden="true"></i>
                     <span>{{ $this->emailMessage }}</span>
-                </div>
+                </x-callout>
             @endif
         </div>
     </div>

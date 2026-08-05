@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Ritorna a tutti i :type',
     'redirect_to_type' => 'Vai a :type',
     'redirect_to_checked_out_to' => 'Vai agli assegnati',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Selezionare il tipo di stato',
     'serial' => 'Seriale',
     'serial_required' => 'È obbligatorio il numero di serie per il bene :number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Etichetta Bene',
     'update' => 'Aggiorna Bene',
     'warranty' => 'Garanzia',
+    'warranty_months' => 'Mesi Di Garanzia',
     'warranty_expires' => 'Scadenza Garanzia',
     'years' => 'anni',
     'asset_location' => 'Aggiorna Sede del Bene',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Informazioni Opzionali',
     'order_details' => 'Informazioni relative all\'ordine',
     'calc_eol' => 'Se viene annullata la data di EOL, usa il calcolo automatico in base alla data d\'acquisto e al tasso di EOL.',
+    'checkin_licenses' => 'Restituzione slot licenza associati',
+    'checkin_child_assets' => 'Restituzione Beni associati',
 ];

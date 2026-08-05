@@ -19,6 +19,8 @@ return [
         'confirm' => 'Apakah Anda yakin ingin menghapus kelas depresiasi ini?',
         'error' => 'Ada masalah menghapus kelas penyusutan. Silakan coba lagi.',
         'success' => 'Kelas depresiasi berhasil dihapus.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

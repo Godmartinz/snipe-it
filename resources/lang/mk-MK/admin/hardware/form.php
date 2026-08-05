@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Врати се на сите :type',
     'redirect_to_type' => 'Оди на :type',
     'redirect_to_checked_out_to' => 'Оди на задолжени',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Изберете статус',
     'serial' => 'Сериски број',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Код на основното средство',
     'update' => 'Ажурирање на основни средства',
     'warranty' => 'Гаранција',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Гаранцијата истекува',
     'years' => 'години',
     'asset_location' => 'Ажурирај локација на средството',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Опционални информации',
     'order_details' => 'Информации за набавка',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

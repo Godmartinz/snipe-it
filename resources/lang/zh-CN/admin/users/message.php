@@ -4,14 +4,18 @@ return [
 
     'accepted' => '您已接受这个物品。',
     'declined' => '您已拒绝这个物品。',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => '您的用户已成功更新，但经理信息未保存，因为您选择的经理也在本次编辑的用户列表中，用户不能是自己的经理。请重新选择您的用户，但这次请排除经理。',
     'user_exists' => '用户已经存在!',
     'cannot_delete' => '用户不存在或您没有权限删除。',
     'user_not_found' => '用户不存在或您没有查看权限。',
     'user_login_required' => '登陆字段是必须的',
     'user_has_no_assets_assigned' => '目前没有分配给用户的资产。',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => '密码为必填项',
     'insufficient_permissions' => '权限不足',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => '用户已经被删除，您需要恢复这个用户才能对其进行编辑或者分配新资产。',
     'ldap_not_configured' => '本次安装过程中未启用LDAP集成。',
     'password_resets_sent' => '密码重置链接已发送给符合以下条件的已选用户：已激活且邮箱地址有效。',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => '密码重置链接已发送至 :email!',
     'user_has_no_email' => '此用户的个人资料中没有电子邮件地址。',
     'log_record_not_found' => '找不到该用户匹配的日志记录。',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => '用户创建成功',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => '此帐户的密码由LDAP / Active Directory管理。请联系您的IT部门更改您的密码。',
         'multi_company_items_assigned' => '该用户被分配的物品属于另一家公司。请归还它们或编辑它们所在的公司。',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

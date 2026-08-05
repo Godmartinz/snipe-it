@@ -20,6 +20,8 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an accessory seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an accessory. Arís, le d\'thoil.',
         'success' => 'Scriosadh an cúlpháirtí go rathúil.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

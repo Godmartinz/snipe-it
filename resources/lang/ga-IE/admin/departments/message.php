@@ -17,6 +17,8 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an roinn seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an roinn. Arís, le d\'thoil.',
         'success' => 'Scriosadh an roinn go rathúil.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

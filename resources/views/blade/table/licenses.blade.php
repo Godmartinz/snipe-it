@@ -1,6 +1,7 @@
 @props([
     'route' => route('api.licenses.index'),
     'name' => 'default',
+    'export_name' => null,
     'presenter' => \App\Presenters\LicensePresenter::dataTableLayout(),
     'fixed_right_number' => 2,
     'fixed_number' => 1,
@@ -22,12 +23,13 @@
         :$presenter
         :$fixed_right_number
         :$fixed_number
+        use_sticky_css
         :$show_search
         :$show_column_search
         :$show_advanced_search
         buttons="licenseButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-licenses-{{ date('Y-m-d') }}"
+        export_filename="export-{{ str_slug($export_name ?? $name) }}-licenses-{{ date('Y-m-d') }}"
     />
 
 

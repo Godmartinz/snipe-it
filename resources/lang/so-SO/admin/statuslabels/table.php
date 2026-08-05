@@ -13,6 +13,7 @@ return [
     'pending' => 'La sugayo',
     'status_type' => 'Nooca Xaaladda',
     'show_in_nav' => 'Muuji dhinaca nav',
+    'status_label' => 'Status Label',
     'title' => 'Calaamadaha heerka',
     'undeployable' => 'Aan la hawlgelin',
     'update' => 'Cusbooneysii Heerka Summada',

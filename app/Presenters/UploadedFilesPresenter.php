@@ -8,16 +8,22 @@ namespace App\Presenters;
 class UploadedFilesPresenter extends Presenter
 {
     /**
-     * Json Column Layout for bootstrap table
+     * Json Column Layout for bootstrap table.
      *
+     * @param  array  $hide_fields  Column field names to omit from the layout.
+     *                              Callers pass `['available_actions']` for
+     *                              read-only views (e.g. the model files tab
+     *                              for users without models.files) so the
+     *                              delete button doesn't render at all.
      * @return string
      */
-    public static function dataTableLayout()
+    public static function dataTableLayout($hide_fields = [])
     {
 
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -26,6 +32,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'icon',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -35,6 +42,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -44,6 +52,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'filename',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -53,6 +62,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'download',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -64,6 +74,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -72,6 +83,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -80,14 +92,20 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.created_at'),
                 'visible' => true,
                 'formatter' => 'dateDisplayFormatter',
-            ], [
+            ],
+        ];
+
+        if (! in_array('available_actions', $hide_fields)) {
+            $layout[] = [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -96,8 +114,8 @@ class UploadedFilesPresenter extends Presenter
                 'formatter' => 'deleteUploadFormatter',
                 'printIgnore' => true,
                 'class' => 'hidden-print',
-            ],
-        ];
+            ];
+        }
 
         return json_encode($layout);
     }

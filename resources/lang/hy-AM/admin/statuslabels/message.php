@@ -20,6 +20,8 @@ return [
         'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս կարգավիճակի պիտակը։',
         'error' => 'Կարգավիճակի պիտակը ջնջելիս խնդիր առաջացավ։ Խնդրում ենք կրկին փորձել։',
         'success' => 'Կարգավիճակի պիտակը հաջողությամբ ջնջվել է։',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

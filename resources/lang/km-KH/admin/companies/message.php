@@ -16,5 +16,7 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបក្រុមហ៊ុននេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបក្រុមហ៊ុន។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'ក្រុមហ៊ុនត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Standaard gebruikersovereenkomst niet gevonden. Ga naar Instellingen en voeg er één toe.',
     'total' => 'Totaal',
     'remaining' => 'Besch.',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Accessoire bijwerken',
     'use_default_eula' => 'Gebruik de <a href="#" data-toggle="modal" data-target="#eulaModal"> standaard gebruikersovereenkomst</a>.',
     'use_default_eula_disabled' => '<del>Gebruik de standaard gebruikersovereenkomst.</del> Geen standaard gebruikersovereenkomst ingesteld. Ga naar Instellingen en voeg er één toe.',

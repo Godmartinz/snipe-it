@@ -19,6 +19,8 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovu klasu amortizacije?',
         'error' => 'Došlo je do problema s brisanjem klase amortizacije. Molim pokušajte ponovo.',
         'success' => 'Klasa amortizacije uspešno je izbrisana.',
+        'bulk_success' => 'Klasa zastarevanja je uspešno izbrisana.|:count klase zastarevanja su uspešno izbrisane.',
+        'partial_success' => 'Klasa zastarevanja je uspešno izbrisana. Detaljne informacije pogledajte ispod.|:count klase statusa su uspešno izbrisane. Detaljne informacije pogledajte ispod.',
     ],
 
 ];

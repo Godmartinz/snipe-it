@@ -3,6 +3,7 @@
 return [
     'actions' => 'Veiksmai',
     'add' => 'Pridėti naują',
+    'back' => 'Grįžti',
     'cancel' => 'Atšaukti',
     'checkin_and_delete' => 'Paimti viską / Panaikinti naudotoją',
     'delete' => 'Panaikinti',

@@ -19,6 +19,8 @@ return [
         'confirm' => 'Is jy seker jy wil hierdie depresiasieklas verwyder?',
         'error' => 'Daar was \'n probleem met die verwydering van die waardeverminderingsklas. Probeer asseblief weer.',
         'success' => 'Die waardeverminderingsklas is suksesvol verwyder.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

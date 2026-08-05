@@ -20,7 +20,7 @@ return [
         'error' => 'Došlo je do problema sa brisanjem dobavljača. Molim pokušajte ponovo.',
         'success' => 'Dobavljač je uspešno izbrisan.',
         'not_found' => 'Dobavljač nije pronađen.',
-        'bulk_success' => 'Dobavljači su uspešno izbrisani.',
+        'bulk_success' => 'Dobavljač je uspešno izbrisan.|:count dobavljača su uspešno izbrisani.',
         'partial_success' => '.',
     ],
 

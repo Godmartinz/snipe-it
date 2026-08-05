@@ -35,6 +35,12 @@ return [
         'assets_do_not_exist_or_are_invalid' => 'Selected assets cannot be updated.',
     ],
 
+    'bulk_update' => [
+        'success' => 'Asset updated successfully.|:count assets were updated successfully.',
+        'partial' => ':success asset(s) updated successfully, :failed failed. See the results array for details.',
+        'error' => 'No assets were updated. See the results array for details.',
+    ],
+
     'restore' => [
         'error' => 'Asset was not restored, please try again',
         'success' => 'Asset restored successfully.',
@@ -68,9 +74,54 @@ return [
         'file_delete_error' => 'The file was unable to be deleted',
         'file_missing' => 'The file selected is missing',
         'file_already_deleted' => 'The file selected was already deleted',
+        'file_missing_on_disk' => 'The file for this import is no longer on disk. It may have been deleted outside of Snipe-IT. Delete this entry and re-upload the file to try again.',
+        'file_empty' => 'This file has no data rows. Nothing can be imported from it.',
+        'header_row_missing' => 'This file does not have a recognized header row. Delete this entry and re-upload the file to try again.',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
         'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
+        'bulk_delete' => [
+            'button' => 'Delete Selected (:count)',
+            'confirm_title' => 'Delete selected import files?',
+            'confirm_body' => 'You are about to permanently delete :count import file(s). This cannot be undone.',
+            'confirm_button' => 'Suprimeix',
+            'success' => 'Import file deleted successfully.|:count import files were deleted successfully.',
+            'skipped' => ':count file(s) were skipped because you do not have permission to delete them.',
+            'select_all' => 'Select all files on this page',
+            'select_row' => 'Select :file for bulk delete',
+        ],
+        'row_count' => '{0} No data rows in this file|{1} :count data row to import|[2,*] :count data rows to import',
+        'summary' => [
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'skipped' => 'Skipped as duplicates',
+            'errored' => 'Errored',
+            'no_changes' => 'The import finished but nothing was created or updated. Every row was skipped, usually because the underlying records already existed. Check the counts below and adjust the CSV or import type if that is not what you expected.',
+        ],
+        'update_mode_help' => 'When enabled, existing records matched by identity (serial, asset tag, username, etc.) are updated instead of skipped. Any column in your CSV with an empty value will clear the corresponding field on the existing record. Columns you leave out of your CSV entirely are not touched, so existing values are preserved. Required fields (like name and seats on a license) cannot be cleared. Leaving them empty will produce a validation error for that row.',
+        'type_required' => 'Please select an import type before continuing.',
+        'processing' => 'Processing your import. Please wait until this finishes before closing the page.',
+        'backup_running' => 'Running backup before importing. This can take a while on larger files. Please wait.',
+        'backup_label' => 'Pre-import backup',
+        'backup_complete' => 'Backup complete',
+        'import_label' => 'Importació',
+        'required_fields_missing' => 'The following required fields are not mapped: :fields',
+        'history' => [
+            'missing_asset_tag_identity' => '(missing asset tag)',
+            'missing_asset_tag_message' => 'Row skipped: no asset tag provided.',
+            'asset_not_found_message' => 'Asset with this tag does not exist. Import assets first, then re-run the history import.',
+            'user_not_matched_message' => 'No user matched ":name" - toggle the match-by options in step 1 or create the user first.',
+        ],
+        'wizard' => [
+            'step_type' => 'Choose type',
+            'step_map' => 'Map fields',
+            'step_preview' => 'Preview',
+            'back' => 'Enrere',
+            'next' => 'Next',
+            'preview_button' => 'Preview',
+            'process' => 'Process import',
+            'preview_intro' => 'Previewing the first :count row(s) after applying your mapping. Use the Back button if you need to edit the mapped attributes before importing.',
+        ],
     ],
 
     'delete' => [
@@ -92,6 +143,18 @@ return [
     'multi-checkout' => [
         'error' => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
+    ],
+
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'You must select at least one asset from the list',
+    ],
+
+    'multi-audit' => [
+        'success' => ':count asset audited successfully.|:count assets audited successfully.',
+        'partial_error' => ':success asset audited, :failed failed. Check the errors below and try again.|:success assets audited, :failed failed. Check the errors below and try again.',
+        'no_assets_selected' => 'You must select at least one asset from the list',
     ],
 
     'checkin' => [

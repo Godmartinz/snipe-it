@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Зареєстровано через масове повернення ліцензій у графічному інтерфейсі ліцензій',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Видати всі місця',
             'modal' => 'Ця дія перевірить одне місце для першого доступного користувача. | Ця дія перевірить всі :available_seats_count місць з першими доступними користувачами. Користувача вважається доступним для цього місця, якщо ця ліцензія вже не перевірена їм, і автоматично призначення властивості ліцензії увімкнено на їхній обліковий запис користувача.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Нічого робити. Немає користувачів, які не мають цієї ліцензії, призначеної для них.',
             'log_msg' => 'Перевірено через масову ліцензію з GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

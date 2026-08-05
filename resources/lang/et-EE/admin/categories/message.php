@@ -21,7 +21,7 @@ return [
         'confirm' => 'Kas oled kindel, et soovid selle kategooria kustutada?',
         'error' => 'Kategooria kustutamisel tekkis probleem. Palun proovi uuesti.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

@@ -78,6 +78,7 @@ class IconHelper
             case 'angle-right':
                 return 'fas fa-angle-right';
             case 'warning':
+            case 'alert':
                 return 'fas fa-exclamation-triangle';
             case 'kits':
                 return 'fas fa-object-group';
@@ -121,11 +122,18 @@ class IconHelper
                 return 'fa-solid fa-key';
             case 'api-key':
                 return 'fas fa-user-secret';
+            case 'impersonate':
+                return 'fa-solid fa-user-ninja';
+            case 'transfer':
+                return 'fa-solid fa-person-walking-arrow-right';
+            case 'undo':
+                return 'fas fa-arrow-left';
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':
                 return 'fas fa-tachometer-alt';
             case 'info-circle':
+            case 'info':
                 return 'fas fa-info-circle';
             case 'caret-right':
                 return 'fa fa-caret-right';
@@ -135,6 +143,10 @@ class IconHelper
                 return 'fa fa-caret-down';
             case 'arrow-circle-right':
                 return 'fa fa-arrow-circle-right';
+            case 'arrow-right':
+                return 'fas fa-arrow-right';
+            case 'arrow-left':
+                return 'fas fa-arrow-left';
             case 'minus':
                 return 'fas fa-minus';
             case 'spinner':
@@ -156,11 +168,13 @@ class IconHelper
             case 'remote':
                 return 'fa-solid fa-house-laptop';
             case 'more-info':
+            case 'help':
             case 'support':
                 return 'far fa-life-ring';
             case 'plus':
                 return 'fas fa-plus';
             case 'history':
+            case 'assetHistory':
                 return 'fa-solid fa-timeline';
             case 'more-files':
                 return 'fa-solid fa-laptop-file';
@@ -178,6 +192,8 @@ class IconHelper
                 return 'fas fa-map-marker-alt';
             case 'location':
                 return 'fas fa-map-marker-alt';
+            case 'markdown':
+                return 'fab fa-markdown';
             case 'superadmin':
             case 'admin':
                 return 'fas fa-crown';
@@ -199,10 +215,10 @@ class IconHelper
                 return 'fas fa-list-ol';
             case 'labels':
                 return 'fas fa-tags';
+            case 'signature':
+                return 'fa-solid fa-signature';
             case 'ldap':
                 return 'fas fa-sitemap';
-            case 'google':
-                return 'fa-brands fa-google';
             case 'saml':
                 return 'fas fa-sign-in-alt';
             case 'backups':
@@ -274,6 +290,7 @@ class IconHelper
                 return 'fa-regular fa-square-caret-left';
             case 'square':
                 return 'fa-solid fa-square';
+            case 'assetModel':
             case 'models':
             case 'model':
                 return 'fa-solid fa-boxes-stacked';

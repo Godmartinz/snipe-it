@@ -17,6 +17,8 @@ return [
         'confirm' => 'Adakah anda pasti ingin memadamkan jabatan ini?',
         'error' => 'Terdapat isu memadamkan jabatan. Sila cuba lagi.',
         'success' => 'Jabatan telah berjaya dipadam.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

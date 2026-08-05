@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Checked in via bulk license checkin in license GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Cumpără toate locurile',
             'modal' => 'Această acțiune va verifica un loc pentru primul utilizator disponibil. Acest lucru va verifica toate locurile :available_seats_count pentru primii utilizatori disponibili. Se consideră că un utilizator este disponibil pentru acest scaun dacă nu are deja licența verificată la el, iar proprietatea Auto-Atribuire Licență este activată pe contul lor de utilizator.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nimic de făcut. Nu există utilizatori care să nu aibă deja această licență atribuită.',
             'log_msg' => 'Verificat prin licenta de verificare in Licenta GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

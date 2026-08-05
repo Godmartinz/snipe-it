@@ -20,6 +20,8 @@ return [
         'confirm' => 'Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το εξάρτημα;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας το αξεσουάρ. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Το εξάρτημα διαγράφηκε με επιτυχία.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

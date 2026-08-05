@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Import;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Tests\Support\Importing;
@@ -27,6 +28,13 @@ class ImportFactory extends Factory
             'file_path' => Str::random().'.csv',
             'filesize' => $this->faker->randomDigitNotNull(),
             'field_map' => null,
+            // In production `store()` always sets `created_by = auth()->id()`,
+            // so an import never exists without an owner. Mirror that here:
+            // if the test is already actingAs someone, use them; otherwise
+            // mint a fresh user. This keeps the "actor owns their import"
+            // idiom that existing tests already assume, and lets the API
+            // owner-scope on read/process paths match production behavior.
+            'created_by' => auth()->id() ?? User::factory(),
         ];
     }
 
@@ -223,6 +231,19 @@ class ImportFactory extends Factory
             $fileBuilder = Importing\CategoriesImportFileBuilder::new();
             $attributes['name'] = "Category {$attributes['name']}";
             $attributes['import_type'] = 'category';
+            $attributes['header_row'] = $fileBuilder->toCsv()[0];
+            $attributes['first_row'] = $fileBuilder->firstRow();
+
+            return $attributes;
+        });
+    }
+
+    public function assetHistory()
+    {
+        return $this->state(function (array $attributes) {
+            $fileBuilder = Importing\AssetHistoryImportFileBuilder::new();
+            $attributes['name'] = "{$attributes['name']} Asset History";
+            $attributes['import_type'] = 'assetHistory';
             $attributes['header_row'] = $fileBuilder->toCsv()[0];
             $attributes['first_row'] = $fileBuilder->firstRow();
 

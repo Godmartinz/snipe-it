@@ -7,25 +7,23 @@
             <h4 class="modal-title">{{ trans('admin/kits/general.append_consumable') }}</h4>
         </div>
         <div class="modal-body">
-            <form action="{{ route('api.kits.consumables.store', $kitId) }}" onsubmit="return false">
+            <form class="form-horizontal" action="{{ route('api.kits.consumables.store', $kitId) }}" onsubmit="return false">
                 {{ csrf_field() }}
-                <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-                </div>
+                <x-alert type="danger" id="modal_error_msg" style="display:none">
+                </x-alert>
 
                 <div class="dynamic-form-row">
-                    <div class="col-md-4 col-xs-12"><label for="modal-consumable_id">{{ trans('general.consumable') }}:
-                        </label></div>
+                    <label for="modal-consumable_id" class="col-md-4 col-xs-12 control-label">{{ trans('general.consumable') }}:</label>
                     <div class="col-md-8 col-xs-12 required">
                         <select class="js-data-ajax" data-endpoint="consumables" name="consumable" style="width: 100%" id="modal-consumable_id"></select>
                     </div>
                 </div>
 
                 <div class="dynamic-form-row">
-                        <div class="col-md-4 col-xs-12"><label for="modal-quantity_id">{{ trans('general.quantity') }}:
-                            </label></div>
-                        <div class="col-md-8 col-xs-12 required">
-                            <input type='text' name='quantity' id='modal-quantity_id' class="form-control" value="1">
-                        </div>
+                    <label for="modal-quantity_id" class="col-md-4 col-xs-12 control-label">{{ trans('general.quantity') }}:</label>
+                    <div class="col-md-8 col-xs-12 required">
+                        <input type='text' name='quantity' id='modal-quantity_id' class="form-control" value="1">
+                    </div>
                 </div>
 
             </form>

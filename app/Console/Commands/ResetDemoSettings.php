@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 
 class ResetDemoSettings extends Command
 {
@@ -47,7 +48,7 @@ class ResetDemoSettings extends Command
         $settings->auto_increment_assets = 1;
         $settings->logo = 'snipe-logo.png';
         $settings->alert_email = 'service@snipe-it.io';
-        $settings->login_note = 'Use `admin` / `password` to login to the demo.';
+        $settings->login_note = "Use any of the following credentials to login to the demo:\n\n- `admin` / `password`\n- `assets` / `password`\n- `testuser` / `password`";
         $settings->header_color = '#3c8dbc';
         $settings->link_dark_color = '#5fa4cc';
         $settings->link_light_color = '#296282;';
@@ -84,6 +85,44 @@ class ResetDemoSettings extends Command
             $user->enable_sounds = 1;
             $user->save();
         }
+
+        $assetsUser = User::updateOrCreate(
+            ['username' => 'assets'],
+            [
+                'first_name' => 'Assets',
+                'last_name' => 'User',
+                'password' => Hash::make('password'),
+                'activated' => 1,
+            ]
+        );
+        $assetsUser->permissions = json_encode([
+            'assets.view' => 1,
+            'assets.create' => 1,
+            'assets.edit' => 1,
+            'assets.delete' => 1,
+            'assets.checkout' => 1,
+            'assets.checkin' => 1,
+            'assets.audit' => 1,
+            'assets.files' => 1,
+            'assets.view.requestable' => 1,
+            'assets.view.encrypted_custom_fields' => 1,
+        ]);
+        $assetsUser->save();
+
+        $testUser = User::updateOrCreate(
+            ['username' => 'testuser'],
+            [
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'password' => Hash::make('password'),
+                'activated' => 1,
+            ]
+        );
+        $testUser->permissions = json_encode([
+            'self.checkout_assets' => 1,
+            'assets.view.requestable' => 1,
+        ]);
+        $testUser->save();
 
         \Storage::disk('public')->put('snipe-logo.png', file_get_contents(public_path('img/demo/snipe-logo.png')));
         \Storage::disk('public')->put('snipe-logo-lg.png', file_get_contents(public_path('img/demo/snipe-logo-lg.png')));

@@ -16,5 +16,7 @@ return [
         'confirm' => 'Anda yakin ingin menghapus perusahaan ini?',
         'error' => 'Ada masalah menghapus perusahaan. Silakan coba lagi.',
         'success' => 'Perusahaan berhasil dihapus.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

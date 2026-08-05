@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Vrni se na vse :tip',
     'redirect_to_type' => 'Pojdi na :tip',
     'redirect_to_checked_out_to' => 'Pojdite na odjavljeno do',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Izberite vrsto statusa',
     'serial' => 'Serijska številka',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Oznaka sredstva',
     'update' => 'Posodobitev sredstva',
     'warranty' => 'Garancija',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Garancija poteče',
     'years' => 'let',
     'asset_location' => 'Posodobi lokacijo sredstva',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Neobvezne informacije',
     'order_details' => 'Informacije povezane z naročilom',
     'calc_eol' => 'Če datum konca življenjske dobe EOL ničelno določite, uporabite samodejni izračun EOL na podlagi datuma nakupa in stopnje EOL.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Accessories;
 
+use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccessoryCheckoutRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\CheckoutAcceptance;
@@ -15,10 +16,11 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AccessoryCheckoutController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Return the form to checkout an Accessory to a user.
@@ -64,22 +66,58 @@ class AccessoryCheckoutController extends Controller
         $this->authorize('checkout', $accessory);
 
         $target = $this->determineCheckoutTarget();
-        session()->put(['checkout_to_type' => $target]);
+
+        if (! $accessory->canCheckoutTo($target)) {
+            $targetType = match (class_basename($target)) {
+                'User' => trans('general.user'),
+                'Location' => trans('general.location'),
+                default => trans('general.asset'),
+            };
+
+            return redirect()->back()->with('error', trans('general.error_checkout_company_mismatch', [
+                'item' => trans('general.accessory').' "'.$accessory->name.'"',
+                'item_company' => $accessory->company?->name ?? trans('general.unassigned'),
+                'target' => $targetType.' "'.($target->name ?? $target->username ?? $target->id).'"',
+            ]));
+        }
 
         $accessory->checkout_qty = $request->input('checkout_qty', 1);
 
-        for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+        // Concurrency guard. AccessoryCheckoutRequest's
+        // number_remaining_after_checkout rule runs on an unlocked read of
+        // numRemaining(), so two simultaneous checkout requests could both
+        // pass validation, both attach rows, and land the register at -1.
+        // Re-fetch the parent row under lockForUpdate INSIDE a transaction,
+        // re-check availability against the locked snapshot, and only then
+        // write. Mirrors the License checkout locking pattern.
+        $overAllocated = false;
 
-            $accessory_checkout = new AccessoryCheckout([
-                'accessory_id' => $accessory->id,
-                'created_at' => Carbon::now(),
-                'assigned_to' => $target->id,
-                'assigned_type' => $target::class,
-                'note' => $request->input('note'),
-            ]);
+        DB::transaction(function () use ($accessory, $request, $target, &$overAllocated): void {
+            $locked = Accessory::whereKey($accessory->id)->lockForUpdate()->first();
 
-            $accessory_checkout->created_by = auth()->id();
-            $accessory_checkout->save();
+            if (! $locked || $locked->numRemaining() < $accessory->checkout_qty) {
+                $overAllocated = true;
+
+                return;
+            }
+
+            for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+
+                $accessory_checkout = new AccessoryCheckout([
+                    'accessory_id' => $accessory->id,
+                    'created_at' => Carbon::now(),
+                    'assigned_to' => $target->id,
+                    'assigned_type' => $target::class,
+                    'note' => $request->input('note'),
+                ]);
+
+                $accessory_checkout->created_by = auth()->id();
+                $accessory_checkout->save();
+            }
+        });
+
+        if ($overAllocated) {
+            return redirect()->back()->with('error', trans('admin/accessories/message.checkout.unavailable'));
         }
 
         event(new CheckoutableCheckedOut(
@@ -120,11 +158,7 @@ class AccessoryCheckoutController extends Controller
 
             // If requireAcceptance() is false the listener won't have created one; create it now.
             if (! $acceptance) {
-                $acceptance = new CheckoutAcceptance;
-                $acceptance->checkoutable()->associate($accessory);
-                $acceptance->assignedTo()->associate($targetUser);
-                $acceptance->qty = $accessory->checkout_qty;
-                $acceptance->save();
+                $acceptance = CreateCheckoutAcceptanceAction::run($accessory, $targetUser, $accessory->checkout_qty);
             }
 
             session([

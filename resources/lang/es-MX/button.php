@@ -3,6 +3,7 @@
 return [
     'actions' => 'Acciones',
     'add' => 'Agregar nuevo',
+    'back' => 'Atrás',
     'cancel' => 'Cancelar',
     'checkin_and_delete' => 'Ingresar todo / Eliminar usuario',
     'delete' => 'Borrar',
@@ -22,7 +23,7 @@ return [
     'add_maintenance' => 'Añadir mantenimiento',
     'append' => 'Añadir',
     'new' => 'Nuevo',
-    'show_hide_info' => 'Mostrar/Ocultar Más información',
+    'show_hide_info' => 'Mostrar/Ocultar más información',
     'var' => [
         'clone' => 'Clonar :item_type',
         'edit' => 'Editar :item_type',

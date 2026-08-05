@@ -52,7 +52,7 @@ return [
 
     'fieldset_default_value' => [
 
-        'error' => 'Error validating default fieldset values.',
+        'error' => '기본 필드셋 값 검증 오류.',
 
     ],
 

@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class AssetCheckoutController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Returns a view that presents a form to check an asset out to a
@@ -45,7 +46,13 @@ class AssetCheckoutController extends Controller
         $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
 
         if ($asset->isInvalid()) {
-            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
+            // Also flash the specific validation messages via
+            // multi_error_messages so they surface in the top alert
+            // on the edit page. See the matching block in
+            // AssetCheckinController::create() for the reasoning.
+            return redirect()->route('hardware.edit', $asset)
+                ->withErrors($asset->getErrors())
+                ->with('multi_error_messages', $asset->getErrors()->all());
         }
 
         if ($asset->availableForCheckout()) {
@@ -85,7 +92,6 @@ class AssetCheckoutController extends Controller
             $admin = auth()->user();
 
             $target = $this->determineCheckoutTarget();
-            session()->put(['checkout_to_type' => $target]);
 
             $asset = $this->updateAssetLocation($asset, $target);
 
@@ -103,9 +109,11 @@ class AssetCheckoutController extends Controller
                 $asset->status_id = $request->input('status_id');
             }
 
-            if ($request->boolean('set_not_requestable')) {
-                $asset->requestable = false;
-            }
+            // Two-way toggle: checked = requestable, unchecked (or absent) =
+            // not. The form pre-populates the checkbox with the asset's current
+            // state so users can flip either direction (e.g. mark "no longer
+            // requestable" during checkout because the item is now assigned).
+            $asset->requestable = $request->boolean('requestable');
 
             if (! empty($asset->licenseseats->all())) {
                 if (request('checkout_to_type') == 'user') {
@@ -119,13 +127,18 @@ class AssetCheckoutController extends Controller
             // Add any custom fields that should be included in the checkout
             $asset->customFieldsForCheckinCheckout('display_checkout');
 
-            $settings = Setting::getSettings();
+            if (! $asset->canCheckoutTo($target)) {
+                $targetType = match (class_basename($target)) {
+                    'User' => trans('general.user'),
+                    'Location' => trans('general.location'),
+                    default => trans('general.asset'),
+                };
 
-            // We have to check whether $target->company_id is null here since locations don't have a company yet
-            if (($settings->full_multiple_companies_support) && ((! is_null($target->company_id)) && (! is_null($asset->company_id)))) {
-                if ($target->company_id != $asset->company_id) {
-                    return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('general.error_user_company'));
-                }
+                return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('general.error_checkout_company_mismatch', [
+                    'item' => trans('general.asset').' "'.$asset->display_name.'"',
+                    'item_company' => $asset->company?->name ?? trans('general.unassigned'),
+                    'target' => $targetType.' "'.($target->name ?? $target->username ?? $target->id).'"',
+                ]));
             }
 
             session()->put([
@@ -134,7 +147,27 @@ class AssetCheckoutController extends Controller
                 'sign_in_place' => $request->boolean('sign_in_place'),
             ]);
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'), null, $request->boolean('sign_in_place'))) {
+            // Concurrency guard. availableForCheckout() above ran on an
+            // unlocked read, so two simultaneous form submits can both
+            // observe the asset as available and both proceed through
+            // checkOut(), producing duplicate checkout-history rows and
+            // double-incrementing checkout_counter on a single-assignment
+            // asset. Re-fetch the row under lockForUpdate INSIDE a
+            // transaction and re-check availability against the locked
+            // snapshot; the second request blocks until the first commits
+            // and then sees the asset as no longer available. Mirrors the
+            // pattern in Api\AssetsController::checkout and
+            // ConsumablesController::store (GHSA-x4g2-87xc-m5jm).
+            $checkedOut = DB::transaction(function () use ($asset, $target, $admin, $checkout_at, $expected_checkin, $request): bool {
+                $locked = Asset::whereKey($asset->id)->lockForUpdate()->first();
+                if (! $locked || ! $locked->availableForCheckout()) {
+                    return false;
+                }
+
+                return (bool) $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'), null, $request->boolean('sign_in_place'));
+            });
+
+            if ($checkedOut) {
 
                 // When sign_in_place is requested and the target is a user, redirect to the
                 // acceptance/signature page so the user can sign in person. The signature is
@@ -149,10 +182,7 @@ class AssetCheckoutController extends Controller
 
                     // If requireAcceptance() is false the listener won't have created one; create it now.
                     if (! $acceptance) {
-                        $acceptance = new CheckoutAcceptance;
-                        $acceptance->checkoutable()->associate($asset);
-                        $acceptance->assignedTo()->associate($target);
-                        $acceptance->save();
+                        $acceptance = CreateCheckoutAcceptanceAction::run($asset, $target);
                     }
 
                     session([
@@ -169,10 +199,17 @@ class AssetCheckoutController extends Controller
                     ->with('success', trans('admin/hardware/message.checkout.success'));
             }
 
-            // Redirect to the asset management page with error
-            return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('admin/hardware/message.checkout.error').$asset->getErrors());
+            // Redirect back to the checkout form with the specific
+            // validation messages surfaced via multi_error_messages
+            // (replaces the previous stringified MessageBag concat).
+            return redirect()->route('hardware.checkout.create', $asset)
+                ->with('error', trans('admin/hardware/message.checkout.error'))
+                ->with('multi_error_messages', $asset->getErrors()->all());
         } catch (ModelNotFoundException $e) {
-            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
+            return redirect()->back()
+                ->with('error', trans('admin/hardware/message.checkout.error'))
+                ->withErrors($asset->getErrors())
+                ->with('multi_error_messages', $asset->getErrors()->all());
         } catch (CheckoutNotAllowed $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

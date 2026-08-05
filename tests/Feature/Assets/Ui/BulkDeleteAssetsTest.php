@@ -196,4 +196,36 @@ class BulkDeleteAssetsTest extends TestCase
         $expectedMessage = trans_choice('admin/hardware/message.delete.assigned_to_error', 1, ['asset_tag' => $asset->asset_tag]);
         $this->assertEquals($expectedMessage, $errorMessage);
     }
+
+    public function test_bulk_delete_redirects_to_stashed_same_origin_url()
+    {
+        $user = User::factory()->viewAssets()->deleteAssets()->create();
+        $asset = Asset::factory()->create();
+        $originUrl = route('hardware.index').'?status_type=Deployed';
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => $originUrl])
+            ->post('/hardware/bulkdelete', [
+                'ids' => [$asset->id],
+                'bulk_actions' => 'delete',
+            ])
+            ->assertRedirect($originUrl);
+    }
+
+    public function test_bulk_delete_ignores_poisoned_stashed_url()
+    {
+        // Defense-in-depth: even if BulkAssetsController::edit()'s
+        // write-side gate were bypassed, the read here must still keep
+        // the redirect on-domain.
+        $user = User::factory()->viewAssets()->deleteAssets()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => 'https://evil.example.com/steal-session'])
+            ->post('/hardware/bulkdelete', [
+                'ids' => [$asset->id],
+                'bulk_actions' => 'delete',
+            ])
+            ->assertRedirect(route('hardware.index'));
+    }
 }

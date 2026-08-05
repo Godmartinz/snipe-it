@@ -30,25 +30,7 @@ class SettingsServiceProvider extends ServiceProvider
         // Share common setting variables with all views.
         view()->composer('*', function ($view) {
             $view->with('snipeSettings', Setting::getSettings());
-        });
-
-        // Make sure the limit is actually set, is an integer and does not exceed system limits
-        app()->singleton('api_limit_value', function () {
-            $limit = config('app.max_results');
-            $int_limit = intval(request('limit'));
-
-            if ((abs($int_limit) > 0) && ($int_limit <= config('app.max_results'))) {
-                $limit = abs($int_limit);
-            }
-
-            return $limit;
-        });
-
-        // Make sure the offset is actually set and is an integer
-        app()->singleton('api_offset_value', function () {
-            $offset = intval(request('offset'));
-
-            return $offset;
+            $view->with('settings', Setting::getSettings());
         });
 
         /**

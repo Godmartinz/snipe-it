@@ -20,6 +20,8 @@ return [
         'confirm' => 'இந்த நிலைப்பட்டியலை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'நிலை லேபிள் நீக்கப்பட்ட ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'தகுதி லேபிள் வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

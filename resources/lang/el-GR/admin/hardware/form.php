@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'Go to :type',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Επιλέξτε Τύπο Κατάστασης',
     'serial' => 'Σειριακός',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Ετικέτα πόρων',
     'update' => 'Ενημέρωση παγίου',
     'warranty' => 'Εγγύηση',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Λήξη Εγγύησης',
     'years' => 'έτη',
     'asset_location' => 'Ενημέρωση Θέσης Περιουσιακών Στοιχείων',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Προαιρετικές Πληροφορίες',
     'order_details' => 'Σχετικές Πληροφορίες Παραγγελίας',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

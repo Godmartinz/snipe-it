@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'ត្រឡប់ទៅ ទាំងអស់ វិញ ៖ ប្រភេទ',
     'redirect_to_type' => 'ចូលទៅកាន់៖ ប្រភេទ',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'ជ្រើសរើសប្រភេទស្ថានភាព',
     'serial' => 'Serial',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'ទ្រព្យសម្បត្តិ',
     'update' => 'ធ្វើបច្ចុប្បន្នភាព Asset',
     'warranty' => 'ការធានា',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'ការធានាផុតកំណត់',
     'years' => 'ឆ្នាំ',
     'asset_location' => 'ធ្វើបច្ចុប្បន្នភាពទីតាំង Asset',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'ព័ត៌មានមិនសូវចាំបាច់',
     'order_details' => 'ព័ត៌មានពាក់ព័ន្ធនឹងការបញ្ជាទិញ',
     'calc_eol' => 'ប្រសិនបើទុកជាមោឃៈកាលបរិច្ឆេទ EOL ប្រើការគណនា EOL ដោយស្វ័យប្រវត្តិដោយផ្អែកលើកាលបរិច្ឆេទទិញ និងអត្រា EOL ។',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

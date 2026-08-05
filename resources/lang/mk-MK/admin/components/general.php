@@ -13,4 +13,7 @@ return [
     'total' => 'Вкупно',
     'update' => 'Уреди компонента',
     'checkin_limit' => 'Количината што е вратена мора да биде еднаква или помала од :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

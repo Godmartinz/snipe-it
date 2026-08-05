@@ -19,6 +19,7 @@ use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\MailTest;
+use App\Rules\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 /**
  * This controller handles all actions related to Settings for
@@ -53,7 +56,23 @@ class SettingsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        return view('settings/index', compact('settings'));
+        $impersonationUsernames = (array) config('app.user_impersonation_usernames');
+        if (empty($impersonationUsernames)) {
+            $impersonators = collect();
+            $missingImpersonationUsernames = [];
+        } else {
+            $impersonators = User::withTrashed()
+                ->whereIn(DB::raw('LOWER(username)'), array_map('mb_strtolower', $impersonationUsernames))
+                ->orderBy('username')
+                ->get();
+            $foundLower = $impersonators->map(fn ($u) => mb_strtolower((string) $u->username))->all();
+            $missingImpersonationUsernames = array_values(array_filter(
+                $impersonationUsernames,
+                fn ($name) => ! in_array(mb_strtolower($name), $foundLower, true)
+            ));
+        }
+
+        return view('settings/index', compact('settings', 'impersonators', 'missingImpersonationUsernames'));
     }
 
     /**
@@ -92,10 +111,12 @@ class SettingsController extends Controller
         $old_locations_fmcs = $setting->scope_locations_fmcs;
         $setting->full_multiple_companies_support = $request->input('full_multiple_companies_support', '0');
         $setting->scope_locations_fmcs = $request->input('scope_locations_fmcs', '0');
+        $setting->null_company_is_floater = $request->input('null_company_is_floater', '0');
 
-        // Backward compatibility for locations makes no sense without FullMultipleCompanySupport
+        // These options make no sense without FullMultipleCompanySupport
         if (! $setting->full_multiple_companies_support) {
             $setting->scope_locations_fmcs = '0';
+            $setting->null_company_is_floater = '0';
         }
 
         // check for inconsistencies when activating scoped locations
@@ -144,6 +165,51 @@ class SettingsController extends Controller
     }
 
     /**
+     * Stream a CSV of every location-scoping FMCS mismatch.
+     *
+     * This endpoint runs the full walk (artisan=true) and streams
+     * the same table columns the CLI command prints, as CSV.
+     */
+    public function downloadLocationScopingReport(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $mismatched = Helper::test_locations_fmcs(true);
+
+        $filename = 'location-scoping-mismatches-'.date('Y-m-d').'.csv';
+
+        return response()->streamDownload(function () use ($mismatched) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, [
+                'Type',
+                'ID',
+                'Name',
+                'Checkout Type',
+                'Company IDs',
+                'Item Companies',
+                'Item Location',
+                'Location Company',
+                'Location Company ID',
+            ]);
+
+            // Formula-escape data rows using the same helper + setting as
+            // ReportsController's exports. Row values include user-editable
+            // free text (item name, item companies, item location, location
+            // company) which a low-privilege user could set to a spreadsheet
+            // formula. Without escaping, the payload evaluates when a
+            // superuser opens the downloaded CSV in Excel / LibreOffice /
+            // Google Sheets. Same backtick prefix ReportsController uses.
+            $formatter = new EscapeFormula('`');
+            foreach ($mismatched as $row) {
+                if (config('app.escape_formulas') === false) {
+                    fputcsv($out, $row);
+                } else {
+                    fputcsv($out, $formatter->escapeRecord($row));
+                }
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
+    /**
      * Return a form to allow a super admin to update settings.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -188,6 +254,13 @@ class SettingsController extends Controller
             if ($request->has('site_name')) {
                 $request->validate(['site_name' => 'required']);
             }
+
+            $request->validate([
+                'header_color' => ['nullable', new CssColor],
+                'link_light_color' => ['nullable', new CssColor],
+                'link_dark_color' => ['nullable', new CssColor],
+                'nav_link_color' => ['nullable', new CssColor],
+            ]);
 
             $setting->header_color = $request->input('header_color', '#3c8dbc');
             $setting->link_light_color = $request->input('link_light_color', '#296282');
@@ -551,19 +624,21 @@ class SettingsController extends Controller
         $setting->label2_2d_target = $request->input('label2_2d_target');
         $setting->label2_fields = $request->input('label2_fields');
         $setting->label2_empty_row_count = $request->input('label2_empty_row_count');
-        $setting->labels_per_page = $request->input('labels_per_page');
-        $setting->labels_width = $request->input('labels_width');
-        $setting->labels_height = $request->input('labels_height');
-        $setting->labels_pmargin_left = $request->input('labels_pmargin_left');
-        $setting->labels_pmargin_right = $request->input('labels_pmargin_right');
-        $setting->labels_pmargin_top = $request->input('labels_pmargin_top');
-        $setting->labels_pmargin_bottom = $request->input('labels_pmargin_bottom');
-        $setting->labels_display_bgutter = $request->input('labels_display_bgutter');
-        $setting->labels_display_sgutter = $request->input('labels_display_sgutter');
-        $setting->labels_fontsize = $request->input('labels_fontsize');
-        $setting->labels_pagewidth = $request->input('labels_pagewidth');
-        $setting->labels_pageheight = $request->input('labels_pageheight');
-        $setting->labels_display_company_name = $request->input('labels_display_company_name', '0');
+        if (! $request->boolean('label2_enable')) {
+            $setting->labels_per_page = $request->input('labels_per_page');
+            $setting->labels_width = $request->input('labels_width');
+            $setting->labels_height = $request->input('labels_height');
+            $setting->labels_pmargin_left = $request->input('labels_pmargin_left');
+            $setting->labels_pmargin_right = $request->input('labels_pmargin_right');
+            $setting->labels_pmargin_top = $request->input('labels_pmargin_top');
+            $setting->labels_pmargin_bottom = $request->input('labels_pmargin_bottom');
+            $setting->labels_display_bgutter = $request->input('labels_display_bgutter');
+            $setting->labels_display_sgutter = $request->input('labels_display_sgutter');
+            $setting->labels_fontsize = $request->input('labels_fontsize');
+            $setting->labels_pagewidth = $request->input('labels_pagewidth');
+            $setting->labels_pageheight = $request->input('labels_pageheight');
+            $setting->labels_display_company_name = $request->input('labels_display_company_name', '0');
+        }
 
         // Barcodes
         $setting->qr_code = $request->input('qr_code', '0');
@@ -988,78 +1063,136 @@ class SettingsController extends Controller
             return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
         }
 
-        if (! config('app.lock_passwords')) {
-            $path = 'app/backups';
-
-            if (Storage::exists($path.'/'.$filename)) {
-
-                // grab the user's info so we can make sure they exist in the system
-                $user = User::find(auth()->id());
-
-                // TODO: run a backup
-
-                Artisan::call('db:wipe', [
-                    '--force' => true,
-                ]);
-
-                Log::warning('User '.auth()->user()->username.' is attempting to restore from: '.storage_path($path).'/'.$filename);
-
-                $restore_params = [
-                    '--force' => true,
-                    '--no-progress' => true,
-                    'filename' => storage_path($path).'/'.$filename,
-                ];
-
-                if ($request->input('clean')) {
-                    Log::debug("Attempting 'clean' - first, guessing prefix...");
-                    Artisan::call('snipeit:restore', [
-                        '--sanitize-guess-prefix' => true,
-                        'filename' => storage_path($path).'/'.$filename,
-                    ]);
-                    $guess_prefix_output = Artisan::output();
-                    Log::debug("Sanitize output is: $guess_prefix_output");
-                    [$prefix, $_output] = explode("\n", $guess_prefix_output);
-                    Log::debug("prefix is: '$prefix'");
-                    $restore_params['--sanitize-with-prefix'] = $prefix;
-                }
-
-                // run the restore command
-                Artisan::call('snipeit:restore',
-                    $restore_params
-                );
-
-                // If it's greater than 300, it probably worked
-                $output = Artisan::output();
-
-                /* Run migrations */
-                Log::debug('Migrating database...');
-                Artisan::call('migrate', ['--force' => true]);
-                $migrate_output = Artisan::output();
-                Log::debug($migrate_output);
-
-                $find_user = DB::table('users')->where('username', $user->username)->exists();
-
-                if (! $find_user) {
-                    Log::warning('Attempting to restore user: '.$user->username);
-                    $new_user = $user->replicate();
-                    $new_user->push();
-                } else {
-                    Log::debug('User: '.$user->username.' already exists.');
-                }
-
-                Log::debug('Logging all users out..');
-                Artisan::call('snipeit:global-logout', ['--force' => true]);
-
-                DB::table('users')->update(['remember_token' => null]);
-                Auth::logout();
-
-                return redirect()->route('login')->with('success', trans('admin/settings/message.restore.success'));
-            } else {
-                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
-            }
-        } else {
+        if (config('app.lock_passwords')) {
             return redirect()->route('settings.backups.index')->with('error', trans('general.feature_disabled'));
         }
+
+        $path = 'app/backups';
+
+        if (! Storage::exists($path.'/'.$filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
+
+        $absolutePath = storage_path($path).'/'.$filename;
+
+        // Verify the archive is actually a zip and can be opened, BEFORE we
+        // do anything destructive. Prior behavior wiped the database first
+        // and only then tried to open the archive. An invalid or corrupted
+        // upload therefore destroyed the existing database and left the
+        // install with an empty migrated schema, while the flow still
+        // reported success because snipeit:restore returns exit 0 on
+        // internal errors (see RestoreFromBackup::handle).
+        //
+        // Refuse to proceed if the PHP zip extension is not loaded. The
+        // downstream snipeit:restore command needs ZipArchive too, so
+        // running it without ext-zip would fail after the wipe.
+        if (! class_exists(ZipArchive::class)) {
+            Log::error('Restore aborted: PHP zip extension is not loaded, cannot validate archive before wiping database.');
+
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.zip_extension_missing'));
+        }
+
+        $zip = new ZipArchive;
+        $openResult = $zip->open($absolutePath);
+        if ($openResult !== true) {
+            Log::warning('Restore aborted: archive at '.$absolutePath.' failed zip open with code '.$openResult);
+
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.archive_invalid', ['filename' => $filename]));
+        }
+        $zip->close();
+
+        // grab the user's info so we can make sure they exist in the system
+        $user = User::find(auth()->id());
+
+        // Take a fresh pre-restore backup so we can point the operator at
+        // it if the restore fails after we wipe. This is the mitigation
+        // the pre-existing
+        $preRestoreBackupName = 'pre-restore-'.date('Y-m-d-H-i-s').'.zip';
+        Log::debug('Running pre-restore backup: '.$preRestoreBackupName);
+        $preBackupExit = Artisan::call('snipeit:backup', [
+            '--filename' => $preRestoreBackupName,
+            '--force' => true,
+        ]);
+        $preBackupPath = storage_path($path).'/'.$preRestoreBackupName;
+
+        if ($preBackupExit !== 0 || ! Storage::exists($path.'/'.$preRestoreBackupName)) {
+            Log::warning('Pre-restore backup failed (exit '.$preBackupExit.'); aborting restore to protect existing data.');
+
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.pre_backup_failed'));
+        }
+
+        Log::warning('User '.auth()->user()->username.' is attempting to restore from: '.$absolutePath.' (pre-restore backup at '.$preBackupPath.')');
+
+        $restore_params = [
+            '--force' => true,
+            '--no-progress' => true,
+            'filename' => $absolutePath,
+        ];
+
+        if ($request->input('clean')) {
+            Log::debug("Attempting 'clean' - first, guessing prefix...");
+            Artisan::call('snipeit:restore', [
+                '--sanitize-guess-prefix' => true,
+                'filename' => $absolutePath,
+            ]);
+            $guess_prefix_output = Artisan::output();
+            Log::debug("Sanitize output is: $guess_prefix_output");
+            [$prefix, $_output] = explode("\n", $guess_prefix_output);
+            Log::debug("prefix is: '$prefix'");
+            $restore_params['--sanitize-with-prefix'] = $prefix;
+        }
+
+        Artisan::call('db:wipe', ['--force' => true]);
+
+        // run the restore command
+        $restoreExit = Artisan::call('snipeit:restore', $restore_params);
+        $restoreOutput = Artisan::output();
+        Log::debug('snipeit:restore output: '.$restoreOutput);
+
+        // snipeit:restore returns 0 even on some internal errors, so we also
+        // scan its output for its own "Could not access file" / "DB_CONNECTION
+        // must be MySQL" style error strings.
+        $restoreLooksFailed = $restoreExit !== 0 || str_contains(strtolower($restoreOutput), 'could not access file') || str_contains(strtolower($restoreOutput), 'db_connection must be mysql');
+
+        if ($restoreLooksFailed) {
+            Log::error('Restore failed after db:wipe. Pre-restore backup available at '.$preBackupPath);
+
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
+                'backup' => $preRestoreBackupName,
+            ]));
+        }
+
+        /* Run migrations */
+        Log::debug('Migrating database...');
+        $migrateExit = Artisan::call('migrate', ['--force' => true]);
+        $migrate_output = Artisan::output();
+        Log::debug($migrate_output);
+
+        if ($migrateExit !== 0) {
+            Log::error('Migrate failed after restore. Pre-restore backup available at '.$preBackupPath);
+
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
+                'backup' => $preRestoreBackupName,
+            ]));
+        }
+
+        $find_user = DB::table('users')->where('username', $user->username)->exists();
+
+        if (! $find_user) {
+            Log::warning('Attempting to restore user: '.$user->username);
+            $new_user = $user->replicate();
+            $new_user->push();
+        } else {
+            Log::debug('User: '.$user->username.' already exists.');
+        }
+
+        Log::debug('Logging all users out..');
+        Artisan::call('snipeit:global-logout', ['--force' => true]);
+
+        DB::table('users')->update(['remember_token' => null]);
+        Auth::logout();
+
+        return redirect()->route('login')->with('success', trans('admin/settings/message.restore.success'));
     }
 
     /**
@@ -1141,9 +1274,53 @@ class SettingsController extends Controller
             ->where('oauth_clients.personal_access_client', true)
             ->count();
 
+        $setting = Setting::getSettings();
+        $blockApiUserAgents = (bool) old('block_api_user_agents', $setting?->block_api_user_agents);
+        $blockedApiUserAgents = old(
+            'blocked_api_user_agents',
+            $setting?->blocked_api_user_agents ?? implode("\n", Setting::DEFAULT_BLOCKED_API_USER_AGENTS),
+        );
+        $blockBlankApiUserAgents = (bool) old('block_blank_api_user_agents', $setting?->block_blank_api_user_agents);
+
         return view('settings.api', [
             'personalAccessTokenCount' => $personalAccessTokenCount,
+            'setting' => $setting,
+            'blockApiUserAgents' => $blockApiUserAgents,
+            'blockedApiUserAgents' => $blockedApiUserAgents,
+            'blockBlankApiUserAgents' => $blockBlankApiUserAgents,
         ]);
+    }
+
+    /**
+     * Persist the API request-filter settings (User-Agent allow/block list)
+     * from the API settings page.
+     */
+    public function postApiRequestFilters(Request $request): RedirectResponse
+    {
+        if (is_null($setting = Setting::getSettings())) {
+            return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
+        }
+
+        // Check we're not on the public demo, and redirect without saving if we are.
+        // Otherwise this could mess with the demo API explorer
+        if (config('app.lock_passwords')) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#api-request-filters')
+                ->with('error', trans('general.feature_disabled'));
+        }
+
+        $setting->block_api_user_agents = $request->boolean('block_api_user_agents');
+        $blockedUserAgents = trim((string) $request->input('blocked_api_user_agents', ''));
+        $setting->blocked_api_user_agents = $blockedUserAgents === '' ? null : $blockedUserAgents;
+        $setting->block_blank_api_user_agents = $request->boolean('block_blank_api_user_agents');
+
+        if ($setting->save()) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#api-request-filters')
+                ->with('success', trans('admin/settings/message.update.success'));
+        }
+
+        return redirect()->back()->withInput()->withErrors($setting->getErrors());
     }
 
     /**

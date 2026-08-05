@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Walang napiling mga model, kaya walang nai-delete.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count ang mga modelo ay na-delete na, gayunpaman ::success_count ang mga modelo ay hindi mai-delete dahil sa mayron pa silang asset na naiuugnay sa kanila.',
     ],

@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutablesCheckedOutInBulk;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
+use App\Http\Requests\UploadFileRequest;
+use App\Http\Traits\CheckInOutTrait;
+use App\Http\Traits\MigratesLegacyAssetLocations;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\LicenseSeat;
+use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Models\User;
 use App\View\Label;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +35,8 @@ use Illuminate\Support\Facades\Log;
 
 class BulkAssetsController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
+    use MigratesLegacyAssetLocations;
 
     /**
      * Display the bulk edit page.
@@ -73,15 +82,36 @@ class BulkAssetsController extends Controller
             return redirect()->route('hardware.bulkcheckout.show');
         }
 
+        if ($request->input('bulk_actions') === 'checkin') {
+            if ($referer = Helper::sameOriginUrl($request->headers->get('referer'))) {
+                redirect()->setIntendedUrl($referer);
+            }
+            $request->session()->flashInput(['selected_assets' => $asset_ids]);
+
+            return redirect()->route('hardware.bulkcheckin.show');
+        }
+
+        if ($request->input('bulk_actions') === 'audit') {
+            $request->session()->flashInput(['selected_assets' => $asset_ids]);
+
+            return redirect()->route('hardware.bulk-audit.show');
+        }
+
         if ($request->input('bulk_actions') === 'maintenance') {
             $request->session()->flashInput(['selected_assets' => $asset_ids]);
 
             return redirect()->route('maintenances.create');
         }
 
-        // Figure out where we need to send the user after the update is complete, and store that in the session
-        $bulk_back_url = request()->headers->get('referer');
-        session(['bulk_back_url' => $bulk_back_url]);
+        // Stash where to redirect after update/destroy. Referer is user-
+        // controllable, so run it through the same-origin gate so a
+        // hostile referrer can't turn the later redirect($bulk_back_url)
+        // into an open-redirect. If the referrer fails validation the
+        // reader falls back to route('hardware.index') via the same
+        // helper coalescing pattern.
+        if ($safeReferer = Helper::sameOriginUrl(request()->headers->get('referer'))) {
+            session(['bulk_back_url' => $safeReferer]);
+        }
 
         $allowed_columns = [
             'id',
@@ -230,9 +260,11 @@ class BulkAssetsController extends Controller
         $has_errors = 0;
         $error_array = [];
 
-        // Get the back url from the session and then destroy the session
-
-        $bulk_back_url = $request->session()->pull('bulk_back_url', url()->previous());
+        // Pull the stashed-and-vetted back URL from edit(). If the
+        // session slot is empty (direct POST, session lost, etc.) fall
+        // back to the plain index rather than url()->previous(), which
+        // is Referer-derived and would need its own sanitize step.
+        $bulk_back_url = Helper::sameOriginUrl($request->session()->pull('bulk_back_url')) ?? route('hardware.index');
 
         $custom_field_columns = CustomField::all()->pluck('db_column')->toArray();
 
@@ -584,11 +616,10 @@ class BulkAssetsController extends Controller
     {
         $this->authorize('delete', Asset::class);
 
-        $bulk_back_url = route('hardware.index');
-
-        if ($request->session()->has('bulk_back_url')) {
-            $bulk_back_url = $request->session()->pull('bulk_back_url');
-        }
+        // Same pattern as update(): pull the vetted URL from edit()'s
+        // stash, fall through to the plain index if it's missing or was
+        // somehow poisoned upstream of the sanitize step.
+        $bulk_back_url = Helper::sameOriginUrl($request->session()->pull('bulk_back_url')) ?? route('hardware.index');
         $assetIds = $request->input('ids');
 
         if (empty($assetIds)) {
@@ -654,7 +685,14 @@ class BulkAssetsController extends Controller
             $admin = auth()->user();
 
             $target = $this->determineCheckoutTarget();
-            session()->put(['checkout_to_type' => $target]);
+            // Store the STRING kind ('user' / 'asset' / 'location') the
+            // operator picked, not the resolved model — the checkout-selector
+            // partial compares against string literals and an Eloquent
+            // instance in the slot silently fails every match. Unlike the
+            // per-item Asset / Accessory controllers, this method has no
+            // downstream session put that would overwrite a bad early value,
+            // so this is the sole source of truth.
+            session()->put(['checkout_to_type' => request('checkout_to_type')]);
 
             if (! is_array($request->input('selected_assets'))) {
                 return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
@@ -673,18 +711,25 @@ class BulkAssetsController extends Controller
                     ->with('error', trans('general.error_assets_already_checked_out'));
             }
 
-            // Prevent checking out assets across companies if FMCS enabled
-            if (Setting::getSettings()->full_multiple_companies_support && $target->company_id) {
-                $company_ids = $assets->pluck('company_id')->unique();
+            // Prevent checking out assets across companies if FMCS enabled.
+            if (Setting::getSettings()->full_multiple_companies_support) {
+                $company_ids = $assets->pluck('company_id')->filter()->unique();
 
-                // if there is more than one unique company id or the singular company id does not match
-                // then the checkout is invalid
-                if ($company_ids->count() > 1 || $company_ids->first() != $target->company_id) {
-                    // re-add the asset ids so the assets select is re-populated
-                    $request->session()->flashInput(['selected_assets' => $asset_ids]);
+                if ($company_ids->isNotEmpty()) {
+                    if ($company_ids->count() > 1) {
+                        // Selected assets span multiple companies; bulk checkout can't satisfy all of them.
+                        $mismatch = true;
+                    } else {
+                        // All assets share the same company; let the model enforce the checkout rules.
+                        $mismatch = ! $assets->first()->canCheckoutTo($target);
+                    }
 
-                    return redirect(route('hardware.bulkcheckout.show'))
-                        ->with('error', trans('general.error_user_company_multiple'));
+                    if ($mismatch) {
+                        $request->session()->flashInput(['selected_assets' => $asset_ids]);
+
+                        return redirect(route('hardware.bulkcheckout.show'))
+                            ->with('error', trans('general.error_user_company_multiple'));
+                    }
                 }
             }
 
@@ -716,8 +761,32 @@ class BulkAssetsController extends Controller
                         $asset->status_id = $request->input('status_id');
                     }
 
-                    if ($request->boolean('set_not_requestable')) {
-                        $asset->requestable = false;
+                    // The bulk-checkout form now carries a plain `requestable`
+                    // checkbox (matching the per-item hardware/checkout form
+                    // so the localStorage-backed remembered-default JS is
+                    // shared between the two). Always set the flag from the
+                    // request, so the operator's explicit choice sticks.
+                    $asset->requestable = $request->boolean('requestable');
+
+                    // Concurrency guard, same shape as Api\AssetsController::checkout.
+                    // Bulk checkout iterates over a selection of asset IDs and
+                    // calls checkOut per asset without a per-row lock; two
+                    // operators submitting overlapping bulk selections at the
+                    // same instant could each pass the caller-side selection
+                    // and both proceed through checkOut on the same asset,
+                    // landing duplicate history rows and doubling
+                    // checkout_counter for that asset. Re-fetch the row under
+                    // lockForUpdate and re-check availability before invoking
+                    // checkOut. Assets that racing bulk actions have already
+                    // claimed are skipped and surfaced as errors, matching how
+                    // the per-asset checkout path behaves.
+                    $locked = Asset::whereKey($asset->id)->lockForUpdate()->first();
+                    if (! $locked || ! $locked->availableForCheckout()) {
+                        $errors = array_merge_recursive($errors, [
+                            'asset_'.$asset->id => [trans('admin/hardware/message.checkout.not_available')],
+                        ]);
+
+                        continue;
                     }
 
                     $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);
@@ -747,8 +816,17 @@ class BulkAssetsController extends Controller
                     e($request->get('note')),
                 );
 
-                // Redirect to the new asset page
-                return redirect()->to('hardware')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
+                // Honor the redirect_option select from the form. Choosing
+                // 'bulk_checkout' bounces the operator right back to the
+                // bulk-checkout screen so they can keep scanning without
+                // navigating away — the workflow that Quick Scan Checkin
+                // uses for the checkin side. Any other value (default is
+                // 'index') falls back to the asset listing.
+                $redirect = $request->input('redirect_option') === 'bulk_checkout'
+                    ? route('hardware.bulkcheckout.show')
+                    : route('hardware.index');
+
+                return redirect()->to($redirect)->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
             }
 
             // Redirect to the asset management page with error
@@ -759,21 +837,362 @@ class BulkAssetsController extends Controller
 
     }
 
+    /**
+     * Show Bulk Checkin Page
+     */
+    public function showCheckin(): View
+    {
+        $this->authorize('checkin', Asset::class);
+
+        $notAssigned = collect();
+
+        if (old('selected_assets') && is_array(old('selected_assets'))) {
+            $assets = Asset::withTrashed()->findMany(old('selected_assets'));
+
+            [$assigned, $notAssigned] = $assets->partition(function (Asset $asset) {
+                return $asset->assigned_to;
+            });
+
+            session()->flashInput(['selected_assets' => $assigned->pluck('id')->values()->toArray()]);
+        }
+
+        $do_not_change = ['' => trans('general.do_not_change')];
+        $status_label_list = $do_not_change + Helper::statusLabelList();
+
+        return view('hardware/bulk-checkin', [
+            'statusLabel_list' => $status_label_list,
+            'removed_assets' => $notAssigned,
+        ]);
+    }
+
+    /**
+     * Process Multiple Checkin Request
+     */
+    public function storeCheckin(Request $request): RedirectResponse
+    {
+        $this->authorize('checkin', Asset::class);
+
+        if (! is_array($request->input('selected_assets'))) {
+            return redirect()->route('hardware.bulkcheckin.show')->withInput()->with('error', trans('admin/hardware/message.multi-checkin.no_assets_selected'));
+        }
+
+        $asset_ids = array_filter($request->input('selected_assets'));
+
+        $assets = Asset::withTrashed()->findOrFail($asset_ids);
+
+        // Resolve via the scoped Location query so non-existent IDs and IDs the actor
+        // cannot see under FMCS are rejected before we touch any asset.
+        $submittedLocation = null;
+        if ($request->filled('location_id')) {
+            $submittedLocation = Location::find($request->input('location_id'));
+
+            if (! $submittedLocation) {
+                return redirect()->route('hardware.bulkcheckin.show')->withInput()
+                    ->with('error', trans('admin/hardware/message.create.target_not_found.location'));
+            }
+        }
+
+        $checkin_at = date('Y-m-d H:i:s');
+        if ($request->filled('checkin_at') && $request->input('checkin_at') != date('Y-m-d')) {
+            $checkin_at = $request->input('checkin_at');
+        }
+
+        $errors = [];
+        $admin = auth()->user();
+
+        DB::transaction(function () use ($assets, $admin, $checkin_at, $request, $submittedLocation, &$errors) {
+            foreach ($assets as $asset) {
+                $this->authorize('checkin', $asset);
+
+                if (is_null($asset->assignedTo)) {
+                    continue;
+                }
+
+                $target = $asset->assignedTo;
+                $originalValues = $asset->getRawOriginal();
+
+                $asset->expected_checkin = null;
+                $asset->assignedTo()->disassociate($asset);
+                $asset->accepted = null;
+
+                if ($request->filled('status_id')) {
+                    $asset->status_id = $request->input('status_id');
+                }
+
+                $this->migrateLegacyLocations($asset);
+
+                $asset->location_id = $asset->rtd_location_id;
+
+                if ($request->has('location_id')) {
+                    if ($submittedLocation) {
+                        $asset->location_id = $submittedLocation->id;
+                        if ($request->input('update_default_location') == 0) {
+                            $asset->rtd_location_id = $submittedLocation->id;
+                        }
+                    } else {
+                        $asset->location_id = null;
+                    }
+                }
+
+                $asset->last_checkin = $checkin_at;
+
+                if ($request->boolean('checkin_licenses')) {
+                    $asset->licenseseats->each(function (LicenseSeat $seat) {
+                        $seat->update(['assigned_to' => null]);
+                    });
+                }
+
+                CheckoutAcceptance::pending()->whereHasMorph('checkoutable', [Asset::class], function (Builder $query) use ($asset) {
+                    $query->where('id', $asset->id);
+                })->get()->each->delete();
+
+                if ($asset->save()) {
+                    if ($request->boolean('checkin_child_assets')) {
+                        Asset::where('assigned_type', Asset::class)
+                            ->where('assigned_to', $asset->id)
+                            ->update(['location_id' => $asset->location_id]);
+                    }
+
+                    event(new CheckoutableCheckedIn($asset, $target, $admin, $request->input('note'), $checkin_at, $originalValues));
+                } else {
+                    $errors = array_merge_recursive($errors, $asset->getErrors()->toArray());
+                }
+            }
+        });
+
+        if (! $errors) {
+            return redirect()->intended(route('hardware.index'))->with('success', trans_choice('admin/hardware/message.multi-checkin.success', count($asset_ids)));
+        }
+
+        return redirect()->route('hardware.bulkcheckin.show')->withInput()
+            ->with('error', trans_choice('admin/hardware/message.multi-checkin.error', count($asset_ids)))
+            ->withErrors($errors);
+    }
+
+    /**
+     * Show the bulk-audit form: single shared note, optional location
+     * override, optional next_audit_date override. Applied uniformly
+     * to every selected asset when the form is submitted.
+     *
+     * The full walk-per-asset customization the single-audit form
+     * offers (custom fields, per-asset image, etc.) is intentionally
+     * out of scope here; the whole point of bulk audit is to
+     * touch-and-go a stack of items at once. Users needing to record
+     * per-item details should still use the single audit form.
+     */
+    public function showAudit(): View
+    {
+        $this->authorize('audit', Asset::class);
+
+        $settings = Setting::getSettings();
+
+        // Only prefill next_audit_date when the install has an
+        // audit_interval configured. Without it, `(int) null` falls
+        // out to 0 months and the field prefills as today, which
+        // reads as "audit this again immediately" and isn't useful.
+        $next_audit_date = $settings->audit_interval
+            ? Carbon::now()->addMonths((int) $settings->audit_interval)->toDateString()
+            : null;
+
+        // FMCS location-scoping only: a location under scope_locations_fmcs
+        // belongs to exactly one company, so a shared audit-location can't
+        // legitimately fit assets from multiple companies. Inspect the
+        // selection, then either scope the picker to the shared company
+        // or hide the controls entirely. If location scoping is off (or
+        // FMCS is off), the picker renders unscoped, matching the
+        // pre-existing behavior.
+        [$sharedCompanyId, $hideLocationFields] = $this->auditLocationVisibility($settings);
+
+        return view('hardware/bulk-audit', [
+            'next_audit_date' => $next_audit_date,
+            'sharedCompanyId' => $sharedCompanyId,
+            'hideLocationFields' => $hideLocationFields,
+        ]);
+    }
+
+    /**
+     * Decide how the bulk-audit location controls should render, based
+     * on the selection's company distribution and the current FMCS
+     * settings. Returns [sharedCompanyId, hideLocationFields].
+     *
+     * Extracted from showAudit() so the outer render method stays
+     * focused; also reused by storeAudit() as a server-side guard so
+     * a crafted POST that includes a location_id + update_location=1
+     * on a spanning selection can't sneak past the UI hiding the
+     * fields for that case.
+     */
+    private function auditLocationVisibility(Setting $settings): array
+    {
+        if (! $settings->scope_locations_fmcs) {
+            return [null, false];
+        }
+
+        $selected = old('selected_assets');
+        if (! is_array($selected) || empty($selected)) {
+            return [null, false];
+        }
+
+        $companyIds = Asset::whereIn('id', $selected)
+            ->distinct()
+            ->pluck('company_id')
+            ->filter(fn ($id) => $id !== null)
+            ->unique();
+
+        if ($companyIds->count() === 1) {
+            return [(int) $companyIds->first(), false];
+        }
+
+        if ($companyIds->count() > 1) {
+            return [null, true];
+        }
+
+        return [null, false];
+    }
+
+    /**
+     * Apply the audit to every selected asset. Same skip-observer
+     * pattern the single-asset audit uses (AssetsController::auditStore)
+     * so the assets table update doesn't fire an extra Actionlog
+     * 'update' entry alongside the 'audit' entry logAudit() writes.
+     */
+    public function storeAudit(UploadFileRequest $request): RedirectResponse
+    {
+        $this->authorize('audit', Asset::class);
+
+        if (! is_array($request->input('selected_assets'))) {
+            return redirect()->route('hardware.bulk-audit.show')->withInput()
+                ->with('error', trans('admin/hardware/message.multi-audit.no_assets_selected'));
+        }
+
+        $asset_ids = array_filter($request->input('selected_assets'));
+        $assets = Asset::whereIn('id', $asset_ids)->get();
+
+        // Resolve the submitted location once, before we touch any asset,
+        // so a location the actor can't see (or a fabricated id) fails
+        // fast. Matches the pattern the storeCheckin method uses.
+        $submittedLocation = null;
+        if ($request->filled('location_id')) {
+            $submittedLocation = Location::find($request->input('location_id'));
+            if (! $submittedLocation) {
+                return redirect()->route('hardware.bulk-audit.show')->withInput()
+                    ->with('error', trans('admin/hardware/message.create.target_not_found.location'));
+            }
+
+            // Server-side guard mirroring the UI's hide behavior: under
+            // FMCS location scoping, a location legitimately belongs to
+            // one company only. If the selection spans multiple
+            // companies, discard the submitted location so we don't
+            // fail every row on the fmcs_location model validation. UI
+            // hides the field for this case; this handles a crafted
+            // POST that submits location_id anyway.
+            if (Setting::getSettings()->scope_locations_fmcs) {
+                $selectedCompanies = $assets->pluck('company_id')->filter()->unique();
+                if ($selectedCompanies->count() > 1) {
+                    $submittedLocation = null;
+                }
+            }
+        }
+
+        $errors = [];
+        $succeeded = 0;
+
+        DB::transaction(function () use ($assets, $request, $submittedLocation, &$errors, &$succeeded) {
+            foreach ($assets as $asset) {
+                $rowError = $this->auditSingleAsset($asset, $request, $submittedLocation);
+                if ($rowError === null) {
+                    $succeeded++;
+                } else {
+                    $errors[$asset->id] = $rowError;
+                }
+            }
+        });
+
+        if (! $errors) {
+            return redirect()->route('hardware.index')
+                ->with('success', trans_choice('admin/hardware/message.multi-audit.success', $succeeded, ['count' => $succeeded]));
+        }
+
+        return redirect()->route('hardware.bulk-audit.show')->withInput()
+            ->with('error', trans_choice('admin/hardware/message.multi-audit.partial_error', count($errors), ['success' => $succeeded, 'failed' => count($errors)]))
+            ->withErrors($errors);
+    }
+
+    /**
+     * Apply the shared bulk-audit payload to one asset. Returns the
+     * model's errors array on failure, null on success.
+     *
+     * Extracted from storeAudit() so that method stays under Codacy's
+     * NPath complexity threshold. Nested filled()/hasFile()/isValid()
+     * branches inside a transaction closure multiply out to ~300 NPath
+     * when inline; the split drops the outer method well under 100.
+     *
+     * Behavioral notes preserved from the inline version:
+     * - update_location=1 is required to overwrite the asset's actual
+     *   location_id (matches single-audit + API semantics).
+     * - The audit log always records the submitted location as
+     *   "where the audit happened" regardless of update_location.
+     * - unsetEventDispatcher + manual isValid() skips the observer's
+     *   redundant "update" log entry alongside the "audit" entry.
+     * - A single uploaded image is copied per-asset (per-row filename
+     *   avoids collisions when two audits fire in the same second).
+     */
+    private function auditSingleAsset(Asset $asset, UploadFileRequest $request, ?Location $submittedLocation): ?array
+    {
+        $this->authorize('audit', $asset);
+
+        $originalValues = $asset->getRawOriginal();
+
+        if ($request->filled('next_audit_date')) {
+            $asset->next_audit_date = $request->input('next_audit_date');
+        }
+        $asset->last_audit_date = date('Y-m-d H:i:s');
+
+        if ($submittedLocation && $request->input('update_location') == '1') {
+            $asset->location_id = $submittedLocation->id;
+        }
+
+        $asset->unsetEventDispatcher();
+
+        if (! $asset->isValid() || ! $asset->save()) {
+            return $asset->getErrors()->toArray();
+        }
+
+        $file_name = null;
+        if ($request->hasFile('image')) {
+            $file_name = $request->handleFile('private_uploads/audits/', 'audit-'.$asset->id, $request->file('image'));
+        }
+
+        $asset->logAudit(
+            $request->input('note'),
+            $submittedLocation?->id,
+            $file_name,
+            $originalValues,
+        );
+
+        return null;
+    }
+
     public function restore(Request $request): RedirectResponse
     {
-        $this->authorize('update', Asset::class);
+        // Restore is a delete-level action across the codebase. The bulk
+        // POST handler used to gate on authorize('update', Asset::class),
+        // letting an assets.edit user undo an admin's soft-delete.
+        $this->authorize('delete', Asset::class);
         $assetIds = $request->input('ids');
 
         if (empty($assetIds)) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.restore.nothing_updated'));
-        } else {
-            foreach ($assetIds as $key => $assetId) {
-                $asset = Asset::withTrashed()->find($assetId);
+        }
+
+        foreach ($assetIds as $assetId) {
+            // Skip invalid or forged IDs. Prior code called ->restore() on
+            // null and 500'd on the first bad id in the payload.
+            if ($asset = Asset::withTrashed()->find($assetId)) {
                 $asset->restore();
             }
-
-            return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.restore.success'));
         }
+
+        return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.restore.success'));
     }
 
     public function hasUndeployableStatus(array $asset_ids)

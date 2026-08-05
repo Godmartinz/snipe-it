@@ -13,6 +13,7 @@ return [
     'pending' => 'Pendente',
     'status_type' => 'Tipo de Situação',
     'show_in_nav' => 'Mostrar na barra lateral de navegação',
+    'status_label' => 'Rótulos de Situação',
     'title' => 'Rótulos de Situação',
     'undeployable' => 'Não implementável',
     'update' => 'Atualizar Rótulo de Situação',

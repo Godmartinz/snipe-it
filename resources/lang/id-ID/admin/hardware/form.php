@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Kembali ke semua :type',
     'redirect_to_type' => 'Pergi ke :type',
     'redirect_to_checked_out_to' => 'Pergi ke yang Dipinjamkan ke',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Memilih Tipe Status',
     'serial' => 'Serial',
     'serial_required' => 'Aset :number memerlukan nomor seri',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Tag Aset',
     'update' => 'Perbarui Aset',
     'warranty' => 'Garansi',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Garansi Berakhir',
     'years' => 'tahun',
     'asset_location' => 'Perbarui Lokasi Aset',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Informasi Tambahan',
     'order_details' => 'Informasi Pesanan',
     'calc_eol' => 'Jika mengosongkan tanggal EOL, gunakan perhitungan EOL otomatis berdasarkan tanggal pembelian dan tarif EOL.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

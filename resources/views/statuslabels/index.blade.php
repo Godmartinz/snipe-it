@@ -13,11 +13,16 @@
         <x-page-column class="col-md-9">
             <x-box>
 
+                <x-slot:bulkactions>
+                    <x-table.bulk-statuslabels />
+                </x-slot:bulkactions>
+
                 <x-table
                     name="statuslabel"
                     buttons="statuslabelButtons"
                     fixed_right_number="1"
                     fixed_number="1"
+                    use_sticky_css
                     api_url="{{ route('api.statuslabels.index') }}"
                     :presenter="\App\Presenters\StatusLabelPresenter::dataTableLayout()"
                     export_filename="export-statuslabels-{{ date('Y-m-d') }}"

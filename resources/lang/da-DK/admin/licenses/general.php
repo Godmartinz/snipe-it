@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Checked in via bulk license checkin in license GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Tjek Alle Pladser Ud',
             'modal' => 'Denne handling vil kassere et sæde til den første tilgængelige bruger. ● Denne handling vil kasserer alle :available_seats_count sæder til de første tilgængelige brugere. En bruger anses for at være tilgængelig for dette sæde, hvis de ikke allerede har denne licens tjekket ud til dem, og Auto-Tildel Licens-egenskaben er aktiveret på deres brugerkonto.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Intet at gøre. Der er ingen brugere som ikke allerede har denne licens tildelt dem.',
             'log_msg' => 'Checket ud via bulk licens checkout i licens GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

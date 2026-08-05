@@ -72,8 +72,8 @@ class AssetsImportFileBuilder extends FileBuilder
         return [
             'asset_tag' => Str::random(),
             'assigneeFullName' => $faker->name,
-            'assigneeEmail' => $faker->email,
-            'assigneeUsername' => $faker->userName,
+            'assigneeEmail' => Str::random(10).'@example.com',
+            'assigneeUsername' => 'import_'.Str::random(10),
             'category' => Str::random(),
             'companyName' => Str::random()." {$faker->companySuffix}",
             'itemName' => Str::random(),

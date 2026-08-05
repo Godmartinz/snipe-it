@@ -16,7 +16,16 @@ class AccessoryPresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -25,6 +34,7 @@ class AccessoryPresenter extends Presenter
                 'printIgnore' => true,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -32,6 +42,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'accessoriesLinkFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -40,6 +51,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -48,18 +60,21 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'companiesLinkObjFormatter',
             ],  [
                 'field' => 'category',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.category'),
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
                 'field' => 'model_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/models/table.modelnumber'),
                 'formatter' => 'accessoriesLinkFormatter',
             ], [
                 'field' => 'manufacturer',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -68,6 +83,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'manufacturersLinkObjFormatter',
             ], [
                 'field' => 'supplier',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -76,12 +92,14 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'suppliersLinkObjFormatter',
             ], [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.location'),
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
                 'field' => 'min_amt',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.min_amt'),
@@ -89,6 +107,7 @@ class AccessoryPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'qty',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/accessories/general.total'),
@@ -96,6 +115,7 @@ class AccessoryPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'remaining',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'visible' => false,
@@ -104,6 +124,7 @@ class AccessoryPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'checkouts_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => true,
@@ -112,8 +133,9 @@ class AccessoryPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'percent_remaining',
+                'scope' => 'col',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
                 'switchable' => true,
                 'title' => '% '.trans('general.remaining'),
                 'visible' => true,
@@ -121,6 +143,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'purchase_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
@@ -128,12 +151,14 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'purchase_cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.unit_cost'),
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'total_cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.total_cost'),
@@ -141,12 +166,14 @@ class AccessoryPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'order_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.order_number'),
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
@@ -154,6 +181,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'notesFormatter',
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -161,6 +189,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -169,6 +198,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -177,6 +207,7 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'change',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'visible' => true,
@@ -185,6 +216,7 @@ class AccessoryPresenter extends Presenter
                 'printIgnore' => true,
             ], [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -203,6 +235,7 @@ class AccessoryPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -211,6 +244,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'assigned_to',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -219,7 +253,18 @@ class AccessoryPresenter extends Presenter
                 'formatter' => 'polymorphicItemFormatter',
             ],
             [
+                'field' => 'assigned_to.companies',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.companies'),
+                'visible' => true,
+                'formatter' => 'companiesArrayLinkFormatter',
+            ],
+            [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -228,6 +273,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -237,6 +283,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.created_by'),
@@ -245,6 +292,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -263,6 +311,7 @@ class AccessoryPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -272,6 +321,7 @@ class AccessoryPresenter extends Presenter
 
             [
                 'field' => 'accessory',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => false,
                 'switchable' => false,
@@ -281,6 +331,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -290,6 +341,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -298,6 +350,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -307,6 +360,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.created_by'),
@@ -315,6 +369,7 @@ class AccessoryPresenter extends Presenter
             ],
             [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

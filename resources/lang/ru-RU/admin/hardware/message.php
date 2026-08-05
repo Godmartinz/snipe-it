@@ -35,6 +35,12 @@ return [
         'assets_do_not_exist_or_are_invalid' => 'Выбранные медиафайлы не могут быть обновлены.',
     ],
 
+    'bulk_update' => [
+        'success' => 'Актив успешно обновлен.|:count активов были успешно обновлены.',
+        'partial' => ':success активы(ы) успешно обновлены, :failed faily. Смотрите результаты массива для деталей.',
+        'error' => 'Активы не были обновлены. Подробнее см. в массиве результатов.',
+    ],
+
     'restore' => [
         'error' => 'Актив не был восстановлен, повторите попытку',
         'success' => 'Актив успешно восстановлен.',
@@ -68,9 +74,54 @@ return [
         'file_delete_error' => 'Невозможно удалить файл',
         'file_missing' => 'Выбранный файл отсутствует',
         'file_already_deleted' => 'Выбранный файл уже удален',
+        'file_missing_on_disk' => 'The file for this import is no longer on disk. It may have been deleted outside of Snipe-IT. Delete this entry and re-upload the file to try again.',
+        'file_empty' => 'This file has no data rows. Nothing can be imported from it.',
+        'header_row_missing' => 'This file does not have a recognized header row. Delete this entry and re-upload the file to try again.',
         'header_row_has_malformed_characters' => 'Один или несколько атрибутов в строке заголовка содержат неправильно сформированные символы UTF-8',
         'content_row_has_malformed_characters' => 'Один или несколько атрибутов в первой строке содержимого содержат неправильно сформированные символы UTF-8',
         'transliterate_failure' => 'Транслитерация из :encoding в UTF-8 не удалась из-за недопустимых символов во входных данных',
+        'bulk_delete' => [
+            'button' => 'Удалить выбранное (:count)',
+            'confirm_title' => 'Удалить выбранные файлы импорта?',
+            'confirm_body' => 'Вы собираетесь безвозвратно удалить :count файлов импорта. Это невозможно отменить.',
+            'confirm_button' => 'Удалить',
+            'success' => 'Файл импорта успешно удален.|:count файлов импорта успешно удалены.',
+            'skipped' => ':count файла(ов) было пропущено, поскольку у вас нет прав на их удаление.',
+            'select_all' => 'Выбрать все файлы на этой странице',
+            'select_row' => 'Выберите :file для массового удаления',
+        ],
+        'row_count' => '{0} No data rows in this file|{1} :count data row to import|[2,*] :count data rows to import',
+        'summary' => [
+            'created' => 'Создано',
+            'updated' => 'Обновлено',
+            'skipped' => 'Skipped as duplicates',
+            'errored' => 'Errored',
+            'no_changes' => 'The import finished but nothing was created or updated. Every row was skipped, usually because the underlying records already existed. Check the counts below and adjust the CSV or import type if that is not what you expected.',
+        ],
+        'update_mode_help' => 'When enabled, existing records matched by identity (serial, asset tag, username, etc.) are updated instead of skipped. Any column in your CSV with an empty value will clear the corresponding field on the existing record. Columns you leave out of your CSV entirely are not touched, so existing values are preserved. Required fields (like name and seats on a license) cannot be cleared. Leaving them empty will produce a validation error for that row.',
+        'type_required' => 'Please select an import type before continuing.',
+        'processing' => 'Processing your import. Please wait until this finishes before closing the page.',
+        'backup_running' => 'Running backup before importing. This can take a while on larger files. Please wait.',
+        'backup_label' => 'Pre-import backup',
+        'backup_complete' => 'Backup complete',
+        'import_label' => 'Импорт',
+        'required_fields_missing' => 'The following required fields are not mapped: :fields',
+        'history' => [
+            'missing_asset_tag_identity' => '(missing asset tag)',
+            'missing_asset_tag_message' => 'Row skipped: no asset tag provided.',
+            'asset_not_found_message' => 'Asset with this tag does not exist. Import assets first, then re-run the history import.',
+            'user_not_matched_message' => 'No user matched ":name" - toggle the match-by options in step 1 or create the user first.',
+        ],
+        'wizard' => [
+            'step_type' => 'Choose type',
+            'step_map' => 'Map fields',
+            'step_preview' => 'Предпросмотр',
+            'back' => 'Назад',
+            'next' => 'Далее',
+            'preview_button' => 'Предпросмотр',
+            'process' => 'Process import',
+            'preview_intro' => 'Previewing the first :count row(s) after applying your mapping. Use the Back button if you need to edit the mapped attributes before importing.',
+        ],
     ],
 
     'delete' => [
@@ -94,14 +145,26 @@ return [
         'success' => 'Актив успешно выдан.|Активы успешно выданы.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Актив не был выдан, пожалуйста, попробуйте еще раз|Активы не были выданы, пожалуйста, попробуйте еще раз',
+        'success' => 'Актив успешно выдан.|Активы успешно выданы.',
+        'no_assets_selected' => 'Вы должны выбрать хотя бы один актив из списка',
+    ],
+
+    'multi-audit' => [
+        'success' => ':count asset audited successfully.|:count assets audited successfully.',
+        'partial_error' => ':success asset audited, :failed failed. Check the errors below and try again.|:success assets audited, :failed failed. Check the errors below and try again.',
+        'no_assets_selected' => 'Вы должны выбрать хотя бы один актив из списка',
+    ],
+
     'checkin' => [
         'error' => 'Актив не был отвязан, пожалуйста попробуйте снова',
         'success' => 'Актив успешно отвязан.',
         'user_does_not_exist' => 'Этот пользователь является недопустимым. Пожалуйста, попробуйте еще раз.',
         'already_checked_in' => 'Этот актив уже привязан.',
-        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
-        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
-        'force_checkin_error' => 'Could not clear invalid assignment.',
+        'force_checkin_orphaned_success' => 'Некорректное назначение успешно удалено.',
+        'force_checkin_not_orphaned' => 'Элемент не находится в состоянии некорректного назначения.',
+        'force_checkin_error' => 'Не удалось очистить недопустимое назначение.',
 
     ],
 

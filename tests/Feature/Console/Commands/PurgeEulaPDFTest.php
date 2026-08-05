@@ -18,14 +18,10 @@ class PurgeEulaPDFTest extends TestCase
         $company = Company::factory()->create();
         $asset = Asset::factory()->create();
         $otherAsset = Asset::factory()->create();
-        $softDeletedUser = User::factory()->create([
-            'company_id' => $company->id,
-        ]);
+        $softDeletedUser = User::factory()->forCompany($company)->create();
         $softDeletedUser->delete();
 
-        $activeUser = User::factory()->create([
-            'company_id' => $company->id,
-        ]);
+        $activeUser = User::factory()->forCompany($company)->create();
 
         $acceptanceToPurge = CheckoutAcceptance::factory()->create([
             'checkoutable_type' => Asset::class,
@@ -69,12 +65,8 @@ class PurgeEulaPDFTest extends TestCase
         $targetAsset = Asset::factory()->create();
         $otherAsset = Asset::factory()->create();
 
-        $userInTargetCompany = User::factory()->create([
-            'company_id' => $targetCompany->id,
-        ]);
-        $userInOtherCompany = User::factory()->create([
-            'company_id' => $otherCompany->id,
-        ]);
+        $userInTargetCompany = User::factory()->forCompany($targetCompany)->create();
+        $userInOtherCompany = User::factory()->forCompany($otherCompany)->create();
 
         $targetAcceptance = CheckoutAcceptance::factory()->create([
             'checkoutable_type' => Asset::class,
@@ -128,19 +120,13 @@ class PurgeEulaPDFTest extends TestCase
         $wrongCompanyAsset = Asset::factory()->create();
         $activeUserAsset = Asset::factory()->create();
 
-        $matchingUser = User::factory()->create([
-            'company_id' => $targetCompany->id,
-        ]);
+        $matchingUser = User::factory()->forCompany($targetCompany)->create();
         $matchingUser->delete();
 
-        $wrongCompanyUser = User::factory()->create([
-            'company_id' => $otherCompany->id,
-        ]);
+        $wrongCompanyUser = User::factory()->forCompany($otherCompany)->create();
         $wrongCompanyUser->delete();
 
-        $activeUserInTargetCompany = User::factory()->create([
-            'company_id' => $targetCompany->id,
-        ]);
+        $activeUserInTargetCompany = User::factory()->forCompany($targetCompany)->create();
         Storage::fake('local');
         Storage::put('private_uploads/signatures/matching-signature.png', 'fake');
         Storage::put('private_uploads/eula-pdfs/matching-eula.pdf', 'fake');
@@ -202,9 +188,7 @@ class PurgeEulaPDFTest extends TestCase
     {
         $company = Company::factory()->create();
 
-        $softDeletedUser = User::factory()->create([
-            'company_id' => $company->id,
-        ]);
+        $softDeletedUser = User::factory()->forCompany($company)->create();
         $softDeletedUser->delete();
 
         $recentAsset = Asset::factory()->create();

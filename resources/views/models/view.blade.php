@@ -17,10 +17,9 @@
 
         @if ($model->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
-                    <x-icon type="warning" />
+                <x-callout type="warning" icon="warning" live="assertive">
                     {{ trans('admin/models/general.deleted') }}
-                </div>
+                </x-callout>
             </div>
         @endif
 
@@ -54,7 +53,7 @@
         </x-page-column>
         <x-page-column class="col-md-3">
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$model" img_path="{{ app('models_upload_url') }}">
+                <x-info-panel :infoPanelObj="$model" img_path="{{ app('models_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'models', 'id' => $model->id])">
                     <x-slot:buttons>
                         <x-button.edit :item="$model" :route="route('models.edit', $model->id)" />
                         <x-button.add :item="\App\Models\Asset::class" :tooltip="trans('general.new_asset')" :route="route('hardware.create', ['model_id' => $model->id])"/>

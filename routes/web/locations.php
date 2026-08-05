@@ -18,21 +18,25 @@ Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
     Route::post(
         '{location}/restore',
         [LocationsController::class, 'postRestore']
-    )->name('locations.restore')->withTrashed();
+    )->where('location', '[0-9]+')
+        ->name('locations.restore')->withTrashed();
 
     Route::get('{locationId}/clone',
         [LocationsController::class, 'getClone']
-    )->name('clone/location');
+    )->where('locationId', '[0-9]+')
+        ->name('clone/location');
 
     Route::get(
         '{locationId}/printassigned',
         [LocationsController::class, 'print_assigned']
-    )->name('locations.print_assigned');
+    )->where('locationId', '[0-9]+')
+        ->name('locations.print_assigned');
 
     Route::get(
         '{locationId}/printallassigned',
         [LocationsController::class, 'print_all_assigned']
-    )->name('locations.print_all_assigned');
+    )->where('locationId', '[0-9]+')
+        ->name('locations.print_all_assigned');
 
 });
 

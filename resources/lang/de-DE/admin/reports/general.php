@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Akzeptanzanfrage gelöscht',
     'acceptance_request' => 'Akzeptierungsanfrage',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Adressinformation',
         'user_company' => 'Unternehmen des Benutzers',
         'user_city' => 'Stadt des Benuzers',

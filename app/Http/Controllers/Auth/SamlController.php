@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Services\Saml;
 use Illuminate\Http\RedirectResponse;
@@ -75,6 +76,7 @@ class SamlController extends Controller
     {
         $auth = $this->saml->getAuth();
         $ssoUrl = $auth->login(session()->get('url.intended'), [], false, false, false, false);
+
         return redirect()->away($ssoUrl);
     }
 
@@ -92,10 +94,23 @@ class SamlController extends Controller
      */
     public function acs(Request $request)
     {
+        // RelayState is attacker-controllable via a hostile IdP or a
+        // crafted SAML POST binding. Sanitize before storing so any
+        // downstream consumer that skips Helper::getRedirectOption
+        // (LoginController::authenticated, RedirectIfAuthenticated,
+        // DashboardController, etc. all call redirect()->intended()
+        // directly, which does no host validation) can't be steered
+        // off-site. sameOriginUrl() also strips CR/LF and rejects
+        // non-http(s) schemes. Runs before getAuth() so the sanitize
+        // step is unconditional even if SAML happens to be disabled at
+        // request time.
+        if ($relayState = Helper::sameOriginUrl($request->post('RelayState'))) {
+            session()->put('url.intended', $relayState);
+        }
+
         $saml = $this->saml;
         $auth = $saml->getAuth();
         $saml_exception = false;
-        session()->put('url.intended', $request->post('RelayState'));
         try {
             $auth->processResponse();
         } catch (\Exception $e) {

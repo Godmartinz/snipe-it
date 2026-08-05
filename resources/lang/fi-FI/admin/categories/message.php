@@ -21,7 +21,7 @@ return [
         'confirm' => 'Oletko varma että haluat poistaa tämän kategorian?',
         'error' => 'Kategorian poistossa tapahtui virhe. Yritä uudelleen.',
         'success' => 'Kategoria poistettiin onnistuneesti.',
-        'bulk_success' => 'Kategoriat poistettiin onnistuneesti.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Kategoria poistettiin onnistuneesti. Katso lisätietoja alapuolelta. | :count kategoriaa poistettiin onnistuneesti. Katso lisätietoja alapuolelta.',
     ],
 

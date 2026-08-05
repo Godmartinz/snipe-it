@@ -10,6 +10,13 @@ use Tests\TestCase;
 
 class AccessoriesForSelectListTest extends TestCase implements TestsFullMultipleCompaniesSupport
 {
+    public function test_requires_view_selectlists_permission(): void
+    {
+        $this->actingAsForApi(User::factory()->create())
+            ->getJson(route('api.accessories.selectlist'))
+            ->assertForbidden();
+    }
+
     public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
@@ -18,8 +25,8 @@ class AccessoriesForSelectListTest extends TestCase implements TestsFullMultiple
         $accessoryB = Accessory::factory()->for($companyB)->create();
 
         $superuser = User::factory()->superuser()->create();
-        $userInCompanyA = $companyA->users()->save(User::factory()->viewAccessories()->make());
-        $userInCompanyB = $companyB->users()->save(User::factory()->viewAccessories()->make());
+        $userInCompanyA = $companyA->users()->save(User::factory()->editAccessories()->make());
+        $userInCompanyB = $companyB->users()->save(User::factory()->editAccessories()->make());
 
         $this->settings->enableMultipleFullCompanySupport();
 
@@ -49,7 +56,7 @@ class AccessoriesForSelectListTest extends TestCase implements TestsFullMultiple
     {
         [$accessoryA, $accessoryB] = Accessory::factory()->count(2)->create();
 
-        $this->actingAsForApi(User::factory()->viewAccessories()->create())
+        $this->actingAsForApi(User::factory()->editAccessories()->create())
             ->getJson(route('api.accessories.selectlist'))
             ->assertOk()
             ->assertJsonPath('total_count', 2)

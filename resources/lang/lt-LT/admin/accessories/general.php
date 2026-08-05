@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Nerastas pirminis numatytasis licencinis sutikimas (EULA). Pridėkite jį nustatymuose.',
     'total' => 'Iš viso',
     'remaining' => 'Laisva',
+    'requestable' => 'Naudotojai gali užsakyti šį priedą',
     'update' => 'Redaguoti priedą',
     'use_default_eula' => 'Vietoj to naudokite <a href="#" data-toggle="modal" data-target="#eulaModal"> pirminį numatytąjį licencinį sutikimą (EULA)</a>.',
     'use_default_eula_disabled' => '<del>Naudokite pirminį numatytąjį licencinį sutikimą (EULA).</del> Pirminis numatytasis EULA neparinktas. Pridėkite jį nustatymuose.',

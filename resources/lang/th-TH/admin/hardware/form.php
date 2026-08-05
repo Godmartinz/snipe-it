@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'ไปที่ :type',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'เลือกประเภทสถานะ',
     'serial' => 'ซีเรียล',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'รหัสทรัพย์สิน',
     'update' => 'ปรับปรุงสินทรัพย์',
     'warranty' => 'การรับประกัน',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'การรับประกันหมดอายุ',
     'years' => 'ปี',
     'asset_location' => 'Update Asset Location',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Optional Information',
     'order_details' => 'Order Related Information',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

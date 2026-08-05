@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Codsiga aqbalaadda waa la tirtiray',
     'acceptance_request' => 'Codsiga aqbalida',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Cinwaanka Isticmaalaha',
         'user_company' => 'User Company',
         'user_city' => 'Isticmaalka Magaalada',

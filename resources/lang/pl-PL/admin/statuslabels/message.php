@@ -20,6 +20,8 @@ return [
         'confirm' => 'Czy na pewno chcesz usunąć ten status etykiety?',
         'error' => 'Wystąpił błąd podczas usuwania statusu etykiety. Spróbuj ponownie.',
         'success' => 'Status etykiety został usunięty pomyślnie.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

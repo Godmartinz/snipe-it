@@ -16,7 +16,16 @@ class CompanyPresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -24,6 +33,7 @@ class CompanyPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -31,7 +41,25 @@ class CompanyPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'companiesLinkFormatter',
             ], [
+                'field' => 'parent',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/companies/table.parent'),
+                'visible' => true,
+                'formatter' => 'companiesLinkObjFormatter',
+            ], [
+                'field' => 'children_count',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/companies/table.children'),
+                'visible' => true,
+            ], [
                 'field' => 'phone',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -40,6 +68,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'fax',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -48,6 +77,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'email',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -56,6 +86,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'emailFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -64,6 +95,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'users_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.users'),
@@ -72,6 +104,7 @@ class CompanyPresenter extends Presenter
 
             ], [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.assets'),
@@ -80,6 +113,7 @@ class CompanyPresenter extends Presenter
 
             ], [
                 'field' => 'licenses_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.licenses'),
@@ -87,6 +121,7 @@ class CompanyPresenter extends Presenter
                 'class' => 'css-license',
             ], [
                 'field' => 'accessories_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.accessories'),
@@ -94,6 +129,7 @@ class CompanyPresenter extends Presenter
                 'class' => 'css-accessory',
             ], [
                 'field' => 'consumables_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.consumables'),
@@ -101,6 +137,7 @@ class CompanyPresenter extends Presenter
                 'class' => 'css-consumable',
             ], [
                 'field' => 'components_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.components'),
@@ -108,6 +145,7 @@ class CompanyPresenter extends Presenter
                 'class' => 'css-component',
             ], [
                 'field' => 'tag_color',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -117,12 +155,14 @@ class CompanyPresenter extends Presenter
             ],
             [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -130,6 +170,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -138,6 +179,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -146,6 +188,7 @@ class CompanyPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

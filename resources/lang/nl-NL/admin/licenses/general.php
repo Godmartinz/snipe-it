@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Ingecheckt via bulk licentiecontrole in licentie GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Alle licenties uitchecken',
             'modal' => 'Met deze actie wordt één plaats uit gecheckt naar de eerste beschikbare gebruiker. | deze actie zal alle :available_seats_count plaatsen uit checken aan de eerste beschikbare gebruikers. Een gebruiker wordt beschouwd als beschikbaar voor deze plaats als hij deze licentie nog niet heeft ontvangen, en de Licenties automatisch toewijzen eigenschap is ingeschakeld op hun gebruikersaccount.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Niets te doen. Er zijn geen gebruikers die deze licentie nog niet aan hen hebben toegewezen.',
             'log_msg' => 'Uitgecheckt via bulklicentie-checkout in licentie GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

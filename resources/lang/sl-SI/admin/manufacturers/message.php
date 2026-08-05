@@ -25,7 +25,7 @@ return [
         'confirm' => 'Ali ste prepričani, da želite izbrisati tega proizvajalca?',
         'error' => 'Pri izbrisu proizvajalca je prišlo do težave. Prosim poskusite ponovno.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

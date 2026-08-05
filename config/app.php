@@ -12,7 +12,6 @@ use App\Providers\RouteServiceProvider;
 use App\Providers\SamlServiceProvider;
 use App\Providers\SettingsServiceProvider;
 use App\Providers\SnipeTranslationServiceProvider;
-use Elibyy\TCPDF\Facades\TCPDF;
 use Illuminate\Auth\AuthServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
@@ -235,6 +234,26 @@ return [
 
     /*
    |--------------------------------------------------------------------------
+   | ALLOW INTERNAL WEBHOOK TARGETS
+   |--------------------------------------------------------------------------
+   |
+   | By default the webhook endpoint validator refuses URLs that resolve to
+   | loopback, link-local, RFC-1918, or otherwise-non-public IPs. This
+   | prevents a super-admin (or someone who has taken over a super-admin
+   | account) from turning the outbound notification path into an SSRF
+   | primitive against internal services or cloud metadata endpoints.
+   |
+   | Some operators legitimately run their own webhook receiver on the same
+   | private network as Snipe-IT (self-hosted Mattermost, Rocket.Chat, an
+   | internal ChatOps bot, etc.). Setting this to true re-enables outbound
+   | requests to those addresses. Scheme restrictions (http/https only) are
+   | still enforced. Leave this off unless you know you need it.
+   |
+   */
+    'webhook_allow_internal_targets' => env('WEBHOOK_ALLOW_INTERNAL_TARGETS', false),
+
+    /*
+   |--------------------------------------------------------------------------
    | LOG AUTHED USER HEADER
    |--------------------------------------------------------------------------
    |
@@ -340,6 +359,66 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allow test buttons to target private / loopback IPs
+    |--------------------------------------------------------------------------
+    |
+    | Various admin screens (LDAP wizard, Google OAuth, webhook config, etc.)
+    | expose "Test" buttons that fire a real network request to a user-
+    | supplied host. Without a guard these are SSRF / port-scanning vectors:
+    | a superadmin (compromised account, insider, or SaaS tenant) could
+    | probe internal-only services, cloud metadata endpoints (169.254.169.254),
+    | loopback, etc. and read the distinguishing error responses to
+    | enumerate them.
+    |
+    | Default: false. The test helpers resolve the hostname and reject any
+    | URL that lands on a private / loopback / link-local / reserved range.
+    |
+    | Set to true ONLY when the Snipe-IT installation is legitimately
+    | pointed at services on the same private network (self-hosted on-prem
+    | alongside internal AD/Slack/webhooks is the typical case). Never
+    | enable on hosted / multi-tenant deployments.
+    |
+    */
+
+    'test_allow_private_ips' => env('TEST_ALLOW_PRIVATE_IPS', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Superuser Impersonation
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of usernames allowed to impersonate other users.
+    | Users in this list must ALSO be superusers. Empty or unset means the
+    | feature is completely off. Wrap usernames that contain commas in double
+    | quotes. Example: ALLOW_USER_IMPERSONATION=admin,"jane, doe"
+    |
+    */
+
+    'user_impersonation_usernames' => (function () {
+        $raw = env('ALLOW_USER_IMPERSONATION', '');
+
+        // Reject anything that isn't a string. env() converts literal "true"/"false"/"null"/etc.
+        // to PHP bool/null, which would otherwise stringify to garbage tokens.
+        if (! is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $usernames = [];
+        $seen = [];
+        foreach (str_getcsv($raw, ',', '"', '\\') as $token) {
+            $token = trim((string) $token);
+            $lower = mb_strtolower($token);
+            if ($token !== '' && ! isset($seen[$lower])) {
+                $usernames[] = $token;
+                $seen[$lower] = true;
+            }
+        }
+
+        return $usernames;
+    })(),
+
+    /*
+    |--------------------------------------------------------------------------
     | Minimum PHP version
     |--------------------------------------------------------------------------
     |
@@ -400,8 +479,6 @@ return [
         DumbPasswordServiceProvider::class,
         Eduardokum\LaravelMailAutoEmbed\ServiceProvider::class,
         SocialiteServiceProvider::class,
-        Elibyy\TCPDF\ServiceProvider::class,
-
         /*
         * Application Service Providers...
         */
@@ -456,7 +533,6 @@ return [
         'Mail' => Mail::class,
         'Notification' => Notification::class,
         'Password' => Password::class,
-        'PDF' => TCPDF::class,
         'Queue' => Queue::class,
         'Redirect' => Redirect::class,
         'Redis' => Redis::class,

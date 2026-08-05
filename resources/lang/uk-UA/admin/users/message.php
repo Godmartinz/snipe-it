@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Ви успішно підтвердили отримання цього активу.',
     'declined' => 'Ви успішно відхилили отримання цього активу.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Ваші користувачі успішно оновлені, однак Ваш запис менеджера не було збережено, оскільки обраний вами менеджер також був у списку користувачів, для редагування, і користувачі можуть не бути їх власним керівником. Будь ласка, оберіть ваших користувачів знову, не маючи менеджера.',
     'user_exists' => 'Користувач вже існує!',
     'cannot_delete' => 'Користувач не існує або у вас немає прав на його видалення.',
     'user_not_found' => 'Користувач не існує або у вас немає дозволу на його перегляд.',
     'user_login_required' => 'Поле авторизації є обов\'язковим',
     'user_has_no_assets_assigned' => 'Немає медіафайлів в даний час призначених користувачеві.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Пароль є обов\'язковим.',
     'insufficient_permissions' => 'Недостатньо прав.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Цей користувач був видалений. Вам доведеться відновити цього користувача, щоб відредагувати його або призначити йому нові активи.',
     'ldap_not_configured' => 'Для цього встановлення інтеграція з LDAP не була налаштована.',
     'password_resets_sent' => 'Вибрані користувачі, що активовані та дійсні електронні адреси, були відправлені на посилання для відновлення пароля.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Посилання для зміни пароля було надіслано на :email!',
     'user_has_no_email' => 'Цей користувач не має електронної пошти у своєму профілі.',
     'log_record_not_found' => 'Відповідний запис журналу для цього користувача не знайдено.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Користувача було успішно створено.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Пароль для цього облікового запису керується LDAP/Active Directory. Зверніться до свого ІТ-відділу, щоб змінити пароль. ',
         'multi_company_items_assigned' => 'Цей користувач має інші активи, які належать іншій компанії. Будь ласка, перевірте їх в чи відредагуйте свою компанію.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

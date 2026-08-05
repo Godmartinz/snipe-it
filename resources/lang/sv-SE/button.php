@@ -3,6 +3,7 @@
 return [
     'actions' => 'Åtgärder',
     'add' => 'Lägg till ny',
+    'back' => 'Bakåt',
     'cancel' => 'Avbryt',
     'checkin_and_delete' => 'Checka in alla / ta bort användare',
     'delete' => 'Radera',

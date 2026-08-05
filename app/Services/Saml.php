@@ -312,7 +312,12 @@ class Saml
         $this->loadDataFromSession();
         $username = $this->getUsername();
 
-        return User::where('username', '=', $username)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+        $user = User::where('username', '=', $username)
+            ->whereNull('deleted_at')
+            ->where('activated', '=', '1')
+            ->first();
+
+        return User::verifyExactUsernameMatch($user, (string) $username);
     }
 
     /**

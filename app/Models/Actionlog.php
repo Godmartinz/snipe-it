@@ -88,6 +88,7 @@ class Actionlog extends SnipeModel
      */
     protected $searchableRelations = [
         'company' => ['name'],
+        'location' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
         'user' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
         'assets' => ['asset_tag', 'name', 'serial', 'order_number', 'notes', 'purchase_date'],
@@ -653,5 +654,49 @@ class Actionlog extends SnipeModel
     public function scopeOrderByCreatedBy($query, $order)
     {
         return $query->leftJoin('users as admin_sort', 'action_logs.created_by', '=', 'admin_sort.id')->select('action_logs.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
+    // Audit report (issue #9430): the frontend has advertised location
+    // as sortable for a while but the API whitelist didn't include it,
+    // so clicks silently fell back to created_at. action_logs stores
+    // its own location_id snapshot (see the belongsTo above) so this
+    // is a plain leftJoin on locations, no polymorphic asset walk.
+    public function scopeOrderByLocation($query, $order)
+    {
+        return $query->leftJoin('locations as location_sort', 'action_logs.location_id', '=', 'location_sort.id')
+            ->select('action_logs.*')
+            ->orderBy('location_sort.name', $order);
+    }
+
+    // Also for the audit report: next_audit_date lives on the asset
+    // (the log doesn't snapshot it), so we join to assets on the
+    // polymorphic item_id + item_type pair. Non-Asset item_types get
+    // NULL from the leftJoin and sort naturally at the end.
+    public function scopeOrderByAssetNextAuditDate($query, $order)
+    {
+        return $query->leftJoin('assets as asset_sort', function ($join) {
+            $join->on('action_logs.item_id', '=', 'asset_sort.id')
+                ->where('action_logs.item_type', '=', Asset::class);
+        })
+            ->select('action_logs.*')
+            ->orderBy('asset_sort.next_audit_date', $order);
+    }
+
+    // Item name sort for the audit report (#9430). Only Assets get
+    // audited, so the action_type=audit filter upstream guarantees
+    // item_type=Asset here and a straight Asset join is correct.
+    // Sibling activity reports that sort by item on other action_types
+    // (checkout/checkin/etc.) will get NULL names for non-Asset rows
+    // and sort them at the ends; that matches the pre-refactor state
+    // where item sort silently fell back to created_at, and fixing
+    // truly-polymorphic item sort is a bigger separate change.
+    public function scopeOrderByItemName($query, $order)
+    {
+        return $query->leftJoin('assets as asset_item_sort', function ($join) {
+            $join->on('action_logs.item_id', '=', 'asset_item_sort.id')
+                ->where('action_logs.item_type', '=', Asset::class);
+        })
+            ->select('action_logs.*')
+            ->orderBy('asset_item_sort.name', $order);
     }
 }

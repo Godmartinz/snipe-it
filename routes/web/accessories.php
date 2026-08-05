@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accessories;
+use App\Http\Controllers\BulkAccessoriesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,15 +18,21 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
         [Accessories\AccessoryCheckoutController::class, 'store']
     )->name('accessories.checkout.store');
 
+    // accessoryID is a numeric auto-increment PK. Constrain at the router
+    // so non-numeric garbage (pen-test scanners) 404s here instead of
+    // reaching the breadcrumb closure at BreadcrumbsServiceProvider:128
+    // which is typed `int $accessoryID` and throws TypeError.
     Route::get(
         '{accessoryID}/checkin/{backto?}',
         [Accessories\AccessoryCheckinController::class, 'create']
-    )->name('accessories.checkin.show');
+    )->where('accessoryID', '[0-9]+')
+        ->name('accessories.checkin.show');
 
     Route::post(
         '{accessoryID}/checkin/{backto?}',
         [Accessories\AccessoryCheckinController::class, 'store']
-    )->name('accessories.checkin.store');
+    )->where('accessoryID', '[0-9]+')
+        ->name('accessories.checkin.store');
 
     Route::get('{accessory}/clone',
         [Accessories\AccessoriesController::class, 'getClone']
@@ -40,3 +47,7 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
 Route::resource('accessories', Accessories\AccessoriesController::class, [
     'middleware' => ['auth'],
 ]);
+
+Route::post('accessories/bulk/delete', [BulkAccessoriesController::class, 'destroy'])
+    ->middleware(['auth'])
+    ->name('accessories.bulk.delete');

@@ -31,6 +31,11 @@ return [
             'log_msg' => '通过许可证GUI中的“批量归还许可证”进行归还',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => '签出所有席位',
             'modal' => '此操作将签出一个席位给第一个可用的用户。| 此操作将签出所有共 :available _seas_count 个席位给第一个可用的用户。 如果此许可证尚未签出给用户，并且在该用户账户上启用了“自动分配许可证”属性，则认定该用户可以使用此席位。',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => '没有什么要做的。没有尚未分配此许可证的用户。',
             'log_msg' => '在许可证GUI中通过“批量许可证签出”签出',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

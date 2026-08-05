@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Връщане към всички :type',
     'redirect_to_type' => 'Отидете на :type',
     'redirect_to_checked_out_to' => 'Отидете на Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Избиране на тип на статуса',
     'serial' => 'Сериен номер',
     'serial_required' => 'Актив :number изисква сериен номер',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Инвентарен номер',
     'update' => 'Обновяване на актив',
     'warranty' => 'Гаранция',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Гаранцията изтича',
     'years' => 'години',
     'asset_location' => 'Обновяване на местоположение',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Допълнителна информация',
     'order_details' => 'Информация за състоянието на поръчка',
     'calc_eol' => 'Ако нулирате EOL датата, ще се използва EOL дата базирана на дата на закупуване + EOL норма.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

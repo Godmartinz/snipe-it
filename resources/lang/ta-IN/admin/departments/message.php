@@ -17,6 +17,8 @@ return [
         'confirm' => 'இந்தத் துறையை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'திணைக்களம் நீக்கப்பட்ட ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'துறை வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

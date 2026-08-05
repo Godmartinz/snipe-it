@@ -25,7 +25,7 @@ return [
         'confirm' => '¿Está seguro de que desea eliminar este fabricante?',
         'error' => 'Ocurrió un problema eliminando el fabricante. Por favor, intente nuevamente.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Vrátit všem :type',
     'redirect_to_type' => 'Přejit na :type',
     'redirect_to_checked_out_to' => 'Přejít na přiřazeného uživatele',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Zvolte typ stavu',
     'serial' => 'Sériové číslo',
     'serial_required' => 'Nutno doplnit sériové číslo majetku :number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Označení majetku',
     'update' => 'Úprava majetku',
     'warranty' => 'Záruka',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Záruka končí',
     'years' => 'roky',
     'asset_location' => 'Upravit umístění',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Volitelné informace',
     'order_details' => 'Informace související s objednávkou',
     'calc_eol' => 'Pokud není datum konce životnosti vyplněno, vypočítá se automaticky podle data nákupu a odpisové sazby.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

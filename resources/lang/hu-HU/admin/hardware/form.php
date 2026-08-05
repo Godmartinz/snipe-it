@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Vissza az összes :type-hoz',
     'redirect_to_type' => 'Ugrás ide :type',
     'redirect_to_checked_out_to' => 'Ugrás a Kiadva ide-re',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Állapot típusának kiválasztása',
     'serial' => 'Sorozatszám',
     'serial_required' => 'A :number számú eszközhöz sorozatszám szükséges',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Eszköz azonosító',
     'update' => 'Eszköz frissítés',
     'warranty' => 'Garancia',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Jótállás érvényessége',
     'years' => 'évek',
     'asset_location' => 'Eszköz helyszín frissítése',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Nem kötelező információk',
     'order_details' => 'Megrendeléssel kapcsolatos információk',
     'calc_eol' => 'Ha az EOL dátum üres, számítsa automatikusan a beszerzés és az EOL ráta alapján.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

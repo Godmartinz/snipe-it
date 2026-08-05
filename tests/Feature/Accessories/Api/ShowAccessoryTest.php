@@ -27,7 +27,7 @@ class ShowAccessoryTest extends TestCase implements TestsFullMultipleCompaniesSu
         $accessoryForCompanyA = Accessory::factory()->for($companyA)->create();
 
         $superuser = User::factory()->superuser()->create();
-        $userForCompanyB = User::factory()->for($companyB)->viewAccessories()->create();
+        $userForCompanyB = User::factory()->forCompany($companyB)->viewAccessories()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
 

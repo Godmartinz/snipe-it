@@ -134,7 +134,9 @@ class ConsumablesController extends Controller
     public function edit(Consumable $consumable): View|RedirectResponse
     {
         $this->authorize($consumable);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
 
         return view('consumables/edit')
             ->with('item', $consumable)

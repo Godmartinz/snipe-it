@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Kits;
 
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Traits\CheckInOutTrait;
 use App\Models\Asset;
 use App\Models\PredefinedKit;
 use App\Models\User;
@@ -23,7 +23,7 @@ class CheckoutKitController extends Controller
 {
     public $kitService;
 
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     public function __construct(PredefinedKitCheckoutService $kitService)
     {
@@ -53,6 +53,8 @@ class CheckoutKitController extends Controller
      */
     public function store(Request $request, $kit_id)
     {
+        $this->authorize('checkout', Asset::class);
+
         $user_id = e($request->input('user_id'));
         if (is_null($user = User::find($user_id))) {
             return redirect()->back()->with('error', trans('admin/users/message.user_not_found'));

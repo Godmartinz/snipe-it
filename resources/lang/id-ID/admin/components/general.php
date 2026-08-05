@@ -13,4 +13,7 @@ return [
     'total' => 'Total',
     'update' => 'Perbarui Komponen',
     'checkin_limit' => 'Jumlah yang dikembalikan harus sama dengan atau kurang dari :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

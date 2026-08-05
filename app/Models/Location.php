@@ -34,7 +34,7 @@ class Location extends SnipeModel
     protected $table = 'locations';
 
     protected $rules = [
-        'name' => 'required|max:255|unique_undeleted',
+        'name' => 'required|max:255|unique_undeleted_in_scope:parent_id,company_id',
         'address' => 'max:191|nullable',
         'address2' => 'max:191|nullable',
         'city' => 'max:191|nullable',
@@ -43,7 +43,7 @@ class Location extends SnipeModel
         'zip' => 'max:10|nullable',
         'manager_id' => 'exists:users,id|nullable',
         'parent_id' => 'nullable|exists:locations,id|non_circular:locations,id',
-        'company_id' => 'integer|nullable|exists:companies,id',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
     ];
 
     protected $casts = [
@@ -115,6 +115,7 @@ class Location extends SnipeModel
     protected $searchableRelations = [
         'parent' => ['name'],
         'company' => ['name'],
+        'manager' => ['first_name', 'last_name', 'display_name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
@@ -170,14 +171,13 @@ class Location extends SnipeModel
      */
     public function assets()
     {
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::where(function ($q) {
+            $q->where('deployable', 1)->orWhere('pending', 1)->orWhere('archived', 0);
+        })->whereNull('deleted_at')->pluck('id');
+
         return $this->hasMany(Asset::class, 'location_id')
-            ->whereHas(
-                'status', function ($query) {
-                    $query->where('status_labels.deployable', '=', 1)
-                        ->orWhere('status_labels.pending', '=', 1)
-                        ->orWhere('status_labels.archived', '=', 0);
-                }
-            );
+            ->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     public function countAllTheThings()
@@ -265,6 +265,28 @@ class Location extends SnipeModel
     }
 
     /**
+     * Walk up the parent chain to find the nearest ancestor with a company_id.
+     * Used by FMCS checkout validation so that assets can be checked out to
+     * child locations whose company is only set on a parent location.
+     */
+    public function effectiveFmcsCompanyId(): ?int
+    {
+        if ($this->company_id) {
+            return (int) $this->company_id;
+        }
+
+        $ancestor = $this->parent()->withoutGlobalScopes()->first();
+        while ($ancestor) {
+            if ($ancestor->company_id) {
+                return (int) $ancestor->company_id;
+            }
+            $ancestor = $ancestor->parent()->withoutGlobalScopes()->first();
+        }
+
+        return null;
+    }
+
+    /**
      * Establishes the locations -> company relationship
      *
      * @author [T. Regnery] [<tobias.regnery@gmail.com>]
@@ -347,7 +369,20 @@ class Location extends SnipeModel
      * @param  text  $order  Order
      * @return Illuminate\Database\Query\Builder Modified query builder
      */
-    public static function indenter($locations_with_children, $parent_id = null, $prefix = '')
+    /**
+     * The map's keys are parent_id values, with `0` used for "no parent / top-
+     * level". Using 0 (not null) avoids PHP 8.4's deprecation of null array
+     * offsets when callers build the map from `$location->parent_id`.
+     *
+     * `$prefix` is the accumulated indent marker for the current recursion
+     * depth (two dashes per level), so `use_text` reads e.g.
+     * `-- Rack 1` or `---- Rack 1a` in the dropdown. Locations can nest
+     * arbitrarily deep and the previous `A › B › C` breadcrumb form produced
+     * unreadable long strings for even modestly nested hierarchies
+     * (see #19398). Company::indenter keeps the breadcrumb form because its
+     * hierarchy is capped at one parent level and reads cleanly there.
+     */
+    public static function indenter($locations_with_children, int $parent_id = 0, $prefix = '')
     {
         $results = [];
 
@@ -356,10 +391,11 @@ class Location extends SnipeModel
         }
 
         foreach ($locations_with_children[$parent_id] as $location) {
-            $location->use_text = $prefix.' '.$location->name;
+            $location->use_text = $prefix === ''
+                ? $location->name
+                : $prefix.' '.$location->name;
             $location->use_image = ($location->image) ? Storage::disk('public')->url('locations/'.$location->image) : null;
             $results[] = $location;
-            // now append the children. (if we have any)
             if (array_key_exists($location->id, $locations_with_children)) {
                 $results = array_merge($results, self::indenter($locations_with_children, $location->id, $prefix.'--'));
             }

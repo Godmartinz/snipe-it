@@ -119,7 +119,8 @@ class CategoriesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $categories->count()) ? $categories->count() : app('api_offset_value');
+        $total = $categories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -139,7 +140,6 @@ class CategoriesController extends Controller
                 break;
         }
 
-        $total = $categories->count();
         $categories = $categories->skip($offset)->take($limit)->get();
 
         return (new CategoriesTransformer)->transformCategories($categories, $total);
@@ -160,6 +160,7 @@ class CategoriesController extends Controller
         $this->authorize('create', Category::class);
         $category = new Category;
         $category->fill($request->all());
+        $category->created_by = auth()->id();
         $category->category_type = strtolower($request->input('category_type'));
         $category = $request->handleImages($category);
 

@@ -25,26 +25,20 @@ class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
     public function test_adheres_to_full_multiple_companies_support_scoping()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
-        $userInCompanyA = User::factory()->for($companyA)->createAccessories()->create();
+        $userInCompanyA = User::factory()->forCompany($companyA)->createAccessories()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
 
-        // attempt to store an accessory for company B
-        $response = $this->actingAsForApi($userInCompanyA)
+        // A user in company A cannot create an accessory assigned to company B — request is rejected.
+        $this->actingAsForApi($userInCompanyA)
             ->postJson(route('api.accessories.store'), [
                 'category_id' => Category::factory()->forAccessories()->create()->id,
                 'name' => 'My Awesome Accessory',
                 'qty' => 1,
                 'company_id' => $companyB->id,
-            ])->assertStatusMessageIs('success');
+            ])->assertStatusMessageIs('error');
 
-        $accessory = Accessory::withoutGlobalScopes()->findOrFail($response['payload']['id']);
-
-        $this->assertSame($companyA->id, $accessory->company_id);
-        $this->assertDatabaseMissing('accessories', [
-            'name' => 'My Awesome Accessory',
-            'company_id' => $companyB->id,
-        ]);
+        $this->assertDatabaseMissing('accessories', ['name' => 'My Awesome Accessory']);
     }
 
     public function test_can_store_accessory()

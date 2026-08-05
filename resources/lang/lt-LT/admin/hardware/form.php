@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Grįžti prie visų :type',
     'redirect_to_type' => 'Eiti į :type',
     'redirect_to_checked_out_to' => 'Eiti į išduotus',
+    'redirect_to_bulk_checkout' => 'Grįžti į „Išduoti kelis“',
     'select_statustype' => 'Pasirinkite būsenos tipą',
     'serial' => 'Serijinis numeris',
     'serial_required' => 'Turtui :number būtina nurodyti serijinį numerį',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Inventorinis numeris',
     'update' => 'Turto atnaujinimas',
     'warranty' => 'Garantija',
+    'warranty_months' => 'Garantijos mėnesiai',
     'warranty_expires' => 'Garantija baigiasi',
     'years' => 'metai',
     'asset_location' => 'Atnaujinti turto vietą',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Papildoma informacija',
     'order_details' => 'Su užsakymu susijusi informacija',
     'calc_eol' => 'Jei EOL data nustatoma iš naujo, naudoti automatinį EOL apskaičiavimą pagal įsigijimo datą ir nusidėvėjimo laipsnį.',
+    'checkin_licenses' => 'Paimti priskirtas licencijų vietas',
+    'checkin_child_assets' => 'Paimti priskirtą turtą',
 ];

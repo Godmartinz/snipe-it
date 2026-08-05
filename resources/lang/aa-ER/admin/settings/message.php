@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'crwdns1426:0crwdne1426:0',
         'restore_warning' => 'crwdns6709:0crwdne6709:0',
         'restore_confirm' => 'crwdns6711:0crwdne6711:0',
+        'delete_disabled_help' => 'crwdns15145:0crwdne15145:0',
     ],
     'restore' => [
         'success' => 'crwdns12668:0crwdne12668:0',
+        'archive_invalid' => 'crwdns15557:0crwdne15557:0',
+        'zip_extension_missing' => 'crwdns15559:0crwdne15559:0',
+        'pre_backup_failed' => 'crwdns15561:0crwdne15561:0',
+        'failed_with_backup' => 'crwdns15563:0crwdne15563:0',
     ],
     'purge' => [
         'error' => 'crwdns1615:0crwdne1615:0',

@@ -16,6 +16,7 @@ use App\Models\Depreciation;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Maintenance;
+use App\Models\MaintenanceType;
 use App\Models\Manufacturer;
 use App\Models\PredefinedKit;
 use App\Models\Statuslabel;
@@ -35,12 +36,13 @@ use App\Policies\DepreciationPolicy;
 use App\Policies\LicensePolicy;
 use App\Policies\LocationPolicy;
 use App\Policies\MaintenancePolicy;
+use App\Policies\MaintenanceTypePolicy;
 use App\Policies\ManufacturerPolicy;
 use App\Policies\PredefinedKitPolicy;
 use App\Policies\StatuslabelPolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
-use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Console\ClientCommand;
@@ -71,6 +73,7 @@ class AuthServiceProvider extends ServiceProvider
         License::class => LicensePolicy::class,
         Location::class => LocationPolicy::class,
         Maintenance::class => MaintenancePolicy::class,
+        MaintenanceType::class => MaintenanceTypePolicy::class,
         PredefinedKit::class => PredefinedKitPolicy::class,
         Statuslabel::class => StatuslabelPolicy::class,
         Supplier::class => SupplierPolicy::class,
@@ -93,9 +96,10 @@ class AuthServiceProvider extends ServiceProvider
         ]);
 
         $this->registerPolicies();
-        Passport::tokensExpireIn(Carbon::now()->addYears((int) config('passport.expiration_years')));
-        Passport::refreshTokensExpireIn(Carbon::now()->addYears((int) config('passport.expiration_years')));
-        Passport::personalAccessTokensExpireIn(Carbon::now()->addYears((int) config('passport.expiration_years')));
+        $expirationYears = (int) config('passport.expiration_years');
+        Passport::tokensExpireIn(CarbonInterval::years($expirationYears));
+        Passport::refreshTokensExpireIn(CarbonInterval::years($expirationYears));
+        Passport::personalAccessTokensExpireIn(CarbonInterval::years($expirationYears));
 
         Passport::cookie(config('passport.cookie_name'));
 

@@ -115,9 +115,9 @@ class CheckoutConsumableNotification extends Notification
                 ->title(trans('mail.Consumable_checkout_notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityTitle')
-                ->fact(trans('mail.Consumable_checkout_notification').' by ', $admin->display_name)
-                ->fact(trans('mail.assigned_to'), $target->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->numRemaining())
+                ->fact(trans('mail.Consumable_checkout_notification').' by ', (string) ($admin?->display_name ?? ''))
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->numRemaining())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

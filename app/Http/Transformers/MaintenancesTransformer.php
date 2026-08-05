@@ -73,7 +73,12 @@ class MaintenancesTransformer
             'asset_maintenance_type' => e($assetmaintenance->asset_maintenance_type),
             'start_date' => Helper::getFormattedDateObject($assetmaintenance->start_date, 'date'),
             'asset_maintenance_time' => (int) $assetmaintenance->asset_maintenance_time,
-            'completion_date' => Helper::getFormattedDateObject($assetmaintenance->completion_date, 'date'),
+            'expected_completion_date' => Helper::getFormattedDateObject($assetmaintenance->expected_completion_date, 'date'),
+            // Legacy alias for `expected_completion_date` (the column was
+            // renamed to match the "Expected Completion" UI label). Kept
+            // in the payload so API v1 consumers reading .completion_date
+            // don't break. Both keys point at the same underlying value.
+            'completion_date' => Helper::getFormattedDateObject($assetmaintenance->expected_completion_date, 'date'),
             'user_id' => ($assetmaintenance->adminuser) ? [
                 'id' => $assetmaintenance->adminuser->id,
                 'name' => e($assetmaintenance->adminuser->display_name),
@@ -81,6 +86,22 @@ class MaintenancesTransformer
             'created_by' => ($assetmaintenance->adminuser) ? [
                 'id' => (int) $assetmaintenance->adminuser->id,
                 'name' => e($assetmaintenance->adminuser->display_name),
+            ] : null,
+            'maintenance_type' => $assetmaintenance->maintenanceType
+                ? e($assetmaintenance->maintenanceType->name)
+                : null,
+            'responsible_party' => ($assetmaintenance->responsibleParty) ? [
+                'id' => (int) $assetmaintenance->responsibleParty->id,
+                'name' => e($assetmaintenance->responsibleParty->display_name),
+            ] : null,
+            'checked_out_to_at_creation' => $assetmaintenance->checked_out_to_id ? [
+                'id' => (int) $assetmaintenance->checked_out_to_id,
+                'type' => $assetmaintenance->checked_out_to_type,
+            ] : null,
+            'completed_at' => Helper::getFormattedDateObject($assetmaintenance->completed_at, 'datetime'),
+            'completed_by' => ($assetmaintenance->completedByUser) ? [
+                'id' => (int) $assetmaintenance->completedByUser->id,
+                'name' => e($assetmaintenance->completedByUser->display_name),
             ] : null,
             'created_at' => Helper::getFormattedDateObject($assetmaintenance->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($assetmaintenance->updated_at, 'datetime'),
@@ -91,6 +112,7 @@ class MaintenancesTransformer
         $permissions_array['available_actions'] = [
             'update' => (Gate::allows('update', Asset::class) && ((($assetmaintenance->asset) && $assetmaintenance->asset->deleted_at == ''))) ? true : false,
             'delete' => Gate::allows('delete', Asset::class),
+            'complete' => Gate::allows('update', Asset::class) && ! $assetmaintenance->completed_at,
         ];
 
         $array += $permissions_array;
@@ -128,10 +150,26 @@ class MaintenancesTransformer
             'supplier' => ($assetmaintenance->supplier) ? e($assetmaintenance->supplier?->name) : null,
             'url' => ($assetmaintenance->url) ? e($assetmaintenance->url) : null,
             'cost' => Helper::formatCurrencyOutput($assetmaintenance->cost),
+            'maintenance_type' => $assetmaintenance->maintenanceType
+                ? e($assetmaintenance->maintenanceType->name)
+                : null,
             'asset_maintenance_type' => e($assetmaintenance->asset_maintenance_type),
             'start_date' => Helper::getFormattedDateObject($assetmaintenance->start_date, 'date'),
             'asset_maintenance_time' => $assetmaintenance->asset_maintenance_time,
-            'completion_date' => Helper::getFormattedDateObject($assetmaintenance->completion_date, 'date'),
+            'expected_completion_date' => Helper::getFormattedDateObject($assetmaintenance->expected_completion_date, 'date'),
+            // Legacy alias for `expected_completion_date`; see the
+            // matching comment in transformMaintenance() above.
+            'completion_date' => Helper::getFormattedDateObject($assetmaintenance->expected_completion_date, 'date'),
+            'responsible_party' => ($assetmaintenance->responsibleParty) ? [
+                'id' => (int) $assetmaintenance->responsibleParty->id,
+                'name' => e($assetmaintenance->responsibleParty->display_name),
+            ] : null,
+            'checked_out_to_at_creation' => ($assetmaintenance->checkedOutTo) ? e($assetmaintenance->checkedOutTo->display_name) : null,
+            'completed_at' => Helper::getFormattedDateObject($assetmaintenance->completed_at, 'datetime'),
+            'completed_by' => ($assetmaintenance->completedByUser) ? [
+                'id' => (int) $assetmaintenance->completedByUser->id,
+                'name' => e($assetmaintenance->completedByUser->display_name),
+            ] : null,
             'created_by' => ($assetmaintenance->adminuser) ? e($assetmaintenance->adminuser->display_name) : null,
             'created_at' => Helper::getFormattedDateObject($assetmaintenance->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($assetmaintenance->updated_at, 'datetime'),

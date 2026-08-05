@@ -19,6 +19,8 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an rang dímheasa seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an rang dímheasa. Arís, le d\'thoil.',
         'success' => 'Scriosadh an rang dímheasa go rathúil.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

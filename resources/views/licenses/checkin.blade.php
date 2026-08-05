@@ -76,7 +76,7 @@
                 <label for="note" class="col-md-3 control-label">{{ trans('general.checkin_note') }}</label>
                 <div class="col-md-8">
                     <textarea class="form-control" id="notes" name="notes" rows="5"></textarea>
-                    {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="notes" />
                 </div>
             </div>
                         <x-redirect_submit_options

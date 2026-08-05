@@ -31,6 +31,11 @@ return [
             'log_msg' => 'crwdns12570:0crwdne12570:0',
         ],
 
+        'checkin_selected' => [
+            'success' => 'crwdns14899:0crwdne14899:0',
+            'no_seats_selected' => 'crwdns14901:0crwdne14901:0',
+        ],
+
         'checkout_all' => [
             'button' => 'crwdns11561:0crwdne11561:0',
             'modal' => 'crwdns11563:0crwdne11563:0',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'crwdns11575:0crwdne11575:0',
             'log_msg' => 'crwdns11577:0crwdne11577:0',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'crwdns15531:0crwdne15531:0',
+            'log_msg' => 'crwdns15533:0crwdne15533:0',
         ],
     ],
 

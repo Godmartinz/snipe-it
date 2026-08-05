@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccessoryCheckoutRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAccessoryRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Http\Transformers\AccessoriesTransformer;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
 
 class AccessoriesController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Display a listing of the resource.
@@ -51,11 +51,15 @@ class AccessoriesController extends Controller
                 'model_number',
                 'eol',
                 'notes',
+                'purchase_cost',
+                'purchase_date',
                 'created_at',
+                'updated_at',
                 'min_amt',
                 'company_id',
                 'notes',
                 'checkouts_count',
+                'image',
                 'order_number',
                 'qty',
                 // These are *relationships* so we wouldn't normally include them in this array,
@@ -79,7 +83,13 @@ class AccessoriesController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $accessories->where('accessories.company_id', '=', $request->input('company_id'));
+            // expand_company_hierarchy=1 opts the company show-page tabs into the
+            // parent/child rollup so a child shows items inherited from its parent.
+            if ($request->boolean('expand_company_hierarchy')) {
+                $accessories->whereIn('accessories.company_id', Company::reachableCompanyIds($request->input('company_id')));
+            } else {
+                $accessories->where('accessories.company_id', '=', $request->input('company_id'));
+            }
         }
 
         if ($request->filled('order_number')) {
@@ -107,7 +117,8 @@ class AccessoriesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : abs($request->input('offset'));
+        $total = $accessories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -133,12 +144,17 @@ class AccessoriesController extends Controller
             case 'created_by':
                 $accessories = $accessories->OrderByCreatedByName($order);
                 break;
+            case 'total_cost':
+                $accessories = $accessories->orderByRaw('COALESCE(purchase_cost, 0) * qty '.$order);
+                break;
+            case 'percent_remaining':
+                $accessories = $accessories->OrderPercentRemaining($order);
+                break;
             default:
                 $accessories = $accessories->orderBy($column_sort, $order);
                 break;
         }
 
-        $total = $accessories->count();
         $accessories = $accessories->skip($offset)->take($limit)->get();
 
         return (new AccessoriesTransformer)->transformAccessories($accessories, $total);
@@ -234,6 +250,10 @@ class AccessoriesController extends Controller
         $total = $accessory_checkouts->count();
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
 
+        $accessory_checkouts->loadMorph('assignedTo', [
+            User::class => ['companies'],
+        ]);
+
         return (new AccessoriesTransformer)->transformCheckedoutAccessory($accessory_checkouts, $total);
     }
 
@@ -303,15 +323,31 @@ class AccessoriesController extends Controller
         $this->authorize('checkout', $accessory);
         $target = $this->determineCheckoutTarget();
 
-        if ((Setting::getSettings()->full_multiple_companies_support == '1') && ($accessory->company_id !== $target->company_id)) {
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $target->companies()->where('companies.id', $accessory->company_id)->exists())) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 
         $accessory->checkout_qty = $request->input('checkout_qty', 1);
         $payload = null;
+        $overAllocated = false;
 
-        // Keep checkout rows and checkout log/event atomic to avoid ghost assignments.
-        DB::transaction(function () use ($accessory, $request, $target, &$payload): void {
+        // Concurrency guard. AccessoryCheckoutRequest validated
+        // number_remaining_after_checkout >= 0 with an unlocked read of
+        // numRemaining(), so two simultaneous checkout requests could both
+        // pass validation, both attach rows, and land the register at -1.
+        // Re-fetch the parent row under lockForUpdate INSIDE the
+        // transaction, re-check availability against the locked snapshot,
+        // and only then write. Mirrors the License checkout locking
+        // pattern.
+        DB::transaction(function () use ($accessory, $request, $target, &$payload, &$overAllocated): void {
+            $locked = Accessory::whereKey($accessory->id)->lockForUpdate()->first();
+
+            if (! $locked || $locked->numRemaining() < $accessory->checkout_qty) {
+                $overAllocated = true;
+
+                return;
+            }
+
             for ($i = 0; $i < $accessory->checkout_qty; $i++) {
 
                 $accessory_checkout = new AccessoryCheckout([
@@ -345,6 +381,10 @@ class AccessoriesController extends Controller
                 $accessory->checkout_qty,
             ));
         });
+
+        if ($overAllocated) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/accessories/message.checkout.unavailable')));
+        }
 
         return response()->json(Helper::formatStandardApiResponse('success', $payload, trans('admin/accessories/message.checkout.success')));
 
@@ -401,6 +441,7 @@ class AccessoriesController extends Controller
      */
     public function selectlist(Request $request)
     {
+        $this->authorize('view.selectlists');
 
         $accessories = Accessory::select([
             'accessories.id',

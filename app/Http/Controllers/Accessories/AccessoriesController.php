@@ -9,7 +9,6 @@ use App\Models\Accessory;
 use App\Models\Company;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -77,6 +76,7 @@ class AccessoriesController extends Controller
         $accessory->created_by = auth()->id();
         $accessory->supplier_id = request('supplier_id');
         $accessory->notes = request('notes');
+        $accessory->requestable = request('requestable', 0);
 
         if ($request->has('use_cloned_image')) {
             $cloned_model_img = Accessory::select('image')->find($request->input('clone_image_from_id'));
@@ -117,7 +117,9 @@ class AccessoriesController extends Controller
     public function edit(Accessory $accessory): View|RedirectResponse
     {
         $this->authorize('update', $accessory);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
 
         return view('accessories.edit')->with('item', $accessory)->with('category_type', 'accessory');
     }
@@ -183,6 +185,7 @@ class AccessoriesController extends Controller
             $accessory->qty = request('qty');
             $accessory->supplier_id = request('supplier_id');
             $accessory->notes = request('notes');
+            $accessory->requestable = request('requestable', 0);
 
             $accessory = $request->handleImages($accessory);
 
@@ -216,14 +219,11 @@ class AccessoriesController extends Controller
         $accessory->loadCount('checkouts as checkouts_count');
 
         if ($accessory->isDeletable()) {
-            if ($accessory->image) {
-                try {
-                    Storage::disk('public')->delete('accessories'.'/'.$accessory->image);
-                } catch (\Exception $e) {
-                    Log::debug($e);
-                }
-            }
-
+            // Note: the image file is deliberately preserved across this
+            // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+            // removes it later when the row is force-deleted. Keeping
+            // the file here means a restored soft-deleted row still has
+            // its image.
             $accessory->delete();
 
             return redirect()->route('accessories.index')->with('success', trans('admin/accessories/message.delete.success'));

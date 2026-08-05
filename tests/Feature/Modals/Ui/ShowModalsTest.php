@@ -9,7 +9,18 @@ class ShowModalsTest extends TestCase
 {
     public function test_user_modal_renders()
     {
-        $admin = User::factory()->createUsers()->create();
+        // Force distinctive attribute values here rather than accepting the
+        // Faker defaults. assertDontSee does a substring check on the entire
+        // response body, so a Faker-generated first name of "Gene" collides
+        // with legitimate modal text like "Generate Password" and produces a
+        // false-positive failure. The strings below cannot appear inside any
+        // translated label, class name, or DOM attribute in the modal.
+        $admin = User::factory()->createUsers()->create([
+            'first_name' => 'ZzModalTestFirst',
+            'last_name' => 'ZzModalTestLast',
+            'email' => 'zz-modal-test@example.invalid',
+        ]);
+
         $response = $this->actingAs($admin)
             ->get('modals/user')
             ->assertOk();

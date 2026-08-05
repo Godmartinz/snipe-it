@@ -13,6 +13,7 @@ return [
     'pending' => 'Hindi pa natapos',
     'status_type' => 'Ang Uri ng Katayuan',
     'show_in_nav' => 'Ipakita sa side nav',
+    'status_label' => 'Status Label',
     'title' => 'Ang mga Label ng Katayuan',
     'undeployable' => 'Hindi pwedeng i-deploy',
     'update' => 'I-update ang Label ng Katayuan',

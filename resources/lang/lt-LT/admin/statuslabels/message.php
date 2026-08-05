@@ -20,12 +20,14 @@ return [
         'confirm' => 'Ar tikrai norite panaikinti šią būsenos žymą?',
         'error' => 'Bandant panaikinti būsenos žymą įvyko klaida. Bandykite dar kartą.',
         'success' => 'Būsenos žyma sėkmingai panaikinta.',
+        'bulk_success' => 'Būsenos žyma sėkmingai ištrinta.|Būsenos žymos (:count) sėkmingai ištrintos.',
+        'partial_success' => 'Būsenos žyma sėkmingai ištrinta. Daugiau informacijos rasite žemiau. | Būsenos žymos (:count) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
     ],
 
     'help' => [
         'undeployable' => 'Šis turtas negali būti niekam priskiriamas.',
         'deployable' => 'Šis turtas gali būti išduodamas. Išdavus turtą, jo meta būsena pasikeis į <i class="fas fa-circle text-blue"></i> <strong>Naudojamas</strong>.',
-        'archived' => 'Šio turto negalima išduoti, jis bus matomas tik archyviniame rodinyje. Ši būsena naudinga, norint išsaugoti duomenis apie turtą biudžetavimo ar kitiems tikslams, tuo pačiu pašalinant jį iš kasdienių turto sąrašų.',
+        'archived' => 'Šio turto negalima išduoti, jis bus matomas tik rodinyje „Archyvuotas“. Ši būsena naudinga, norint išsaugoti duomenis apie turtą biudžeto planavimo ar istoriniais tikslais, tačiau pašalinant jį iš kasdienių turto sąrašų.',
         'pending' => 'Šis turtas dar negali būti kam nors priskirtas. Ši būsena dažniausiai naudojama, kai turtas yra perduotas remontui, bet planuojama jį sugrąžinti į apyvartą.',
     ],
 

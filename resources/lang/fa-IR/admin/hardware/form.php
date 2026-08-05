@@ -54,6 +54,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'Go to :type',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'انتخاب نوع وضعیت',
     'serial' => 'سریال',
     'serial_required' => 'Asset :number requires a serial number',
@@ -64,6 +65,7 @@ return [
     'update' => 'به روز رسانی دارایی
 ',
     'warranty' => 'گارانتی',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'انقضای ضمانت',
     'years' => 'سال ها',
     'asset_location' => 'بروزرسانی مکان دارایی',
@@ -80,4 +82,6 @@ return [
     'order_details' => 'اطلاعات مربوط به سفارش
 ',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

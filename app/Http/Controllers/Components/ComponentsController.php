@@ -4,15 +4,13 @@ namespace App\Http\Controllers\Components;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ImageUploadRequest;
+use App\Http\Requests\StoreComponentRequest;
+use App\Http\Requests\UpdateComponentRequest;
 use App\Models\Company;
 use App\Models\Component;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * This class controls all actions related to Components for
@@ -74,7 +72,7 @@ class ComponentsController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function store(ImageUploadRequest $request)
+    public function store(StoreComponentRequest $request)
     {
         $this->authorize('create', Component::class);
         $component = new Component;
@@ -127,7 +125,9 @@ class ComponentsController extends Controller
     {
 
         $this->authorize('update', $component);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
 
         return view('components/edit')
             ->with('item', $component)
@@ -148,19 +148,8 @@ class ComponentsController extends Controller
      *
      * @since [v3.0]
      */
-    public function update(ImageUploadRequest $request, Component $component)
+    public function update(UpdateComponentRequest $request, Component $component)
     {
-        $min = $component->numCheckedOut();
-        $validator = Validator::make($request->all(), [
-            'qty' => "required|numeric|min:$min",
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
         $this->authorize('update', $component);
 
         // Update the component data
@@ -211,15 +200,11 @@ class ComponentsController extends Controller
 
         $this->authorize('delete', $component);
 
-        // Remove the image if one exists
-        if ($component->image && Storage::disk('public')->exists('components/'.$component->image)) {
-            try {
-                Storage::disk('public')->delete('components/'.$component->image);
-            } catch (\Exception $e) {
-                Log::debug($e);
-            }
-        }
-
+        // Note: the image file is deliberately preserved across this
+        // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+        // removes it later when the row is force-deleted. Keeping the
+        // file here means a restored soft-deleted row still has its
+        // image.
         if ($component->numCheckedOut() > 0) {
             return redirect()->route('components.index')->with('error', trans('admin/components/message.delete.error_qty'));
         }

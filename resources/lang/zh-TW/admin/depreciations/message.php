@@ -19,6 +19,8 @@ return [
         'confirm' => '您確定要刪除此折舊類別嗎？',
         'error' => '刪除折舊類別時發生問題。請再試一次。',
         'success' => '刪除折舊類別成功。',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

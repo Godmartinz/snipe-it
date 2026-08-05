@@ -16,5 +16,7 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an chuideachta seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an chuideachta. Arís, le d\'thoil.',
         'success' => 'Scriosadh an Chuideachta go rathúil.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

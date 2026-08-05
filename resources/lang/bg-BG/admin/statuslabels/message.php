@@ -20,6 +20,8 @@ return [
         'confirm' => 'Сигурни ли сте, че желаете да изтриете този етикет за статус?',
         'error' => 'Имаше проблем при изтриването на етикета за статус. Моля опитайте отново.',
         'success' => 'Етикета за статус бе изтрит успешно.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

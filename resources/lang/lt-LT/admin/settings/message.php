@@ -7,15 +7,20 @@ return [
         'success' => 'Nustatymai sėkmingai atnaujinti.',
     ],
     'backup' => [
-        'delete_confirm' => 'Ar tikrai norite ištrinti atsarginę kopiją? Šis veiksmas negrįžtamas. ',
+        'delete_confirm' => 'Ar tikrai norite ištrinti šią atsarginę kopiją? Šis veiksmas negrįžtamas. ',
         'file_deleted' => 'Atsarginė kopija sėkmingai ištrinta. ',
         'generated' => 'Atsarginė kopija sėkmingai sukurta.',
         'file_not_found' => 'Šio atsarginės kopijos failo serveryje rasti nepavyko.',
         'restore_warning' => 'Taip, atkurti. Suprantu, kad tai perrašys visus šiuo metu duomenų bazėje esančius duomenis. Taip pat, kad bus atjungti visi esami naudotojai (įskaitant mane).',
         'restore_confirm' => 'Ar tikrai norite atkurti savo duomenų bazę iš :filename?',
+        'delete_disabled_help' => 'Atsarginių kopijų ištrynimas yra išjungtas. Jei norite įjungti atsarginių kopijų ištrynimą, kreipkitės į administratorių.',
     ],
     'restore' => [
         'success' => 'Jūsų sistemos atsarginė kopija buvo atkurta. Prisijunkite iš naujo.',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Valymo metu įvyko klaida. ',
@@ -54,7 +59,7 @@ return [
     ],
     'location_scoping' => [
         'not_saved' => 'Jūsų nustatymai nebuvo išsaugoti.',
-        'mismatch' => 'Duomenų bazėje yra 1 elementas, į kurį reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.|Duomenų bazėje yra :count elementai (-ų), į kuriuos reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.',
+        'mismatch' => 'Duomenų bazėje yra 1 elementas, į kurį reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.|Duomenų bazėje yra elementai (:count), į kuriuos reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.',
     ],
     'oauth' => [
         'token_revoked' => 'Asmeninis prieigos raktas sėkmingai atšauktas.',

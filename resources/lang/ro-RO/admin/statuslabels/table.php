@@ -13,6 +13,7 @@ return [
     'pending' => 'In asteptare',
     'status_type' => 'Tip status',
     'show_in_nav' => 'Afișați în naveta laterală',
+    'status_label' => 'Etichetă Stare',
     'title' => 'Etichete status',
     'undeployable' => 'Nelansabil',
     'update' => 'Actualizeaza eticheta status',

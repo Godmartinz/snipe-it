@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Wróć do wszystkich :type',
     'redirect_to_type' => 'Przejdź do :type',
     'redirect_to_checked_out_to' => 'Przejdź do wydania do',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Wybierz status',
     'serial' => 'Numer seryjny',
     'serial_required' => 'Środek :number wymaga numeru seryjnego',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Numer środka',
     'update' => 'Aktualizacja środka',
     'warranty' => 'Gwarancja',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Gwarancja wygasa',
     'years' => 'rok',
     'asset_location' => 'Zaktualizuj lokalizację środka',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Informacje opcjonalne',
     'order_details' => 'Informacje związane z zamówieniem',
     'calc_eol' => 'W przypadku unieważnienia daty wycofania z eksploatacji, użyj automatycznego obliczenia wycofania z eksploatacji w oparciu o datę zakupu i czas wycofania z eksploatacji.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

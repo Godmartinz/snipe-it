@@ -53,7 +53,7 @@ trait Searchable
      */
     public function scopeTextSearch($query, $search)
     {
-        $preparedSearch = $this->prepareSearchInput((string) $search);
+        $preparedSearch = $this->prepareSearchInput(is_array($search) ? implode(' ', $search) : (string) $search);
         $terms = $preparedSearch['terms'];
         $filters = $preparedSearch['filters'];
         $filterOperator = $preparedSearch['filter_operator'];

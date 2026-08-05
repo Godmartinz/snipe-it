@@ -13,4 +13,7 @@ return [
     'total' => '總計',
     'update' => '更新組件',
     'checkin_limit' => '借出數量必須等於或小於 :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

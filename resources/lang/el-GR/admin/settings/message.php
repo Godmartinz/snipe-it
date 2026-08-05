@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'Αυτό το αρχείο αντιγράφων ασφαλείας δεν βρέθηκε στο διακομιστή.',
         'restore_warning' => 'Ναι, να το αποκαταστήσω, αναγνωρίζω ότι αυτό θα αντικαταστήσει όλα τα υπάρχοντα δεδομένα που υπάρχουν αυτή τη στιγμή στη βάση δεδομένων. Αυτό θα αποσυνδεθεί επίσης από όλους τους υπάρχοντες χρήστες (συμπεριλαμβανομένων και εσείς).',
         'restore_confirm' => 'Είστε βέβαιοι ότι θέλετε να επαναφέρετε τη βάση δεδομένων σας από :filename?',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => 'Your system backup has been restored. Please log in again.',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Παρουσιάστηκε ένα σφάλμα κατά την εκκαθάριση. ',

@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ma hubtaa inaad rabto inaad tirtirto Summada Xaaladdan?',
         'error' => 'Waxaa jirtay arrin tirtiraysa Summada Xaaladda. Fadlan isku day mar kale.',
         'success' => 'Summada heerka waxa la tirtiray si guul leh.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

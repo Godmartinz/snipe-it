@@ -13,6 +13,7 @@ return [
     'pending' => 'In attesa',
     'status_type' => 'Tipo di stato',
     'show_in_nav' => 'Mostra nel nav nav',
+    'status_label' => 'Etichetta stato',
     'title' => 'Etichette di Stato',
     'undeployable' => 'Non Distribuilbile',
     'update' => 'Aggiorna Etichetta di Stato',

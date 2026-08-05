@@ -13,6 +13,7 @@ return [
     'pending' => 'En attente',
     'status_type' => 'Type d\'état',
     'show_in_nav' => 'Afficher dans la barre latérale',
+    'status_label' => 'Libellé du statut',
     'title' => 'Étiquette de statut',
     'undeployable' => 'Non déployable',
     'update' => 'Mettre à jour l\'étiquette de statut',

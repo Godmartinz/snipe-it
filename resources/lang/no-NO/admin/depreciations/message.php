@@ -19,6 +19,8 @@ return [
         'confirm' => 'Er du sikker på at du vil slette denne avskrivningen ?',
         'error' => 'Det oppsto et problem med sletting av avskrivningen. Vennligst prøv igjen.',
         'success' => 'Avskrivningen ble slettet.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

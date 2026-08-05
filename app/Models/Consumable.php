@@ -48,7 +48,7 @@ class Consumable extends SnipeModel
         'name' => 'required|max:255',
         'qty' => 'required|integer|min:0|max:99999',
         'category_id' => 'required|integer',
-        'company_id' => 'integer|nullable',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
         'min_amt' => 'integer|min:0|max:99999|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
@@ -494,5 +494,26 @@ class Consumable extends SnipeModel
     public function scopeOrderByCreatedBy($query, $order)
     {
         return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Mirrors Consumable::percentRemaining(): (qty - consumables_users_count) / qty * 100.
+     * consumables_users_count is added by withCount() in the API index()
+     * before this scope runs. Guards against division by zero for
+     * consumables with qty of 0.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN consumables.qty = 0 THEN 0 ELSE ((consumables.qty - consumables_users_count) * 100.0 / consumables.qty) END '.$direction);
     }
 }

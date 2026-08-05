@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Vráceno prostřednictvím hromadného vrácení licencí v rozhraní licence',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Vydat všchny licence',
             'modal' => 'Tímto vydáte jednu licenci prvnímu dostupnému uživateli. | Tímto vydáte všech :available_seats_count licencí dostupným uživatelům, přičemž dostupný uživatel je takový, který ještě nepřevzal tuto licenci a přitom má zapnutou volbu automatického přiřazování licencí.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nelze provést, neboť již nezbývají žádní uživatelé, kteří tuto licenci nemají přiřazenu.',
             'log_msg' => 'Vydáno pomocí hromadného zpracování licencí',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

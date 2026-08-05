@@ -114,9 +114,9 @@ class CheckoutLicenseSeatNotification extends Notification
                 ->title(trans('mail.License_Checkout_Notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityTitle')
-                ->fact(trans('mail.License_Checkout_Notification').' by ', $admin->display_name)
-                ->fact(trans('mail.assigned_to'), $target->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->availCount()->count())
+                ->fact(trans('mail.License_Checkout_Notification').' by ', (string) ($admin?->display_name ?? ''))
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->availCount()->count())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

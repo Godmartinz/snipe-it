@@ -10,11 +10,11 @@ use App\Http\Traits\MigratesLegacyAssetLocations;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\LicenseSeat;
+use App\Models\Location;
 use App\Models\Statuslabel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
 
 class AssetCheckinController extends Controller
 {
@@ -48,7 +48,15 @@ class AssetCheckinController extends Controller
         $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
 
         if ($asset->isInvalid()) {
-            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
+            // Also flash the specific error messages so they surface
+            // in the top alert on the edit page. Without this, model-
+            // level rules that fail on a field the edit form doesn't
+            // render (or is scrolled off-screen) leave the user with
+            // a generic "check the form" message and nothing visibly
+            // highlighted. See notifications.blade.php multi_error_messages.
+            return redirect()->route('hardware.edit', $asset)
+                ->withErrors($asset->getErrors())
+                ->with('multi_error_messages', $asset->getErrors()->all());
         }
 
         $target_option = match ($asset->assigned_type) {
@@ -84,7 +92,7 @@ class AssetCheckinController extends Controller
     public function store(AssetCheckinRequest $request, $assetId = null, $backto = null): RedirectResponse
     {
         // Check if the asset exists
-        if (is_null($asset = Asset::find($assetId))) {
+        if (is_null($asset = Asset::withTrashed()->find($assetId))) {
             // Redirect to the asset management page with error
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
@@ -124,8 +132,12 @@ class AssetCheckinController extends Controller
             ->where('deployable', 1)
             ->exists();
 
-        if ($request->boolean('set_requestable') && $isDeployableStatus) {
-            $asset->requestable = true;
+        // Requestable is only meaningful when the selected status is deployable
+        // (the view hides the wrapper otherwise). Under a deployable status,
+        // apply the checkbox value: checked = true, unchecked (or absent) =
+        // false, per Laravel's boolean() default.
+        if ($isDeployableStatus) {
+            $asset->requestable = $request->boolean('requestable');
         }
 
         // Add any custom fields that should be included in the checkout
@@ -133,15 +145,40 @@ class AssetCheckinController extends Controller
 
         $this->migrateLegacyLocations($asset);
 
-        $asset->location_id = $asset->rtd_location_id;
+        // The checkin form ships two location pickers (location_id and
+        // rtd_location_id), both pre-populated with the asset's existing
+        // rtd_location_id. The common case (submit without touching either
+        // field) reproduces the codebase-wide checkin convention: current
+        // location resets to rtd, default stays put. Fixes #19401.
+        //
+        // Both are resolved through the scoped Location query so
+        // non-existent IDs and IDs the actor cannot see under FMCS are
+        // rejected before we write them.
+        foreach (['location_id', 'rtd_location_id'] as $field) {
+            if (! $request->has($field)) {
+                // Field wasn't in the submitted form at all (test / API
+                // caller). Fall back to the pre-fix "reset location to rtd"
+                // convention for location_id; leave rtd untouched.
+                if ($field === 'location_id') {
+                    $asset->location_id = $asset->rtd_location_id;
+                }
 
-        if ($request->filled('location_id')) {
-            Log::debug('NEW Location ID: '.$request->input('location_id'));
-            $asset->location_id = $request->input('location_id');
-
-            if ($request->input('update_default_location') == 0) {
-                $asset->rtd_location_id = $request->input('location_id');
+                continue;
             }
+
+            if (! $request->filled($field)) {
+                // User cleared the picker via select2's X button.
+                $asset->{$field} = null;
+
+                continue;
+            }
+
+            $submittedLocation = Location::find($request->input($field));
+            if (! $submittedLocation) {
+                return redirect()->back()->withInput()
+                    ->with('error', trans('admin/hardware/message.create.target_not_found.location'));
+            }
+            $asset->{$field} = $submittedLocation->id;
         }
 
         $originalValues = $asset->getRawOriginal();
@@ -186,8 +223,13 @@ class AssetCheckinController extends Controller
                 ->with('success', trans('admin/hardware/message.checkin.success'));
         }
 
-        // Redirect to the asset management page with error
-        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkin.error').$asset->getErrors());
+        // Redirect to the asset management page with error. Flash the
+        // specific validation messages via multi_error_messages so the
+        // user sees WHAT failed instead of the previous stringified
+        // MessageBag concatenation.
+        return redirect()->route('hardware.index')
+            ->with('error', trans('admin/hardware/message.checkin.error'))
+            ->with('multi_error_messages', $asset->getErrors()->all());
     }
 
     /**

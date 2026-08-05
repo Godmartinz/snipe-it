@@ -90,7 +90,7 @@ return [
         'AW' => 'Aruba',
         'AX' => 'Alandai',
         'AZ' => 'Azerbaidžanas',
-        'BA' => 'Bosnija ir Hercogovina',
+        'BA' => 'Bosnija ir Hercegovina',
         'BB' => 'Barbadosas',
         'BE' => 'Belgija',
         'BD' => 'Bangladešas',

@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Видалено запит на підтвердження',
     'acceptance_request' => 'Прийнятий запит',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Адреса користувача',
         'user_company' => 'User Company',
         'user_city' => 'Місто Користувача',

@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Richiesta di accettazione eliminata',
     'acceptance_request' => 'Richiesta di accettazione',
     'custom_export' => [
+        'asset_company' => 'Azienda del Bene',
+        'asset_serial' => 'Seriale del Bene',
+        'assigned_asset_tag' => 'Tag del Bene assegnato',
         'user_address' => 'Indirizzo Utente',
         'user_company' => 'Azienda Utente',
         'user_city' => 'Città Utente',

@@ -18,4 +18,11 @@ return [
     'asset_maintenance_incomplete' => 'Non ancora completato',
     'warranty' => 'Garanzia',
     'not_warranty' => 'Senza garanzia',
+    'complete' => [
+        'confirm' => 'Sicuro di voler segnare questa manutenzione come completa? Questa azione non può essere annullata.',
+        'success' => 'Manutenzione segnata come completata.',
+        'error' => 'Si è verificato un problema segnando questa manutenzione come completata. Riprova.',
+    ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

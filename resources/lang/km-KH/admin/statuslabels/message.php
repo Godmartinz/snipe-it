@@ -20,6 +20,8 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបស្លាកស្ថានភាពនេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបស្លាកស្ថានភាព។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'ស្លាកស្ថានភាពត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

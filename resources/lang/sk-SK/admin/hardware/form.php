@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Naspať na všetky :type',
     'redirect_to_type' => 'Prejsť na :type',
     'redirect_to_checked_out_to' => 'Prejsť na priradenie',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Vyberte typ stavu',
     'serial' => 'Sériové číslo',
     'serial_required' => 'Majetok :number vyžaduje sériové číslo',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Označenie majetku',
     'update' => 'Úprava majetku',
     'warranty' => 'Záruka',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Koniec záruky',
     'years' => 'roky/ov',
     'asset_location' => 'Upraviť lokalitu majetku',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Nepovinné informácie',
     'order_details' => 'Informácie súvisiace s objednávkou',
     'calc_eol' => 'Ak odstránite EOL dátum použite sa automatická EOL kalkulácia vychádzajúca z dátumu nákupu a EOL periody.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

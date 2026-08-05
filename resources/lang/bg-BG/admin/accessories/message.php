@@ -20,6 +20,8 @@ return [
         'confirm' => 'Сигурни ли сте, че искате да изтриете този аксесоар?',
         'error' => 'Възникна проблем при изтриването на този аксесоар. Моля опитайте отново.',
         'success' => 'Аксесоарът бе изтрит успешно.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

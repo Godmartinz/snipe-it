@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Lisans arayüzündeki toplu lisans iade işlemiyle geri alındı',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count lisans koltuğu başarıyla zimmetten düşüldü. | :count lisans koltuğu başarıyla zimmetten düşüldü.',
+            'no_seats_selected' => 'Hiçbir koltuk seçilmedi.',
+        ],
+
         'checkout_all' => [
             'button' => 'Tüm koltukları incele',
             'modal' => 'Bu işlem, müsait olan ilk kullanıcıya bir koltuğun ödemesini yapacaktır. | Bu işlem, tüm :available_seats_count koltukları ilk müsait kullanıcılara teslim edecektir. Bir kullanıcı, bu lisansı henüz kendisine teslim etmemişse ve kullanıcı hesabında Otomatik Lisans Atama özelliği etkinleştirilmişse, bu koltuk için uygun kabul edilir.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Yapacak bir şey yok. Henüz kendisine bu lisans atanmamış kullanıcı yok.',
             'log_msg' => 'Lisans GUI\'sinde toplu lisans ödemesi yoluyla teslim alındı',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'تم حذف طلب القبول',
     'acceptance_request' => 'طلب القبول',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'عنوان المستخدم',
         'user_company' => 'User Company',
         'user_city' => 'مدينة المستخدم',

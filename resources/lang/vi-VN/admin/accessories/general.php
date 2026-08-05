@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Điều khoản sử dụng mặc định chưa được thiết lập. Hãy thêm một cái vào trong phần Settings.',
     'total' => 'Tổng số',
     'remaining' => 'Sẵn có',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Cập nhật Phụ Kiện',
     'use_default_eula' => 'Dùng <a href="#" data-toggle="modal" data-target="#eulaModal"> điều khoản sử dụng mặc định.',
     'use_default_eula_disabled' => '<del>Dùng điều khoản sử dụng mặc định.<del> Điều khoản sử dụng chưa được thiết lập. Hãy thêm một cái vào trong phần Settings.',

@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute უნდა იყოს უნიკალური ორივე ცხრილში: :table1 და :table2.',
     'unique_undeleted' => ':attribute უნდა იყოს უნიკალური.',
     'non_circular' => ':attribute არ უნდა გამოიწვიოს ციკლური რეფერენცია.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute ველი არ შეიძლება იყოს მასივი.',
     'disallow_same_pwd_as_user_fields' => 'პაროლი არ შეიძლება ემთხვეოდეს მომხმარებლის სახელს.',
     'letters' => 'პაროლი უნდა შეიცავდეს მინიმუმ ერთ ასოს.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute-ის ატვირთვა ჩაიშალა.',
     'uppercase' => ':attribute ველი უნდა იყოს დიდი ასოებით.',
     'url' => ':attribute ველი უნდა იყოს ვალიდური URL მისამართი.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => ':attribute ველი უნდა იყოს ვალიდური ULID.',
     'uuid' => ':attribute ველი უნდა იყოს ვალიდური UUID.',
-    'fmcs_location' => 'ადმინისტრატორის პარამეტრებში ჩართულია კომპანიის მრავალმხრივი მხარდაჭერა და ლოკაციის გამორკვევა, ხოლო არჩეული ლოკაცია და კომპანია ერთმანეთთან შეუთავსებელია.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
 
     /*

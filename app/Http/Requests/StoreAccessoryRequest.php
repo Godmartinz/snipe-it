@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\Category;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -21,6 +22,10 @@ class StoreAccessoryRequest extends ImageUploadRequest
     {
         parent::prepareForValidation();
 
+        if ($this->filled('purchase_cost') && ! is_float($this->input('purchase_cost')) && preg_match('/^[\d.,]+$/', (string) $this->input('purchase_cost'))) {
+            $this->merge(['purchase_cost' => Helper::ParseCurrency($this->input('purchase_cost'))]);
+        }
+
         if ($this->category_id) {
             if ($category = Category::find($this->category_id)) {
                 $this->merge([
@@ -28,7 +33,6 @@ class StoreAccessoryRequest extends ImageUploadRequest
                 ]);
             }
         }
-
     }
 
     /**

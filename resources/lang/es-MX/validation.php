@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute debe ser único entre la :table1 y :table2. ',
     'unique_undeleted' => ':attribute debe ser único.',
     'non_circular' => ':attribute no debe crear una referencia circular.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute no puede ser una matriz.',
     'disallow_same_pwd_as_user_fields' => 'La contraseña no puede ser la misma que el nombre de usuario.',
     'letters' => 'La contraseña debe contener al menos una letra.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute no se pudo cargar.',
     'uppercase' => 'El campo :attribute debe estar en mayúsculas.',
     'url' => 'El campo :attribute debe ser una URL válida.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => 'El campo :attribute debe ser un ULID válido.',
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
-    'fmcs_location' => 'El soporte completo de múltiples empresas y el alcance de la ubicación están habilitados en la Configuración de Administración, y la ubicación seleccionada y la empresa seleccionada no son compatibles.',
+    'valid_css_color' => 'El campo :attribute debe ser un color CSS válido (hex, rgb, rgba, hsl, o hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'El campo :attribute debe ser único en la compañía y ubicación seleccionadas.',
 
     /*

@@ -1,7 +1,7 @@
 @props([
     'box_style' => 'default',
     'header' => false,
-    'footer' => false,
+    'top_submit' => false,
 ])
 @aware(['name', 'route'])
 
@@ -9,11 +9,32 @@
 <!-- Start box component -->
 <div {{ $attributes->merge(['class' => 'box box-'.$box_style]) }}>
 
-    @if ($header)
+    @if ($header || $top_submit)
         <div class="box-header with-border">
-            <h2 class="box-title">
-                {{ $header }}
-            </h2>
+            @if ($top_submit)
+                {{-- Long-form pattern: title on the left, save button pulled
+                     right. Title truncates with an ellipsis so a long
+                     display_name can't push the save button off the row. --}}
+                <div class="row">
+                    <div class="col-md-10">
+                        @if ($header)
+                            <h2 class="box-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; padding-top: 7px;">
+                                {{ $header }}
+                            </h2>
+                        @endif
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success pull-right" name="submit">
+                            <x-icon type="checkmark"/>
+                            {{ trans('general.save') }}
+                        </button>
+                    </div>
+                </div>
+            @else
+                <h2 class="box-title">
+                    {{ $header }}
+                </h2>
+            @endif
         </div>
     @endif
 
@@ -32,13 +53,16 @@
             </div>
         @endif
 
-            @if (($slot) && (!$slot->isEmpty()))
-                {{ $slot }}
-            @endif
+            {{-- Render slot unconditionally — ComponentSlot::isEmpty()
+                 materializes the slot to inspect it, doubling every DB call
+                 inside. An empty slot renders nothing visible. --}}
+            {{ $slot }}
 
     </div>
 
-    @if ($route)
+    @if (isset($customfooter))
+        {{ $customfooter }}
+    @elseif ($route)
         <x-box.footer />
     @endif
 </div>

@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Restituzione effettuata tramite la restituzione massiva nell\'interfaccia delle Licenze',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count slot licenza restituito con successo. | :count slot licenza restituiti con successo.',
+            'no_seats_selected' => 'Nessuno slot licenza selezionato.',
+        ],
+
         'checkout_all' => [
             'button' => 'Assegna tutti gli slot',
             'modal' => 'Questa azione assegnerà uno slot al primo utente disponibile. | Questa azione assegnerà :available_seats_count slot ai primi utenti disponibili. Un utente è considerato disponibile per questo slot se non ha già questa Licenza assegnata e se l\'Auto Assegnazione Licenza è attiva sul suo account utente.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Non ho fatto nulla: Non ci sono utenti senza questa licenza.',
             'log_msg' => 'Assegnazione effettuato tramite GUI di assegnazione massiva di licenze',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\CheckoutableCheckedIn;
+use App\Exceptions\MissingLogTarget;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageUploadRequest;
@@ -85,7 +86,13 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $components->where('components.company_id', '=', $request->input('company_id'));
+            // expand_company_hierarchy=1 opts the company show-page tabs into the
+            // parent/child rollup so a child shows items inherited from its parent.
+            if ($request->boolean('expand_company_hierarchy')) {
+                $components->whereIn('components.company_id', Company::reachableCompanyIds($request->input('company_id')));
+            } else {
+                $components->where('components.company_id', '=', $request->input('company_id'));
+            }
         }
 
         if ($request->filled('order_number')) {
@@ -143,6 +150,9 @@ class ComponentsController extends Controller
                 break;
             case 'created_by':
                 $components = $components->OrderByCreatedBy($order);
+                break;
+            case 'percent_remaining':
+                $components = $components->OrderPercentRemaining($order);
                 break;
             default:
                 $components = $components->orderBy($column_sort, $order);
@@ -319,6 +329,13 @@ class ComponentsController extends Controller
             // Scoped lookup can hide cross-company records and lead to partial writes.
             $asset = Asset::withoutGlobalScopes()->find($request->input('assigned_to'));
 
+            // withoutGlobalScopes bypasses SoftDeletes so we can distinguish
+            // "no such asset" from "in another company" for FMCS messaging.
+            // Trashed assets must not be treated as valid checkout targets.
+            if ($asset && ! empty($asset->deleted_at)) {
+                $asset = null;
+            }
+
             if (! $asset) {
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')));
             }
@@ -327,21 +344,59 @@ class ComponentsController extends Controller
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
             }
 
-            // Keep pivot + action log in one transaction so checkout is all-or-nothing.
-            DB::transaction(function () use ($component, $request, $asset): void {
-                $component->assigned_to = $request->input('assigned_to');
+            // Concurrency guard. The numRemaining() checks above are
+            // unlocked reads, so two simultaneous checkout requests could
+            // both pass, both attach a pivot row, and land the register at
+            // -1. Re-fetch the parent under lockForUpdate INSIDE the
+            // transaction and re-check against the locked snapshot before
+            // writing. Mirrors the License checkout locking pattern.
+            $overAllocated = false;
 
-                $component->assets()->attach($component->id, [
+            try {
+                DB::transaction(function () use ($component, $request, $asset, &$overAllocated): void {
+                    $locked = Component::whereKey($component->id)->lockForUpdate()->first();
+
+                    if (! $locked || $locked->numRemaining() < $request->input('assigned_qty')) {
+                        $overAllocated = true;
+
+                        return;
+                    }
+
+                    $component->assigned_to = $request->input('assigned_to');
+
+                    $component->assets()->attach($component->id, [
+                        'component_id' => $component->id,
+                        'created_at' => Carbon::now(),
+                        'assigned_qty' => $request->input('assigned_qty', 1),
+                        'created_by' => auth()->id(),
+                        'asset_id' => $request->input('assigned_to'),
+                        'note' => $request->input('note'),
+                    ]);
+
+                    $component->logCheckout($request->input('note'), $asset, null, [], $request->get('assigned_qty', 1));
+                });
+            } catch (MissingLogTarget $e) {
+                // Loggable trait fell through its target check inside the
+                // transaction. DB::transaction rethrew on exception, so the
+                // pivot attach was rolled back and no checkout persisted.
+                // Downgrade what would otherwise surface as an unhandled 500
+                // to a 4xx the client can act on, and warning-log for
+                // triage (see the same pattern in LicenseSeatsController).
+                Log::warning('logCheckout target validation failed during component checkout.', [
                     'component_id' => $component->id,
-                    'created_at' => Carbon::now(),
-                    'assigned_qty' => $request->input('assigned_qty', 1),
-                    'created_by' => auth()->id(),
                     'asset_id' => $request->input('assigned_to'),
-                    'note' => $request->input('note'),
+                    'error' => $e->getMessage(),
                 ]);
 
-                $component->logCheckout($request->input('note'), $asset, null, [], $request->get('assigned_qty', 1));
-            });
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'), 422);
+            }
+
+            if ($overAllocated) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/components/message.checkout.unavailable', [
+                    'remaining' => $component->fresh()->numRemaining(),
+                    'requested' => $request->input('assigned_qty'),
+                ])));
+            }
 
             return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/components/message.checkout.success')));
         }

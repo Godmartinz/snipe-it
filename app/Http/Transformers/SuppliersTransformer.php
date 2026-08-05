@@ -57,6 +57,9 @@ class SuppliersTransformer
             $permissions_array['available_actions'] = [
                 'update' => Gate::allows('update', Supplier::class),
                 'delete' => (Gate::allows('delete', Supplier::class) && ($supplier->isDeletable())),
+                'bulk_selectable' => [
+                    'delete' => (Gate::allows('delete', Supplier::class) && ($supplier->isDeletable())),
+                ],
             ];
 
             $array += $permissions_array;

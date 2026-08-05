@@ -59,8 +59,8 @@ class RestoreUserTest extends TestCase
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $superuser = User::factory()->superuser()->create();
-        $userFromA = User::factory()->deletedUser()->deleteUsers()->for($companyA)->create();
-        $userFromB = User::factory()->deletedUser()->deleteUsers()->for($companyB)->create();
+        $userFromA = User::factory()->deletedUser()->deleteUsers()->forCompany($companyA)->create();
+        $userFromB = User::factory()->deletedUser()->deleteUsers()->forCompany($companyB)->create();
 
         $this->actingAsForApi($userFromA)
             ->postJson(route('api.users.restore', ['user' => $userFromB->id]))

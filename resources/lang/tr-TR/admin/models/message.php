@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Hiçbir model seçilmedi, bu nedenle hiçbir şey silinmedi.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model silindi!|:success_count modelleri silindi!',
         'success_partial' => ':success_count adet model(ler) silindi, ancak :fail_count adet için silme işlemini tamamlayamadık, çünkü bunlar halâ varlıklarla ilişkilendirilmiş durumda.',
     ],

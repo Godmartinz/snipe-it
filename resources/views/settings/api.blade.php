@@ -15,6 +15,11 @@
                     <x-slot:tabnav>
 
                         <x-tabs.nav-item
+                            name="api-request-filters"
+                            :label="trans('admin/settings/general.api_request_filters')"
+                        />
+
+                        <x-tabs.nav-item
                             name="personal-access-tokens"
                             :label="trans('admin/settings/general.oauth_personal_access_tokens')"
                             :count="$personalAccessTokenCount ?? 0"
@@ -32,6 +37,56 @@
                     </x-slot:tabnav>
 
                     <x-slot:tabpanes>
+                        <x-tabs.pane name="api-request-filters">
+                            <x-form route="{{ route('settings.oauth.request_filters.save') }}">
+
+                                <input type="hidden" name="block_api_user_agents" value="0" />
+                                <x-form.checkbox-row
+                                    name="block_api_user_agents"
+                                    :label="trans('admin/settings/general.block_api_user_agents_text')"
+                                    :checked="$blockApiUserAgents"
+                                    :help_text="trans('admin/settings/general.block_api_user_agents_help')"
+                                    aria-controls="blocked_api_user_agents"
+                                    data-toggle="disable-when-unchecked"
+                                    data-disable-target="#blocked_api_user_agents"
+                                />
+
+                                <x-form.row
+                                    :label="trans('admin/settings/general.blocked_api_user_agents_text')"
+                                    name="blocked_api_user_agents"
+                                    input_div_class="col-md-5"
+                                    :help_text="trans('admin/settings/general.blocked_api_user_agents_help')"
+                                >
+                                    <x-slot:input>
+                                        <textarea
+                                            class="form-control"
+                                            id="blocked_api_user_agents"
+                                            name="blocked_api_user_agents"
+                                            rows="10"
+                                            aria-describedby="blocked_api_user_agents-help"
+                                            @disabled(! $blockApiUserAgents)
+                                        >{{ $blockedApiUserAgents }}</textarea>
+                                    </x-slot:input>
+                                </x-form.row>
+
+                                <input type="hidden" name="block_blank_api_user_agents" value="0" />
+                                <x-form.checkbox-row
+                                    name="block_blank_api_user_agents"
+                                    :label="trans('admin/settings/general.block_blank_api_user_agents_text')"
+                                    :checked="$blockBlankApiUserAgents"
+                                    :help_text="trans('admin/settings/general.block_blank_api_user_agents_help')"
+                                />
+
+                                <div class="form-group">
+                                    <div class="col-md-8 col-md-offset-3">
+                                        <button type="submit" class="btn btn-primary">
+                                            <x-icon type="checkmark" /> {{ trans('general.save') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </x-form>
+                        </x-tabs.pane>
+
                         <x-tabs.pane name="authorized-applications">
                             <div class="oauth-tab-content">
                                 <livewire:oauth-clients section="authorized-applications"/>
@@ -51,7 +106,9 @@
                 </x-tabs>
         </x-container>
     @else
-        <p class="text-warning"><i class="fas fa-lock" aria-hidden="true"></i> {{ trans('general.feature_disabled') }}</p>
+        <x-container>
+            <x-demo-lock>{{ trans('general.feature_disabled') }}</x-demo-lock>
+        </x-container>
     @endif
 
 @stop

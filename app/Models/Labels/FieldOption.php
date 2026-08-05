@@ -3,6 +3,8 @@
 namespace App\Models\Labels;
 
 use App\Models\Asset;
+use App\Models\User;
+use App\Helpers\Helper;
 
 class FieldOption
 {
@@ -27,21 +29,32 @@ class FieldOption
         // assignedTo directly on the asset is a special case where
         // we want to avoid returning the property directly
         // and instead return the entity's presented name.
-        if ($dataPath[0] === 'assignedTo') {
-            if ($asset->relationLoaded('assignedTo')) {
-                // If the "assignedTo" relationship was eager loaded then the way to get the
-                // relationship changes from $asset->assignedTo to $asset->assigned.
-                return $asset->assigned ? $asset->assigned->display_name : null;
-            }
+        if (in_array($dataPath[0], ['assignedTo', 'displayName'])) {
+            $assigned = $asset->relationLoaded('assignedTo') ? $asset->assigned : $asset->assignedTo;
 
-            return $asset->assignedTo ? $asset->assignedTo->display_name : null;
+            if (!$assigned) {
+                return null;
+            }
+            if ($dataPath[0] === 'displayName') {
+                return $assigned->getRawOriginal('display_name') ?? $assigned->display_name;
+            }
+            if ($assigned instanceof User) {
+                return $assigned->full_name;
+            }
+            return $assigned->name ?? $assigned->display_name ?? null;
         }
 
         // Handle Laravel's stupid Carbon datetime casting
         if ($dataPath[0] === 'purchase_date') {
             return $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : null;
         }
+        if ($dataPath[0] === 'warranty_months') {
 
+            return ($asset->warranty_months > 0) ? e($asset->warranty_months . ' ' . trans('admin/hardware/form.months')) : null;
+        }
+        if ($dataPath[0] === 'warranty_expires') {
+            return ($asset->warranty_months > 0) ? $asset->warranty_expires->toDateString() : null;
+        }
         return $dataPath->reduce(
             function ($myValue, $path) {
                 try {

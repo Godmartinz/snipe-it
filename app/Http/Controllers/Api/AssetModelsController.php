@@ -16,7 +16,6 @@ use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -133,7 +132,8 @@ class AssetModelsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assetmodels->count()) ? $assetmodels->count() : abs($request->input('offset'));
+        $total = $assetmodels->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -152,12 +152,17 @@ class AssetModelsController extends Controller
             case 'created_by':
                 $assetmodels->OrderByCreatedByName($order);
                 break;
+            case 'depreciation':
+                $assetmodels->leftJoin('depreciations as depreciation_sort', 'models.depreciation_id', '=', 'depreciation_sort.id')->orderBy('depreciation_sort.name', $order);
+                break;
+            case 'percent_remaining':
+                $assetmodels->OrderPercentRemaining($order);
+                break;
             default:
                 $assetmodels->orderBy($sort, $order);
                 break;
         }
 
-        $total = $assetmodels->count();
         $assetmodels = $assetmodels->skip($offset)->take($limit)->get();
 
         return (new AssetModelsTransformer)->transformAssetModels($assetmodels, $total);
@@ -275,14 +280,13 @@ class AssetModelsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/models/message.assoc_users')));
         }
 
-        if ($assetmodel->image) {
-            try {
-                Storage::disk('public')->delete('assetmodels/'.$assetmodel->image);
-            } catch (\Exception $e) {
-                Log::info($e);
-            }
-        }
-
+        // Note: the image file is deliberately preserved across this
+        // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+        // removes it later when the row is force-deleted. Keeping the
+        // file here means a restored soft-deleted row still has its
+        // image. Also fixes a latent path bug: the old delete used
+        // `assetmodels/` but handleImages stores under `models/`, so
+        // the unlink here was silently missing the file anyway.
         $assetmodel->delete();
 
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/models/message.delete.success')));

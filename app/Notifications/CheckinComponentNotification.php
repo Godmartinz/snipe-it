@@ -119,9 +119,9 @@ class CheckinComponentNotification extends Notification
                 ->title(trans('mail.Component_checkin_notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'header')
-                ->fact(trans('mail.Component_checkin_notification').' by ', $admin->display_name ?: 'CLI tool')
-                ->fact(trans('mail.checkedin_from'), $target->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->numRemaining())
+                ->fact(trans('mail.Component_checkin_notification').' by ', $admin?->display_name ?: 'CLI tool')
+                ->fact(trans('mail.checkedin_from'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->numRemaining())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

@@ -6,6 +6,7 @@ use App\Models\Traits\Acceptable;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\AccessoryPresenter;
 use App\Presenters\Presentable;
@@ -29,6 +30,7 @@ class Accessory extends SnipeModel
     use HasUploads;
     use Loggable;
     use Presentable;
+    use Requestable;
     use Searchable;
     use SoftDeletes;
     use ValidatingTrait;
@@ -80,7 +82,7 @@ class Accessory extends SnipeModel
         'name' => 'required|max:255',
         'qty' => 'nullable|integer|min:0',
         'category_id' => 'required|integer|exists:categories,id',
-        'company_id' => 'integer|nullable',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
         'min_amt' => 'integer|min:0|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
@@ -153,6 +155,15 @@ class Accessory extends SnipeModel
             $value = null;
         }
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable accessories. Unlike assets, accessories
+     * have no deployable status to check, so the flag is all we need here.
+     */
+    public function scopeRequestableAccessories($query)
+    {
+        return $query->where('accessories.requestable', '1');
     }
 
     /**
@@ -523,5 +534,26 @@ class Accessory extends SnipeModel
     public function scopeOrderSupplier($query, $order)
     {
         return $query->leftJoin('suppliers', 'accessories.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Mirrors Accessory::percentRemaining(): (qty - checkouts_count) / qty * 100.
+     * checkouts_count is added by withCount() in the API index() before
+     * this scope runs. Guards against division by zero for accessories
+     * with qty of 0.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN accessories.qty = 0 THEN 0 ELSE ((accessories.qty - checkouts_count) * 100.0 / accessories.qty) END '.$direction);
     }
 }

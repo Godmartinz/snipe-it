@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute turi būti unikalus :table1 ir :table2. ',
     'unique_undeleted' => ':attribute turi būti unikalus.',
     'non_circular' => ':attribute neturi kurti žiedinės nuorodos.',
+    'parent_must_be_top_level' => 'Pasirinktas :attribute pats turi būti aukščiausio lygio elementas. Leidžiamas tik vienas įdėjimo (susluoksniavimo) lygis.',
+    'must_have_no_children' => 'Šis elementas jau turi savo vaikinius elementus, todėl jam negalima priskirti pagrindinio elemento.',
     'not_array' => ':attribute negali būti masyvas.',
     'disallow_same_pwd_as_user_fields' => 'Slaptažodis negali sutapti su naudotojo vardu.',
     'letters' => 'Slaptažodyje turi būti bent viena raidė.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute įkelti nepavyko.',
     'uppercase' => ':attribute lauke turi būti tik didžiosios raidės.',
     'url' => ':attribute lauke turi būti galiojantis URL adresas.',
+    'external_url' => 'Laukas :attribute turi būti galiojantis išorinis URL (http:// arba https://), kuris nenukreipia į privatų ar vietinį adresą.',
     'ulid' => ':attribute lauke turi būti galiojantis ULID identifikatorius.',
     'uuid' => ':attribute lauke turi būti galiojantis UUID identifikatorius.',
-    'fmcs_location' => 'Administratoriaus nustatymuose yra įjungtas pilnas kelių įmonių palaikymas ir vietos susiejimas, o pasirinkta vieta ir pasirinkta įmonė yra nesuderinamos.',
+    'valid_css_color' => ':attribute laukas turi būti galiojanti CSS spalva (hex, rgb, rgba, hsl arba hsla).',
+    'fmcs_company' => 'Laukas :attribute yra privalomas, nes įjungtas pilnas kelių įmonių palaikymas ir nėra leidžiami „bendri visiems“ objektai.',
+    'fmcs_location' => 'Vieta ":location" priklauso :location_company, kuri nesutampa su pasirinkta įmone.',
     'is_unique_across_company_and_location' => ':attribute turi būti unikalus pasirinktai įmonei ir vietai.',
 
     /*

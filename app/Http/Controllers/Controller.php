@@ -102,4 +102,32 @@ abstract class Controller extends BaseController
         view()->share('signedIn', Auth::check());
         view()->share('user', auth()->user());
     }
+
+    /**
+     * Accessor for the object-type map. The public static array above is
+     * kept for back-compat with any external callers that reach into it
+     * directly, but internal callers should prefer this getter so static
+     * analyzers (Codacy) don't misparse `parent::$map_object_type` as a
+     * variable-variable dereference.
+     */
+    public static function getMapObjectType(): array
+    {
+        return static::$map_object_type;
+    }
+
+    /**
+     * Accessor for the storage-path map. See getMapObjectType for rationale.
+     */
+    public static function getMapStoragePath(): array
+    {
+        return static::$map_storage_path;
+    }
+
+    /**
+     * Accessor for the file-prefix map. See getMapObjectType for rationale.
+     */
+    public static function getMapFilePrefix(): array
+    {
+        return static::$map_file_prefix;
+    }
 }

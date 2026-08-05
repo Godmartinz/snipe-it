@@ -26,7 +26,7 @@ class UpdateConsumableTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
         $consumableForCompanyA = Consumable::factory()->for($companyA)->create();
-        $userForCompanyB = User::factory()->editConsumables()->for($companyB)->create();
+        $userForCompanyB = User::factory()->editConsumables()->forCompany($companyB)->create();
 
         $this->actingAs($userForCompanyB)
             ->get(route('consumables.edit', $consumableForCompanyA))
@@ -48,7 +48,7 @@ class UpdateConsumableTest extends TestCase
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $consumableForCompanyA = Consumable::factory()->for($companyA)->create();
-        $userForCompanyB = User::factory()->editConsumables()->for($companyB)->create();
+        $userForCompanyB = User::factory()->editConsumables()->forCompany($companyB)->create();
 
         $this->actingAs($userForCompanyB)
             ->put(route('consumables.update', $consumableForCompanyA), [

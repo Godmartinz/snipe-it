@@ -25,7 +25,7 @@ return [
         'confirm' => 'Ste si istí, že chete zmazať tohto výrobcu?',
         'error' => 'Pri mazaní výrobcu nastala chyba. Skúste znovu.',
         'success' => 'Výrobca bol úspešne odstránený.',
-        'bulk_success' => 'Výrobcovia boli úspešne odstránení.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Výrobca bol úspešne odstránený. Ďalšie informácie nájdete nižšie. | :count výrobcovia boli úspešne odstránení. Ďalšie informácie nájdete nižšie.',
     ],
 

@@ -6,6 +6,7 @@ use App\Actions\CheckoutRequests\CancelCheckoutRequestAction;
 use App\Actions\CheckoutRequests\CreateCheckoutRequestAction;
 use App\Enums\ActionType;
 use App\Exceptions\AssetNotRequestable;
+use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * This controller handles all actions related to the ability for users
@@ -120,6 +122,7 @@ class ViewAssetsController extends Controller
             'consumables',
             'accessories',
             'licenses',
+            'companies',
         ])->find($selectedUserId);
 
         // If the user to view couldn't be found (shouldn't happen with proper logic), redirect with error
@@ -158,11 +161,17 @@ class ViewAssetsController extends Controller
             },
         ])->RequestableModels()->get();
 
-        return view('account/requestable-assets', compact('assets', 'models'));
+        $accessories = Accessory::with('category', 'location', 'requests')
+            ->withCount('checkouts as checkouts_count')
+            ->RequestableAccessories()
+            ->get();
+
+        return view('account/requestable-assets', compact('assets', 'models', 'accessories'));
     }
 
     public function getRequestItem(Request $request, $itemType, $itemId = null, $cancel_by_admin = false, $requestingUser = null): RedirectResponse
     {
+        $data = [];
         $item = null;
         $fullItemType = 'App\\Models\\'.studly_case($itemType);
 
@@ -191,29 +200,55 @@ class ViewAssetsController extends Controller
         $data['item_type'] = $itemType;
         $data['target'] = auth()->user();
 
-        if ($fullItemType == Asset::class) {
-            $data['item_url'] = route('hardware.show', $item->id);
-        } else {
-            $data['item_url'] = route("view/{$itemType}", $item->id);
-        }
+        $data['item_url'] = match ($fullItemType) {
+            Asset::class => route('hardware.show', $item->id),
+            AssetModel::class => route('view/model', $item->id),
+            Accessory::class => route('accessories.show', $item->id),
+            default => route("view/{$itemType}", $item->id),
+        };
 
         $settings = Setting::getSettings();
 
-        if (($item_request = $item->isRequestedBy($user)) || $cancel_by_admin) {
-            $item->cancelRequest($requestingUser);
-            $data['item_quantity'] = ($item_request) ? $item_request->qty : 1;
+        $is_admin = $user->isSuperUser() || $user->isAdmin();
+
+        if ($cancel_by_admin && ! $is_admin) {
+            return redirect()->back()->with('error', trans('general.insufficient_permissions'));
+        }
+
+        if (($item_request = $item->isRequestedBy($user)) || ($is_admin && $cancel_by_admin)) {
+            $item->cancelRequest($is_admin && $cancel_by_admin ? $requestingUser : null);
+            $data['item_quantity'] = ($item_request) ? $item_request->quantity : 1;
             $logaction->logaction(ActionType::RequestCanceled);
 
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
-                $settings->notify((new RequestAssetCancelation($data))->locale($settings->locale));
+                try {
+                    $settings->notify((new RequestAssetCancelation($data))->locale($settings->locale));
+                } catch (Exception $e) {
+                    Log::warning('Could not send request cancellation notification: '.$e->getMessage());
+                }
             }
 
             return redirect()->back()->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
         } else {
-            $item->request();
+            // AssetModel was previously missing from this gate, so a
+            // POST to /account/request/asset_model/{id} would bypass
+            // the model's `requestable` flag entirely and still
+            // create a request record. Now uses RequestableModels()
+            // to match the Asset / Accessory checks above.
+            if (($fullItemType === Asset::class && is_null(Asset::RequestableAssets()->find($item->id)))
+                || ($fullItemType === Accessory::class && is_null(Accessory::RequestableAccessories()->find($item->id)))
+                || ($fullItemType === AssetModel::class && is_null(AssetModel::RequestableModels()->find($item->id)))) {
+                return redirect()->back()->with('error', trans('admin/hardware/message.requests.error'));
+            }
+
+            $item->request($data['item_quantity']);
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
                 $logaction->logaction('requested');
-                $settings->notify((new RequestAssetNotification($data))->locale($settings->locale));
+                try {
+                    $settings->notify((new RequestAssetNotification($data))->locale($settings->locale));
+                } catch (Exception $e) {
+                    Log::warning('Could not send asset request notification: '.$e->getMessage());
+                }
             }
 
             return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.success'));

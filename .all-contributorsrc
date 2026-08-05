@@ -4271,6 +4271,60 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "CybotTM",
+      "name": "Sebastian Mendel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/326348?v=4",
+      "profile": "https://github.com/CybotTM",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "krmax44",
+      "name": "Max",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12673799?v=4",
+      "profile": "https://github.com/krmax44",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "olivierlambert",
+      "name": "Olivier Lambert",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1241401?v=4",
+      "profile": "https://vates.tech",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "TowyTowy",
+      "name": "TowyTowy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/85077986?v=4",
+      "profile": "https://github.com/TowyTowy",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Akashmdshetty",
+      "name": "Akash M D",
+      "avatar_url": "https://avatars.githubusercontent.com/u/180300697?v=4",
+      "profile": "https://portfolio-akash-m-ds-projects.vercel.app/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rodchristiansen",
+      "name": "Rod Christiansen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7052526?v=4",
+      "profile": "http://blog.focused.systems",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

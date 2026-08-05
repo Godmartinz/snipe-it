@@ -108,9 +108,9 @@ class CheckinAccessoryNotification extends Notification
                 ->title(trans('Accessory_Checkin_Notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityTitle')
-                ->fact(trans('mail.checked_into'), $item->location->name ? $item->location->name : '')
-                ->fact(trans('mail.Accessory_Checkin_Notification').' by ', $admin->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->numRemaining())
+                ->fact(trans('mail.checked_into'), $item->location?->name ?: '')
+                ->fact(trans('mail.Accessory_Checkin_Notification').' by ', (string) ($admin?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->numRemaining())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

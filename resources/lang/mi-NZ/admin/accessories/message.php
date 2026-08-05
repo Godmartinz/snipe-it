@@ -20,6 +20,8 @@ return [
         'confirm' => 'Kei te hiahia koe ki te muku i tenei taputapu?',
         'error' => 'He raruraru kei te whakakore i te taputapu. Tena ngana ano.',
         'success' => 'Kua whakakorehia te taputapu.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

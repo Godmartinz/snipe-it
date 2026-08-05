@@ -17,10 +17,9 @@
 
         @if ($user->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
-                    <x-icon type="warning"/>
+                <x-callout type="warning" icon="warning" live="assertive">
                     {{ trans('admin/users/message.user_deleted_warning') }}
-                </div>
+                </x-callout>
             </div>
         @endif
 
@@ -33,6 +32,7 @@
                     <x-tabs.license-tab count="{{ $user->licenses()->count() }}"/>
                     <x-tabs.accessory-tab count="{{ $user->accessories()->count() }}"/>
                     <x-tabs.consumable-tab count="{{ $user->consumables()->count() }}"/>
+                    <x-tabs.maintenance-tab count="{{ $user->assignedMaintenances()->count() }}"/>
                     <x-tabs.files-tab :item="$user" count="{{ $user->uploads()->count() }}"/>
                     <x-tabs.eula-tab count="{{ $user->eulas()->count() }}"/>
                     <x-tabs.location-tab count="{{ $user->managedLocations()->count() }}"/>
@@ -182,7 +182,6 @@
                                     </x-data-row>
                                 @endif
 
-
                             </x-page-data>
 
                             <!-- ./ definition list column -->
@@ -194,7 +193,7 @@
                         <x-page-column class="col-md-4 col-sm-12">
 
 
-                            @if($user->getUserTotalCost()->total_user_cost > 0)
+                            @if ($user->getUserTotalCost()->total_user_cost > 0)
                                 <x-well class="well-sm">
 
                                     <div class="well-display">
@@ -209,6 +208,15 @@
 
                                         <x-data-row icon_type="accessories" label="{{ trans('general.accessories') }}" align="right">
                                             {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->accessory_cost)}}
+                                        </x-data-row>
+
+                                        {{-- Sum across complete + active maintenances tied
+                                             to this user — used to surface "which users
+                                             cost the most maintenance over time" as a glance.
+                                             The current-active count lives on the tab badge
+                                             above so we don't duplicate it here. --}}
+                                        <x-data-row icon_type="maintenances" :label="trans('general.maintenance_cost')" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->maintenance_cost) }}
                                         </x-data-row>
 
                                         <x-data-row icon_type="cost" label=" {{ trans('admin/users/table.total_assets_cost') }}" align="right">
@@ -283,25 +291,29 @@
                             </x-well>
 
 
-                            @if ( ($user->activated == '1') && (auth()->user()->isSuperUser()) && ($user->two_factor_active_and_enrolled()) && ($snipeSettings->two_factor_enabled!='0') && ($snipeSettings->two_factor_enabled!=''))
+                                <!-- Impersonation button -->
+                                @if (Auth::check() && Auth::user()->mayImpersonate($user))
+                                    <button type="button" class="btn btn-danger hidden-print btn-social btn-block" data-toggle="modal" data-target="#confirmImpersonateModal" data-tooltip="true" data-title="{{ trans('admin/users/general.impersonate_user', ['name' => $user->display_name]) }}">
+                                        <x-icon type="impersonate" class="fa-fw" style="font-size: 17px;"/>
+                                        {{ trans('general.impersonate') }}
+                                        <span class="sr-only">{{ trans('admin/users/general.impersonate_user', ['name' => $user->display_name]) }}</span>
+                                    </button>
+                                @endif
 
-                                <!-- 2FA reset -->
 
-                                <a class="btn btn-theme btn-sm" id="two_factor_reset" style="margin-right: 10px; margin-top: 10px;">
-                                    {{ trans('admin/settings/general.two_factor_reset') }}
-                                </a>
-                                <span id="two_factor_reseticon">
-                                </span>
-                                <span id="two_factor_resetresult">
-                                </span>
-                                <span id="two_factor_resetstatus">
-                                </span>
-                                <br>
-                                <p class="help-block" style="line-height: 1.6;">
-                                    {{ trans('admin/settings/general.two_factor_reset_help') }}
-                                </p>
 
-                            @endif
+                                @if (auth()->user()->isSuperUser() && $user->twoFactorResettable())
+                                    <!-- 2FA reset -->
+                                    <button type="button" class="btn btn-theme hidden-print btn-social btn-block" data-toggle="modal" data-target="#confirmTwoFactorResetModal" style="margin-right: 10px; margin-top: 10px;">
+                                        <x-icon type="mobile" class="fa-fw"/>
+                                        {{ trans('admin/settings/general.two_factor_reset') }}
+                                    </button>
+                                    <br>
+                                    <p class="help-block" style="line-height: 1.6;">
+                                        {{ trans('admin/settings/general.two_factor_reset_help') }}
+                                    </p>
+                                @endif
+
 
 
                         </x-page-column>
@@ -310,6 +322,25 @@
                     </x-tabs.pane>
 
                     <x-tabs.pane name="licenses" :count="$user->licenses()->count()">
+
+                        @can('checkin', \App\Models\License::class)
+                        <x-slot:table_header>{{ trans('general.licenses') }}</x-slot:table_header>
+                        <x-slot:bulkactions>
+                            <div class="hidden-print" style="padding-top:10px; min-width:400px;">
+                                <form method="POST" action="{{ route('licenses.bulkcheckin.selected') }}" id="userLicenseBulkCheckinForm" class="form-inline">
+                                    @csrf
+                                    <label for="userLicenseBulkActions"><span class="sr-only">{{ trans('button.bulk_actions') }}</span></label>
+                                    <select name="bulk_actions" id="userLicenseBulkActions" class="form-control select2" style="min-width:350px;">
+                                        <option value="checkin">{{ trans('general.checkin') }}</option>
+                                    </select>
+                                    <button type="submit" id="userLicenseBulkCheckinButton" class="btn btn-theme" disabled>{{ trans('button.go') }}</button>
+                                    <span id="userLicenseBulkCheckinCount" style="display:none; margin-left:8px; line-height:34px;">&mdash; <span class="badge">0</span> {{ trans('general.selected') }}</span>
+                                </form>
+                            </div>
+                        </x-slot:bulkactions>
+                        @endcan
+
+                        @can('view', \App\Models\License::class)
                         <table
                             data-cookie-id-table="userLicenseTable"
                             data-id-table="userLicenseTable"
@@ -326,17 +357,25 @@
 
                             <thead>
                                 <tr>
-                                    <th>{{ trans('general.name') }}</th>
-                                    <th>{{ trans('admin/licenses/form.license_key') }}</th>
-                                    <th data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                                    <th>{{ trans('admin/licenses/form.purchase_order') }}</th>
-                                    <th>{{ trans('general.order_number') }}</th>
-                                    <th class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
+                                    @can('checkin', \App\Models\License::class)
+                                        <th scope="col" class="hidden-print">{{ trans('general.id') }}</th>
+                                    @endcan
+                                    <th scope="col">{{ trans('general.name') }}</th>
+                                    <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
+                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
+                                    <th scope="col">{{ trans('admin/licenses/form.purchase_order') }}</th>
+                                    <th scope="col">{{ trans('general.order_number') }}</th>
+                                    <th scope="col" class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($user->licenses as $license)
                                     <tr>
+                                        @can('checkin', \App\Models\License::class)
+                                        <td class="hidden-print">
+                                            <input type="checkbox" class="user-license-seat-checkbox hidden-print" form="userLicenseBulkCheckinForm" name="ids[]" value="{{ $license->pivot->id }}">
+                                        </td>
+                                        @endcan
                                         <td class="col-md-4">
                                             {!! $license->present()->nameUrl() !!}
                                         </td>
@@ -365,6 +404,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        @endcan
 
                     </x-tabs.pane>
 
@@ -377,6 +417,7 @@
                             {{ trans('general.accessories_assigned') }}
                         </x-slot:table_header>
 
+                        @can('view', \App\Models\Accessory::class)
                         <table
                             data-cookie-id-table="userAccessoryTable"
                             data-id-table="userAccessoryTable"
@@ -391,12 +432,12 @@
                     }'>
                             <thead>
                                 <tr>
-                                    <th>{{ trans('general.id') }}</th>
-                                    <th>{{ trans('general.name') }}</th>
-                                    <th>{{ trans('general.date') }}</th>
-                                    <th data-fieldname="note">{{ trans('general.notes') }}</th>
-                                    <th data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th class="hidden-print">{{ trans('general.action') }}</th>
+                                    <th scope="col">{{ trans('general.id') }}</th>
+                                    <th scope="col">{{ trans('general.name') }}</th>
+                                    <th scope="col">{{ trans('general.date') }}</th>
+                                    <th scope="col" data-fieldname="note">{{ trans('general.notes') }}</th>
+                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
+                                    <th scope="col" class="hidden-print">{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -418,10 +459,12 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        @endcan
 
                     </x-tabs.pane>
 
                     <x-tabs.pane name="consumables" :count="$user->consumables()->count()">
+                        @can('view', \App\Models\Consumable::class)
                         <table
                             data-cookie-id-table="userConsumableTable"
                             data-id-table="userConsumableTable"
@@ -437,10 +480,10 @@
                     }'>
                             <thead>
                                 <tr>
-                                    <th class="col-md-3">{{ trans('general.name') }}</th>
-                                    <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th class="col-md-2">{{ trans('general.date') }}</th>
-                                    <th class="col-md-5">{{ trans('general.notes') }}</th>
+                                    <th scope="col" class="col-md-3">{{ trans('general.name') }}</th>
+                                    <th scope="col" class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
+                                    <th scope="col" class="col-md-2">{{ trans('general.date') }}</th>
+                                    <th scope="col" class="col-md-5">{{ trans('general.notes') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -456,7 +499,19 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        @endcan
 
+                    </x-tabs.pane>
+
+                    {{-- Maintenances tab: every maintenance whose underlying
+                         asset was checked out to this user. Shows open and
+                         closed; the tab badge only counts the open ones
+                         (see assignedMaintenances()->active() above). --}}
+                    <x-tabs.pane name="maintenances" :count="$user->assignedMaintenances()->count()">
+                        <x-table.maintenances
+                            :route="route('api.maintenances.index', ['checked_out_to_id' => $user->id, 'checked_out_to_type' => \App\Models\User::class])"
+                            export_filename="export-maintenances-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                     </x-tabs.pane>
 
                     <x-tabs.pane name="managed-users" :count="$user->managesUsers()->count()">
@@ -486,7 +541,7 @@
                         <x-table.files object_type="users" :object="$user"/>
                     </x-tabs.pane>
 
-                    <x-tabs.pane name="eulas" :count="$user->accessories()->count()">
+                    <x-tabs.pane name="eulas" :count="$user->eulas()->count()">
                         <x-slot:table_header>
                             {{ trans('general.eula') }}
                         </x-slot:table_header>
@@ -509,11 +564,11 @@
                     }'>
                             <thead>
                                 <tr>
-                                    <th data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
-                                    <th data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
-                                    <th data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
-                                    <th data-field="note">{{ trans('general.notes') }}</th>
-                                    <th data-field="url" data-formatter="fileDownloadButtonsFormatter">{{ trans('general.download') }}</th>
+                                    <th scope="col" data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
+                                    <th scope="col" data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
+                                    <th scope="col" data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
+                                    <th scope="col" data-field="note">{{ trans('general.notes') }}</th>
+                                    <th scope="col" data-field="url" data-formatter="fileDownloadButtonsFormatter">{{ trans('general.download') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -554,11 +609,20 @@
                         <x-button.clone :item="$user" :route="route('users.clone.show', $user)"/>
                         <x-button.restore :item="$user" :route="route('users.restore.store',  $user)"/>
 
-                        @if($user->allAssignedCount() != '0')
+
+                    @if($user->allAssignedCount() != '0')
                         <a href="{{ route('users.print', $user->id) }}" class="btn btn-sm btn-theme hidden-print" target="_blank" rel="noopener" data-tooltip="true" data-title="{{ trans('admin/users/general.print_assigned') }}">
                             <x-icon type="print" class="fa-fw"/>
                         </a>
                         @endif
+
+                        @can('checkout', \App\Models\Asset::class)
+                            @if (($user->assets()->whereNull('deleted_at')->count() + $user->accessories()->count() + $user->licenses()->count()) > 0)
+                                <a href="{{ route('users.transfer.show', $user) }}" class="btn btn-sm btn-theme hidden-print" data-tooltip="true" data-title="{{ trans('admin/users/general.transfer.button_tooltip') }}">
+                                    <x-icon type="transfer" class="fa-fw"/>
+                                </a>
+                            @endif
+                        @endcan
 
 
                         @if(!empty($user->email) && ($user->allAssignedCount() != '0'))
@@ -603,6 +667,19 @@
         </x-page-column>
     </x-container>
 
+    @if (Auth::check() && Auth::user()->mayImpersonate($user))
+        @include('users.impersonate-confirm-modal')
+    @endif
+
+    @if (auth()->user()->isSuperUser() && $user->twoFactorResettable())
+        @include('modals.confirm-action', [
+            'modal_name' => 'confirmTwoFactorResetModal',
+            'route' => route('users.two_factor_reset', $user->id),
+            'title' => trans('admin/settings/general.two_factor_reset'),
+            'body' => trans('admin/settings/general.two_factor_reset_confirm', ['name' => $user->display_name]),
+        ])
+    @endif
+
 @endsection
 
 
@@ -615,42 +692,29 @@
 <script nonce="{{ csrf_token() }}">
 $(function () {
 
-  $("#two_factor_reset").click(function(){
-    $("#two_factor_resetrow").removeClass('success');
-    $("#two_factor_resetrow").removeClass('danger');
-    $("#two_factor_resetstatus").html('');
-    $("#two_factor_reseticon").html('<x-icon type="spinner" />');
-    $.ajax({
-      url: '{{ route('api.users.two_factor_reset', ['id'=> $user->id]) }}',
-      type: 'POST',
-      data: {},
-      headers: {
-        "X-Requested-With": 'XMLHttpRequest',
-        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-      },
-      dataType: 'json',
-
-      success: function (data) {
-        $("#two_factor_reset_toggle").html('').html('<span class="text-danger"><x-icon type="x" /> {{ trans('general.no') }}</span>');
-        $("#two_factor_reseticon").html('');
-          $("#two_factor_resetstatus").html('<span class="text-success"><x-icon type="checkmark" /> ' + data.message + '</span>');
-
-      },
-
-      error: function (data) {
-        $("#two_factor_reseticon").html('');
-        $("#two_factor_reseticon").html('<x-icon type="warning" class="text-danger" />');
-        $('#two_factor_resetstatus').text(data.message);
-      }
-
-    });
-  });
-
     $("#optional_info").on("click",function(){
         $('#optional_details').fadeToggle(100);
         $('#optional_info_icon').toggleClass('fa-caret-right fa-caret-down');
         var optional_info_open = $('#optional_info_icon').hasClass('fa-caret-down');
         document.cookie = "optional_info_open="+optional_info_open+'; path=/';
+    });
+
+    $(document).on('change', '.user-license-seat-checkbox', function () {
+        var count = $('.user-license-seat-checkbox:checked').length;
+        $('#userLicenseBulkCheckinButton').prop('disabled', count === 0);
+        $('#userLicenseBulkCheckinCount .badge').text(count);
+        if (count > 0) {
+            $('#userLicenseBulkCheckinCount').show();
+        } else {
+            $('#userLicenseBulkCheckinCount').hide();
+        }
+        var total = $('.user-license-seat-checkbox').length;
+        $('#userLicenseSelectAll').prop('indeterminate', count > 0 && count < total);
+        $('#userLicenseSelectAll').prop('checked', count === total);
+    });
+
+    $(document).on('change', '#userLicenseSelectAll', function () {
+        $('.user-license-seat-checkbox').prop('checked', $(this).is(':checked')).trigger('change');
     });
 });
 </script>

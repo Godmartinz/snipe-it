@@ -75,14 +75,14 @@
                 }'>
                     <thead>
                         <tr>
-                            <th data-sortable="true" data-visible="false" data-searchable="true">{{ trans('general.id') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.username') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('admin/users/table.display_name') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.employee_number') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.first_name') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.last_name') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.email') }}</th>
-                            <th data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.notes') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="false" data-searchable="true">{{ trans('general.id') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.username') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('admin/users/table.display_name') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.employee_number') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.first_name') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.last_name') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.email') }}</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-searchable="true">{{ trans('general.notes') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -100,7 +100,7 @@
                                 @if ($entry['status']=='success')
                                 <span class="text-success"><i class="fas fa-check"></i> {!! $entry['note'] !!}</span>
                                 @else
-                                <span class="alert-msg" aria-hidden="true">{!! $entry['note'] !!}</span>
+                                <span class="alert-msg" role="alert" aria-live="assertive">{!! $entry['note'] !!}</span>
                                 @endif
                                 </td>
                             </tr>

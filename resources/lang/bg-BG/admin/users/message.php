@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Вие приехте успешно този актив.',
     'declined' => 'Вие отказахте този актив.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Вашите потребителски профили бяха обновени успешно, обаче вашето управителско вписване не беше запазено, защото управителят, които сте избрали бе в списъка с потребителски профили за промяна и потребителите не могат да бъдат свои управители. Моля изберете вашите потребителски профили отново, с изключение на управителя.',
     'user_exists' => 'Потребителят вече съществува!',
     'cannot_delete' => 'Потребителят не съществува или нямате права да го изтриете.',
     'user_not_found' => 'Потребителят не съществува или нямате разрешение да го видите.',
     'user_login_required' => 'Полето за вход е задължително',
     'user_has_no_assets_assigned' => 'Няма заведени активи на този потребител.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Паролата е задължителна.',
     'insufficient_permissions' => 'Нямате необходимите права.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Този потребител е изтрит. За да редактирате данните за него или да му зададете актив, трябва първо да възстановите потребителя.',
     'ldap_not_configured' => 'Интеграцията с LDAP не е конфигурирана за тази инсталация.',
     'password_resets_sent' => 'Избраните потребители, които са активирани и имат валиден е-майл адрес им беше изпратен линк за смяна на парола.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Изпратена е връзка за въстановяване на паролата до :email!',
     'user_has_no_email' => 'Този потребител няма е-майл адрес в неговия профил.',
     'log_record_not_found' => 'Не е намерен лог запис за този потребител.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Потребителят е създаден.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Паролата за този профил се управлява от LDAP / Active Directory. Моля, свържете се с вашия ИТ отдел, за да промените паролата си.',
         'multi_company_items_assigned' => 'Този потребител претежава активи, които пренадлежат на друга фирма. Моля впишете ги обратно или редактирайте фирмата на активите.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

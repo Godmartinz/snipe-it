@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => '返回到所有 :type',
     'redirect_to_type' => '跳转到 :type',
     'redirect_to_checked_out_to' => '跳转到已签出者',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => '选择状态类型',
     'serial' => '序列号',
     'serial_required' => 'Asset :number 需要序列号',
@@ -50,6 +51,7 @@ return [
     'tag' => '资产标签',
     'update' => '更新资产',
     'warranty' => '质保',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => '保修到期',
     'years' => '年',
     'asset_location' => '更新资产位置',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => '可选信息',
     'order_details' => '订单相关信息',
     'calc_eol' => '如果将 EOL 日期设为零，则根据购买日期和 报废率 自动计算 EOL。',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

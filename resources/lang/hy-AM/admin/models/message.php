@@ -45,6 +45,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Մոդելներ չեն ընտրվել, ուստի ոչինչ չի ջնջվել։',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Մոդելը ջնջվել է։|:success_count մոդել ջնջվել է։
 ',
         'success_partial' => ':success_count մոդել(ներ) ջնջվել է(են), սակայն :fail_count մոդել հնարավոր չեղավ ջնջել, քանի որ դրանց հետ կապված ակտիվներ կան։',

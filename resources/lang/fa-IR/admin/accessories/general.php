@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'هیچ EULA اولیه پیشفرضی یافت نشد.در تنظیمات اضافه کنید',
     'total' => 'مجموع',
     'remaining' => 'سود',
+    'requestable' => 'Users may request this accessory',
     'update' => 'به روزرساتی وسیله',
     'use_default_eula' => 'از Use the <a href="#" data-toggle="modal" data-target="#eulaModal">EULA پیشفرض اولیه</a> instead.
  استفاده کنید',

@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Повернутися до всіх :type',
     'redirect_to_type' => 'Перейти до :type',
     'redirect_to_checked_out_to' => 'Перейти до виданих',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Виберіть тип статусу',
     'serial' => 'Серійник',
     'serial_required' => 'Для активу :number необхідно вказати серійний номер',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Тег активу',
     'update' => 'Оновити актив',
     'warranty' => 'Гарантія',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Гарантійний термін дії',
     'years' => 'р.',
     'asset_location' => 'Оновити розташування активу',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Додаткова інформація',
     'order_details' => 'Пов\'язані відомості про замовлення',
     'calc_eol' => 'Якщо необхідно обнулити дату EOL, використовуйте автоматичний розрахунок EOL на основі дати покупки й дати EOL.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Nuk u gjet asnjë EULA. Shtoni një te Cilësimet.',
     'total' => 'Total',
     'remaining' => 'Avail',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Update Accessory',
     'use_default_eula' => 'Përdor <a href="#" data-toggle="modal" data-target="#eulaModal"> EULA-ja kryesore </a> në vend të kësaj.',
     'use_default_eula_disabled' => '<del>Përdorni në vend të kësaj EULA-n kryesore.</del> Nuk është vendosur asnjë EULA kryesore. Ju lutemi shtoni një te Cilësimet.',

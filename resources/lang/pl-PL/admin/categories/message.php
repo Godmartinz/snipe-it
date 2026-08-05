@@ -21,7 +21,7 @@ return [
         'confirm' => 'Czy jesteś pewien że chcesz usunąć tą kategorię ?',
         'error' => 'Wystąpił błąd podczas usuwania kategorii. Spróbuj ponownie.',
         'success' => 'Pomyślnie usunięto kategorię.',
-        'bulk_success' => 'Pomyślnie usunięto kategorie.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Kategoria usunięta z powodzeniem. Sprawdź szczegółowe informacje poniżej. | :count kategorie zostały usunięte z powodzeniem. Sprawdź szczegółowe informacje poniżej.',
     ],
 

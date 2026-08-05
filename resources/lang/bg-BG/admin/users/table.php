@@ -17,7 +17,7 @@ return [
     'last_login' => 'Последен вход',
     'last_name' => 'Фамилия',
     'location' => 'Местоположение',
-    'lock_passwords' => 'Настройките за вход не могат да бъдат променяни в Демо версията.',
+    'lock_passwords' => 'Some user details cannot be changed on the demo. Try creating a new user instead.',
     'manager' => 'Ръководител',
     'managed_locations' => 'Управлявани места',
     'managed_users' => 'Управлявани потребители',

@@ -4,6 +4,8 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\CustomField;
+use App\Models\Location;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -168,6 +170,27 @@ class AssetIndexTest extends TestCase
             ->assertResponseContainsInRows($assetB, 'asset_tag');
     }
 
+    public function test_assets_can_be_filtered_by_custom_field()
+    {
+        $field = CustomField::factory()->create();
+
+        $matchingAssets = Asset::factory()->count(3)->hasMultipleCustomFields([$field])->create();
+        foreach ($matchingAssets as $asset) {
+            $asset->{$field->db_column_name()} = 'target-value';
+            $asset->save();
+        }
+
+        // These assets have a null value for the custom field column and should not be returned
+        Asset::factory()->count(2)->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index', [
+                $field->db_column_name() => 'target-value',
+            ]))
+            ->assertOk()
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 3)->etc());
+    }
+
     public function test_gracefully_handles_malformed_filter()
     {
         $this->actingAsForApi(User::factory()->viewAssets()->create())
@@ -195,5 +218,45 @@ class AssetIndexTest extends TestCase
                 'rows',
             ])
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 3)->etc());
+    }
+
+    /**
+     * Regression for a missing `break` in the API asset sort switch that
+     * silently fell through from `case 'location'` into `case 'rtd_location'`,
+     * applying both OrderLocation and OrderRtdLocation to the query so the
+     * caller got a sort keyed on rtd_location first and location second when
+     * they asked for location only. Verify sort=location alone controls the
+     * result ordering.
+     */
+    public function test_sort_by_location_does_not_fall_through_to_rtd_location(): void
+    {
+        $zebraLocation = Location::factory()->create(['name' => 'Zebra Warehouse']);
+        $aardvarkLocation = Location::factory()->create(['name' => 'Aardvark Warehouse']);
+
+        // Cross the pairing between location and rtd_location so a fallthrough
+        // that applied OrderRtdLocation would put the assets in a different
+        // order than a clean OrderLocation.
+        $assetLocatedAtAardvark = Asset::factory()->create([
+            'location_id' => $aardvarkLocation->id,
+            'rtd_location_id' => $zebraLocation->id,
+        ]);
+        $assetLocatedAtZebra = Asset::factory()->create([
+            'location_id' => $zebraLocation->id,
+            'rtd_location_id' => $aardvarkLocation->id,
+        ]);
+
+        $response = $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index', [
+                'sort' => 'location',
+                'order' => 'asc',
+                'limit' => 20,
+            ]))
+            ->assertOk()
+            ->json('rows');
+
+        $this->assertSame(
+            [$assetLocatedAtAardvark->id, $assetLocatedAtZebra->id],
+            [$response[0]['id'], $response[1]['id']],
+        );
     }
 }

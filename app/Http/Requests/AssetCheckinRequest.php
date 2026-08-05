@@ -26,7 +26,7 @@ class AssetCheckinRequest extends Request
         $settings = Setting::getSettings();
 
         $rules = [
-            'set_requestable' => 'nullable|boolean',
+            'requestable' => 'nullable|boolean',
         ];
 
         if ($settings->require_checkinout_notes) {

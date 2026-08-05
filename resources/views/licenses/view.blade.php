@@ -46,9 +46,21 @@
                             {{ trans('general.assigned') }}
                         </x-slot:table_header>
 
+                        @can('checkin', $license)
+                        <x-slot:bulkactions>
+                            <x-table.bulk-actions
+                                action_route="{{ route('licenses.bulkcheckin.selected') }}"
+                                model_name="seat"
+                            >
+                                <option value="checkin">{{ trans('general.checkin') }}</option>
+                            </x-table.bulk-actions>
+                        </x-slot:bulkactions>
+                        @endcan
+
                         <x-table
                             fixed_right_number="1"
                             fixed_number="1"
+                            use_sticky_css
                             api_url="{{ route('api.licenses.seats.index', [$license->id, 'status' => 'assigned']) }}"
                             :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats()"
                             export_filename="export-{{ str_slug($license->name) }}-assigned-{{ date('Y-m-d') }}"
@@ -66,7 +78,7 @@
                         <x-table
                             show_search="false"
                             api_url="{{ route('api.licenses.seats.index', [$license->id, 'status' => 'available']) }}"
-                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats()"
+                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats(false)"
                             export_filename="export-{{ str_slug($license->name) }}-available-{{ date('Y-m-d') }}"
                         />
 
@@ -93,7 +105,7 @@
 
         <x-page-column class="col-md-3">
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$license" img_path="{{ app('licenses_upload_url') }}">
+                <x-info-panel :infoPanelObj="$license" img_path="{{ app('licenses_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'licenses', 'id' => $license->id])">
 
 
                     <x-slot:buttons>

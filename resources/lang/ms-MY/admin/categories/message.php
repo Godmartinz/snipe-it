@@ -21,7 +21,7 @@ return [
         'confirm' => 'Adakah anda pasti untuk memadam kategori ini?',
         'error' => 'Terdapat ralat untuk menghapuskan kategori ini. Sila cuba lagi.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

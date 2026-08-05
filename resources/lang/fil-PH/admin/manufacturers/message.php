@@ -25,7 +25,7 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang tagapagsagawang ito?',
         'error' => 'Mayroong isyu sa pag-delete ng tagapagsagawa. Mangayaring subukang muli.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

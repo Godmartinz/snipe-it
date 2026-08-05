@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Non sono stati selezionati modelli, quindi non è stato eliminato nulla.',
+        'nothing_deletable' => 'Nessuno dei modelli selezionati può essere eliminato perché hanno ancora Beni associati.',
         'success' => 'Modello cancellato!|:success_count modelli cancellati!',
         'success_partial' => ':success_count modelli sono stati eliminati, tuttavia non è stato possibile eliminare :fail_count modelli perché dispongono ancora di risorse associate.',
     ],

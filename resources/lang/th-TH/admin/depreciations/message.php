@@ -19,6 +19,8 @@ return [
         'confirm' => 'คุณแน่ใจที่จะลบหมวดค่าเสื่อมราคานี้?',
         'error' => 'มีปัญหาระหว่างการลบหมวดค่าเสื่อมราคา กรุณาลองใหม่อีกครั้ง',
         'success' => 'หมวดค่าเสื่อมราคาถูกลบแล้ว',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

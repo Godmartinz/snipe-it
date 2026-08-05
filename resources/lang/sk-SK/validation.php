@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => 'Pole :attribute musí byť unikátne naprieč :table1 a :table2. ',
     'unique_undeleted' => 'Pole :attribute musí byť unikátne.',
     'non_circular' => 'Pole :attribute nemôže vytvárať kruhovú referenciu.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute nemôže byť poľom.',
     'disallow_same_pwd_as_user_fields' => 'Heslo nemôže byť rovnaké ako užívateľské meno.',
     'letters' => 'Heslo musí obsahovať najmenej jedno písmeno.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => 'Pole :attribute sa nepodarilo nahrať.',
     'uppercase' => 'Pole :attribute musí obsahovať veľké písmená.',
     'url' => 'Pole :attribute musí obsahovať správnu URL adresu.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => 'Pole :attribute musí obsahovať platný ULID.',
     'uuid' => 'Pole :attribute musí obsahovať platný ULID.',
-    'fmcs_location' => 'V nastaveniach je povolená plná podpora viacerých spoločností a zvolená lokalita a spoločnosť nie sú kompatibilné.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'Atribút :attribute musí byť jedinečný v rámci vybranej spoločnosti a lokality.',
 
     /*

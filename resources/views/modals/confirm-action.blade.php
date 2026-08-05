@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div class="modal fade" id="{{ $modal_name }}" tabindex="-1" role="dialog" aria-labelledby="{{ $modal_name }}Label" aria-hidden="true">
+<div class="modal fade {{ $modal_class ?? '' }}" id="{{ $modal_name }}" tabindex="-1" role="dialog" aria-labelledby="{{ $modal_name }}Label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -18,8 +18,8 @@
 
             </div> <!-- /.modal-body-->
             <div class="modal-footer">
-                <a href="#" class="pull-left" data-dismiss="modal">{{ trans('button.cancel') }}</a>
-                <button type="submit" class="btn btn-primary">{{ trans('general.confirm') }}</button>
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">{{ trans('button.cancel') }}</button>
+                <button type="submit" class="btn {{ $button_class ?? 'btn-primary' }}">{{ $button_label ?? trans('general.confirm') }}</button>
             </div>
             </form>
         </div>

@@ -73,7 +73,13 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $consumables->where('consumables.company_id', '=', $request->input('company_id'));
+            // expand_company_hierarchy=1 opts the company show-page tabs into the
+            // parent/child rollup so a child shows items inherited from its parent.
+            if ($request->boolean('expand_company_hierarchy')) {
+                $consumables->whereIn('consumables.company_id', Company::reachableCompanyIds($request->input('company_id')));
+            } else {
+                $consumables->where('consumables.company_id', '=', $request->input('company_id'));
+            }
         }
 
         if ($request->filled('order_number')) {
@@ -105,7 +111,8 @@ class ConsumablesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $consumables->count()) ? $consumables->count() : app('api_offset_value');
+        $total = $consumables->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
@@ -125,6 +132,9 @@ class ConsumablesController extends Controller
             case 'remaining':
                 $consumables = $consumables->OrderRemaining($order);
                 break;
+            case 'percent_remaining':
+                $consumables = $consumables->OrderPercentRemaining($order);
+                break;
             case 'supplier':
                 $consumables = $consumables->OrderSupplier($order);
                 break;
@@ -137,7 +147,6 @@ class ConsumablesController extends Controller
                 break;
         }
 
-        $total = $consumables->count();
         $consumables = $consumables->skip($offset)->take($limit)->get();
 
         return (new ConsumablesTransformer)->transformConsumables($consumables, $total);
@@ -310,25 +319,58 @@ class ConsumablesController extends Controller
 
         // Resolve the raw target first, then enforce FMCS explicitly.
         // Scoped lookup can hide cross-company users and make failures ambiguous.
-        if (! $user = User::withoutGlobalScopes()->find($request->input('assigned_to'))) {
-            // Return error message
+        $user = User::withoutGlobalScopes()->find($request->input('assigned_to'));
+
+        // withoutGlobalScopes bypasses SoftDeletes so we can tell "no such
+        // user" from "user in another company" for FMCS messaging. Trashed
+        // users must not be treated as valid checkout targets.
+        if ($user && ! empty($user->deleted_at)) {
+            $user = null;
+        }
+
+        if (! $user) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
         }
 
-        if ((Setting::getSettings()->full_multiple_companies_support == '1') && ($consumable->company_id !== $user->company_id)) {
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $user->companies()->where('companies.id', $consumable->company_id)->exists())) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 
         // Update the consumable data
         $consumable->assigned_to = $request->input('assigned_to');
 
-        // Keep pivot writes and checkout log/event atomic to avoid partial checkout state.
-        DB::transaction(function () use ($consumable, $request, $user): void {
+        // Concurrency guard. The unlocked numRemaining() check above is
+        // advisory only — two simultaneous checkout requests can both read
+        // "1 remaining", both pass the check, both attach a pivot row, and
+        // land the register at -1. Re-fetch the parent row under
+        // lockForUpdate INSIDE the transaction, re-check availability
+        // against the locked snapshot, and only then write. Any concurrent
+        // checkout blocks on the row lock until this transaction commits.
+        // Mirrors the pattern already used by License checkout (which locks
+        // LicenseSeat rows).
+        $errorResponse = null;
+
+        DB::transaction(function () use ($consumable, $request, $user, &$errorResponse): void {
+            $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
+
+            if (! $locked || $locked->numRemaining() < $consumable->checkout_qty) {
+                $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable', [
+                    'requested' => $consumable->checkout_qty,
+                    'remaining' => $locked ? $locked->numRemaining() : 0,
+                ])));
+
+                return;
+            }
+
             for ($i = 0; $i < $consumable->checkout_qty; $i++) {
                 $consumable->users()->attach($consumable->id,
                     [
                         'consumable_id' => $consumable->id,
-                        'created_by' => $user->id,
+                        // The pivot's created_by is the operator recording the
+                        // checkout, not the checkout target. Sibling paths
+                        // (web ConsumableCheckoutController, web + API
+                        // ComponentCheckoutController) all key off auth()->id().
+                        'created_by' => auth()->id(),
                         'assigned_to' => $request->input('assigned_to'),
                         'note' => $request->input('note'),
                     ]
@@ -345,6 +387,10 @@ class ConsumablesController extends Controller
             ));
         });
 
+        if ($errorResponse) {
+            return $errorResponse;
+        }
+
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/consumables/message.checkout.success')));
 
     }
@@ -356,6 +402,8 @@ class ConsumablesController extends Controller
      */
     public function selectlist(Request $request): array
     {
+        $this->authorize('view.selectlists');
+
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',

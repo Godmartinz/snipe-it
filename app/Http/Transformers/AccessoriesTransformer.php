@@ -26,6 +26,7 @@ class AccessoriesTransformer
             'id' => $accessory->id,
             'name' => e($accessory->name),
             'image' => ($accessory->image) ? Storage::disk('public')->url('accessories/'.e($accessory->image)) : null,
+            'qr_code_url' => route('qr_code/common', ['object_type' => 'accessories', 'id' => $accessory->id]),
             'company' => ($accessory->company) ? [
                 'id' => $accessory->company->id,
                 'name' => e($accessory->company->name),
@@ -79,7 +80,9 @@ class AccessoriesTransformer
             'update' => Gate::allows('update', Accessory::class),
             'delete' => $accessory->checkouts_count === 0 && Gate::allows('delete', Accessory::class),
             'clone' => Gate::allows('create', Accessory::class),
-
+            'bulk_selectable' => [
+                'delete' => $accessory->checkouts_count === 0,
+            ],
         ];
 
         $permissions_array['user_can_checkout'] = false;

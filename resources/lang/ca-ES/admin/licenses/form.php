@@ -3,7 +3,7 @@
 return [
 
     'asset' => 'Recurs',
-    'checkin' => 'Checkin',
+    'checkin' => 'Retorna',
     'create' => 'Create License',
     'expiration' => 'Expiration Date',
     'license_key' => 'Product Key',

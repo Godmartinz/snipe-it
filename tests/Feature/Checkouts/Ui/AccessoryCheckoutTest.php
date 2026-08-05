@@ -10,6 +10,7 @@ use App\Models\CheckoutAcceptance;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AccessoryCheckoutTest extends TestCase
@@ -294,6 +295,38 @@ class AccessoryCheckoutTest extends TestCase
 
         $this->assertNotNull($acceptance);
         $this->assertEquals(2, $acceptance->qty);
+        $this->assertDatabaseCount('checkout_acceptances', 1);
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('account.accept.item', $acceptance));
+    }
+
+    public function test_accessory_sign_in_place_creates_acceptance_when_acceptance_not_required()
+    {
+        $targetUser = User::factory()->create();
+        $accessory = Accessory::factory()->notRequiringAcceptance()->create(['qty' => 5]);
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->from(route('accessories.checkout.show', $accessory))
+            ->post(route('accessories.checkout.store', $accessory), [
+                'assigned_user' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'redirect_option' => 'index',
+                'checkout_qty' => 2,
+                'sign_in_place' => 1,
+            ]);
+
+        $acceptance = CheckoutAcceptance::query()
+            ->where('checkoutable_type', Accessory::class)
+            ->where('checkoutable_id', $accessory->id)
+            ->where('assigned_to_id', $targetUser->id)
+            ->pending()
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($acceptance);
+        $this->assertEquals(2, $acceptance->qty);
+        $this->assertDatabaseCount('checkout_acceptances', 1);
 
         $response->assertStatus(302)
             ->assertRedirect(route('account.accept.item', $acceptance));
@@ -313,5 +346,46 @@ class AccessoryCheckoutTest extends TestCase
             ]);
 
         $response->assertSessionHas('sign_in_place', true);
+    }
+
+    /**
+     * Regression: AccessoryCheckoutController::store used to call
+     *   session()->put(['checkout_to_type' => $target]);
+     * with $target being the resolved Eloquent model, not the string kind.
+     * The checkout-selector partial compares against 'user'/'asset'/'location'
+     * literals, so an object silently mismatched and no radio was rendered
+     * `checked`.
+     *
+     * @see \App\Http\Controllers\Accessories\AccessoryCheckoutController::store
+     */
+    #[DataProvider('accessoryCheckoutTargetTypesProvider')]
+    public function test_accessory_checkout_stores_target_type_as_string_in_session(string $type)
+    {
+        [$field, $target] = match ($type) {
+            'user' => ['assigned_user', User::factory()->create()->id],
+            'asset' => ['assigned_asset', Asset::factory()->create()->id],
+            'location' => ['assigned_location', Location::factory()->create()->id],
+        };
+        $accessory = Accessory::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('accessories.checkout.store', $accessory), [
+                'checkout_to_type' => $type,
+                $field => $target,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $stored = session('checkout_to_type');
+        $this->assertIsString($stored, 'checkout_to_type must be a string, not an Eloquent model');
+        $this->assertSame($type, $stored);
+    }
+
+    public static function accessoryCheckoutTargetTypesProvider(): array
+    {
+        return [
+            'user target' => ['user'],
+            'asset target' => ['asset'],
+            'location target' => ['location'],
+        ];
     }
 }

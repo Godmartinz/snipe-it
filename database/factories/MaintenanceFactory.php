@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Asset;
 use App\Models\Maintenance;
+use App\Models\MaintenanceType;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,12 +25,22 @@ class MaintenanceFactory extends Factory
      */
     public function definition()
     {
+        $maintenanceType = MaintenanceType::factory()->create();
+
         return [
-            'asset_id' => Asset::factory()->laptopZenbook(),
+            // Set location_id to rtd_location_id on the generated asset so
+            // seeded maintenance rows point at assets with a real location,
+            // matching what snipeit:sync-asset-locations would have set.
+            'asset_id' => Asset::factory()->laptopZenbook()->afterMaking(function (Asset $asset) {
+                if ($asset->location_id === null) {
+                    $asset->location_id = $asset->rtd_location_id;
+                }
+            }),
             'supplier_id' => Supplier::factory(),
-            'asset_maintenance_type' => $this->faker->randomElement(['maintenance', 'repair', 'upgrade']),
+            'maintenance_type_id' => $maintenanceType->id,
+            'asset_maintenance_type' => $maintenanceType->name,
             'name' => $this->faker->sentence(3),
-            'start_date' => $this->faker->date(),
+            'start_date' => $this->faker->dateTime()->format('Y-m-d H:i:s'),
             'is_warranty' => $this->faker->boolean(),
             'notes' => $this->faker->paragraph(),
             'url' => $this->faker->url(),

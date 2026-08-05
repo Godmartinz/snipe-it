@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute :table1 ve :table2 genelinde benzersiz olmalıdır. ',
     'unique_undeleted' => ':attribute benzersiz olmalıdır.',
     'non_circular' => ':attribute döngüsel bir başvuru oluşturmamalıdır.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute bir dizi olamaz.',
     'disallow_same_pwd_as_user_fields' => 'Şifre kullanıcı adı ile aynı olamaz.',
     'letters' => 'Şifre en az bir harf içermelidir.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ': Özniteliği yüklenemedi.',
     'uppercase' => ':attribute alanı büyük harflerle olmalıdır.',
     'url' => ':attribute alanı geçerli bir URL olmalıdır.',
+    'external_url' => ':attribute alanı, özel veya yerel bir adrese işaret etmeyen geçerli bir harici URL (http:// veya https://) olmalıdır.',
     'ulid' => ':attribute alanı geçerli bir ULID olmalıdır.',
     'uuid' => ':attribute alanı geçerli bir UUID olmalıdır.',
-    'fmcs_location' => 'Tam çoklu şirket desteği ve konum kapsamı Yönetici Ayarları’nda etkinleştirilmiştir ve seçilen konum ile seçilen şirket birbiriyle uyumlu değildir.',
+    'valid_css_color' => ':attribute alanı geçerli bir CSS rengi olmalıdır (hex, rgb, rgba, hsl veya hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => '":location" konumu, seçilen şirketle eşleşmeyen :location_company şirketine ait.',
     'is_unique_across_company_and_location' => ':attribute, seçilen şirket ve konum içinde benzersiz olmalıdır.',
 
     /*

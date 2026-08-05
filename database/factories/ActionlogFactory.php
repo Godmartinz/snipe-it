@@ -40,11 +40,15 @@ class ActionlogFactory extends Factory
             $target = User::inRandomOrder()->first();
             $asset = Asset::inRandomOrder()->RTD()->first();
 
+            // Fall back to the asset's default (rtd) location when the target
+            // user has no location set. Mirrors the fallback in
+            // App\Console\Commands\SyncAssetLocations so we don't seed assets
+            // with a null location_id.
             $asset->update(
                 [
                     'assigned_to' => $target->id,
                     'assigned_type' => User::class,
-                    'location_id' => $target->location_id,
+                    'location_id' => $target->location_id ?? $asset->rtd_location_id,
                 ]
             );
 

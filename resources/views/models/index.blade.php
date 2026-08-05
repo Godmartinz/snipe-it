@@ -30,6 +30,7 @@
                     buttons="modelButtons"
                     fixed_right_number="2"
                     fixed_number="1"
+                    use_sticky_css
                     toolbar_id="modelsToolbar"
                     api_url="{{ route('api.models.index', ['status' => e(request('status'))]) }}"
                     :presenter="\App\Presenters\AssetModelPresenter::dataTableLayout()"

@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use App\Models\Accessory;
-use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -14,10 +13,15 @@ use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -97,6 +101,29 @@ class Helper
         if ($str) {
             return $Parsedown->text(strip_tags($str));
         }
+    }
+
+    /**
+     * Slice an in-memory Collection into a LengthAwarePaginator using the
+     * page + perPage values normalized by SetPaginationDefaults middleware.
+     *
+     * Selectlist endpoints that fetch the full set up-front (so they can
+     * post-process — e.g. hierarchy indenting in Companies / Locations) need
+     * to wrap the result in a paginator before handing it to SelectlistTransformer.
+     * This helper avoids re-deriving the page math at every call site, and
+     * inherits the middleware's bounds check against config('app.max_results').
+     */
+    public static function paginateCollection(Collection $items): LengthAwarePaginator
+    {
+        $page = app('api_current_page');
+        $perPage = app('api_limit_value');
+
+        return new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+        );
     }
 
     public static function parseEscapedMarkedownInline($str = null)
@@ -663,7 +690,7 @@ class Helper
      */
     public static function depreciationList()
     {
-        $depreciation_list = ['' => 'Do Not Depreciate'] + Depreciation::orderBy('name', 'asc')
+        $depreciation_list = ['' => trans('admin/licenses/form.no_depreciation')] + Depreciation::orderBy('name', 'asc')
             ->pluck('name', 'id')->toArray();
 
         return $depreciation_list;
@@ -725,6 +752,14 @@ class Helper
     {
         $keys = array_keys(CustomField::PREDEFINED_FORMATS);
         $stuff = array_combine($keys, $keys);
+
+        // Display-only label swap. 'ANY' as a label reads like the format
+        // requires something; 'ANY/NONE' makes it clear that no validation
+        // is applied. The KEY stays 'ANY' so submitted form values,
+        // JS lookups, and stored/compared values all keep working.
+        if (isset($stuff['ANY'])) {
+            $stuff['ANY'] = 'ANY/NONE';
+        }
 
         return $stuff;
     }
@@ -812,113 +847,140 @@ class Helper
      */
     public static function checkLowInventory()
     {
-        $alert_threshold = Setting::getSettings()->alert_threshold;
-        $consumables = Consumable::withCount('consumableAssignments as consumables_users_count')->whereNotNull('min_amt')->get();
-        $accessories = Accessory::withCount('checkouts as checkouts_count')->whereNotNull('min_amt')->get();
-        $components = Component::withCount('assets as sum_unconstrained_assets')->whereNotNull('min_amt')->get();
-        $asset_models = AssetModel::where('min_amt', '>', 0)->withCount(['availableAssets', 'assets'])->get();
-        $licenses = License::withCount('availCount as licenses_available')->where('min_amt', '>', 0)->get();
+        $alert_threshold = (int) Setting::getSettings()->alert_threshold;
+
+        // Push the "below threshold" filter into SQL via havingRaw on the
+        // withCount alias, so only rows that will actually alert get
+        // hydrated. Previous shape loaded every row with min_amt set and
+        // filtered in PHP — on a 1000-item deployment with 5 low-inventory
+        // items that meant 200× more rows than needed. Also select only
+        // the columns the foreach uses (id / name / qty / min_amt),
+        // avoiding hydration of long text columns like License::serial.
+        // select() must come BEFORE withCount(): withCount uses addSelect
+        // under the hood, so a select() after would wipe the count alias.
+        // GROUP BY primary key satisfies SQLite's strict "HAVING requires
+        // an aggregated query" check — MariaDB allows bare HAVING but the
+        // test suite runs SQLite. Grouping by a unique key is a no-op for
+        // row cardinality (functional dependency), so nothing else shifts.
+        $consumables = Consumable::select('id', 'name', 'qty', 'min_amt')
+            ->withCount('consumableAssignments as consumables_users_count')
+            ->whereNotNull('min_amt')
+            ->groupBy('consumables.id')
+            ->havingRaw('(qty - consumables_users_count) < (min_amt + ?)', [$alert_threshold])
+            ->get();
+
+        $accessories = Accessory::select('id', 'name', 'qty', 'min_amt')
+            ->withCount('checkouts as checkouts_count')
+            ->whereNotNull('min_amt')
+            ->groupBy('accessories.id')
+            ->havingRaw('(qty - checkouts_count) < (min_amt + ?)', [$alert_threshold])
+            ->get();
+
+        $components = Component::select('id', 'name', 'qty', 'min_amt')
+            ->withCount('assets as sum_unconstrained_assets')
+            ->whereNotNull('min_amt')
+            ->groupBy('components.id')
+            ->havingRaw('(qty - sum_unconstrained_assets) < (min_amt + ?)', [$alert_threshold])
+            ->get();
+
+        $asset_models = AssetModel::select('id', 'name', 'min_amt')
+            ->where('min_amt', '>', 0)
+            ->withCount(['availableAssets', 'assets'])
+            ->groupBy('models.id')
+            ->havingRaw('available_assets_count < (min_amt + ?)', [$alert_threshold])
+            ->get();
+
+        // Use the licenses_available withCount alias directly in the
+        // foreach below rather than $license->remaincount(). remaincount()
+        // fires two extra queries per row (licenseSeatsCount via
+        // getLicenseSeatsCountAttribute() and assigned_seats_count via
+        // getAssignedSeatsCountAttribute()), plus a third
+        // unReassignableCount() query for non-reassignable licenses —
+        // classic N+1 on a licenses-with-min_amt list.
+        $licenses = License::select('id', 'name', 'min_amt')
+            ->withCount('availCount as licenses_available')
+            ->where('min_amt', '>', 0)
+            ->groupBy('licenses.id')
+            ->havingRaw('licenses_available < (min_amt + ?)', [$alert_threshold])
+            ->get();
 
         $items_array = [];
         $all_count = 0;
 
         foreach ($consumables as $consumable) {
-            $avail = $consumable->numRemaining();
-            if ($avail <= ($consumable->min_amt) + $alert_threshold) {
-                if ($consumable->qty > 0) {
-                    $percent = number_format((($avail / $consumable->qty) * 100), 0);
-                } else {
-                    $percent = 100;
-                }
+            $avail = $consumable->qty - $consumable->consumables_users_count;
+            $percent = $consumable->qty > 0
+                ? number_format((($avail / $consumable->qty) * 100), 0)
+                : 100;
 
-                $items_array[$all_count]['id'] = $consumable->id;
-                $items_array[$all_count]['name'] = $consumable->name;
-                $items_array[$all_count]['type'] = 'consumables';
-                $items_array[$all_count]['percent'] = $percent;
-                $items_array[$all_count]['remaining'] = $avail;
-                $items_array[$all_count]['min_amt'] = $consumable->min_amt;
-                $all_count++;
-            }
+            $items_array[$all_count]['id'] = $consumable->id;
+            $items_array[$all_count]['name'] = $consumable->name;
+            $items_array[$all_count]['type'] = 'consumables';
+            $items_array[$all_count]['percent'] = $percent;
+            $items_array[$all_count]['remaining'] = $avail;
+            $items_array[$all_count]['min_amt'] = $consumable->min_amt;
+            $all_count++;
         }
 
         foreach ($accessories as $accessory) {
             $avail = $accessory->qty - $accessory->checkouts_count;
-            if ($avail <= ($accessory->min_amt) + $alert_threshold) {
-                if ($accessory->qty > 0) {
-                    $percent = number_format((($avail / $accessory->qty) * 100), 0);
-                } else {
-                    $percent = 100;
-                }
+            $percent = $accessory->qty > 0
+                ? number_format((($avail / $accessory->qty) * 100), 0)
+                : 100;
 
-                $items_array[$all_count]['id'] = $accessory->id;
-                $items_array[$all_count]['name'] = $accessory->name;
-                $items_array[$all_count]['type'] = 'accessories';
-                $items_array[$all_count]['percent'] = $percent;
-                $items_array[$all_count]['remaining'] = $avail;
-                $items_array[$all_count]['min_amt'] = $accessory->min_amt;
-                $all_count++;
-            }
+            $items_array[$all_count]['id'] = $accessory->id;
+            $items_array[$all_count]['name'] = $accessory->name;
+            $items_array[$all_count]['type'] = 'accessories';
+            $items_array[$all_count]['percent'] = $percent;
+            $items_array[$all_count]['remaining'] = $avail;
+            $items_array[$all_count]['min_amt'] = $accessory->min_amt;
+            $all_count++;
         }
 
         foreach ($components as $component) {
-            $avail = $component->numRemaining();
-            if ($avail <= ($component->min_amt) + $alert_threshold) {
-                if ($component->qty > 0) {
-                    $percent = number_format((($avail / $component->qty) * 100), 0);
-                } else {
-                    $percent = 100;
-                }
+            $avail = $component->qty - $component->sum_unconstrained_assets;
+            $percent = $component->qty > 0
+                ? number_format((($avail / $component->qty) * 100), 0)
+                : 100;
 
-                $items_array[$all_count]['id'] = $component->id;
-                $items_array[$all_count]['name'] = $component->name;
-                $items_array[$all_count]['type'] = 'components';
-                $items_array[$all_count]['percent'] = $percent;
-                $items_array[$all_count]['remaining'] = $avail;
-                $items_array[$all_count]['min_amt'] = $component->min_amt;
-                $all_count++;
-            }
+            $items_array[$all_count]['id'] = $component->id;
+            $items_array[$all_count]['name'] = $component->name;
+            $items_array[$all_count]['type'] = 'components';
+            $items_array[$all_count]['percent'] = $percent;
+            $items_array[$all_count]['remaining'] = $avail;
+            $items_array[$all_count]['min_amt'] = $component->min_amt;
+            $all_count++;
         }
 
         foreach ($asset_models as $asset_model) {
+            $total_owned = $asset_model->assets_count;
+            $avail = $asset_model->available_assets_count;
+            $percent = $avail > 0
+                ? number_format((($avail / $total_owned) * 100), 0)
+                : 100;
 
-            $asset = new Asset;
-            $total_owned = $asset_model->assets_count; // requires the withCount() clause in the initial query!
-            $avail = $asset_model->available_assets_count; // requires the withCount() clause in the initial query!
-
-            if ($avail <= ($asset_model->min_amt) + $alert_threshold) {
-                if ($avail > 0) {
-                    $percent = number_format((($avail / $total_owned) * 100), 0);
-                } else {
-                    $percent = 100;
-                }
-                $items_array[$all_count]['id'] = $asset_model->id;
-                $items_array[$all_count]['name'] = $asset_model->name;
-                $items_array[$all_count]['type'] = 'models';
-                $items_array[$all_count]['percent'] = $percent;
-                $items_array[$all_count]['remaining'] = $avail;
-                $items_array[$all_count]['min_amt'] = $asset_model->min_amt;
-                $all_count++;
-            }
+            $items_array[$all_count]['id'] = $asset_model->id;
+            $items_array[$all_count]['name'] = $asset_model->name;
+            $items_array[$all_count]['type'] = 'models';
+            $items_array[$all_count]['percent'] = $percent;
+            $items_array[$all_count]['remaining'] = $avail;
+            $items_array[$all_count]['min_amt'] = $asset_model->min_amt;
+            $all_count++;
         }
 
         foreach ($licenses as $license) {
-            $avail = $license->remaincount();
-            if ($avail <= ($license->min_amt) + $alert_threshold) {
-                if ($avail > 0) {
-                    $percent = number_format((($avail / $license->min_amt) * 100), 0);
-                } else {
-                    $percent = 100;
-                }
+            $avail = $license->licenses_available;
+            $percent = $avail > 0
+                ? number_format((($avail / $license->min_amt) * 100), 0)
+                : 100;
 
-                $items_array[$all_count]['id'] = $license->id;
-                $items_array[$all_count]['name'] = $license->name;
-                $items_array[$all_count]['type'] = 'licenses';
-                $items_array[$all_count]['percent'] = $percent;
-                $items_array[$all_count]['remaining'] = $avail;
-                $items_array[$all_count]['min_amt'] = $license->min_amt;
-                $all_count++;
-            }
-
+            $items_array[$all_count]['id'] = $license->id;
+            $items_array[$all_count]['name'] = $license->name;
+            $items_array[$all_count]['type'] = 'licenses';
+            $items_array[$all_count]['percent'] = $percent;
+            $items_array[$all_count]['remaining'] = $avail;
+            $items_array[$all_count]['min_amt'] = $license->min_amt;
+            $all_count++;
         }
 
         return $items_array;
@@ -1063,26 +1125,96 @@ class Helper
      */
     public static function checkIfRequired($class, $field)
     {
+        // Transient forms with no bound model (e.g. bulk-checkout) can't be
+        // introspected for required-ness; treat the field as not required
+        // rather than crashing on `null::rules()`. Callers that need the
+        // real required flag will pass an $item.
+        if (! $class) {
+            return false;
+        }
+
         $rules = $class::rules();
         foreach ($rules as $rule_name => $rule) {
             if ($rule_name == $field) {
                 if (is_array($rule)) {
                     if (in_array('required', $rule)) {
                         return true;
-                    } else {
-                        return false;
                     }
-                } else {
-                    if (strpos($rule, 'required') === false) {
-                        return false;
-                    } else {
+                    if (in_array('fmcs_company', $rule) && self::fmcsCompanyIsCurrentlyRequired()) {
                         return true;
                     }
+
+                    return false;
+                } else {
+                    if (strpos($rule, 'required') !== false) {
+                        return true;
+                    }
+                    if (strpos($rule, 'fmcs_company') !== false && self::fmcsCompanyIsCurrentlyRequired()) {
+                        return true;
+                    }
+
+                    return false;
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Mirror of the fmcs_company validator's runtime condition, used by
+     * checkIfRequired() so Blade fields render the "required" indicator
+     * (asterisk / aria-required) in the same conditions the backend will
+     * reject a blank submission. See ValidationServiceProvider.
+     */
+    protected static function fmcsCompanyIsCurrentlyRequired(): bool
+    {
+        $settings = \App\Models\Setting::getSettings();
+        if (! $settings->full_multiple_companies_support) {
+            return false;
+        }
+        if ((bool) $settings->null_company_is_floater) {
+            return false;
+        }
+        if (! auth()->check()) {
+            return false;
+        }
+        $actor = auth()->user();
+        if ($actor->isSuperUser()) {
+            return false;
+        }
+
+        // Uncompanied users work in the null pseudo-company namespace
+        // under strict mode; null IS a valid company id for them, so
+        // don't render the field as required.
+        return $actor->companies()->exists();
+    }
+
+    /**
+     * Return the numeric max length declared for a field in the model's
+     * validation rules (looks for `max:N`). Returns null when the model, field,
+     * or `max:` rule can't be found — callers should fall back to whatever
+     * default they want. Used by `<x-form.row>` to auto-cap text inputs to
+     * the DB column width without every callsite having to pass maxlength.
+     */
+    public static function fieldMaxLength($class, string $field): ?int
+    {
+        if (! $class) {
+            return null;
+        }
+
+        $rules = $class::rules();
+        $rule = $rules[$field] ?? null;
+        if ($rule === null) {
+            return null;
+        }
+
+        $rule_string = is_array($rule) ? implode('|', $rule) : $rule;
+        if (preg_match('/(?:^|\|)max:(\d+)/', $rule_string, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 
     /**
@@ -1129,6 +1261,31 @@ class Helper
         }
 
         return $string;
+    }
+
+    /**
+     * Resolves the value to render in a custom-field form input for the current
+     * request. Encapsulates the "encrypted + no view.encrypted_custom_fields
+     * gate" branch so every element type in custom_fields_form.blade.php
+     * consults the same rule, and any future form template can call one method
+     * rather than reconstructing the ternary inline.
+     *
+     * Returns the shared masked-value string when the field is encrypted and
+     * the caller cannot view encrypted custom fields. Otherwise returns the
+     * decrypted stored value for the given $item, or the model-scoped default
+     * value when no $item is present (create form path).
+     */
+    public static function customFieldFormValue(CustomField $field, $item, $model)
+    {
+        if ($field->field_encrypted && ! Gate::allows('assets.view.encrypted_custom_fields')) {
+            return strtoupper(trans('admin/custom_fields/general.encrypted'));
+        }
+
+        if (isset($item)) {
+            return self::gracefulDecrypt($field, $item->{$field->db_column_name()});
+        }
+
+        return $field->defaultValue($model->id);
     }
 
     public static function formatStandardApiResponse($status, $payload = null, $messages = null)
@@ -1268,11 +1425,13 @@ class Helper
         $allowedExtensionMap = [
             // Images
             'jpg' => 'far fa-image',
+            'jfif' => 'far fa-image',
             'jpeg' => 'far fa-image',
             'gif' => 'far fa-image',
             'png' => 'far fa-image',
             'webp' => 'far fa-image',
             'avif' => 'far fa-image',
+            'ico' => 'far fa-image',
             'svg' => 'fas fa-vector-square',
 
             // word
@@ -1297,14 +1456,17 @@ class Helper
             'txt' => 'far fa-file-alt',
             'rtf' => 'far fa-file-alt',
             'xml' => 'fas fa-code',
+            'json' => 'fas fa-code',
 
             // Misc
             'pdf' => 'far fa-file-pdf',
             'lic' => 'far fa-save',
+            'key' => 'fas fa-key',
 
             // video
             'mov' => 'fa-solid fa-video',
             'mp4' => 'fa-solid fa-video',
+            'webm' => 'fa-solid fa-video',
 
             // audio
             'ogg' => 'fa-solid fa-file-audio',
@@ -1589,6 +1751,47 @@ class Helper
             ]) ? 'rtl' : 'ltr';
     }
 
+    /**
+     * Return $url if it points at the same origin as config('app.url'),
+     * otherwise null. Callers should coalesce with a safe default:
+     *
+     *   $target = Helper::sameOriginUrl($input) ?? route('home');
+     *
+     * Any user-controllable redirect target (hidden form field, Referer
+     * header, SAML RelayState, url.intended session value, etc.) MUST
+     * pass through this before reaching redirect(...) or we hand attackers
+     * an open-redirect / phishing hand-off primitive. Relative URLs are
+     * treated as same-origin; javascript:/data: and other non-http(s)
+     * schemes are rejected. CR/LF are stripped to prevent response-splitting
+     * via a crafted Location header.
+     */
+    public static function sameOriginUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        $url = str_replace(["\r", "\n"], '', $url);
+
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return null;
+        }
+
+        if (isset($parts['scheme']) && ! in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        $host = $parts['host'] ?? null;
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+
+        if ($host !== null && strcasecmp($host, (string) $appHost) !== 0) {
+            return null;
+        }
+
+        return $url;
+    }
+
     public static function getRedirectOption($request, $id, $table, $item_id = null): RedirectResponse
     {
 
@@ -1596,7 +1799,12 @@ class Helper
         $checkout_to_type = session('checkout_to_type') ?? null;
         $checkedInFrom = session('checkedInFrom');
         $other_redirect = session('other_redirect');
-        $backUrl = session()->pull('url.intended', 'home');
+
+        // Defense-in-depth: url.intended can be written by any writer
+        // in the app (SamlController::acs sanitizes its RelayState
+        // input up-front, but future writers may not), and Laravel's
+        // redirect()->intended() performs no host validation on read.
+        $backUrl = self::sameOriginUrl(session()->pull('url.intended', 'home')) ?? route('home');
 
         // return to previous page
         if ($redirect_option == 'back') {
@@ -1605,14 +1813,28 @@ class Helper
 
         // return to index
         if ($redirect_option == 'index') {
-            return match ($table) {
-                'Assets' => redirect()->route('hardware.index'),
-                'Users' => redirect()->route('users.index'),
-                'Licenses' => redirect()->route('licenses.index'),
-                'Accessories' => redirect()->route('accessories.index'),
-                'Components' => redirect()->route('components.index'),
-                'Consumables' => redirect()->route('consumables.index'),
+            $indexUrl = match ($table) {
+                'Assets' => route('hardware.index'),
+                'Users' => route('users.index'),
+                'Licenses' => route('licenses.index'),
+                'Accessories' => route('accessories.index'),
+                'Components' => route('components.index'),
+                'Consumables' => route('consumables.index'),
+                'Maintenances' => route('maintenances.index'),
             };
+
+            // #15214: preserve query-string filters when the user came
+            // from a filtered view of the same index they're being sent
+            // back to (side-nav status filter, category filter, etc.).
+            // Without this the plain index route drops the caller's
+            // context and the user has to re-select their side-nav
+            // filter after every edit. $backUrl was already vetted for
+            // off-site hosts above.
+            if ($backUrl && parse_url($backUrl, PHP_URL_PATH) === parse_url($indexUrl, PHP_URL_PATH)) {
+                return redirect($backUrl);
+            }
+
+            return redirect($indexUrl);
         }
 
         // return to thing being assigned
@@ -1675,19 +1897,93 @@ class Helper
     {
         $mismatched = [];
 
+        // Eager-load every relation the loop below walks, plus each item's own
+        // company/location for the mismatch-detail lookups. Previously each
+        // per-relation `$location->{$keyword}` fired one query per location and
+        // each per-item `$item->location->company->name` fired two more per
+        // mismatch, which blew up on installs with lots of locations
+        // (customer with 100+ locations timed out the settings-page enable
+        // check). Adding `.company` on each many-relation also removes the
+        // per-mismatch company query on the artisan report path.
+        $manyRelations = [
+            'accessories.company',
+            'assets.company',
+            'assignedAccessories.accessory.company',
+            'assignedAssets.company',
+            'components.company',
+            'consumables.company',
+            'rtd_assets.company',
+            'users.companies',
+        ];
+        $oneRelations = ['manager.companies', 'parent.company'];
+        $childrenRelation = $location_id ? ['children.company'] : [];
+        $eagerLoads = array_merge($manyRelations, $oneRelations, $childrenRelation);
+
         if ($location_id) {
-            $location = Location::find($location_id);
-            if ($location) {
-                $locations = collect([])->push(Location::find($location_id));
-            }
+            $location = Location::with($eagerLoads)->find($location_id);
+            $locations = $location ? collect([$location]) : collect();
         } else {
-            $locations = Location::all();
+            $locations = Location::with($eagerLoads)->get();
         }
 
         // Bail out early if there are no locations
         if ($locations->count() == 0) {
             return [];
         }
+
+        $floater = (bool) Setting::getSettings()->null_company_is_floater;
+
+        // Preload every user's pivot company memberships in one query so the
+        // canReceiveFromCompany check below is a pure in-memory lookup instead
+        // of a per-user pivot query. We hit the pivot table directly (rather
+        // than reading `$user->companies`) to match canReceiveFromCompany's
+        // FMCS-scope-bypassing behavior on the User model.
+        $userIds = collect();
+        foreach ($locations as $location) {
+            $userIds = $userIds->concat($location->users->pluck('id'));
+            if ($location->manager) {
+                $userIds->push($location->manager->id);
+            }
+        }
+        $userIds = $userIds->filter()->unique()->values();
+        $userCompanyMap = $userIds->isEmpty()
+            ? collect()
+            : DB::table('company_user')
+                ->whereIn('user_id', $userIds)
+                ->get()
+                ->groupBy('user_id')
+                ->map(fn ($rows) => $rows->pluck('company_id')->map(fn ($id) => (int) $id)->all());
+
+        // Preload the (child_id -> parent_id) map once so the parent-company
+        // branch of canReceiveFromCompany doesn't fire a per-user query. The
+        // hierarchy is one level deep so this stays small.
+        $parentByChild = DB::table('companies')
+            ->whereNotNull('parent_id')
+            ->pluck('parent_id', 'id')
+            ->map(fn ($p) => (int) $p);
+
+        // In-memory equivalent of User::canReceiveFromCompany that uses the
+        // preloaded pivot and parent maps. Kept as a closure so a future
+        // change to the on-model logic is easy to mirror here.
+        $canUserReceive = function (int $userId, ?int $companyId) use ($userCompanyMap, $parentByChild, $floater) {
+            $userCompanyIds = $userCompanyMap->get($userId, []);
+            if ($companyId === null) {
+                if ($floater) {
+                    return true;
+                }
+
+                return empty($userCompanyIds);
+            }
+            if (empty($userCompanyIds)) {
+                return $floater;
+            }
+            if (in_array($companyId, $userCompanyIds, true)) {
+                return true;
+            }
+            $parentOfItemCompany = $parentByChild->get($companyId);
+
+            return $parentOfItemCompany !== null && in_array($parentOfItemCompany, $userCompanyIds, true);
+        };
 
         foreach ($locations as $location) {
             // in case of an update of a single location, use the newly requested company_id
@@ -1723,26 +2019,51 @@ class Helper
                 foreach ($keywords as $keyword) {
                     if ($relation == 'many') {
                         $items = $location->{$keyword}->all();
+                        // assignedAccessories returns AccessoryCheckout records (no company_id);
+                        // resolve each to its parent Accessory so the comparison is valid.
+                        if ($keyword === 'assignedAccessories') {
+                            $items = collect($items)->map(fn ($checkout) => $checkout->accessory)->filter()->values()->all();
+                        }
                     } else {
                         $items = collect([])->push($location->$keyword);
                     }
 
                     $count = 0;
                     foreach ($items as $item) {
+                        if (! $item) {
+                            continue;
+                        }
 
-                        if ($item && $item->company_id != $location_company) {
+                        // Users belong to companies via the many-to-many pivot (company_user).
+                        // Use the preloaded closure instead of $item->canReceiveFromCompany
+                        // so this stays in-memory (avoids one pivot query + one parent
+                        // hierarchy query per user).
+                        if ($item instanceof User) {
+                            $isMismatch = ! $canUserReceive((int) $item->id, $location_company === null ? null : (int) $location_company);
+                        } elseif ($item->company_id == $location_company) {
+                            $isMismatch = false;
+                        } elseif (is_null($item->company_id) || is_null($location_company)) {
+                            $isMismatch = ! $floater;
+                        } else {
+                            $isMismatch = true;
+                        }
+
+                        if ($isMismatch) {
+                            if ($item instanceof User) {
+                                $itemCompanyIds = $item->companies->pluck('id')->implode(', ');
+                                $itemCompanyNames = $item->companies->pluck('name')->implode(', ');
+                            } else {
+                                $itemCompanyIds = $item->company_id ?? null;
+                                $itemCompanyNames = $item->company->name ?? null;
+                            }
 
                             $mismatched[] = [
                                 class_basename(get_class($item)),
                                 $item->id,
                                 $item->name ?? $item->asset_tag ?? $item->serial ?? $item->username,
                                 $item->assigned_type ? str_replace('App\\Models\\', '', $item->assigned_type) : null,
-                                $item->company_id ?? null,
-                                $item->company->name ?? null,
-                                //                                    $item->defaultLoc->id ?? null,
-                                //                                    $item->defaultLoc->name ?? null,
-                                //                                    $item->defaultLoc->company->id ?? null,
-                                //                                    $item->defaultLoc->company->name ?? null,
+                                $itemCompanyIds,
+                                $itemCompanyNames,
                                 $item->location->name ?? null,
                                 $item->location->company->name ?? null,
                                 $location_company ?? null,
@@ -1855,5 +2176,44 @@ class Helper
 
         return 'App\\Models\\'.ucwords($model);
 
+    }
+
+    /**
+     * Render a markdown-textarea value as HTML.
+     *
+     * Soft line breaks (single newlines) are rendered as <br> so that line
+     * breaks typed in the textarea are preserved in the output.
+     *
+     * When $inline is true, block-level elements are suppressed and hard
+     * breaks are pre-processed manually — used for the encrypted reveal span
+     * where block HTML cannot be placed inside a font-size-toggled <span>.
+     */
+    public static function renderMarkdown(?string $text, bool $inline = false): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        if ($inline) {
+            // Convert newlines to CommonMark hard breaks for inline rendering
+            $text = preg_replace('/(?<! {2})\n/', "  \n", $text);
+
+            return Str::inlineMarkdown($text, ['html_input' => 'escape', 'allow_unsafe_links' => false]);
+        }
+
+        $html = trim(Str::markdown($text, [
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+            'renderer' => ['soft_break' => "<br>\n"],
+        ]));
+
+        // If the entire output is a single <p> block, unwrap it so the content
+        // renders inline-ish without the <p> adding unwanted top spacing in the
+        // compact detail-view layout.
+        if (str_starts_with($html, '<p>') && str_ends_with($html, '</p>') && substr_count($html, '<p>') === 1) {
+            return substr($html, 3, -4);
+        }
+
+        return $html;
     }
 }

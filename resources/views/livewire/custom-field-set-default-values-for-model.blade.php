@@ -14,7 +14,7 @@
                  style="width:100%; min-width:350px;"
                  aria-label="custom_fieldset"
              />
-            {!! $errors->first('custom_fieldset', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
+            <x-form.error name="custom_fieldset" />
         </div>
         <div class="col-md-3">
             @if ($fieldset_id)
@@ -48,20 +48,16 @@
                                 @if ($field->format == "DATE")
 
                                     <div class="input-group col-md-4" style="padding-left: 0px;">
-                                        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true">
-                                            <input
-                                                type="text"
-                                                class="form-control"
-                                                placeholder="{{ trans('general.select_date') }}"
-                                                name="default_values[{{ $field->id }}]"
-                                                id="default-value{{ $field->id }}"
-                                                wire:model="selectedValues.{{ $field->db_column }}"
-                                                {{-- catch the onchange event and dispatch an InputEvent ourselves so Livewire can react to it... --}}
-                                                {{-- https://laracasts.com/discuss/channels/livewire/livewire-and-bootstrap-datepicker?page=1&replyId=623122--}}
-                                                onchange="this.dispatchEvent(new InputEvent('input'))"
-                                            >
-                                            <span class="input-group-addon"><x-icon type="calendar" /></span>
-                                        </div>
+                                        {{-- wire:model + the input-event dispatch on change is the
+                                             usual Livewire workaround so the picker's value change
+                                             flows back to the component. See
+                                             https://laracasts.com/discuss/channels/livewire/livewire-and-bootstrap-datepicker?page=1&replyId=623122 --}}
+                                        <x-input.datepicker
+                                            id="default-value{{ $field->id }}"
+                                            name="default_values[{{ $field->id }}]"
+                                            wire:model="selectedValues.{{ $field->db_column }}"
+                                            onchange="this.dispatchEvent(new InputEvent('input'))"
+                                        />
                                     </div>
 
                                 @elseif ($field->element == "text")
@@ -143,7 +139,7 @@
                                         <?php
                                         $errormessage = $errors->first($field->db_column_name());
                                         if ($errormessage) {
-                                            print('<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> '.$errormessage.'</span>');
+                                            print('<span class="alert-msg" role="alert" aria-live="assertive">'.$errormessage.'</span>');
                                         }
                                         ?>
                         </div>

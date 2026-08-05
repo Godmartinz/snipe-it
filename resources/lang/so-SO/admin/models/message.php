@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Noocyo lama dooran, marka waxba lama tirtirin.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model waa la tirtiray!|:success_count moodallada ah waa la tirtiray!',
         'success_partial' => ':success_count moodeel(yaasha) waa la tirtiray, si kastaba ha ahaatee :fail_count waa la tirtiri waayay sababtoo ah wali waxay haystaan ​​hanti iyaga la xriirta.',
     ],

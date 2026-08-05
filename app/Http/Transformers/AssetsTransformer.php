@@ -98,6 +98,7 @@ class AssetsTransformer
                 'tag_color' => ($asset->defaultLoc->tag_color) ? e($asset->defaultLoc->tag_color) : null,
             ] : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
+            'qr_code_url' => route('qr_code/common', ['object_type' => 'hardware', 'id' => $asset->id]),
             'qr' => ($setting->qr_code == '1') ? Storage::disk('public')->url('barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png') : null,
             'alt_barcode' => ($setting->alt_barcode_enabled == '1') ? Storage::disk('public')->url('barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png') : null,
             'assigned_to' => $this->transformAssignedTo($asset),
@@ -117,7 +118,7 @@ class AssetsTransformer
             'age' => $asset->purchase_date ? $asset->purchase_date->locale(app()->getLocale())->diffForHumans() : '',
             'last_checkout' => Helper::getFormattedDateObject($asset->last_checkout, 'datetime'),
             'last_checkin' => Helper::getFormattedDateObject($asset->last_checkin, 'datetime'),
-            'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
+            'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'datetime'),
             'purchase_cost' => Helper::formatCurrencyOutput($asset->purchase_cost),
             'checkin_counter' => (int) $asset->checkin_counter,
             'checkout_counter' => (int) $asset->checkout_counter,
@@ -134,9 +135,9 @@ class AssetsTransformer
                     $decrypted = Helper::gracefulDecrypt($field, $asset->{$field->db_column});
                     $value = (Gate::allows('assets.view.encrypted_custom_fields')) ? $decrypted : strtoupper(trans('admin/custom_fields/general.encrypted'));
 
-                    if ($field->format == 'DATE') {
+                    if ($field->format == 'DATE' || $field->format == 'DATETIME') {
                         if (Gate::allows('assets.view.encrypted_custom_fields')) {
-                            $value = Helper::getFormattedDateObject($value, 'date', false);
+                            $value = Helper::getFormattedDateObject($value, $field->format == 'DATETIME' ? 'datetime' : 'date', false);
                         } else {
                             $value = strtoupper(trans('admin/custom_fields/general.encrypted'));
                         }
@@ -144,7 +145,7 @@ class AssetsTransformer
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea' && Gate::allows('assets.view.encrypted_custom_fields')) ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -152,13 +153,13 @@ class AssetsTransformer
                 } else {
                     $value = $asset->{$field->db_column};
 
-                    if (($field->format == 'DATE') && (! is_null($value)) && ($value != '')) {
-                        $value = Helper::getFormattedDateObject($value, 'date', false);
+                    if ((in_array($field->format, ['DATE', 'DATETIME'])) && (! is_null($value)) && ($value != '')) {
+                        $value = Helper::getFormattedDateObject($value, $field->format == 'DATETIME' ? 'datetime' : 'date', false);
                     }
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -178,6 +179,16 @@ class AssetsTransformer
             'update' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)) ? true : false,
             'audit' => Gate::allows('audit', Asset::class) ? true : false,
             'delete' => ($asset->deleted_at == '' && $asset->assigned_to == '' && Gate::allows('delete', Asset::class) && ($asset->deleted_at == '')) ? true : false,
+            'bulk_selectable' => [
+                'edit' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)),
+                'maintenance' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)),
+                'checkout' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('checkout', Asset::class)),
+                'checkin' => ($asset->deleted_at == '' && $asset->assigned_to && Gate::allows('checkin', Asset::class)),
+                'audit' => ($asset->deleted_at == '' && Gate::allows('audit', Asset::class)),
+                'delete' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('delete', Asset::class)),
+                'labels' => $asset->deleted_at == '',
+                'restore' => ($asset->deleted_at != '' && Gate::allows('create', Asset::class)),
+            ],
         ];
 
         if (request('components') == 'true') {
@@ -186,8 +197,16 @@ class AssetsTransformer
                 $array['components'] = [];
 
                 foreach ($asset->components as $component) {
-                    $array['components'][] = [
+                    // Info-disclosure guard: if the caller is denied view
+                    // on this specific component, omit it from the response
+                    // entirely - not even id / pivot_id are exposed, so a
+                    // caller with an explicit components.view deny can't
+                    // enumerate what's on the asset.
+                    if (Gate::denies('view', $component)) {
+                        continue;
+                    }
 
+                    $array['components'][] = [
                         'id' => $component->id,
                         'pivot_id' => $component->pivot->id,
                         'name' => e($component->name),
@@ -195,7 +214,6 @@ class AssetsTransformer
                         'purchase_cost' => $component->purchase_cost,
                         'purchase_total' => $component->calculated_purchase_cost,
                         'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
-
                     ];
                 }
             }
@@ -214,8 +232,30 @@ class AssetsTransformer
 
     public function transformAssignedTo($asset)
     {
+        if (! $asset->assigned) {
+            return null;
+        }
+
         if ($asset->checkedOutToUser()) {
-            return $asset->assigned ? [
+            // Info-disclosure guard: this shape is embedded in every
+            // asset response (index, show, checkout-listings). A caller
+            // with assets.view but not users.view used to read the
+            // assignee's username / email / employee number / jobtitle
+            // straight out of a hardware payload. Denied fallback keeps
+            // id / type / name because someone with assets.view
+            // legitimately needs to know WHO has an asset - what gets
+            // stripped is PII (username, email, employee_num, jobtitle,
+            // first/last name split). Instance check so FMCS scoping
+            // applies too.
+            if (Gate::denies('view', $asset->assigned)) {
+                return [
+                    'id' => (int) $asset->assigned->id,
+                    'type' => 'user',
+                    'name' => e($asset->assigned->display_name),
+                ];
+            }
+
+            return [
                 'id' => (int) $asset->assigned->id,
                 'username' => e($asset->assigned->username),
                 'name' => e($asset->assigned->display_name),
@@ -225,14 +265,19 @@ class AssetsTransformer
                 'employee_number' => ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
                 'jobtitle' => $asset->assigned->jobtitle ? e($asset->assigned->jobtitle) : null,
                 'type' => 'user',
-            ] : null;
+            ];
         }
 
-        return $asset->assigned ? [
+        // Assets can be checked out to assets or locations. Basic
+        // identity (name) is preserved without a permission gate on the
+        // target: someone with assets.view legitimately needs to know
+        // which location an asset is at or which parent asset it belongs
+        // to, and neither is PII.
+        return [
             'id' => $asset->assigned->id,
             'name' => e($asset->assigned->display_name),
             'type' => $asset->assignedType(),
-        ] : null;
+        ];
     }
 
     public function transformRequestedAssets(Collection $assets, $total)
@@ -255,7 +300,7 @@ class AssetsTransformer
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
             'model' => ($asset->model) ? e($asset->model->name) : null,
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
-            'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
+            'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'datetime'),
             'location' => ($asset->location) ? e($asset->location->name) : null,
             'status' => ($asset->status) ? $asset->present()->statusMeta : null,
             'assigned_to_self' => ($asset->assigned_to == auth()->id()),
@@ -270,11 +315,11 @@ class AssetsTransformer
                 if (($field->field_encrypted == '0') && ($field->show_in_requestable_list == '1')) {
 
                     $value = $asset->{$field->db_column};
-                    if (($field->format == 'DATE') && (! is_null($value)) && ($value != '')) {
-                        $value = Helper::getFormattedDateObject($value, 'date', false);
+                    if ((in_array($field->format, ['DATE', 'DATETIME'])) && (! is_null($value)) && ($value != '')) {
+                        $value = Helper::getFormattedDateObject($value, $field->format == 'DATETIME' ? 'datetime' : 'date', false);
                     }
 
-                    $fields_array[$field->db_column] = e($value);
+                    $fields_array[$field->db_column] = ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value);
                 }
 
                 $array['custom_fields'] = $fields_array;
@@ -368,7 +413,7 @@ class AssetsTransformer
         if (Gate::allows('viewKeys', $licenseseat->license)) {
             $product_key = $licenseseat->license->serial ?? null;
         } else {
-            $product_key = '------------';
+            $product_key = License::PRODUCT_KEY_MASK;
         }
 
         $array = [
@@ -388,6 +433,9 @@ class AssetsTransformer
         $permissions_array['available_actions'] = [
             'checkout' => false,
             'checkin' => Gate::allows('checkin', License::class),
+            'bulk_selectable' => [
+                'checkin' => Gate::allows('checkin', License::class),
+            ],
         ];
 
         $array += $permissions_array;
@@ -399,14 +447,34 @@ class AssetsTransformer
     public function transformCheckedoutComponents(Collection $components_assets, $total)
     {
         $array = [];
+        $suppressed = 0;
         foreach ($components_assets as $component_checkout) {
+            $component = $component_checkout->component;
+
+            // Info-disclosure guard: GET /api/v1/hardware/{asset}/assigned/components
+            // is gated only on assets.view, so a caller with assets.view but
+            // an explicit deny on components.view used to read the component's
+            // name / qty / note straight off this response. When denied, skip
+            // the row entirely so nothing about the component (not even id
+            // or existence) is exposed. Instance check so FMCS scoping
+            // applies too.
+            //
+            // The controller-supplied $total still reflects the true row
+            // count and would leak "there are N components you can't see",
+            // so decrement it by the number of rows suppressed here.
+            if (! $component || Gate::denies('view', $component)) {
+                $suppressed++;
+
+                continue;
+            }
+
             $array[] = [
                 'assigned_pivot_id' => $component_checkout->id,
                 'name' => [
-                    'id' => $component_checkout->component?->id,
-                    'name' => e($component_checkout->component?->display_name),
+                    'id' => $component->id,
+                    'name' => e($component->display_name),
                     'type' => 'component',
-                    'deleted_at' => $component_checkout->component?->deleted_at,
+                    'deleted_at' => $component->deleted_at,
                 ],
                 'assigned_qty' => $component_checkout->assigned_qty,
                 'note' => ($component_checkout->note) ? e($component_checkout->note) : null,
@@ -416,12 +484,12 @@ class AssetsTransformer
                     'name' => e($component_checkout->adminuser->display_name),
                 ] : null,
                 'available_actions' => [
-                    'checkin' => (($component_checkout->component?->deleted_at == '') && Gate::allows('checkin', Component::class)),
-                    'view' => (($component_checkout->component?->deleted_at == '') && Gate::allows('view', Component::class)),
+                    'checkin' => (($component->deleted_at == '') && Gate::allows('checkin', Component::class)),
+                    'view' => (($component->deleted_at == '') && Gate::allows('view', Component::class)),
                 ],
             ];
         }
 
-        return (new DatatablesTransformer)->transformDatatables($array, $total);
+        return (new DatatablesTransformer)->transformDatatables($array, max(0, $total - $suppressed));
     }
 }

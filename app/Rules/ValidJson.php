@@ -15,7 +15,7 @@ class ValidJson implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! json_validate($value)) {
+        if (! is_string($value) || ! json_validate($value)) {
             $fail(trans('validation.json'));
         }
     }

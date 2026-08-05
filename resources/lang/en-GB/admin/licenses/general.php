@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Checked in via bulk licence checkin in licence GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Check Out All Seats',
             'modal' => 'This action will check out one seat to the first available user. | This action will check out all :available_seats_count seats to the first available users. A user is considered available for this seat if they do not already have this licence checked out to them, and the Auto-Assign Licence property is enabled on their user account.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nothing to do. There are no users who do not already have this licence assigned to them.',
             'log_msg' => 'Checked out via bulk licence check out in licence GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

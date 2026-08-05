@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'Go to :type',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Veldu stöðu',
     'serial' => 'Raðnúmer',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Eignamerking',
     'update' => 'Eign uppfærð',
     'warranty' => 'Ábyrgð',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Ábyrgð gildir til',
     'years' => 'ár',
     'asset_location' => 'Update Asset Location',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Viðbótarupplýsingar',
     'order_details' => 'Innkaupaupplýsingar',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

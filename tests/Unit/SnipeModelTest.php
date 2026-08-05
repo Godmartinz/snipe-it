@@ -23,13 +23,42 @@ class SnipeModelTest extends TestCase
     {
         $c = new SnipeModel;
         $c->purchase_cost = '';
-        $this->assertTrue($c->purchase_cost == null);
+        $this->assertNull($c->purchase_cost);
+        $c->purchase_cost = null;
+        $this->assertNull($c->purchase_cost);
         $c->purchase_cost = '0.00';
-        $this->assertTrue($c->purchase_cost == 0.00);
+        $this->assertSame(0.0, (float) $c->purchase_cost);
         $c->purchase_cost = '9.54';
-        $this->assertTrue($c->purchase_cost == 9.54);
-        $c->purchase_cost = '9.50';
-        $this->assertTrue($c->purchase_cost == 9.5);
+        $this->assertSame(9.54, (float) $c->purchase_cost);
+        $c->purchase_cost = 12.34;             // already a float — no ParseCurrency needed
+        $this->assertSame(12.34, (float) $c->purchase_cost);
+    }
+
+    public function test_sets_purchase_cost_from_us_format_with_thousands()
+    {
+        $this->settings->set(['digit_separator' => '1,234.56']);
+        $c = new SnipeModel;
+
+        $c->purchase_cost = '8,888.00';
+        $this->assertSame(8888.0, (float) $c->purchase_cost);
+
+        $c->purchase_cost = '8888.00';
+        $this->assertSame(8888.0, (float) $c->purchase_cost);
+    }
+
+    public function test_sets_purchase_cost_from_eu_format_with_thousands()
+    {
+        $this->settings->set(['digit_separator' => '1.234,56']);
+        $c = new SnipeModel;
+
+        $c->purchase_cost = '8.888,00';
+        $this->assertSame(8888.0, (float) $c->purchase_cost);
+
+        $c->purchase_cost = '8888,00';
+        $this->assertSame(8888.0, (float) $c->purchase_cost);
+
+        $c->purchase_cost = '12,34';
+        $this->assertSame(12.34, (float) $c->purchase_cost);
     }
 
     public function test_nulls_blank_location_ids_but_not_others()

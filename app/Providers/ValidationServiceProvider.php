@@ -84,6 +84,87 @@ class ValidationServiceProvider extends ServiceProvider
         });
 
         /**
+         * Exists if undeleted
+         *
+         * Validates that a value points at a row that exists AND is not
+         * soft-deleted. Companion to unique_undeleted, used to gate places
+         * where an ID from user input is looked up (checkout targets, etc.).
+         *
+         * Laravel's built-in `exists` rule runs on the raw DB table and does
+         * not filter soft-deleted rows unless the caller adds a `whereNull`
+         * chain by hand. This custom rule bakes that in.
+         *
+         * $parameters[0] is the TABLE NAME to query
+         * $parameters[1] is the COLUMN to match against (defaults to id)
+         *
+         * Usage: `exists_undeleted:users,id`
+         */
+        Validator::extend('exists_undeleted', function ($attribute, $value, $parameters, $validator) {
+            if (count($parameters) < 1) {
+                return false;
+            }
+            $column = $parameters[1] ?? 'id';
+
+            return DB::table($parameters[0])
+                ->where($column, '=', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+
+        /**
+         * Unique-if-undeleted, scoped to one or more sibling columns on the same row.
+         *
+         * Where `unique_undeleted` enforces global uniqueness on a column,
+         * `unique_undeleted_in_scope` enforces uniqueness only within a bucket
+         * defined by the values of one or more OTHER columns on the same row.
+         * Used for tree-structured tables where a child name only needs to be
+         * unique among its siblings, and (under FMCS) among its siblings in
+         * the same company.
+         *
+         * NULL is treated as its own bucket per standard SQL semantics: two
+         * top-level locations (parent_id IS NULL) named "HQ" collide with
+         * each other, but "HQ" at the top level does not collide with "HQ"
+         * that has a parent.
+         *
+         * $parameters[0] is the TABLE NAME being queried
+         * $parameters[1] is the ID of the row being edited (0 for creates)
+         * $parameters[2..N] are the sibling COLUMN NAMES that make up the scope
+         *
+         * The UniqueUndeletedTrait's prepareUniqueUndeletedInScopeRule method
+         * prepends the table + id for you, so on the model you just declare:
+         *   'name' => 'unique_undeleted_in_scope:parent_id,company_id'
+         */
+        Validator::extend('unique_undeleted_in_scope', function ($attribute, $value, $parameters, $validator) {
+            if (count($parameters) < 2) {
+                return true;
+            }
+
+            $table = $parameters[0];
+            $ignoreId = (int) $parameters[1];
+            $scopeColumns = array_slice($parameters, 2);
+            $data = $validator->getData();
+
+            $query = DB::table($table)
+                ->whereNull('deleted_at')
+                ->where($attribute, '=', $value);
+
+            if ($ignoreId > 0) {
+                $query->where('id', '!=', $ignoreId);
+            }
+
+            foreach ($scopeColumns as $column) {
+                $scopeValue = $data[$column] ?? null;
+                if ($scopeValue === null || $scopeValue === '') {
+                    $query->whereNull($column);
+                } else {
+                    $query->where($column, '=', $scopeValue);
+                }
+            }
+
+            return $query->count() < 1;
+        });
+
+        /**
          * Unique if undeleted for two columns
          *
          * Same as unique_undeleted but taking the combination of two columns as unique constrain.
@@ -179,6 +260,67 @@ class ValidationServiceProvider extends ServiceProvider
             }
 
             return true;
+        });
+
+        // Together, these two validators enforce a one-level-deep self-
+        // referential hierarchy. They're split (rather than combined into one
+        // rule) so each failure produces a message that actually describes
+        // the cause — "the parent you picked isn't top-level" reads very
+        // differently from "this row already has children of its own."
+        //
+        // Example usage on a parent_id column self-referencing the same table:
+        //   'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id'
+
+        // The chosen parent_id (1) must not be the row itself (no self-parent),
+        // and (2) must itself be a top-level row (its own parent_id IS NULL).
+        // Either failure means saving would create depth > 1.
+        Validator::extend('parent_must_be_top_level', function ($attribute, $value, $parameters, $validator) {
+            if (is_null($value) || $value === '') {
+                return true;
+            }
+
+            if (count($parameters) < 2) {
+                throw new \Exception('Required validator parameters: <table>,<primary key>');
+            }
+
+            $table = $parameters[0];
+            $pk = $parameters[1];
+
+            $data = $validator->getData();
+            $modelId = $data[$pk] ?? null;
+
+            if ($modelId && (int) $modelId === (int) $value) {
+                return false;
+            }
+
+            $chosenParentParentId = DB::table($table)->where($pk, $value)->value('parent_id');
+
+            return is_null($chosenParentParentId);
+        });
+
+        // If the row being saved already has children of its own, it can't be
+        // assigned a parent — doing so would push those children to depth 2.
+        // Only checked on update (a brand-new row has no children yet).
+        Validator::extend('must_have_no_children', function ($attribute, $value, $parameters, $validator) {
+            if (is_null($value) || $value === '') {
+                return true;
+            }
+
+            if (count($parameters) < 2) {
+                throw new \Exception('Required validator parameters: <table>,<primary key>');
+            }
+
+            $table = $parameters[0];
+            $pk = $parameters[1];
+
+            $data = $validator->getData();
+            $modelId = $data[$pk] ?? null;
+
+            if (! $modelId) {
+                return true;
+            }
+
+            return ! DB::table($table)->where('parent_id', $modelId)->exists();
         });
 
         // Yo dawg. I heard you like validators.
@@ -349,15 +491,103 @@ class ValidationServiceProvider extends ServiceProvider
             return in_array($value, $options);
         });
 
+        Validator::replacer('fmcs_location', function ($message, $attribute, $rule, $parameters, $validator) {
+            $locationId = $validator->getData()[$attribute] ?? null;
+            $location = $locationId ? Location::find($locationId) : null;
+
+            return str_replace(
+                [':location_company', ':location'],
+                [
+                    $location?->company?->name ?? trans('general.unassigned'),
+                    $location?->name ?? '?',
+                ],
+                $message
+            );
+        });
+
+        // Enforces "Company must be picked" when FMCS is on AND
+        // null_company_is_floater is disabled (strict mode). Without this
+        // rule a companied non-superuser can save a form with an unset
+        // company dropdown, land a row with company_id=NULL, and then
+        // have that row instantly filtered out of their own view by the
+        // strict-mode scope. See #19192. Passes when:
+        //  - FMCS is off (nothing to enforce)
+        //  - null_company_is_floater is on (nulls are legal floaters)
+        //  - value is present (form was filled in)
+        //  - no auth context (CLI, seeders, or importers bypass, matching
+        //    the SaveUserRequest cannot_make_floater gate posture)
+        //  - acting user is a superuser (they see everything, so a null
+        //    is an explicit choice, not an accident)
+        //  - acting user has NO company memberships. In strict mode
+        //    such users legitimately operate in the null "pseudo-company"
+        //    namespace, where Company::scopeCompanyablesDirectly scopes
+        //    them to whereNull($company_id) and null IS a valid company
+        //    id for them. Forcing them to pick a non-null company would
+        //    both lock them out of their normal workflow and produce a
+        //    row they wouldn't be able to see afterward.
+        // extendImplicit (not extend) because Laravel skips "explicit"
+        // rules when the field is null or absent. Since the whole point
+        // of fmcs_company is to fire ON blank submissions, it must run
+        // implicitly. Same reason built-in rules like `required`,
+        // `filled`, `present`, `accepted` are all registered implicit.
+        Validator::extendImplicit('fmcs_company', function ($attribute, $value, $parameters, $validator) {
+            $settings = Setting::getSettings();
+            if (! $settings->full_multiple_companies_support) {
+                return true;
+            }
+            if ((bool) $settings->null_company_is_floater) {
+                return true;
+            }
+            if (! empty($value)) {
+                return true;
+            }
+            if (! auth()->check()) {
+                return true;
+            }
+            $actor = auth()->user();
+            if ($actor->isSuperUser()) {
+                return true;
+            }
+            if (! $actor->companies()->exists()) {
+                return true;
+            }
+
+            return false;
+        });
+
+        Validator::replacer('fmcs_company', function ($message) {
+            return str_replace(':attribute', trans('general.company'), $message);
+        });
+
         // Validates that the company of the validated object matches the company of the location in case of scoped locations
         Validator::extend('fmcs_location', function ($attribute, $value, $parameters, $validator) {
             $settings = Setting::getSettings();
             if ($settings->full_multiple_companies_support == '1' && $settings->scope_locations_fmcs == '1') {
-                $company_id = array_get($validator->getData(), 'company_id');
+                $data = $validator->getData();
+                // Support both multi-company (company_ids[]) and single-company (company_id) requests
+                $companyIds = array_filter(array_unique(array_merge(
+                    (array) ($data['company_ids'] ?? []),
+                    [$data['company_id'] ?? null]
+                )));
+                // No company context available (e.g. model-level validation before companies are
+                // persisted) — nothing to compare against, so skip the check.
+                if (empty($companyIds)) {
+                    return true;
+                }
+
                 $location = Location::find($value);
 
-                if (($location) && ($company_id != $location->company_id)) {
-                    return false;
+                if ($location) {
+                    $effectiveCompanyId = $location->effectiveFmcsCompanyId();
+
+                    if ($effectiveCompanyId === null) {
+                        // No company found anywhere in the parent chain — floater rule applies.
+                        return (bool) $settings->null_company_is_floater;
+                    }
+
+                    if (! in_array($effectiveCompanyId, $companyIds)) {
+                        return false;
+                    }
                 }
             }
 

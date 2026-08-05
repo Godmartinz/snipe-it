@@ -15,27 +15,17 @@
 
                     <form action="{{ route('manufacturers.seed') }}" method="POST">
                       {{ csrf_field() }}
-                    <div class="callout callout-info">
-                      <p>
-                          {{ trans('general.seeding.manufacturers.prompt') }}
+                    <x-callout type="info" role="status">
+                        {{ trans('general.seeding.manufacturers.prompt') }}
                         <button class="btn btn-sm btn-theme hidden-print" rel="noopener">
                           {{ trans('general.seeding.manufacturers.button') }}
                         </button>
-                      </p>
-                    </div>
+                    </x-callout>
                     </form>
 
               @else
                 <x-slot:bulkactions>
-                    <x-table.bulk-actions
-                            name='manufacturer'
-                            action_route="{{route('manufacturers.bulk.delete')}}"
-                            model_name="manufacturer"
-                    >
-                        @can('delete', App\Models\Manufacturer::class)
-                            <option>Delete</option>
-                        @endcan
-                    </x-table.bulk-actions>
+                    <x-table.bulk-manufacturers />
                 </x-slot:bulkactions>
 
 
@@ -44,6 +34,7 @@
                         buttons="manufacturerButtons"
                         fixed_right_number="1"
                         fixed_number="1"
+                        use_sticky_css
                         api_url="{{ route('api.manufacturers.index') }}"
                         :presenter="\App\Presenters\ManufacturerPresenter::dataTableLayout()"
                         export_filename="export-manufacturers-{{ date('Y-m-d') }}"

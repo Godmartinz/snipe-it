@@ -13,6 +13,7 @@ return [
     'pending' => 'Ar feitheamh',
     'status_type' => 'Cineál Stádas',
     'show_in_nav' => 'Taispeáin sa taobh taobh',
+    'status_label' => 'Status Label',
     'title' => 'Lipéid Stádas',
     'undeployable' => 'Neamhfhostaithe',
     'update' => 'Lipéad Stádas Nuashonraithe',

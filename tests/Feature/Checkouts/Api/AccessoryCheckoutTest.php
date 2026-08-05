@@ -197,9 +197,9 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $superuser = User::factory()->superuser()->withoutCompany()->create();
         $accessoryInCompanyA = Accessory::factory()->for($companyA)->create(['qty' => 1]);
-        $userInCompanyB = User::factory()->for($companyB)->create();
+        $userInCompanyB = User::factory()->forCompany($companyB)->create();
 
         $this->actingAsForApi($superuser)
             ->postJson(route('api.accessories.checkout', $accessoryInCompanyA), [
@@ -227,5 +227,88 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
         ]);
 
         $this->assertEquals(1, $accessoryInCompanyA->fresh()->numRemaining());
+    }
+
+    public function test_user_in_same_company_can_checkout_accessory_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $company = Company::factory()->create();
+        $accessory = Accessory::factory()->for($company)->create(['qty' => 5]);
+        $target = $company->users()->save(User::factory()->make());
+        $actor = User::factory()->superuser()->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.accessories.checkout', $accessory), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+    }
+
+    public function test_user_in_multiple_companies_can_checkout_accessory_from_any_of_their_companies_when_full_company_support_is_enabled()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyB->id]);
+
+        $accessoryInA = Accessory::factory()->for($companyA)->create(['qty' => 5]);
+        $accessoryInB = Accessory::factory()->for($companyB)->create(['qty' => 5]);
+        $actor = User::factory()->superuser()->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.accessories.checkout', $accessoryInA), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.accessories.checkout', $accessoryInB), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+    }
+
+    /**
+     * Security regression pin: sibling to the consumable race test.
+     * AccessoryCheckoutRequest validates number_remaining_after_checkout
+     * with an unlocked numRemaining() read. Two racing checkouts for a
+     * qty=1 accessory both used to pass validation and both attach pivot
+     * rows. Fix wraps the writes in DB::transaction with a lockForUpdate
+     * re-check. This test pre-drains the pivot to simulate the "someone
+     * else grabbed it" moment and asserts we refuse.
+     */
+    public function test_checkout_refuses_when_inventory_is_already_exhausted(): void
+    {
+        $target = User::factory()->create();
+        $accessory = Accessory::factory()->create(['qty' => 1]);
+        $actor = User::factory()->superuser()->create();
+
+        \App\Models\AccessoryCheckout::create([
+            'accessory_id' => $accessory->id,
+            'assigned_to' => $target->id,
+            'assigned_type' => User::class,
+            'created_by' => $actor->id,
+        ]);
+
+        $this->assertSame(0, $accessory->fresh()->numRemaining());
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.accessories.checkout', $accessory), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+                'checkout_qty' => 1,
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertSame(1, $accessory->checkouts()->count(), 'A second pivot row would mean the register went negative');
+        $this->assertSame(0, $accessory->fresh()->numRemaining());
     }
 }

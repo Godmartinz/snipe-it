@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Importing\Api;
 
+use App\Models\Actionlog as ActionLog;
 use App\Models\Asset;
 use App\Models\Import;
 use App\Models\Location;
@@ -62,13 +63,13 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->importFileResponse(['import' => $import->id, 'send-welcome' => 1])
             ->assertOk()
             ->assertExactJson([
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 1, 'updated' => 0, 'skipped' => 0, 'errored' => 0]],
                 'status' => 'success',
                 'messages' => ['redirect_url' => route('users.index')],
             ]);
 
         $newUser = User::query()
-            ->with(['company', 'location'])
+            ->with(['companies', 'location'])
             ->where('username', $row['username'])
             ->sole();
 
@@ -79,7 +80,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals($row['lastName'], $newUser->last_name);
         $this->assertEquals($row['displayName'], $newUser->display_name);
         $this->assertEquals($row['employeeNumber'], $newUser->employee_num);
-        $this->assertEquals($row['companyName'], $newUser->company->name);
+        $this->assertEquals($row['companyName'], $newUser->companies->first()->name);
         $this->assertEquals($row['location'], $newUser->location->name);
         $this->assertEquals($row['phoneNumber'], $newUser->phone);
         $this->assertEquals($row['position'], $newUser->jobtitle);
@@ -115,6 +116,44 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertNull($newUser->persist_code);
         $this->assertNull($newUser->reset_password_code);
         $this->assertEquals(0, $newUser->activated);
+    }
+
+    #[Test]
+    public function parses_non_iso_start_and_end_dates(): void
+    {
+        $row = ImportFileBuilder::new()->definition();
+        $row['start_date'] = '07/28/2025';
+        $row['end_date'] = '12/31/2025';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertEquals('2025-07-28', $newUser->start_date);
+        $this->assertEquals('2025-12-31', $newUser->end_date);
+    }
+
+    #[Test]
+    public function stores_null_when_start_or_end_date_is_unparseable(): void
+    {
+        $row = ImportFileBuilder::new()->definition();
+        $row['start_date'] = 'not-a-date';
+        $row['end_date'] = 'also-not-a-date';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertNull($newUser->start_date);
+        $this->assertNull($newUser->end_date);
     }
 
     #[Test]
@@ -199,7 +238,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
             ->assertInternalServerError()
             ->assertExactJson([
                 'status' => 'import-errors',
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 1]],
                 'messages' => [
                     '' => [
                         'User' => [
@@ -228,19 +267,22 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
-        $updatedUser = User::query()->with(['company', 'location'])->find($user->id);
+        $updatedUser = User::query()->with(['companies', 'location'])->find($user->id);
         $updatedAttributes = [
             'first_name',
             'display_name',
             'email',
             'last_name',
             'employee_num',
-            'company',
             'location_id',
-            'company_id',
             'updated_at',
             'phone',
             'jobtitle',
+            // The import changes the user's company via the company_user pivot.
+            // syncLegacyCompanyIdMirror() then updates the users.legacy_company_id
+            // mirror to reflect that change, so it also legitimately differs
+            // between $user (pre-import) and $updatedUser (post-import).
+            'legacy_company_id',
         ];
 
         $this->assertEquals($row['email'], $updatedUser->email);
@@ -248,7 +290,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals($row['displayName'], $updatedUser->display_name);
         $this->assertEquals($row['lastName'], $updatedUser->last_name);
         $this->assertEquals($row['employeeNumber'], $updatedUser->employee_num);
-        $this->assertEquals($row['companyName'], $updatedUser->company->name);
+        $this->assertEquals($row['companyName'], $updatedUser->companies->first()->name);
         $this->assertEquals($row['location'], $updatedUser->location->name);
         $this->assertEquals($row['phoneNumber'], $updatedUser->phone);
         $this->assertEquals($row['position'], $updatedUser->jobtitle);
@@ -258,6 +300,118 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
             Arr::except($user->attributesToArray(), $updatedAttributes),
             Arr::except($updatedUser->attributesToArray(), $updatedAttributes),
         );
+    }
+
+    #[Test]
+    public function update_mode_clears_field_when_csv_column_is_present_but_empty(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $user = User::factory()->create([
+            'jobtitle' => 'Pre-existing Job Title',
+            'phone' => '555-1234',
+        ])->refresh();
+
+        $this->assertNotEmpty($user->jobtitle);
+        $this->assertNotEmpty($user->phone);
+
+        $row = ImportFileBuilder::new()->definition();
+        $row['username'] = $user->username;
+        $row['firstName'] = $user->first_name;
+        $row['lastName'] = $user->last_name;
+        $row['position'] = '';
+        $row['phoneNumber'] = '';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $user->refresh();
+        $this->assertNull($user->jobtitle);
+        $this->assertNull($user->phone);
+    }
+
+    #[Test]
+    public function update_mode_preserves_fields_when_csv_column_is_absent(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $user = User::factory()->create([
+            'jobtitle' => 'Do Not Lose This',
+            'phone' => '555-1234',
+        ])->refresh();
+
+        $originalJobTitle = $user->jobtitle;
+        $originalPhone = $user->phone;
+
+        // Import a CSV that only has the identity field (username) plus one
+        // updated column. All other User fields are absent from the CSV, so
+        // their DB values must be preserved on update.
+        $partialFile = new ImportFileBuilder([[
+            'username' => $user->username,
+            'firstName' => 'RenamedFirstName',
+        ]]);
+        $partialImport = Import::factory()->users()->create([
+            'file_path' => $partialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $partialImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $user->refresh();
+        $this->assertEquals('RenamedFirstName', $user->first_name);
+        $this->assertEquals($originalJobTitle, $user->jobtitle);
+        $this->assertEquals($originalPhone, $user->phone);
+    }
+
+    #[Test]
+    public function update_mode_logs_user_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+        $initialImport = Import::factory()->users()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $user = User::query()->where('username', $initialRow['username'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'position' => $initialRow['position'].' Updated',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->users()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $user->refresh();
+        $this->assertEquals($updatedRow['position'], $user->jobtitle);
+
+        $updateLog = ActionLog::query()
+            ->where('item_type', User::class)
+            ->where('item_id', $user->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after user importer update mode.');
     }
 
     /**
@@ -303,7 +457,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
             ->json();
 
         $newUser = User::query()
-            ->with(['company', 'location'])
+            ->with(['companies', 'location'])
             ->where('username', $row['companyName'])
             ->sole();
 
@@ -313,7 +467,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals($row['dumbName'], $newUser->display_name);
         $this->assertEquals($row['email'], $newUser->jobtitle);
         $this->assertEquals($row['phoneNumber'], $newUser->employee_num);
-        $this->assertEquals($row['username'], $newUser->company->name);
+        $this->assertEquals($row['username'], $newUser->companies->first()->name);
         $this->assertEquals($row['firstName'], $newUser->location->name);
         $this->assertEquals($row['employeeNumber'], $newUser->phone);
         $this->assertFalse(Hash::isHashed($newUser->password));
@@ -348,5 +502,79 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertNull($newUser->persist_code);
         $this->assertNull($newUser->reset_password_code);
         $this->assertEquals(0, $newUser->activated);
+    }
+
+    #[Test]
+    public function import_only_user_cannot_overwrite_auth_fields_when_updating(): void
+    {
+        $victim = User::factory()->create([
+            'username' => 'victim_user',
+            'email' => 'original@example.com',
+        ]);
+
+        $importFileBuilder = new ImportFileBuilder([
+            array_merge(ImportFileBuilder::new()->definition(), [
+                'username' => 'victim_user',
+                'email' => 'hijacked@evil.com',
+            ]),
+        ]);
+
+        $this->actingAsForApi(User::factory()->canImport()->create());
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $this->assertEquals('original@example.com', $victim->refresh()->email);
+    }
+
+    #[Test]
+    public function user_with_import_and_edit_users_permission_can_update_auth_fields(): void
+    {
+        $target = User::factory()->create([
+            'username' => 'target_user',
+            'email' => 'original@example.com',
+        ]);
+
+        $importFileBuilder = new ImportFileBuilder([
+            array_merge(ImportFileBuilder::new()->definition(), [
+                'username' => 'target_user',
+                'email' => 'updated@example.com',
+            ]),
+        ]);
+
+        $this->actingAsForApi(User::factory()->canImport()->editUsers()->create());
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $this->assertEquals('updated@example.com', $target->refresh()->email);
+    }
+
+    #[Test]
+    public function display_name_falls_back_to_full_name_when_column_is_missing_from_csv(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new()->forget('displayName');
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertEquals("{$row['firstName']} {$row['lastName']}", $newUser->display_name);
+    }
+
+    #[Test]
+    public function display_name_falls_back_to_full_name_when_column_is_empty_in_csv(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new(['displayName' => '']);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertEquals("{$row['firstName']} {$row['lastName']}", $newUser->display_name);
     }
 }

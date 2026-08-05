@@ -20,7 +20,7 @@ return [
         'error' => 'Възникна проблем при изтриване на доставчика. Моля, опитайте отново.',
         'success' => 'Доставчикът е изтрит.',
         'not_found' => 'Доставчика не е намерен.',
-        'bulk_success' => 'Доставчиците бяха изтрити успешно.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

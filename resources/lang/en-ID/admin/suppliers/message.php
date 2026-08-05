@@ -20,7 +20,7 @@ return [
         'error' => 'Terjadi masalah saat menghapus pemasok. Silahkan coba lagi.',
         'success' => 'Pemasok berhasil dihapus.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

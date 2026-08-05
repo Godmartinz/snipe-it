@@ -2,7 +2,7 @@
 
 return [
 
-    'invalid_category_type' => 'The category must be a consumable category.',
+    'invalid_category_type' => '카테고리는 소모품 카테고리여야 합니다.',
     'does_not_exist' => '소모품이 존재하지 않습니다.',
 
     'create' => [
@@ -25,7 +25,7 @@ return [
         'error' => '소모품이 반출되지 않았습니다. 다시 시도해 주세요.',
         'success' => '소모품이 반출 되었습니다.',
         'user_does_not_exist' => '잘못된 사용자 입니다. 다시 시도해 주세요.',
-        'unavailable' => 'There are not enough consumables for this checkout. Please check the quantity left. ',
+        'unavailable' => '이 반출에 필요한 소모품이 충분하지 않습니다. 남은 수량을 확인하세요.',
     ],
 
     'checkin' => [

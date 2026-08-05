@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'Go to :type',
     'redirect_to_checked_out_to' => 'Go to Checked Out to',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Vælg statustype',
     'serial' => 'Serienummer',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Aktiv mærkat',
     'update' => 'Aktiv Opdatering',
     'warranty' => 'Garanti',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Garantiudløb',
     'years' => 'år',
     'asset_location' => 'Opdater Aktiv Placering',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Valgfri Information',
     'order_details' => 'Ordre Relateret Information',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

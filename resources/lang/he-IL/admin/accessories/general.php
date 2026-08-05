@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'לא נמצאה ברירת מחדל לתנאי השימוש. הוסף ברירת מחדל בהגדרות.',
     'total' => 'סה"כ',
     'remaining' => 'נותר',
+    'requestable' => 'Users may request this accessory',
     'update' => 'עידכון אביזר',
     'use_default_eula' => 'במקום זאת, השתמש ב- <a href="#" data-toggle="modal" data-target="#eulaModal"> ברירת המחדל הראשית EULA</a>.',
     'use_default_eula_disabled' => '<del> השתמש ב- EULA ברירת המחדל הראשוני במקום. </del> לא נקבעה ברירת המחדל הראשית של הסכם הרישיון למשתמש קצה. הוסף אחד בהגדרות.',

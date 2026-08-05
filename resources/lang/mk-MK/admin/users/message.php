@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Вашите корисници се ажурирани, но записот за менаџерот не е зачуван, бидејќи менаџерот што го избравте беше во листата на корисници што се ажурираа. Корисниците не може да бидат свој сопствен менаџер. Изберете ги корисниците повторно, со исклучок на менаџерот и пробајте пак.',
     'user_exists' => 'Корисникот веќе постои!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Корисникот не постои или вие намате овластување да го видите.',
     'user_login_required' => 'Полето за корисничко име е задолжително',
     'user_has_no_assets_assigned' => 'Моментално нема средства доделени на корисникот.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Потребна е лозинка.',
     'insufficient_permissions' => 'Недоволни дозволи.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Овој корисник е избришан. Ќе мора да го вратите за да го ажурирате или да му доделите нови основни средства.',
     'ldap_not_configured' => 'Интеграција со LDAP не е конфигурирана.',
     'password_resets_sent' => 'На избраниот корисник кој е активиран и има валидна адреса на е-пошта испратен е линк за обнова на лозинката.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Линк за обнова на лозинка е испратен на :email!',
     'user_has_no_email' => 'Корисникот нема адреса на е-пошта во неговиот профил.',
     'log_record_not_found' => 'Не можеше да се најде соодветен запис од дневникот за овој корисник.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Корисникот е креиран.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Лозинката за корисникот е управувана од LDAP/Active Directory. Ве молиме контактирајте го одделот за ИТ за да ја смените вашата лозинка. ',
         'multi_company_items_assigned' => 'Овој корисник има доделени ставки кои припаѓаат на друга компанија. Ве молиме проверете ги или уредете ја нивната компанија.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

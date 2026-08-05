@@ -18,18 +18,16 @@
 
         @if (!$asset->model)
             <div class="col-md-12">
-                <div class="callout callout-danger">
-                    <p>
-                        <strong>{{ trans('admin/models/message.no_association') }}</strong> {{ trans('admin/models/message.no_association_fix') }}
-                    </p>
-                </div>
+                <x-callout type="danger" live="assertive">
+                    <strong>{{ trans('admin/models/message.no_association') }}</strong> {{ trans('admin/models/message.no_association_fix') }}
+                </x-callout>
             </div>
         @endif
 
         @if ($asset->checkInvalidNextAuditDate())
             <div class="col-md-12">
-                <div class="callout callout-warning">
-                    <p><strong>{{ trans('general.warning',
+                <x-callout type="warning" live="assertive">
+                    <strong>{{ trans('general.warning',
                         [
                             'warning' => trans('admin/hardware/message.warning_audit_date_mismatch',
                                     [
@@ -38,17 +36,16 @@
                                     ]
                                     )
                         ]
-                        ) }}</strong></p>
-                </div>
+                        ) }}</strong>
+                </x-callout>
             </div>
         @endif
 
         @if ($asset->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
-                    <x-icon type="warning"/>
+                <x-callout type="warning" icon="warning" live="assertive">
                     {{ trans('general.asset_deleted_warning') }}
-                </div>
+                </x-callout>
             </div>
         @endif
 
@@ -72,7 +69,7 @@
                     />
                     <x-tabs.note-tab :item="$asset" count="{{ $asset->journal->count() }}"/>
                     <x-tabs.files-tab :item="$asset" count="{{ $asset->uploads()->count() }}"/>
-                    <x-tabs.model-files-tab count="{{ $asset->model?->uploads()->count() }}"/>
+                    <x-tabs.model-files-tab :item="$asset->model" count="{{ $asset->model?->uploads()->count() }}"/>
                     <x-tabs.history-tab count="{{ $asset->history()->count() }}" :model="$asset"/>
                     <x-tabs.upload-tab :item="$asset"/>
                 </x-slot:tabnav>
@@ -114,7 +111,7 @@
                                 <x-icon type="expected_checkin" class="fa-fw"/>
                                 <strong>{{ trans('general.expected_checkin') }}</strong>
                                 @if ($asset->expected_checkin!='')
-                                    {{ Helper::getFormattedDateObject($asset->expected_checkin, 'date', false) }}
+                                    {{ Helper::getFormattedDateObject($asset->expected_checkin, 'datetime', false) }}
                                     <span class="text-muted hidden-sm hidden-md">{{ Carbon::parse($asset->expected_checkin)->diffForHumans(['parts' => 2]) }}</span>
                                 @else
                                     {{ trans('general.na') }}
@@ -206,7 +203,7 @@
                                         {{ $asset->journal->last()->note }}
                                         <i class="fa-solid fa-quote-right"></i>
                                         <span class="text-muted">
-                                            - {!!  $asset->journal->last()->adminuser->present()->formattedNameLink !!}
+                                            - {!!  $asset->journal->last()->adminuser?->present()->formattedNameLink !!}
                                             ({{ Helper::getFormattedDateObject($asset->journal->last()->created_at, 'datetime', false) }})
                                         </span>
                                     </x-data-row>
@@ -299,7 +296,7 @@
                             <x-well class="well-sm">
                                 <div class="well-display">
                                     <x-data-row icon_type="maintenances" label="Active Maintenances" align="right">
-                                        {{ $asset->maintenances->whereNull('completion_date')->count() }}
+                                        {{ $asset->maintenances()->active()->count() }}
                                     </x-data-row>
 
                                     <x-data-row icon_type="checkout" :label="trans('general.checkouts_count')" align="right">
@@ -318,11 +315,12 @@
 
 
 
-                            @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
+                            @if ($snipeSettings->isQrEnabled())
                                 <div class="col-md-12 text-center asset-qr-img" style="padding-top: 15px;">
-                                    <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                    <img src="{{ route('qr_code/common', ['object_type' => 'hardware', 'id' => $asset->id]) }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
                                 </div>
                             @endif
+
 
                         </x-page-column>
                         <!-- end side stats  column -->
@@ -330,7 +328,29 @@
                     </x-tabs.pane>
 
                     <x-tabs.pane name="licenses" :count="$asset->licenses->count()">
-                        <x-table.licenses show_search="false" :route="route('api.assets.licenselist', $asset)" :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeatsCheckedOutToAssets()"/>
+                        @can('view', \App\Models\License::class)
+                        <x-slot:table_header>{{ trans('general.licenses') }}</x-slot:table_header>
+                        @endcan
+
+                        @can('checkin', \App\Models\License::class)
+                        <x-slot:bulkactions>
+                            <x-table.bulk-actions
+                                action_route="{{ route('licenses.bulkcheckin.selected') }}"
+                                model_name="seat"
+                            >
+                                <option value="checkin">{{ trans('general.checkin') }}</option>
+                            </x-table.bulk-actions>
+                        </x-slot:bulkactions>
+                        @endcan
+
+                        @can('view', \App\Models\License::class)
+                        <x-table
+                            show_search="false"
+                            api_url="{{ route('api.assets.licenselist', $asset) }}"
+                            :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeatsCheckedOutToAssets()"
+                            export_filename="export-licenses-{{ str_slug($asset->asset_tag) }}-{{ date('Y-m-d') }}"
+                        />
+                        @endcan
                     </x-tabs.pane>
 
                     <x-tabs.pane name="components" :count="$asset->components->sum('assigned_qty')">
@@ -351,23 +371,19 @@
                             buttons="accessoryButtons"
                             api_url="{{ route('api.assets.assigned_accessories', ['asset' => $asset]) }}"
                             :presenter="\App\Presenters\AssetPresenter::assignedAccessoriesDataTableLayout()"
-                            export_filename="export-maintenances-{{ str_slug($asset->name) }}-{{ date('Y-m-d') }}"
+                            export_filename="export-accessories-{{ str_slug($asset->name) }}-{{ date('Y-m-d') }}"
                         />
                     </x-tabs.pane>
 
 
                     <!-- start maintenances tab pane -->
                     <x-tabs.pane name="maintenances">
-
-                        <x-slot:table_header>
-                            {{ trans('general.maintenances') }}
-                        </x-slot:table_header>
-
-                        <x-table
-                            name="assetMaintenances"
-                            buttons="maintenanceButtons"
-                            api_url="{{ route('api.maintenances.index', array('asset_id' => $asset->id)) }}"
-                            :presenter="\App\Presenters\MaintenancesPresenter::dataTableLayout()"
+                        <x-slot:bulkactions>
+                            <x-table.bulk-maintenances name="assetMaintenance" />
+                        </x-slot:bulkactions>
+                        <x-table.maintenances
+                            name="assetMaintenance"
+                            :route="route('api.maintenances.index', ['asset_id' => $asset->id])"
                             export_filename="export-maintenances-{{ str_slug($asset->name) }}-{{ date('Y-m-d') }}"
                         />
                     </x-tabs.pane>
@@ -379,7 +395,9 @@
                             :table_header="trans('general.audits')"
                             :model="$asset"
                             :route="route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset', 'action_type' => 'audit'])"
-                            :hide_fields="['id','action_type', 'item', 'changed', 'target','quantity','changed','serial','signature_file','log_meta']"/>
+                            :hide_fields="['id','action_type', 'item', 'changed', 'target','quantity','changed','serial','signature_file','log_meta']"
+                            :extra_columns="$audit_custom_field_columns"
+                        />
                     </x-tabs.pane>
                     <!-- end audits tab pane -->
 
@@ -455,6 +473,7 @@
         @include ('modals.add-note', ['type' => 'asset', 'id' => $asset->id])
     @endcan
         @include ('partials.bootstrap-table')
+        <x-modals.maintenance-complete />
     @endsection
 
 @stop

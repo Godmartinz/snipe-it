@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Ha aceptado este elemento con éxito.',
     'declined' => 'Has rechazado este elemento con éxito.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Sus usuarios han sido actualizados con éxito, sin embargo, la entrada supervisor (manager) no fue guardada porque el supervisor seleccionado también estaba en la lista de usuarios a editar, y los usuarios no pueden ser su propio supervisor. Vuelva a seleccionar los usuarios, excluyendo al supervisor.',
     'user_exists' => '¡El usuario ya existe!',
     'cannot_delete' => 'El usuario no existe o no tiene permiso para eliminarlo.',
     'user_not_found' => 'El usuario no existe o no tiene permiso para verlos.',
     'user_login_required' => 'El campo usuario es obligatorio',
     'user_has_no_assets_assigned' => 'No hay activos asignados al usuario.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'La contraseña es obligatoria.',
     'insufficient_permissions' => 'No tiene permiso.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Este usuario ha sido eliminado. Tendrá que restaurar este usuario para editarlo o para asignarle nuevos activos.',
     'ldap_not_configured' => 'La integración con LDAP no ha sido configurada para esta instalación.',
     'password_resets_sent' => 'A los usuarios seleccionados que están activados y tienen una dirección de correo electrónico válida se les ha enviado un enlace de restablecimiento de contraseña.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => '¡Se ha enviado un enlace de restablecimiento de contraseña a :email!',
     'user_has_no_email' => 'Este usuario no tiene una dirección de correo electrónico en su perfil.',
     'log_record_not_found' => 'No se pudo encontrar un registro de eventos que coincida con este usuario.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Usuario correctamente creado.',
@@ -46,7 +59,7 @@ return [
         'delete_has_users_var' => 'Este usuario todavía supervisa a otro usuario. Por favor primero seleccione otro supervisor para ese usuario.|Este usuario todavía supervisa :count usuarios. Por favor primero seleccione otro supervisor para ellos.',
         'unsuspend' => 'Hubo un problema marcando como no suspendido al usuario. Por favor, inténtelo de nuevo.',
         'import' => 'Ha habido un problema importando los usuarios. Por favor intente nuevamente.',
-        'asset_already_accepted' => 'This item has already been accepted.',
+        'asset_already_accepted' => 'Este artículo ya ha sido aceptado.',
         'accept_or_decline' => 'Debe aceptar o rechazar este equipo.',
         'cannot_delete_yourself' => 'Nos sentiríamos muy mal si usted se eliminara, por favor reconsidérelo.',
         'incorrect_user_accepted' => 'El elemento que ha intentado aceptar no fue asignado a usted.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'La contraseña para esta cuenta es administrada por LDAP / Active Directory. Póngase en contacto con su departamento de TI para cambiar su contraseña.',
         'multi_company_items_assigned' => 'Este usuario tiene elementos asignados que pertenecen a una empresa diferente. Por favor, ingréselos o edite su empresa.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

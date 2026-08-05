@@ -58,7 +58,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         $this->importFileResponse(['import' => $import->id])
             ->assertOk()
             ->assertExactJson([
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 1, 'updated' => 0, 'skipped' => 0, 'errored' => 0]],
                 'status' => 'success',
                 'messages' => [
                     'redirect_url' => route('accessories.index'),
@@ -255,7 +255,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
             ->assertInternalServerError()
             ->assertExactJson([
                 'status' => 'import-errors',
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 1]],
                 'messages' => [
                     '' => [
                         'Accessory' => [
@@ -306,6 +306,117 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
     }
 
     #[Test]
+    public function update_mode_logs_accessory_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->accessory()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $accessory = Accessory::query()->where('name', $initialRow['itemName'])->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->accessory()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $accessory->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $accessory->order_number);
+
+        $updateLog = Actionlog::query()
+            ->where('item_type', Accessory::class)
+            ->where('item_id', $accessory->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after accessory importer update mode.');
+    }
+
+    #[Test]
+    public function update_mode_clears_field_when_csv_column_is_present_but_empty(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $accessory = Accessory::factory()->create([
+            'notes' => 'Some pre-existing notes',
+            'purchase_date' => '2022-01-01',
+        ])->refresh();
+
+        $this->assertNotNull($accessory->purchase_date);
+        $this->assertNotEmpty($accessory->notes);
+
+        $row = ImportFileBuilder::new()->definition();
+        $row['itemName'] = $accessory->name;
+        $row['notes'] = '';
+        $row['purchaseDate'] = '';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->accessory()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $accessory->refresh();
+        $this->assertNull($accessory->notes);
+        $this->assertNull($accessory->purchase_date);
+    }
+
+    #[Test]
+    public function update_mode_preserves_fields_when_csv_column_is_absent(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $accessory = Accessory::factory()->create([
+            'notes' => 'Do not lose this',
+            'purchase_date' => '2022-01-01',
+        ])->refresh();
+
+        $originalNotes = $accessory->notes;
+        $originalPurchaseDate = $accessory->purchase_date?->toDateString();
+
+        // Import a CSV that only has the identity field (name) plus one
+        // updated column. All other Accessory fields are absent from the
+        // CSV, so their DB values must be preserved on update.
+        $partialFile = new ImportFileBuilder([[
+            'itemName' => $accessory->name,
+            'orderNumber' => 'UPDATED-ORDER',
+        ]]);
+        $partialImport = Import::factory()->accessory()->create([
+            'file_path' => $partialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $partialImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $accessory->refresh();
+        $this->assertEquals('UPDATED-ORDER', $accessory->order_number);
+        $this->assertEquals($originalNotes, $accessory->notes);
+        $this->assertEquals($originalPurchaseDate, $accessory->purchase_date?->toDateString());
+    }
+
+    #[Test]
     public function when_import_file_contains_empty_values(): void
     {
         $accessory = Accessory::factory()->create(['name' => Str::random()]);
@@ -334,7 +445,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
             ->assertInternalServerError()
             ->assertExactJson([
                 'status' => 'import-errors',
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 1]],
                 'messages' => [
                     $importFileBuilder->firstRow()['itemName'] => [
                         'Accessory' => [
@@ -413,5 +524,63 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         $this->assertEquals($row['manufacturerName'], $newAccessory->category->name);
         $this->assertEquals($row['category'], $newAccessory->manufacturer->name);
         $this->assertEquals($row['purchaseCost'], $newAccessory->location->name);
+    }
+
+    #[Test]
+    public function accessory_import_checks_out_to_user_when_username_matches(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $target = User::factory()->create(['username' => 'accessorytarget']);
+
+        // Hand-crafted CSV: needs the checkout columns
+        // (checkout_class + username) alongside the standard accessory
+        // columns, which the AccessoriesImportFileBuilder doesn't include.
+        $csv = "Item Name,Category,Quantity,Company,Checkout Type,Username\n"
+            .'CSV-Checked-Accessory,Cables,5,CSVCo,user,'.$target->username."\n";
+        $filename = 'accessory-checkout-'.uniqid().'.csv';
+        file_put_contents(config('app.private_uploads').'/imports/'.$filename, $csv);
+
+        try {
+            $import = Import::factory()->accessory()->create(['file_path' => $filename]);
+
+            $this->actingAsForApi($actor);
+            $this->importFileResponse(['import' => $import->id])->assertOk();
+
+            $accessory = Accessory::query()->where('name', 'CSV-Checked-Accessory')->sole();
+            $this->assertEquals(5, $accessory->qty);
+
+            $this->assertDatabaseHas('accessories_checkout', [
+                'accessory_id' => $accessory->id,
+                'assigned_to' => $target->id,
+                'assigned_type' => User::class,
+            ]);
+        } finally {
+            @unlink(config('app.private_uploads').'/imports/'.$filename);
+        }
+    }
+
+    #[Test]
+    public function accessory_import_without_checkout_columns_does_not_create_checkout(): void
+    {
+        $actor = User::factory()->superuser()->create();
+
+        $csv = "Item Name,Category,Quantity,Company\n"
+            ."CSV-Uncheckedout-Accessory,Cables,3,CSVCo\n";
+        $filename = 'accessory-nocheckout-'.uniqid().'.csv';
+        file_put_contents(config('app.private_uploads').'/imports/'.$filename, $csv);
+
+        try {
+            $import = Import::factory()->accessory()->create(['file_path' => $filename]);
+
+            $this->actingAsForApi($actor);
+            $this->importFileResponse(['import' => $import->id])->assertOk();
+
+            $accessory = Accessory::query()->where('name', 'CSV-Uncheckedout-Accessory')->sole();
+            $this->assertDatabaseMissing('accessories_checkout', [
+                'accessory_id' => $accessory->id,
+            ]);
+        } finally {
+            @unlink(config('app.private_uploads').'/imports/'.$filename);
+        }
     }
 }

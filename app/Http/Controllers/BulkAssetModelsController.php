@@ -38,6 +38,11 @@ class BulkAssetModelsController extends Controller
                     }
                 }
 
+                if ($valid_count === 0) {
+                    return redirect()->route('models.index')
+                        ->with('error', trans('admin/models/message.bulkdelete.nothing_deletable'));
+                }
+
                 return view('models/bulk-delete', compact('models'))->with('valid_count', $valid_count);
 
                 // Otherwise display the bulk edit screen

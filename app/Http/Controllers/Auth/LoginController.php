@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Ldap;
 use App\Models\SamlNonce;
@@ -56,7 +57,17 @@ class LoginController extends Controller
     {
         parent::__construct();
         $this->middleware('guest', ['except' => ['logout', 'postTwoFactorAuth', 'getTwoFactorAuth', 'getTwoFactorEnroll']]);
-        Session::put('backUrl', \URL::previous());
+
+        // backUrl feeds redirectTo(), which Laravel hands to the
+        // post-login Redirector without host validation. URL::previous()
+        // is Referer-derived and login endpoints are often the loosest
+        // on CSRF, so sanitize before storing. If the referrer isn't
+        // safe we leave backUrl unset and redirectTo() falls back to
+        // $this->redirectTo.
+        if ($safeReferer = Helper::sameOriginUrl(\URL::previous())) {
+            Session::put('backUrl', $safeReferer);
+        }
+
         $this->saml = $saml;
     }
 
@@ -173,6 +184,7 @@ class LoginController extends Controller
 
         // Check if the user already exists in the database and was imported via LDAP
         $user = User::where('username', '=', $request->input('username'))->whereNull('deleted_at')->where('ldap_import', '=', 1)->where('activated', '=', '1')->first(); // FIXME - if we get more than one we should fail. and we sure about this ldap_import thing?
+        $user = User::verifyExactUsernameMatch($user, (string) $request->input('username'));
         Log::debug('Local auth lookup complete');
 
         // The user does not exist in the database. Try to get them from LDAP.
@@ -243,7 +255,9 @@ class LoginController extends Controller
 
             try {
                 $user = User::where('username', '=', $remote_user)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+                $user = User::verifyExactUsernameMatch($user, (string) $remote_user);
                 Log::debug('Remote user auth lookup complete');
+
                 if (! is_null($user)) {
                     Auth::login($user, $request->input('remember'));
                 }
@@ -522,6 +536,6 @@ class LoginController extends Controller
 
     public function redirectTo()
     {
-        return Session::get('backUrl') ? Session::get('backUrl') : $this->redirectTo;
+        return Helper::sameOriginUrl(Session::get('backUrl')) ?? $this->redirectTo;
     }
 }

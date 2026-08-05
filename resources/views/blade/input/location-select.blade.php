@@ -9,6 +9,7 @@
     'multiple' => false,
     'helpText' => null,
     'hideNewButton' => false,
+    'companyId' => null,
 ])
 
 @php
@@ -41,11 +42,15 @@
             @if ($multiple)
                 multiple
             @endif
+            @if ($companyId)
+                data-company-id="{{ $companyId }}"
+            @endif
         >
+            <option value=""></option>
             @if ($selected)
                 @foreach(Arr::wrap($selected) as $value)
                     <option value="{{ $value }}" selected="selected" role="option" aria-selected="true"  role="option">
-                        {{ optional(Location::find($value))->name }}
+                        {{ Location::find($value)?->name }}
                     </option>
                 @endforeach
             @endif
@@ -60,7 +65,7 @@
         @endunless
     </div>
 
-    {!! $errors->first($name, '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
+    <div class="col-md-8 col-md-offset-3"><x-form.error :name="$name" /></div>
 
     @if ($helpText)
         <div class="col-md-7 col-sm-11 col-md-offset-3">

@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Úspešne ste potvrdili prijatie majetku.',
     'declined' => 'Odmietnutie majetku bolo úspešné.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Používatelia boli úspešné aktualizovaný, avčak položka manažér nebola uložená, pretože zvolený manažér sa taktiež nachádzal v zoznam na úpravu a používatel nemôže byť sám sebe manazérom. Prosim zvoľte Vašich používateľov znovu s vynechaním manažéera.',
     'user_exists' => 'Používateľ už existuje!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Používateľ neexistuje alebo nemáte oprávnenie na jeho zobrazenie.',
     'user_login_required' => 'Prihlasovacie meno je povinné',
     'user_has_no_assets_assigned' => 'Momentálne nie je priradený používateľovi žiaden majetok.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Heslo je povinné.',
     'insufficient_permissions' => 'Nedostatočné oprávnenia.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Tento používateľ bol odstránený. Používateľa musíte obnoviť, ak ho chcete upraviť alebo mu priradiť majetok.',
     'ldap_not_configured' => 'LDAP prepojenie nebolo nastavené pre túto inštaláciu.',
     'password_resets_sent' => 'Vybraní používatelia sú aktivovaný. Na ich adresu bola zaslaný okaz na resetovanie hesla.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Odkaz na obnovenie hesla bol zaslaný na emailovú adresu :email!',
     'user_has_no_email' => 'Tento používateľ nemá zadanú emailovú adresu v profile.',
     'log_record_not_found' => 'Pre tohto používateľa sa nepodarilo nájsť odpovedajúci záznam v logoch.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Používateľ bol úspešne vytovrený.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Heslo pre tento účet je spravované cez LDAP/Active Directory. Pre zmneu hesla prosím kontaktujte Vaše IT oddelenie. ',
         'multi_company_items_assigned' => 'Tento používateľ má priradené položky vo vlastníctve inej spoločnosti. Prosím prevezmite ich alebo upravte spoločnosť.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

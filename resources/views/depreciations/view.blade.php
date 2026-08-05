@@ -34,7 +34,10 @@
 
                     <!-- start licenses tab pane -->
                     <x-tabs.pane name="licenses">
-                        <x-table.licenses name="licenses" :route="route('api.licenses.index', ['depreciation_id' => $depreciation->id])"/>
+                        <x-slot:bulkactions>
+                            <x-table.bulk-licenses />
+                        </x-slot:bulkactions>
+                        <x-table.licenses name="licenses" :export_name="$depreciation->name" :route="route('api.licenses.index', ['depreciation_id' => $depreciation->id])"/>
                     </x-tabs.pane>
                     <!-- end licenses tab pane -->
 

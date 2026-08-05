@@ -20,6 +20,8 @@ return [
         'confirm' => 'Opravdu si přejete odstranit tento stavový štítek?',
         'error' => 'Vyskytl se problém při mazání datového štítku. Zkuste to znovu prosím.',
         'success' => 'Stavový štítek byl úspěšně smazán.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

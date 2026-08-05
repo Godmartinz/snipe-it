@@ -32,6 +32,11 @@ return [
             'log_msg' => 'Վերադարձվել է լիցենզիաների GUI-ում զանգվածային վերադարձման միջոցով',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Տրամադրել բոլոր տեղերը',
             'modal' => 'Այս գործողությունը կտրամադրի մեկ տեղ առաջին հասանելի օգտատիրոջը։ | Այս գործողությունը կտրամադրի բոլոր :available_seats_count տեղերը առաջին հասանելի օգտատերերին։ Օգտատերը համարվում է հասանելի այս տեղի համար, եթե նրան արդեն տրամադրված չէ այս լիցենզիան, և նրա հաշվի վրա միացված է «Ավտոմատ հատկացում» հատկությունը։',
@@ -43,6 +48,11 @@ return [
             'warn_no_avail_users' => 'Ոչինչ անելու կարիք չկա։ Բոլոր օգտատերերին արդեն հատկացված է այս լիցենզիան։',
             'log_msg' => 'Տրամադրվել է լիցենզիաների GUI-ում զանգվածային տրամադրման միջոցով',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

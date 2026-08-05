@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => 'Beni',
-        'note' => 'Concede l\'accesso alla sezione Assets dell\'applicazione.',
+        'note' => 'Concede l\'accesso alla sezione Assets dell\'applicazione. ',
     ],
 
     'assetsview' => [
         'name' => 'Visualizza Asset',
+        'note' => 'Note that users with this permission will also be able to see (not modify or delete) files uploaded to the asset model as well. This is to make it easier to share common documents like user manuals across assets without having to upload them to every asset, and to avoid having to grant the user permission to modify asset files.',
     ],
 
     'assetscreate' => [
@@ -436,20 +437,20 @@ return [
     ],
 
     'depreciations' => [
-        'name' => 'Gestione degli ammortamenti',
-        'note' => 'Consente agli utenti di gestire e visualizzare i dettagli dell\'ammortamento degli asset.',
+        'name' => 'Gestione dei deprezzamenti',
+        'note' => 'Consente agli utenti di gestire e visualizzare i dettagli del deprezzamento dei Beni.',
     ],
     'depreciationsview' => [
-        'name' => 'Visualizza Dettagli Di Ammortamento',
+        'name' => 'Visualizza Dettagli Deprezzamento',
     ],
     'depreciationsedit' => [
-        'name' => 'Modifica Impostazioni Di Ammortamento',
+        'name' => 'Modifica Impostazioni Deprezzamento',
     ],
     'depreciationsdelete' => [
-        'name' => 'Elimina Record Di Ammortamento',
+        'name' => 'Elimina Record Deprezzamento',
     ],
     'depreciationscreate' => [
-        'name' => 'Crea Record Di Ammortamento',
+        'name' => 'Crea Record Deprezzamento',
     ],
 
     'grant_all' => 'Concedi tutti i permessi per :area',

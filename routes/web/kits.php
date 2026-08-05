@@ -5,7 +5,20 @@ use App\Models\PredefinedKit;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
-Route::group(['prefix' => 'kits/{kit}', 'middleware' => ['auth']], function () {
+// All numeric-PK params inside this group get constrained via the group's
+// `where` array so garbage-input requests 404 at the router before hitting
+// controllers or breadcrumbs.
+Route::group([
+    'prefix' => 'kits/{kit}',
+    'middleware' => ['auth'],
+    'where' => [
+        'kit' => '[0-9]+',
+        'license_id' => '[0-9]+',
+        'model_id' => '[0-9]+',
+        'consumable_id' => '[0-9]+',
+        'accessory_id' => '[0-9]+',
+    ],
+], function () {
 
     // Route::get('licenses',
     //     [Kits\PredefinedKitsController::class, 'indexLicenses']

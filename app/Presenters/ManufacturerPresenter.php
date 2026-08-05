@@ -17,13 +17,16 @@ class ManufacturerPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
                 'titleTooltip' => trans('general.select_all_none'),
                 'printIgnore' => true,
                 'class' => 'hidden-print',
             ],
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -32,6 +35,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -41,6 +45,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -50,6 +55,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'url',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -59,6 +65,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'support_url',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -69,6 +76,7 @@ class ManufacturerPresenter extends Presenter
 
             [
                 'field' => 'support_phone',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -79,6 +87,7 @@ class ManufacturerPresenter extends Presenter
 
             [
                 'field' => 'support_email',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -88,6 +97,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'warranty_lookup_url',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -98,6 +108,7 @@ class ManufacturerPresenter extends Presenter
 
             [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -107,6 +118,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'licenses_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -116,6 +128,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'consumables_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -125,6 +138,7 @@ class ManufacturerPresenter extends Presenter
             ],
             [
                 'field' => 'accessories_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -133,6 +147,7 @@ class ManufacturerPresenter extends Presenter
                 'class' => 'css-accessory',
             ], [
                 'field' => 'components_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -141,6 +156,7 @@ class ManufacturerPresenter extends Presenter
                 'class' => 'css-component',
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -148,6 +164,7 @@ class ManufacturerPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -156,6 +173,7 @@ class ManufacturerPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -164,6 +182,7 @@ class ManufacturerPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

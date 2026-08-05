@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => 'Поле :attribute має бути унікальним для :table1 і :table2. ',
     'unique_undeleted' => 'Поле :attribute має бути унікальним.',
     'non_circular' => 'Поле :attribute не повинне створювати круглие посилання.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute не може бути масивом.',
     'disallow_same_pwd_as_user_fields' => 'Пароль не може бути таким же, як ім\'я користувача.',
     'letters' => 'Пароль має містити принаймні одну букву.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => 'Завантаження поля :attribute не вдалося.',
     'uppercase' => 'Поле :attribute має бути з верхнім регістром.',
     'url' => 'Поле :attribute має бути коректним URL.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => 'Поле :attribute має бути дійсним ULID.',
     'uuid' => 'Поле :attribute має бути коректним UUID.',
-    'fmcs_location' => 'У налаштуваннях адміністратора увімкнено повну підтримку декількох компаній та обмеження видимості за локаціями, проте вибрана локація та вибрана компанія несумісні.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'Поле :attribute має бути унікальним у межах вибраної компанії та локації.',
 
     /*

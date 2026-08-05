@@ -34,7 +34,7 @@ class Asset extends Depreciable
 {
     protected $presenter = AssetPresenter::class;
 
-    protected $with = ['model', 'adminuser', 'location', 'company'];
+    // protected $with = ['model', 'adminuser', 'location', 'company'];
 
     use CompanyableTrait;
     use HasFactory;
@@ -94,7 +94,7 @@ class Asset extends Depreciable
         'eol_explicit' => 'boolean',
         'last_checkout' => 'datetime',
         'last_checkin' => 'datetime',
-        'expected_checkin' => 'datetime:m-d-Y',
+        'expected_checkin' => 'datetime',
         'last_audit_date' => 'datetime',
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id' => 'integer',
@@ -108,12 +108,37 @@ class Asset extends Depreciable
         'deleted_at' => 'datetime',
     ];
 
+    /**
+     * location_id and company_id should store NULL when there's no
+     * assignment, never 0. Old data and previous bugs occasionally
+     * left `0` behind (empty select2 → '' → integer-cast → 0), which
+     * then breaks `exists:` validation and FMCS queries that treat
+     * NULL and 0 as different. `set` normalizes on write, `get`
+     * normalizes on read so legacy rows already storing 0 present as
+     * null at the model boundary until they're re-saved.
+     */
+    protected function locationId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null || (int) $value === 0) ? null : (int) $value,
+            set: fn ($value) => ($value === '' || $value === null || (int) $value === 0) ? null : (int) $value,
+        );
+    }
+
+    protected function companyId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null || (int) $value === 0) ? null : (int) $value,
+            set: fn ($value) => ($value === '' || $value === null || (int) $value === 0) ? null : (int) $value,
+        );
+    }
+
     protected $rules = [
         'model_id' => ['required', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
         'status_id' => ['required', 'integer', 'exists:status_labels,id'],
         'asset_tag' => ['required', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
         'name' => ['nullable', 'max:255'],
-        'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+        'company_id' => ['nullable', 'integer', 'exists:companies,id', 'fmcs_company'],
         'warranty_months' => ['nullable', 'numeric', 'digits_between:0,240'],
         'last_checkout' => ['nullable', 'date_format:Y-m-d H:i:s'],
         'last_checkin' => ['nullable', 'date_format:Y-m-d H:i:s'],
@@ -146,8 +171,6 @@ class Asset extends Depreciable
      */
     protected $fillable = [
         'asset_tag',
-        'assigned_to',
-        'assigned_type',
         'company_id',
         'image',
         'location_id',
@@ -243,11 +266,18 @@ class Asset extends Depreciable
         });
     }
 
-    // To properly set the expected checkin as Y-m-d
     public function setExpectedCheckinAttribute($value)
     {
         if ($value == '') {
             $value = null;
+        }
+        // Normalise to Y-m-d H:i:s so date-only strings ("2026-07-17") end
+        // up as valid datetime values in the DB. On MariaDB the DATETIME
+        // column would widen automatically, but SQLite (used in tests) is
+        // dynamically typed and stores the raw string, which then fails
+        // datetime BETWEEN comparisons in the DueForCheckin scope.
+        if ($value !== null && $value !== '') {
+            $value = Carbon::parse($value)->format('Y-m-d H:i:s');
         }
         $this->attributes['expected_checkin'] = $value;
     }
@@ -421,7 +451,7 @@ class Asset extends Depreciable
     protected function expectedCheckinFormattedDate(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => array_key_exists('expected_checkin', $attributes) ? Helper::getFormattedDateObject($attributes['expected_checkin'], 'date', false) : null,
+            get: fn (mixed $value, array $attributes) => array_key_exists('expected_checkin', $attributes) ? Helper::getFormattedDateObject($attributes['expected_checkin'], 'datetime', false) : null,
         );
     }
 
@@ -487,16 +517,18 @@ class Asset extends Depreciable
 
     public function availableForCheckIn()
     {
-
-        // This asset is currently assigned to anyone and is not deleted...
-        if (($this->assigned_to != '') && ($this->status) && ($this->status->archived == '0')
-            && ($this->status->deployable == '1')
-        ) {
-            return true;
-
+        if ($this->assigned_to == '') {
+            return false;
         }
 
-        return false;
+        // Deleted assets that are still checked out should always allow checkin
+        if ($this->deleted_at != '') {
+            return true;
+        }
+
+        return $this->status
+            && ($this->status->archived == '0')
+            && ($this->status->deployable == '1');
     }
 
     /**
@@ -1480,13 +1512,10 @@ class Asset extends Depreciable
      */
     public function scopePending($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 1)
-                    ->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('pending');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1536,14 +1565,11 @@ class Asset extends Depreciable
      */
     public function scopeRTD($query)
     {
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('deployable');
+
         return $query->whereNull('assets.assigned_to')
-            ->whereHas(
-                'status', function ($query) {
-                    $query->where('deployable', '=', 1)
-                        ->where('pending', '=', 0)
-                        ->where('archived', '=', 0);
-                }
-            );
+            ->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1554,13 +1580,10 @@ class Asset extends Depreciable
      */
     public function scopeUndeployable($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 0)
-                    ->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('undeployable');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1571,11 +1594,10 @@ class Asset extends Depreciable
      */
     public function scopeNotArchived($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('not_archived');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1676,11 +1698,15 @@ class Asset extends Depreciable
     public function scopeDueForCheckin($query, $settings)
     {
         $interval = (int) $settings->due_checkin_days ?? 0;
-        $today = Carbon::now();
-        $interval_date = $today->copy()->addDays($interval)->format('Y-m-d');
+        // expected_checkin is a DATETIME. Use startOfDay/endOfDay explicitly so
+        // an asset due back on the last day of the interval at (say) 2:30 PM
+        // still falls inside the range. Formatting only Y-m-d silently widens
+        // to midnight and would exclude anything later that day.
+        $windowStart = Carbon::now()->startOfDay();
+        $windowEnd = Carbon::now()->addDays($interval)->endOfDay();
 
         return $query->whereNotNull('assets.expected_checkin')
-            ->whereBetween('assets.expected_checkin', [$today->format('Y-m-d'), $interval_date])
+            ->whereBetween('assets.expected_checkin', [$windowStart, $windowEnd])
             ->where('assets.archived', '=', 0)
             ->whereNotNull('assets.assigned_to')
             ->NotArchived();
@@ -1697,8 +1723,12 @@ class Asset extends Depreciable
      */
     public function scopeOverdueForCheckin($query)
     {
+        // expected_checkin is a DATETIME, so "overdue" is time-aware: an
+        // asset due back this morning at 09:00 is overdue by 09:01. Compare
+        // against Carbon::now() instead of today's midnight so mid-day
+        // dashboard views reflect what's actually late right now.
         return $query->whereNotNull('assets.expected_checkin')
-            ->where('assets.expected_checkin', '<', Carbon::now()->format('Y-m-d'))
+            ->where('assets.expected_checkin', '<', Carbon::now())
             ->where('assets.archived', '=', 0)
             ->whereNotNull('assets.assigned_to')
             ->NotArchived();
@@ -1738,17 +1768,14 @@ class Asset extends Depreciable
      */
     public function scopeAssetsForShow($query)
     {
-
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
         if (Setting::getSettings()->show_archived_in_list != 1) {
-            return $query->whereHas(
-                'status', function ($query) {
-                    $query->where('archived', '=', 0);
-                }
-            );
-        } else {
-            return $query;
+            $validStatusIds = Statuslabel::idsFor('not_archived');
+
+            return $query->whereIn('assets.status_id', $validStatusIds->isEmpty() ? [0] : $validStatusIds);
         }
 
+        return $query;
     }
 
     /**
@@ -1759,13 +1786,10 @@ class Asset extends Depreciable
      */
     public function scopeArchived($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 0)
-                    ->where('archived', '=', 1);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('archived');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**

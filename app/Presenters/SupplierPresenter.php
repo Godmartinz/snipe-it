@@ -15,13 +15,16 @@ class SupplierPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
                 'titleTooltip' => trans('general.select_all_none'),
                 'printIgnore' => true,
                 'class' => 'hidden-print',
             ],
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -30,6 +33,7 @@ class SupplierPresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -38,6 +42,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'suppliersLinkFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -47,6 +52,7 @@ class SupplierPresenter extends Presenter
             ],
             [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -56,6 +62,7 @@ class SupplierPresenter extends Presenter
                 'class' => 'css-barcode',
             ],  [
                 'field' => 'accessories_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -66,6 +73,7 @@ class SupplierPresenter extends Presenter
             ],
             [
                 'field' => 'licenses_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -75,6 +83,7 @@ class SupplierPresenter extends Presenter
                 'class' => 'css-license',
             ], [
                 'field' => 'components_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -84,6 +93,7 @@ class SupplierPresenter extends Presenter
                 'class' => 'css-component',
             ], [
                 'field' => 'consumables_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -93,6 +103,7 @@ class SupplierPresenter extends Presenter
                 'class' => 'css-consumable',
             ], [
                 'field' => 'url',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -101,6 +112,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'externalLinkFormatter',
             ], [
                 'field' => 'address',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -108,6 +120,7 @@ class SupplierPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'address2',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -115,6 +128,7 @@ class SupplierPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'city',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -122,6 +136,7 @@ class SupplierPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'state',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -129,6 +144,7 @@ class SupplierPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'zip',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -136,6 +152,7 @@ class SupplierPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'country',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -143,6 +160,7 @@ class SupplierPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'phone',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -151,6 +169,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'fax',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -159,6 +178,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'tag_color',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -167,12 +187,14 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'colorTagFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -181,6 +203,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ],  [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -189,6 +212,7 @@ class SupplierPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

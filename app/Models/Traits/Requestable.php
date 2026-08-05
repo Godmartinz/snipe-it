@@ -33,7 +33,7 @@ trait Requestable
     public function request($qty = 1)
     {
         $this->requests()->save(
-            new CheckoutRequest(['user_id' => auth()->id(), 'qty' => $qty])
+            new CheckoutRequest(['user_id' => auth()->id(), 'quantity' => $qty])
         );
     }
 

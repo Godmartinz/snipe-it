@@ -3,8 +3,10 @@
 namespace Tests\Feature\Importing\Api;
 
 use App\Models\Actionlog as ActivityLog;
+use App\Models\Company;
 use App\Models\Import;
 use App\Models\License;
+use App\Models\LicenseSeat;
 use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Str;
@@ -57,7 +59,7 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
         $this->importFileResponse(['import' => $import->id])
             ->assertOk()
             ->assertExactJson([
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 1, 'updated' => 0, 'skipped' => 0, 'errored' => 0]],
                 'status' => 'success',
                 'messages' => ['redirect_url' => route('licenses.index')],
             ]);
@@ -218,7 +220,7 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
             ->assertInternalServerError()
             ->assertExactJson([
                 'status' => 'import-errors',
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 1]],
                 'messages' => [
                     $row['licenseName'] => [
                         "License \"{$row['licenseName']}\"" => [
@@ -275,6 +277,148 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
         $this->assertEquals($license->termination_date, $updatedLicense->termination_date);
         $this->assertEquals($license->deprecate, $updatedLicense->deprecate);
         $this->assertEquals($license->min_amt, $updatedLicense->min_amt);
+    }
+
+    #[Test]
+    public function update_mode_clears_field_when_csv_column_is_present_but_empty(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+        $initialImport = Import::factory()->license()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $license = License::query()
+            ->where('name', $initialRow['licenseName'])
+            ->where('serial', $initialRow['serialNumber'])
+            ->sole();
+
+        // Sanity: initial import should have populated the fields we are
+        // about to clear. Guards against a false negative if the fixture
+        // shape changes and the fields default to null.
+        $this->assertNotNull($license->expiration_date);
+        $this->assertNotEmpty($license->license_email);
+        $this->assertNotEmpty($license->notes);
+
+        // Re-import with these columns present but empty. Empty CSV cells
+        // should clear the corresponding DB fields, not preserve them.
+        $clearedRow = array_merge($initialRow, [
+            'expirationDate' => '',
+            'licensedToEmail' => '',
+            'notes' => '',
+        ]);
+        $clearFile = new ImportFileBuilder([$clearedRow]);
+        $clearImport = Import::factory()->license()->create([
+            'file_path' => $clearFile->saveToImportsDirectory(),
+        ]);
+        $this->importFileResponse([
+            'import' => $clearImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $license->refresh();
+        $this->assertNull($license->expiration_date);
+        $this->assertNull($license->license_email);
+        $this->assertNull($license->notes);
+    }
+
+    #[Test]
+    public function update_mode_preserves_fields_when_csv_column_is_absent(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+        $initialImport = Import::factory()->license()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $license = License::query()
+            ->where('name', $initialRow['licenseName'])
+            ->where('serial', $initialRow['serialNumber'])
+            ->sole();
+
+        $originalEmail = $license->license_email;
+        $originalNotes = $license->notes;
+        $originalExpirationDate = $license->expiration_date?->toDateString();
+
+        // Re-import with a CSV that only has the identity fields plus one
+        // updated field. All other columns are absent from the CSV, so
+        // their DB values must be preserved.
+        // A short static order number keeps the assertion within License's
+        // order_number varchar(50) limit regardless of what the initial row
+        // faker produced. Prefixing the faker value overflowed on some seeds.
+        $newOrderNumber = 'UPDATED-ORDER-123';
+
+        $partialRow = [
+            'licenseName' => $initialRow['licenseName'],
+            'serialNumber' => $initialRow['serialNumber'],
+            'orderNumber' => $newOrderNumber,
+        ];
+        $partialFile = new ImportFileBuilder([$partialRow]);
+        $partialImport = Import::factory()->license()->create([
+            'file_path' => $partialFile->saveToImportsDirectory(),
+        ]);
+        $this->importFileResponse([
+            'import' => $partialImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $license->refresh();
+        $this->assertEquals($newOrderNumber, $license->order_number);
+        $this->assertEquals($originalEmail, $license->license_email);
+        $this->assertEquals($originalNotes, $license->notes);
+        $this->assertEquals($originalExpirationDate, $license->expiration_date?->toDateString());
+    }
+
+    #[Test]
+    public function update_mode_logs_license_update_in_actionlog(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $initialFile = ImportFileBuilder::new();
+        $initialRow = $initialFile->firstRow();
+
+        $initialImport = Import::factory()->license()->create([
+            'file_path' => $initialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $initialImport->id])->assertOk();
+
+        $license = License::query()
+            ->where('name', $initialRow['licenseName'])
+            ->where('serial', $initialRow['serialNumber'])
+            ->sole();
+
+        $updatedRow = array_merge($initialRow, [
+            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+        ]);
+
+        $updateFile = new ImportFileBuilder([$updatedRow]);
+        $updateImport = Import::factory()->license()->create([
+            'file_path' => $updateFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $updateImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $license->refresh();
+        $this->assertEquals($updatedRow['orderNumber'], $license->order_number);
+
+        $updateLog = ActivityLog::query()
+            ->where('item_type', License::class)
+            ->where('item_id', $license->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($updateLog, 'Expected an update action log entry after license importer update mode.');
     }
 
     #[Test]
@@ -352,5 +496,97 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
         $this->assertNull($newLicense->termination_date);
         $this->assertNull($newLicense->deprecate);
         $this->assertNull($newLicense->min_amt);
+    }
+
+    #[Test]
+    public function import_license_checkout_is_blocked_when_fmcs_companies_differ(): void
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $user = User::factory()->forCompany($companyB)->create();
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $companyA->name,
+            'checkoutUsername' => $user->username,
+            'seats' => 5,
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $license = License::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $checkedOutSeat = LicenseSeat::where('license_id', $license->id)->whereNotNull('assigned_to')->first();
+        $this->assertNull($checkedOutSeat, 'License seat should not be checked out when item and user companies differ under FMCS');
+    }
+
+    #[Test]
+    public function import_license_checkout_is_allowed_when_fmcs_companies_match(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->forCompany($company)->create();
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $company->name,
+            'checkoutUsername' => $user->username,
+            'seats' => 5,
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $license = License::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $checkedOutSeat = LicenseSeat::where('license_id', $license->id)->where('assigned_to', $user->id)->first();
+        $this->assertNotNull($checkedOutSeat, 'License seat should be checked out when companies match under FMCS');
+    }
+
+    #[Test]
+    public function import_license_checkout_is_blocked_when_floater_disabled_and_user_has_no_company(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->withoutCompany()->create();
+        $this->settings->enableMultipleFullCompanySupport()->disableFloaterMode();
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $company->name,
+            'checkoutUsername' => $user->username,
+            'seats' => 5,
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $license = License::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $checkedOutSeat = LicenseSeat::where('license_id', $license->id)->whereNotNull('assigned_to')->first();
+        $this->assertNull($checkedOutSeat, 'License seat should not be checked out to a no-company user when floater mode is off');
+    }
+
+    #[Test]
+    public function import_license_checkout_is_allowed_when_floater_enabled_and_user_has_no_company(): void
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->withoutCompany()->create();
+        $this->settings->enableFloaterMode();
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $company->name,
+            'checkoutUsername' => $user->username,
+            'seats' => 5,
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $license = License::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $checkedOutSeat = LicenseSeat::where('license_id', $license->id)->where('assigned_to', $user->id)->first();
+        $this->assertNotNull($checkedOutSeat, 'License seat should be checked out to a no-company user when floater mode is on');
     }
 }

@@ -46,7 +46,7 @@ class CheckoutAssetNotification extends Notification
         }
 
         if ($this->item->expected_checkin) {
-            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
+            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'datetime',
                 false);
         }
     }
@@ -129,9 +129,9 @@ class CheckoutAssetNotification extends Notification
                 ->type('success')
                 ->title(trans('mail.Asset_Checkout_Notification', ['tag' => '']))
                 ->addStartGroupToSection('activityText')
-                ->fact(trans('mail.assigned_to'), $target->display_name)
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityText')
-                ->fact(trans('general.administrator'), $admin->display_name)
+                ->fact(trans('general.administrator'), (string) ($admin?->display_name ?? ''))
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

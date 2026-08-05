@@ -21,6 +21,7 @@
         :$presenter
         :$fixed_right_number
         :$fixed_number
+        use_sticky_css
         buttons="modelButtons"
         api_url="{{ $route }}"
         export_filename="export-models-{{ date('Y-m-d') }}"

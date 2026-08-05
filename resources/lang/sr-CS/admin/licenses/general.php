@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Razduži putem grupnog razduživanja u interfejsu licence',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count sedišta je uspešno razduženo. | :count sedišta je uspešno razduženo.',
+            'no_seats_selected' => 'Nijedno sedište nije izabrano.',
+        ],
+
         'checkout_all' => [
             'button' => 'Zaduži sva mesta',
             'modal' => 'Ova radnja će zadužiti jedno mesto prvom dostupnom korisniku. | Ova radnja će zadužiti svih :available_seats_count mesta prvim dostupnim korisnicima. Korisnik se smatra dostupnim za ovo mesto ako već nemaju zaduženu ovu licencu, i parametar Automatsko dodeljivanje licence je omogućen za njihov nalog.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Ne treba ništa uraditi. Nema korisnika koji nemaju već dodeljenu ovu licencu.',
             'log_msg' => 'Zaduženo grupnim razduživanjem u ekranu licenci',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

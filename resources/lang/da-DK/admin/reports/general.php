@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Accept-anmodning slettet',
     'acceptance_request' => 'Anmodning om accept',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Bruger Adresse',
         'user_company' => 'User Company',
         'user_city' => 'Bruger By',

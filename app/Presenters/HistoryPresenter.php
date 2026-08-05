@@ -9,7 +9,7 @@ class HistoryPresenter extends Presenter
      *
      * @return string
      */
-    public static function dataTableLayout($hide_fields = [])
+    public static function dataTableLayout($hide_fields = [], $extra_columns = [])
     {
         $layout = [];
 
@@ -30,6 +30,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'icon',
+                    'scope' => 'col',
                     'searchable' => false,
                     'sortable' => true,
                     'switchable' => true,
@@ -44,6 +45,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'created_at',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -56,6 +58,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'created_by',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'title' => trans('general.created_by'),
@@ -68,6 +71,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'action_type',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -80,6 +84,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'action_date',
+                    'scope' => 'col',
                     'searchable' => false,
                     'sortable' => true,
                     'title' => trans('general.action_date'),
@@ -92,6 +97,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'item',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -105,6 +111,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'item.serial',
+                    'scope' => 'col',
                     'title' => trans('admin/hardware/table.serial'),
                     'visible' => false,
                 ]);
@@ -114,6 +121,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'target',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -127,6 +135,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'file',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -140,6 +149,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'file_download',
+                    'scope' => 'col',
                     'searchable' => false,
                     'sortable' => true,
                     'switchable' => true,
@@ -153,6 +163,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'quantity',
+                    'scope' => 'col',
                     'searchable' => false,
                     'sortable' => true,
                     'visible' => true,
@@ -164,6 +175,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'note',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'visible' => true,
@@ -176,6 +188,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'signature_file',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'switchable' => true,
@@ -189,6 +202,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'log_meta',
+                    'scope' => 'col',
                     'searchable' => false,
                     'sortable' => false,
                     'visible' => true,
@@ -201,6 +215,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'remote_ip',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'visible' => false,
@@ -212,6 +227,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'user_agent',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'visible' => false,
@@ -223,6 +239,7 @@ class HistoryPresenter extends Presenter
             array_push($layout,
                 [
                     'field' => 'action_source',
+                    'scope' => 'col',
                     'searchable' => true,
                     'sortable' => true,
                     'visible' => false,
@@ -230,6 +247,6 @@ class HistoryPresenter extends Presenter
                 ]);
         }
 
-        return json_encode($layout);
+        return json_encode(array_merge($layout, $extra_columns));
     }
 }

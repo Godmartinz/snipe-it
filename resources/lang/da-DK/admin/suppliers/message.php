@@ -20,7 +20,7 @@ return [
         'error' => 'Der opstod et problem ved at slette leverandøren. Prøv igen.',
         'success' => 'Leverandøren blev slettet med succes.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -35,11 +35,15 @@ return new class extends Migration
      */
     private function updateAssetAuditLogs(string $driver): void
     {
+        $prefix = DB::getTablePrefix();
+        $actionLogs = $prefix.'action_logs';
+        $assets = $prefix.'assets';
+
         if ($driver === 'mysql' || $driver === 'mariadb') {
             // MySQL/MariaDB supports UPDATE ... JOIN directly
-            DB::statement('
-                UPDATE action_logs al
-                INNER JOIN assets src
+            DB::statement("
+                UPDATE {$actionLogs} al
+                INNER JOIN {$assets} src
                     ON src.id = al.item_id
                     AND src.company_id IS NOT NULL
                 SET al.company_id = src.company_id
@@ -47,15 +51,15 @@ return new class extends Migration
                   AND al.item_type = ?
                   AND al.company_id IS NULL
                   AND al.deleted_at IS NULL
-            ', [self::AUDIT_ACTION, self::ASSET_CLASS]);
+            ", [self::AUDIT_ACTION, self::ASSET_CLASS]);
         } else {
             // SQLite / PostgreSQL: use a correlated subquery update
-            DB::statement('
-                UPDATE action_logs
+            DB::statement("
+                UPDATE {$actionLogs}
                 SET company_id = (
                     SELECT src.company_id
-                    FROM assets src
-                    WHERE src.id = action_logs.item_id
+                    FROM {$assets} src
+                    WHERE src.id = {$actionLogs}.item_id
                       AND src.company_id IS NOT NULL
                     LIMIT 1
                 )
@@ -64,11 +68,11 @@ return new class extends Migration
                   AND company_id IS NULL
                   AND deleted_at IS NULL
                   AND EXISTS (
-                      SELECT 1 FROM assets src2
-                      WHERE src2.id = action_logs.item_id
+                      SELECT 1 FROM {$assets} src2
+                      WHERE src2.id = {$actionLogs}.item_id
                         AND src2.company_id IS NOT NULL
                   )
-            ', [self::AUDIT_ACTION, self::ASSET_CLASS]);
+            ", [self::AUDIT_ACTION, self::ASSET_CLASS]);
         }
     }
 };

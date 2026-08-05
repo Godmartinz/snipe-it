@@ -13,4 +13,7 @@ return [
     'total' => 'Total',
     'update' => 'Actualizați componenta',
     'checkin_limit' => 'Suma bifată trebuie să fie egală sau mai mică decât :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

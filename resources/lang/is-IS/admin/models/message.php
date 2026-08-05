@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Engar tegundir voru valdar og því var engu eytt.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Tegund eytt!|:success_count tegundum eytt!',
         'success_partial' => ':success_count tegund(um) var eytt, hins vegar var ekki hægt að eyða :fail_count vegna þess að þau hafa enn eignir tengdar þeim.',
     ],

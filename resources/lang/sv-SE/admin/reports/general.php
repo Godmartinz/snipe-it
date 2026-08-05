@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Begäran om godkännande borttagen',
     'acceptance_request' => 'Begäran om godkännande',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Användarens adress',
         'user_company' => 'User Company',
         'user_city' => 'Användarens stad',

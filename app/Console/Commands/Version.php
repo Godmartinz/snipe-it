@@ -4,6 +4,9 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\select;
+
 class Version extends Command
 {
     /**
@@ -11,7 +14,7 @@ class Version extends Command
      *
      * @var string
      */
-    protected $signature = 'version:update {--branch=master} {--type=patch}';
+    protected $signature = 'version:update';
 
     /**
      * The console command description.
@@ -37,30 +40,40 @@ class Version extends Command
      */
     public function handle()
     {
-        $use_branch = $this->option('branch');
-        $use_type = $this->option('type');
+        $use_branch = select(
+            label: 'Which branch?',
+            options: ['master', 'develop'],
+            default: 'develop',
+        );
+
+        $use_type = select(
+            label: 'Which release type?',
+            options: [
+                'hash' => 'Hash bump',
+                'patch' => 'Patch release',
+                'minor' => 'Minor release',
+                'major' => 'Major release',
+                'pre-patch' => 'Pre-patch release',
+                'pre-minor' => 'Pre-minor release',
+                'pre-major' => 'Pre-major release',
+            ],
+            default: 'hash',
+            scroll: 7,
+        );
+
         $git_branch = trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
         $build_version = trim(shell_exec('git rev-list --count '.$use_branch));
         $versionFile = 'config/version.php';
         $full_hash_version = str_replace("\n", '', shell_exec('git describe master --tags'));
 
         $version = explode('-', $full_hash_version);
-        $app_version = $current_app_version = $version[0];
+        $app_version = $version[0];
         $hash_version = (array_key_exists('2', $version)) ? $version[2] : '';
         $prerelease_version = '';
 
-        $this->line('Branch is: '.$use_branch);
-        $this->line('Type is: '.$use_type);
-        $this->line('Current version is: '.$full_hash_version);
-
-        if (count($version) == 3) {
-            $this->line('This does not look like an alpha/beta release.');
-        } else {
-            if (array_key_exists('3', $version)) {
-                $this->line('The current version looks like a beta release.');
-                $prerelease_version = $version[1];
-                $hash_version = $version[3];
-            }
+        if (array_key_exists('3', $version)) {
+            $prerelease_version = $version[1];
+            $hash_version = $version[3];
         }
 
         $app_version_raw = explode('.', $app_version);
@@ -74,54 +87,52 @@ class Version extends Command
             $patch = $app_version_raw[2];
         }
 
-        if ($use_type == 'major') {
+        if ($use_type === 'major') {
             $app_version = 'v'.($maj + 1).".$min.$patch";
-        } elseif ($use_type == 'minor') {
+        } elseif ($use_type === 'minor') {
             $app_version = 'v'."$maj.".($min + 1).".$patch";
-        } elseif ($use_type == 'pre') {
-            $pre_raw = str_replace('beta', '', $prerelease_version);
-            $pre_raw = str_replace('alpha', '', $pre_raw);
-            $pre_raw = str_ireplace('rc', '', $pre_raw);
-            $pre_raw = $pre_raw++;
-            $this->line('Setting the pre-release to '.$prerelease_version.'-'.$pre_raw);
-            $app_version = 'v'."$maj.".($min + 1).".$patch";
-        } elseif ($use_type == 'patch') {
+        } elseif ($use_type === 'pre-patch') {
+            $app_version = 'v'."$maj.$min.".($patch + 1).'-pre';
+        } elseif ($use_type === 'pre-minor') {
+            $app_version = 'v'."$maj.".($min + 1).'.0-pre';
+        } elseif ($use_type === 'pre-major') {
+            $app_version = 'v'.($maj + 1).'.0.0-pre';
+        } elseif ($use_type === 'patch') {
             $app_version = 'v'."$maj.$min.".($patch + 1);
-            // If nothing is passed, leave the version as it is, just increment the build
-        } else {
-            $app_version = 'v'."$maj.$min.".$patch;
         }
 
-        // Determine if this tag already exists, or if this prior to a release
-        $this->line('Running: git rev-parse master '.$current_app_version);
-        // $pre_release = trim(shell_exec('git rev-parse '.$use_branch.' '.$current_app_version.' 2>&1 1> /dev/null'));
-
-        if ($use_branch == 'develop') {
+        if ($use_branch === 'develop' && ! str_ends_with($app_version, '-pre')) {
             $app_version = $app_version.'-pre';
         }
 
+        $full_hash_version = str_replace($version[0], $app_version, $full_hash_version);
         $full_app_version = $app_version.' - build '.$build_version.'-'.$hash_version;
 
-        $array = var_export(
-            [
-                'app_version' => $app_version,
-                'full_app_version' => $full_app_version,
-                'build_version' => $build_version,
-                'prerelease_version' => $prerelease_version,
-                'hash_version' => $hash_version,
-                'full_hash' => $full_hash_version,
-                'branch' => $git_branch, ],
-            true
-        );
+        $content = <<<PHP
+        <?php
 
-        // Construct our file content
-        $content = <<<CON
-<?php
-return $array;
-CON;
+        return [
+            'app_version' => '$app_version',
+            'full_app_version' => '$full_app_version',
+            'build_version' => '$build_version',
+            'prerelease_version' => '$prerelease_version',
+            'hash_version' => '$hash_version',
+            'full_hash' => '$full_hash_version',
+            'branch' => '$git_branch',
+        ];
 
-        // And finally write the file and output the current version
+        PHP;
+
         \File::put($versionFile, $content);
-        $this->info('Setting NEW version: '.$full_app_version.' ('.$git_branch.')');
+        info('New version: '.$full_app_version.' ('.$git_branch.')');
+
+        info('Building JS/CSS assets...');
+        passthru('npm run prod', $exitCode);
+
+        if ($exitCode !== 0) {
+            $this->error('Asset build failed with exit code '.$exitCode);
+        } else {
+            info('Assets built successfully.');
+        }
     }
 }

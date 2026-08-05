@@ -327,4 +327,78 @@ class BulkEditAssetsTest extends TestCase
             $this->assertEquals('Original Encrypted Text', Crypt::decrypt($asset->{$encrypted->db_column}));
         });
     }
+
+    public function test_same_origin_referer_is_stored_as_bulk_back_url()
+    {
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $assets = Asset::factory()->count(2)->create();
+        $originUrl = route('hardware.index').'?status_type=Deployed';
+
+        $this->actingAs($user)
+            ->from($originUrl)
+            ->post('/hardware/bulkedit', [
+                'ids' => $assets->pluck('id')->toArray(),
+                'bulk_actions' => 'edit',
+                'sort' => 'id',
+                'order' => 'asc',
+            ])
+            ->assertSessionHas('bulk_back_url', $originUrl);
+    }
+
+    public function test_offsite_referer_is_not_stored_as_bulk_back_url()
+    {
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $assets = Asset::factory()->count(2)->create();
+
+        $this->actingAs($user)
+            ->from('https://evil.example.com/phish')
+            ->post('/hardware/bulkedit', [
+                'ids' => $assets->pluck('id')->toArray(),
+                'bulk_actions' => 'edit',
+                'sort' => 'id',
+                'order' => 'asc',
+            ])
+            ->assertSessionMissing('bulk_back_url');
+    }
+
+    public function test_bulk_update_redirects_to_stashed_same_origin_url()
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $originUrl = route('hardware.index').'?status_type=Deployed';
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => $originUrl])
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect($originUrl);
+    }
+
+    public function test_bulk_update_falls_back_to_hardware_index_when_stashed_url_is_missing()
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect(route('hardware.index'));
+    }
+
+    public function test_bulk_update_ignores_poisoned_stashed_url()
+    {
+        // If the write-side gate were ever bypassed, the read-side
+        // helper coalescing must still keep the redirect on-domain.
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => 'https://evil.example.com/steal-session'])
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect(route('hardware.index'));
+    }
 }

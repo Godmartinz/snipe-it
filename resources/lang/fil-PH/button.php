@@ -3,6 +3,7 @@
 return [
     'actions' => 'Ang mga aksyon',
     'add' => 'Magdagdag ng bago',
+    'back' => 'Bumalik',
     'cancel' => 'I-kansela',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'I-delete',

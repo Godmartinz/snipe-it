@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Zurückgenommen über Massen-Rücknahme in der Lizenzübersicht',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Alle Plätze herausgeben',
             'modal' => 'Diese Aktion wird einen Platz für den ersten verfügbaren Benutzer herausgeben. | Diese Aktion wird alle :available_seats_count Plätze an die ersten verfügbaren Benutzer herausgeben. Ein Benutzer wird als verfügbar für diesen Platz betrachtet, wenn er diese Lizenz noch nicht zugewiesen hat und die "Lizenzen automatisch zuweisen" Eigenschaft auf dem Benutzerkonto aktiviert ist.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nichts zu tun. Es gibt keine Benutzer, denen diese Lizenz noch nicht zugewiesen ist.',
             'log_msg' => 'Herausgegeben über Massen-Herausgeben in Lizenzübersicht',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

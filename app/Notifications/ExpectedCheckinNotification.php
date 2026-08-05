@@ -56,7 +56,7 @@ class ExpectedCheckinNotification extends Notification
         $message = (new MailMessage)->markdown('notifications.markdown.expected-checkin',
             [
                 'expected_checkin_date' => $this->params->expected_checkin,
-                'date' => Helper::getFormattedDateObject($this->params->expected_checkin, 'date', false),
+                'date' => Helper::getFormattedDateObject($this->params->expected_checkin, 'datetime', false),
                 'asset' => $this->params->display_name,
                 'serial' => $this->params->serial,
                 'asset_tag' => $this->params->asset_tag,

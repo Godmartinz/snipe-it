@@ -22,7 +22,7 @@ class MergeUsersTest extends TestCase
         Asset::factory()->count(3)->assignedToUser($user2)->create();
         Asset::factory()->count(3)->assignedToUser($user_to_merge_into)->create();
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -50,7 +50,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->licenses->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -78,7 +78,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->accessories->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -106,7 +106,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->consumables->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -134,7 +134,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->uploads->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -162,7 +162,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->acceptances->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -190,7 +190,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->userlog->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],

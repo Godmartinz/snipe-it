@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Checked in via bulk license checkin in license GUI',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Entrega de todos os lugares',
             'modal' => 'Esta ação entregará um lugar para o primeiro usuário disponível. Esta ação entregará todos os :available_seats_count lugares para os primeiros utilizadores disponíveis. Um utilizador é considerado disponível para este lugar se ele ainda não tiver essa licença reservada para ele, e a propriedade de Licença Atribuir Automaticamente está ativada na sua conta de utilizador.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nada a fazer. Não há utilizadores sem essa licença atribuída.',
             'log_msg' => 'Entrega feita através da entrega em massa da licença',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

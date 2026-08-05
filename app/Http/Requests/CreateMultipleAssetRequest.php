@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -26,8 +27,20 @@ class CreateMultipleAssetRequest extends ImageUploadRequest // should I extend f
     {
         parent::prepareForValidation();
 
+        if ($this->filled('purchase_cost') && ! is_float($this->input('purchase_cost')) && preg_match('/^[\d.,]+$/', (string) $this->input('purchase_cost'))) {
+            $this->merge(['purchase_cost' => Helper::ParseCurrency($this->input('purchase_cost'))]);
+        }
+
         if (Setting::getSettings()->full_multiple_companies_support == '1' && ! $this->user()->isSuperUser()) {
-            $this->mergeIfMissing(['company_id' => $this->user()->company_id]);
+            // Default the new asset's company to the first company the actor is
+            // pivoted to. The pivot is the source of truth for membership; the
+            // legacy users.company_id scalar is no longer consulted for scoping.
+            $primaryCompanyId = $this->user()->companies()
+                ->orderBy('companies.id')
+                ->value('companies.id');
+            if ($primaryCompanyId) {
+                $this->mergeIfMissing(['company_id' => (int) $primaryCompanyId]);
+            }
         }
     }
 

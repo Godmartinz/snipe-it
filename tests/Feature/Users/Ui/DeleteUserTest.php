@@ -61,8 +61,8 @@ class DeleteUserTest extends TestCase
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $superuser = User::factory()->superuser()->create();
-        $userFromA = User::factory()->deleteUsers()->for($companyA)->create();
-        $userFromB = User::factory()->deleteUsers()->for($companyB)->create();
+        $userFromA = User::factory()->deleteUsers()->forCompany($companyA)->create();
+        $userFromB = User::factory()->deleteUsers()->forCompany($companyB)->create();
 
         $response = $this->followingRedirects()->actingAs($userFromA)
             ->delete(route('users.destroy', ['user' => $userFromB->id]))

@@ -45,6 +45,7 @@ return [
     'redirect_to_type' => 'Անցնել :type
 ',
     'redirect_to_checked_out_to' => 'Անցնել հանձնված՝',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Ընտրել կարգավճակ',
     'serial' => 'Սերիական համար',
     'serial_required' => ':number ակտիվը պահանջում է սերիական համար',
@@ -53,6 +54,7 @@ return [
     'tag' => 'Ակտիվի պիտակ',
     'update' => 'Թարմացնել ակտիվը',
     'warranty' => 'Երաշխիքային ժամկետ',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Ժամկետի ավարտ',
     'years' => 'տարիներ',
     'asset_location' => 'Թարմացնել ակտիվի տեղադիրքը',
@@ -67,4 +69,6 @@ return [
     'optional_infos' => 'Հավելայլ տեղեկություններ',
     'order_details' => 'Պատվերի հետ կապված տեղեկություններ',
     'calc_eol' => 'Եթե EOL ամսաթիվը դատարկվում է, օգտագործել ավտոմատ EOL հաշվարկ՝ հիմնված գնման ամսաթվի և EOL տոկոսադրույքի վրա։',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

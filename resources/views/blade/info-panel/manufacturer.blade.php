@@ -1,6 +1,7 @@
 @props([
-    'manufacturer' => null,
-    'asset' => null,
+    'infoPanelObj' => null,
+    'manufacturer' => $infoPanelObj->model?->manufacturer ?? $infoPanelObj->manufacturer,
+
 ])
 
 
@@ -35,10 +36,10 @@
                 @endif
 
 
-                    @if(($asset) && ($asset->manufacturer) && ($asset->manufacturer->warranty_lookup_url))
+                @if ($manufacturer->warranty_lookup_url)
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                        {{ $asset->present()->dynamicUrl($asset->manufacturer->warranty_lookup_url) }}
+                        {{ $infoPanelObj->present()->dynamicUrl($manufacturer->warranty_lookup_url) }}
                     </x-info-element.url>
                     <br>
                 @endif
@@ -54,7 +55,7 @@
                 @if($manufacturer->support_url)
                     <x-icon type="external-link" class="fa-fw"/>
                     <x-info-element.url>
-                        {{ $manufacturer->support_url }}
+                        {{ $infoPanelObj->present()->dynamicUrl($manufacturer->support_url) }}
                     </x-info-element.url>
                     <br>
                 @endif

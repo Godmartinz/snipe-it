@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Раздолжи преку групно раздолжување во интерфејсот за лиценци',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Задолжи ги сите места',
             'modal' => 'Оваа акција ќе го задолжи на првиот достапен корисник. | Оваа акција ќе ги задолжи :available_seats_count места за првиот достапен корисник. Корисникот се смета за достапен за ова седиште ако веќе ја немаат задолжено оваа лиценца, и автоматското доделување лиценци е овозможено на нивната сметка.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Не треба ништо да се прави. Нема корисници што ја немаат доделено оваа лиценца.',
             'log_msg' => 'Задолжено преку интерфејсот за групно задолжување лиценци',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

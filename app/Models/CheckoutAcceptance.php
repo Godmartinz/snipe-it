@@ -217,7 +217,7 @@ class CheckoutAcceptance extends Model
         if ($data['logo'] != null) {
             $pdf->writeHTML('<img src="@'.$data['logo'].'">', true, 0, true, 0, '');
         } else {
-            $pdf->writeHTML('<h3>'.$data['site_name'].'</h3><br /><br />', true, 0, true, 0, 'C');
+            $pdf->writeHTML('<h3>'.e($data['site_name']).'</h3><br /><br />', true, 0, true, 0, 'C');
         }
 
         $pdf->Ln();
@@ -243,13 +243,13 @@ class CheckoutAcceptance extends Model
         if ($data['item_serial'] != null) {
             $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
         }
-        if (!empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
+        if (! empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
             foreach ($data['custom_fields'] as $customField) {
                 $label = $customField['label'] ?? null;
                 $value = $customField['value'] ?? null;
 
                 if (($label !== null) && ($value !== null) && ($value !== '')) {
-                    $pdf->writeHTML(e((string) $label) . ': ' . e((string) $value), true, 0, true, 0, '');
+                    $pdf->writeHTML(e((string) $label).': '.e((string) $value), true, 0, true, 0, '');
                 }
             }
         }
@@ -259,7 +259,7 @@ class CheckoutAcceptance extends Model
         }
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
-        $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.$data['employee_num'].')' : ''), true, 0, true, 0, '');
+        $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.e($data['employee_num']).')' : ''), true, 0, true, 0, '');
         if ($data['email'] != null) {
             $pdf->writeHTML(trans('general.email').': '.e($data['email']), true, 0, true, 0, '');
         }
@@ -267,13 +267,18 @@ class CheckoutAcceptance extends Model
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
 
-        // Break the EULA into lines based on newlines, and check each line for RTL or CJK characters
-        $eula_lines = preg_split("/\r\n|\n|\r/", $data['eula']);
+        // Break the EULA into markdown blocks separated by blank lines (rather than splitting on every
+        // newline), and check each block for RTL or CJK characters. Splitting on blank lines keeps
+        // multi-line markdown constructs - e.g. nested lists - together in a single block, so Parsedown
+        // can render them correctly. Blank lines are Parsedown's own block boundaries, so rendering
+        // block-by-block matches the whole-document rendering used for the acceptance email; splitting
+        // on every newline previously flattened nested lists into a single flat list (#18176).
+        $eula_blocks = preg_split('/\R(?:[ \t]*\R)+/', $data['eula']);
 
-        foreach ($eula_lines as $eula_line) {
-            Helper::hasRtl($eula_line) ? $pdf->setRTL(true) : $pdf->setRTL(false);
-            Helper::isCjk($eula_line) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
-            $pdf->writeHTML(Helper::parseEscapedMarkedown($eula_line), true, 0, true, 0, '');
+        foreach ($eula_blocks as $eula_block) {
+            Helper::hasRtl($eula_block) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+            Helper::isCjk($eula_block) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+            $pdf->writeHTML(Helper::parseEscapedMarkedown($eula_block), true, 0, true, 0, '');
         }
         $pdf->Ln();
         $pdf->Ln();
@@ -300,6 +305,5 @@ class CheckoutAcceptance extends Model
         $pdf->writeHTML(trans('general.accepted_date').': '.e($data['accepted_date']), true, 0, true, 0, '');
 
         return $pdf->Output($pdf_filename, 'S');
-
     }
 }

@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Sprawdzone poprzez sprawdzenie licencji zbiorczej w interfejsie licencyjnym',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Zamów wszystkie miejsca',
             'modal' => 'Ta akcja obejmie jedno miejsce pierwszemu dostępnemu użytkownikowi. | Ta akcja obejmie wszystkie miejsca :available_seats_count dla pierwszych dostępnych użytkowników. Użytkownik jest uważany za dostępny dla tego miejsca, jeśli nie ma jeszcze tej licencji wyrejestrowanej dla nich, a własność automatycznego przypisywania licencji jest włączona na ich koncie użytkownika.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nic do zrobienia. Nie ma żadnych użytkowników, którzy nie mają jeszcze przypisanej im tej licencji.',
             'log_msg' => 'Zamówione za pomocą licencji masowej w interfejsie licencyjnym',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Hromadne prevziať v rozhraní pre správu licencií',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Odovzdať všetky sloty',
             'modal' => 'Táto akcia odovzdá jeden slot prvému dostupnému používateľovi. | Táto akcia odovzdá všetkých :available_seats_count slotov prvých dostupných používateľom. Používateľ je považovaný za dostupného v prípade, ak mu ešte nebola odovzdaná táto licencia a daný používateľ ma povolené automatické priradzovanie licencií.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Nie je možné zrealizovať. Nezostal žiaden používateľ, ktorý by túto licenciu ešte nemal priradenú.',
             'log_msg' => 'Hromadne odovzdať v rozhraní pre správu licencií',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

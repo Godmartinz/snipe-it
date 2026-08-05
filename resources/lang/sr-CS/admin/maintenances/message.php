@@ -18,4 +18,11 @@ return [
     'asset_maintenance_incomplete' => 'Nije još završeno',
     'warranty' => 'Garancija',
     'not_warranty' => 'Bez garancije',
+    'complete' => [
+        'confirm' => 'Da li zaista želite da označite ovo održavanje kao završeno? To se ne može poništiti.',
+        'success' => 'Održavanje je označeno kao završeno.',
+        'error' => 'Pojavio se problem pri označavanju ovog održavanja završenim. Molim vas pokušajte ponovo.',
+    ],
+    'bulk_delete' => 'Nije obrisan nijedan zapis održavanja (:skipped preskočeno).|Obrisano :count zapisa održavanja. (:skipped preskočeno)|Obrisano :count zapisa održavanja. (:skipped preskočeno)',
+    'bulk_complete' => 'Nijedan zapis održavanja nije označen kao završen (:skipped preskočeno ili već završeno).|Označeno je :count zapisa održavanja kao završeno. (:skipped preskočeno ili već završeno)|Označeno :count zapisa održavanja kao završeno. (:skipped preskočeno ili već završeno)',
 ];

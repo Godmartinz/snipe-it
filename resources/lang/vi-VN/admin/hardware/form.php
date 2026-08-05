@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Quay lại tất cả :type',
     'redirect_to_type' => 'Đi tới :type',
     'redirect_to_checked_out_to' => 'Chuyển đến mục Đã cấp phát',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Lựa chọn loại tình trạng',
     'serial' => 'Số Sê-ri',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Thẻ tài sản',
     'update' => 'Cập nhật tài sản',
     'warranty' => 'Bảo hành',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Hết hạn bảo hành',
     'years' => 'năm',
     'asset_location' => 'Cập nhật vị trí tài sản',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Thông tin bổ sung',
     'order_details' => 'Thông tin đơn hàng',
     'calc_eol' => 'Nếu để trống ngày hết vòng đời (EOL), hệ thống sẽ tự động tính toán dựa trên ngày mua và tỷ lệ EOL.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

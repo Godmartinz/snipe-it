@@ -217,6 +217,11 @@ class SearchableTraitTest extends TestCase
 
     /**
      * Test License structured filter search on attributes
+     *
+     * The serial-key filter case actor holds viewKeys since Api\LicensesController
+     * routes viewKeys-less callers through TextSearchWithoutSerial, which strips
+     * `serial` from the searchable attribute set (see the FD-56674 fix). The
+     * inverse behavior for non-viewKeys callers is pinned in LicenseIndexTest.
      */
     public function test_license_structured_filter_on_attributes()
     {
@@ -230,7 +235,7 @@ class SearchableTraitTest extends TestCase
             ->assertOk()
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->etc());
 
-        $this->actingAsForApi(User::factory()->viewLicenses()->create())
+        $this->actingAsForApi(User::factory()->viewLicenses()->viewKeysLicenses()->create())
             ->getJson(route('api.licenses.index', [
                 'filter' => json_encode(['serial' => 'ADOBE']),
             ]))
@@ -570,6 +575,27 @@ class SearchableTraitTest extends TestCase
             ->getJson(route('api.assets.index', ['search' => '']))
             ->assertOk()
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 3)->etc());
+    }
+
+    /**
+     * Regression: passing search as an array (?search[]=foo) must not throw
+     * "Array to string conversion" — values should be joined and searched normally.
+     */
+    public function test_array_search_param_does_not_throw()
+    {
+        Asset::factory()->create(['name' => 'ArraySearchMacBook']);
+        Asset::factory()->create(['name' => 'ArraySearchDell']);
+
+        // search[]=ArraySearchMacBook simulates ?search[]=ArraySearchMacBook in the URL
+        $this->actingAsForApi(User::factory()->viewAssets()->create())
+            ->getJson(route('api.assets.index', ['search' => ['ArraySearchMacBook']]))
+            ->assertOk()
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->etc());
+
+        // Multiple array values must not throw — exact match count depends on join semantics
+        $this->actingAsForApi(User::factory()->viewAssets()->create())
+            ->getJson(route('api.assets.index', ['search' => ['ArraySearchMacBook', 'ArraySearchDell']]))
+            ->assertOk();
     }
 
     /**

@@ -3,7 +3,7 @@
 return [
 
     'does_not_exist' => '狀態標籤不存在',
-    'deleted_label' => 'Deleted Status Label',
+    'deleted_label' => '已刪除的狀態標籤',
     'assoc_assets' => '至少還有一個資產與此狀態標籤關聯，目前不能被删除，請確認後重試。 ',
 
     'create' => [
@@ -20,6 +20,8 @@ return [
         'confirm' => '您確定要刪除此狀態標籤嗎？',
         'error' => '刪除狀態標籤失敗，請重試。',
         'success' => '刪除狀態標籤成功。',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

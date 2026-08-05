@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Ямар ч загвар сонгогдоогүй тул юу ч устаагүй.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count ширхэг загвар устсан ба :fail_count ширхэг загвар одоо хүртэл хөрөнгөтэй холбоотой байгаа тул устаагүй.',
     ],

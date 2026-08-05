@@ -13,15 +13,7 @@
         <x-box>
 
             <x-slot:bulkactions>
-                <x-table.bulk-actions
-                    name='category'
-                    action_route="{{route('categories.bulk.delete')}}"
-                    model_name="category"
-                >
-                @can('delete', App\Models\Category::class)
-                    <option>Delete</option>
-                @endcan
-                </x-table.bulk-actions>
+                <x-table.bulk-categories />
             </x-slot:bulkactions>
 
             <x-table
@@ -29,6 +21,7 @@
                     buttons="categoryButtons"
                     fixed_right_number="1"
                     fixed_number="1"
+                    use_sticky_css
                     show_advanced_search="true"
                     api_url="{{ route('api.categories.index') }}"
                     :presenter="\App\Presenters\CategoryPresenter::dataTableLayout()"

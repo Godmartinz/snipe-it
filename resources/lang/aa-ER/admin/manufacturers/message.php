@@ -25,7 +25,7 @@ return [
         'confirm' => 'crwdns901:0crwdne901:0',
         'error' => 'crwdns1126:0crwdne1126:0',
         'success' => 'crwdns13890:0crwdne13890:0',
-        'bulk_success' => 'crwdns13892:0crwdne13892:0',
+        'bulk_success' => 'crwdns15049:0crwdne15049:0',
         'partial_success' => 'crwdns13894:0crwdne13894:0',
     ],
 

@@ -3,6 +3,7 @@
 return [
     'actions' => 'Handlinger',
     'add' => 'Tilføj Ny',
+    'back' => 'Tilbage',
     'cancel' => 'Annuller',
     'checkin_and_delete' => 'Tjek alt ind og slet bruger',
     'delete' => 'Slet',

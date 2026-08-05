@@ -10,11 +10,15 @@ use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
 use App\Mail\UnacceptedAssetReminderMail;
+use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Component;
+use App\Models\Consumable;
 use App\Models\Group;
+use App\Models\License;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
@@ -112,6 +116,14 @@ class UsersController extends Controller
         $user->display_name = $request->input('display_name');
         if ($request->filled('password')) {
             $user->password = bcrypt($request->input('password'));
+        } else {
+            // SaveUserRequest only skips password validation when the
+            // user is being created deactivated. If we got here with no
+            // password, the user cannot log in anyway, so store the
+            // noPassword placeholder raw. Hash::check at login always
+            // fails against a plain string, so no authentication path
+            // can ever match this value.
+            $user->password = $user->noPassword();
         }
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
@@ -123,7 +135,7 @@ class UsersController extends Controller
         $user->mobile = $request->input('mobile');
         $user->location_id = $request->input('location_id', null);
         $user->department_id = $request->input('department_id', null);
-        $user->company_id = Company::getIdForUser($request->input('company_id', null));
+        $companyIds = array_filter(array_map('intval', (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))));
         $user->manager_id = $request->input('manager_id', null);
         $user->notes = $request->input('notes');
         $user->address = $request->input('address', null);
@@ -153,6 +165,7 @@ class UsersController extends Controller
         }
 
         if ($user->save()) {
+            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
 
             if (($user->activated == '1') && ($user->email != '') && ($request->input('send_welcome') == '1')) {
 
@@ -164,7 +177,7 @@ class UsersController extends Controller
 
             }
 
-            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+            if (auth()->user()->isSuperUser() && auth()->user()->can('editableOnDemo')) {
                 $user->groups()->sync($request->input('groups'));
             }
 
@@ -205,7 +218,9 @@ class UsersController extends Controller
     {
 
         $this->authorize('update', $user);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
         $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
@@ -275,7 +290,7 @@ class UsersController extends Controller
         $user->phone = $request->input('phone');
         $user->mobile = $request->input('mobile');
         $user->location_id = $request->input('location_id', null);
-        $user->company_id = Company::getIdForUser($request->input('company_id', null));
+        $companyIds = array_filter(array_map('intval', (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))));
         $user->manager_id = $request->input('manager_id', null);
         $user->notes = $request->input('notes');
         $user->department_id = $request->input('department_id', null);
@@ -291,15 +306,14 @@ class UsersController extends Controller
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
 
-        // Set this here so that we can overwrite it later if the user is an admin or superadmin
-        $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
-
-        // Update the location of any assets checked out to this user
-        Asset::where('assigned_type', User::class)
-            ->where('assigned_to', $user->id)
-            ->update(['location_id' => $request->input('location_id', null)]);
-
-        // check for permissions related fields and only set them if the user has permission to edit them
+        // Permission-gated fields: `activated` lives inside this gate too.
+        // An earlier version of this method assigned `activated` right
+        // before the gate on the theory that the gate would overwrite it.
+        // That let anyone with users.edit toggle an admin's activated flag
+        // by POSTing a full edit payload — the gate would deny the second
+        // assignment but the first had already stuck. Every auth-field
+        // write must live inside this branch so an unauthorized caller
+        // can't reach past the gate on any of them.
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
             $user->username = trim($request->input('username'));
@@ -311,11 +325,14 @@ class UsersController extends Controller
                 $user->password = bcrypt($request->input('password'));
             }
 
-            $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
-                requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permission')),
-                authenticatedUser: $authenticatedUser,
-                originalPermissions: $orig_permissions_array,
-            ));
+            if ($request->has('permission')) {
+                $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
+                    requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permission')),
+                    authenticatedUser: $authenticatedUser,
+                    originalPermissions: $orig_permissions_array,
+                    targetUser: $user,
+                ));
+            }
 
             // Only save groups if the user is a superuser
             if (auth()->user()->isSuperUser()) {
@@ -333,6 +350,8 @@ class UsersController extends Controller
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
+            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.update'));
@@ -477,7 +496,7 @@ class UsersController extends Controller
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
-        $user_to_clone = User::with('userloc')->withTrashed()->find($user->id);
+        $user_to_clone = User::with('userloc', 'companies')->withTrashed()->find($user->id);
         // Make sure they can view this particular user
         $this->authorize('view', $user_to_clone);
 
@@ -534,54 +553,76 @@ class UsersController extends Controller
             // Open output stream
             $handle = fopen('php://output', 'w');
 
+            $headers = [
+                // strtolower to prevent Excel from trying to open it as a SYLK file
+                strtolower(trans('general.id')),
+                trans('admin/companies/table.title'),
+                trans('admin/users/table.title'),
+                trans('general.employee_number'),
+                trans('admin/users/table.first_name'),
+                trans('admin/users/table.last_name'),
+                trans('admin/users/table.name'),
+                trans('admin/users/table.display_name'),
+                trans('admin/users/table.username'),
+                trans('admin/users/table.email'),
+                trans('admin/users/table.phone'),
+                trans('admin/users/table.mobile'),
+                trans('general.website'),
+                trans('general.address'),
+                trans('general.city'),
+                trans('general.state'),
+                trans('general.country'),
+                trans('general.zip'),
+                trans('admin/users/table.manager'),
+                trans('admin/users/table.location'),
+                trans('general.department'),
+                trans('general.assets'),
+                trans('general.licenses'),
+                trans('general.accessories'),
+                trans('general.consumables'),
+                trans('general.groups'),
+                trans('general.permissions'),
+                trans('general.notes'),
+                trans('admin/users/table.activated'),
+                trans('general.created_at'),
+                trans('general.importer.vip'),
+                trans('admin/users/general.remote'),
+                trans('general.language'),
+                trans('general.autoassign_licenses'),
+                trans('general.ldap_sync'),
+                trans('admin/users/general.two_factor_enrolled'),
+                trans('admin/users/general.two_factor_active'),
+                trans('admin/users/table.managed_users'),
+                trans('admin/users/table.managed_locations'),
+                trans('admin/users/general.department_manager'),
+                trans('general.created_by'),
+                trans('general.updated_at'),
+                trans('general.start_date'),
+                trans('general.end_date'),
+                trans('admin/users/table.last_login'),
+                trans('admin/licenses/table.deleted_at'),
+            ];
+
+            fputcsv($handle, $headers);
+
             $users = User::with(
                 'assets',
                 'accessories',
                 'consumables',
-                'department',
+                'department.manager',
                 'licenses',
                 'manager',
                 'groups',
                 'userloc',
-                'company'
-            )->orderBy('created_at', 'DESC')
+                'companies',
+                'createdBy'
+            )->withCount(['managesUsers as manages_users_count', 'managedLocations as manages_locations_count'])
+                ->orderBy('created_at', 'DESC')
                 ->chunk(500, function ($users) use ($handle) {
-                    $headers = [
-                        // strtolower to prevent Excel from trying to open it as a SYLK file
-                        strtolower(trans('general.id')),
-                        trans('admin/companies/table.title'),
-                        trans('admin/users/table.title'),
-                        trans('general.employee_number'),
-                        trans('admin/users/table.first_name'),
-                        trans('admin/users/table.last_name'),
-                        trans('admin/users/table.name'),
-                        trans('admin/users/table.username'),
-                        trans('admin/users/table.email'),
-                        trans('admin/users/table.manager'),
-                        trans('admin/users/table.location'),
-                        trans('general.department'),
-                        trans('general.assets'),
-                        trans('general.licenses'),
-                        trans('general.accessories'),
-                        trans('general.consumables'),
-                        trans('general.groups'),
-                        trans('general.permissions'),
-                        trans('general.notes'),
-                        trans('admin/users/table.activated'),
-                        trans('general.created_at'),
-                    ];
-
-                    fputcsv($handle, $headers);
 
                     $formatter = new EscapeFormula('`');
 
                     foreach ($users as $user) {
-                        $user_groups = '';
-
-                        foreach ($user->groups as $user_group) {
-                            $user_groups .= $user_group->name.', ';
-                        }
-
                         $permissionstring = '';
 
                         if ($user->isSuperUser()) {
@@ -595,14 +636,23 @@ class UsersController extends Controller
                         // Add a new row with data
                         $values = [
                             $user->id,
-                            ($user->company) ? $user->company->name : '',
+                            $user->companies->pluck('name')->implode('|'),
                             $user->jobtitle,
                             $user->employee_num,
                             $user->first_name,
                             $user->last_name,
-                            $user->display_name,
+                            $user->getFullNameAttribute(),
+                            $user->getRawOriginal('display_name'),
                             $user->username,
                             $user->email,
+                            $user->phone,
+                            $user->mobile,
+                            $user->website,
+                            $user->address,
+                            $user->city,
+                            $user->state,
+                            $user->country,
+                            $user->zip,
                             ($user->manager) ? $user->manager->display_name : '',
                             ($user->userloc) ? $user->userloc->name : '',
                             ($user->department) ? $user->department->name : '',
@@ -610,11 +660,27 @@ class UsersController extends Controller
                             $user->licenses->count(),
                             $user->accessories->count(),
                             $user->consumables->count(),
-                            $user_groups,
+                            $user->groups->pluck('name')->implode(', '),
                             $permissionstring,
                             $user->notes,
                             ($user->activated == '1') ? trans('general.yes') : trans('general.no'),
                             $user->created_at,
+                            ($user->vip == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->remote == '1') ? trans('general.yes') : trans('general.no'),
+                            $user->locale,
+                            ($user->autoassign_licenses == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->ldap_import == '1') ? trans('general.yes') : trans('general.no'),
+                            ($user->two_factor_active_and_enrolled()) ? trans('general.yes') : trans('general.no'),
+                            ($user->two_factor_active()) ? trans('general.yes') : trans('general.no'),
+                            $user->manages_users_count,
+                            $user->manages_locations_count,
+                            ($user->department && $user->department->manager) ? $user->department->manager->display_name : '',
+                            ($user->createdBy) ? $user->createdBy->display_name : '',
+                            $user->updated_at,
+                            $user->start_date,
+                            $user->end_date,
+                            $user->last_login,
+                            $user->deleted_at,
                         ];
 
                         // CSV_ESCAPE_FORMULAS is set to false in the .env
@@ -649,9 +715,37 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::withInventoryRelations($id)->first();
+        $actor = auth()->user();
+        $canViewAssets = $actor->can('view', Asset::class);
+        $canViewLicenses = $actor->can('view', License::class);
+        $canViewAccessories = $actor->can('view', Accessory::class);
+        $canViewConsumables = $actor->can('view', Consumable::class);
+        $canViewComponents = $actor->can('view', Component::class);
 
-        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
+        $user = User::withInventoryRelations(
+            $id,
+            $canViewAssets,
+            $canViewLicenses,
+            $canViewAccessories,
+            $canViewConsumables,
+            $canViewComponents,
+        )->first();
+
+        $indirectItemsCount = 0;
+        if ($canViewAssets && $user?->assets) {
+            foreach ($user->assets as $asset) {
+                $indirectItemsCount += $asset->assignedAssets->count();
+                if ($canViewComponents) {
+                    $indirectItemsCount += $asset->components->count();
+                }
+                if ($canViewLicenses) {
+                    $indirectItemsCount += $asset->licenses->count();
+                }
+                if ($canViewAccessories) {
+                    $indirectItemsCount += $asset->assignedAccessories->count();
+                }
+            }
+        }
 
         if ($user) {
             $this->authorize('view', $user);
@@ -769,5 +863,41 @@ class UsersController extends Controller
         }
 
         return redirect()->back()->with('error', trans('general.pwd_reset_not_sent'));
+    }
+
+    public function twoFactorReset(User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        if (! $user->twoFactorResettable()) {
+            return redirect()->back()->with('error', trans('general.unauthorized'));
+        }
+
+        if (! auth()->user()->can('canEditAuthFields', $user) || ! auth()->user()->can('editableOnDemo')) {
+            return redirect()->back()->with('error', trans('general.unauthorized'));
+        }
+
+        try {
+            $user->two_factor_secret = null;
+            $user->two_factor_enrolled = 0;
+            $user->saveQuietly();
+
+            $log = new Actionlog;
+            $log->target_type = User::class;
+            $log->target_id = $user->id;
+            $log->item_type = User::class;
+            $log->item_id = $user->id;
+            $log->created_at = date('Y-m-d H:i:s');
+            $log->created_by = auth()->id();
+            $log->logaction('2FA reset');
+
+            return redirect()->route('users.show', $user)
+                ->with('success', trans('admin/settings/general.two_factor_reset_success'));
+        } catch (\Exception $e) {
+            Log::error($e);
+
+            return redirect()->route('users.show', $user)
+                ->with('error', trans('admin/settings/general.two_factor_reset_error'));
+        }
     }
 }

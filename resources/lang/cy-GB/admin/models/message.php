@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Dim modelau wedi dewis, felly dim byd i\'w ddileu.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count model(au) wedi\'i dileu, :fail_count heb eu ddileu gan bod asedau wedi perthnasu iddo.',
     ],

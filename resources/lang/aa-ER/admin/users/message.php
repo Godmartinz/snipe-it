@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'crwdns14254:0crwdne14254:0',
     'declined' => 'crwdns14256:0crwdne14256:0',
+    'accept_signature_write_failed' => 'crwdns15569:0crwdne15569:0',
+    'accept_pdf_write_failed' => 'crwdns15571:0crwdne15571:0',
     'bulk_manager_warn' => 'crwdns1849:0crwdne1849:0',
     'user_exists' => 'crwdns787:0crwdne787:0',
     'cannot_delete' => 'crwdns14468:0crwdne14468:0',
     'user_not_found' => 'crwdns14470:0crwdne14470:0',
     'user_login_required' => 'crwdns789:0crwdne789:0',
     'user_has_no_assets_assigned' => 'crwdns11868:0crwdne11868:0',
+    'nothing_currently_assigned' => 'crwdns15149:0crwdne15149:0',
     'user_password_required' => 'crwdns790:0crwdne790:0',
     'insufficient_permissions' => 'crwdns791:0crwdne791:0',
+    'auth_fields_denied' => 'crwdns15511:0crwdne15511:0',
     'user_deleted_warning' => 'crwdns1133:0crwdne1133:0',
     'ldap_not_configured' => 'crwdns1412:0crwdne1412:0',
     'password_resets_sent' => 'crwdns5922:0crwdne5922:0',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'crwdns6087:0crwdne6087:0',
     'user_has_no_email' => 'crwdns10536:0crwdne10536:0',
     'log_record_not_found' => 'crwdns11844:0crwdne11844:0',
+
+    'impersonate' => [
+        'started' => 'crwdns15117:0crwdne15117:0',
+        'stopped' => 'crwdns15119:0crwdne15119:0',
+        'cannot_impersonate_self' => 'crwdns15121:0crwdne15121:0',
+        'cannot_impersonate_superuser' => 'crwdns15123:0crwdne15123:0',
+        'target_not_active' => 'crwdns15125:0crwdne15125:0',
+        'impersonator_missing' => 'crwdns15127:0crwdne15127:0',
+    ],
 
     'success' => [
         'create' => 'crwdns792:0crwdne792:0',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'crwdns1889:0crwdne1889:0',
         'multi_company_items_assigned' => 'crwdns12754:0crwdne12754:0',
         'no_pending_acceptances' => 'crwdns14720:0crwdne14720:0',
+        'company_not_permitted' => 'crwdns15565:0crwdne15565:0',
     ],
 
     'deletefile' => [

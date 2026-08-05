@@ -17,6 +17,8 @@ return [
         'confirm' => 'Sei sicuro di voler eliminare questo reparto?',
         'error' => 'Si è verificato un problema eliminando il reparto. Riprova.',
         'success' => 'Il reparto è stato eliminato correttamente.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Առաջնային EULA չկա. Ավելացրեք Կարգավորումների միջոցով։',
     'total' => 'Ընդհանուր',
     'remaining' => 'Գործող',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Թարմացնել աքսեսուարը',
     'use_default_eula' => 'Օգտագործել <a href="#" data-toggle="modal" data-target="#eulaModal">առաջնային EULA</a>-ն։',
     'use_default_eula_disabled' => '<del>Օգտագործել առջնային EULA-ն</del> Առաջնային EULA չկա. Ավելացրեք Կարգավորումների միջոցով։',

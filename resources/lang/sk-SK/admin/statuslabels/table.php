@@ -13,6 +13,7 @@ return [
     'pending' => 'Čakajúce',
     'status_type' => 'Typ stavu',
     'show_in_nav' => 'Zobraziť v bočnom menu',
+    'status_label' => 'Stav',
     'title' => 'Stavy',
     'undeployable' => 'Neodovzdateľný',
     'update' => 'Upraviť stav',

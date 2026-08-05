@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Return to all :type',
     'redirect_to_type' => 'עבור ל :type',
     'redirect_to_checked_out_to' => 'עבור לנמסר ל',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'בחר סוג סטטוס',
     'serial' => 'סידורי',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => 'תג נכס',
     'update' => 'עדכון נכס',
     'warranty' => 'אַחֲרָיוּת',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'תפוגת האחריות',
     'years' => 'שנים',
     'asset_location' => 'עדכן מיקום הנכס',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'מידע אופציונלי',
     'order_details' => 'מידע הנוגע להזמנה',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

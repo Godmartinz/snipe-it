@@ -13,6 +13,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -35,7 +36,7 @@ class LicenseCheckinController extends Controller
     {
         // Check if the asset exists
         $license = License::find($licenseSeat->license_id);
-        $this->authorize('checkout', $license);
+        $this->authorize('checkin', $license);
 
         return view('licenses/checkin', compact('licenseSeat'))->with('backto', $backTo);
     }
@@ -69,7 +70,7 @@ class LicenseCheckinController extends Controller
             return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.checkin.error'));
         }
 
-        $this->authorize('checkout', $license);
+        $this->authorize('checkin', $license);
 
         // Declare the rules for the form validation
         $rules = [
@@ -127,10 +128,45 @@ class LicenseCheckinController extends Controller
      * @see LicenseCheckinController::create() method that provides the form view
      * @since [v6.1.1]
      *
-     * @return RedirectResponse
-     *
      * @throws AuthorizationException
      */
+    public function bulkCheckinSelected(Request $request): RedirectResponse
+    {
+        $this->authorize('checkin', License::class);
+
+        $seatIds = $request->input('ids', []);
+
+        if (empty($seatIds)) {
+            return redirect()->back()->with('warning', trans('admin/licenses/general.bulk.checkin_selected.no_seats_selected'));
+        }
+
+        $seats = LicenseSeat::whereIn('id', $seatIds)
+            ->where(function ($query) {
+                $query->whereNotNull('assigned_to')->orWhereNotNull('asset_id');
+            })
+            ->with('license', 'user', 'asset')
+            ->get();
+
+        $count = 0;
+        foreach ($seats as $seat) {
+            if (! $seat->license || ! Gate::allows('checkin', $seat->license)) {
+                continue;
+            }
+            $target = $seat->user ?? $seat->asset;
+            $seat->assigned_to = null;
+            $seat->asset_id = null;
+            if (! $seat->license->reassignable) {
+                $seat->unreassignable_seat = true;
+            }
+            if ($seat->save()) {
+                event(new CheckoutableCheckedIn($seat, $target, auth()->user(), null));
+                $count++;
+            }
+        }
+
+        return redirect()->back()->with('success', trans_choice('admin/licenses/general.bulk.checkin_selected.success', $count, ['count' => $count]));
+    }
+
     public function bulkCheckin(Request $request, $licenseId)
     {
 

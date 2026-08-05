@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\Manufacturers\DeleteManufacturerAction;
+use App\Actions\Manufacturers\DestroyManufacturerAction;
 use App\Exceptions\ItemStillHasChildren;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -43,6 +43,7 @@ class ManufacturersController extends Controller
             'created_at',
             'updated_at',
             'image',
+            'accessories_count',
             'assets_count',
             'consumables_count',
             'components_count',
@@ -116,7 +117,8 @@ class ManufacturersController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $manufacturers->count()) ? $manufacturers->count() : app('api_offset_value');
+        $total = $manufacturers->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -131,7 +133,6 @@ class ManufacturersController extends Controller
                 break;
         }
 
-        $total = $manufacturers->count();
         $manufacturers = $manufacturers->skip($offset)->take($limit)->get();
 
         return (new ManufacturersTransformer)->transformManufacturers($manufacturers, $total);
@@ -212,7 +213,7 @@ class ManufacturersController extends Controller
     {
         $this->authorize('delete', $manufacturer);
         try {
-            DeleteManufacturerAction::run($manufacturer);
+            DestroyManufacturerAction::run($manufacturer);
         } catch (ItemStillHasChildren $e) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.bulk_delete_associations.general_assoc_warning', ['item' => trans('general.manufacturer')])));
         } catch (\Exception $e) {

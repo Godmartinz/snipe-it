@@ -12,7 +12,7 @@
             style="width:100%;"
             aria-label="status_id"
         />
-        {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="status_id" />
     </div>
     <div class="col-md-2 col-sm-2 text-left">
 
@@ -25,7 +25,7 @@
     </div>
 
     <div class="col-md-7 col-sm-11 col-md-offset-3" id="status_helptext">
-        <p id="selected_status_status" style="display:none;"></p>
+        <p id="selected_status_status" role="status" aria-live="polite" aria-atomic="true" style="display:none;"></p>
     </div>
 
 </div>

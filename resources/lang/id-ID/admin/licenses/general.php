@@ -31,6 +31,11 @@ return [
             'log_msg' => 'Dikembalikan melalui pengembalian lisensi massal di GUI lisensi',
         ],
 
+        'checkin_selected' => [
+            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
+            'no_seats_selected' => 'No seats were selected.',
+        ],
+
         'checkout_all' => [
             'button' => 'Berikan Semua Slot Lisensi',
             'modal' => 'Tindakan ini akan meminjamkan atau memberikan satu slot lisensi kepada pengguna pertama yang tersedia. | Tindakan ini akan meminjamkan atau memberikan semua :available_seats_count slot lisensi kepada pengguna pertama yang tersedia. Seorang pengguna dianggap tersedia untuk slot lisensi ini jika mereka belum meminjam atau menerima lisensi ini, dan properti Otomatiskan Penugasan Lisensi diaktifkan pada akun pengguna mereka.',
@@ -42,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Tidak ada yang perlu dilakukan. Tidak ada pengguna yang belum ditetapkan pada lisensi ini.',
             'log_msg' => 'Dipinjamkan atau Diberikan melalui peminjaman atau pemberian lisensi massal di GUI lisensi',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

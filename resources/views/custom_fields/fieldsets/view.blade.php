@@ -33,15 +33,15 @@
                     <tr>
                         {{-- Hide the sorting handle if we can't update the fieldset --}}
                         @can('update', $custom_fieldset)
-                            <th class="col-md-1"><span class="sr-only">{{ trans('admin/custom_fields/general.reorder') }}</span></th>
+                            <th scope="col" class="col-md-1"><span class="sr-only">{{ trans('admin/custom_fields/general.reorder') }}</span></th>
                         @endcan
-                        <th class="col-md-1" style="display: none;">{{ trans('admin/custom_fields/general.order') }}</th>
-                        <th class="col-md-3">{{ trans('admin/custom_fields/general.field_name') }}</th>
-                        <th class="col-md-2">{{ trans('admin/custom_fields/general.field_format') }}</th>
-                        <th class="col-md-2">{{ trans('admin/custom_fields/general.field_element') }}</th>
-                        <th class="col-md-1">{{ trans('admin/custom_fields/general.encrypted') }}</th>
-                        <th class="col-md-1">{{ trans('admin/custom_fields/general.required') }}</th>
-                        <th class="col-md-1"><span class="sr-only">{{ trans('button.remove') }}</span></th>
+                        <th scope="col" class="col-md-1" style="display: none;">{{ trans('admin/custom_fields/general.order') }}</th>
+                        <th scope="col" class="col-md-3">{{ trans('admin/custom_fields/general.field_name') }}</th>
+                        <th scope="col" class="col-md-2">{{ trans('admin/custom_fields/general.field_format') }}</th>
+                        <th scope="col" class="col-md-2">{{ trans('admin/custom_fields/general.field_element') }}</th>
+                        <th scope="col" class="col-md-1">{{ trans('admin/custom_fields/general.encrypted') }}</th>
+                        <th scope="col" class="col-md-1">{{ trans('admin/custom_fields/general.required') }}</th>
+                        <th scope="col" class="col-md-1"><span class="sr-only">{{ trans('button.remove') }}</span></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -67,14 +67,14 @@
                                 @if ($field->pivot->required)
                                     <form method="post" action="{{ route('fields.optional', [$custom_fieldset->id, $field->id]) }}">
                                         @csrf
-                                        <button type="submit" class="btn btn-link"><i class="fa fa-check text-success" aria-hidden="true"></i></button>
+                                        <button type="submit" class="btn btn-link" data-tooltip="true" title="{{ trans('admin/custom_fields/general.make_optional') }}" aria-label="{{ trans('admin/custom_fields/general.make_optional') }}"><i class="fa fa-check text-success" aria-hidden="true"></i></button>
                                     </form>
 
                                 @else
 
                                     <form method="post" action="{{ route('fields.required', [$custom_fieldset->id, $field->id]) }}">
                                         @csrf
-                                        <button type="submit" class="btn btn-link"><i class="fa fa-times text-danger" aria-hidden="true"></i></button>
+                                        <button type="submit" class="btn btn-link" data-tooltip="true" title="{{ trans('admin/custom_fields/general.make_required') }}" aria-label="{{ trans('admin/custom_fields/general.make_required') }}"><i class="fa fa-times text-danger" aria-hidden="true"></i></button>
                                     </form>
                                 @endif
 

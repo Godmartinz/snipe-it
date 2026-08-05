@@ -140,11 +140,11 @@ class CheckoutAccessoryNotification extends Notification
                 ->title(trans('mail.Accessory_Checkout_Notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityTitle')
-                ->fact(trans('mail.assigned_to'), $target->display_name)
-                ->fact(trans('general.qty'), $this->checkout_qty)
-                ->fact(trans('mail.checkedout_from'), $item->location->name ? $item->location->name : '')
-                ->fact(trans('mail.Accessory_Checkout_Notification').' by ', $admin->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->numRemaining())
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('general.qty'), (string) ($this->checkout_qty ?? 1))
+                ->fact(trans('mail.checkedout_from'), $item->location?->name ?: '')
+                ->fact(trans('mail.Accessory_Checkout_Notification').' by ', (string) ($admin?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->numRemaining())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

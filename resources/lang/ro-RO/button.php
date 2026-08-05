@@ -3,6 +3,7 @@
 return [
     'actions' => 'Actiuni',
     'add' => 'Adauga',
+    'back' => 'Inapoi',
     'cancel' => 'Anuleaza',
     'checkin_and_delete' => 'Verifică tot / Șterge Utilizatorul',
     'delete' => 'Sterge',

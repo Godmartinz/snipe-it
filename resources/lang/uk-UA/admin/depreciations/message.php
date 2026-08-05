@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ви впевнені, що хочете видалити цей клас амортизації?',
         'error' => 'Сталася помилка при видаленні класу амортизації. Будь ласка, спробуйте знову.',
         'success' => 'Клас амортизації був успішно видалений.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -3,6 +3,7 @@
 return [
     'actions' => 'Ficilada',
     'add' => 'Kudar Cusub',
+    'back' => 'Dib u noqo',
     'cancel' => 'Jooji',
     'checkin_and_delete' => 'Geli Dhammaan / Tirtir Isticmaalaha',
     'delete' => 'Tirtir',

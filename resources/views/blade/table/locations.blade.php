@@ -11,19 +11,13 @@
 
 
     <x-slot:bulkactions>
-        <x-table.bulk-actions
-            name='location'
-            action_route="{{ route('locations.bulkdelete.show') }}"
-            model_name="location">
-            @can('delete', App\Models\Location::class)
-                <option>{{ trans('general.delete') }}</option>
-            @endcan
-        </x-table.bulk-actions>
+        <x-table.bulk-locations />
     </x-slot:bulkactions>
     
     <x-table
         :$presenter
         :$fixed_right_number
+        use_sticky_css
         show_column_search="true"
         show_advanced_search="false"
         buttons="locationButtons"

@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Zurück zu allen :type',
     'redirect_to_type' => 'Gehe zu :type',
     'redirect_to_checked_out_to' => 'Gehe von herausgegeben zu',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Status Typ auswählen',
     'serial' => 'Seriennummer',
     'serial_required' => 'Asset :number erfordert eine Seriennummer',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Asset Tag',
     'update' => 'Asset Update',
     'warranty' => 'Garantie',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Garantie Ablaufdatum',
     'years' => 'Jahre',
     'asset_location' => 'Standort des Assets aktualisieren',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Optionale Informationen',
     'order_details' => 'Bestellinformationen',
     'calc_eol' => 'Wenn du das EOL-Datum auf Null setzt, dann verwende die automatische EOL-Berechnung basierend auf dem Kaufdatum und der EOL-Rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

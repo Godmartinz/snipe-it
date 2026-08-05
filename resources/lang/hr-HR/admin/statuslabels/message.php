@@ -20,6 +20,8 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovu oznaku statusa?',
         'error' => 'Došlo je do problema s brisanjem oznake stanja. Molim te pokušaj ponovno.',
         'success' => 'Oznaka statusa uspješno je izbrisana.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

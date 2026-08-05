@@ -246,6 +246,58 @@ class AssetAcceptanceTest extends TestCase
         );
     }
 
+    public function test_acceptance_note_cannot_inject_markdown_image_tag(): void
+    {
+        // Regression for GHSA (F41 / Adam Nurudini). A low-privilege user
+        // could submit an acceptance note like `![x](/var/www/html/.env)`,
+        // which Blade's HTML escape leaves intact (the chars are not HTML
+        // metacharacters). CommonMark then expanded it into a real <img>
+        // tag inside the outbound notification, and laravel-mail-auto-embed
+        // resolved the src via file_get_contents() or curl, exfiltrating
+        // arbitrary local files or issuing SSRF requests. The fix registers
+        // a CommonMark extension that overrides the Image renderer so no
+        // <img> tag survives markdown parsing.
+        Event::fake([CheckoutAccepted::class]);
+        Notification::fake();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+
+        $lfrPayload = '![x](/etc/hostname)';
+        $ssrfPayload = '![y](http://169.254.169.254/latest/meta-data/)';
+        $filePayload = '![z](file:///var/www/html/.env)';
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+                'note' => "{$lfrPayload} {$ssrfPayload} {$filePayload}",
+            ])
+            ->assertRedirectToRoute('account.accept')
+            ->assertSessionHas('success');
+
+        Notification::assertSentTo(
+            $checkoutAcceptance,
+            function (AcceptanceItemAcceptedNotification $notification) {
+                $rendered = $notification->toMail()->render();
+
+                // None of the payload targets should survive as an <img src>
+                // in the rendered email. laravel-mail-auto-embed resolves any
+                // surviving img src via file_get_contents() (LFR) or curl (SSRF).
+                // Legitimate header/logo <img> tags with app-controlled src
+                // paths are unaffected. This test targets only user-controlled
+                // src values that Adam's F41 report demonstrated.
+                foreach (['/etc/hostname', '169.254.169.254', '/var/www/html/.env', 'file://'] as $payload) {
+                    $this->assertStringNotContainsString(
+                        $payload,
+                        $rendered,
+                        "Rendered mail contains attacker-controlled path \"{$payload}\" - CommonMark image markdown was not blocked."
+                    );
+                }
+
+                return true;
+            }
+        );
+    }
+
     public function test_admin_can_complete_sign_in_place_acceptance_and_is_redirected_to_selected_destination()
     {
         Event::fake([CheckoutAccepted::class]);

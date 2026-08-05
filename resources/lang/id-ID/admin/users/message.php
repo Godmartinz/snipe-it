@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Pengguna Anda telah berhasil diperbarui, namun entri pengelola Anda tidak disimpan karena manajer yang Anda pilih juga ada dalam daftar pengguna untuk diedit, dan pengguna mungkin bukan manajer mereka sendiri. Silakan pilih pengguna Anda lagi, tidak termasuk manajernya.',
     'user_exists' => 'Pengguna sudah ada!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Pengguna tidak ada atau Anda tidak memiliki izin untuk melihatnya.',
     'user_login_required' => 'Kolom login wajib di-isi',
     'user_has_no_assets_assigned' => 'Tidak ada aset yang saat ini ditetapkan kepada pengguna.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Kata sandi wajib di-isi.',
     'insufficient_permissions' => 'Tidak ada hak akses.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Pengguna ini telah di hapus. Anda harus kembalikan dahulu pengguna ini jika ingin menyunting atau di berikan hak kelola aset.',
     'ldap_not_configured' => 'Integrasi LDAP belum dikonfigurasi untuk instalasi ini.',
     'password_resets_sent' => 'Pengguna terpilih yang diaktifkan dan memiliki alamat email yang valid telah dikirimi tautan pengaturan ulang kata sandi.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Tautan reset kata sandi telah dikirim ke :email!',
     'user_has_no_email' => 'Pengguna ini tidak memiliki alamat email di profil mereka.',
     'log_record_not_found' => 'Catatan log yang cocok untuk pengguna ini tidak dapat ditemukan.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Pengguna sukses di buat.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Kata sandi untuk akun ini dikelola oleh LDAP / Active Directory. Silakan menghubungi departemen TI Anda untuk mengganti kata sandi Anda.',
         'multi_company_items_assigned' => 'Pengguna ini memiliki item yang ditetapkan yang dimiliki oleh company lain. Harap kembalikan item tersebut atau edit entitas mereka.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

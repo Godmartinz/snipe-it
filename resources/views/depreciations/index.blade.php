@@ -10,12 +10,19 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="depreciation">
+
+            <x-slot:bulkactions>
+                <x-table.bulk-depreciations />
+            </x-slot:bulkactions>
+
             <x-table
+                    name="depreciation"
                     show_column_search="false"
                     buttons="depreciationButtons"
                     fixed_right_number="1"
                     fixed_number="1"
+                    use_sticky_css
                     api_url="{{ route('api.depreciations.index') }}"
                     :presenter="\App\Presenters\DepreciationPresenter::dataTableLayout()"
                     export_filename="export-depreciations-{{ date('Y-m-d') }}"

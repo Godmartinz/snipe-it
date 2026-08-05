@@ -16,5 +16,7 @@ return [
         'confirm' => 'இந்த நிறுவனத்தை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'நிறுவனத்தை நீக்குவதில் ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'நிறுவனம் வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

@@ -119,9 +119,9 @@ class CheckinLicenseSeatNotification extends Notification
                 ->title(trans('mail.License_Checkin_Notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'header')
-                ->fact(trans('mail.License_Checkin_Notification').' by ', $admin->display_name ?: 'CLI tool')
-                ->fact(trans('mail.checkedin_from'), $target->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->availCount()->count())
+                ->fact(trans('mail.License_Checkin_Notification').' by ', $admin?->display_name ?: 'CLI tool')
+                ->fact(trans('mail.checkedin_from'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->availCount()->count())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 

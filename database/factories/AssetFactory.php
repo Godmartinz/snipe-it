@@ -40,7 +40,13 @@ class AssetFactory extends Factory
                 return Statuslabel::where('name', 'Ready to Deploy')->first() ?? Statuslabel::factory()->rtd()->create(['name' => 'Ready to Deploy']);
             },
             'created_by' => User::factory()->superuser(),
-            'asset_tag' => $this->faker->unixTime('now'),
+            // Guaranteed unique per faker instance rather than relying on
+            // wall-clock seconds. The previous `unixTime('now')` default
+            // collided with `unique_undeleted:assets,asset_tag` when a
+            // test created assets back-to-back within one second, which
+            // showed up as off-by-one flakiness on GH's slower runners
+            // (e.g. MergeUsersTest asserting 9 but getting 8).
+            'asset_tag' => $this->faker->unique()->numerify('##########'),
             'notes' => 'Created by DB seeder',
             'purchase_date' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get())->format('Y-m-d'),
             'purchase_cost' => $this->faker->randomFloat(2, '299.99', '2999.99'),
@@ -62,7 +68,7 @@ class AssetFactory extends Factory
             // the explicit boolean gets set in the saving() method on the observer
             $asset->asset_eol_date = $this->faker->boolean(5)
                 ? CarbonImmutable::parse($asset->purchase_date)->addMonths(rand(0, 20))->format('Y-m-d')
-                : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model->eol)->format('Y-m-d');
+                : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model?->eol ?? rand(12, 60))->format('Y-m-d');
         });
     }
 

@@ -17,6 +17,8 @@ return [
         'confirm' => 'Sigur doriți să ștergeți acest departament?',
         'error' => 'A apărut o problemă cu ștergerea departamentului. Vă rugăm să încercați din nou.',
         'success' => 'Departamentul a fost șters cu succes.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

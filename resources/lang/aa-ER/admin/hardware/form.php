@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'crwdns12222:0crwdne12222:0',
     'redirect_to_type' => 'crwdns12224:0crwdne12224:0',
     'redirect_to_checked_out_to' => 'crwdns12226:0crwdne12226:0',
+    'redirect_to_bulk_checkout' => 'crwdns15505:0crwdne15505:0',
     'select_statustype' => 'crwdns1167:0crwdne1167:0',
     'serial' => 'crwdns716:0crwdne716:0',
     'serial_required' => 'crwdns13774:0crwdne13774:0',
@@ -50,6 +51,7 @@ return [
     'tag' => 'crwdns719:0crwdne719:0',
     'update' => 'crwdns720:0crwdne720:0',
     'warranty' => 'crwdns721:0crwdne721:0',
+    'warranty_months' => 'crwdns15217:0crwdne15217:0',
     'warranty_expires' => 'crwdns1986:0crwdne1986:0',
     'years' => 'crwdns722:0crwdne722:0',
     'asset_location' => 'crwdns6543:0crwdne6543:0',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'crwdns10490:0crwdne10490:0',
     'order_details' => 'crwdns10492:0crwdne10492:0',
     'calc_eol' => 'crwdns12782:0crwdne12782:0',
+    'checkin_licenses' => 'crwdns14891:0crwdne14891:0',
+    'checkin_child_assets' => 'crwdns14893:0crwdne14893:0',
 ];

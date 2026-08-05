@@ -20,7 +20,7 @@ return [
         'error' => 'Ханган нийлүүлэгчийг устгах асуудал гарч байсан. Дахин оролдоно уу.',
         'success' => 'Ханган нийлүүлэгч амжилттай устгагдсан.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

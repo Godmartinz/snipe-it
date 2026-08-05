@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'هیچ مدلی انتخاب نشده بود، بنابراین هیچ چیز حذف نشد.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => 'مدل(های) :success_count حذف شدند، اما :fail_count حذف نشدند زیرا هنوز دارایی های مرتبط با آنها هستند.
 ',

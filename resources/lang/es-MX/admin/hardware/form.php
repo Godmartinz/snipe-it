@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => 'Regresar a :type',
     'redirect_to_type' => 'Ir a :type',
     'redirect_to_checked_out_to' => 'Ir a elementos asignados',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Seleccione un tipo de estado',
     'serial' => 'Número de serie',
     'serial_required' => 'El activo :number requiere un número de serie',
@@ -50,6 +51,7 @@ return [
     'tag' => 'Placa del activo',
     'update' => 'Actualizar activo',
     'warranty' => 'Garantía',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Vencimiento de la garantía',
     'years' => 'años',
     'asset_location' => 'Actualizar ubicación del activo',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'Información opcional',
     'order_details' => 'Información relacionada con el pedido',
     'calc_eol' => 'Si deja nula la fecha EOL, utilice el cálculo automático basado en la fecha de compra y la frecuencia de EOL.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

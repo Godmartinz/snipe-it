@@ -21,7 +21,7 @@ return [
         'confirm' => 'คุณแน่ใจที่ต้องการจะลบหมวดหมู่นี้?',
         'error' => 'มีปัญหาขณะลบหมวดหมู่นี้ กรุณาลองอีกครั้ง.',
         'success' => 'หมวดหมู่ถูกลบแล้ว',
-        'bulk_success' => 'หมวดหมู่ถูกลบแล้ว',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'หมวดหมู่ถูกลบแล้ว ดูข้อมูลเพิ่มเติมด้านล่าง | :count หมวดหมู่ได้ถูกลบแล้ว ดูข้อมูลเพิ่มเติมด้านล่าง',
     ],
 

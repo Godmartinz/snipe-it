@@ -13,6 +13,7 @@ return [
     'pending' => 'crwdns1164:0crwdne1164:0',
     'status_type' => 'crwdns1165:0crwdne1165:0',
     'show_in_nav' => 'crwdns1687:0crwdne1687:0',
+    'status_label' => 'crwdns15031:0crwdne15031:0',
     'title' => 'crwdns681:0crwdne681:0',
     'undeployable' => 'crwdns1166:0crwdne1166:0',
     'update' => 'crwdns682:0crwdne682:0',

@@ -42,6 +42,7 @@ return [
     'redirect_to_all' => '全ての:typeに戻る',
     'redirect_to_type' => ':type に移動',
     'redirect_to_checked_out_to' => 'チェックアウト先へ移動',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'ステータスタイプを選択',
     'serial' => 'シリアル',
     'serial_required' => 'Asset :number requires a serial number',
@@ -50,6 +51,7 @@ return [
     'tag' => '資産タグ',
     'update' => '資産アップデート',
     'warranty' => '保証',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => '保証期限',
     'years' => '年',
     'asset_location' => '資産の場所を更新',
@@ -64,4 +66,6 @@ return [
     'optional_infos' => 'オプション情報',
     'order_details' => 'オーダー関連情報',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'checkin_licenses' => 'Checkin associated license seats',
+    'checkin_child_assets' => 'Checkin associated assets',
 ];

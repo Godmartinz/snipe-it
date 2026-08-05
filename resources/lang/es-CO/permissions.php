@@ -26,7 +26,7 @@ return [
 
     'import' => [
         'name' => 'Importar CSV',
-        'note' => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'note' => 'Esto permitirá a los usuarios importar aunque se niegue el acceso a usuarios, activos, etc en otros lugares.',
     ],
 
     'reports' => [
@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => 'Activos',
-        'note' => 'Grants access to the Assets section of the application.',
+        'note' => 'Dar acceso a la sección de Activos de la aplicación. ',
     ],
 
     'assetsview' => [
         'name' => 'Ver activos',
+        'note' => 'Note that users with this permission will also be able to see (not modify or delete) files uploaded to the asset model as well. This is to make it easier to share common documents like user manuals across assets without having to upload them to every asset, and to avoid having to grant the user permission to modify asset files.',
     ],
 
     'assetscreate' => [
@@ -72,7 +73,7 @@ return [
 
     'assetsviewrequestable' => [
         'name' => 'Ver activos solicitados',
-        'note' => 'Allows the user to view assets that are marked as requestable.',
+        'note' => 'Permite al usuario ver los activos marcados como solicitados.',
     ],
 
     'assetsviewencrypted-custom-fields' => [
@@ -155,16 +156,16 @@ return [
         'note' => 'Grants access to the Consumables section of the application.',
     ],
     'consumablesview' => [
-        'name' => 'View Consumables',
+        'name' => 'Ver Comsumibles',
     ],
     'consumablescreate' => [
         'name' => 'Crear nuevos consumibles',
     ],
     'consumablesedit' => [
-        'name' => 'Edit Consumables',
+        'name' => 'Editar Consumibles',
     ],
     'consumablesdelete' => [
-        'name' => 'Delete Consumables',
+        'name' => 'Eliminar Consumibles',
     ],
     'consumablescheckout' => [
         'name' => 'Check Out Consumables',
@@ -274,17 +275,17 @@ return [
     ],
 
     'modelscreate' => [
-        'name' => 'Create New Models',
+        'name' => 'Crear nuevos modelos',
     ],
     'modelsedit' => [
-        'name' => 'Edit Models',
+        'name' => 'Editar Modelos',
     ],
     'modelsdelete' => [
-        'name' => 'Delete Models',
+        'name' => 'Eliminar Modelos',
     ],
     'categories' => [
         'name' => 'Categorías',
-        'note' => 'Grants access to the Categories section of the application.',
+        'note' => 'Dar acceso a la sección de Categorías de la aplicación.',
     ],
     'categoriesview' => [
         'name' => 'Ver categorias',
@@ -306,7 +307,7 @@ return [
         'name' => 'Ver Departamentos',
     ],
     'departmentscreate' => [
-        'name' => 'Create New Departments',
+        'name' => 'Crear nuevos departamentos',
     ],
     'departmentsedit' => [
         'name' => 'Editar Departamentos',
@@ -344,11 +345,11 @@ return [
         'name' => 'Edit Status Labels',
     ],
     'statuslabelsdelete' => [
-        'name' => 'Delete Status Labels',
+        'name' => 'Eliminar Etiquetas de Estado',
     ],
     'custom-fields' => [
         'name' => 'Campos personalizados',
-        'note' => 'Grants access to the Custom Fields section of the application used by Assets.',
+        'note' => 'Dar acceso a la sección de Campos Personalizados de la aplicación utilizada por los Activos.',
     ],
     'customfieldsview' => [
         'name' => 'Ver Campos Personalizados',
@@ -420,11 +421,11 @@ return [
     ],
     'selfapi' => [
         'name' => 'Administrar las claves del API',
-        'note' => 'Allows users to create, view, and revoke their own API tokens. User tokens will have the same permissions as the user who created them.',
+        'note' => 'Permite a los usuarios crear, ver y revocar sus propios tokens API. Los tokens de usuario tendrán los mismos permisos que el usuario que los creo.',
     ],
     'selfedit-location' => [
         'name' => 'Editar Ubicación',
-        'note' => 'Allows users to edit the location associated with their own user account.',
+        'note' => 'Permite a los usuarios editar la ubicación asociada con su propia cuenta de usuario.',
     ],
     'selfcheckout-assets' => [
         'name' => 'Self Check Out Assets',
