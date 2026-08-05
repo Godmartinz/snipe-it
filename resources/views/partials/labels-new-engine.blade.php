@@ -163,6 +163,15 @@
 {{--        </div>--}}
 {{--    </div>--}}
 {{--</fieldset>--}}
+<fieldset name="label-preview">
+    <x-form.legend>
+        {{ trans('admin/settings/general.label2_label_preview') }}: <code
+                id="label2_preview_template">{{ $setting->label2_template }}</code>
+    </x-form.legend>
+    <div class="col-md-12" style="margin-bottom: 10px;">
+        @include('partials.label2-preview')
+    </div>
+</fieldset>
 
 <fieldset name="label-settings">
     <x-form.legend help_text="{{ trans('admin/settings/general.labels_title_help') }}">
@@ -344,14 +353,6 @@
     </div>
 </fieldset>
 
-<fieldset name="label-preview">
-    <x-form.legend>
-        {{ trans('admin/settings/general.label2_label_preview') }}: <code id="label2_preview_template">{{ $setting->label2_template }}</code>
-    </x-form.legend>
-    <div class="col-md-12" style="margin-bottom: 10px;">
-        @include('partials.label2-preview')
-    </div>
-</fieldset>
 
 
 @include('partials.bootstrap-table')

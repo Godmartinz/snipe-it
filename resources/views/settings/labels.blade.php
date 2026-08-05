@@ -177,7 +177,7 @@
                     : row.name;
 
                 $('#label2_template').val(value);
-                $('#selected-template-display').text(row.name || value);
+                $('#label2_preview_template').text(row.name || value);
 
                 document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
             });
