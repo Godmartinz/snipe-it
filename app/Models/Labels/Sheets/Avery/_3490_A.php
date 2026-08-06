@@ -133,10 +133,16 @@ class _3490_A extends _3490
         return $this->fieldValueFont;
     }
 
+    public function getTextRenderMode(): string
+    {
+        return 'vertical_stack';
+    }
+
     protected function getContentEditorConfig(): array
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->getLabelPrintableArea()->h - (self::TITLE_SIZE + self::TITLE_MARGIN),
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
@@ -147,6 +153,7 @@ class _3490_A extends _3490
             'title_font' => $this->getTitleFont(),
             'field_label_font' => $this->getFieldLabelFont(),
             'field_value_font' => $this->getFieldValueFont(),
+            'text_render_mode' => $this->getTextRenderMode(),
         ];
     }
 

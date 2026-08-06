@@ -140,8 +140,9 @@ class _5267_A extends _5267
             '2dbarcode_size' => $this->get2DBarcodeSize(),
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
-            'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
+            'field_label_font_size' => 0.001,
+            'field_value_font_size' => .3,
+            'field_label_margin' => .25,
         ];
     }
 
