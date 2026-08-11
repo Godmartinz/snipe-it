@@ -119,8 +119,10 @@ class TZe_24mm_B extends TZe_24mm
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => 14,
 
             'tag_font_size' => $this->getTagSize(),
+            'tag_offset_x' => 2,
 
             'logo_max_width' => $this->getLogoMaxWidth(),
             'logo_margin' => $this->getLogoMargin(),
@@ -134,9 +136,9 @@ class TZe_24mm_B extends TZe_24mm
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
 
-            'tag_alignment' => 'C',
+            'tag_alignment' => 'L',
             'logo_h_align' => 'R',
-            'text_render_mode' => 'block',
+            'text_render_mode' => 'vertical_stack',
         ];
     }
     public function write($pdf, $record)
