@@ -118,6 +118,7 @@ class TZe_24mm_C extends TZe_24mm
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => 12,
 
             'tag_font_size' => $this->getTagSize(),
 
@@ -133,7 +134,7 @@ class TZe_24mm_C extends TZe_24mm
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
 
-            'tag_alignment' => 'C',
+            'tag_alignment' => 'L',
             'logo_h_align' => 'R',
             'text_render_mode' => 'block',
         ];

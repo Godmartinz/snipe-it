@@ -121,17 +121,21 @@ class TZe_24mm_E extends TZe_24mm
             'tag_font_size' => $this->getTagSize(),
 
             'title_font_size' => $this->getTitleSize(),
-            'title_margin' => $this->getTitleMargin(),
+            'title_margin' => .5,
+            'title_font' => 'freesans',
 
-            'field_label_font_size' => $this->getLabelSize(),
+            'field_label_font_size' => 2,
             'field_label_margin' => $this->getLabelMargin(),
+            'field_label_font' => 'freesans',
 
-            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_font_size' => 1.8,
             'field_value_margin' => -1.85,
+            'field_value_font' => 'freemono',
 
             'tag_offset_y' => 2.5,
             'tag_alignment' => 'L',
             'tag_position_mode' => 'under_barcode',
+            'tag_font' => 'freesans',
             'logo_h_align' => 'R',
             'text_render_mode' => 'block',
             'text_area_offset_y' => 2.0,

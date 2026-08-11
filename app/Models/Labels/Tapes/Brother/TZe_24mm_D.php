@@ -110,20 +110,26 @@ class TZe_24mm_D extends TZe_24mm
     protected function getContentEditorConfig(): array
     {
         return [
-            'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_size' => 3,
+            'barcode_2d_size' => 11,
+            'barcode_margin' => .4,
             'barcode1D_v_align' => $this->getBarcode1DVAlign(),
             'tag_font_size' => $this->getTagSize(),
+            'tag_font' => 'freemono',
 
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
+            'title_font' => 'freemono',
 
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
+            'field_label_font' => 'freemono',
 
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
+            'field_value_font' => 'freemono',
 
-            'tag_alignment' => 'C',
+            'tag_alignment' => 'L',
             'logo_h_align' => 'R',
             'text_render_mode' => 'block',
         ];
