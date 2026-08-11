@@ -28,6 +28,7 @@ trait HasCustomLabelEditorConfig
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
             'title_offset_x' => $this->getTitleOffsetX(),
+            'title_position' => $this->getTitlePosition(),
 
             // Fields
             'field_label_font' => $this->getFieldLabelFont(),

@@ -243,7 +243,7 @@ abstract class CustomSheetLabel extends RectangleSheet
 
         /*
         |--------------------------------------------------------------------------
-        |Reserve bottom strip for 1D barcode
+        | Reserve bottom strip for 1D barcode
         |--------------------------------------------------------------------------
         */
         if ($record->has('barcode1d') && $this->getSupport1DBarcode()) {
@@ -260,18 +260,104 @@ abstract class CustomSheetLabel extends RectangleSheet
             ];
 
             $layout['body']['y2'] -= ($barcodeHeight + $barcodeMargin);
-            $layout['body']['y2'] = max($layout['body']['y1'], $layout['body']['y2']);
-            $layout['body']['h'] = max(0, $layout['body']['y2'] - $layout['body']['y1']);
+            $layout['body']['y2'] = max(
+                $layout['body']['y1'],
+                $layout['body']['y2']
+            );
+
+            $layout['body']['h'] = max(
+                0,
+                $layout['body']['y2'] - $layout['body']['y1']
+            );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | add Logo, 2D Barcode, and Tag to the layout
+        | Resolve title + fields
         |--------------------------------------------------------------------------
         */
-        $logoBox = $this->resolveLogoBox($record, $layout['body']);
-        $barcode2dBox = $this->resolve2DBarcodeBox($record, $layout['body'], $logoBox);
-        $tagBox = $this->resolveTagBox($record, $layout['body'], $barcode2dBox, $logoBox);
+        $title = $this->resolveLayoutTitle($record);
+        $fields = $this->resolveLayoutFields($record);
+
+        $titlePosition = $this->getTitlePosition();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Working body
+        |--------------------------------------------------------------------------
+        */
+        $contentBody = $layout['body'];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reserve top strip for title
+        |--------------------------------------------------------------------------
+        */
+        if (
+            $title !== null
+            && $title !== ''
+            && $titlePosition === 'top'
+        ) {
+            $titleSize = max(0, $this->getTitleSize());
+            $titleAdvance = $titleSize + max(0, $this->getTitleMargin());
+
+            /*
+             * Title itself occupies the original top of the body.
+             */
+            $layout['title'] = [
+                'x' => $layout['body']['x1'] + $this->getTitleOffsetX(),
+                'y' => $layout['body']['y1'],
+                'w' => max(
+                    0,
+                    $layout['body']['x2']
+                    - ($layout['body']['x1'] + $this->getTitleOffsetX())
+                ),
+                'h' => $titleSize,
+                'font_size' => $titleSize,
+                'advance' => $titleAdvance,
+            ];
+
+            /*
+             * Everything else begins below the title.
+             */
+            $contentBody['y1'] += $titleAdvance;
+            $contentBody['y1'] = min(
+                $contentBody['y1'],
+                $contentBody['y2']
+            );
+
+            $contentBody['h'] = max(
+                0,
+                $contentBody['y2'] - $contentBody['y1']
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logo, 2D barcode, and tag
+        |--------------------------------------------------------------------------
+        |
+        | IMPORTANT:
+        | Use $contentBody here, not $layout['body'].
+        |--------------------------------------------------------------------------
+        */
+        $logoBox = $this->resolveLogoBox(
+            $record,
+            $contentBody
+        );
+
+        $barcode2dBox = $this->resolve2DBarcodeBox(
+            $record,
+            $contentBody,
+            $logoBox
+        );
+
+        $tagBox = $this->resolveTagBox(
+            $record,
+            $contentBody,
+            $barcode2dBox,
+            $logoBox
+        );
 
         $layout['logo'] = $logoBox;
         $layout['barcode2d'] = $barcode2dBox;
@@ -283,7 +369,7 @@ abstract class CustomSheetLabel extends RectangleSheet
         |--------------------------------------------------------------------------
         */
         $layout['text'] = $this->resolveTextBox(
-            $layout['body'],
+            $contentBody,
             array_filter([
                 $layout['logo'],
                 $layout['barcode2d'],
@@ -291,18 +377,29 @@ abstract class CustomSheetLabel extends RectangleSheet
             ])
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Title + fields inside text box
-        |--------------------------------------------------------------------------
-        */
-        $title = $this->resolveLayoutTitle($record);
-        $fields = $this->resolveLayoutFields($record);
+        $layout['text'] = $this->applyTextAreaConstraints(
+            $layout['text']
+        );
 
-        $layout['text'] = $this->applyTextAreaConstraints($layout['text']);
         $textY = $layout['text']['y1'];
         $bottomLimit = $layout['text']['y2'];
-        $availableHeight = max(0, $bottomLimit - $textY);
+        $availableHeight = max(
+            0,
+            $bottomLimit - $textY
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate field scaling
+        |--------------------------------------------------------------------------
+        |
+        | If the title is on top, its space has already been reserved.
+        | Do not make labelFieldLayoutScaling() reserve it again.
+        |--------------------------------------------------------------------------
+        */
+        $scalingTitle = $titlePosition === 'top'
+            ? null
+            : $title;
 
         $fieldLayout = Helper::labelFieldLayoutScaling(
             $pdf,
@@ -313,20 +410,31 @@ abstract class CustomSheetLabel extends RectangleSheet
             $this->getLabelSize(),
             $this->getFieldSize(),
             $this->getFieldMargin(),
-            $title,
+            $scalingTitle,
             $this->getTitleSize(),
             $this->getTitleMargin(),
             $this->getLabelMargin(),
             $this->getFieldMargin()
         );
 
-        if ($fieldLayout['hasTitle']) {
+        /*
+        |--------------------------------------------------------------------------
+        | Normal / inline title
+        |--------------------------------------------------------------------------
+        */
+        if (
+            $titlePosition !== 'top'
+            && $fieldLayout['hasTitle']
+        ) {
             $x = $layout['text']['x1'] + $this->getTitleOffsetX();
 
             $layout['title'] = [
                 'x' => $x,
                 'y' => $textY,
-                'w' => max(0, $layout['text']['x2'] - $x),
+                'w' => max(
+                    0,
+                    $layout['text']['x2'] - $x
+                ),
                 'h' => $fieldLayout['titleSize'],
                 'font_size' => $fieldLayout['titleSize'],
                 'advance' => $fieldLayout['titleAdvance'],
@@ -335,8 +443,21 @@ abstract class CustomSheetLabel extends RectangleSheet
             $textY += $fieldLayout['titleAdvance'];
         }
 
-        $labelWidth = min($fieldLayout['labelWidth'], $layout['text']['w'] * 0.45);
-        $gap = max(0.8, $this->getFieldMargin() * max($fieldLayout['scale'], 0.5));
+        /*
+        |--------------------------------------------------------------------------
+        | Fields
+        |--------------------------------------------------------------------------
+        */
+        $labelWidth = min(
+            $fieldLayout['labelWidth'],
+            $layout['text']['w'] * 0.45
+        );
+
+        $gap = max(
+            0.8,
+            $this->getFieldMargin()
+            * max($fieldLayout['scale'], 0.5)
+        );
 
         $layout['fields'] = $this->makeFieldsLayout(
             $layout['text'],

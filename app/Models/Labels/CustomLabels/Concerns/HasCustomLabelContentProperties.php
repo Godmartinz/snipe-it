@@ -50,6 +50,7 @@ trait HasCustomLabelContentProperties
     protected float $textSizeMod = 1.0;
     protected float $textAreaOffsetY = 0.0;
     protected string $textRenderMode = 'normal';
+    protected string $titlePosition = 'inline';
 
     protected ?float $textAreaWidth = null;
     protected ?float $textAreaHeight = null;
@@ -119,6 +120,10 @@ trait HasCustomLabelContentProperties
         return $this->titleOffsetX;
     }
 
+    public function getTitlePosition(): string
+    {
+        return $this->titlePosition;
+    }
     public function getTitleFont(): string
     {
         return $this->titleFont;

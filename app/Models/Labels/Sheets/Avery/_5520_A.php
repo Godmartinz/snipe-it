@@ -149,6 +149,7 @@ class _5520_A extends _5520
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => $this->getLabelPrintableArea()->h - (self::TITLE_SIZE + self::TITLE_MARGIN),
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
@@ -159,6 +160,8 @@ class _5520_A extends _5520
             'title_font' => $this->getTitleFont(),
             'field_label_font' => $this->getFieldLabelFont(),
             'field_value_font' => $this->getFieldValueFont(),
+            'title_position' => 'top',
+            'title_offset_x' => 0.590551,
         ];
     }
 

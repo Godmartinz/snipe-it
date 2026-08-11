@@ -224,6 +224,7 @@ trait SeedsCustomLabelFromTemplate
             'tag_font' => 'tagFont',
 
             'title_font' => 'titleFont',
+            'title_position' => 'titlePosition',
 
             'field_alignment' => 'fieldAlignment', // Tape only
             'field_label_font' => 'fieldLabelFont',

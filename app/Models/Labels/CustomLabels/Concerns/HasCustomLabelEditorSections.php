@@ -101,6 +101,14 @@ trait HasCustomLabelEditorSections
                             'title_font_size' => ['type' => 'number'],
                             'title_margin' => ['type' => 'number'],
                             'title_offset_x' => ['type' => 'number'],
+                            'title_position' => [
+                                'type' => 'select',
+                                'options' => [
+                                    'inline' => 'admin/labels/general.options.inline',
+                                    'top' => 'admin/labels/general.options.top',
+
+                                ],
+                            ],
                         ],
                     ],
 
