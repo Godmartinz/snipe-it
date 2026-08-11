@@ -70,6 +70,10 @@ class TZe_18mm_A extends TZe_18mm
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'text_size_mod' => $this->getTextSizeMod(),
+            'tag_font_size' => 5.5,
+            'field_value_font_size' => 5.5,
+            'field_label_font_size' => 0.1,
+            'tag_offset_y' => -3,
         ];
     }
 

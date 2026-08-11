@@ -89,7 +89,7 @@ class L4736_A extends L4736
 
     public function getSupportAssetTag()
     {
-        return true;
+        return false;
     }
 
     public function getSupport1DBarcode()
@@ -121,12 +121,15 @@ class L4736_A extends L4736
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => 15,
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
-            'field_label_font_size' => $this->getLabelSize(),
+            'title_position' => 'top',
+            'title_offset_x' => 7,
+            'field_label_font_size' => 1.8,
             'field_label_margin' => $this->getLabelMargin(),
-            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_font_size' => 2.8,
             'field_value_margin' => $this->getFieldMargin(),
         ];
     }

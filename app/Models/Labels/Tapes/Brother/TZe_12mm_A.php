@@ -72,6 +72,9 @@ class TZe_12mm_A extends TZe_12mm
             'barcode_size' => $this->getBarcodeSize(),
             'barcode_margin' => $this->getBarcodeMargin(),
             'text_size_mod' => $this->getTextSizeMod(),
+            'field_label_font_size' => 0.1,
+            'field_value_font_size' => 0,
+            'tag_font_size' => 3.5,
         ];
     }
 

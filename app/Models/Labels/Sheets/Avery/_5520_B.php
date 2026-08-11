@@ -125,15 +125,17 @@ class _5520_B extends _5520
     protected function getContentEditorConfig(): array
     {
         return [
-            'barcode_size' => $this->getBarcodeSize(),
+            'barcode_size' => .15,
             'barcode_margin' => .025,
             'tag_font_size' => $this->getTagSize(),
-            'title_font_size' => $this->getTitleSize(),
+            'title_font_size' => 0.0826772,
             'title_margin' => $this->getTitleMargin(),
-            'field_label_font_size' => $this->getLabelSize(),
+            'title_offset_x' => 0.629921,
+            'field_label_font_size' => 0.09,
             'field_label_margin' => $this->getLabelMargin(),
-            'field_value_font_size' => $this->getFieldSize(),
+            'field_value_font_size' => 0.1106299,
             'field_value_margin' => $this->getFieldMargin(),
+            'text_render_mode' => 'vertical_stack'
         ];
     }
 

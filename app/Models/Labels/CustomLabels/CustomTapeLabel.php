@@ -438,7 +438,7 @@ abstract class CustomTapeLabel extends Label
 
     protected function renderTag($pdf, $record, array $layout): void
     {
-        if ($this->getTextRenderMode() === 'block') {
+        if (in_array($this->getTextRenderMode(), ['block', 'vertical_stack'], true)) {
             $this->renderBlockTag($pdf, $record, $layout);
             return;
         }

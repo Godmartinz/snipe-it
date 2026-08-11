@@ -101,15 +101,17 @@ class TZe_24mm_A extends TZe_24mm
 
     public function getTextRenderMode(): string
     {
-        return 'block';
+        return 'vertical_stack';
     }
 
     protected function getContentEditorConfig(): array
     {
         return [
             'barcode_margin' => $this->getBarcodeMargin(),
+            'barcode_2d_size' => 15,
 
             'tag_font_size' => $this->getTagSize(),
+            'tag_offset_x' => 2,
 
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),

@@ -146,6 +146,8 @@ class _3490_A extends _3490
             'tag_font_size' => $this->getTagSize(),
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
+            'title_position' => 'top',
+            'title_offset_x' => 0.669291,
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
             'field_value_font_size' => $this->getFieldSize(),
