@@ -78,7 +78,13 @@ trait HasCustomLabelEditorSections
                         'label' => 'admin/labels/general.groups.tag',
                         'toggle' => 'supports.asset_tag',
                         'fields' => [
-                            'tag_font' => ['type' => 'text'],
+                            'tag_font' => ['type' => 'select',
+                                'options' => [
+                                    'freemono' => 'admin/labels/general.options.freemono',
+                                    'freesans' => 'admin/labels/general.options.freesans',
+                                    'dejavusans' => 'admin/labels/general.options.dejavusans',
+                                ],
+                            ],
                             'tag_font_size' => ['type' => 'number'],
                             'tag_alignment' => [
                                 'type' => 'select',
@@ -97,7 +103,13 @@ trait HasCustomLabelEditorSections
                         'label' => 'admin/labels/general.groups.title',
                         'toggle' => 'supports.title',
                         'fields' => [
-                            'title_font' => ['type' => 'text'],
+                            'title_font' => ['type' => 'select',
+                                'options' => [
+                                    'freemono' => 'admin/labels/general.options.freemono',
+                                    'freesans' => 'admin/labels/general.options.freesans',
+                                    'dejavusans' => 'admin/labels/general.options.dejavusans',
+                                ],
+                            ],
                             'title_font_size' => ['type' => 'number'],
                             'title_margin' => ['type' => 'number'],
                             'title_offset_x' => ['type' => 'number'],
@@ -116,7 +128,13 @@ trait HasCustomLabelEditorSections
                         'label' => 'admin/labels/general.groups.field_labels',
                         'toggle' => 'supports.fields',
                         'fields' => [
-                            'field_label_font' => ['type' => 'text'],
+                            'field_label_font' => ['type' => 'select',
+                                'options' => [
+                                    'freemono' => 'admin/labels/general.options.freemono',
+                                    'freesans' => 'admin/labels/general.options.freesans',
+                                    'dejavusans' => 'admin/labels/general.options.dejavusans',
+                                ],
+                            ],
                             'field_label_font_size' => ['type' => 'number'],
                             'field_label_margin' => ['type' => 'number'],
                         ],
@@ -126,7 +144,13 @@ trait HasCustomLabelEditorSections
                         'label' => 'admin/labels/general.groups.field_values',
                         'toggle' => 'supports.fields',
                         'fields' => [
-                            'field_value_font' => ['type' => 'text'],
+                            'field_value_font' => ['type' => 'select',
+                                'options' => [
+                                    'freemono' => 'admin/labels/general.options.freemono',
+                                    'freesans' => 'admin/labels/general.options.freesans',
+                                    'dejavusans' => 'admin/labels/general.options.dejavusans',
+                                ],
+                            ],
                             'field_value_font_size' => ['type' => 'number'],
                             'field_value_margin' => ['type' => 'number'],
                         ],

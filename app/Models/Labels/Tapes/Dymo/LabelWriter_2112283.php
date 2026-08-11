@@ -124,15 +124,19 @@ class LabelWriter_2112283 extends LabelWriter
             'tag_font_size' => $this->getTagSize(),
             'tag_alignment' => 'C',
             'tag_position_mode' => 'under_barcode',
+            'tag_font' => 'freesans',
 
-            'title_font_size' => $this->getTitleSize(),
+            'title_font_size' => 3.8,
             'title_margin' => $this->getTitleMargin(),
+            'title_font' => 'freesans',
 
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),
+            'field_label_font' => 'freesans',
 
             'field_value_font_size' => $this->getFieldSize(),
             'field_value_margin' => $this->getFieldMargin(),
+            'field_value_font' => 'freemono',
 
             'text_render_mode' => 'block',
         ];
