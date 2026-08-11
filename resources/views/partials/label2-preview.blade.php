@@ -63,8 +63,10 @@
                         .map((value) => ({[value.name]: value.value}))
                     );
 
-                    const template = $('#label2_template').val() || settings.label2_template;
-
+                    const template =
+                        $('input[name="label2_template"]:checked').val()
+                        || settings.label2_template;
+                    
                     if (!template) return;
 
                     settings.label2_template = template;

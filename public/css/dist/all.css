@@ -21584,6 +21584,46 @@ img.navbar-brand-img,
 .left-navblock {
   max-width: 500px;
 }
+.label-type-selector .label-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 140px;
+  margin-bottom: 10px;
+  background-color: var(--box-bg);
+  color: var(--color-fg);
+  border: 2px solid var(--input-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+.label-type-selector .label-type-card input {
+  display: none;
+}
+.label-type-selector .label-type-card i {
+  font-size: 42px;
+  margin-bottom: 12px;
+  color: var(--color-fg);
+}
+.label-type-selector .label-type-card span {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+.label-type-selector .label-type-card:hover {
+  border-color: var(--main-theme-color);
+}
+.label-type-selector .label-type-card.active {
+  background-color: var(--main-theme-color);
+  border-color: var(--main-theme-color);
+  color: var(--nav-primary-text-color);
+}
+.label-type-selector .label-type-card.active i,
+.label-type-selector .label-type-card.active span {
+  color: var(--nav-primary-text-color);
+}
 .main-header .logo {
   background-color: inherit;
 }

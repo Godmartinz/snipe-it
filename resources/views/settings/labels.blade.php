@@ -176,7 +176,7 @@
                     ? 'custom:' + row.custom_label_id
                     : row.name;
 
-                $('#label2_template').val(value);
+                $('input[name="label2_template"]:checked').val(value);
                 $('#label2_preview_template').text(row.name || value);
 
                 document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));

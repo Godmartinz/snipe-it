@@ -417,19 +417,36 @@ class LabelsController extends Controller
     {
         $labelName = str_replace('/', '\\', $labelName);
 
+        $customLabel = null;
+
+        if (str_starts_with($labelName, 'custom:')) {
+            $customLabelId = (int)str_replace('custom:', '', $labelName);
+
+            $customLabel = CustomUserLabel::find($customLabelId);
+        }
         $baseTemplate = match (true) {
+            $customLabel !== null => null,
             $labelName === 'DefaultLabel' => new DefaultLabel,
             $labelName === 'StandardTape' => null,
             default => Label::find($labelName),
         };
 
-        $isTape = str_starts_with($labelName, 'Tapes\\') || $labelName === 'StandardTape';
+        $isTape = $customLabel
+            ? $customLabel->type === 'tape'
+            : (
+                $request->input('type') === 'tape'
+                || str_starts_with($labelName, 'Tapes\\')
+                || $labelName === 'StandardTape'
+            );
 
-        $editorConfig = [
-            'content' => $request->input('content', []),
-            'supports' => $request->input('supports', []),
-        ];
-
+        if ($customLabel) {
+            $editorConfig = $customLabel->config_snapshot;
+        } else {
+            $editorConfig = [
+                'content' => $request->input('content', []),
+                'supports' => $request->input('supports', []),
+            ];
+        }
         if ($isTape) {
             $editorConfig['dimensions'] = $request->input('dimensions', []);
             $template = new PreviewTapeLabel;
