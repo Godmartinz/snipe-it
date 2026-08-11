@@ -82,7 +82,7 @@ class Tape_53mm_A extends Tape_53mm
     protected function getContentEditorConfig(): array
     {
         return [
-            'barcode_2d_size' => 31.0,
+            'barcode_2d_size' => 27.0,
             'barcode2D_v_align' => 'T',
             'barcode2D_placement' => 'stacked',
 
@@ -90,6 +90,7 @@ class Tape_53mm_A extends Tape_53mm
 
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
+            'title_offset_x' => '7',
 
             'field_label_font_size' => $this->getLabelSize(),
             'field_label_margin' => $this->getLabelMargin(),

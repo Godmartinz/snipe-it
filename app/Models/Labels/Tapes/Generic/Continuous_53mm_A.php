@@ -77,7 +77,7 @@ class Continuous_53mm_A extends Continuous_53mm
     protected function getContentEditorConfig(): array
     {
         return [
-            'barcode_2d_size' => 44.0,
+            'barcode_2d_size' => 32.0,
             'barcode2D_v_align' => 'T',
             'barcode2D_placement' => 'stacked',
 
@@ -85,6 +85,7 @@ class Continuous_53mm_A extends Continuous_53mm
 
             'title_font_size' => $this->titleSize,
             'title_margin' => $this->titleMargin,
+            'title_offset_x' => 8,
 
             'field_label_font_size' => $this->labelSize,
             'field_label_margin' => $this->labelMargin,
