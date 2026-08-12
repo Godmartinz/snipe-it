@@ -573,9 +573,13 @@ class LabelsController extends Controller
         }
 
         try {
-            $template = $selectedLabel
-                ? Label::find($selectedLabel)
-                : new DefaultLabel;
+            if ($selectedLabel === 'StandardTape') {
+                $template = new PreviewTapeLabel;
+            } else {
+                $template = $selectedLabel
+                    ? Label::find($selectedLabel)
+                    : new DefaultLabel;
+            }
         } catch (\Throwable $e) {
             $template = new DefaultLabel;
             $selectedLabel = 'DefaultLabel';
@@ -607,6 +611,10 @@ class LabelsController extends Controller
     }
     protected function previewLabelForTemplate($template)
     {
+        if ($template instanceof PreviewTapeLabel) {
+            return $template;
+        }
+
         $name = $template->getName();
 
         if (str_starts_with($name, 'Tapes\\')) {

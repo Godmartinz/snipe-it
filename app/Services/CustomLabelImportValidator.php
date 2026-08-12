@@ -112,7 +112,7 @@ class CustomLabelImportValidator
         return [
             'printable_area' => ['required', 'array'],
 
-            'content.barcode1D_v_align' => ['nullable', 'string', 'in:T,C,B'],
+            'content.barcode1D_v_align' => ['nullable', 'string', 'in:T,M,B'],
             'content.barcode1D_placement' => ['nullable', 'string', 'in:full_width,text_column,inline'],
 
             'content.barcode2D_placement' => ['nullable', 'string', 'in:stacked,inline,text_column'],
