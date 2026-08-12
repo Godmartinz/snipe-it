@@ -70,7 +70,7 @@ class LabelsController extends Controller
 
         }
 
-        $exampleAsset = Asset::factory()->labelPreview()->make();
+        $exampleAsset = LabelPreviewAsset::make();
 
         $customFieldColumns = CustomField::where('field_encrypted', '=', 0)->pluck('db_column');
 
