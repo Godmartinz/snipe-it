@@ -1772,6 +1772,18 @@
                 class: 'btn-info',
                 title: 'Create New Label'
             }
+        },
+        btnImport: {
+            icon: 'fa-solid fa-file-import',
+            text: 'Import Label',
+            title: 'Import Label',
+            event() {
+                $('#import-label-modal').modal('show');
+            },
+            attributes: {
+                class: 'btn-info',
+                title: 'Import Label'
+            }
         }
     });
 

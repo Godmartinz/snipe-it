@@ -346,6 +346,7 @@ return [
     'sure_to_delete_var' => 'Are you sure you wish to delete :item?',
     'delete_what' => 'Delete :item',
     'submit' => 'Submit',
+    'text' => 'Text',
     'target' => 'Target',
     'time_and_date_display' => 'Time and Date Display',
     'total_assets' => 'total assets',

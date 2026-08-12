@@ -14,30 +14,6 @@
         .checkbox label {
             padding-right: 40px;
         }
-
-        .import-toggle .btn {
-            background-color: #f5f5f5; /* light neutral */
-            color: #333;
-        }
-
-        .import-toggle .btn:hover {
-            background-color: #e6e6e6;
-        }
-
-        .import-toggle .btn.active {
-            background-color: #337ab7; /* Bootstrap primary */
-            color: #fff;
-        }
-
-        .import-toggle .btn:focus,
-        .import-toggle .btn:active:focus,
-        .import-toggle .btn.active:focus,
-        .import-toggle .btn.focus,
-        .import-toggle .btn.active.focus {
-            outline: none !important;
-            box-shadow: none !important;
-            -webkit-box-shadow: none !important;
-        }
     </style>
 
     <form method="POST" action="{{ route('settings.labels.save') }}" accept-charset="UTF-8" id="settingsForm" autocomplete="off" class="form-horizontal" role="form">
@@ -102,15 +78,11 @@
         </div> <!-- /.row-->
     </form>
     <livewire:labels.new-label-setup/>
+    <livewire:labels.import-label/>
     <form id="delete-custom-label-form" method="POST" style="display:none;">
         @csrf
         @method('DELETE')
     </form>
-    <form id="import-label-form" method="POST" enctype="multipart/form-data"
-          action="{{ route('settings.labels.import') }}">
-        @csrf
-    </form>
-
 @stop
 
 @push('js')
@@ -282,53 +254,6 @@
 
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        });
-
-        $('.import-toggle-btn').on('click', function () {
-            const method = $(this).data('method');
-
-            $('.import-toggle-btn')
-                .removeClass('btn-primary active')
-                .addClass('btn-default');
-
-            $(this)
-                .addClass('btn-primary active')
-                .removeClass('btn-default');
-
-            $('#import_method').val(method);
-
-            $('#text-input-group').toggle(method === 'text');
-            $('#json-input-group').toggle(method === 'json');
-        });
-
-        $('#config_file').on('change', function () {
-            const hasFile = this.files && this.files.length > 0;
-
-            $('#import-file-button').prop('disabled', !hasFile);
-        });
-
-        $('#config_snapshot').on('input', function () {
-
-            const value = $(this).val().trim();
-
-            try {
-                JSON.parse(value);
-
-                $('#import-text-button').prop('disabled', false);
-
-                $('#json-validation-message')
-                    .hide()
-                    .text('');
-
-            } catch (e) {
-
-                $('#import-text-button').prop('disabled', true);
-
-                $('#json-validation-message')
-                    .show()
-                    .addClass('text-danger')
-                    .text('Invalid JSON');
-            }
         });
 
     </script>
