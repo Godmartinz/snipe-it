@@ -177,29 +177,44 @@
                     : row.name;
 
                 $('input[name="label2_template"]:checked').val(value);
+
                 $('#label2_preview_template').text(row.name || value);
 
-                document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
+                document.getElementById('settingsForm')
+                    ?.dispatchEvent(new Event('change'));
             });
 
             $('#label2TemplateTable').on('load-success.bs.table', function () {
-                const selected = $('#label2_template').val();
+                // On initial load, the saved setting is the source of truth.
+                const selected = @json($setting->label2_template);
 
                 isPreselecting = true;
 
-                $('#label2TemplateTable').bootstrapTable('getData').forEach((row, index) => {
-                    const value = row.source === 'custom'
-                        ? 'custom:' + row.custom_label_id
-                        : row.name;
+                $('#label2TemplateTable')
+                    .bootstrapTable('getData')
+                    .forEach((row, index) => {
+                        const value = row.source === 'custom'
+                            ? 'custom:' + row.custom_label_id
+                            : row.name;
 
-                    if (value === selected) {
-                        $('#label2TemplateTable').bootstrapTable('check', index);
-                    }
-                });
+                        if (value === selected) {
+                            $('#label2TemplateTable')
+                                .bootstrapTable('check', index);
+
+                            // check.bs.table is suppressed while preselecting,
+                            // so explicitly set the canonical form value here.
+                            $('input[name="label2_template"]:checked')
+                                .val(value);
+
+                            $('#label2_preview_template')
+                                .text(row.name || value);
+                        }
+                    });
 
                 isPreselecting = false;
 
-                document.getElementById('settingsForm')?.dispatchEvent(new Event('change'));
+                document.getElementById('settingsForm')
+                    ?.dispatchEvent(new Event('change'));
             });
         });
 

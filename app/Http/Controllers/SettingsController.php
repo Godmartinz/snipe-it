@@ -36,6 +36,7 @@ use Illuminate\Validation\Rule;
 use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipArchive;
+use App\Models\Labels\CustomUserLabel;
 
 /**
  * This controller handles all actions related to Settings for
@@ -595,6 +596,16 @@ class SettingsController extends Controller
     public function getLabels(): View
     {
         $is_gd_installed = extension_loaded('gd');
+        $setting = Setting::getSettings();
+
+        $setting->label2_template_name = $setting->label2_template;
+
+        if (str_starts_with($setting->label2_template, 'custom:')) {
+            $customLabelId = (int)str_replace('custom:', '', $setting->label2_template);
+
+            $setting->label2_template_name = CustomUserLabel::find($customLabelId)?->name
+                ?? $setting->label2_template;
+        }
 
         return view('settings.labels')
             ->with('setting', Setting::getSettings())

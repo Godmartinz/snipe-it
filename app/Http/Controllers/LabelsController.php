@@ -43,20 +43,29 @@ class LabelsController extends Controller
 
             $id = (int)str_replace('custom:', '', $labelName);
             $customLabel = CustomUserLabel::find($id);
-
+            
             if (!$customLabel) {
                 $template = new DefaultLabel;
             } else {
-                $baseLabel = CustomUserLabel::makeBaseLabel(
-                    data_get($customLabel->config_snapshot, 'template', $customLabel->base_label)
+                $baseTemplateName = data_get(
+                    $customLabel->config_snapshot,
+                    'template',
+                    $customLabel->base_label
                 );
 
-                $template = ($customLabel->type === 'tape')
+                $template = $customLabel->type === 'tape'
                     ? new PreviewTapeLabel
                     : new PreviewSheetLabel;
 
-                if ($baseLabel) {
-                    $template->seedFromTemplate($baseLabel);
+                if ($baseTemplateName === 'StandardTape') {
+                    // Nothing to seed. The custom snapshot contains
+                    // the tape dimensions/content/support configuration.
+                } else {
+                    $baseLabel = CustomUserLabel::makeBaseLabel($baseTemplateName);
+
+                    if ($baseLabel) {
+                        $template->seedFromTemplate($baseLabel);
+                    }
                 }
 
                 $template->applyEditorConfig($customLabel->config_snapshot ?? []);

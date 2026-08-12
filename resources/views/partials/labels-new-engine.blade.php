@@ -166,7 +166,7 @@
 <fieldset name="label-preview">
     <x-form.legend>
         {{ trans('admin/settings/general.label2_label_preview') }}: <code
-                id="label2_preview_template">{{ $setting->label2_template }}</code>
+                id="label2_preview_template">{{ $setting->label2_template_name }}</code>
     </x-form.legend>
     <div class="col-md-12" style="margin-bottom: 10px;">
         @include('partials.label2-preview')
