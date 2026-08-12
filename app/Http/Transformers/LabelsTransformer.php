@@ -80,6 +80,12 @@ class LabelsTransformer
     protected function transformCustomLabel(CustomUserLabel $label): array
     {
         $snapshot = $label->config_snapshot ?? [];
+        $dimensionPath = $label->type === 'tape'
+            ? 'dimensions'
+            : 'label';
+
+        $width = (float)data_get($snapshot, "{$dimensionPath}.width", 0);
+        $height = (float)data_get($snapshot, "{$dimensionPath}.height", 0);
 
         return [
             'custom_label_id' => $label->id,
@@ -93,8 +99,8 @@ class LabelsTransformer
 
             'unit' => 'mm',
 
-            'width' => number_format((float) data_get($snapshot, 'label.width', 0), 2),
-            'height' => number_format((float) data_get($snapshot, 'label.height', 0), 2),
+            'width' => number_format($width, 2),
+            'height' => number_format($height, 2),
 
             'margin_top' => data_get($snapshot, 'label.margin_top'),
             'margin_bottom' => data_get($snapshot, 'label.margin_bottom'),
@@ -109,8 +115,8 @@ class LabelsTransformer
             'support_title' => data_get($snapshot, 'supports.title'),
 
             'sheet_info' => [
-                'label_width' => data_get($snapshot, 'label.width'),
-                'label_height' => data_get($snapshot, 'label.height'),
+                'label_width' => $width,
+                'label_height' => $height,
                 'label_margin_top' => data_get($snapshot, 'label.margin_top'),
                 'label_margin_bottom' => data_get($snapshot, 'label.margin_bottom'),
                 'label_margin_left' => data_get($snapshot, 'label.margin_left'),

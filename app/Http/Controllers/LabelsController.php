@@ -173,15 +173,26 @@ class LabelsController extends Controller
             })->toArray();
         };
 
-        $baseLabel = CustomUserLabel::makeBaseLabel($label->base_label);
+        if ($isTape && $label->base_label === 'StandardTape') {
+            $baseLabel = new PreviewTapeLabel;
+        } else {
+            $baseLabel = CustomUserLabel::makeBaseLabel(
+                $label->base_label
+            );
+        }
 
         if (!$baseLabel) {
             return redirect()->back()
-                ->with('error', trans('admin/labels/labels.base_label_missing'));
+                ->with(
+                    'error',
+                    trans('admin/labels/labels.base_label_missing')
+                );
         }
 
         $makePreviewLabel = function () use ($isTape) {
-            return $isTape ? new PreviewTapeLabel : new PreviewSheetLabel;
+            return $isTape
+                ? new PreviewTapeLabel
+                : new PreviewSheetLabel;
         };
 
         $baseWorkingLabel = $makePreviewLabel();
@@ -330,6 +341,9 @@ class LabelsController extends Controller
             'name' => $validated['name'],
             ...$finalConfig,
         ];
+        if ($type === 'tape') {
+            $configSnapshot['dimensions'] = $submittedConfig['dimensions'];
+        }
 
         $overrides = CustomUserLabel::diffEditorConfig($finalConfig, $baseConfig);
 
