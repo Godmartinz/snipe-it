@@ -4,30 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportCustomLabelRequest;
 use App\Models\Asset;
-use App\Models\AssetModel;
-use App\Models\Category;
-use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Labels\CustomLabels\PreviewSheetLabel;
 use App\Models\Labels\CustomLabels\PreviewTapeLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\DefaultLabel;
 use App\Models\Labels\Label;
-use App\Models\Location;
-use App\Models\Manufacturer;
 use App\Models\Setting;
-use App\Models\Supplier;
-use App\Models\User;
 use App\View\Label as LabelView;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Services\CustomLabelImportValidator;
 use Illuminate\Validation\Rule;
 use App\Models\Labels\RectangleSheet;
+use App\Models\Labels\LabelPreviewAsset;
 
-use App\Models\Labels\CustomLabels\CustomSheetLabel;
-
-//use App\Models\Labels\CustomLabels\CustomTapeLabel;
 class LabelsController extends Controller
 {
     /**
@@ -43,7 +34,7 @@ class LabelsController extends Controller
 
             $id = (int)str_replace('custom:', '', $labelName);
             $customLabel = CustomUserLabel::find($id);
-            
+
             if (!$customLabel) {
                 $template = new DefaultLabel;
             } else {
@@ -198,13 +189,9 @@ class LabelsController extends Controller
                 );
         }
 
-        $makePreviewLabel = function () use ($isTape) {
-            return $isTape
-                ? new PreviewTapeLabel
-                : new PreviewSheetLabel;
-        };
+        $previewLabelClass = $isTape ? new PreviewTapeLabel : new PreviewSheetLabel;
 
-        $baseWorkingLabel = $makePreviewLabel();
+        $baseWorkingLabel = new $previewLabelClass();
         $baseWorkingLabel->seedFromTemplate($baseLabel);
 
         $baseConfig = $baseWorkingLabel->getEditorConfigSections();
@@ -228,7 +215,7 @@ class LabelsController extends Controller
 
         $mergedConfig = array_replace_recursive($baseConfig, $submittedConfig);
 
-        $workingLabel = $makePreviewLabel();
+        $workingLabel = new $previewLabelClass();
         $workingLabel->seedFromTemplate($baseLabel);
         $workingLabel->applyEditorConfig($mergedConfig);
 
@@ -486,7 +473,7 @@ class LabelsController extends Controller
 
         $template->applyEditorConfig($editorConfig);
 
-        $exampleAsset = Asset::factory()->labelPreview()->make();
+        $exampleAsset = LabelPreviewAsset::make();;
 
         $customFieldColumns = CustomField::where('field_encrypted', 0)->pluck('db_column');
 
@@ -552,14 +539,30 @@ class LabelsController extends Controller
     public function createFromExisting(Request $request)
     {
         if ($request->filled('custom_label_id')) {
-            $customLabel = CustomUserLabel::findOrFail($request->get('custom_label_id'));
+            $customLabel = CustomUserLabel::findOrFail(
+                $request->get('custom_label_id')
+            );
 
             $config = $customLabel->config_snapshot;
             $config['name'] = 'Copy of ' . $customLabel->name;
 
+            $previewLabel = $customLabel->type === 'tape'
+                ? new PreviewTapeLabel
+                : new PreviewSheetLabel;
+
+            $baseLabel = CustomUserLabel::makeBaseLabel(
+                $customLabel->base_label
+            );
+
+            if ($baseLabel) {
+                $previewLabel->seedFromTemplate($baseLabel);
+            }
+
+            $previewLabel->applyEditorConfig($config);
+
             return view('settings.label-edit', [
                 'config' => $config,
-                'sections' => $customLabel->getEditorSections(),
+                'sections' => $previewLabel->getEditorSections(),
                 'selectedLabel' => $customLabel->base_label,
                 'selectedType' => $customLabel->type,
                 'importedConfig' => null,
