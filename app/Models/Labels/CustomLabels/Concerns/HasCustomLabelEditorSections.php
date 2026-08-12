@@ -102,26 +102,30 @@ trait HasCustomLabelEditorSections
                     'title' => [
                         'label' => 'admin/labels/general.groups.title',
                         'toggle' => 'supports.title',
-                        'fields' => [
-                            'title_font' => ['type' => 'select',
+                        'fields' => array_filter([
+                            'title_font' => [
+                                'type' => 'select',
                                 'options' => [
                                     'freemono' => 'admin/labels/general.options.freemono',
                                     'freesans' => 'admin/labels/general.options.freesans',
                                     'dejavusans' => 'admin/labels/general.options.dejavusans',
                                 ],
                             ],
+
                             'title_font_size' => ['type' => 'number'],
                             'title_margin' => ['type' => 'number'],
                             'title_offset_x' => ['type' => 'number'],
-                            'title_position' => [
-                                'type' => 'select',
-                                'options' => [
-                                    'inline' => 'admin/labels/general.options.inline',
-                                    'top' => 'admin/labels/general.options.top',
 
-                                ],
-                            ],
-                        ],
+                            'title_position' => !$this->isTapeLabel()
+                                ? [
+                                    'type' => 'select',
+                                    'options' => [
+                                        'inline' => 'admin/labels/general.options.inline',
+                                        'top' => 'admin/labels/general.options.top',
+                                    ],
+                                ]
+                                : null,
+                        ]),
                     ],
 
                     'field_labels' => [

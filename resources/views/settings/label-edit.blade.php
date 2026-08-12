@@ -226,6 +226,40 @@
                     .val(value === 'L' ? 'R' : 'L');
             }
         });
+
+        function syncContentSupportGroups() {
+            $('.label-editor-group[data-support-toggle]').each(function () {
+                const $group = $(this);
+                const toggle = $group.data('support-toggle');
+
+                const parts = toggle.split('.');
+
+                if (parts.length !== 2) {
+                    return;
+                }
+
+                const inputName = `${parts[0]}[${parts[1]}]`;
+                const $input = $(`[name="${inputName}"]`);
+
+                let enabled = false;
+
+                if ($input.is(':checkbox')) {
+                    enabled = $input.is(':checked');
+                } else {
+                    enabled = parseInt($input.val(), 10) > 0;
+                }
+
+                $group.toggle(enabled);
+            });
+        }
+
+        $(document).on(
+            'change',
+            'input[name^="supports["][type="checkbox"]',
+            syncContentSupportGroups
+        );
+
+        $(syncContentSupportGroups);
     </script>
     @livewireScripts
 @endpush

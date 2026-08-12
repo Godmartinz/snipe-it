@@ -63,7 +63,22 @@
         @elseif (isset($section['groups']))
             <div class="label-content-groups">
                 @foreach ($section['groups'] as $groupKey => $group)
-                    <div class="panel panel-default">
+                    @php
+                        $toggle = $group['toggle'] ?? null;
+                        $isSupported = $toggle
+                            ? (bool) data_get($config, $toggle, false)
+                            : true;
+                    @endphp
+
+                    <div
+                            class="panel panel-default label-editor-group"
+                            @if($toggle)
+                                data-support-toggle="{{ $toggle }}"
+                            @endif
+                            @if(!$isSupported)
+                                style="display:none;"
+                            @endif
+                    >
                         <div class="panel-heading">
                             <strong>{{ trans($group['label']) }}</strong>
                         </div>
