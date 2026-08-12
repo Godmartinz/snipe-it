@@ -1,7 +1,7 @@
 <div class="box box-default label-config-panel">
     <div class="box-header with-border">
         <x-form.legend>
-            {{ trans($section['label']) }}
+            {{ $section['label'] }}
         </x-form.legend>
     </div>
 
@@ -26,7 +26,7 @@
                                         @checked((bool) $value)
                                 >
 
-                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                {{ $field['label'] }}
 
                             @elseif ($field['type'] === 'number')
 
@@ -40,13 +40,13 @@
                                     >
 
                                     <label for="{{ $name }}">
-                                        {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                        {{ $field['label'] }}
                                     </label>
                                 </div>
 
                             @else
 
-                                {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+                                {{ $field['label'] }}
 
                                 <input
                                         type="{{ $field['type'] }}"
@@ -60,6 +60,7 @@
                     </div>
                 @endforeach
             </div>
+
         @elseif (isset($section['groups']))
             <div class="label-content-groups">
                 @foreach ($section['groups'] as $groupKey => $group)
@@ -80,7 +81,7 @@
                             @endif
                     >
                         <div class="panel-heading">
-                            <strong>{{ trans($group['label']) }}</strong>
+                            <strong>{{ $group['label'] }}</strong>
                         </div>
 
                         <div class="panel-body">
@@ -96,6 +97,7 @@
                     </div>
                 @endforeach
             </div>
+
         @else
             @foreach ($section['fields'] as $fieldKey => $field)
                 @include('partials.label-editor-field', [

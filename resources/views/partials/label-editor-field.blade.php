@@ -5,7 +5,7 @@
 
 <div class="form-group">
     <label class="col-md-4 control-label">
-        {{ trans("admin/labels/general.fields.{$fieldKey}") }}
+        {{ $field['label'] }}
     </label>
 
     <div class="col-md-4">
@@ -18,6 +18,7 @@
                     value="1"
                     @checked((bool) $value)
             >
+
         @elseif ($field['type'] === 'select')
             <select name="{{ $name }}" class="form-control">
                 @foreach ($field['options'] as $optionValue => $optionLabel)
@@ -25,10 +26,11 @@
                             value="{{ $optionValue }}"
                             @selected($value == $optionValue)
                     >
-                        {{ trans($optionLabel) }}
+                        {{ $optionLabel }}
                     </option>
                 @endforeach
             </select>
+
         @else
             <input
                     type="{{ $field['type'] }}"
