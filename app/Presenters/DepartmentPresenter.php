@@ -85,7 +85,8 @@ class DepartmentPresenter extends Presenter
                 'title' => trans('general.people'),
                 'titleTooltip' => trans('general.people'),
                 'visible' => true,
-                'class' => 'css-house-user',
+                'class' => 'css-house-user text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],  [
                 'field' => 'tag_color',
                 'scope' => 'col',

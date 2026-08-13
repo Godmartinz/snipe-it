@@ -22,15 +22,13 @@
                     {{ trans('admin/hardware/general.bulk_audit') }}
                 </x-slot:header>
 
-                @include('partials.forms.edit.asset-select', [
-                    'translated_name' => trans('general.assets'),
-                    'fieldname' => 'selected_assets[]',
-                    'multiple' => true,
-                    'required' => true,
-                    'select_id' => 'assigned_assets_select',
-                    'asset_selector_div_id' => 'assets_to_audit_div',
-                    'asset_ids' => old('selected_assets'),
-                ])
+                <x-input.asset-select
+                    :label="trans('general.assets')"
+                    name="selected_assets"
+                    :multiple="true"
+                    :required="true"
+                    :selected="old('selected_assets')"
+                />
 
                 {{-- Location controls: hidden entirely when the
                      selection spans multiple companies AND FMCS

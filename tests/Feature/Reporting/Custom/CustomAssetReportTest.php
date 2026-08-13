@@ -4,8 +4,10 @@ namespace Tests\Feature\Reporting\Custom;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\CustomFieldset;
 use App\Models\ReportTemplate;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
@@ -221,7 +223,11 @@ class CustomAssetReportTest extends TestCase
         $customField = CustomField::factory()->encrypt()->create();
         $columnName = $customField->db_column_name();
 
-        $asset = Asset::factory()->create(['name' => 'Encrypted Asset']);
+        $fieldset = CustomFieldset::factory()->create();
+        $fieldset->fields()->attach($customField, ['order' => 1, 'required' => false]);
+        $model = AssetModel::factory()->create(['fieldset_id' => $fieldset->id]);
+
+        $asset = Asset::factory()->for($model, 'model')->create(['name' => 'Encrypted Asset']);
         $asset->{$columnName} = Crypt::encrypt('super-secret-value');
         $asset->save();
 
@@ -371,6 +377,90 @@ class CustomAssetReportTest extends TestCase
             ->assertSeeTextInStreamedResponse('Asset At Boundary')
             ->assertSeeTextInStreamedResponse('Asset Above')
             ->assertDontSeeTextInStreamedResponse('Asset Below');
+    }
+
+    public function test_custom_report_hides_values_for_custom_fields_not_in_the_assets_model_fieldset()
+    {
+        // Two custom fields exist, each attached to a different fieldset. Both
+        // physical `_snipeit_` columns still hold values on both assets
+        // (simulating the customer scenario where a field was removed from a
+        // fieldset after values had already been written). The custom report
+        // used to expose those orphaned values because it read the column
+        // directly. It now gates the value on membership in the asset's model's
+        // fieldset so orphaned values come back blank.
+        $priority = CustomField::factory()->create(['name' => 'Priority']);
+        $majorOsRelease = CustomField::factory()->create(['name' => 'Major OS Release']);
+
+        $laptopFieldset = CustomFieldset::factory()->create(['name' => 'Laptop']);
+        $laptopFieldset->fields()->attach($priority, ['order' => 1, 'required' => false]);
+
+        $switchFieldset = CustomFieldset::factory()->create(['name' => 'Switch']);
+        $switchFieldset->fields()->attach($majorOsRelease, ['order' => 1, 'required' => false]);
+
+        $laptopModel = AssetModel::factory()->create(['fieldset_id' => $laptopFieldset->id]);
+        $switchModel = AssetModel::factory()->create(['fieldset_id' => $switchFieldset->id]);
+
+        $priorityColumn = $priority->db_column_name();
+        $osColumn = $majorOsRelease->db_column_name();
+
+        $laptop = Asset::factory()->for($laptopModel, 'model')->create(['name' => 'Laptop 001']);
+        $laptop->{$priorityColumn} = 'HIGH';
+        $laptop->{$osColumn} = 'ORPHANED-OS-VALUE';
+        $laptop->save();
+
+        $switch = Asset::factory()->for($switchModel, 'model')->create(['name' => 'Switch 001']);
+        $switch->{$priorityColumn} = 'ORPHANED-PRIORITY-VALUE';
+        $switch->{$osColumn} = '17.9';
+        $switch->save();
+
+        $response = $this->actingAs(User::factory()->canViewReports()->create())
+            ->post('reports/custom', [
+                'asset_name' => '1',
+                $priorityColumn => '1',
+                $osColumn => '1',
+            ])
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=utf-8');
+
+        $rows = collect(Reader::createFromString($response->streamedContent())->getRecords())->values();
+        $header = $rows->first();
+        $body = $rows->slice(1)->values();
+
+        $priorityIndex = array_search('Priority', $header, true);
+        $osIndex = array_search('Major OS Release', $header, true);
+        $nameIndex = array_search(trans('admin/hardware/form.name'), $header, true);
+        $this->assertNotFalse($priorityIndex);
+        $this->assertNotFalse($osIndex);
+        $this->assertNotFalse($nameIndex);
+
+        $byName = $body->keyBy(fn ($row) => $row[$nameIndex] ?? null);
+
+        $this->assertSame('HIGH', $byName['Laptop 001'][$priorityIndex] ?? null);
+        $this->assertSame('', $byName['Laptop 001'][$osIndex] ?? null,
+            'Orphaned Major OS Release value should be hidden on an asset whose model fieldset does not include it');
+
+        $this->assertSame('', $byName['Switch 001'][$priorityIndex] ?? null,
+            'Orphaned Priority value should be hidden on an asset whose model fieldset does not include it');
+        $this->assertSame('17.9', $byName['Switch 001'][$osIndex] ?? null);
+    }
+
+    public function test_custom_report_form_only_shows_custom_fields_that_belong_to_a_fieldset()
+    {
+        // Fields with no fieldset association can never surface a value in a
+        // report (post-fix), so the form should not offer them as selectable
+        // columns either. Otherwise the user ticks a checkbox and gets an
+        // always-empty column back, which is confusing.
+        $attached = CustomField::factory()->create(['name' => 'Priority']);
+        $orphan = CustomField::factory()->create(['name' => 'Retired Field']);
+
+        $fieldset = CustomFieldset::factory()->create();
+        $fieldset->fields()->attach($attached, ['order' => 1, 'required' => false]);
+
+        $this->actingAs(User::factory()->canViewReports()->create())
+            ->get(route('reports/custom'))
+            ->assertOk()
+            ->assertSee('Priority')
+            ->assertDontSee('Retired Field');
     }
 
     public function test_last_updated_range_is_inclusive_of_the_end_day()

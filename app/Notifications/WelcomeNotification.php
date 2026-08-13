@@ -23,7 +23,15 @@ class WelcomeNotification extends Notification
      */
     public function __construct(public User $user)
     {
-        $this->user->token = Password::broker('invites')->createToken($user);
+        // Password::broker() is typed to return the interface
+        // Illuminate\Contracts\Auth\PasswordBroker, which doesn't
+        // declare createToken(). The concrete Illuminate\Auth\Passwords\
+        // PasswordBroker does. Narrow the type locally so PHPStan can
+        // resolve the method against the concrete class.
+        /** @var \Illuminate\Auth\Passwords\PasswordBroker $broker */
+        $broker = Password::broker('invites');
+
+        $this->user->token = $broker->createToken($user);
         $this->user->expire_date = now()->addMinutes((int) config('auth.passwords.invites.expire', 2880))->format('F j, Y, g:i a');
     }
 

@@ -204,7 +204,7 @@
 
                   <!-- start history tab pane -->
                   <x-tabs.pane name="history">
-                      <x-table.history :model="$location" :route="route('api.locations.history', $location)"/>
+                      <x-table.history :model="$location" :route="route('api.locations.history', $location)" :hide_fields="['order_number']"/>
                   </x-tabs.pane>
                   <!-- end history tab pane -->
 

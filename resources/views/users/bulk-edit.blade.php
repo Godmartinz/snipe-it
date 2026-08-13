@@ -28,15 +28,21 @@
 
                 <x-demo-callout />
 
-                {{-- Department --}}
-                @include ('partials.forms.edit.department-select', ['translated_name' => trans('general.department'), 'fieldname' => 'department_id'])
+                <x-input.department-select
+                    :label="trans('general.department')"
+                    name="department_id"
+                    :selected="old('department_id')"
+                />
                 <x-form.checkbox-row
                     name="null_department_id"
                     :label="trans_choice('general.set_users_field_to_null', count($users), ['field' => trans('general.department'), 'user_count' => count($users)])"
                 />
 
-                {{-- Location --}}
-                @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
+                <x-input.location-select
+                    :label="trans('general.location')"
+                    name="location_id"
+                    :selected="old('location_id')"
+                />
                 <x-form.checkbox-row
                     name="null_location_id"
                     :label="trans_choice('general.set_users_field_to_null', count($users), ['field' => trans('general.location'), 'user_count' => count($users)])"
@@ -44,7 +50,12 @@
 
                 {{-- Company (gated on the FMCS + acting user check) --}}
                 @if (\App\Models\Company::canManageUsersCompanies())
-                    @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.select_company'), 'fieldname' => 'company_ids', 'multiple' => 'true'])
+                    <x-input.company-select
+                        :label="trans('general.select_company')"
+                        name="company_ids"
+                        :multiple="true"
+                        :selected="old('company_ids')"
+                    />
                     <x-form.checkbox-row
                         name="null_company_ids"
                         :label="trans_choice('general.set_users_field_to_null', count($users), ['field' => trans('general.companies'), 'user_count' => count($users)])"

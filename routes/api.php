@@ -44,6 +44,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
     });
 
     /**
+     * OrderItems (acquisition line-items). Standard REST index, filter
+     * by item_type + item_id for a specific parent, or asset_model_id
+     * for the AssetModel aggregate.
+     */
+    Route::get('order-items',
+        [Api\OrderItemsController::class, 'index']
+    )->name('api.order-items.index');
+
+    /**
      * Account routes
      */
     Route::group(['prefix' => 'account'], function () {
@@ -127,6 +136,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'checkin',
             ]
         )->name('api.accessories.checkin');
+
+        Route::post('{accessory}/adjust-quantity',
+            [
+                Api\AccessoriesController::class,
+                'adjustQuantity',
+            ]
+        )->name('api.accessories.adjust-quantity');
 
         Route::get('selectlist',
             [
@@ -269,6 +285,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         ]
     )->name('api.components.checkout');
 
+    Route::post('components/{component}/adjust-quantity',
+        [
+            Api\ComponentsController::class,
+            'adjustQuantity',
+        ]
+    )->name('api.components.adjust-quantity');
+
     Route::resource('components',
         Api\ComponentsController::class,
         ['names' => [
@@ -315,6 +338,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'checkout',
             ]
         )->name('api.consumables.checkout');
+
+        Route::post('{consumable}/adjust-quantity',
+            [
+                Api\ConsumablesController::class,
+                'adjustQuantity',
+            ]
+        )->name('api.consumables.adjust-quantity');
 
     });
 

@@ -161,7 +161,19 @@ class Importer extends Component
         'accessory' => [Accessory::class, ['item_name' => 'name', 'category' => 'category_id']],
         'consumable' => [Consumable::class, ['item_name' => 'name', 'category' => 'category_id']],
         'component' => [ComponentModel::class, ['item_name' => 'name', 'category' => 'category_id']],
-        'license' => [License::class, ['item_name' => 'name', 'seats' => 'seats']],
+        // license: only item_name is enforced at wizard level. `seats` is
+        // the license's total capacity count (not a per-seat pivot id).
+        // License imports currently drive three different intents depending
+        // on the row shape: (1) create a new License with N seats,
+        // (2) update an existing License's capacity, (3) assign a user or
+        // asset to one of an existing License's free seats. The importer
+        // figures out which path each row takes at process time. seats is
+        // only needed for (1) and (2); (3) doesn't reference it. Since the
+        // wizard can't know per-row which path a caller intends, we don't
+        // enforce seats at the wizard level. Server-side validation still
+        // enforces `seats` on the create path per License::$rules. See
+        // issue #19467.
+        'license' => [License::class, ['item_name' => 'name']],
         'user' => [User::class, ['first_name' => 'first_name', 'username' => 'username']],
         'location' => [Location::class, ['name' => 'name']],
         'supplier' => [Supplier::class, ['name' => 'name']],
@@ -199,7 +211,14 @@ class Importer extends Component
         $tmp = [];
         if ($this->activeFile) {
             $tmp = array_combine($this->headerRow, $this->field_map);
-            $tmp = array_filter($tmp);
+            // Drop only nulls (columns the auto-map couldn't bind to
+            // anything for this import type). Preserve empty strings,
+            // which encode the user's explicit "Do not import" choice
+            // in the wizard select. Bare array_filter($tmp) treats both
+            // as falsy and silently loses the user selection, forcing
+            // them to re-set "Do not import" every time the template
+            // is reloaded (see the wizard-side companion fix for #19450).
+            $tmp = array_filter($tmp, fn ($v) => $v !== null);
         }
 
         return json_encode($tmp);
@@ -854,9 +873,18 @@ class Importer extends Component
         $this->field_map = null;
         foreach ($this->headerRow as $element) {
             if (isset($this->activeFile->field_map[$element])) {
+                // Preserved values may be either a real target-field key
+                // or the empty string "" (user's explicit "Do not import"
+                // choice, persisted by generate_field_map). Push through
+                // as-is; the blade side's is_null-based @continue keeps
+                // "" rows visible so the user can flip them back.
                 $this->field_map[] = $this->activeFile->field_map[$element];
             } else {
-                $this->field_map[] = null; // re-inject the 'nulls' if a file was imported with some 'Do Not Import' settings
+                // Header wasn't in the saved map at all. Treat as
+                // never-mapped (auto-map couldn't bind or this header
+                // is new since the template was saved). Null hides the
+                // row in the wizard by design.
+                $this->field_map[] = null;
             }
         }
 
@@ -1026,21 +1054,17 @@ class Importer extends Component
             }
         }
 
-        // Asset imports let users map custom fields on top of the built-in
-        // ones. A custom field marked required in ANY fieldset should be
-        // flagged as required at the wizard level - we can't know per-row
-        // which fieldset each asset will land in, so we treat the union
-        // across all fieldsets as the safe requirement set. Users see the
-        // strictest possible bar and can back out if their CSV doesn't
-        // cover it.
-        if ($type === 'asset') {
-            $requiredCustomFields = CustomField::whereHas(
-                'fieldset',
-                fn ($q) => $q->where('custom_field_custom_fieldset.required', 1),
-            )->get()->map->db_column_name()->all();
-
-            $required = array_values(array_unique(array_merge($required, $requiredCustomFields)));
-        }
+        // Custom fields are intentionally NOT flagged as required at the
+        // wizard level for asset imports. Required-ness varies per fieldset,
+        // and a CSV can span multiple asset models pointing at different
+        // fieldsets, so a field required in Fieldset A may be irrelevant
+        // for rows destined for Fieldset B (issue #19468). Server-side
+        // validation on Asset::save() enforces the correct per-asset rule
+        // via customFieldValidationRules() -> $model->fieldset->validation_rules(),
+        // which reads the pivot->required flag for the specific fieldset
+        // attached to the row's model. Rows that legitimately need the
+        // field will still fail at save-time and surface in the import
+        // error output.
 
         return $required;
     }

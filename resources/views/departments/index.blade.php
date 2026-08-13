@@ -21,7 +21,6 @@
                     buttons="departmentButtons"
                     fixed_right_number="1"
                     fixed_number="1"
-                    use_sticky_css
                     api_url="{{ route('api.departments.index') }}"
                     :presenter="\App\Presenters\DepartmentPresenter::dataTableLayout()"
                     export_filename="export-departments-{{ date('Y-m-d') }}"

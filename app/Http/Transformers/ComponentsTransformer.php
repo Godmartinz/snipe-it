@@ -22,6 +22,11 @@ class ComponentsTransformer
 
     public function transformComponent(Component $component)
     {
+        // See AccessoriesTransformer for the last-acquisition-with-fallback
+        // resolution pattern for supplier / purchase_date / purchase_cost.
+        $lastDefaults = $component->lastOrderDefaults();
+        $lastSupplier = $component->lastAcquisitionSupplier();
+
         $array = [
             'id' => (int) $component->id,
             'name' => e($component->name),
@@ -40,10 +45,10 @@ class ComponentsTransformer
                 'name' => e($component->category->name),
                 'tag_color' => $component->category->tag_color ? e($component->category->tag_color) : null,
             ] : null,
-            'supplier' => ($component->supplier) ? [
-                'id' => $component->supplier->id,
-                'name' => e($component->supplier->name),
-                'tag_color' => $component->supplier->tag_color ? e($component->supplier->tag_color) : null,
+            'supplier' => $lastSupplier ? [
+                'id' => $lastSupplier->id,
+                'name' => e($lastSupplier->name),
+                'tag_color' => $lastSupplier->tag_color ? e($lastSupplier->tag_color) : null,
             ] : null,
             'manufacturer' => ($component->manufacturer) ? [
                 'id' => $component->manufacturer->id,
@@ -51,9 +56,10 @@ class ComponentsTransformer
                 'tag_color' => $component->manufacturer->tag_color ? e($component->manufacturer->tag_color) : null,
             ] : null,
             'model_number' => ($component->model_number) ? e($component->model_number) : null,
-            'order_number' => e($component->order_number),
-            'purchase_date' => Helper::getFormattedDateObject($component->purchase_date, 'date'),
-            'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
+            // See AccessoriesTransformer for why order_number is no longer
+            // in the parent-level output.
+            'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,
+            'purchase_cost' => Helper::formatCurrencyOutput($lastDefaults['unit_cost'] ?? null),
             'total_cost' => Helper::formatCurrencyOutput($component->totalCostSum()),
             'remaining' => (int) $component->numRemaining(),
             'percent_remaining' => round($component->percentRemaining()),
@@ -76,6 +82,7 @@ class ComponentsTransformer
             'checkout' => Gate::allows('checkout', Component::class),
             'checkin' => Gate::allows('checkin', Component::class),
             'update' => Gate::allows('update', Component::class),
+            'adjust_quantity' => Gate::allows('update', Component::class),
             'clone' => Gate::allows('create', Component::class),
             'delete' => $component->isDeletable(),
         ];

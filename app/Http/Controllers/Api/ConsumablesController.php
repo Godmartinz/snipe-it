@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\FilterRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreConsumableRequest;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -15,12 +17,15 @@ use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\Setting;
 use App\Models\User;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ConsumablesController extends Controller
 {
+    use HandlesAdjustQuantity;
+
     /**
      * Display a listing of the resource.
      *
@@ -32,7 +37,8 @@ class ConsumablesController extends Controller
     {
         $this->authorize('index', Consumable::class);
 
-        $consumables = Consumable::with('company', 'location', 'category', 'supplier', 'manufacturer')
+        // See ComponentsController for the orderItems.order.supplier eager-load rationale.
+        $consumables = Consumable::with('company', 'location', 'category', 'defaultSupplier', 'manufacturer', 'orderItems.order.supplier')
             ->withCount('users as consumables_users_count');
 
         // This array is what determines which fields should be allowed to be sorted on ON the table itself.
@@ -40,7 +46,6 @@ class ConsumablesController extends Controller
         $allowed_columns = [
             'id',
             'name',
-            'order_number',
             'min_amt',
             'purchase_date',
             'purchase_cost',
@@ -83,7 +88,12 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('order_number')) {
-            $consumables->where('consumables.order_number', '=', $request->input('order_number'));
+            // Reroute through the HasOrders orders() HasManyThrough since
+            // the parent consumables.order_number column no longer exists.
+            $orderNumber = $request->input('order_number');
+            $consumables->whereHas('orders', function ($query) use ($orderNumber) {
+                $query->where('orders.order_number', '=', $orderNumber);
+            });
         }
 
         if ($request->filled('category_id')) {
@@ -99,7 +109,7 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('supplier_id')) {
-            $consumables->where('consumables.supplier_id', '=', $request->input('supplier_id'));
+            $consumables->where('consumables.default_supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('location_id')) {
@@ -141,6 +151,18 @@ class ConsumablesController extends Controller
             case 'created_by':
                 $consumables = $consumables->OrderByCreatedBy($order);
                 break;
+            case 'purchase_cost':
+                // See AccessoriesController for the rationale — these
+                // three sorts walk order_items rather than removed
+                // parent columns.
+                $consumables = $consumables->OrderByLastPurchaseCost($order);
+                break;
+            case 'purchase_date':
+                $consumables = $consumables->OrderByLastPurchaseDate($order);
+                break;
+            case 'total_cost':
+                $consumables = $consumables->OrderByTotalOrderCost($order);
+                break;
             default:
                 $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
                 $consumables = $consumables->orderBy($sort, $order);
@@ -167,9 +189,15 @@ class ConsumablesController extends Controller
         $consumable = new Consumable;
         $consumable->fill($request->all());
         $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        // See AccessoriesController::store for the default-supplier seeding rationale.
+        if (! $request->filled('default_supplier_id') && $request->filled('supplier_id')) {
+            $consumable->default_supplier_id = $request->input('supplier_id');
+        }
         $consumable = $request->handleImages($consumable);
 
         if ($consumable->save()) {
+            $this->enrichInitialOrderFromRequest($request, $consumable);
+
             return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.create.success')));
         }
 
@@ -205,15 +233,55 @@ class ConsumablesController extends Controller
     {
         $this->authorize('update', Consumable::class);
         $consumable = Consumable::findOrFail($id);
-        $consumable->fill($request->all());
+
+        // See Api\AccessoriesController::update for the qty / order_number
+        // / supplier_id contract. Same logic mirrored here.
+        $qtyBefore = (int) $consumable->qty;
+        $qtyRequested = $request->has('qty') ? (int) $request->input('qty') : $qtyBefore;
+        $qtyDelta = $qtyRequested - $qtyBefore;
+
+        // supplier_id, purchase_date, purchase_cost, and order_number
+        // are create-only on the parent. Post-create acquisitions live
+        // as Orders + OrderItems, so update-mode drops all four.
+        $consumable->fill($request->except([
+            'qty',
+            'order_number',
+            'purchase_cost',
+            'purchase_date',
+            'supplier_id',
+        ]));
         $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $consumable = $request->handleImages($consumable);
 
-        if ($consumable->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
+        if (! $consumable->save()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
+        if ($qtyDelta !== 0) {
+            $orderId = $this->resolveOrderForAdjustment($request, $consumable, $qtyDelta);
+            try {
+                $consumable->adjustQuantity(
+                    $qtyDelta,
+                    $request->input('note') ?: "API qty change: {$qtyBefore} → {$qtyRequested}",
+                    $orderId,
+                );
+            } catch (DomainException) {
+                return response()->json(
+                    Helper::formatStandardApiResponse('error', null, trans('general.adjust_quantity_below_zero')),
+                    422,
+                );
+            }
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
+    }
+
+    /**
+     * See Api\AccessoriesController::adjustQuantity for the shape/contract.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Consumable $consumable): JsonResponse
+    {
+        return $this->adjustQuantityAsJson($request, $consumable);
     }
 
     /**

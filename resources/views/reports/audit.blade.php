@@ -21,7 +21,7 @@
                             data-sort-order="asc"
                             id="auditReport"
                             data-url="{{ route('api.activity.index', ['action_type' => 'audit']) }}"
-                            class="table table-striped snipe-table"
+                            class="table table-striped snipe-table snipe-table--sticky-right-1"
                             data-advanced-search="false"
                             data-export-options='{
                         "fileName": "activity-report-{{ date('Y-m-d') }}",

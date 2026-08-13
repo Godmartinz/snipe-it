@@ -31,21 +31,41 @@ class ReportsController extends Controller
      */
     public function index(FilterRequest $request): JsonResponse|array
     {
+        // Resolve incoming item_type / target_type against the
+        // allowlist BEFORE any downstream use. This is both an authz
+        // gate (denies probing arbitrary classes) and a correctness
+        // fix (Helper::normalizeFullModelName uses ucwords() which
+        // mangles CamelCase names, so `licenseseat` used to Fatal on
+        // App\Models\Licenseseat::withTrashed()). resolveActivityReportType
+        // returns the canonical fully-qualified class string or null.
+        $targetClass = null;
+        $itemClass = null;
+
+        if ($request->filled('target_type')) {
+            $targetClass = $this->resolveActivityReportType($request->input('target_type'));
+            if ($targetClass === null) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Invalid target_type'), 400);
+            }
+        }
+        if ($request->filled('item_type')) {
+            $itemClass = $this->resolveActivityReportType($request->input('item_type'));
+            if ($itemClass === null) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Invalid item_type'), 400);
+            }
+        }
 
         // If the user doesn't have permission to view the item or the target,
         // then they shouldn't be able to see the activity log for that item or target,
         // but if they have the general activity view permission,
         // then they can see all activity logs regardless of the item or target.
-        if ((! Gate::allows('activity.view')) && (($request->filled('target_type') && $request->filled('target_id')) || ($request->filled('item_type') && $request->filled('item_id')))) {
+        if ((! Gate::allows('activity.view')) && (($targetClass && $request->filled('target_id')) || ($itemClass && $request->filled('item_id')))) {
 
-            if (($request->filled('target_type')) && ($request->filled('target_id'))) {
-                $targetClass = Helper::normalizeFullModelName(request()->input('target_type'));
+            if ($targetClass && $request->filled('target_id')) {
                 $target = $targetClass::withTrashed()->find(request()->input('target_id'));
                 $this->authorize('view', $target ?? $targetClass);
             }
 
-            if (($request->filled('item_type')) && ($request->filled('item_id'))) {
-                $itemClass = Helper::normalizeFullModelName(request()->input('item_type'));
+            if ($itemClass && $request->filled('item_id')) {
                 $item = $itemClass::withTrashed()->find(request()->input('item_id'));
                 $this->authorize('view', $item ?? $itemClass);
             }
@@ -56,18 +76,18 @@ class ReportsController extends Controller
 
         $actionlogs = Actionlog::with('item', 'user', 'adminuser', 'target', 'location');
 
-        if (($request->filled('target_type')) && ($request->filled('target_id'))) {
+        if ($targetClass && $request->filled('target_id')) {
             $actionlogs = $actionlogs->where('target_id', '=', $request->input('target_id'))
-                ->where('target_type', '=', Helper::normalizeFullModelName($request->input('target_type')));
+                ->where('target_type', '=', $targetClass);
         }
 
-        if (($request->filled('item_type')) && ($request->filled('item_id'))) {
-            $actionlogs = $actionlogs->where(function ($query) use ($request) {
+        if ($itemClass && $request->filled('item_id')) {
+            $actionlogs = $actionlogs->where(function ($query) use ($request, $itemClass) {
                 $query->where('item_id', '=', $request->input('item_id'))
-                    ->where('item_type', '=', Helper::normalizeFullModelName($request->input('item_type')))
-                    ->orWhere(function ($query) use ($request) {
+                    ->where('item_type', '=', $itemClass)
+                    ->orWhere(function ($query) use ($request, $itemClass) {
                         $query->where('target_id', '=', $request->input('item_id'))
-                            ->where('target_type', '=', Helper::normalizeFullModelName($request->input('item_type')));
+                            ->where('target_type', '=', $itemClass);
                     });
             });
         }
@@ -288,5 +308,29 @@ class ReportsController extends Controller
             'labels' => array_map(fn ($d) => Carbon::parse($d)->format('M j'), $curDates),
             'prev_label' => $prevStart->format('M j').' – '.$prevEnd->format('M j'),
         ], $datasets));
+    }
+
+    /**
+     * Match caller-supplied item_type / target_type input against the
+     * activity-report allowlist and return the canonical class string.
+     * Delegates short-name → FQCN to Helper::normalizeFullModelName so
+     * this endpoint keeps accepting either shape (`asset` or
+     * `App\Models\Asset`), same as every other call site of that helper.
+     * The final match is case-insensitive against the allowlist to
+     * recover from normalizeFullModelName's ucwords() step, which
+     * mangles CamelCase names (`licenseseat` becomes the nonexistent
+     * App\Models\Licenseseat and would have fatal'd downstream).
+     * Null result means the caller should 400.
+     */
+    private function resolveActivityReportType(string $type): ?string
+    {
+        $candidate = Helper::normalizeFullModelName($type);
+        foreach (self::getActivityReportClassAllowlist() as $allowed) {
+            if (strcasecmp($candidate, $allowed) === 0) {
+                return $allowed;
+            }
+        }
+
+        return null;
     }
 }

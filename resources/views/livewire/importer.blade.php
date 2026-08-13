@@ -513,15 +513,22 @@
                                     @if (! empty($headerRow))
                                         @foreach ($headerRow as $index => $header)
                                             @php
-                                                // Skip CSV columns that the auto-map
-                                                // couldn't bind to any target for the
-                                                // current import type. If the user
-                                                // needs manual control they can
-                                                // pick a different import type in
-                                                // step 1 and the map re-runs.
+                                                // Render every CSV header, whether or
+                                                // not the auto-map bound it to a target.
+                                                // Auto-unmapped columns come through
+                                                // with $currentMapping = null and render
+                                                // with the "Do not import" placeholder
+                                                // selected; the user can pick a target
+                                                // from the dropdown if they want to. An
+                                                // earlier iteration of the wizard hid
+                                                // unmapped columns to keep the mapping
+                                                // step focused, but reporter feedback
+                                                // (swift2512 / Dewi4nt on #19450) was
+                                                // that people want to see every column
+                                                // so they can hand-map anything the
+                                                // auto-matcher missed.
                                                 $currentMapping = $field_map[$index] ?? null;
                                             @endphp
-                                            @continue(empty($currentMapping))
 
                                             <div class="form-group col-md-12" wire:key="header-row-{{ $index }}">
                                                 <label for="field_map.{{ $index }}" class="col-md-3 control-label text-right">{{ $header }}</label>
@@ -945,17 +952,32 @@
         // For the importFile part:
         $(function () {
 
+            // Client-side re-entry guard for the Process button. The server
+            // holds the actual per-import mutex (see the acquire/release
+            // block in Api\ImportController::process), which is what closes
+            // the concurrent-writer race for real; this flag just prevents
+            // the same-tab wizard from firing a second startProcessing while
+            // the first slice chain is still running. Cheap UX polish so
+            // the user isn't left wondering whether their impatient
+            // second-click did something.
+            var isProcessingImport = false;
+
             // The #import button lives inside #importMappingModal now, but
             // the modal is rendered as a sibling of #upload-table (not
             // inside it), so delegate from document to catch the click
             // regardless of where in the DOM the modal ends up after
             // Bootstrap moves it.
             $(document).on('click', '#importMappingModal #import', function () {
+                if (isProcessingImport) {
+                    return false;
+                }
                 if (!$wire.$get('typeOfImport')) {
                     $wire.$set('statusType', 'error');
                     $wire.$set('statusText', "An import type is required... "); //TODO: translate?
                     return;
                 }
+                isProcessingImport = true;
+                $(this).prop('disabled', true).attr('aria-busy', 'true');
                 $wire.$set('statusType', 'pending');
                 $wire.$set('statusText', '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> {{ trans('admin/hardware/form.processing_spinner') }}');
 
@@ -1174,6 +1196,15 @@
                     }
 
                     chain.always(function () {
+                        // Release the client-side re-entry guard so the
+                        // Process button becomes clickable again if the
+                        // user needs to retry (e.g. anySliceFailed branch
+                        // below keeps them on the wizard). On success the
+                        // modal hides and the page redirects anyway, so
+                        // the button state is moot in that case.
+                        isProcessingImport = false;
+                        $('#importMappingModal #import').prop('disabled', false).removeAttr('aria-busy');
+
                         $wire.$set('progress', 100);
                         var somethingLanded = aggregatedTally.created > 0 || aggregatedTally.updated > 0;
 

@@ -60,6 +60,16 @@ class DatabaseSeeder extends Seeder
         $this->reportMemory('after DepreciationSeeder (2nd)');
         $this->call(StatuslabelSeeder::class);
         $this->reportMemory('after StatuslabelSeeder');
+
+        // Wipe Orders / OrderItems before any inventory seeder runs so a
+        // re-seed doesn't inherit acquisition rows from the previous
+        // session. The inventory seeders (Accessory / Asset / Component /
+        // Consumable) truncate their own tables but the observer-written
+        // Orders / OrderItems live in a shared polymorphic pair, so we
+        // clear them centrally here.
+        DB::table('order_items')->truncate();
+        DB::table('orders')->truncate();
+
         $this->call(AccessorySeeder::class);
         $this->reportMemory('after AccessorySeeder');
         $this->call(AssetSeeder::class);

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property-read string $display_name
+ */
 class SnipeModel extends Model
 {
     // Setters that are appropriate across multiple models.

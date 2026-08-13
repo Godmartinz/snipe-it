@@ -126,8 +126,13 @@ class Version extends Command
         \File::put($versionFile, $content);
         info('New version: '.$full_app_version.' ('.$git_branch.')');
 
-        info('Building JS/CSS assets...');
-        passthru('npm run prod', $exitCode);
+        // Master ships production-minified assets; develop / topic
+        // branches ship the dev-build artifacts so partial merges
+        // don't drop into master with mismatched compiled JS/CSS.
+        $npmScript = $use_branch === 'master' ? 'npm run prod' : 'npm run dev';
+
+        info('Building JS/CSS assets ('.$npmScript.')...');
+        passthru($npmScript, $exitCode);
 
         if ($exitCode !== 0) {
             $this->error('Asset build failed with exit code '.$exitCode);

@@ -98,6 +98,14 @@ class AcceptanceController extends Controller
             abort(403, trans('general.insufficient_permissions'));
         }
 
+        // Bound the note server-side. Unbounded notes were reaching synchronous
+        // CommonMark rendering in the acceptance notification email and
+        // consuming worker CPU on a per-request basis (defense in depth against
+        // the parser CVE; the commonmark bump to 2.9.0 is the primary fix).
+        $request->validate([
+            'note' => 'nullable|string|max:1000',
+        ]);
+
         $acceptance = CheckoutAcceptance::find($id);
 
         if (! $acceptance) {
@@ -192,11 +200,12 @@ class AcceptanceController extends Controller
             }
         }
 
-        // Convert PDF logo to base64 for TCPDF
-        // This is needed for TCPDF to properly embed the image if it's a png and the cache isn't writable
+        // Convert PDF logo to base64 for TCPDF. Reading via the disk (rather
+        // than file_get_contents on a local path) keeps this working when
+        // uploads live on s3 or another non-local filesystem.
         $encoded_logo = null;
         if (($settings->acceptance_pdf_logo) && (Storage::disk('public')->exists($settings->acceptance_pdf_logo))) {
-            $encoded_logo = base64_encode(file_get_contents(public_path().'/uploads/'.basename($settings->acceptance_pdf_logo)));
+            $encoded_logo = base64_encode(Storage::disk('public')->get($settings->acceptance_pdf_logo));
         }
 
         // Get the data array ready for the notifications and PDF generation

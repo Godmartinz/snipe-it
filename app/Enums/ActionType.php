@@ -20,6 +20,7 @@ enum ActionType: string
     case Declined = 'declined';
     case Audit = 'audit';
     case NoteAdded = 'note added';
+    case QuantityAdjust = 'adjusted quantity';
 
     // Users
     case TwoFactorReset = '2FA reset';

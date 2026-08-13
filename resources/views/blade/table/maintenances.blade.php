@@ -18,7 +18,6 @@
     <x-table
         :fixed_right_number="$fixed_right_number"
         :fixed_number="$fixed_number"
-        use_sticky_css
         buttons="maintenanceButtons"
         api_url="{{ $route ?? route('api.maintenances.index') }}"
         :presenter="\App\Presenters\MaintenancesPresenter::dataTableLayout()"

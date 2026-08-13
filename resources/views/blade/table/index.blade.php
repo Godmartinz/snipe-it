@@ -10,25 +10,22 @@
     'fixed_right_number' => null,
     'sort_order' => 'asc',
     'sort_field' => 'name',
-    'nosticky' => false,
-    'use_sticky_css' => false,
 ])
 
 @aware(['name'])
 
-{{-- When use_sticky_css is on, the bootstrap-table fixed-columns
-     extension is disabled (data-fixed-columns=false) and we pin the
-     first / last N columns via CSS position:sticky instead. Sidesteps
-     the clone-and-overlay approach that misplaces tooltips when the
-     container reflows (see /hardware/2600#maintenances + info panel
-     toggle) and drifts in height with long-content rows. Matching CSS
-     lives in overrides.less under `.snipe-table--sticky-*-N`. --}}
+{{-- fixed_number / fixed_right_number pin the first / last N columns
+     via CSS position:sticky (snipe-table--sticky-*-N in overrides.less).
+     The bootstrap-table fixed-columns feature that used to handle this
+     was pulled from the bundle — its clone-and-overlay approach
+     misplaced tooltips when the container reflowed and drifted in
+     height with long-content rows. --}}
 <table
     role="table"
     @class([
         'table', 'table-striped', 'snipe-table',
-        'snipe-table--sticky-right-' . $fixed_right_number => $use_sticky_css && $fixed_right_number,
-        'snipe-table--sticky-left-' . $fixed_number => $use_sticky_css && $fixed_number,
+        'snipe-table--sticky-right-' . $fixed_right_number => (bool) $fixed_right_number,
+        'snipe-table--sticky-left-' . $fixed_number => (bool) $fixed_number,
     ])
     data-cookie-id-table="{{ $name }}ListingTable"
     data-id-table="{{ $name }}ListingTable"
@@ -49,16 +46,6 @@
 
     @if ($presenter)
         data-columns="{{ $presenter }}"
-    @endif
-
-    data-fixed-columns="{{ (! $use_sticky_css && (($fixed_number) || ($fixed_right_number) || ($nosticky!='true'))) ? 'true' : 'false' }}"
-
-    @if ($fixed_number && ! $use_sticky_css)
-        data-fixed-number="{{ $fixed_number }}"
-    @endif
-
-    @if ($fixed_right_number && ! $use_sticky_css)
-        data-fixed-right-number="{{ $fixed_right_number }}"
     @endif
 
     @if ($buttons)

@@ -52,8 +52,12 @@
                     </x-form.row>
                 @endif
 
-                {{-- Location --}}
-                @include('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id', 'company_id' => $asset->company_id])
+                <x-input.location-select
+                    :label="trans('general.location')"
+                    name="location_id"
+                    :selected="old('location_id')"
+                    :companyId="$asset->company_id"
+                />
 
                 {{-- Update location + help block (kept hand-rolled so the
                      help text sits inside the input column alongside the
@@ -100,12 +104,13 @@
                     </x-slot:input>
                 </x-form.row>
 
-                {{-- Note --}}
-                <x-form.row :label="trans('general.notes')" name="note" input_div_class="col-md-8">
-                    <x-slot:input>
-                        <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
-                    </x-slot:input>
-                </x-form.row>
+                <x-form.row
+                    :label="trans('general.notes')"
+                    name="note"
+                    type="textarea"
+                    :item="$asset"
+                    input_div_class="col-md-8"
+                />
 
                 {{-- Audit image --}}
                 <x-input.image-upload :helpText="trans('general.audit_images_help')" />

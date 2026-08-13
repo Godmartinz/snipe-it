@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\JsonEncodingException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
@@ -291,72 +292,123 @@ class ImportController extends Controller
             return response()->json(Helper::formatStandardApiResponse('import-errors', null, $error), 500);
         }
 
-        $errors = $request->import($import);
-        $redirectTo = 'hardware.index';
-        switch ($request->input('import-type')) {
-            case 'asset':
-            case 'assetHistory':
-                $model_perms = 'App\Models\Asset';
-                $redirectTo = 'hardware.index';
-                break;
-            case 'assetModel':
-                $model_perms = 'App\Models\AssetModel';
-                $redirectTo = 'models.index';
-                break;
-            case 'accessory':
-                $model_perms = 'App\Models\Accessory';
-                $redirectTo = 'accessories.index';
-                break;
-            case 'consumable':
-                $model_perms = 'App\Models\Consumable';
-                $redirectTo = 'consumables.index';
-                break;
-            case 'component':
-                $model_perms = 'App\Models\Component';
-                $redirectTo = 'components.index';
-                break;
-            case 'license':
-                $model_perms = 'App\Models\License';
-                $redirectTo = 'licenses.index';
-                break;
-            case 'user':
-                $model_perms = 'App\Models\User';
-                $redirectTo = 'users.index';
-                break;
-            case 'location':
-                $model_perms = 'App\Models\Location';
-                $redirectTo = 'locations.index';
-                break;
-            case 'supplier':
-                $model_perms = 'App\Models\Supplier';
-                $redirectTo = 'suppliers.index';
-                break;
-            case 'manufacturer':
-                $model_perms = 'App\Models\Manufacturer';
-                $redirectTo = 'manufacturers.index';
-                break;
-            case 'category':
-                $model_perms = 'App\Models\Category';
-                $redirectTo = 'categories.index';
-                break;
+        // Per-import processing mutex. Two calls into process() for the
+        // same import (two admins clicking at once, a double-fire from the
+        // wizard, a browser retry, an intermediate proxy retry) would each
+        // run their own snapshot of the app-layer unique-validation
+        // checks, both find no live duplicates, and both insert - producing
+        // duplicate rows that the downstream unique_undeleted rule can't
+        // retroactively resolve. This UPDATE is an atomic compare-and-set:
+        // only one caller wins per Import row for the duration of that
+        // request. The lock is released at the end of the request (both
+        // success and error paths, see the finally-shaped block below) so
+        // legitimate sequential slices from the SAME caller can fire the
+        // next slice against a released lock. A stale lock from a crashed
+        // slice self-heals after 5 minutes (timeout branch). See
+        // ImportConcurrencyTest for the acquire / release / stale-takeover
+        // assertions.
+        $now = now();
+        $acquired = DB::table('imports')
+            ->where('id', $import_id)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('processing_by')
+                    ->orWhere('processing_started_at', '<', $now->copy()->subMinutes(5));
+            })
+            ->update([
+                'processing_by' => auth()->id(),
+                'processing_started_at' => $now,
+            ]);
+
+        if ($acquired === 0) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/hardware/message.import.already_processing')
+            ), 409);
         }
 
-        $tally = $request->getTally();
-        // Payload only carries the tally when at least one importer for this
-        // type has been wired up to record it. Un-instrumented importers
-        // leave every count at zero; suppress the block in that case so we
-        // don't surface a misleading all-zero summary in the wizard.
-        $tallyPayload = array_sum($tally) > 0 ? ['tally' => $tally] : null;
+        try {
+            $errors = $request->import($import);
+            $redirectTo = 'hardware.index';
+            switch ($request->input('import-type')) {
+                case 'asset':
+                case 'assetHistory':
+                    $model_perms = 'App\Models\Asset';
+                    $redirectTo = 'hardware.index';
+                    break;
+                case 'assetModel':
+                    $model_perms = 'App\Models\AssetModel';
+                    $redirectTo = 'models.index';
+                    break;
+                case 'accessory':
+                    $model_perms = 'App\Models\Accessory';
+                    $redirectTo = 'accessories.index';
+                    break;
+                case 'consumable':
+                    $model_perms = 'App\Models\Consumable';
+                    $redirectTo = 'consumables.index';
+                    break;
+                case 'component':
+                    $model_perms = 'App\Models\Component';
+                    $redirectTo = 'components.index';
+                    break;
+                case 'license':
+                    $model_perms = 'App\Models\License';
+                    $redirectTo = 'licenses.index';
+                    break;
+                case 'user':
+                    $model_perms = 'App\Models\User';
+                    $redirectTo = 'users.index';
+                    break;
+                case 'location':
+                    $model_perms = 'App\Models\Location';
+                    $redirectTo = 'locations.index';
+                    break;
+                case 'supplier':
+                    $model_perms = 'App\Models\Supplier';
+                    $redirectTo = 'suppliers.index';
+                    break;
+                case 'manufacturer':
+                    $model_perms = 'App\Models\Manufacturer';
+                    $redirectTo = 'manufacturers.index';
+                    break;
+                case 'category':
+                    $model_perms = 'App\Models\Category';
+                    $redirectTo = 'categories.index';
+                    break;
+            }
 
-        if ($errors) { // Failure
-            return response()->json(Helper::formatStandardApiResponse('import-errors', $tallyPayload, $errors), 500);
+            $tally = $request->getTally();
+            // Payload only carries the tally when at least one importer for this
+            // type has been wired up to record it. Un-instrumented importers
+            // leave every count at zero; suppress the block in that case so we
+            // don't surface a misleading all-zero summary in the wizard.
+            $tallyPayload = array_sum($tally) > 0 ? ['tally' => $tally] : null;
+
+            if ($errors) { // Failure
+                return response()->json(Helper::formatStandardApiResponse('import-errors', $tallyPayload, $errors), 500);
+            }
+            // Flash message before the redirect
+            Session::flash('success', trans('admin/hardware/message.import.success'));
+
+            $redirect_url = auth()->user()->can('view', $model_perms) ? route($redirectTo) : route('imports.index');
+
+            return response()->json(Helper::formatStandardApiResponse('success', $tallyPayload, ['redirect_url' => $redirect_url]));
+        } finally {
+            // Release the mutex so the next legitimate slice from the same
+            // caller (or a subsequent process attempt after this one has
+            // finished, including the error path above) can acquire. The
+            // 5-minute stale-timeout branch of the acquire WHERE remains as
+            // a safety net for the case where this release never runs
+            // (fatal error, request killed mid-flight).
+            DB::table('imports')
+                ->where('id', $import_id)
+                ->where('processing_by', auth()->id())
+                ->update([
+                    'processing_by' => null,
+                    'processing_started_at' => null,
+                ]);
         }
-        // Flash message before the redirect
-        Session::flash('success', trans('admin/hardware/message.import.success'));
-
-        $redirect_url = auth()->user()->can('view', $model_perms) ? route($redirectTo) : route('imports.index');
-
-        return response()->json(Helper::formatStandardApiResponse('success', $tallyPayload, ['redirect_url' => $redirect_url]));
     }
 
     /**

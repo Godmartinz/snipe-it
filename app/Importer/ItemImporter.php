@@ -76,7 +76,12 @@ class ItemImporter extends Importer
 
         $this->item['name'] = $this->findCsvMatch($row, 'item_name');
         $this->item['notes'] = $this->findCsvMatch($row, 'notes');
-        $this->item['order_number'] = $this->findCsvMatch($row, 'order_number');
+        // order_number is no longer a column on the inventory tables —
+        // it moved to the Orders / OrderItems data model. Sub-importers
+        // call ItemImporter::recordOrderForImportedRow() after the row
+        // saves to record the acquisition. Reading the value straight
+        // off the row inside that helper (rather than staging into
+        // $this->item['order_number']) avoids a fillable-drop no-op.
         $this->item['purchase_cost'] = $this->findCsvMatch($row, 'purchase_cost');
         $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
         $this->item['min_amt'] = $this->findCsvMatch($row, 'min_amt');
@@ -161,6 +166,127 @@ class ItemImporter extends Importer
     protected function sanitizeItemForUpdating($model)
     {
         return $this->sanitizeItemForStoring($model, true);
+    }
+
+    /**
+     * Apply a sanitized update payload to a model, routing any qty change
+     * through the AdjustsQuantity trait so it becomes a QuantityAdjust
+     * action_log entry rather than a silent update-log overwrite. Only
+     * kicks in for models that use the trait (Accessory, Consumable,
+     * Component). For everything else it's a plain $model->update().
+     *
+     * A DomainException from adjustQuantity (would drop qty below the
+     * currently-in-use count) is logged and the row's non-qty updates
+     * still stick. The AdjustsQuantity trait's `$orderNumber` argument
+     * is passed as null here because the Orders / OrderItems data model
+     * now owns the acquisition record; wiring the importer to also
+     * create an Order for the qty delta is a separate follow-up under
+     * the adjust-quantity flow rework.
+     */
+    protected function applyUpdateWithQtyAdjust($model, array $sanitized): void
+    {
+        $qtyRequested = null;
+
+        if (method_exists($model, 'adjustQuantity') && array_key_exists('qty', $sanitized)) {
+            // Empty CSV cell (present but blank) means "don't touch qty"
+            // on update — not "set qty to 0". Casting '' straight to (int)
+            // 0 produced a delta of -currentQty and silently drained
+            // inventory on any import row that included an empty
+            // quantity column.
+            if ($sanitized['qty'] !== '' && $sanitized['qty'] !== null) {
+                $qtyRequested = (int) $sanitized['qty'];
+            }
+            unset($sanitized['qty']);
+        }
+
+        $qtyBefore = $qtyRequested !== null ? (int) $model->qty : null;
+
+        $model->update($sanitized);
+
+        if ($qtyRequested === null || $qtyRequested === $qtyBefore) {
+            return;
+        }
+
+        try {
+            $model->adjustQuantity(
+                $qtyRequested - $qtyBefore,
+                "Import: qty updated from {$qtyBefore} to {$qtyRequested}",
+                null,
+            );
+        } catch (\DomainException) {
+            $this->log('Skipping qty change for '.($model->name ?? 'row').': would drop on-hand below the currently-checked-out count.');
+        }
+    }
+
+    /**
+     * Record the CSV row's order_number (if any) as an Order + OrderItem
+     * pair against the freshly-saved model. Called from the CREATE
+     * branch of every sub-importer that participates in the Orders data
+     * model (Accessory, Consumable, Component, Asset, License).
+     *
+     * Dedupes on the Order side via (order_number, supplier_id, company_id)
+     * so multiple items in the same CSV that share an order_number all
+     * land under a single Order row. Never dedupes on the OrderItem
+     * side — each imported row is its own line, matching the "one line
+     * per item purchased" semantic.
+     *
+     * Deliberately does not run on UPDATE imports: importer update mode
+     * means "the CSV has a corrected version of an existing row", not
+     * "a new purchase happened". The adjust-quantity flow is the path
+     * that records replenishment events for existing rows and will
+     * grow its own Order-creation wiring when that flow is reworked.
+     */
+    protected function recordOrderForImportedRow($model, array $row): void
+    {
+        $orderNumber = trim((string) $this->findCsvMatch($row, 'order_number'));
+        $currency = trim((string) $this->findCsvMatch($row, 'currency'));
+        $supplierId = $this->item['supplier_id'] ?? null;
+        $purchaseDate = $this->item['purchase_date'] ?? null;
+        $rawCost = $this->item['purchase_cost'] ?? null;
+        $purchaseCost = ($rawCost !== null && $rawCost !== '') ? (float) $rawCost : null;
+
+        if ($orderNumber === ''
+            && $currency === ''
+            && $supplierId === null
+            && $purchaseDate === null
+            && $purchaseCost === null
+        ) {
+            return;
+        }
+
+        // Every accessory / consumable / component / asset create fires
+        // its observer which writes an initial Order + OrderItem from
+        // parent attributes (with null acquisition metadata, parents
+        // don't carry those columns any more). The importer's job here
+        // is to enrich the observer-created rows with the CSV's values.
+        $initialLine = $model->orderItems()->latest('id')->first();
+        if (! $initialLine || ! $initialLine->order) {
+            return;
+        }
+
+        $order = $initialLine->order;
+        $updates = [];
+
+        if ($orderNumber !== '' && $order->order_number !== $orderNumber) {
+            $updates['order_number'] = $orderNumber;
+        }
+        if ($currency !== '' && $order->currency !== $currency) {
+            $updates['currency'] = $currency;
+        }
+        if ($supplierId !== null && (int) $order->supplier_id !== (int) $supplierId) {
+            $updates['supplier_id'] = (int) $supplierId;
+        }
+        if ($purchaseDate !== null && optional($order->purchase_date)->toDateString() !== (string) $purchaseDate) {
+            $updates['purchase_date'] = $purchaseDate;
+        }
+
+        if ($updates !== []) {
+            $order->update($updates);
+        }
+
+        if ($purchaseCost !== null && (float) $initialLine->price !== $purchaseCost) {
+            $initialLine->update(['price' => $purchaseCost]);
+        }
     }
 
     /**

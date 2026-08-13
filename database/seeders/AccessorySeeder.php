@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
+use App\Models\Actionlog;
 use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +18,8 @@ class AccessorySeeder extends Seeder
 {
     public function run()
     {
+        // See AssetModelSeeder for the stale-action_log rationale.
+        Actionlog::where('item_type', Accessory::class)->delete();
         Accessory::truncate();
         DB::table('accessories_checkout')->truncate();
 
@@ -33,29 +37,35 @@ class AccessorySeeder extends Seeder
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
-        Accessory::factory()->appleUsbKeyboard()->create([
-            'location_id' => $locationIds->random(),
-            'supplier_id' => $supplierIds->random(),
-            'created_by' => $admin->id,
-        ]);
+        // Build a fresh acquisition payload per accessory so demo rows
+        // don't all share the same supplier / cost / date. The seeded
+        // supplier also seeds the parent's default_supplier_id template
+        // so future adjust-quantity events pre-populate with it.
+        //
+        // withInitialAcquisition enriches the observer-written Order +
+        // OrderItem with realistic acquisition metadata. The observer
+        // alone leaves those fields null because form-driven creates
+        // enrich them via enrichInitialOrderFromRequest, which a seeder
+        // can't invoke.
+        $randomAcquisition = function () use ($supplierIds) {
+            $supplier = Supplier::find($supplierIds->random());
+            $cost = fake()->randomFloat(2, 5, 250);
+            $date = Carbon::instance(fake()->dateTimeBetween('-1 years', 'now'))->toDateString();
 
-        Accessory::factory()->appleBtKeyboard()->create([
-            'location_id' => $locationIds->random(),
-            'supplier_id' => $supplierIds->random(),
-            'created_by' => $admin->id,
-        ]);
+            return compact('supplier', 'cost', 'date');
+        };
 
-        Accessory::factory()->appleMouse()->create([
-            'location_id' => $locationIds->random(),
-            'supplier_id' => $supplierIds->random(),
-            'created_by' => $admin->id,
-        ]);
-
-        Accessory::factory()->microsoftMouse()->create([
-            'location_id' => $locationIds->random(),
-            'supplier_id' => $supplierIds->random(),
-            'created_by' => $admin->id,
-        ]);
+        foreach (['appleUsbKeyboard', 'appleBtKeyboard', 'appleMouse', 'microsoftMouse'] as $state) {
+            $acq = $randomAcquisition();
+            Accessory::factory()
+                ->{$state}()
+                ->withInitialAcquisition($acq['supplier'], $acq['cost'], $acq['date'])
+                ->create([
+                    'location_id' => $locationIds->random(),
+                    'default_supplier_id' => $acq['supplier']->id,
+                    'created_by' => $admin->id,
+                ]);
+        }
 
         // Check out a handful of each accessory to random users so the
         // view page doesn't render empty. Uses the AccessoryCheckout

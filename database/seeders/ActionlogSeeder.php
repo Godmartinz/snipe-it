@@ -15,7 +15,14 @@ class ActionlogSeeder extends Seeder
 
     public function run()
     {
-        Actionlog::truncate();
+        // Only wipe the specific action types this seeder is about to
+        // re-populate. A blanket truncate trashes the observer-written
+        // `create` / `update` / `qty_adjust` logs from earlier seeders
+        // (Accessory, Consumable, Component, Asset, ...) and leaves the
+        // demo DB inconsistent with the invariants those logs are meant
+        // to uphold — e.g. the qty-reconciliation migration relies on
+        // `create` + `qty_adjust` summing to parent.qty.
+        Actionlog::where('action_type', 'checkout')->delete();
 
         if (! Asset::count()) {
             $this->call(AssetSeeder::class);

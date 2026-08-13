@@ -210,6 +210,10 @@
                                             {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->accessory_cost)}}
                                         </x-data-row>
 
+                                        <x-data-row icon_type="consumables" label="{{ trans('general.consumables') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->consumable_cost) }}
+                                        </x-data-row>
+
                                         {{-- Sum across complete + active maintenances tied
                                              to this user — used to surface "which users
                                              cost the most maintenance over time" as a glance.
@@ -448,7 +452,7 @@
                                         <td>{{ Helper::getFormattedDateObject($accessory->pivot->created_at, 'datetime',  false) }}</td>
                                         <td>{{ $accessory->pivot->note }}</td>
                                         <td>
-                                            {!! Helper::formatCurrencyOutput($accessory->purchase_cost) !!}
+                                            {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
                                         </td>
                                         <td class="hidden-print">
                                             @can('checkin', $accessory)
@@ -491,7 +495,7 @@
                                     <tr>
                                         <td>{!! $consumable->present()->nameUrl() !!}</td>
                                         <td>
-                                            {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}
+                                            {!! Helper::formatCurrencyOutput($consumable->lastOrderDefaults()['unit_cost'] ?? null) !!}
                                         </td>
                                         <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>
                                         <td>{{ $consumable->pivot->note }}</td>
@@ -594,7 +598,7 @@
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$user" :route="route('api.users.history', $user)"/>
+                        <x-table.history :model="$user" :route="route('api.users.history', $user)" :hide_fields="['order_number']"/>
                     </x-tabs.pane>
                     <!-- end history tab pane -->
                 </x-slot:tabpanes>
@@ -650,7 +654,7 @@
                         <x-button.delete :item="$user"/>
 
                         @can('delete', $user)
-                            <form action="{{ route('users/bulkedit') }}" method="POST" class="form-inline" style="display: inline; padding-right: 5px;">
+                            <form action="{{ route('users/bulkedit') }}" method="POST" class="form-inline pull-right" style="display: inline; padding-right: 5px;">
                                 <!-- CSRF Token -->
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="bulk_actions" value="delete"/>

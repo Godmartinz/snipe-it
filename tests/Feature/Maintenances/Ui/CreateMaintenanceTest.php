@@ -90,6 +90,62 @@ class CreateMaintenanceTest extends TestCase
         $this->assertHasTheseActionLogs($maintenance, ['create', 'uploaded']);
     }
 
+    public function test_cleared_responsible_party_persists_as_null()
+    {
+        // Regression for issue #19452: the create form pre-populates
+        // responsible_party_id with the acting user as a UX default,
+        // but if the user clears the picker before submitting, the
+        // server used to fall back to the acting user via a `?:`
+        // shortcut, nullifying the user's clear. The submission is a
+        // deliberate deselection and must persist as null, matching
+        // update()'s behavior.
+        $actor = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $type = MaintenanceType::factory()->create();
+
+        $this->actingAs($actor)
+            ->post(route('maintenances.store'), [
+                'name' => 'Cleared Party Maintenance',
+                'selected_assets' => [$asset->id],
+                'maintenance_type_id' => $type->id,
+                'start_date' => '2021-01-01 00:00:00',
+                'is_warranty' => '0',
+                'responsible_party_id' => '',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('maintenances.index'));
+
+        $this->assertDatabaseHas('maintenances', [
+            'name' => 'Cleared Party Maintenance',
+            'responsible_party_id' => null,
+        ]);
+    }
+
+    public function test_explicitly_picked_responsible_party_persists()
+    {
+        $actor = User::factory()->superuser()->create();
+        $party = User::factory()->create();
+        $asset = Asset::factory()->create();
+        $type = MaintenanceType::factory()->create();
+
+        $this->actingAs($actor)
+            ->post(route('maintenances.store'), [
+                'name' => 'Picked Party Maintenance',
+                'selected_assets' => [$asset->id],
+                'maintenance_type_id' => $type->id,
+                'start_date' => '2021-01-01 00:00:00',
+                'is_warranty' => '0',
+                'responsible_party_id' => $party->id,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('maintenances.index'));
+
+        $this->assertDatabaseHas('maintenances', [
+            'name' => 'Picked Party Maintenance',
+            'responsible_party_id' => $party->id,
+        ]);
+    }
+
     public function test_can_backfill_a_completed_maintenance_via_create()
     {
         // Users record maintenances that were already finished (backfill).

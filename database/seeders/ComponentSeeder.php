@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Location;
+use App\Models\Supplier;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +17,8 @@ class ComponentSeeder extends Seeder
 {
     public function run()
     {
+        // See AssetModelSeeder for the stale-action_log rationale.
+        Actionlog::where('item_type', Component::class)->delete();
         Component::truncate();
         DB::table('components_assets')->truncate();
 
@@ -29,22 +34,31 @@ class ComponentSeeder extends Seeder
 
         $locationIds = Location::all()->pluck('id');
 
-        Component::factory()->ramCrucial4()->create([
-            'company_id' => $companyIds->random(),
-            'location_id' => $locationIds->random(),
-        ]);
-        Component::factory()->ramCrucial8()->create([
-            'company_id' => $companyIds->random(),
-            'location_id' => $locationIds->random(),
-        ]);
-        Component::factory()->ssdCrucial120()->create([
-            'company_id' => $companyIds->random(),
-            'location_id' => $locationIds->random(),
-        ]);
-        Component::factory()->ssdCrucial240()->create([
-            'company_id' => $companyIds->random(),
-            'location_id' => $locationIds->random(),
-        ]);
+        if (! Supplier::count()) {
+            $this->call(SupplierSeeder::class);
+        }
+        $supplierIds = Supplier::all()->pluck('id');
+
+        // See AccessorySeeder for the withInitialAcquisition rationale.
+        $randomAcquisition = function () use ($supplierIds) {
+            $supplier = Supplier::find($supplierIds->random());
+            $cost = fake()->randomFloat(2, 10, 500);
+            $date = Carbon::instance(fake()->dateTimeBetween('-1 years', 'now'))->toDateString();
+
+            return compact('supplier', 'cost', 'date');
+        };
+
+        foreach (['ramCrucial4', 'ramCrucial8', 'ssdCrucial120', 'ssdCrucial240'] as $state) {
+            $acq = $randomAcquisition();
+            Component::factory()
+                ->{$state}()
+                ->withInitialAcquisition($acq['supplier'], $acq['cost'], $acq['date'])
+                ->create([
+                    'company_id' => $companyIds->random(),
+                    'location_id' => $locationIds->random(),
+                    'default_supplier_id' => $acq['supplier']->id,
+                ]);
+        }
 
         // Check out a couple of each component to random assets so the
         // view page doesn't render an empty checkout list. Components

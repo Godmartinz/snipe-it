@@ -655,9 +655,6 @@ h4 {
     padding-top: 15px;
     padding-bottom: 15px;
   }
-  .firstnav {
-    padding-top: 120px !important;
-  }
   .product {
     width: 400px;
   }
@@ -859,24 +856,13 @@ thead th.css-history > .th-inner::before {
   .tab-content .tab-pane .alert-block {
     margin-top: 120px;
   }
-  .sidebar-menu {
-    margin-top: 160px;
-  }
 }
 @media screen and (max-width: 912px) and (min-width: 512px) {
-  .sidebar-menu {
-    margin-top: 100px;
-  }
   .navbar-custom-menu > .navbar-nav > li.dropdown.user.user-menu {
     float: right;
   }
   .navbar-custom-menu > .navbar-nav > li > .dropdown-menu {
     margin-right: -39px;
-  }
-}
-@media screen and (max-width: 1268px) and (min-width: 912px) {
-  .sidebar-menu {
-    margin-top: 50px;
   }
 }
 @media screen and (max-width: 992px) {
@@ -2550,13 +2536,53 @@ table rows
   color: white !important;
 }
 .snipe-top-scrollbar {
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
-  height: 15px;
-  margin-bottom: 4px;
+  box-sizing: border-box;
+  height: 18px;
+  padding-bottom: 4px;
+  background-color: var(--box-bg);
+  scrollbar-width: auto;
+  scrollbar-color: rgba(0, 0, 0, 0.35) rgba(0, 0, 0, 0.06);
+  z-index: 101;
+}
+.snipe-top-scrollbar.is-pinned {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.snipe-top-scrollbar::-webkit-scrollbar {
+  height: 14px;
+}
+.snipe-top-scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 7px;
+}
+.snipe-top-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 7px;
+}
+.snipe-top-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .snipe-top-scrollbar-inner {
   height: 1px;
+}
+.bootstrap-table .fixed-table-body {
+  scrollbar-width: auto;
+  scrollbar-color: rgba(0, 0, 0, 0.35) rgba(0, 0, 0, 0.06);
+}
+.bootstrap-table .fixed-table-body::-webkit-scrollbar {
+  height: 14px;
+}
+.bootstrap-table .fixed-table-body::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 7px;
+}
+.bootstrap-table .fixed-table-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: 7px;
+}
+.bootstrap-table .fixed-table-body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 /**
 main header nav
@@ -2678,6 +2704,21 @@ Active and hover for top tier sidenav items
  */
 .main-sidebar {
   background-color: #1e282c;
+}
+@media (min-width: 768px) {
+  .main-header {
+    margin-left: 230px;
+    transition: margin-left 0.3s ease-in-out;
+  }
+  .main-header .navbar {
+    margin-left: 0;
+  }
+  .sidebar-mini.sidebar-collapse .main-header {
+    margin-left: 50px;
+  }
+  .sidebar-mini.sidebar-collapse .main-header .navbar {
+    margin-left: 0;
+  }
 }
 .sidebar-menu > li.active > a,
 .sidebar-menu > li:hover > a,
@@ -3100,6 +3141,25 @@ dl.table-display {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+@media (max-width: 1400px) {
+  .box-body .fixed-table-toolbar > .search.pull-right {
+    clear: both !important;
+    margin-top: 8px;
+  }
+}
+.info-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0 -10px;
+}
+.info-panel-actions > .pull-right {
+  order: 1;
+  margin-left: auto;
+}
+.info-panel-actions > .pull-right ~ .pull-right {
+  margin-left: 0;
 }
 
 

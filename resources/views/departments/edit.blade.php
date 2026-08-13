@@ -28,8 +28,6 @@
                         name="company_id"
                         :selected="old('company_id', $item->company_id)"
                     />
-                @else
-                    <input id="hidden_company_id" type="hidden" name="company_id" value="{{ Auth::user()->company_id }}">
                 @endif
 
                 <x-form.row

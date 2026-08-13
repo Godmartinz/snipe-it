@@ -48,6 +48,7 @@ class Actionlog extends SnipeModel
         'item_id',
         'action_type',
         'note',
+        'order_item_id',
         'target_id',
         'target_type',
         'stored_eula',
@@ -91,27 +92,37 @@ class Actionlog extends SnipeModel
         'location' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
         'user' => ['first_name', 'last_name', 'username', 'email', 'employee_num'],
-        'assets' => ['asset_tag', 'name', 'serial', 'order_number', 'notes', 'purchase_date'],
+        // Free-text search on QuantityAdjust logs walks through the
+        // OrderItem line to its parent Order so an order-number
+        // string still finds the right log rows after the parent
+        // action_logs.order_number column moved to Orders.
+        'orderItem.order' => ['order_number'],
+        'assets' => ['asset_tag', 'name', 'serial', 'notes', 'purchase_date'],
         'assets.model' => ['name', 'model_number', 'eol', 'notes'],
         'assets.model.category' => ['name', 'notes'],
         'assets.location' => ['name'],
         'assets.defaultLoc' => ['name'],
         'assets.model.manufacturer' => ['name', 'notes'],
-        'licenses' => ['name', 'serial', 'notes', 'order_number', 'license_email', 'license_name', 'purchase_order', 'purchase_date'],
+        'licenses' => ['name', 'serial', 'notes', 'license_email', 'license_name', 'purchase_order', 'purchase_date'],
         'licenses.category' => ['name', 'notes'],
         'licenses.supplier' => ['name'],
-        'consumables' => ['name', 'notes', 'order_number', 'model_number', 'item_no', 'purchase_date'],
+        // consumables / components / accessories no longer expose a
+        // supplier() or purchase_date accessor on the parent — those
+        // moved to the Orders / OrderItems polymorphic data model per
+        // acquisition event. The "default_supplier" template lives on
+        // defaultSupplier() and is safe to walk for search.
+        'consumables' => ['name', 'notes', 'model_number', 'item_no'],
         'consumables.category' => ['name', 'notes'],
         'consumables.location' => ['name', 'notes'],
-        'consumables.supplier' => ['name', 'notes'],
-        'components' => ['name', 'notes', 'purchase_date'],
+        'consumables.defaultSupplier' => ['name', 'notes'],
+        'components' => ['name', 'notes'],
         'components.category' => ['name', 'notes'],
         'components.location' => ['name', 'notes'],
-        'components.supplier' => ['name', 'notes'],
-        'accessories' => ['name', 'purchase_date'],
+        'components.defaultSupplier' => ['name', 'notes'],
+        'accessories' => ['name'],
         'accessories.category' => ['name'],
         'accessories.location' => ['name', 'notes'],
-        'accessories.supplier' => ['name', 'notes'],
+        'accessories.defaultSupplier' => ['name', 'notes'],
     ];
 
     /**
@@ -364,6 +375,21 @@ class Actionlog extends SnipeModel
     {
         return $this->belongsTo(User::class, 'created_by')
             ->withTrashed();
+    }
+
+    /**
+     * QuantityAdjust log rows carry the specific OrderItem line this
+     * replenishment produced via the order_item_id column. The parent
+     * Order (with order_number, purchase_order, supplier, currency,
+     * purchase_date) is reachable via `$log->orderItem->order`.
+     *
+     * Points at order_items rather than orders because a single Order
+     * deduped across staggered receipts carries multiple lines, and the
+     * log entry has to identify the exact line for its event.
+     */
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 
     /**

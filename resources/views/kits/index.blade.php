@@ -16,7 +16,6 @@
                 :presenter="\App\Presenters\PredefinedKitPresenter::dataTableLayout()"
                 :fixed_number="1"
                 :fixed_right_number="2"
-                use_sticky_css
                 buttons="kitButtons"
                 api_url="{{ route('api.kits.index') }}"
                 export_filename="export-kits-{{ date('Y-m-d') }}"

@@ -173,6 +173,9 @@ class IconHelper
                 return 'far fa-life-ring';
             case 'plus':
                 return 'fas fa-plus';
+            case 'plus-minus':
+            case 'adjust-quantity':
+                return 'fa-solid fa-plus-minus';
             case 'history':
             case 'assetHistory':
                 return 'fa-solid fa-timeline';

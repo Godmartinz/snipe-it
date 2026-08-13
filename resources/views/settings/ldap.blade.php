@@ -852,60 +852,32 @@
             html += '<div style="overflow:auto;">'
             html += '<div>{{ trans('admin/settings/message.ldap.sync_success') }}<br><br></div>'
             html += '<table class="table table-striped snipe-table table-bordered table-condensed">'
-            html += buildLdapResultsTableHeader()
-            html += buildLdapResultsTableBody(results.user_sync.users)
+            html += buildLdapResultsTableHeader(results.user_sync.fields)
+            html += buildLdapResultsTableBody(results.user_sync.users, results.user_sync.fields)
             html += '</table></div>'
             html += ''
             return html;
         }
 
-        function buildLdapResultsTableHeader(user)
+        function buildLdapResultsTableHeader(fields)
         {
-            var keys = [
-                '{{ trans('admin/settings/general.employee_number') }}',
-                '{{ trans('mail.username') }}',
-                '{{ trans('admin/users/table.display_name') }}',
-                '{{ trans('general.first_name') }}',
-                '{{ trans('general.last_name') }}',
-                '{{ trans('general.email') }}',
-                '{{ trans('general.phone') }}',
-                '{{ trans('admin/users/table.mobile') }}',
-                '{{ trans('admin/users/table.manager') }}',
-                '{{ trans('general.address') }}',
-                '{{ trans('general.city') }}',
-                '{{ trans('general.state') }}',
-                '{{ trans('general.zip') }}',
-                '{{ trans('general.country') }}',
-                '{{ trans('general.location') }}',
-            ]
             let header = '<thead><tr>'
-            for (var i in keys) {
-                header += '<th scope="col" style="white-space: nowrap;">' + keys[i] + '</th>'
+            for (const key in fields) {
+                header += '<th scope="col" style="white-space: nowrap;">' + fields[key] + '</th>'
             }
             header += "</tr></thead>"
             return header;
         }
 
-        function buildLdapResultsTableBody(users)
+        function buildLdapResultsTableBody(users, fields)
         {
             let body = '<tbody>'
-            for (var i in users) {
-                body += '<tr>';
-                body += '<td style="white-space: nowrap;">' + (users[i].employee_number ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].username ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].display_name ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].firstname ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].lastname ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].email ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].phone ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].mobile ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;"><span class="nullval">' + (users[i].manager ?? 'NULL') + '</span></td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].address ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].city ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].state ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].zip ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].country ?? '<span class="nullval">NULL</span>') + '</td>';
-                body += '<td style="white-space: nowrap;">' + (users[i].location ?? '<span class="nullval">NULL</span>') + '</td>';
+            const nullCell = '<span class="nullval">NULL</span>'
+            for (const i in users) {
+                body += '<tr>'
+                for (const key in fields) {
+                    body += '<td style="white-space: nowrap;">' + (users[i][key] ?? nullCell) + '</td>'
+                }
                 body += '</tr>'
             }
             body += "</tbody>"

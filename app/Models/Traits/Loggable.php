@@ -74,7 +74,12 @@ trait Loggable
 
         // Start with the polymorphic history relation so all filters and
         // ordering are applied to the same query instance.
-        $history = $this->history();
+        //
+        // 'orderItem.order' eager-loaded because ActionlogsTransformer
+        // renders order_number / purchase_order via the OrderItem line
+        // to its parent Order. Without this the transformer fires an
+        // N+1 subquery per row in the history tab.
+        $history = $this->history()->with('orderItem.order');
 
         if ($request->filled('search')) {
             $history = $history->TextSearch(e($request->input('search')));

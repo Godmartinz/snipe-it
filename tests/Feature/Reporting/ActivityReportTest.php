@@ -189,6 +189,40 @@ class ActivityReportTest extends TestCase
 
     }
 
+    public function test_activity_report_normalizes_lowercase_camelcase_input()
+    {
+        // Reg-test for the pre-existing `licenseseat` Fatal Error:
+        // Helper::normalizeFullModelName uses ucwords(), which only
+        // capitalizes the first letter of each space-delimited word.
+        // A lowercase short name like `licenseseat` (which FilterRequest
+        // accepts) came out as the nonexistent App\Models\Licenseseat
+        // and Fatal'd when withTrashed()->find() called the class. The
+        // resolver's case-insensitive lookup now returns the canonical
+        // App\Models\LicenseSeat, so the request succeeds cleanly.
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.activity.index', [
+                'item_type' => 'licenseseat',
+                'item_id' => 999999,
+            ]))
+            ->assertOk();
+    }
+
+    public function test_activity_report_rejects_types_not_in_form_request_allowlist()
+    {
+        // FilterRequest already rejects arbitrary class names, but
+        // Snipe-IT returns validation failures as HTTP 200 with body
+        // status=error (project convention). Pinning that shape so a
+        // refactor that changes either FilterRequest or the response
+        // envelope shows up in tests before it ships.
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.activity.index', [
+                'item_type' => 'NotARealClass',
+                'item_id' => 1,
+            ]))
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+    }
+
     public function test_search_matches_action_log_location_name()
     {
         // Activity Report eager-loads and shows the location on each

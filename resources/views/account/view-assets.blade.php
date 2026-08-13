@@ -711,7 +711,7 @@
                     <td>{{ $accessory->name }}</td>
                     @can('self.view_purchase_cost')
                       <td>
-                        {!! Helper::formatCurrencyOutput($accessory->purchase_cost) !!}
+                        {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
                       </td>
                     @endcan
 
@@ -758,7 +758,7 @@
                     <td>{{ $consumable->name }}</td>
                     @can('self.view_purchase_cost')
                       <td>
-                        {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}
+                        {!! Helper::formatCurrencyOutput($consumable->lastOrderDefaults()['unit_cost'] ?? null) !!}
                       </td>
                     @endcan
                     <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>

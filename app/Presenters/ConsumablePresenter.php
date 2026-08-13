@@ -97,18 +97,14 @@ class ConsumablePresenter extends Presenter
                 'visible' => false,
                 'formatter' => 'manufacturersLinkObjFormatter',
             ], [
-                'field' => 'order_number',
-                'scope' => 'col',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.order_number'),
-                'visible' => true,
-            ], [
+                // "Last" prefix — see AccessoryPresenter for the
+                // rationale on why the index page can't show a single
+                // Purchase Date once Orders can carry many per item.
                 'field' => 'purchase_date',
                 'scope' => 'col',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
-                'title' => trans('general.purchase_date'),
+                'title' => trans('general.last_purchase_date'),
                 'visible' => true,
                 'formatter' => 'dateDisplayFormatter',
             ], [
@@ -150,9 +146,9 @@ class ConsumablePresenter extends Presenter
             ], [
                 'field' => 'purchase_cost',
                 'scope' => 'col',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
-                'title' => trans('general.unit_cost'),
+                'title' => trans('general.last_unit_cost'),
                 'visible' => true,
                 'class' => 'text-right text-padding-number-cell',
                 'footerFormatter' => 'sumFormatter',

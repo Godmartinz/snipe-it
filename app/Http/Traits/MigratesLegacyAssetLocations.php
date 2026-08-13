@@ -15,17 +15,17 @@ trait MigratesLegacyAssetLocations
      */
     private function migrateLegacyLocations(Asset $asset): void
     {
-        if ($asset->rtd_location_id == '0') {
+        if ($asset->rtd_location_id == 0) {
             Log::debug('Manually override the RTD location IDs');
             Log::debug('Original RTD Location ID: '.$asset->rtd_location_id);
-            $asset->rtd_location_id = '';
+            $asset->rtd_location_id = null;
             Log::debug('New RTD Location ID: '.$asset->rtd_location_id);
         }
 
-        if ($asset->location_id == '0') {
+        if ($asset->location_id == 0) {
             Log::debug('Manually override the location IDs');
             Log::debug('Original Location ID: '.$asset->location_id);
-            $asset->location_id = '';
+            $asset->location_id = null;
             Log::debug('New Location ID: '.$asset->location_id);
         }
     }

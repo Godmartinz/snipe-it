@@ -8,6 +8,7 @@ use App\Models\CustomField;
 use App\Models\CustomFieldset;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -24,9 +25,7 @@ use Tests\TestCase;
  */
 class EncryptedCustomFieldFormDisclosureTest extends TestCase
 {
-    /**
-     * @dataProvider elementTypeProvider
-     */
+    #[DataProvider('elementTypeProvider')]
     public function test_edit_form_masks_encrypted_custom_field_for_user_without_view_encrypted(array $fieldAttributes, string $secret): void
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
@@ -42,9 +41,7 @@ class EncryptedCustomFieldFormDisclosureTest extends TestCase
             ->assertSee(strtoupper(trans('admin/custom_fields/general.encrypted')), false);
     }
 
-    /**
-     * @dataProvider elementTypeProvider
-     */
+    #[DataProvider('elementTypeProvider')]
     public function test_edit_form_shows_encrypted_custom_field_plaintext_for_superuser(array $fieldAttributes, string $secret): void
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');

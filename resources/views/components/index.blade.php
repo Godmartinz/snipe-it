@@ -14,6 +14,9 @@
             <x-table.components :route="route('api.components.index')" />
         </x-box>
     </x-container>
+@can('update', \App\Models\Component::class)
+    <x-modals.adjust-quantity />
+@endcan
 @stop
 
 @section('moar_scripts')

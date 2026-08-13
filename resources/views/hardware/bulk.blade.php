@@ -143,10 +143,17 @@
                     </x-slot:input>
                 </x-form.row>
 
-                @include ('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
+                <x-input.model-select
+                    :label="trans('admin/hardware/form.model')"
+                    name="model_id"
+                    :selected="old('model_id')"
+                />
 
-                {{-- Default location --}}
-                @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id'])
+                <x-input.location-select
+                    :label="trans('admin/hardware/form.default_location')"
+                    name="rtd_location_id"
+                    :selected="old('rtd_location_id')"
+                />
 
                 {{-- Actual-location update rule (3-way radio) --}}
                 <x-form.radio-row
@@ -160,37 +167,28 @@
                     input_div_class="col-md-9 col-md-offset-3"
                 />
 
-                {{-- Purchase cost with tenant-currency prefix addon. The
-                     row component's built-in input_group_addon only carries
-                     an icon, not free text, so this stays as slot:input. --}}
-                <x-form.row
-                    :label="trans('admin/hardware/form.cost')"
-                    name="purchase_cost"
-                    input_div_class="input-group col-md-3"
-                >
-                    <x-slot:input>
-                        <span class="input-group-addon">{{ $snipeSettings->default_currency }}</span>
-                        <input type="text" class="form-control" pattern="^\d+([.,]\d+)?$" maxlength="10" placeholder="{{ trans('admin/hardware/form.cost') }}" name="purchase_cost" id="purchase_cost" value="{{ old('purchase_cost') }}">
-                    </x-slot:input>
-                </x-form.row>
+                {{-- purchase_cost and order_number are intentionally not
+                     bulk-editable here. Assets have no currency column, so
+                     bulk-writing purchase_cost on rows that trace back to an
+                     Order can silently diverge from order_items.price and
+                     misrepresent the currency of the original purchase. The
+                     single-asset edit form still exposes both, and the
+                     controller enforces this omission on the POST side too. --}}
 
-                {{-- Supplier --}}
-                @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
-
-                {{-- Company --}}
-                @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
-
-                {{-- Order number --}}
-                <x-form.row
-                    :label="trans('admin/hardware/form.order')"
-                    name="order_number"
-                    type="text"
-                    :maxlength="200"
-                    input_div_class="col-md-7"
+                <x-input.supplier-select
+                    :label="trans('general.supplier')"
+                    name="supplier_id"
+                    :selected="old('supplier_id')"
                 />
 
-                {{-- Warranty months with unit-suffix addon. Same reason as
-                     purchase_cost — free-text addon needs slot:input. --}}
+                <x-input.company-select
+                    :label="trans('general.company')"
+                    name="company_id"
+                    :selected="old('company_id')"
+                />
+
+                {{-- Warranty months with unit-suffix addon. Free-text addon
+                     needs slot:input. --}}
                 <x-form.row
                     :label="trans('admin/hardware/form.warranty')"
                     name="warranty_months"
@@ -244,7 +242,11 @@
                     input_div_class="col-md-7"
                 />
 
-                @include ('partials.forms.edit.notes')
+                <x-form.row
+                    :label="trans('general.notes')"
+                    name="notes"
+                    type="textarea"
+                />
 
                 {{-- Set notes to null --}}
                 <x-form.checkbox-row

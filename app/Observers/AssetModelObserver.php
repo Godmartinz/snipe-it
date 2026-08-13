@@ -49,7 +49,11 @@ class AssetModelObserver
         $logAction->item_type = AssetModel::class;
         $logAction->item_id = $model->id;
         $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->created_by = auth()->id();
+        // Fallback to the model's own created_by so seeder / artisan
+        // paths (no authenticated user) still attribute the create log
+        // to a real user. On web requests auth()->id() is always set,
+        // so the fallback never engages there.
+        $logAction->created_by = auth()->id() ?? $model->created_by;
         if ($model->imported) {
             $logAction->setActionSource('importer');
         }

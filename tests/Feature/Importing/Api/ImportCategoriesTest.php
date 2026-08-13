@@ -176,6 +176,57 @@ class ImportCategoriesTest extends ImportDataTestCase implements TestsPermission
     }
 
     #[Test]
+    public function import_sets_alert_on_response_flag(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $importFileBuilder = new ImportFileBuilder([[
+            'name' => 'Alerting Laptops',
+            'category_type' => 'asset',
+            'alert_on_response' => 1,
+        ]]);
+        $import = Import::factory()->categories()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newCategory = Category::query()->where('name', 'Alerting Laptops')->sole();
+
+        $this->assertEquals(1, $newCategory->alert_on_response);
+    }
+
+    #[Test]
+    public function update_mode_updates_alert_on_response_flag(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $category = Category::factory()->assetLaptopCategory()->create([
+            'alert_on_response' => 1,
+        ])->refresh();
+
+        $this->assertEquals(1, $category->alert_on_response);
+
+        $importFileBuilder = new ImportFileBuilder([[
+            'name' => $category->name,
+            'category_type' => $category->category_type,
+            'alert_on_response' => 0,
+        ]]);
+        $import = Import::factory()->categories()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $category->refresh();
+
+        $this->assertEquals(0, $category->alert_on_response);
+    }
+
+    #[Test]
     public function update_mode_preserves_fields_when_csv_column_is_absent(): void
     {
         $this->actingAsForApi(User::factory()->superuser()->create());

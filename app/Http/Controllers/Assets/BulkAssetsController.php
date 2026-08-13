@@ -292,12 +292,18 @@ class BulkAssetsController extends Controller
          * make sense (for example, changing the status ID to something incompatible with
          * its checkout status.
          */
+        // purchase_cost and order_number are intentionally not bulk-editable.
+        // Assets carry no currency column, so bulk-writing purchase_cost on
+        // rows that trace back to an Order can silently diverge from
+        // order_items.price and misrepresent the currency of the original
+        // purchase. Removing them from both the "should we build an update
+        // array" trigger AND from the conditionallyAddItem chain below
+        // prevents both UI-form and hand-crafted-POST callers from setting
+        // them via bulk edit. Single-asset edit still allows both.
         if (($request->filled('name'))
             || ($request->filled('purchase_date'))
             || ($request->filled('expected_checkin'))
-            || ($request->filled('purchase_cost'))
             || ($request->filled('supplier_id'))
-            || ($request->filled('order_number'))
             || ($request->filled('warranty_months'))
             || ($request->filled('rtd_location_id'))
             || ($request->filled('requestable'))
@@ -332,7 +338,6 @@ class BulkAssetsController extends Controller
                 $this->conditionallyAddItem('name')
                     ->conditionallyAddItem('purchase_date')
                     ->conditionallyAddItem('expected_checkin')
-                    ->conditionallyAddItem('order_number')
                     ->conditionallyAddItem('requestable')
                     ->conditionallyAddItem('supplier_id')
                     ->conditionallyAddItem('warranty_months')

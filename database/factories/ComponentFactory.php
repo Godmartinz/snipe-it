@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon as SupportCarbon;
 
 class ComponentFactory extends Factory
 {
@@ -38,12 +39,11 @@ class ComponentFactory extends Factory
             'min_amt' => $this->faker->numberBetween($min = 1, $max = 2),
             'model_number' => $this->faker->numberBetween(1000000, 50000000),
             'name' => $this->faker->text(20),
-            'order_number' => $this->faker->numberBetween(1000000, 50000000),
-            'purchase_cost' => $this->faker->randomFloat(2),
-            'purchase_date' => $this->faker->dateTime()->format('Y-m-d'),
+            'default_purchase_cost' => $this->faker->randomFloat(2),
+            'legacy_purchase_date' => $this->faker->dateTime()->format('Y-m-d'),
             'qty' => $this->faker->numberBetween(3, 10),
             'serial' => $this->faker->uuid(),
-            'supplier_id' => Supplier::factory(),
+            'default_supplier_id' => Supplier::factory(),
         ];
     }
 
@@ -125,6 +125,42 @@ class ComponentFactory extends Factory
                 'created_by' => 1,
                 'asset_id' => $asset->id ?? Asset::factory()->create()->id,
             ]);
+        });
+    }
+
+    /**
+     * Populate the observer-written initial Order + OrderItem with
+     * acquisition metadata (supplier / unit_cost / purchase_date) —
+     * simulating what the create form's `enrichInitialOrderFromRequest`
+     * writes when the user fills those fields at create time. Lets
+     * tests assert Order-level state without going through the HTTP
+     * controller.
+     */
+    public function withInitialAcquisition(
+        ?Supplier $supplier = null,
+        ?float $unitCost = null,
+        ?string $purchaseDate = null,
+    ) {
+        return $this->afterCreating(function (Component $component) use ($supplier, $unitCost, $purchaseDate) {
+            $line = $component->orderItems()->latest('id')->first();
+            if (! $line) {
+                return;
+            }
+            if ($unitCost !== null) {
+                $line->price = $unitCost;
+                $line->save();
+            }
+            $order = $line->order;
+            if (! $order) {
+                return;
+            }
+            if ($supplier !== null) {
+                $order->supplier_id = $supplier->id;
+            }
+            if ($purchaseDate !== null) {
+                $order->purchase_date = SupportCarbon::parse($purchaseDate);
+            }
+            $order->save();
         });
     }
 }

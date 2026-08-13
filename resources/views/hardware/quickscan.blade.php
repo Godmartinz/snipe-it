@@ -60,8 +60,11 @@
                         </div>
                     </div>
 
-                    {{-- Location --}}
-                    @include('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
+                    <x-input.location-select
+                        :label="trans('general.location')"
+                        name="location_id"
+                        :selected="old('location_id')"
+                    />
 
                     {{-- Update-location checkbox. The label carries an
                          inline popover trigger (icon + Bootstrap popover
@@ -98,16 +101,12 @@
                         </x-slot:input>
                     </x-form.row>
 
-                    {{-- Note --}}
                     <x-form.row
                         :label="trans('admin/hardware/form.notes')"
                         name="note"
+                        type="textarea"
                         input_div_class="col-md-8"
-                    >
-                        <x-slot:input>
-                            <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     {{-- Clear name on successful audit --}}
                     <x-form.checkbox-row

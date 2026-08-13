@@ -20,7 +20,6 @@
                         buttons="companyButtons"
                         fixed_right_number="1"
                         fixed_number="1"
-                        use_sticky_css
                         api_url="{{ route('api.companies.index') }}"
                         :presenter="\App\Presenters\CompanyPresenter::dataTableLayout()"
                         export_filename="export-companies-{{ date('Y-m-d') }}"

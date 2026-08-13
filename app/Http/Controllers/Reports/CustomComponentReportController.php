@@ -171,7 +171,9 @@ class CustomComponentReportController extends Controller
             ],
             'purchase_date' => [
                 'headers' => [trans('general.purchase_date')],
-                'values' => fn ($component, $i) => [$component->purchase_date ? Carbon::make($component->purchase_date)->format('Y-m-d') : ''],
+                'values' => fn ($component, $i) => [
+                    ($d = $component->lastOrderDefaults()['purchase_date'] ?? null) ? Carbon::make($d)->format('Y-m-d') : '',
+                ],
             ],
             'quantity' => [
                 'headers' => [trans('general.quantity')],
@@ -183,15 +185,28 @@ class CustomComponentReportController extends Controller
             ],
             'unit_cost' => [
                 'headers' => [trans('general.unit_cost')],
-                'values' => fn ($component, $i) => [$component->purchase_cost],
+                'values' => fn ($component, $i) => [$component->lastOrderDefaults()['unit_cost'] ?? ''],
             ],
             'order' => [
                 'headers' => [trans('admin/hardware/form.order')],
-                'values' => fn ($component, $i) => [$component->order_number],
+                // order_number moved off the parent Component column to
+                // the Orders / OrderItems polymorphic pair. A component
+                // can now have multiple orders across its history;
+                // render them as a comma-separated list so a
+                // single-column CSV cell stays readable while still
+                // surfacing every historical order the report caller
+                // might be looking for.
+                'values' => fn ($component, $i) => [
+                    $component->orders
+                        ->pluck('order_number')
+                        ->filter()
+                        ->unique()
+                        ->implode(', '),
+                ],
             ],
             'supplier' => [
                 'headers' => [trans('general.supplier')],
-                'values' => fn ($component, $i) => [$component->supplier?->name],
+                'values' => fn ($component, $i) => [$component->lastAcquisitionSupplier()?->name],
             ],
             'location' => [
                 'headers' => [trans('general.location')],
@@ -255,7 +270,14 @@ class CustomComponentReportController extends Controller
                 'company',
                 'location',
                 'manufacturer',
-                'supplier',
+                'defaultSupplier',
+                // Eager-loaded so the 'order' report column can pluck
+                // Order.order_number per row without firing N+1 queries
+                // through the HasManyThrough relation on every render.
+                // orderItems.order.supplier feeds the "supplier" column's
+                // lastAcquisitionSupplier() lookup.
+                'orders',
+                'orderItems.order.supplier',
             ]);
 
         $request->whenFilled('include_assignments', fn () => $query->with('assets.company'));
@@ -263,15 +285,26 @@ class CustomComponentReportController extends Controller
         $query = $this->appendLocalConstraints($query, $request, [
             'by_model_number' => 'components.model_number',
             'by_name' => 'components.name',
-            'by_order_number' => 'components.order_number',
         ]);
+
+        // Filter by order_number walks through the Orders relation now
+        // that components.order_number is gone. Any Component that has an
+        // OrderItem line under an Order matching the requested string
+        // gets returned. Applied here rather than through the shared
+        // appendLocalConstraints helper because it needs relation-aware
+        // SQL (whereHas), not a bare column comparison.
+        $request->whenFilled('by_order_number', function ($value) use ($query) {
+            $query->whereHas('orders', function ($q) use ($value) {
+                $q->where('orders.order_number', $value);
+            });
+        });
 
         $query = $this->appendForeignConstraints($query, $request, [
             'by_category_id' => 'components.category_id',
             'by_company_id' => 'components.company_id',
             'by_location_id' => 'components.location_id',
             'by_manufacturer_id' => 'components.manufacturer_id',
-            'by_supplier_id' => 'components.supplier_id',
+            'by_supplier_id' => 'components.default_supplier_id',
         ]);
 
         $query = $this->appendNumericalBoundaries($query, $request, [
@@ -280,17 +313,49 @@ class CustomComponentReportController extends Controller
             // ie: quantity_start|quantity_end => qty
             'quantity' => 'qty',
             'min_quantity' => 'min_amt',
-            'unit_cost' => 'purchase_cost',
+            // unit_cost filters against the parent's "typical" cost
+            // (default_purchase_cost). Per-acquisition cost lives on
+            // OrderItem.price — a report filter that walks Orders would
+            // return components that were EVER purchased in the range,
+            // which is a different question. Filter here targets
+            // parent-level "what does this cost per unit today".
+            'unit_cost' => 'default_purchase_cost',
         ]);
 
         $query = $this->appendDateWindowBoundaries($query, $request, [
             // formKey => column
             // _start and _end will be appended to the key
-            // ie: purchase_start|purchase_end => purchase_date
-            'purchase' => 'purchase_date',
             'created' => 'created_at',
             'last_updated' => 'updated_at',
         ]);
+
+        // purchase_start / purchase_end walk the Orders ledger — parent
+        // no longer holds purchase_date, and "was this component ever
+        // acquired between X and Y" is the correct question for a
+        // purchase-date filter. EXISTS lets a component match if any
+        // of its OrderItems point at an Order with purchase_date in
+        // range, without duplicating rows via a join.
+        if ($request->filled('purchase_start') || $request->filled('purchase_end')) {
+            $start = $request->filled('purchase_start')
+                ? Carbon::parse($request->input('purchase_start'))->startOfDay()
+                : null;
+            $end = $request->filled('purchase_end')
+                ? Carbon::parse($request->input('purchase_end'))->endOfDay()
+                : null;
+
+            $query->whereExists(function ($sub) use ($start, $end) {
+                $sub->from('order_items')
+                    ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                    ->whereColumn('order_items.item_id', 'components.id')
+                    ->where('order_items.item_type', Component::class);
+                if ($start) {
+                    $sub->where('orders.purchase_date', '>=', $start);
+                }
+                if ($end) {
+                    $sub->where('orders.purchase_date', '<=', $end);
+                }
+            });
+        }
 
         $query = $this->appendBeforeDateBoundaries($query, $request, [
             // formKey => column

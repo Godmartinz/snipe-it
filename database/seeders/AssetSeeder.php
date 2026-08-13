@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Location;
 use App\Models\Supplier;
@@ -25,6 +26,8 @@ class AssetSeeder extends Seeder
 
     public function run()
     {
+        // See AssetModelSeeder for the stale-action_log rationale.
+        Actionlog::where('item_type', Asset::class)->delete();
         Asset::truncate();
 
         $this->ensureLocationsSeeded();

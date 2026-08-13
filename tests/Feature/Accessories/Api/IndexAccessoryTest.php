@@ -119,10 +119,9 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
         $targetAccessory = Accessory::factory()->create([
             'name' => 'Target Accessory',
             'company_id' => $targetCompany->id,
-            'order_number' => 'ORDER-A',
             'category_id' => $targetCategory->id,
             'manufacturer_id' => $targetManufacturer->id,
-            'supplier_id' => $targetSupplier->id,
+            'default_supplier_id' => $targetSupplier->id,
             'location_id' => $targetLocation->id,
             'notes' => 'NOTE-A',
         ]);
@@ -130,17 +129,18 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
         $otherAccessory = Accessory::factory()->create([
             'name' => 'Other Accessory',
             'company_id' => $otherCompany->id,
-            'order_number' => 'ORDER-B',
             'category_id' => $otherCategory->id,
             'manufacturer_id' => $otherManufacturer->id,
-            'supplier_id' => $otherSupplier->id,
+            'default_supplier_id' => $otherSupplier->id,
             'location_id' => $otherLocation->id,
             'notes' => 'NOTE-B',
         ]);
 
+        // order_number was dropped from the filters list when the parent
+        // column was renamed to legacy_order_number and current order
+        // numbers moved to the QuantityAdjust action_log per event.
         $filters = [
             'company_id' => $targetCompany->id,
-            'order_number' => 'ORDER-A',
             'category_id' => $targetCategory->id,
             'manufacturer_id' => $targetManufacturer->id,
             'supplier_id' => $targetSupplier->id,
@@ -155,5 +155,41 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
                 ->assertResponseContainsInRows($targetAccessory)
                 ->assertResponseDoesNotContainInRows($otherAccessory);
         }
+    }
+
+    public function test_can_sort_accessories_by_raw_remaining_count()
+    {
+        // Requested in issue #18505 alongside the percent_remaining sort:
+        // sort by absolute stock left (qty - active checkouts). The scope
+        // references the withCount-added `checkouts_count` alias, so a
+        // regression in the API's eager-load order would surface here as
+        // a SQL error or a null-count sort.
+        $user = User::factory()->viewAccessories()->create();
+
+        $lots = Accessory::factory()->create(['name' => 'Lots left', 'qty' => 10]);
+        $some = Accessory::factory()->create(['name' => 'Some left', 'qty' => 10]);
+        $none = Accessory::factory()->create(['name' => 'None left', 'qty' => 10]);
+
+        AccessoryCheckout::factory()->count(1)->create(['accessory_id' => $lots->id]);   // remaining = 9
+        AccessoryCheckout::factory()->count(5)->create(['accessory_id' => $some->id]);   // remaining = 5
+        AccessoryCheckout::factory()->count(10)->create(['accessory_id' => $none->id]);  // remaining = 0
+
+        $descRows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', ['sort' => 'remaining', 'order' => 'desc']))
+            ->assertOk()
+            ->json('rows');
+
+        $descNames = array_column($descRows, 'name');
+        $descRelevant = array_values(array_intersect($descNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['Lots left', 'Some left', 'None left'], $descRelevant);
+
+        $ascRows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', ['sort' => 'remaining', 'order' => 'asc']))
+            ->assertOk()
+            ->json('rows');
+
+        $ascNames = array_column($ascRows, 'name');
+        $ascRelevant = array_values(array_intersect($ascNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['None left', 'Some left', 'Lots left'], $ascRelevant);
     }
 }

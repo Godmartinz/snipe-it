@@ -50,7 +50,9 @@ class ConsumableImporter extends ItemImporter
 
         $this->setItemFromCsvIfPresent($row, 'name', 'item_name');
         $this->setItemFromCsvIfPresent($row, 'notes');
-        $this->setItemFromCsvIfPresent($row, 'order_number');
+        // order_number is not on the Consumable model any more — recorded
+        // as an Order + OrderItem via recordOrderForImportedRow() after
+        // the create-branch save below.
         $this->setItemFromCsvIfPresent($row, 'purchase_cost');
         $this->setItemFromCsvIfPresent($row, 'model_number');
         $this->setItemFromCsvIfPresent($row, 'min_amt');
@@ -65,6 +67,20 @@ class ConsumableImporter extends ItemImporter
                 $this->item['purchase_date'] = $raw;
                 $this->item['purchase_date'] = $this->parseOrNullDate('purchase_date');
             }
+        }
+
+        // Mirror supplier_id / purchase_cost into the parent's
+        // default_* template fields so future orders pre-populate from
+        // the last-known-good CSV import. See Consumable::$fillable and
+        // ItemImporter::recordOrderForImportedRow for the split — Order
+        // rows still receive supplier_id / purchase_cost via that helper
+        // (that's the per-acquisition record); default_* here is the
+        // per-parent template.
+        if (array_key_exists('supplier_id', $this->item)) {
+            $this->item['default_supplier_id'] = $this->item['supplier_id'];
+        }
+        if (array_key_exists('purchase_cost', $this->item)) {
+            $this->item['default_purchase_cost'] = $this->item['purchase_cost'];
         }
 
         // Internal signals for the checkout logic; neither is fillable on
@@ -111,8 +127,10 @@ class ConsumableImporter extends ItemImporter
                 return;
             }
             $this->log('Updating Consumable');
-            $consumable->update($this->sanitizeItemForUpdating($consumable));
-            // update() already saves the model, no need to call save() again while Model::unguard() is active
+            // qty routes through adjustQuantity so a CSV qty change
+            // becomes a QuantityAdjust log entry, matching the API
+            // update contract.
+            $this->applyUpdateWithQtyAdjust($consumable, $this->sanitizeItemForUpdating($consumable));
             $consumable->setImported(true);
             $this->recordUpdated();
 
@@ -131,6 +149,7 @@ class ConsumableImporter extends ItemImporter
         if ($consumable->save()) {
             $this->log('Consumable '.$name.' was created');
             $this->recordCreated();
+            $this->recordOrderForImportedRow($consumable, $row);
 
             $this->maybeCheckoutConsumable($consumable);
 

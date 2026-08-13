@@ -152,7 +152,6 @@ return [
         'save_and_next' => 'Save & Continue',
         'verifying' => 'Verifying…',
         'verifying_help' => 'Connecting to your LDAP server and verifying the settings you provided. This may take a few seconds if your server is slow to respond or takes time to negotiate TLS.',
-        'placeholder' => 'This step is coming soon. Complete the earlier steps first, then check back once this section is implemented.',
         'progress_label' => 'LDAP setup progress',
         'step_of' => 'Step :num of :total',
         'state_complete' => 'completed',
@@ -169,8 +168,9 @@ return [
             'subtitle' => 'Congratulations! Your LDAP configuration is connected!',
             'intro' => ' Your directory is connected and active users can now sign in with their LDAP credentials and you can manually sync LDAP users. Consider setting up a scheduled sync so new and updated users are pulled from your directory automatically.',
             'sync_heading' => 'Keep users in sync with your directory',
-            'sync_intro' => 'User syncing is a separate step from authentication. Log-in works right now, but existing accounts are only refreshed when a sync runs. You can run a manual sync from the Users page, or set up a scheduled sync to run automatically.',
+            'sync_intro' => 'User syncing is a separate step from authentication. Log-in works right now, but existing accounts are only refreshed when a sync runs. You can run a manual sync from the Users page, or set up a scheduled sync to run automatically. ',
             'back_to_settings' => 'Back to Settings',
+            'summary_heading' => 'Your current LDAP configuration',
         ],
         'test' => [
             'connect_failed' => 'Could not complete an LDAP handshake with :server. The host may be unreachable, or the port may be open but not actually running an LDAP server. For example, "google.com:636" answers on port 636 but is not the LDAP endpoint. The correct hostname is "ldap.google.com". Double-check the hostname your LDAP/AD provider gave you.',

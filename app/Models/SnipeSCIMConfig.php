@@ -336,7 +336,7 @@ class MappedTable extends Attribute
 
 // Company is stored only in the company_user pivot, not company_id. Read from the pivot
 // and sync it on write. For new users (not yet saved) defer the sync via a saved() callback.
-class SCIMCompanyAttribute extends MappedTable
+class SCIMCompanyAttribute extends Attribute
 {
     protected function doRead(&$object, $attributes = [])
     {
@@ -375,6 +375,58 @@ class SCIMCompanyAttribute extends MappedTable
     public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
     {
         $this->applyCompany($value ? Company::firstOrCreate(['name' => $value])->id : null, $object);
+    }
+}
+
+class SCIMMultiCompanyArray extends Attribute
+{
+    protected function doRead(&$object, $attributes = [])
+    {
+        return $object->companies()->pluck('name')->toArray();
+    }
+
+    private function applyCompanies(array $company_names, Model &$object): void
+    {
+        $names = [];
+        foreach ($company_names as $company) {
+            if (is_array($company) && isset($company['value'])) {
+                // this is how Entra ID does it
+                $names[] = $company['value'];
+            } elseif (is_string($company)) {
+                // This seems to be how Okta does it?
+                $names[] = $company;
+            } else {
+                throw new SCIMException("Unknown 'companies' value: '" . print_r($company, true) . "' of type: " . get_debug_type($company), 400);
+            }
+        }
+
+        $ids = [];
+        foreach ($names as $company_name) {
+            $ids[] = Company::firstOrCreate(['name' => $company_name])->id;
+        }
+        if ($object->exists) {
+            $object->companies()->sync($ids);
+        } else {
+            $object->saved(fn() => $object->companies()->sync($ids));
+        }
+    }
+
+    public function add($value, Model &$object)
+    {
+        \Log::debug("MC ADD VALUE IS: " . print_r($value, true));
+        $this->applyCompanies($value, $object);
+    }
+
+    public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
+    {
+        \Log::debug("MC REPLACE VALUE IS: " . print_r($value, true));
+        $this->applyCompanies($value, $object);
+    }
+
+    public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
+    {
+        \Log::debug("MC PATCH VALUE IS: " . print_r($value, true));
+        $this->applyCompanies($value, $object);
     }
 }
 
@@ -655,6 +707,30 @@ class SnipeSCIMConfig
                                 }
 
                                 throw new SCIMException("Could not handle path for update $path", 422);
+                            } else {
+                                // Okta hits this one for creating a user - it does a full PUT for their ID
+                                \Log::debug("GetValuePAthFilter is null for path: $path");
+                                \Log::debug("GetValuePathFilter is now null and trying to set value of: " . print_r($value, true));
+                                // the Addresses object is a 'list' (array with numeric indices) by definition...
+                                if (is_array($value) && array_is_list($value)) {
+                                    foreach ($value as $address) {
+                                        // we just need to check if this is a 'work' address, we don't really care about "primary => true"
+                                        if (@$address['type'] == 'work') {
+                                            foreach ($address as $key => $v) {
+                                                if (array_key_exists($key, self::$addressmap)) {
+                                                    \Log::debug("Addresses: Setting " . self::$addressmap[$key] . " to '$v'");
+                                                    $object->{self::$addressmap[$key]} = $v;
+                                                }
+                                            }
+                                        } else {
+                                            //should we throw if you give us a 'home' address? I don't know.
+                                            // what if you gave us _both_ ?
+                                        }
+                                    }
+                                } else {
+                                    \Log::debug("Unknown Address Object: " . print_r($value, true));
+                                    throw new SCIMException("Unknown Address object of type: " . gettype($value), 422);
+                                }
                             }
                         }
                     })->withSubAttributes(
@@ -752,7 +828,8 @@ class SnipeSCIMConfig
                 ),
                 (new AttributeSchema(self::GROKABILITY, false))->withSubAttributes(
                     new MappedTable('location', 'location', Location::class, 'location_id', 'name'),
-                    new SCIMCompanyAttribute('company', 'company', Company::class, 'company_id', 'name'),
+                    new SCIMCompanyAttribute('company'),
+                    (new SCIMMultiCompanyArray('companies'))->ensure('array')->setMultiValued(true),
                 )
             ),
         ];

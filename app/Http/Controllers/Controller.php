@@ -26,13 +26,16 @@ namespace App\Http\Controllers;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\Department;
 use App\Models\License;
+use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Maintenance;
+use App\Models\Manufacturer;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Traits\DisablesDebugbar;
@@ -97,6 +100,56 @@ abstract class Controller extends BaseController
         'users' => 'user',
     ];
 
+    /**
+     * Reverse of $map_object_type: model class => canonical URL segment,
+     * used by generic code (transformers, traits) that has a class
+     * string in hand and needs the segment to build a route or key
+     * into $map_storage_path / $map_file_prefix. Asset uses 'hardware'
+     * because that's the canonical URL segment (the 'assets' and
+     * 'audits' entries above are legacy aliases pointing at the same
+     * model). Add entries here when a new model needs URL-segment
+     * lookup, not by scattering per-model `urlSegment()` methods.
+     */
+    public static $map_class_url_segment = [
+        Accessory::class => 'accessories',
+        Asset::class => 'hardware',
+        Component::class => 'components',
+        Consumable::class => 'consumables',
+        License::class => 'licenses',
+    ];
+
+    /**
+     * Allowlist of fully-qualified model class strings the activity-report
+     * endpoint (Api\ReportsController::index) accepts as item_type /
+     * target_type. This is a security surface: input flows directly into
+     * a runtime class lookup + polymorphic where-clauses. Without a gate,
+     * a caller can probe arbitrary strings and either trigger a Fatal
+     * Error (Helper::normalizeFullModelName + ucwords mangles CamelCase
+     * so `licenseseat` yields `App\Models\Licenseseat`) or route the
+     * authorization check into an unintended class. Kept as a flat list
+     * rather than merged into $map_object_type because the polymorphic
+     * item_type / target_type columns cover more models than the URL
+     * routing map does (Category, LicenseSeat, Manufacturer aren't in
+     * $map_object_type but do appear in action_logs).
+     */
+    public static $activity_report_class_allowlist = [
+        Accessory::class,
+        Asset::class,
+        AssetModel::class,
+        Category::class,
+        Company::class,
+        Component::class,
+        Consumable::class,
+        Department::class,
+        License::class,
+        LicenseSeat::class,
+        Location::class,
+        Maintenance::class,
+        Manufacturer::class,
+        Supplier::class,
+        User::class,
+    ];
+
     public function __construct()
     {
         view()->share('signedIn', Auth::check());
@@ -129,5 +182,23 @@ abstract class Controller extends BaseController
     public static function getMapFilePrefix(): array
     {
         return static::$map_file_prefix;
+    }
+
+    /**
+     * Accessor for the class => URL segment map. See getMapObjectType
+     * for rationale.
+     */
+    public static function getMapClassUrlSegment(): array
+    {
+        return static::$map_class_url_segment;
+    }
+
+    /**
+     * Accessor for the activity-report allowlist. See getMapObjectType
+     * for rationale.
+     */
+    public static function getActivityReportClassAllowlist(): array
+    {
+        return static::$activity_report_class_allowlist;
     }
 }

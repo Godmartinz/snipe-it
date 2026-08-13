@@ -10,7 +10,6 @@
     <x-table
         :$presenter
         :$fixed_right_number
-        use_sticky_css
         show_column_search="true"
         show_advanced_search="false"
         buttons="companyButtons"

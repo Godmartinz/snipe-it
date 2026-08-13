@@ -45,7 +45,7 @@ class CategoryImporter extends ItemImporter
 
         // Boolean flags. Present-empty maps to 0; present-with-value uses
         // fetchHumanBoolean; absent leaves the DB value alone on update.
-        foreach (['use_default_eula', 'require_acceptance', 'checkin_email'] as $flag) {
+        foreach (['use_default_eula', 'require_acceptance', 'checkin_email', 'alert_on_response'] as $flag) {
             if ($this->csvRowHas($row, $flag)) {
                 $raw = $this->findCsvMatch($row, $flag);
                 $this->item[$flag] = ($this->fetchHumanBoolean($raw) == 1) ? 1 : 0;

@@ -60,7 +60,6 @@
                         <x-table
                             fixed_right_number="1"
                             fixed_number="1"
-                            use_sticky_css
                             api_url="{{ route('api.licenses.seats.index', [$license->id, 'status' => 'assigned']) }}"
                             :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeats()"
                             export_filename="export-{{ str_slug($license->name) }}-assigned-{{ date('Y-m-d') }}"

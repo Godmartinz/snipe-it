@@ -18,11 +18,12 @@
 
 @section('header_right')
 
-    @can('create', \App\Models\User::class)
-        @if ($snipeSettings->ldap_enabled == 1)
-            <a href="{{ route('ldap/user') }}" class="btn btn-theme pull-right"><i class="fas fa-sitemap"></i> {{trans('general.ldap_sync')}}</a>
-        @endif
-    @endcan
+    {{-- LDAP sync surfaces users from across the entire directory
+         regardless of company scoping, so the button is superuser-only
+         to match LDAPImportController's authorization. --}}
+    @if (auth()->user()?->isSuperUser() && $snipeSettings->ldap_enabled == 1)
+        <a href="{{ route('ldap/user') }}" class="btn btn-theme pull-right"><i class="fas fa-sitemap"></i> {{trans('general.ldap_sync')}}</a>
+    @endif
 @stop
 
 {{-- Page content --}}

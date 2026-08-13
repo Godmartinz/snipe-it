@@ -21,6 +21,11 @@ Route::group(['prefix' => 'consumables', 'middleware' => ['auth']], function () 
     )->where('consumable', '[0-9]+')
         ->name('consumables.clone.create');
 
+    Route::post('{consumable}/adjust-quantity',
+        [Consumables\ConsumablesController::class, 'adjustQuantity']
+    )->where('consumable', '[0-9]+')
+        ->name('consumables.adjust-quantity');
+
 });
 
 Route::resource('consumables', Consumables\ConsumablesController::class, [

@@ -85,7 +85,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 1234.90,
             'supplier_id' => $supplier1->id,
             'company_id' => $company1->id,
-            'order_number' => '123456',
             'warranty_months' => 24,
             'next_audit_date' => '2024-06-01',
             'requestable' => false,
@@ -95,7 +94,10 @@ class BulkEditAssetsTest extends TestCase
         // gets the ids together to submit to the endpoint
         $id_array = $assets->pluck('id')->toArray();
 
-        // submits the ids and new values for each attribute
+        // submits the ids and new values for each attribute. order_number
+        // was dropped from the payload when the parent Asset column moved
+        // to the Orders / OrderItems data model; the bulk-edit path no
+        // longer touches it.
         $this->actingAs(User::factory()->editAssets()->create())->post(route('hardware/bulksave'), [
             'ids' => $id_array,
             'name' => 'New Asset Name',
@@ -106,7 +108,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 5678.92,
             'supplier_id' => $supplier2->id,
             'company_id' => $company2->id,
-            'order_number' => '7890',
             'warranty_months' => 36,
             'next_audit_date' => '2025-01-01',
             'requestable' => true,
@@ -125,7 +126,6 @@ class BulkEditAssetsTest extends TestCase
             $this->assertEquals(5678.92, $asset->purchase_cost);
             $this->assertEquals($supplier2->id, $asset->supplier_id);
             $this->assertEquals($company2->id, $asset->company_id);
-            $this->assertEquals(7890, $asset->order_number);
             $this->assertEquals(36, $asset->warranty_months);
             $this->assertEquals('2025-01-01', $asset->next_audit_date);
             // shouldn't requestable be cast as a boolean??? it's not.
@@ -156,7 +156,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 1234.90,
             'supplier_id' => $supplier1->id,
             'company_id' => $company1->id,
-            'order_number' => '123456',
             'warranty_months' => 24,
             'next_audit_date' => '2024-06-01',
             'requestable' => false,

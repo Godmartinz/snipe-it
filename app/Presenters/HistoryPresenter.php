@@ -171,6 +171,18 @@ class HistoryPresenter extends Presenter
                 ]);
         }
 
+        if (! in_array('order_number', $hide_fields)) {
+            array_push($layout,
+                [
+                    'field' => 'order_number',
+                    'scope' => 'col',
+                    'searchable' => true,
+                    'sortable' => true,
+                    'visible' => true,
+                    'title' => trans('general.order_number'),
+                ]);
+        }
+
         if (! in_array('note', $hide_fields)) {
             array_push($layout,
                 [

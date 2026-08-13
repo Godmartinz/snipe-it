@@ -24,16 +24,14 @@
                         {{ trans('admin/hardware/form.tag') }}
                     </x-slot:header>
 
-                    @include('partials.forms.edit.asset-select', [
-                        'translated_name' => trans('general.assets'),
-                        'fieldname' => 'selected_assets[]',
-                        'multiple' => true,
-                        'required' => true,
-                        'asset_status_type' => 'Deployed',
-                        'select_id' => 'assigned_assets_select',
-                        'asset_selector_div_id' => 'assets_to_checkin_div',
-                        'asset_ids' => old('selected_assets'),
-                    ])
+                    <x-input.asset-select
+                        :label="trans('general.assets')"
+                        name="selected_assets"
+                        :multiple="true"
+                        :required="true"
+                        assetStatusType="Deployed"
+                        :selected="old('selected_assets')"
+                    />
 
                     {{-- Status --}}
                     <x-form.row
@@ -85,17 +83,13 @@
                         </x-slot:input>
                     </x-form.row>
 
-                    {{-- Note --}}
                     <x-form.row
                         :label="trans('general.notes')"
                         name="note"
+                        type="textarea"
                         label_class="col-sm-3"
                         input_div_class="col-md-8"
-                    >
-                        <x-slot:input>
-                            <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     {{-- Checkin associated license seats. The hidden
                          partner input ensures a "0" value submits when

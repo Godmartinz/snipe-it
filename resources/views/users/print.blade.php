@@ -95,8 +95,8 @@
     @endphp
     <div id="start_of_user_section"> {{-- used for page breaks when printing --}}</div>
     <h3>
-        @if ($show_user->company)
-            <b>{{ trans('admin/companies/table.name') }}:</b> {{ $show_user->company->name }}
+        @if ($show_user->companies->isNotEmpty())
+            <b>{{ trans('admin/companies/table.name') }}:</b> {{ $show_user->companies->pluck('name')->join(', ') }}
         <br>
         @endif
         {{ trans('general.assigned_to', ['name' => $show_user->display_name]) }}

@@ -1043,7 +1043,13 @@ class UsersController extends Controller
      */
     public function syncLdapUsers(Request $request)
     {
-        $this->authorize('update', User::class);
+        // Superuser-only: a bulk LDAP sync surfaces users from across
+        // the entire directory (all companies, all OUs), so anyone with
+        // "users.edit" but no full-directory access shouldn't be able
+        // to run it or read the summary that lists them.
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
+        }
         // Call Artisan LDAP import command.
 
         Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('location_id'), '--json_summary' => true]);

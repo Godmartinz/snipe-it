@@ -74,8 +74,11 @@ class UploadedFilesController extends Controller
         // set. Previously the offset ran on the unfiltered count, which
         // could over-clamp when a search narrowed results.
         $total = $uploads->count();
+        // Secondary sort by id so files uploaded within the same second (a
+        // common case in tests and bulk uploads) return in a stable order
+        // rather than whatever the engine happens to pick.
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
-        $uploads = $uploads->skip($offset)->take($limit)->orderBy($sort, $order)->get();
+        $uploads = $uploads->skip($offset)->take($limit)->orderBy($sort, $order)->orderBy('id', $order)->get();
 
         return (new UploadedFilesTransformer)->transformFiles($uploads, $total);
     }

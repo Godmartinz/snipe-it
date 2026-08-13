@@ -32,6 +32,9 @@ use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
 use Watson\Validating\ValidatingTrait;
 
+/**
+ * @property string $display_name
+ */
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
     use CompanyableTrait;
@@ -657,15 +660,28 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function isDeletable()
     {
-
         return Gate::allows('delete', $this)
-            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && $this->hasNoAssignmentBlockers()
+            && ($this->deleted_at == '');
+    }
+
+    /**
+     * The association-blocker half of isDeletable(): true only when the
+     * user has no assigned assets / accessories / licenses / consumables
+     * and isn't managing any users or locations. Split out from
+     * isDeletable() so scripts running outside a request context,
+     * Artisan `snipeit:ldap-sync --delete` flow in particular, can share
+     * the exact same rule without needing an authenticated Gate user to
+     * satisfy the delete-permission check.
+     */
+    public function hasNoAssignmentBlockers(): bool
+    {
+        return (($this->assets_count ?? $this->assets()->count()) === 0)
             && (($this->accessories_count ?? $this->accessories()->count()) === 0)
             && (($this->licenses_count ?? $this->licenses()->count()) === 0)
             && (($this->consumables_count ?? $this->consumables()->count()) === 0)
             && (($this->manages_users_count ?? $this->managesUsers()->count()) === 0)
-            && (($this->manages_locations_count ?? $this->managedLocations()->count()) === 0)
-            && ($this->deleted_at == '');
+            && (($this->manages_locations_count ?? $this->managedLocations()->count()) === 0);
     }
 
     /**
@@ -765,6 +781,16 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function syncCompaniesWithLogging(array $companyIds): void
     {
+        // Belt-and-suspenders coercion so no caller — API, web, importer,
+        // artisan, tinker, a queue job, a future FMCS refactor — can slip
+        // nested arrays or other non-scalars into ->sync(), which would
+        // bind them into SQL query params and trip "Array to string
+        // conversion" (elevated to ErrorException by Laravel's error
+        // handler). Reduce to a flat, unique list of positive int ids.
+        $companyIds = array_values(array_unique(array_filter(
+            array_map('intval', array_filter($companyIds, 'is_scalar'))
+        )));
+
         $oldIds = $this->companies()->orderBy('companies.id')->pluck('companies.id')->toArray();
         $this->companies()->sync($companyIds);
         $newIds = $this->companies()->orderBy('companies.id')->pluck('companies.id')->toArray();
@@ -1704,28 +1730,43 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         $asset_cost = 0;
         $license_cost = 0;
         $accessory_cost = 0;
+        $consumable_cost = 0;
         $maintenance_cost = 0;
+
         foreach ($this->assets as $asset) {
-            $asset_cost += $asset->purchase_cost;
-            $this->asset_cost = $asset_cost;
+            $asset_cost += (float) $asset->purchase_cost;
         }
+        $this->asset_cost = $asset_cost;
+
         foreach ($this->licenses as $license) {
-            $license_cost += $license->purchase_cost;
-            $this->license_cost = $license_cost;
+            $license_cost += (float) $license->purchase_cost;
         }
+        $this->license_cost = $license_cost;
+
+        // Accessory / consumable unit cost tracks the info-panel's "last
+        // unit cost" so this tally matches the per-item rows in the tab
+        // tables. lastOrderDefaults() already merges last-Order price
+        // with the parent's `default_purchase_cost` template value when
+        // an item has no order history, so nothing to fall back to here.
         foreach ($this->accessories as $accessory) {
-            $accessory_cost += $accessory->purchase_cost;
-            $this->accessory_cost = $accessory_cost;
+            $accessory_cost += (float) ($accessory->lastOrderDefaults()['unit_cost'] ?? 0);
         }
+        $this->accessory_cost = $accessory_cost;
+
+        foreach ($this->consumables as $consumable) {
+            $consumable_cost += (float) ($consumable->lastOrderDefaults()['unit_cost'] ?? 0);
+        }
+        $this->consumable_cost = $consumable_cost;
+
         // Maintenances tied to this user as the polymorphic checked_out_to
-        // target. Summed across open + completed records — the user
-        // "caused" both.
+        // target. Summed across open + completed records because the
+        // user "caused" both.
         foreach ($this->assignedMaintenances as $maintenance) {
-            $maintenance_cost += $maintenance->cost;
+            $maintenance_cost += (float) $maintenance->cost;
         }
         $this->maintenance_cost = $maintenance_cost;
 
-        $this->total_user_cost = ($asset_cost + $accessory_cost + $license_cost + $maintenance_cost);
+        $this->total_user_cost = $asset_cost + $accessory_cost + $consumable_cost + $license_cost + $maintenance_cost;
 
         return $this;
     }

@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Consumables;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreConsumableRequest;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Models\Company;
 use App\Models\Consumable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 /**
  * This controller handles all actions related to Consumables for
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class ConsumablesController extends Controller
 {
+    use HandlesAdjustQuantity;
+
     /**
      * Return a view to display component information.
      *
@@ -80,19 +83,20 @@ class ConsumablesController extends Controller
         $consumable = new Consumable;
         $consumable->name = $request->input('name');
         $consumable->category_id = $request->input('category_id');
-        $consumable->supplier_id = $request->input('supplier_id');
         $consumable->location_id = $request->input('location_id');
         $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-        $consumable->order_number = $request->input('order_number');
+        // order_number / supplier_id / purchase_date / purchase_cost all
+        // moved off the parent column to Orders / OrderItems.
         $consumable->min_amt = $request->input('min_amt');
         $consumable->manufacturer_id = $request->input('manufacturer_id');
         $consumable->model_number = $request->input('model_number');
         $consumable->item_no = $request->input('item_no');
-        $consumable->purchase_date = $request->input('purchase_date');
-        $consumable->purchase_cost = $request->input('purchase_cost');
         $consumable->qty = $request->input('qty');
         $consumable->created_by = auth()->id();
         $consumable->notes = $request->input('notes');
+        // Seed the template supplier from the initial-acquisition
+        // supplier on the create form; editable afterwards.
+        $consumable->default_supplier_id = $request->input('default_supplier_id', $request->input('supplier_id'));
 
         if ($request->has('use_cloned_image')) {
             $cloned_model_img = Consumable::select('image')->find($request->input('clone_image_from_id'));
@@ -114,6 +118,8 @@ class ConsumablesController extends Controller
         }
 
         if ($consumable->save()) {
+            $this->enrichInitialOrderFromRequest($request, $consumable);
+
             return Helper::getRedirectOption($request, $consumable->id, 'Consumables')
                 ->with('success', trans('admin/consumables/message.create.success'));
         }
@@ -160,33 +166,26 @@ class ConsumablesController extends Controller
      */
     public function update(StoreConsumableRequest $request, Consumable $consumable)
     {
-
-        $min = $consumable->numCheckedOut();
-        $validator = Validator::make($request->all(), [
-            'qty' => "required|numeric|min:$min",
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
         $this->authorize($consumable);
 
+        // qty and order_number are intentionally NOT accepted on update.
+        // See AccessoriesController::update for rationale. supplier_id is
+        // editable again (imperfect single-value semantics accepted for
+        // the info-panel display).
         $consumable->name = $request->input('name');
         $consumable->category_id = $request->input('category_id');
-        $consumable->supplier_id = $request->input('supplier_id');
         $consumable->location_id = $request->input('location_id');
         $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-        $consumable->order_number = $request->input('order_number');
         $consumable->min_amt = $request->input('min_amt');
         $consumable->manufacturer_id = $request->input('manufacturer_id');
         $consumable->model_number = $request->input('model_number');
         $consumable->item_no = $request->input('item_no');
-        $consumable->purchase_date = $request->input('purchase_date');
-        $consumable->purchase_cost = $request->input('purchase_cost');
-        $consumable->qty = Helper::ParseFloat($request->input('qty'));
+        // supplier_id, purchase_date, purchase_cost are create-only on
+        // the parent. Post-create acquisitions live as Orders +
+        // OrderItems (each with its own supplier / date / price).
+        // default_supplier_id remains editable — see accessory update
+        // controller for the parent-as-template rationale.
+        $consumable->default_supplier_id = $request->input('default_supplier_id');
         $consumable->notes = $request->input('notes');
 
         $consumable = $request->handleImages($consumable);
@@ -259,5 +258,15 @@ class ConsumablesController extends Controller
         return view('consumables/edit')
             ->with('cloned_model', $consumable_to_close)
             ->with('item', $consumable);
+    }
+
+    /**
+     * Apply an on-hand quantity delta (+/-) and log the change. Route
+     * exists here so route-model binding resolves against Consumable,
+     * everything else lives on HandlesAdjustQuantity.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Consumable $consumable): RedirectResponse
+    {
+        return $this->adjustQuantityAsRedirect($request, $consumable);
     }
 }

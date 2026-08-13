@@ -268,6 +268,8 @@ class ViewAssetsController extends Controller
             return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.success'));
         } catch (AssetNotRequestable $e) {
             return redirect()->back()->with('error', 'Asset is not requestable');
+        } catch (\App\Exceptions\DuplicateCheckoutRequest $e) {
+            return redirect()->back()->with('error', trans('admin/hardware/message.requests.duplicate'));
         } catch (AuthorizationException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.requests.error'));
         } catch (Exception $e) {
@@ -283,6 +285,8 @@ class ViewAssetsController extends Controller
             CancelCheckoutRequestAction::run($asset, auth()->user());
 
             return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
+        } catch (\App\Exceptions\NoActiveCheckoutRequest $e) {
+            return redirect()->back()->with('error', trans('admin/hardware/message.requests.no_active'));
         } catch (Exception $e) {
             report($e);
 

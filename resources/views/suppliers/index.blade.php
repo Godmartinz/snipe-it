@@ -21,7 +21,6 @@
                 buttons="supplierButtons"
                 fixed_right_number="1"
                 fixed_number="1"
-                use_sticky_css
                 api_url="{{ route('api.suppliers.index') }}"
                 :presenter="\App\Presenters\SupplierPresenter::dataTableLayout()"
                 export_filename="export-suppliers-{{ date('Y-m-d') }}"

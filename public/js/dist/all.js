@@ -74701,8 +74701,136 @@ $(function () {
     $('#completeMaintenanceModal').modal('show');
   });
 
+  // Adjust-quantity modal (plus-minus button on accessory/consumable/
+  // component list and view pages). Sets the modal form's action from
+  // the trigger's data-adjust-url and populates the header + current
+  // quantity display from the trigger's data attributes. Clears the
+  // signed amount + note + order every open so nothing bleeds between
+  // clicks.
+  $el.on('click', '.adjust-quantity', function () {
+    var $btn = $(this);
+    var $modal = $('#adjustQuantityModal');
+    var $amount = $modal.find('#adjustQuantityAmount');
+
+    // data-available is the trigger's authoritative floor for a decrement
+    // (available = qty - currentlyInUseCount). A delta smaller than
+    // -available would decrement the on-hand qty below what's already
+    // checked out, and AdjustsQuantity::adjustQuantity throws
+    // DomainException. Mirror that server-side floor on the input's min
+    // attribute so the browser stepper refuses to go below and the
+    // constraint-validation message surfaces before submit.
+    var available = parseInt($btn.data('available'), 10);
+    $('#adjustQuantityForm').attr('action', $btn.data('adjust-url'));
+    $modal.find('.adjust-quantity-item-name').text($btn.data('item-name') || '');
+    $modal.find('.adjust-quantity-available').text(!isNaN(available) ? available : '');
+    if (!isNaN(available)) {
+      $amount.attr('min', -available);
+    } else {
+      $amount.removeAttr('min');
+    }
+    $amount.val('');
+    $modal.find('#adjustQuantityOrder').val('');
+    // Reset the acquisition-metadata fields between opens so an
+    // order left half-filled by one operator doesn't bleed into the
+    // next click. Supplier is a select2, so use .val('').trigger('change')
+    // rather than setting the raw <select>; currency reverts to
+    // whatever the modal was originally rendered with (its DOM value
+    // attribute, i.e. the system default_currency).
+    $modal.find('#adjustQuantitySupplier').val('').trigger('change');
+    // Reset purchase_date to today on every open (server-rendered
+    // default is today too). Prevents an operator's earlier
+    // backdate from bleeding into the next event.
+    var todayIso = new Date().toISOString().slice(0, 10);
+    $modal.find('#adjustQuantityPurchaseDate').val(todayIso);
+
+    // Pre-populate unit_cost + currency from the trigger's data-last-*
+    // attrs (server-rendered from the item's most recent OrderItem).
+    // When both are present the "pre-populated from last order" hint
+    // shows underneath the row; the hint gets hidden as soon as the
+    // operator edits either field so it disappears the moment they
+    // override the pre-fill.
+    var lastUnitCost = $btn.data('last-unit-cost');
+    var lastCurrency = $btn.data('last-currency');
+    var $unitCost = $modal.find('#adjustQuantityUnitCost');
+    var $currency = $modal.find('#adjustQuantityCurrency');
+    var $costHint = $modal.find('#adjustQuantityCostHint');
+    $unitCost.val(lastUnitCost !== undefined && lastUnitCost !== '' ? lastUnitCost : '');
+    $currency.val(lastCurrency !== undefined && lastCurrency !== '' ? lastCurrency : $currency.prop('defaultValue') || '');
+    if (lastUnitCost !== undefined && lastUnitCost !== '' || lastCurrency !== undefined && lastCurrency !== '') {
+      $costHint.show();
+    } else {
+      $costHint.hide();
+    }
+
+    // Rebind on every open so multiple modal opens don't stack listeners.
+    $unitCost.off('input.adjustCostHint').on('input.adjustCostHint', function () {
+      $costHint.hide();
+    });
+    $currency.off('input.adjustCostHint').on('input.adjustCostHint', function () {
+      $costHint.hide();
+    });
+    $modal.find('#adjustQuantityNote').val('');
+    $modal.find('#adjustQuantityFile').val('');
+    // js-uploadFile paints selected filenames into #{id}-info; clear it too
+    // so stale filenames from a previous open don't linger in the new modal.
+    $modal.find('#adjustQuantityFile-info').empty();
+
+    // Acquisition-metadata fields (order number, supplier, unit cost,
+    // currency) only make sense when the qty change is a positive
+    // addition (a purchase). Zero or negative amounts represent
+    // corrections / consumption / losses, not acquisitions, so hide
+    // those fields — and blank their values so a submit from that
+    // state doesn't ship stale purchase metadata alongside the log
+    // entry. Show them again the moment the operator types a
+    // positive number. The date label swaps to a generic "Date"
+    // when the event isn't a purchase.
+    //
+    // On modal open the amount is empty ("we don't know yet"), so
+    // stay in the default acquisition-visible state — prefilled
+    // supplier / cost / currency from the last order are preserved
+    // and the hint stays visible if it was shown. We only clear
+    // when the operator actually commits to a 0/negative value.
+    var $acquisitionFields = $modal.find('#adjustQuantityAcquisitionFields');
+    var $costRow = $modal.find('#adjustQuantityCostRow');
+    var $dateLabel = $modal.find('#adjustQuantityPurchaseDateLabel');
+    var purchaseLabel = $dateLabel.data('label-purchase');
+    var genericLabel = $dateLabel.data('label-generic');
+    var syncAcquisitionFieldsVisibility = function syncAcquisitionFieldsVisibility() {
+      var raw = $amount.val();
+      // Treat "no value yet" as still-a-purchase for the visibility
+      // toggle: prefilled acquisition metadata stays intact until
+      // the operator explicitly types a non-positive number.
+      if (raw === '' || raw === null || raw === undefined) {
+        $acquisitionFields.show();
+        $costRow.show();
+        $dateLabel.text(purchaseLabel);
+        return;
+      }
+      var num = parseFloat(raw);
+      var isPurchase = !isNaN(num) && num > 0;
+      $acquisitionFields.toggle(isPurchase);
+      $costRow.toggle(isPurchase);
+      $costHint.toggle(isPurchase && $costHint.data('has-prefill') === true);
+      $dateLabel.text(isPurchase ? purchaseLabel : genericLabel);
+      if (!isPurchase) {
+        $modal.find('#adjustQuantityOrder').val('');
+        $modal.find('#adjustQuantitySupplier').val('').trigger('change');
+        $modal.find('#adjustQuantityUnitCost').val('');
+        $modal.find('#adjustQuantityCurrency').val('');
+      }
+    };
+    // Track the prefill state on the hint so the visibility toggle
+    // can restore it correctly when qty flips positive again.
+    $costHint.data('has-prefill', $costHint.is(':visible'));
+    $amount.off('input.adjustAcquisition').on('input.adjustAcquisition', syncAcquisitionFieldsVisibility);
+    // Initial call keeps everything in the default "purchase" state
+    // (empty amount) so the prefill logic above stays authoritative.
+    syncAcquisitionFieldsVisibility();
+    $modal.modal('show');
+  });
+
   // confirm delete modal
-  $el.on('click', '.delete-asset, .delete-custom-label', function (evnt) {
+  $el.on('click', '.delete-asset', function (evnt) {
     var $context = $(this);
     var $dataConfirmModal = $('#dataConfirmModal');
     // Anchors keep the URL in href; buttons keep it in data-href
@@ -75045,11 +75173,12 @@ $(function () {
     $('a[href="' + $(this).attr('href') + '"]').tab('show');
   });
 
-  // Bootstrap-table's fixed-columns extension computes the overlay widths
-  // at init time. Tables inside a hidden tab pane initialize with a
-  // zero-width container and the fixed left/right columns never recover
-  // on their own once the pane becomes visible. Force a resetView on any
-  // snipe-tables inside the newly-shown pane so fixed columns line up.
+  // Tables inside a hidden tab pane initialize with a zero-width
+  // container, so their column widths and any sticky-column offsets
+  // computed from those widths never recover on their own once the
+  // pane becomes visible. Force a resetView on any snipe-tables
+  // inside the newly-shown pane so column widths + sticky offsets
+  // re-measure against the now-visible container.
   $('body').on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
     var pane = $(e.target).attr('href');
     if (!pane) return;
@@ -75060,10 +75189,10 @@ $(function () {
     });
   });
 
-  // Same story for viewport resizes: the fixed-columns overlay caches
-  // widths from the initial layout and doesn't recompute when the window
-  // width changes. Debounce so a drag-resize doesn't fire resetView on
-  // every intermediate pixel.
+  // Same story for viewport resizes: bootstrap-table caches column
+  // widths from the initial layout and doesn't recompute when the
+  // window width changes. Debounce so a drag-resize doesn't fire
+  // resetView on every intermediate pixel.
   var snipeTableResizeTimer;
   $(window).on('resize', function () {
     clearTimeout(snipeTableResizeTimer);
@@ -75299,8 +75428,33 @@ $(document).ready(function () {
  * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
  *    or just $this->getId() if not).
  */
+// Any livewire-select2 that lives inside a Bootstrap 3 modal has to be
+// initialized with dropdownParent set to the modal, or the search input
+// gets appended to <body> where Bootstrap 3's modal enforceFocus handler
+// immediately steals focus away from it - the dropdown opens, the search
+// field renders, but typing does nothing because focus keeps snapping
+// back into the modal on every keydown. Elements not in a modal get a
+// plain init. Callers with fussier requirements (custom width, template,
+// etc.) can still init select2 manually; this handler only touches
+// elements that don't already have select2 wired up (guarded by the
+// .select2-hidden-accessible class select2 adds after init).
+function initLivewireSelect2($scope) {
+  var $root = $scope && $scope.length ? $scope : $(document);
+  $root.find('.livewire-select2').each(function () {
+    var $el = $(this);
+    if ($el.hasClass('select2-hidden-accessible')) {
+      return;
+    }
+    var opts = {};
+    var $modal = $el.closest('.modal');
+    if ($modal.length) {
+      opts.dropdownParent = $modal;
+    }
+    $el.select2(opts);
+  });
+}
 document.addEventListener('livewire:init', function () {
-  $('.livewire-select2').select2();
+  initLivewireSelect2();
   $(document).on('select2:select', '.livewire-select2', function (event) {
     var target = $(event.target);
     if (!event.target.name || !target.data('livewire-component')) {
@@ -75318,9 +75472,13 @@ document.addEventListener('livewire:init', function () {
   Livewire.interceptMessage(function (_ref) {
     var onFinish = _ref.onFinish;
     onFinish(function () {
-      // Runs after DOM morph completes (or on error/cancel)
+      // Runs after DOM morph completes (or on error/cancel). Livewire
+      // replaces the plain <select> nodes on morph, so a re-init picks
+      // up any that lost their select2 wrapper in the swap. The
+      // already-init guard inside initLivewireSelect2 keeps unchanged
+      // elements untouched.
       queueMicrotask(function () {
-        $(".livewire-select2").select2();
+        initLivewireSelect2();
       });
     });
   });

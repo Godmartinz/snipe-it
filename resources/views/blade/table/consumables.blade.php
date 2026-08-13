@@ -18,7 +18,6 @@
         :$presenter
         :$fixed_right_number
         :$fixed_number
-        use_sticky_css
         show_column_search="true"
         show_advanced_search="true"
         buttons="consumableButtons"

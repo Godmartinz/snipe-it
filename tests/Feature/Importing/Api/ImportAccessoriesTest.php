@@ -66,7 +66,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
             ]);
 
         $newAccessory = Accessory::query()
-            ->with(['location', 'category', 'manufacturer', 'supplier', 'company'])
+            ->with(['location', 'category', 'manufacturer', 'defaultSupplier', 'company'])
             ->where('name', $row['itemName'])
             ->sole();
 
@@ -81,14 +81,18 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $this->assertEquals($row['itemName'], $newAccessory->name);
         $this->assertEquals($row['quantity'], $newAccessory->qty);
-        $this->assertEquals($row['purchaseDate'], $newAccessory->purchase_date->toDateString());
-        $this->assertEquals($row['purchaseCost'], $newAccessory->purchase_cost);
-        $this->assertEquals($row['orderNumber'], $newAccessory->order_number);
+        // supplier + order_number + purchase_date + purchase_cost all
+        // live on the Orders / OrderItems polymorphic pair now — the
+        // importer's recordOrderForImportedRow helper writes them there.
+        $orderItem = $newAccessory->orderItems()->firstOrFail();
+        $this->assertEquals($row['orderNumber'], $orderItem->order->order_number);
+        $this->assertEquals($row['purchaseDate'], $orderItem->order->purchase_date->toDateString());
+        $this->assertEquals((float) $row['purchaseCost'], (float) $orderItem->price);
+        $this->assertEquals($row['supplierName'], $orderItem->order->supplier->name);
         $this->assertEquals($row['notes'], $newAccessory->notes);
         $this->assertEquals($row['category'], $newAccessory->category->name);
         $this->assertEquals('accessory', $newAccessory->category->category_type);
         $this->assertEquals($row['manufacturerName'], $newAccessory->manufacturer->name);
-        $this->assertEquals($row['supplierName'], $newAccessory->supplier->name);
         $this->assertEquals($row['location'], $newAccessory->location->name);
         $this->assertEquals($row['companyName'], $newAccessory->company->name);
         $this->assertEquals($row['modelNumber'], $newAccessory->model_number);
@@ -121,11 +125,15 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
+        // purchase_date landed on the OrderItem's Order rather than the
+        // parent Accessory column — assert that the importer's date
+        // parser normalized the slashed CSV input to a Y-m-d value.
         $accessory = Accessory::query()
             ->where('name', $importFileBuilder->firstRow()['itemName'])
-            ->sole(['purchase_date']);
+            ->sole();
 
-        $this->assertEquals('2022-10-10', $accessory->purchase_date->toDateString());
+        $order = $accessory->orderItems()->latest('id')->firstOrFail()->order;
+        $this->assertEquals('2022-10-10', $order->purchase_date->toDateString());
     }
 
     #[Test]
@@ -219,11 +227,19 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
+        // Supplier reuse across imported rows is observable on the
+        // OrderItem's Order.supplier_id (parent's default_supplier_id
+        // gets seeded from the first-row's supplier for these but the
+        // per-row dedupe rule lives on the Order path).
         $newAccessories = Accessory::query()
-            ->where('name', $importFileBuilder->pluck('itemName'))
-            ->get(['supplier_id']);
+            ->whereIn('name', $importFileBuilder->pluck('itemName'))
+            ->get();
 
-        $this->assertCount(1, $newAccessories->pluck('supplier_id')->unique()->all());
+        $supplierIds = $newAccessories->map(
+            fn ($accessory) => $accessory->orderItems()->latest('id')->first()?->order?->supplier_id,
+        )->filter()->unique()->all();
+
+        $this->assertCount(1, $supplierIds);
     }
 
     #[Test]
@@ -240,8 +256,12 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
             ->sole();
 
         $this->assertNull($newAccessory->min_amt);
-        $this->assertNull($newAccessory->purchase_date);
-        $this->assertNull($newAccessory->purchase_cost);
+        // purchase_date / purchase_cost columns are gone from the parent;
+        // when the CSV omits them, the observer-written OrderItem has
+        // null price and its Order has null purchase_date.
+        $orderItem = $newAccessory->orderItems()->latest('id')->firstOrFail();
+        $this->assertNull($orderItem->order->purchase_date);
+        $this->assertNull($orderItem->price);
     }
 
     #[Test]
@@ -280,22 +300,25 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $updatedAccessory = Accessory::query()->find($accessory->id);
         $updatedAttributes = [
-            'name', 'company_id', 'qty', 'purchase_date', 'purchase_cost',
-            'order_number', 'notes', 'category_id', 'manufacturer_id', 'supplier_id',
+            'name', 'company_id', 'qty', 'default_purchase_cost', 'default_supplier_id',
+            'notes', 'category_id', 'manufacturer_id',
             'location_id', 'model_number', 'updated_at',
         ];
 
         $this->assertEquals($row['itemName'], $updatedAccessory->name);
         $this->assertEquals($row['companyName'], $updatedAccessory->company->name);
         $this->assertEquals($row['quantity'], $updatedAccessory->qty);
-        $this->assertEquals($row['purchaseDate'], $updatedAccessory->purchase_date->toDateString());
-        $this->assertEquals($row['purchaseCost'], $updatedAccessory->purchase_cost);
-        $this->assertEquals($row['orderNumber'], $updatedAccessory->order_number);
+        // Update mode does NOT rewrite historical Orders — the CSV's
+        // purchase_cost / supplier map to the parent's default_*
+        // template fields; purchase_date has no forward-use equivalent
+        // and is silently dropped. When qty differs the value rides on
+        // the QuantityAdjust log (see importer_qty_change_creates_...).
+        $this->assertEquals((float) $row['purchaseCost'], (float) $updatedAccessory->default_purchase_cost);
+        $this->assertEquals($row['supplierName'], $updatedAccessory->defaultSupplier->name);
         $this->assertEquals($row['notes'], $updatedAccessory->notes);
         $this->assertEquals($row['category'], $updatedAccessory->category->name);
         $this->assertEquals('accessory', $updatedAccessory->category->category_type);
         $this->assertEquals($row['manufacturerName'], $updatedAccessory->manufacturer->name);
-        $this->assertEquals($row['supplierName'], $updatedAccessory->supplier->name);
         $this->assertEquals($row['location'], $updatedAccessory->location->name);
         $this->assertEquals($row['modelNumber'], $updatedAccessory->model_number);
 
@@ -321,8 +344,13 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $accessory = Accessory::query()->where('name', $initialRow['itemName'])->sole();
 
+        // Change `notes` (a plain fillable field). orderNumber is
+        // intentionally NOT the trigger here because
+        // ItemImporter::applyUpdateWithQtyAdjust strips order_number from
+        // the update payload, so a notes-only diff is what proves the
+        // update-log path still fires.
         $updatedRow = array_merge($initialRow, [
-            'orderNumber' => (string) $initialRow['orderNumber'].'-UPD',
+            'notes' => (string) ($initialRow['notes'] ?? '').' updated',
         ]);
 
         $updateFile = new ImportFileBuilder([$updatedRow]);
@@ -336,7 +364,7 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         ])->assertOk();
 
         $accessory->refresh();
-        $this->assertEquals($updatedRow['orderNumber'], $accessory->order_number);
+        $this->assertEquals($updatedRow['notes'], $accessory->notes);
 
         $updateLog = Actionlog::query()
             ->where('item_type', Accessory::class)
@@ -355,16 +383,16 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $accessory = Accessory::factory()->create([
             'notes' => 'Some pre-existing notes',
-            'purchase_date' => '2022-01-01',
         ])->refresh();
 
-        $this->assertNotNull($accessory->purchase_date);
         $this->assertNotEmpty($accessory->notes);
 
+        // purchase_date moved off the parent post-Orders — the
+        // "empty CSV cell clears the DB column" behavior for the
+        // parent-owned columns is covered here by notes alone.
         $row = ImportFileBuilder::new()->definition();
         $row['itemName'] = $accessory->name;
         $row['notes'] = '';
-        $row['purchaseDate'] = '';
 
         $importFileBuilder = new ImportFileBuilder([$row]);
         $import = Import::factory()->accessory()->create([
@@ -378,7 +406,6 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $accessory->refresh();
         $this->assertNull($accessory->notes);
-        $this->assertNull($accessory->purchase_date);
     }
 
     #[Test]
@@ -388,18 +415,17 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
 
         $accessory = Accessory::factory()->create([
             'notes' => 'Do not lose this',
-            'purchase_date' => '2022-01-01',
         ])->refresh();
 
         $originalNotes = $accessory->notes;
-        $originalPurchaseDate = $accessory->purchase_date?->toDateString();
 
         // Import a CSV that only has the identity field (name) plus one
-        // updated column. All other Accessory fields are absent from the
-        // CSV, so their DB values must be preserved on update.
+        // updated column. All other parent columns absent from the CSV
+        // must be preserved on update. model_number is the "changed
+        // field" proxy; notes is the "preserved field" proxy.
         $partialFile = new ImportFileBuilder([[
             'itemName' => $accessory->name,
-            'orderNumber' => 'UPDATED-ORDER',
+            'modelNumber' => 'UPDATED-MODEL-NUMBER',
         ]]);
         $partialImport = Import::factory()->accessory()->create([
             'file_path' => $partialFile->saveToImportsDirectory(),
@@ -411,9 +437,8 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         ])->assertOk();
 
         $accessory->refresh();
-        $this->assertEquals('UPDATED-ORDER', $accessory->order_number);
+        $this->assertEquals('UPDATED-MODEL-NUMBER', $accessory->model_number);
         $this->assertEquals($originalNotes, $accessory->notes);
-        $this->assertEquals($originalPurchaseDate, $accessory->purchase_date?->toDateString());
     }
 
     #[Test]
@@ -510,16 +535,28 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
         ])->assertOk();
 
         $newAccessory = Accessory::query()
-            ->with(['location', 'category', 'manufacturer', 'supplier'])
+            ->with(['location', 'category', 'manufacturer'])
             ->where('name', $row['modelNumber'])
             ->sole();
 
+        // purchase_date, purchase_cost, and supplier moved off the
+        // parent to the Orders / OrderItems polymorphic pair —
+        // recordOrderForImportedRow persists them there. Assertions
+        // walk through orderItems.order for those three fields.
         $this->assertEquals($row['modelNumber'], $newAccessory->name);
         $this->assertEquals($row['itemName'], $newAccessory->model_number);
         $this->assertEquals($row['quantity'], $newAccessory->qty);
-        $this->assertEquals($row['notes'], $newAccessory->purchase_date->toDateString());
-        $this->assertEquals($row['location'], $newAccessory->purchase_cost);
-        $this->assertEquals($row['companyName'], $newAccessory->order_number);
+
+        $orderItem = $newAccessory->orderItems()->firstOrFail();
+        $this->assertEquals($row['notes'], $orderItem->order->purchase_date->toDateString());
+        $this->assertEquals($row['location'], (float) $orderItem->price);
+        // See the import_accessory test above for why order_number now
+        // lives on Orders / OrderItems rather than the parent column.
+        // Note this custom-mapping test intentionally maps companyName
+        // to the orderNumber CSV column, verifying that whatever value
+        // that column carries lands on the OrderItem's Order regardless
+        // of what the source column was called.
+        $this->assertEquals($row['companyName'], $orderItem->order->order_number);
         $this->assertEquals($row['purchaseDate'], $newAccessory->notes);
         $this->assertEquals($row['manufacturerName'], $newAccessory->category->name);
         $this->assertEquals($row['category'], $newAccessory->manufacturer->name);

@@ -114,7 +114,8 @@ class ManufacturerPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.assets'),
                 'visible' => true,
-                'class' => 'css-barcode',
+                'class' => 'css-barcode text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'licenses_count',
@@ -124,7 +125,8 @@ class ManufacturerPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.licenses'),
                 'visible' => true,
-                'class' => 'css-license',
+                'class' => 'css-license text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'consumables_count',
@@ -134,7 +136,8 @@ class ManufacturerPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.consumables'),
                 'visible' => true,
-                'class' => 'css-consumable',
+                'class' => 'css-consumable text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'accessories_count',
@@ -144,7 +147,8 @@ class ManufacturerPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.accessories'),
                 'visible' => true,
-                'class' => 'css-accessory',
+                'class' => 'css-accessory text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'components_count',
                 'scope' => 'col',
@@ -153,7 +157,8 @@ class ManufacturerPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.components'),
                 'visible' => true,
-                'class' => 'css-component',
+                'class' => 'css-component text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'created_by',
                 'scope' => 'col',

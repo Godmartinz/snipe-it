@@ -6,7 +6,9 @@ use App\Events\CheckoutableCheckedIn;
 use App\Exceptions\MissingLogTarget;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Asset;
@@ -14,6 +16,7 @@ use App\Models\Company;
 use App\Models\Component;
 use App\Models\Setting;
 use Carbon\Carbon;
+use DomainException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +26,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ComponentsController extends Controller
 {
+    use HandlesAdjustQuantity;
+
     /**
      * Display a listing of the resource.
      *
@@ -61,8 +66,11 @@ class ComponentsController extends Controller
 
             ];
 
+        // Eager-load orderItems.order.supplier so lastAcquisitionSupplier()
+        // walks the relation cache in the transformer instead of firing a
+        // Supplier::find() per row.
         $components = Component::select('components.*')
-            ->with('company', 'location', 'category', 'supplier', 'adminuser', 'manufacturer')
+            ->with('company', 'location', 'category', 'defaultSupplier', 'adminuser', 'manufacturer', 'orderItems.order.supplier')
             ->withSum('unconstrainedAssets as sum_unconstrained_assets', 'components_assets.assigned_qty');
 
         $filter = [];
@@ -96,7 +104,12 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('order_number')) {
-            $components->where('components.order_number', '=', $request->input('order_number'));
+            // Reroute through the HasOrders orders() HasManyThrough since
+            // the parent components.order_number column no longer exists.
+            $orderNumber = $request->input('order_number');
+            $components->whereHas('orders', function ($query) use ($orderNumber) {
+                $query->where('orders.order_number', '=', $orderNumber);
+            });
         }
 
         if ($request->filled('category_id')) {
@@ -104,7 +117,7 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('supplier_id')) {
-            $components->where('components.supplier_id', '=', $request->input('supplier_id'));
+            $components->where('components.default_supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('manufacturer_id')) {
@@ -154,6 +167,21 @@ class ComponentsController extends Controller
             case 'percent_remaining':
                 $components = $components->OrderPercentRemaining($order);
                 break;
+            case 'remaining':
+                $components = $components->OrderRemaining($order);
+                break;
+            case 'purchase_cost':
+                // See AccessoriesController for the rationale — these
+                // three sorts walk order_items rather than removed
+                // parent columns.
+                $components = $components->OrderByLastPurchaseCost($order);
+                break;
+            case 'purchase_date':
+                $components = $components->OrderByLastPurchaseDate($order);
+                break;
+            case 'total_cost':
+                $components = $components->OrderByTotalOrderCost($order);
+                break;
             default:
                 $components = $components->orderBy($column_sort, $order);
                 break;
@@ -178,9 +206,15 @@ class ComponentsController extends Controller
         $component = new Component;
         $component->fill($request->all());
         $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        // See AccessoriesController::store for the default-supplier seeding rationale.
+        if (! $request->filled('default_supplier_id') && $request->filled('supplier_id')) {
+            $component->default_supplier_id = $request->input('supplier_id');
+        }
         $component = $request->handleImages($component);
 
         if ($component->save()) {
+            $this->enrichInitialOrderFromRequest($request, $component);
+
             return response()->json(Helper::formatStandardApiResponse('success', $component, trans('admin/components/message.create.success')));
         }
 
@@ -217,15 +251,55 @@ class ComponentsController extends Controller
     {
         $this->authorize('update', Component::class);
         $component = Component::findOrFail($id);
-        $component->fill($request->all());
+
+        // See Api\AccessoriesController::update for the qty / order_number
+        // / supplier_id contract. Same logic mirrored here.
+        $qtyBefore = (int) $component->qty;
+        $qtyRequested = $request->has('qty') ? (int) $request->input('qty') : $qtyBefore;
+        $qtyDelta = $qtyRequested - $qtyBefore;
+
+        // supplier_id, purchase_date, purchase_cost, and order_number
+        // are create-only on the parent. Post-create acquisitions live
+        // as Orders + OrderItems, so update-mode drops all four.
+        $component->fill($request->except([
+            'qty',
+            'order_number',
+            'purchase_cost',
+            'purchase_date',
+            'supplier_id',
+        ]));
         $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $component = $request->handleImages($component);
 
-        if ($component->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $component, trans('admin/components/message.update.success')));
+        if (! $component->save()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $component->getErrors()));
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $component->getErrors()));
+        if ($qtyDelta !== 0) {
+            $orderId = $this->resolveOrderForAdjustment($request, $component, $qtyDelta);
+            try {
+                $component->adjustQuantity(
+                    $qtyDelta,
+                    $request->input('note') ?: "API qty change: {$qtyBefore} → {$qtyRequested}",
+                    $orderId,
+                );
+            } catch (DomainException) {
+                return response()->json(
+                    Helper::formatStandardApiResponse('error', null, trans('general.adjust_quantity_below_zero')),
+                    422,
+                );
+            }
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('success', $component, trans('admin/components/message.update.success')));
+    }
+
+    /**
+     * See Api\AccessoriesController::adjustQuantity for the shape/contract.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Component $component): JsonResponse
+    {
+        return $this->adjustQuantityAsJson($request, $component);
     }
 
     /**

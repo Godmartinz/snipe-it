@@ -129,7 +129,7 @@ class AssignedComponentsTest extends TestCase
     public function test_show_asset_with_components_true_query_omits_components_when_denied(): void
     {
         $asset = Asset::factory()->create();
-        $component = Component::factory()->create(['name' => 'Hidden CPU', 'purchase_cost' => 500]);
+        $component = Component::factory()->withInitialAcquisition(null, 500.0)->create(['name' => 'Hidden CPU']);
         $component->assets()->attach($component->id, [
             'component_id' => $component->id,
             'assigned_qty' => 3,

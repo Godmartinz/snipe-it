@@ -1131,15 +1131,18 @@ class SettingsController extends Controller
         // Take a fresh pre-restore backup so we can point the operator at
         // it if the restore fails after we wipe. This is the mitigation
         // the pre-existing
-        $preRestoreBackupName = 'pre-restore-'.date('Y-m-d-H-i-s').'.zip';
-        Log::debug('Running pre-restore backup: '.$preRestoreBackupName);
+        $requestedBackupFilename = 'pre-restore-'.date('Y-m-d-H-i-s').'.zip';
+        // spatie prepends filename_prefix to the filename provided so this is the actual name on disk:
+        $preRestoreBackupFilename = config('backup.backup.destination.filename_prefix').$requestedBackupFilename;
+        $preBackupPath = storage_path($path).'/'.$preRestoreBackupFilename;
+
+        Log::debug('Running pre-restore backup: '.$preRestoreBackupFilename);
         $preBackupExit = Artisan::call('snipeit:backup', [
-            '--filename' => $preRestoreBackupName,
+            '--filename' => $requestedBackupFilename,
             '--force' => true,
         ]);
-        $preBackupPath = storage_path($path).'/'.$preRestoreBackupName;
 
-        if ($preBackupExit !== 0 || ! Storage::exists($path.'/'.$preRestoreBackupName)) {
+        if ($preBackupExit !== 0 || ! (Storage::exists($path.'/'.$preRestoreBackupFilename))) {
             Log::warning('Pre-restore backup failed (exit '.$preBackupExit.'); aborting restore to protect existing data.');
 
             return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.pre_backup_failed'));
@@ -1182,7 +1185,7 @@ class SettingsController extends Controller
             Log::error('Restore failed after db:wipe. Pre-restore backup available at '.$preBackupPath);
 
             return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
-                'backup' => $preRestoreBackupName,
+                'backup' => $preRestoreBackupFilename,
             ]));
         }
 
@@ -1196,7 +1199,7 @@ class SettingsController extends Controller
             Log::error('Migrate failed after restore. Pre-restore backup available at '.$preBackupPath);
 
             return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
-                'backup' => $preRestoreBackupName,
+                'backup' => $preRestoreBackupFilename,
             ]));
         }
 

@@ -1,5 +1,4 @@
 <?php
-use Carbon\Carbon;
 ?>
 @extends('layouts/default')
 
@@ -197,12 +196,12 @@ use Carbon\Carbon;
                             :table_header="trans('general.notes')"
                             :model="$maintenance"
                             :route="route('api.activity.index', ['item_id' => $maintenance->id, 'item_type' => 'maintenance', 'action_type' => 'note added'])"
-                            :hide_fields="['id','action_type', 'item', 'changed', 'target','file','file_download','quantity','changed','serial','signature_file','log_meta']"
+                            :hide_fields="['id','action_type', 'item', 'changed', 'target','file','file_download','quantity','changed','serial','signature_file','log_meta','order_number']"
                         />
                     </x-tabs.pane>
 
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$maintenance" :route="route('api.maintenances.history', $maintenance)"/>
+                        <x-table.history :model="$maintenance" :route="route('api.maintenances.history', $maintenance)" :hide_fields="['order_number']"/>
                     </x-tabs.pane>
 
                 </x-slot:tabpanes>

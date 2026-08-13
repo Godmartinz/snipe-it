@@ -41,6 +41,11 @@ Route::group(['prefix' => 'components', 'middleware' => ['auth']], function () {
     )->where('component', '[0-9]+')
         ->name('components.clone.create');
 
+    Route::post('{component}/adjust-quantity',
+        [Components\ComponentsController::class, 'adjustQuantity']
+    )->where('component', '[0-9]+')
+        ->name('components.adjust-quantity');
+
 });
 
 Route::resource('components', Components\ComponentsController::class, [

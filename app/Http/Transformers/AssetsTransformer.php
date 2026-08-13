@@ -206,13 +206,18 @@ class AssetsTransformer
                         continue;
                     }
 
+                    $unitCost = $component->lastOrderDefaults()['unit_cost'] ?? null;
+                    $assignedQty = $component->pivot->assigned_qty;
+
                     $array['components'][] = [
                         'id' => $component->id,
                         'pivot_id' => $component->pivot->id,
                         'name' => e($component->name),
-                        'qty' => $component->pivot->assigned_qty,
-                        'purchase_cost' => $component->purchase_cost,
-                        'purchase_total' => $component->calculated_purchase_cost,
+                        'qty' => $assignedQty,
+                        'purchase_cost' => $unitCost,
+                        'purchase_total' => ($unitCost !== null && $assignedQty !== null)
+                            ? (float) $unitCost * (int) $assignedQty
+                            : null,
                         'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
                     ];
                 }

@@ -15,7 +15,6 @@
                     buttons="maintenanceTypeButtons"
                     fixed_right_number="1"
                     fixed_number="1"
-                    use_sticky_css
                     api_url="{{ route('api.maintenance-types.index') }}"
                     :presenter="\App\Presenters\MaintenanceTypePresenter::dataTableLayout()"
                     export_filename="export-maintenance-types-{{ date('Y-m-d') }}"

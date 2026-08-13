@@ -42,6 +42,10 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
         [Accessories\AccessoriesController::class, 'postCreate']
     );
 
+    Route::post('{accessory}/adjust-quantity',
+        [Accessories\AccessoriesController::class, 'adjustQuantity']
+    )->name('accessories.adjust-quantity');
+
 });
 
 Route::resource('accessories', Accessories\AccessoriesController::class, [

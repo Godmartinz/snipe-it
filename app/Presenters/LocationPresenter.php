@@ -78,7 +78,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.people'),
                 'titleTooltip' => trans('general.people'),
                 'visible' => true,
-                'class' => 'css-house-user',
+                'class' => 'css-house-user text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assets_count',
                 'scope' => 'col',
@@ -88,7 +89,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('admin/locations/message.current_location'),
                 'titleTooltip' => trans('admin/locations/message.current_location'),
                 'visible' => true,
-                'class' => 'css-house-laptop',
+                'class' => 'css-house-laptop text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'rtd_assets_count',
                 'scope' => 'col',
@@ -99,7 +101,8 @@ class LocationPresenter extends Presenter
                 'titleTooltip' => trans('admin/hardware/form.default_location'),
                 'tooltip' => 'true',
                 'visible' => false,
-                'class' => 'css-house-flag',
+                'class' => 'css-house-flag text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assigned_assets_count',
                 'scope' => 'col',
@@ -109,7 +112,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('admin/locations/message.assigned_assets'),
                 'titleTooltip' => trans('admin/locations/message.assigned_assets'),
                 'visible' => true,
-                'class' => 'css-house-laptop',
+                'class' => 'css-house-laptop text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'accessories_count',
                 'scope' => 'col',
@@ -119,7 +123,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.accessories'),
                 'titleTooltip' => trans('general.accessories'),
                 'visible' => true,
-                'class' => 'css-accessory',
+                'class' => 'css-accessory text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assigned_accessories_count',
                 'scope' => 'col',
@@ -129,7 +134,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.accessories_assigned'),
                 'titleTooltip' => trans('general.accessories_assigned'),
                 'visible' => true,
-                'class' => 'css-accessory-alt',
+                'class' => 'css-accessory-alt text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'components_count',
                 'scope' => 'col',
@@ -139,7 +145,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.components'),
                 'titleTooltip' => trans('general.components'),
                 'visible' => true,
-                'class' => 'css-component',
+                'class' => 'css-component text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'consumables_count',
@@ -150,7 +157,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.consumables'),
                 'titleTooltip' => trans('general.consumables'),
                 'visible' => true,
-                'class' => 'css-consumable',
+                'class' => 'css-consumable text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'children_count',
@@ -161,7 +169,8 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.child_locations'),
                 'titleTooltip' => trans('general.child_locations'),
                 'visible' => true,
-                'class' => 'css-child-locations',
+                'class' => 'css-child-locations text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'currency',
                 'scope' => 'col',

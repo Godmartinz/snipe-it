@@ -59,7 +59,8 @@ class SupplierPresenter extends Presenter
                 'title' => trans('general.assets'),
                 'titleTooltip' => trans('general.assets'),
                 'visible' => true,
-                'class' => 'css-barcode',
+                'class' => 'css-barcode text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],  [
                 'field' => 'accessories_count',
                 'scope' => 'col',
@@ -69,7 +70,8 @@ class SupplierPresenter extends Presenter
                 'title' => trans('general.accessories'),
                 'titleTooltip' => trans('general.accessories'),
                 'visible' => true,
-                'class' => 'css-accessory',
+                'class' => 'css-accessory text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'licenses_count',
@@ -80,7 +82,8 @@ class SupplierPresenter extends Presenter
                 'title' => trans('general.licenses'),
                 'titleTooltip' => trans('general.licenses'),
                 'visible' => true,
-                'class' => 'css-license',
+                'class' => 'css-license text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'components_count',
                 'scope' => 'col',
@@ -90,7 +93,8 @@ class SupplierPresenter extends Presenter
                 'title' => trans('general.components'),
                 'titleTooltip' => trans('general.components'),
                 'visible' => true,
-                'class' => 'css-component',
+                'class' => 'css-component text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'consumables_count',
                 'scope' => 'col',
@@ -100,7 +104,8 @@ class SupplierPresenter extends Presenter
                 'title' => trans('general.consumables'),
                 'titleTooltip' => trans('general.consumables'),
                 'visible' => true,
-                'class' => 'css-consumable',
+                'class' => 'css-consumable text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'url',
                 'scope' => 'col',

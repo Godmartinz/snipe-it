@@ -471,7 +471,7 @@ class ReportsController extends Controller
     public function getCustomReport(Request $request): View
     {
         $this->authorize('reports.view');
-        $customfields = CustomField::get();
+        $customfields = CustomField::has('fieldset')->get();
         $report_templates = ReportTemplate::where('type', 'asset')->orderBy('name')->get();
 
         // The view needs a template to render correctly, even if it is empty...
@@ -506,7 +506,7 @@ class ReportsController extends Controller
 
         $this->disableDebugbar();
 
-        $customfields = CustomField::get();
+        $customfields = CustomField::has('fieldset')->get();
         $response = new StreamedResponse(function () use ($customfields, $request) {
             Log::debug('Starting streamed response');
             Log::debug('CSV escaping is set to: '.config('app.escape_formulas'));
@@ -739,7 +739,7 @@ class ReportsController extends Controller
 
             $assets = Asset::select('assets.*')->with(
                 'location', 'status', 'company', 'defaultLoc', 'assignedTo',
-                'model.category', 'model.manufacturer', 'supplier');
+                'model.category', 'model.manufacturer', 'model.fieldset.fields', 'supplier');
 
             if ($request->filled('by_location_id')) {
                 $assets->whereIn('assets.location_id', $request->input('by_location_id'));
@@ -1168,12 +1168,16 @@ class ReportsController extends Controller
                         $row[] = config('app.url').'/hardware/'.$asset->id;
                     }
 
+                    $modelFieldIds = $asset->model?->fieldset?->fields->pluck('id') ?? collect();
+
                     foreach ($customfields as $customfield) {
                         $column_name = $customfield->db_column_name();
                         if ($request->filled($customfield->db_column_name())) {
-                            $value = $asset->$column_name;
+                            $value = $modelFieldIds->contains($customfield->id)
+                                ? $asset->$column_name
+                                : null;
 
-                            if (($customfield->field_encrypted == '1') && Gate::allows('assets.view.encrypted_custom_fields')) {
+                            if ($value !== null && $customfield->field_encrypted == '1' && Gate::allows('assets.view.encrypted_custom_fields')) {
                                 $value = Helper::gracefulDecrypt($customfield, $value);
                             }
 

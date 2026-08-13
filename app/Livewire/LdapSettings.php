@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Ldap;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
@@ -76,6 +77,24 @@ class LdapSettings extends Component
     // green checkmark. Cleared on goToStep, disableLdap, and
     // finishWizard so back-nav doesn't retrigger the animation.
     public ?int $justCompletedStep = null;
+
+    // Read-only lock. Set from config('app.lock_passwords') in mount()
+    // and blade uses it to render every wire:model input with the
+    // `readonly` / `disabled` attribute so demo visitors can't retype
+    // real LDAP creds into the wizard. Server-side enforcement lives
+    // in updated(), which reverts any prop mutation back to the
+    // persisted Setting values (defense against a caller that fakes
+    // wire:model updates around the disabled UI).
+    public bool $isReadOnly = false;
+
+    // Properties that stay editable even when isReadOnly is on. The
+    // sample-username field on step 3 has to remain writable so the
+    // Test Find User preview still works, which is the one wizard
+    // interaction we do want demo visitors to exercise.
+    private const READ_ONLY_ALLOWED_PROPS = [
+        'currentStep',
+        'test_sample_username',
+    ];
 
     // Step 1: Connection
     public bool $ldap_enabled = false;
@@ -184,6 +203,7 @@ class LdapSettings extends Component
 
     public function mount(): void
     {
+        $this->isReadOnly = (bool) config('app.lock_passwords');
         $this->hydrateFromPersisted();
 
         // Restore in-flight wizard progress from the session so a page
@@ -206,6 +226,17 @@ class LdapSettings extends Component
             if (! request()->has('step')) {
                 $this->currentStep = 5;
             }
+        }
+
+        // Demo mode unlocks the wizard independent of ldap_enabled.
+        // The save/advance methods are gated shut by lock_passwords
+        // so a visitor with ldap_enabled=false would otherwise be
+        // trapped on step 1 with no way to reach the Test Find User
+        // preview on step 3. Unlocking the stepper here lets them
+        // jump to any step. Fields stay locked via isReadOnly /
+        // updated() enforcement.
+        if ($this->isReadOnly) {
+            $this->highestStepReached = 5;
         }
 
         // Clamp against total step count in case a session pointer
@@ -285,6 +316,21 @@ class LdapSettings extends Component
         ];
     }
 
+    /**
+     * Whether a bind password is currently stored in the settings row.
+     *
+     * hydrateFromPersisted() intentionally leaves $ldap_pword as ''
+     * to avoid round-tripping the plaintext to the browser, so the
+     * summary on step 5 can't tell "no password saved" from "password
+     * saved but not loaded" by looking at the property alone. This
+     * computed checks the persisted row directly for the render.
+     */
+    #[Computed]
+    public function hasPersistedLdapPword(): bool
+    {
+        return ! empty(Setting::getSettings()->ldap_pword);
+    }
+
     public function goToStep(int $step): void
     {
         if ($step >= 1 && $step <= $this->highestStepReached) {
@@ -312,7 +358,18 @@ class LdapSettings extends Component
 
     public function saveAndAdvance()
     {
+        // Demo mode: nothing to save (isReadOnly + updated() lock the
+        // fields to seeded values), but visitors still want to walk
+        // the wizard forward step by step to see each screen. Skip
+        // validation / network test / persist and just advance. The
+        // per-step Test Bind / Test Find User buttons on individual
+        // steps remain available for anyone who wants to fire a live
+        // request against the seeded Forumsys config.
         if (config('app.lock_passwords')) {
+            if ($this->currentStep < 5) {
+                $this->goToStep($this->currentStep + 1);
+            }
+
             return null;
         }
 
@@ -770,38 +827,6 @@ class LdapSettings extends Component
 
     // === Step 3: Attribute mapping ========================================= =============================
 
-    /**
-     * Snipe-IT field name → LDAP-attribute-name Livewire property. Used
-     * both by the preview-table render and by any future sync-side code
-     * that wants a canonical map of "what field goes where." Order here
-     * defines the order in the preview table.
-     *
-     * Any new mappings we create would need to go here too.
-     */
-    protected function attributeMap(): array
-    {
-        return [
-            'username' => $this->ldap_username_field,
-            'first_name' => $this->ldap_fname_field,
-            'last_name' => $this->ldap_lname_field,
-            'display_name' => $this->ldap_display_name,
-            'email' => $this->ldap_email,
-            'employee_num' => $this->ldap_emp_num,
-            'phone' => $this->ldap_phone_field,
-            'mobile' => $this->ldap_mobile,
-            'job_title' => $this->ldap_jobtitle,
-            'manager' => $this->ldap_manager,
-            'department' => $this->ldap_dept,
-            'address' => $this->ldap_address,
-            'city' => $this->ldap_city,
-            'state' => $this->ldap_state,
-            'zip' => $this->ldap_zip,
-            'country' => $this->ldap_country,
-            'location' => $this->ldap_location,
-            'active_flag' => $this->ldap_active_flag,
-        ];
-    }
-
     protected function saveStep3(): void
     {
         $this->validate($this->step3SyntaxRules(), attributes: $this->step3SyntaxAttributes());
@@ -923,7 +948,7 @@ class LdapSettings extends Component
         // whole entry when we only care about a handful.
         $requestedAttrs = array_values(array_filter(array_map(
             fn ($attr) => trim(strtolower((string) $attr)),
-            $this->attributeMap(),
+            Ldap::attributeMap($this),
         )));
 
         $searchResult = @ldap_search($conn, $this->ldap_basedn, $lookupFilter, $requestedAttrs);
@@ -986,10 +1011,12 @@ class LdapSettings extends Component
         // muted). Attribute names are compared lowercase. LDAP is
         // case-insensitive on attribute names.
         $preview = [];
-        foreach ($this->attributeMap() as $snipeField => $ldapAttr) {
+        $labels = Ldap::attributeLabels();
+        foreach (Ldap::attributeMap($this) as $snipeField => $ldapAttr) {
+            $label = $labels[$snipeField] ?? $snipeField;
             $ldapAttrLower = trim(strtolower((string) $ldapAttr));
             if ($ldapAttrLower === '') {
-                $preview[$snipeField] = ['attr' => null, 'value' => null];
+                $preview[$snipeField] = ['label' => $label, 'attr' => null, 'value' => null];
 
                 continue;
             }
@@ -997,7 +1024,7 @@ class LdapSettings extends Component
             if (isset($attributes[$ldapAttrLower][0])) {
                 $value = $attributes[$ldapAttrLower][0];
             }
-            $preview[$snipeField] = ['attr' => $ldapAttr, 'value' => $value];
+            $preview[$snipeField] = ['label' => $label, 'attr' => $ldapAttr, 'value' => $value];
         }
 
         $this->step3TestDn = (string) $dn;
@@ -1336,14 +1363,13 @@ class LdapSettings extends Component
         }
 
         if (! config('app.test_allow_private_ips')) {
-            // FILTER_FLAG_NO_PRIV_RANGE blocks 10/8, 172.16/12, 192.168/16, fc00::/7.
-            // FILTER_FLAG_NO_RES_RANGE blocks loopback (127/8, ::1), link-local
-            // (169.254/16 - cloud metadata!), multicast, broadcast, and other
-            // IETF-reserved ranges.
-            // While this makes sense in some cases, we control that via the
-            // TEST_ALLOW_PRIVATE_IPS env var, since some folks will legitimately need
-            // their install of Snipe-IT to talk to internal networks
-            if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            // Block loopback, RFC-1918, link-local (169.254/16 -- cloud
+            // metadata!), multicast, broadcast, and IPv6 transition
+            // prefixes that would embed a non-public IPv4 payload. See
+            // App\Helpers\PublicIpCheck for the exact ranges covered.
+            // The check is gated on TEST_ALLOW_PRIVATE_IPS because some
+            // installs legitimately need to talk to internal LDAP servers.
+            if (! \App\Helpers\PublicIpCheck::isPublic($ip)) {
                 return trans('admin/settings/general.ldap_wizard.test.private_ip_blocked', ['host' => $host, 'ip' => $ip]);
             }
         }
@@ -1394,6 +1420,20 @@ class LdapSettings extends Component
 
     public function updated(string $property): void
     {
+        // Read-only lock: in demo mode any mutation to a persisted
+        // LDAP config field gets reverted to the seeded Setting value
+        // before the rest of the updated() logic runs. Server-side
+        // enforcement, so a client that fakes wire:model updates
+        // around the UI's readonly / disabled attributes still can't
+        // get modified creds into a Test Bind / Test Find User call.
+        // test_sample_username stays writable so the Look Up preview
+        // still works.
+        if ($this->isReadOnly && ! in_array($property, self::READ_ONLY_ALLOWED_PROPS, true)) {
+            $this->hydrateFromPersisted();
+
+            return;
+        }
+
         // Trim string values on assignment so pasted-with-whitespace
         // inputs get normalized both in the visible field and in the
         // saved config. Without this a leading space on ldap_server

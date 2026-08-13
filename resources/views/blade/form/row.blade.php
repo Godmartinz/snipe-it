@@ -148,16 +148,30 @@
     @endif
 
 
-    {{-- Error + help wrapper. Width tracks $input_div_class so the help
-         line sits directly under the input, not overhanging its right
-         edge. Offset stays col-md-offset-3 to align under the input
-         column (which sits after the col-md-3 label). Callers that
-         want a wider help area can override input_div_class. --}}
-    <div class="{{ $input_div_class }} col-md-offset-3">
+    {{-- Force the help block onto a new grid row regardless of how
+         narrow the input column is. Without this, callers using
+         narrow input_div_class values (e.g. col-lg-3 for a number +
+         days addon) hit a case where label + input + help offset +
+         help width sum to exactly 12, and the help renders beside
+         the input instead of underneath it. --}}
+    <div class="clearfix"></div>
+
+    {{-- Error + help wrapper. Fixed at col-md-9 col-md-offset-3 so the
+         help text always has room to breathe on its own row, regardless
+         of how narrow the input column is. Offset aligns under the
+         input column (which sits after the col-md-3 label). --}}
+    <div class="col-md-9 col-md-offset-3">
         <x-form.error :name="$name" />
 
         @if ($help_text)
-            <x-form.help :name="$name" :icon="$help_icon">{{ $help_text }}</x-form.help>
+            {{-- $help_text is already HTML-entity-escaped by Blade's
+                 attribute-binding sanitize pass (:help_text="trans(...)"
+                 turns real double-quotes into &quot; before the value
+                 lands here). Using {!! !!} outputs those entities as-is
+                 so the browser renders them as real characters. A plain
+                 {{ }} here would escape a second time (&quot; -> &amp;quot;),
+                 which is what shows up as literal &quot; in the page. --}}
+            <x-form.help :name="$name" :icon="$help_icon">{!! $help_text !!}</x-form.help>
         @elseif ($help_html)
             {{-- Raw HTML help — the caller has opted in, we render unescaped
                  straight to the <p>. See the help_html prop docs above. Note:

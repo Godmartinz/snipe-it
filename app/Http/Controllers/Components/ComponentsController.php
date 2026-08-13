@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Components;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\StoreComponentRequest;
 use App\Http\Requests\UpdateComponentRequest;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Models\Company;
 use App\Models\Component;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -20,6 +22,8 @@ use Illuminate\Http\RedirectResponse;
  */
 class ComponentsController extends Controller
 {
+    use HandlesAdjustQuantity;
+
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the components listing, which is generated in getDatatable.
@@ -78,19 +82,20 @@ class ComponentsController extends Controller
         $component = new Component;
         $component->name = $request->input('name');
         $component->category_id = $request->input('category_id');
-        $component->supplier_id = $request->input('supplier_id');
         $component->manufacturer_id = $request->input('manufacturer_id');
         $component->model_number = $request->input('model_number');
         $component->location_id = $request->input('location_id');
         $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-        $component->order_number = $request->input('order_number', null);
+        // order_number / supplier_id / purchase_date / purchase_cost all
+        // moved off the parent column to Orders / OrderItems.
         $component->min_amt = $request->input('min_amt', null);
         $component->serial = $request->input('serial', null);
-        $component->purchase_date = $request->input('purchase_date', null);
-        $component->purchase_cost = $request->input('purchase_cost', null);
         $component->qty = $request->input('qty');
         $component->created_by = auth()->id();
         $component->notes = $request->input('notes');
+        // Seed the template supplier from the initial-acquisition
+        // supplier on the create form; editable afterwards.
+        $component->default_supplier_id = $request->input('default_supplier_id', $request->input('supplier_id'));
 
         $component = $request->handleImages($component);
 
@@ -101,6 +106,8 @@ class ComponentsController extends Controller
         }
 
         if ($component->save()) {
+            $this->enrichInitialOrderFromRequest($request, $component);
+
             return Helper::getRedirectOption($request, $component->id, 'Components')
                 ->with('success', trans('admin/components/message.create.success'));
         }
@@ -152,20 +159,23 @@ class ComponentsController extends Controller
     {
         $this->authorize('update', $component);
 
-        // Update the component data
+        // qty and order_number are intentionally NOT accepted on update.
+        // See AccessoriesController::update for rationale. supplier_id is
+        // editable again (imperfect single-value semantics accepted for
+        // the info-panel display).
         $component->name = $request->input('name');
         $component->category_id = $request->input('category_id');
-        $component->supplier_id = $request->input('supplier_id');
         $component->manufacturer_id = $request->input('manufacturer_id');
         $component->model_number = $request->input('model_number');
         $component->location_id = $request->input('location_id');
         $component->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-        $component->order_number = $request->input('order_number');
         $component->min_amt = $request->input('min_amt');
         $component->serial = $request->input('serial');
-        $component->purchase_date = $request->input('purchase_date');
-        $component->purchase_cost = request('purchase_cost');
-        $component->qty = $request->input('qty');
+        // supplier_id, purchase_date, purchase_cost are create-only on
+        // the parent. Post-create acquisitions live as Orders +
+        // OrderItems. default_supplier_id remains editable as the
+        // parent's "typical supplier" template.
+        $component->default_supplier_id = $request->input('default_supplier_id');
         $component->notes = $request->input('notes');
 
         $component = $request->handleImages($component);
@@ -246,5 +256,15 @@ class ComponentsController extends Controller
         return view('components/edit')
             ->with('item', $cloned_component)
             ->with('component', $cloned_component);
+    }
+
+    /**
+     * Apply an on-hand quantity delta (+/-) and log the change. Route
+     * exists here so route-model binding resolves against Component,
+     * everything else lives on HandlesAdjustQuantity.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Component $component): RedirectResponse
+    {
+        return $this->adjustQuantityAsRedirect($request, $component);
     }
 }

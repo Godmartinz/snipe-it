@@ -55,15 +55,23 @@ class CreateMaintenanceTrackingTest extends TestCase
         ]);
     }
 
-    public function test_responsible_party_defaults_to_creating_user()
+    public function test_responsible_party_omitted_persists_as_null()
     {
+        // Old behavior: the controller filled a missing / empty
+        // responsible_party_id with the acting user via `?: auth()->id()`.
+        // That silently defeated a deliberate clear on the create form
+        // (issue #19452), so the controller now stores whatever the
+        // form submits verbatim. The form template pre-selects the
+        // acting user as a UX default so most creates still end up
+        // with the acting user — but only when the user leaves the
+        // pre-selection alone.
         $actor = User::factory()->superuser()->create();
         $asset = Asset::factory()->create();
         $type = MaintenanceType::factory()->create();
 
         $this->actingAs($actor)
             ->post(route('maintenances.store'), [
-                'name' => 'RP Default Test',
+                'name' => 'RP Omit Test',
                 'selected_assets' => [$asset->id],
                 'maintenance_type_id' => $type->id,
                 'start_date' => '2026-01-01',
@@ -72,7 +80,7 @@ class CreateMaintenanceTrackingTest extends TestCase
 
         $this->assertDatabaseHas('maintenances', [
             'asset_id' => $asset->id,
-            'responsible_party_id' => $actor->id,
+            'responsible_party_id' => null,
         ]);
     }
 

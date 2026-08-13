@@ -62,4 +62,8 @@ return [
         'success' => 'The license was checked in successfully',
     ],
 
+    'import' => [
+        'no_free_seats' => 'License ":license" has no free seats. ":target" was not assigned to a seat.',
+    ],
+
 ];

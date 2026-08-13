@@ -414,4 +414,58 @@ class AssetAcceptanceTest extends TestCase
             ->assertDontSee(route('users.show', $assignee), false)
             ->assertDontSee(route('hardware.checkout.create', $asset), false);
     }
+
+    public function test_oversized_note_is_rejected_before_persistence_or_notification()
+    {
+        // Regression for the DoS reported by PizzaStev3 (Ahmed Mohammed).
+        // An unbounded `note` on the acceptance store endpoint was reaching
+        // synchronous CommonMark rendering in the decline notification and
+        // burning per-request PHP-worker CPU (40k bytes ~= 847ms, 80k ~= 2.6s).
+        // Server-side `max:1000` on the note field closes this at the input
+        // boundary regardless of parser version. Primary fix is the
+        // league/commonmark 2.9.0 bump; this test locks in the input-side guard.
+        Event::fake([CheckoutAccepted::class]);
+        Notification::fake();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+        $oversizedNote = 'F9'.str_repeat(' ', 40_000).'éZ';
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->from(route('account.accept.item', $checkoutAcceptance))
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'declined',
+                'note' => $oversizedNote,
+            ])
+            ->assertRedirect(route('account.accept.item', $checkoutAcceptance))
+            ->assertSessionHasErrors('note');
+
+        $this->assertTrue($checkoutAcceptance->fresh()->isPending(), 'Acceptance state should not advance when note validation fails.');
+        $this->assertNull($checkoutAcceptance->fresh()->declined_at);
+        $this->assertNull($checkoutAcceptance->fresh()->accepted_at);
+
+        Event::assertNotDispatched(CheckoutAccepted::class);
+        Notification::assertNothingSent();
+    }
+
+    public function test_normal_length_note_still_works()
+    {
+        // Negative side of the oversized-note regression: a normal short note
+        // must still round-trip through the acceptance flow. Guards against
+        // over-tightening the max: rule below reasonable UX.
+        Event::fake([CheckoutAccepted::class]);
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+                'note' => str_repeat('a', 500),
+            ])
+            ->assertRedirectToRoute('account.accept')
+            ->assertSessionHas('success');
+
+        $this->assertFalse($checkoutAcceptance->fresh()->isPending());
+
+        Event::assertDispatched(CheckoutAccepted::class);
+    }
 }

@@ -42,8 +42,6 @@
                 data-sort-name="created_at"
                 data-advanced-search="false"
                 id="unacceptedAssetsReport"
-                data-fixed-number="false"
-                data-fixed-right-number="false"
                 class="table table-striped snipe-table"
                 data-export-options='{
                     "fileName": "maintenance-report-{{ date('Y-m-d') }}",

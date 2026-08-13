@@ -87,6 +87,10 @@ class AssetImporter extends ItemImporter
         // avoid the ItemImporter's shared 'notes' handling.
         $this->setItemFromCsvIfPresent($row, 'name', 'item_name');
         $this->setItemFromCsvIfPresent($row, 'notes', 'asset_notes');
+        // Assets keep order_number on the parent column. AssetObserver's
+        // created hook writes the matching Order + OrderItem so we
+        // don't call recordOrderForImportedRow here (that would
+        // duplicate).
         $this->setItemFromCsvIfPresent($row, 'order_number');
         $this->setItemFromCsvIfPresent($row, 'purchase_cost');
         $this->setItemFromCsvIfPresent($row, 'serial');
@@ -323,6 +327,8 @@ class AssetImporter extends ItemImporter
                 $this->recordUpdated();
             } else {
                 $this->recordCreated();
+                // AssetObserver::created already wrote the Order +
+                // OrderItem from the asset's own columns.
             }
 
             // If we have a target to checkout to, lets do so.

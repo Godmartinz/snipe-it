@@ -3,6 +3,8 @@
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\Importer;
+use App\Models\CustomField;
+use App\Models\CustomFieldset;
 use App\Models\Import;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -454,6 +456,46 @@ class ImporterTest extends TestCase
             ->assertSet('statusType', 'error');
     }
 
+    public function test_mapping_step_renders_every_csv_header_even_when_auto_map_finds_no_match(): void
+    {
+        // Reporter feedback on #19450 (swift2512 / Dewi4nt): the wizard
+        // was silently omitting CSV columns whose headers didn't hit an
+        // auto-match or an alias, which left users with no way to
+        // hand-map them. Every header should show up in the mapping list
+        // - matched ones with the target pre-selected, unmatched ones
+        // defaulting to "Do not import" (rendered as an empty-value
+        // option) with the dropdown available.
+        Storage::fake();
+        $user = User::factory()->canImport()->create();
+
+        $import = Import::factory()->create([
+            'created_by' => $user->id,
+            'header_row' => ['Asset Tag', 'lorem ipsum column'],
+            'first_row' => ['ASSET-001', 'whatever'],
+            'import_type' => 'asset',
+        ]);
+        $this->writeFakeImportFile($import, "Asset Tag,lorem ipsum column\nASSET-001,whatever\n");
+
+        $component = Livewire::actingAs($user)
+            ->test(Importer::class)
+            ->call('selectFile', $import->id)
+            ->set('typeOfImport', 'asset');
+
+        // Both header positions are represented in field_map. Index 0 is
+        // the auto-matched target key, index 1 is null (auto-unmapped -
+        // the user picks from the dropdown in the UI).
+        $fieldMap = $component->get('field_map');
+        $this->assertCount(2, $fieldMap, 'field_map should hold one entry per CSV header, matched or not.');
+        $this->assertSame('asset_tag', $fieldMap[0]);
+        $this->assertNull($fieldMap[1]);
+
+        // The unmapped header's raw text is rendered in the mapping list.
+        $component->call('nextStep')
+            ->assertSet('wizardStep', 2)
+            ->assertSee('lorem ipsum column')
+            ->assertSee('Asset Tag');
+    }
+
     public function test_next_step_from_mapping_advances_when_required_fields_are_mapped(): void
     {
         $user = User::factory()->canImport()->create();
@@ -505,6 +547,55 @@ class ImporterTest extends TestCase
             ->tap(function ($c) {
                 $required = $c->instance()->requiredForType('user');
                 $this->assertContains('first_name', $required);
+            });
+    }
+
+    public function test_license_required_fields_do_not_include_seats(): void
+    {
+        // Regression for #19467 follow-up. License::$rules requires seats
+        // for the create path, but a seat-assignment import (matching an
+        // existing license) does not use seats. The wizard cannot know
+        // per-row whether the caller intends create or update, so it must
+        // not enforce seats at wizard level. Per-row server-side validation
+        // still enforces seats on License::save() for genuine creates.
+        Livewire::actingAs(User::factory()->canImport()->create())
+            ->test(Importer::class)
+            ->tap(function ($c) {
+                $required = $c->instance()->requiredForType('license');
+                $this->assertNotContains(
+                    'seats',
+                    $required,
+                    'Seats should not be flagged as required at the wizard level for license imports.',
+                );
+                $this->assertContains('item_name', $required, 'item_name should still be required at the wizard level for license imports.');
+            });
+    }
+
+    public function test_asset_required_fields_do_not_include_custom_fields_required_in_some_fieldsets_only(): void
+    {
+        // Regression for #19468. A CSV of assets can span multiple asset
+        // models with different fieldsets. A custom field required in one
+        // fieldset but not in another (or not attached to another) must not
+        // be flagged as required at the wizard level, because rows destined
+        // for the other fieldset don't need it. Per-asset server-side
+        // validation on Asset::save() enforces the correct rule at save-time.
+        $customField = CustomField::factory()->create(['name' => 'Priority']);
+
+        $laptopFieldset = CustomFieldset::factory()->create();
+        $laptopFieldset->fields()->attach($customField, ['required' => 1, 'order' => 1]);
+
+        // Second fieldset that does NOT include the custom field at all.
+        CustomFieldset::factory()->create();
+
+        Livewire::actingAs(User::factory()->canImport()->create())
+            ->test(Importer::class)
+            ->tap(function ($c) use ($customField) {
+                $required = $c->instance()->requiredForType('asset');
+                $this->assertNotContains(
+                    $customField->db_column_name(),
+                    $required,
+                    'Custom field required in only some fieldsets should not be flagged as required at the wizard level.',
+                );
             });
     }
 

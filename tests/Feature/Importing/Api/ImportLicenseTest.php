@@ -589,4 +589,125 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
         $checkedOutSeat = LicenseSeat::where('license_id', $license->id)->where('assigned_to', $user->id)->first();
         $this->assertNotNull($checkedOutSeat, 'License seat should be checked out to a no-company user when floater mode is on');
     }
+
+    #[Test]
+    public function multiple_rows_without_serial_column_assign_seats_to_a_single_license_in_update_mode(): void
+    {
+        // Regression from the 8.7.0 importer rewrite. Users importing a
+        // seat-assignment CSV (username + license name, no serial column)
+        // were seeing every row create a new License in update mode instead
+        // of matching to an existing null-serial license. Reason:
+        // setItemFromCsvIfPresent skips absent columns so the insert path
+        // stored serial as NULL, but the match query looked for serial = ''
+        // which never matches NULL in SQL. Match now checks
+        // (serial IS NULL OR serial = '').
+        [$firstUser, $secondUser] = User::factory()->count(2)->create();
+        $existingLicense = License::factory()->create([
+            'serial' => null,
+            'seats' => 5,
+        ]);
+
+        $rowShape = [
+            'licenseName' => $existingLicense->name,
+            'category' => 'Software',
+            'seats' => 5,
+        ];
+
+        $file = new ImportFileBuilder([
+            array_merge($rowShape, ['checkoutUsername' => $firstUser->username]),
+            array_merge($rowShape, ['checkoutUsername' => $secondUser->username]),
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $file->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        // Only the one existing License should exist; both rows should have
+        // matched into it. Without the fix, each row created a new license.
+        $licenses = License::where('name', $existingLicense->name)->get();
+        $this->assertCount(1, $licenses, 'Both rows should have matched the existing null-serial license, not created duplicates.');
+
+        // Two seats should be checked out, one per row.
+        $this->assertSame(2, LicenseSeat::where('license_id', $existingLicense->id)->whereNotNull('assigned_to')->count());
+    }
+
+    #[Test]
+    public function import_records_error_when_license_runs_out_of_free_seats(): void
+    {
+        // Regression for #19467 follow-up. If a seat-assignment CSV exceeds
+        // the target license's free-seat count, the trailing rows should
+        // surface as errored tally entries with a specific "no free seats"
+        // message, not silently be dropped on the floor.
+        [$firstUser, $secondUser, $thirdUser] = User::factory()->count(3)->create();
+        $existingLicense = License::factory()->create([
+            'serial' => null,
+            'seats' => 2,
+        ]);
+
+        $rowShape = [
+            'licenseName' => $existingLicense->name,
+            'category' => 'Software',
+            'seats' => 2,
+        ];
+
+        $file = new ImportFileBuilder([
+            array_merge($rowShape, ['checkoutUsername' => $firstUser->username]),
+            array_merge($rowShape, ['checkoutUsername' => $secondUser->username]),
+            array_merge($rowShape, ['checkoutUsername' => $thirdUser->username]),
+        ]);
+
+        $import = Import::factory()->license()->create(['file_path' => $file->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $response = $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ]);
+
+        // The API convention for import runs with any errored rows is HTTP
+        // 500 (see Api\ImportController::importFile line 352). The interesting
+        // assertion is that the tally reflects the failure and the message
+        // surfaces the specific "no free seats" reason.
+        $response->assertStatus(500);
+        $response->assertJson(['status' => 'import-errors']);
+        $this->assertSame(1, $response->json('payload.tally.errored'), 'The row that had no free seat should be counted as errored in the tally.');
+        $this->assertStringContainsString('no free seats', $response->content());
+
+        // Two seats successfully assigned (rows 1 and 2), third row's seat
+        // assignment failed and was recorded.
+        $this->assertSame(2, LicenseSeat::where('license_id', $existingLicense->id)->whereNotNull('assigned_to')->count());
+    }
+
+    #[Test]
+    public function update_matches_existing_license_with_null_serial_when_csv_omits_serial(): void
+    {
+        // Same class of bug as multiple_rows_without_serial_column, on the
+        // update path: an existing License with serial NULL in the DB and a
+        // CSV row that omits the serial column altogether. The old match
+        // query used serial = '' which does not match NULL, so a duplicate
+        // was created. Now checks (serial IS NULL OR serial = '').
+        $license = License::factory()->create(['serial' => null]);
+
+        $file = new ImportFileBuilder([[
+            'licenseName' => $license->name,
+            'category' => 'Software',
+            'seats' => 3,
+            'notes' => 'Updated via seat-assign CSV',
+        ]]);
+
+        $import = Import::factory()->license()->create(['file_path' => $file->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $this->assertSame(1, License::where('name', $license->name)->count(), 'Existing null-serial license should have been matched, not duplicated.');
+        $this->assertSame('Updated via seat-assign CSV', $license->fresh()->notes);
+    }
 }

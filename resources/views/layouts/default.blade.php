@@ -1119,7 +1119,7 @@
 
             };
 
-            $('#create-form, #checkout_form, #userForm').each(function () {
+            $('#create-form, #checkout_form, #userForm, #adjustQuantityForm').each(function () {
                 $(this).validate(snipeValidatorOptions);
             });
 

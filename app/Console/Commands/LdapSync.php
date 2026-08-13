@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Asset;
-use App\Models\Department;
 use App\Models\Group;
 use App\Models\Ldap;
 use App\Models\Location;
@@ -55,27 +54,12 @@ class LdapSync extends Command
         ini_set('max_execution_time', env('LDAP_TIME_LIM', 600)); // 600 seconds = 10 minutes
         ini_set('memory_limit', env('LDAP_MEM_LIM', '500M'));
 
-        // Map the LDAP attributes to the Snipe-IT user fields.
-        $ldap_map = [
-            'username' => Setting::getSettings()->ldap_username_field,
-            'last_name' => Setting::getSettings()->ldap_lname_field,
-            'first_name' => Setting::getSettings()->ldap_fname_field,
-            'active_flag' => Setting::getSettings()->ldap_active_flag,
-            'emp_num' => Setting::getSettings()->ldap_emp_num,
-            'email' => Setting::getSettings()->ldap_email,
-            'phone' => Setting::getSettings()->ldap_phone_field,
-            'mobile' => Setting::getSettings()->ldap_mobile,
-            'jobtitle' => Setting::getSettings()->ldap_jobtitle,
-            'address' => Setting::getSettings()->ldap_address,
-            'city' => Setting::getSettings()->ldap_city,
-            'state' => Setting::getSettings()->ldap_state,
-            'zip' => Setting::getSettings()->ldap_zip,
-            'country' => Setting::getSettings()->ldap_country,
-            'location' => Setting::getSettings()->ldap_location,
-            'dept' => Setting::getSettings()->ldap_dept,
-            'manager' => Setting::getSettings()->ldap_manager,
-            'display_name' => Setting::getSettings()->ldap_display_name,
-        ];
+        // Single source of truth for internal-key => LDAP-attribute-name
+        // lives on the Ldap model so parseAndMapLdapAttributes and this
+        // command can't drift. Used here for the LDAP query attribute
+        // list plus a handful of specific-lookup gates (activated,
+        // manager, location, username) that only LdapSync needs.
+        $ldap_map = Ldap::attributeMap();
 
         $ldap_default_group = Setting::getSettings()->ldap_default_group;
         $search_base = Setting::getSettings()->ldap_base_dn;
@@ -133,7 +117,7 @@ class LdapSync extends Command
              */
             $attributes = array_values(array_filter($ldap_map));
 
-            if (Setting::getSettings()->is_ad === 1 && is_null($ldap_map['active_flag'])) {
+            if (Setting::getSettings()->is_ad === 1 && is_null($ldap_map['activated'])) {
                 $attributes[] = 'useraccountcontrol';
             }
 
@@ -243,37 +227,15 @@ class LdapSync extends Command
 
         // Assign the mapped LDAP attributes for each user to the Snipe-IT user fields
         for ($i = 0; $i < $results['count']; $i++) {
-            $item = [];
-            $item['username'] = $results[$i][$ldap_map['username']][0] ?? null;
-            $item['display_name'] = $results[$i][$ldap_map['display_name']][0] ?? null;
-            $item['employee_number'] = $results[$i][$ldap_map['emp_num']][0] ?? null;
-            $item['lastname'] = $results[$i][$ldap_map['last_name']][0] ?? null;
-            $item['firstname'] = $results[$i][$ldap_map['first_name']][0] ?? null;
-            $item['email'] = $results[$i][$ldap_map['email']][0] ?? null;
+            // parseAndMapLdapAttributes is the shared parser used by the
+            // first-login create path too, so the two flows can't drift
+            // on field names / lookup shape. The two OU-override keys
+            // (ldap_location_override, location_id) are LdapSync-only,
+            // injected earlier by the OU sweep at line 191 or so, so we
+            // stitch them back on here.
+            $item = Ldap::parseAndMapLdapAttributes($results[$i]);
             $item['ldap_location_override'] = $results[$i]['ldap_location_override'] ?? null;
             $item['location_id'] = $results[$i]['location_id'] ?? null;
-            $item['telephone'] = $results[$i][$ldap_map['phone']][0] ?? null;
-            $item['mobile'] = $results[$i][$ldap_map['mobile']][0] ?? null;
-            $item['jobtitle'] = $results[$i][$ldap_map['jobtitle']][0] ?? null;
-            $item['address'] = $results[$i][$ldap_map['address']][0] ?? null;
-            $item['city'] = $results[$i][$ldap_map['city']][0] ?? null;
-            $item['state'] = $results[$i][$ldap_map['state']][0] ?? null;
-            $item['country'] = $results[$i][$ldap_map['country']][0] ?? null;
-            $item['zip'] = $results[$i][$ldap_map['zip']][0] ?? null;
-            $item['department'] = $results[$i][$ldap_map['dept']][0] ?? null;
-            $item['manager'] = $results[$i][$ldap_map['manager']][0] ?? null;
-            $item['location'] = $results[$i][$ldap_map['location']][0] ?? null;
-            $location = $default_location; // initially, set '$location' to the default_location (which may just be null)
-
-            // ONLY if you are using the "ldap_location" option *AND* you have an actual result
-            if ($ldap_map['location'] && $item['location']) {
-                $location = Location::firstOrCreate([
-                    'name' => $item['location'],
-                ]);
-            }
-            $department = Department::firstOrCreate([
-                'name' => $item['department'],
-            ]);
 
             $user = User::withTrashed()->where('username', $item['username'])->first();
             if (! empty($item['username'])) {
@@ -294,55 +256,14 @@ class LdapSync extends Command
                 $item['createorupdate'] = 'created';
             }
 
-            // If a sync option is not filled in on the LDAP settings don't populate the user field
-            if ($ldap_map['username'] != null) {
-                $user->username = $item['username'];
-            }
-            if ($ldap_map['display_name'] != null) {
-                $user->display_name = $item['display_name'];
-            }
-            if ($ldap_map['last_name'] != null) {
-                $user->last_name = $item['lastname'];
-            }
-            if ($ldap_map['first_name'] != null) {
-                $user->first_name = $item['firstname'];
-            }
-            if ($ldap_map['emp_num'] != null) {
-                $user->employee_num = e($item['employee_number']);
-            }
-            if ($ldap_map['email'] != null) {
-                $user->email = $item['email'];
-            }
-            if ($ldap_map['phone'] != null) {
-                $user->phone = $item['telephone'];
-            }
-            if ($ldap_map['mobile'] != null) {
-                $user->mobile = $item['mobile'];
-            }
-            if ($ldap_map['jobtitle'] != null) {
-                $user->jobtitle = $item['jobtitle'];
-            }
-            if ($ldap_map['address'] != null) {
-                $user->address = $item['address'];
-            }
-            if ($ldap_map['city'] != null) {
-                $user->city = $item['city'];
-            }
-            if ($ldap_map['state'] != null) {
-                $user->state = $item['state'];
-            }
-            if ($ldap_map['country'] != null) {
-                $user->country = $item['country'];
-            }
-            if ($ldap_map['zip'] != null) {
-                $user->zip = $item['zip'];
-            }
-            if ($ldap_map['dept'] != null) {
-                $user->department_id = $department->id;
-            }
-            if ($ldap_map['location'] != null) {
-                $user->location_id = $location?->id;
-            }
+            // Shared field-write path with the first-login create flow.
+            // Handles every mapped scalar field, plus Department and
+            // Location firstOrCreate for the LDAP-derived values. The
+            // three LdapSync-only concerns (manager LDAP re-query,
+            // activated / UAC, OU location override) are handled
+            // inline below because they don't apply to the first-login
+            // path.
+            Ldap::applyLdapAttributesToUser($user, $item);
 
             if ($ldap_map['manager'] != null) {
                 if ($item['manager'] != null) {
@@ -394,10 +315,10 @@ class LdapSync extends Command
             }
 
             // Sync activated state for Active Directory.
-            if (! empty($ldap_map['active_flag'])) { // IF we have an 'active' flag set....
+            if (! empty($ldap_map['activated'])) { // IF we have an 'active' flag set....
                 // ....then *most* things that are truthy will activate the user. Anything falsey will deactivate them.
                 // (Specifically, we don't handle a value of '0.0' correctly)
-                $raw_value = @$results[$i][$ldap_map['active_flag']][0];
+                $raw_value = @$results[$i][$ldap_map['activated']][0];
                 $filter_var = filter_var($raw_value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
                 $boolean_cast = (bool) $raw_value;
@@ -449,19 +370,28 @@ class LdapSync extends Command
             } /* implied 'else' here - leave the $user->activated flag alone. Newly-created accounts will be active.
             already-existing accounts will be however the administrator has set them */
 
+            // Location resolution: applyLdapAttributesToUser above has
+            // already written location_id from the LDAP payload when a
+            // value was present. This block layers on the two overrides
+            // it doesn't know about: the OU-based override wins over
+            // everything when set, and the --location CLI flag fills in
+            // when neither the OU override nor an LDAP-derived location
+            // applied to this run.
+            $ldapProvidedLocation = $ldap_map['location'] !== null && $item['location'] !== '';
+
             if ($item['ldap_location_override'] == true) {
                 $user->location_id = $item['location_id'];
-            } elseif ((isset($location)) && (! empty($location))) {
-                if ((is_array($location)) && (array_key_exists('id', $location))) {
-                    $user->location_id = $location['id'];
-                } elseif (is_object($location)) {
-                    $user->location_id = $location->id; // THIS is the magic line, this should do it.
-                }
+            } elseif (! $ldapProvidedLocation && ! empty($default_location)) {
+                $user->location_id = is_array($default_location)
+                    ? $default_location['id']
+                    : $default_location->id;
             }
-            // TODO - should we be NULLING locations if $location is really `null`, and that's what we came up with?
-            // will that conflict with any overriding setting that the user set? Like, if they moved someone from
-            // the 'null' location to somewhere, we wouldn't want to try to override that, right?
-            $location = null;
+            // TODO - should we be NULLING locations when neither the OU
+            // override, the LDAP payload, nor --location produced a
+            // location for this user? Currently we leave whatever they
+            // had, matching the pre-refactor behavior. Changing that
+            // could clobber a location an admin set by hand.
+
             $user->ldap_import = 1;
 
             $errors = '';
@@ -505,13 +435,18 @@ class LdapSync extends Command
             $missing_ldap_users = $missing_ldap_users->get();
 
             foreach ($missing_ldap_users as $missing_user) {
-                $is_deletable = $this->isUserDeletable($missing_user);
+                // Match the rule a manual "delete user" click uses. We
+                // can't call User::isDeletable() directly here because
+                // it wraps a Gate::allows('delete', $user) check that
+                // needs an authenticated web-session user, and this
+                // command runs from cron with no such user
+                $is_deletable = $missing_user->hasNoAssignmentBlockers();
 
                 $missing_item = [
                     'id' => $missing_user->id,
                     'username' => $missing_user->username,
-                    'firstname' => $missing_user->first_name,
-                    'lastname' => $missing_user->last_name,
+                    'first_name' => $missing_user->first_name,
+                    'last_name' => $missing_user->last_name,
                     'email' => $missing_user->email,
                     'createorupdate' => 'skipped',
                     'status' => 'info',
@@ -530,40 +465,24 @@ class LdapSync extends Command
             }
         }
 
-
-
         if ($this->option('summary')) {
-            for ($x = 0; $x < count($summary); $x++) {
-                if ($summary[$x]['status'] == 'error') {
-                    $this->error('ERROR: '.$summary[$x]['firstname'].' '.$summary[$x]['lastname'].' (username:  '.$summary[$x]['username'].') was not imported: '.$summary[$x]['note']);
-                } else {
-                    $this->info('User '.$summary[$x]['firstname'].' '.$summary[$x]['lastname'].' (username:  '.$summary[$x]['username'].') was '.strtoupper($summary[$x]['createorupdate']).'.');
-                }
-            }
+            $rows = array_map(fn ($row) => [
+                $row['username'] ?? '',
+                trim(($row['first_name'] ?? '').' '.($row['last_name'] ?? '')),
+                strtoupper($row['createorupdate'] ?? ''),
+                strtoupper($row['status'] ?? ''),
+                $row['note'] ?? '',
+            ], $summary);
+
+            $this->table(
+                ['Username', 'Name', 'Action', 'Status', 'Note'],
+                $rows,
+            );
         } elseif ($this->option('json_summary')) {
             $json_summary = ['error' => false, 'error_message' => '', 'summary' => $summary]; // hardcoding the error to false and the error_message to blank seems a bit weird
             $this->info(json_encode($json_summary));
         } else {
             return $summary;
         }
-    }
-
-    /**
-     * Checks if the user is deletable without gate check
-     * 
-     * A user is considered deletable if they have no associated assets, accessories, licenses, consumables, managed users, or managed locations.
-     * 
-     * @param User $user The user to check
-     * 
-     * @return bool True if the user is deletable, false otherwise
-     */
-    private function isUserDeletable(User $user): bool
-    {
-        return (($user->assets_count ?? $user->assets()->count()) === 0)
-            && (($user->accessories_count ?? $user->accessories()->count()) === 0)
-            && (($user->licenses_count ?? $user->licenses()->count()) === 0)
-            && (($user->consumables_count ?? $user->consumables()->count()) === 0)
-            && (($user->manages_users_count ?? $user->managesUsers()->count()) === 0)
-            && (($user->manages_locations_count ?? $user->managedLocations()->count()) === 0);
     }
 }
