@@ -491,7 +491,7 @@ class Setting extends Model
         if (str_starts_with($value, 'custom:')) {
             $id = (int) str_replace('custom:', '', $value);
 
-            return CustomUserLabel::find($id)?->name ?? $value;
+            return CustomUserLabel::find($id)->name ?? $value;
         }
 
         try {

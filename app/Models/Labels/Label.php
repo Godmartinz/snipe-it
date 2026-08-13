@@ -176,31 +176,6 @@ abstract class Label
         return ($this->getWidth() >= $this->getHeight()) ? 'L' : 'P';
     }
 
-    abstract public function getBarcodeSize();
-
-    abstract public function getBarcodeMargin();
-
-    abstract public function get2DBarcodeSize();
-
-    abstract public function getTagAlignment();
-
-    abstract public function getLogoMaxWidth();
-
-    abstract public function getLogoMargin();
-
-    abstract public function getTagSize();
-
-    abstract public function getTitleSize();
-
-    abstract public function getTitleMargin();
-
-    abstract public function getLabelSize();
-
-    abstract public function getLabelMargin();
-
-    abstract public function getFieldSize();
-
-    abstract public function getFieldMargin();
     /**
      * Returns the label's printable area as an object.
      *

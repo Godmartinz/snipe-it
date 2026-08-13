@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\Manufacturer;
 use App\Models\Supplier;
 use App\Models\User;
+use Carbon\Carbon;
 
 class LabelPreviewAsset
 {
@@ -21,9 +22,9 @@ class LabelPreviewAsset
         $asset->name = 'JEN-867-5309';
         $asset->asset_tag = '100001';
         $asset->serial = 'SN9876543210';
-        $asset->asset_eol_date = '2025-01-01';
+        $asset->asset_eol_date = Carbon::parse('2025-01-01');
         $asset->order_number = '12345';
-        $asset->purchase_date = '2023-01-01';
+        $asset->purchase_date = Carbon::parse('2023-01-01');
         $asset->status_id = 1;
         $asset->location_id = 1;
 
