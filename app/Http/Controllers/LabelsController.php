@@ -410,10 +410,8 @@ class LabelsController extends Controller
     {
         $labelName = $label->name;
         if ($label->is_default) {
-            return response()->json([
-                'status' => 'error',
-                'message' => trans('admin/labels/labels.default_label_cannot_be_deleted'),
-            ], 403);
+            return redirect()->route('settings.labels.index')
+                ->with('warning', "$labelName can not be deleted. It is currently a default label.");
         }
 
         $label->delete();

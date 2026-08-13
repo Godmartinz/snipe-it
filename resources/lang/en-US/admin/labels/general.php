@@ -21,8 +21,8 @@ return [
     ],
 
     'fields' => [
-        'width' => 'Label Width',
-        'height' => 'Label Height',
+        'width' => 'Page Width',
+        'height' => 'Page Height',
         'label_gap' => 'Label Gap',
         'margin_top' => 'Top Margin',
         'margin_right' => 'Right Margin',

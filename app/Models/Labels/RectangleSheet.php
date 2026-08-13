@@ -82,13 +82,13 @@ abstract class RectangleSheet extends Sheet
     {
         return [
             'letter' => [
-                'name' => 'Letter',
+                'name' => 'Letter (215.9mm x 279.4mm)',
                 'width' => 215.9,
                 'height' => 279.4,
                 'unit' => 'mm',
             ],
             'a4' => [
-                'name' => 'A4',
+                'name' => 'A4 (210mm x 297mm)',
                 'width' => 210.0,
                 'height' => 297.0,
                 'unit' => 'mm',

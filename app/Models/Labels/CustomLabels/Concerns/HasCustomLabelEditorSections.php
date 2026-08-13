@@ -140,6 +140,29 @@ trait HasCustomLabelEditorSections
                             ],
                         ],
                     ],
+                    'logo' => [
+                        'label' => trans('admin/labels/general.groups.logo'),
+                        'toggle' => 'supports.logo',
+                        'fields' => [
+                            'logo_max_width' => [
+                                'type' => 'number',
+                                'label' => trans('admin/labels/general.fields.logo_max_width'),
+                            ],
+                            'logo_margin' => [
+                                'type' => 'number',
+                                'label' => trans('admin/labels/general.fields.logo_margin'),
+                            ],
+                            'logo_h_align' => [
+                                'type' => 'select',
+                                'label' => trans('admin/labels/general.fields.logo_h_align'),
+                                'options' => [
+                                    'L' => trans('admin/labels/general.options.left'),
+                                    'C' => trans('admin/labels/general.options.center'),
+                                    'R' => trans('admin/labels/general.options.right'),
+                                ],
+                            ],
+                        ],
+                    ],
 
                     'title' => [
                         'label' => trans('admin/labels/general.groups.title'),
@@ -227,30 +250,6 @@ trait HasCustomLabelEditorSections
                             'field_value_margin' => [
                                 'type' => 'number',
                                 'label' => trans('admin/labels/general.fields.field_value_margin'),
-                            ],
-                        ],
-                    ],
-
-                    'logo' => [
-                        'label' => trans('admin/labels/general.groups.logo'),
-                        'toggle' => 'supports.logo',
-                        'fields' => [
-                            'logo_max_width' => [
-                                'type' => 'number',
-                                'label' => trans('admin/labels/general.fields.logo_max_width'),
-                            ],
-                            'logo_margin' => [
-                                'type' => 'number',
-                                'label' => trans('admin/labels/general.fields.logo_margin'),
-                            ],
-                            'logo_h_align' => [
-                                'type' => 'select',
-                                'label' => trans('admin/labels/general.fields.logo_h_align'),
-                                'options' => [
-                                    'L' => trans('admin/labels/general.options.left'),
-                                    'C' => trans('admin/labels/general.options.center'),
-                                    'R' => trans('admin/labels/general.options.right'),
-                                ],
                             ],
                         ],
                     ],

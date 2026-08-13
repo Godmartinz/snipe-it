@@ -51,9 +51,13 @@
                                 </div>
                             </div>
                         </div>
-
+                        <label>
+                            Unit: mm (applies to all dimensions)
+                        </label>
+                        <br><br>
                         @if ($type === 'sheet')
                             <div id="sheet-options">
+
                                 <div class="form-group">
                                     <label>{{ trans('admin/labels/general.page_size') }}</label>
 
