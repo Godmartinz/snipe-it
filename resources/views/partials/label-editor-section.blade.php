@@ -1,3 +1,31 @@
+<style>
+    .supports-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .supports-control-input {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .supports-control .supports-number-input {
+        width: 72px;
+        max-width: 72px;
+        min-width: 72px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .supports-control > label {
+        margin-top: 6px;
+        margin-bottom: 0;
+        text-align: center;
+    }
+</style>
 <div class="box box-default label-config-panel">
     <div class="box-header with-border">
         <x-form.legend>
@@ -15,48 +43,57 @@
                     @endphp
 
                     <div class="col-md-2">
-                        <label>
+                        <div class="supports-control">
+
                             @if ($field['type'] === 'checkbox')
-                                <input type="hidden" name="{{ $name }}" value="0">
+                                <div class="supports-control-input">
+                                    <input type="hidden" name="{{ $name }}" value="0">
 
-                                <input
-                                        type="checkbox"
-                                        name="{{ $name }}"
-                                        value="1"
-                                        @checked((bool) $value)
-                                >
+                                    <input
+                                            id="{{ $name }}"
+                                            type="checkbox"
+                                            name="{{ $name }}"
+                                            value="1"
+                                            @checked((bool) $value)
+                                    >
+                                </div>
 
-                                {{ $field['label'] }}
+                                <label for="{{ $name }}">
+                                    {{ $field['label'] }}
+                                </label>
 
                             @elseif ($field['type'] === 'number')
-
-                                <div class="supports-number-field">
+                                <div class="supports-control-input">
                                     <input
                                             id="{{ $name }}"
                                             type="number"
                                             name="{{ $name }}"
                                             value="{{ $value }}"
-                                            class="form-control"
+                                            class="form-control supports-number-input"
                                     >
-
-                                    <label for="{{ $name }}">
-                                        {{ $field['label'] }}
-                                    </label>
                                 </div>
 
+                                <label for="{{ $name }}">
+                                    {{ $field['label'] }}
+                                </label>
+
                             @else
+                                <div class="supports-control-input">
+                                    <input
+                                            id="{{ $name }}"
+                                            type="{{ $field['type'] }}"
+                                            name="{{ $name }}"
+                                            value="{{ $value }}"
+                                            class="form-control"
+                                    >
+                                </div>
 
-                                {{ $field['label'] }}
-
-                                <input
-                                        type="{{ $field['type'] }}"
-                                        name="{{ $name }}"
-                                        value="{{ $value }}"
-                                        class="form-control"
-                                >
-
+                                <label for="{{ $name }}">
+                                    {{ $field['label'] }}
+                                </label>
                             @endif
-                        </label>
+
+                        </div>
                     </div>
                 @endforeach
             </div>
