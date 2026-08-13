@@ -294,10 +294,10 @@ abstract class CustomTapeLabel extends Label
             
             $layout['barcode2d'] = $barcode2dBox;
 
-            if ($barcode2dBox) {
-                $layout['body']['y1'] = $barcode2dBox['y'] + $barcode2dBox['h'] + $this->getBarcode2DMargin();
-                $layout['body']['h'] = max(0, $layout['body']['y2'] - $layout['body']['y1']);
-            }
+
+            $layout['body']['y1'] = $barcode2dBox['y'] + $barcode2dBox['h'] + $this->getBarcode2DMargin();
+            $layout['body']['h'] = max(0, $layout['body']['y2'] - $layout['body']['y1']);
+
 
             $layout['text'] = $layout['body'];
             $layout['logo'] = null;
