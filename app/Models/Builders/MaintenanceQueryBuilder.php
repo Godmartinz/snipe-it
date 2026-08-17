@@ -52,32 +52,32 @@ class MaintenanceQueryBuilder extends Builder
 
     public function orderByTag(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.asset_tag', $order);
     }
 
     public function orderByAssetName(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.name', $order);
     }
 
     public function orderByAssetSerial(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.serial', $order);
     }
 
     public function orderStatusName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('status_labels as maintained_asset_status', 'maintained_asset_status.id', '=', 'maintained_asset.status_id')
             ->orderBy('maintained_asset_status.name', $order);
     }
 
     public function orderLocationName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('locations as maintained_asset_location', 'maintained_asset_location.id', '=', 'maintained_asset.location_id')
             ->orderBy('maintained_asset_location.name', $order);
     }
@@ -92,14 +92,14 @@ class MaintenanceQueryBuilder extends Builder
 
     public function orderByAssetModelName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
             ->orderBy('maintained_asset_model.name', $order);
     }
 
     public function orderByAssetModelNumber(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
             ->orderBy('maintained_asset_model.model_number', $order);
     }

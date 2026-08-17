@@ -613,4 +613,15 @@ return [
 
     'max_unpaginated_records' => env('MAX_UNPAGINATED', '5000'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Report Execution Time Limit
+    |--------------------------------------------------------------------------
+    | Seconds passed to ini_set('max_execution_time') at the top of the
+    | streaming custom-report controllers so long chunked exports don't
+    | get killed by PHP's shorter default. Default 12000 (200 minutes).
+    */
+
+    'report_time_limit' => env('REPORT_TIME_LIMIT', 12000),
+
 ];

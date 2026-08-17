@@ -927,6 +927,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'assets',
             ]
         )->name('api.models.assets');
+
+        Route::post('{id}/restore',
+            [
+                Api\AssetModelsController::class,
+                'restore',
+            ]
+        )->name('api.models.restore');
     });
 
     Route::resource('models',
@@ -976,7 +983,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\SettingsController::class,
                 'ldaptest',
             ]
-        )->name('api.settings.ldaptest');
+        )->middleware('throttle:5,1')->name('api.settings.ldaptest');
 
         Route::post('purge_barcodes',
             [
@@ -997,7 +1004,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\SettingsController::class,
                 'ldaptestlogin',
             ]
-        )->name('api.settings.ldaptestlogin');
+        )->middleware('throttle:5,1')->name('api.settings.ldaptestlogin');
 
         Route::post('mailtest',
             [

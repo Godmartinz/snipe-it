@@ -191,7 +191,7 @@ class CustomField extends Model
         }
 
         if ($formatLabel === 'BOOLEAN') {
-            return ['text', 'checkbox'];
+            return ['text', 'checkbox', 'radio'];
         }
 
         // ANY / null / empty — all elements allowed.

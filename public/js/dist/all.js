@@ -75780,6 +75780,43 @@ $(function () {
     $container.find('input[type="checkbox"]').not($master).not(':disabled').prop('checked', $master.prop('checked'));
   });
 
+  // Custom-report "save template" flow. The three custom reports
+  // (asset / component / consumable) each have a small side-panel
+  // form that captures a template name and posts to the templates
+  // store endpoint carrying the current field selections of the
+  // report configuration form. This handler forwards the template
+  // name + report type into the main report form as hidden inputs,
+  // then submits the main form to templates.store. Report type comes
+  // from the save form's data-report-type attribute so a single JS
+  // path covers all three pages.
+  $(document).on('submit', 'form[data-report-save-template]', function (event) {
+    event.preventDefault();
+    var $saveForm = $(this);
+    var reportType = $saveForm.data('report-type');
+    var targetSelector = $saveForm.data('report-form') || '#custom-report-form';
+    var storeUrl = $saveForm.data('store-url') || $saveForm.attr('action');
+    var $targetForm = $(targetSelector);
+    var nameValue = $saveForm.find('[name="name"]').val();
+    $('<input>').attr({
+      type: 'hidden',
+      name: 'name',
+      value: nameValue
+    }).appendTo($targetForm);
+    $('<input>').attr({
+      type: 'hidden',
+      name: 'type',
+      value: reportType
+    }).appendTo($targetForm);
+    $targetForm.attr('action', storeUrl).submit();
+  });
+
+  // Custom-report saved-template select2: navigate to the route stored
+  // on the selected <option>'s data-route attribute. Shared by all
+  // three custom report pages.
+  $(document).on('select2:select', '#saved_report_select', function (event) {
+    window.location.href = event.params.data.element.dataset.route;
+  });
+
   // When the "This user can login" (activated) checkbox is off, the
   // password + confirmation fields are functionally useless because
   // login is gated by the activated flag. Hide the whole form-group

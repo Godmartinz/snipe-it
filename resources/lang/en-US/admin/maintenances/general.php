@@ -3,6 +3,7 @@
 return [
     'asset_maintenances' => 'Asset Maintenances', // not used anymore
     'maintenances' => 'Maintenances',
+    'create' => 'Create Asset Maintenance',
     'edit' => 'Edit Asset Maintenance',
     'delete' => 'Delete Asset Maintenance',
     'view' => 'View Asset Maintenance Details',

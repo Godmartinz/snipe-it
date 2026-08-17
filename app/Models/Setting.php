@@ -211,9 +211,9 @@ class Setting extends Model
      *
      * Important: Do not remove the e() escaping here, as we output raw in the blade.
      *
-     * @return string escaped CSS
-     *
      * @author A. Gianotto <snipe@snipe.net>
+     *
+     * @return Attribute<string, mixed>
      */
     protected function headerColor(): Attribute
     {
@@ -222,6 +222,9 @@ class Setting extends Model
         );
     }
 
+    /**
+     * @return Attribute<string, mixed>
+     */
     protected function linkLightColor(): Attribute
     {
         return Attribute::make(
@@ -229,6 +232,9 @@ class Setting extends Model
         );
     }
 
+    /**
+     * @return Attribute<string, mixed>
+     */
     protected function linkDarkColor(): Attribute
     {
         return Attribute::make(
@@ -236,6 +242,9 @@ class Setting extends Model
         );
     }
 
+    /**
+     * @return Attribute<string, mixed>
+     */
     protected function navLinkColor(): Attribute
     {
         return Attribute::make(

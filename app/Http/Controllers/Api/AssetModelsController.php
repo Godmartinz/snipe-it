@@ -293,6 +293,30 @@ class AssetModelsController extends Controller
     }
 
     /**
+     * Restore a soft-deleted asset model.
+     */
+    public function restore($id): JsonResponse
+    {
+        $this->authorize('delete', AssetModel::class);
+
+        if ($assetmodel = AssetModel::withTrashed()->find($id)) {
+
+            if ($assetmodel->deleted_at == '') {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.not_deleted', ['item_type' => trans('general.asset_model')])), 200);
+            }
+
+            // The `restore` action_log entry is written by AssetModelObserver::restoring
+            if ($assetmodel->restore()) {
+                return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/models/message.restore.success')), 200);
+            }
+
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.could_not_restore', ['item_type' => trans('general.asset_model'), 'error' => $assetmodel->getErrors()->first()])), 200);
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/models/message.does_not_exist')), 200);
+    }
+
+    /**
      * Gets a paginated collection for the select2 menus
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]

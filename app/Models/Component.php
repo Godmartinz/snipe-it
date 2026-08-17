@@ -182,6 +182,8 @@ class Component extends SnipeModel
      * Per-pivot line cost for components-assets. Pulls the per-unit
      * price from the last acquisition (with the same default_* fallback
      * that lastOrderDefaults() applies) and multiplies by pivot qty.
+     *
+     * @return Attribute<float|null, never>
      */
     protected function calculatedPurchaseCost(): Attribute
     {

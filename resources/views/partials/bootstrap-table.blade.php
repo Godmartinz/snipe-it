@@ -1651,6 +1651,26 @@
     });
     @endcan
 
+    @can('create', \App\Models\MaintenanceType::class)
+    // Maintenance Type table buttons
+    window.maintenanceTypeButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('maintenance-types.create') }}';
+            },
+            attributes: {
+                class: 'btn-warning',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+    });
+    @endcan
+
     @can('create', \App\Models\Department::class)
     // Department table buttons
     window.departmentButtons = () => ({
@@ -2193,6 +2213,14 @@
 
     // This only works for model index pages because it uses the row's model ID
     function genericRowLinkFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here; the formatter
+        // names stay as valid JS identifiers, the URL uses the real
+        // route segment. Matches the groups -> admin/groups precedent
+        // in genericActionsFormatter.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value,row) {
 
             if ((row) && (row.tag_color) && (row.tag_color!='') && (row.tag_color!=undefined)) {
@@ -2243,6 +2271,12 @@
 
     // Use this when we're introspecting into a column object and need to link
     function genericColumnObjLinkFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here. See sibling
+        // formatters for the groups -> admin/groups precedent.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value,row) {
             if ((value) && (value.status_meta)) {
 
@@ -2345,6 +2379,10 @@
 
             if (dest =='groups') {
                 var dest = 'admin/groups';
+            }
+
+            if (dest == 'maintenanceTypes') {
+                dest = 'maintenance-types';
             }
 
 
@@ -2564,6 +2602,13 @@
     }
 
     function genericCheckinCheckoutFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here even though
+        // maintenance-types isn't checkoutable, kept for consistency
+        // with the sibling formatters.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value, row) {
 
             // The user is allowed to check items out, AND the item is deployable
@@ -2627,6 +2672,7 @@
         'licenses',
         'locations',
         'maintenances',
+        'maintenanceTypes',
         'manufacturers',
         'models',
         'statuslabels',

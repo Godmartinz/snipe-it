@@ -255,6 +255,14 @@ class ConsumablesController extends Controller
         $consumable->id = null;
         $consumable->created_by = null;
 
+        // See AccessoriesController::getClone for the rationale, including
+        // the note on why these are explicit assignments not a foreach.
+        $prefill = $consumable_to_close->lastOrderPrefill();
+        $consumable->supplier_id = $prefill['supplier_id'];
+        $consumable->purchase_date = $prefill['purchase_date'];
+        $consumable->purchase_cost = $prefill['purchase_cost'];
+        $consumable->order_number = $prefill['order_number'];
+
         return view('consumables/edit')
             ->with('cloned_model', $consumable_to_close)
             ->with('item', $consumable);

@@ -44,7 +44,7 @@ class CustomFieldValidationTest extends TestCase
             'IP + textarea is rejected' => ['IP', 'textarea', false],
             'BOOLEAN + text is allowed' => ['BOOLEAN', 'text', true],
             'BOOLEAN + checkbox is allowed' => ['BOOLEAN', 'checkbox', true],
-            'BOOLEAN + radio is rejected' => ['BOOLEAN', 'radio', false],
+            'BOOLEAN + radio is allowed' => ['BOOLEAN', 'radio', true],
             'ANY + text is allowed' => ['ANY', 'text', true],
             'ANY + listbox is allowed' => ['ANY', 'listbox', true],
             'ANY + textarea is allowed' => ['ANY', 'textarea', true],
@@ -73,6 +73,32 @@ class CustomFieldValidationTest extends TestCase
             $this->assertArrayHasKey('element', $field->getErrors()->toArray());
             $this->assertDatabaseMissing('custom_fields', ['name' => $field->name]);
         }
+    }
+
+    /**
+     * Regression for issue 19498. The BOOLEAN format's allowed-element list
+     * dropped `radio` when the format/element matrix was introduced, which
+     * broke the pre-existing "yes/no radio group" pattern for boolean custom
+     * fields. Radio has always been consistent with checkbox everywhere else
+     * in the code (encryption gate, field_values requirement, editor's
+     * property-change handler), so this row belongs in the allowed set too.
+     */
+    public function test_boolean_format_allows_radio_element(): void
+    {
+        $field = $this->newField([
+            'element' => 'radio',
+            'field_values' => "Yes\nNo",
+        ]);
+        $field->format = 'BOOLEAN';
+
+        $this->assertTrue($field->save(), 'Errors: '.json_encode($field->getErrors()->toArray()));
+        // format persists as the lowercase validation-rule string ('boolean');
+        // 'BOOLEAN' is the reverse-mapped UI label.
+        $this->assertDatabaseHas('custom_fields', [
+            'id' => $field->id,
+            'element' => 'radio',
+            'format' => 'boolean',
+        ]);
     }
 
     public function test_date_format_rejects_encryption(): void
@@ -214,7 +240,7 @@ class CustomFieldValidationTest extends TestCase
         $this->assertSame(['text'], CustomField::allowedElementKeysForFormat('EMAIL'));
         $this->assertSame(['text'], CustomField::allowedElementKeysForFormat('CUSTOM REGEX'));
         $this->assertSame(['text'], CustomField::allowedElementKeysForFormat('regex:/^\d+$/'));
-        $this->assertSame(['text', 'checkbox'], CustomField::allowedElementKeysForFormat('BOOLEAN'));
+        $this->assertSame(['text', 'checkbox', 'radio'], CustomField::allowedElementKeysForFormat('BOOLEAN'));
         $this->assertSame(CustomField::ELEMENT_KEYS, CustomField::allowedElementKeysForFormat('ANY'));
         $this->assertSame(CustomField::ELEMENT_KEYS, CustomField::allowedElementKeysForFormat(null));
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\Helper;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAssetModelRequest;
-use App\Models\Actionlog;
 use App\Models\AssetModel;
 use App\Models\CustomField;
 use App\Models\SnipeModel;
@@ -236,12 +235,8 @@ class AssetModelsController extends Controller
             }
 
             if ($model->restore()) {
-                $logaction = new Actionlog;
-                $logaction->item_type = AssetModel::class;
-                $logaction->item_id = $model->id;
-                $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->created_by = auth()->id();
-                $logaction->logaction('restore');
+                // The `restore` action_log entry is written by
+                // AssetModelObserver::restoring, no manual write here.
 
                 // Redirect them to the deleted page if there are more, otherwise the section index
                 $deleted_models = AssetModel::onlyTrashed()->count();

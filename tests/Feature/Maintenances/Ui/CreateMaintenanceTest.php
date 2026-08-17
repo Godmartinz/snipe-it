@@ -72,7 +72,8 @@ class CreateMaintenanceTest extends TestCase
         Storage::disk('local')->assertExists('private_uploads/maintenances/'.$uploadedLog->filename);
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => \App\Models\Asset::class,
             'supplier_id' => $supplier->id,
             'maintenance_type_id' => $type->id,
             'asset_maintenance_type' => $type->name,

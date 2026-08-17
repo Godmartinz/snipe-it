@@ -54,6 +54,8 @@ class CheckoutAcceptance extends Model
 
     /**
      * Accessor for the checkoutable item's category name.
+     *
+     * @return Attribute<string|null, never>
      */
     protected function checkoutableCategoryName(): Attribute
     {
@@ -180,6 +182,9 @@ class CheckoutAcceptance extends Model
         return $query->whereNull('accepted_at')->whereNotNull('declined_at');
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function displayCheckoutableType(): Attribute
     {
         return Attribute::make(

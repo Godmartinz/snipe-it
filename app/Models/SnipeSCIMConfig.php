@@ -255,8 +255,35 @@ class SnipeMutableCollection extends MutableCollection
     // stash the object into the request so the displayName uniqueness closure
     // (which re-runs after mapping) can recognize its own row instead of
     // treating it as an existing name collision.
+    //
+    // Missing-value guard: the per-member `required` rule that used to live on
+    // the SCIM config was dropped because it caused ValidationRuleParser to
+    // allocate O(N) rule stacks on the flattened payload, which OOMed on
+    // large group syncs (see the docblock above the members mapping in
+    // SnipeSCIMConfig::getGroupConfig). The check now happens here in a
+    // single walk so clients get a clean 400 pointing at the bad indices
+    // instead of the parent library's misleading 500 with an empty
+    // "One or more members are unknown: " message from findMany() eating
+    // the nulls.
     public function add($value, Model &$object)
     {
+        $missing = [];
+        foreach ((array) $value as $index => $entry) {
+            if (!is_array($entry)
+                || !array_key_exists('value', $entry)
+                || $entry['value'] === null
+                || $entry['value'] === ''
+            ) {
+                $missing[] = $index;
+            }
+        }
+        if ($missing !== []) {
+            throw new SCIMException(
+                'Every members entry must include a "value" field. Missing at indices: ' . implode(',', $missing),
+                400
+            );
+        }
+
         if (! $object->exists) {
             $object->save();
             request()->attributes->set('scim_in_flight_resource', $object);
@@ -413,19 +440,19 @@ class SCIMMultiCompanyArray extends Attribute
 
     public function add($value, Model &$object)
     {
-        \Log::debug("MC ADD VALUE IS: " . print_r($value, true));
+        \Log::debug('MC ADD VALUE IS: ' . print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 
     public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
     {
-        \Log::debug("MC REPLACE VALUE IS: " . print_r($value, true));
+        \Log::debug('MC REPLACE VALUE IS: ' . print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 
     public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
     {
-        \Log::debug("MC PATCH VALUE IS: " . print_r($value, true));
+        \Log::debug('MC PATCH VALUE IS: ' . print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 }
@@ -710,7 +737,7 @@ class SnipeSCIMConfig
                             } else {
                                 // Okta hits this one for creating a user - it does a full PUT for their ID
                                 \Log::debug("GetValuePAthFilter is null for path: $path");
-                                \Log::debug("GetValuePathFilter is now null and trying to set value of: " . print_r($value, true));
+                                \Log::debug('GetValuePathFilter is now null and trying to set value of: ' . print_r($value, true));
                                 // the Addresses object is a 'list' (array with numeric indices) by definition...
                                 if (is_array($value) && array_is_list($value)) {
                                     foreach ($value as $address) {
@@ -718,18 +745,18 @@ class SnipeSCIMConfig
                                         if (@$address['type'] == 'work') {
                                             foreach ($address as $key => $v) {
                                                 if (array_key_exists($key, self::$addressmap)) {
-                                                    \Log::debug("Addresses: Setting " . self::$addressmap[$key] . " to '$v'");
+                                                    \Log::debug('Addresses: Setting ' . self::$addressmap[$key] . " to '$v'");
                                                     $object->{self::$addressmap[$key]} = $v;
                                                 }
                                             }
                                         } else {
-                                            //should we throw if you give us a 'home' address? I don't know.
+                                            // should we throw if you give us a 'home' address? I don't know.
                                             // what if you gave us _both_ ?
                                         }
                                     }
                                 } else {
-                                    \Log::debug("Unknown Address Object: " . print_r($value, true));
-                                    throw new SCIMException("Unknown Address object of type: " . gettype($value), 422);
+                                    \Log::debug('Unknown Address Object: ' . print_r($value, true));
+                                    throw new SCIMException('Unknown Address object of type: ' . gettype($value), 422);
                                 }
                             }
                         }
@@ -892,8 +919,18 @@ class SnipeSCIMConfig
                         }
                         $fail('The name has already been taken.');
                     }),
+                    // The per-member `required` rule on `value` used to live
+                    // on the eloquent() below. Removed intentionally: Laravel's
+                    // ValidationRuleParser::mergeRulesForAttribute allocates one
+                    // rule stack per attribute path in the flattened payload, so
+                    // an incoming members array of N entries produced O(N) rule
+                    // stacks and blew the PHP memory_limit on large group syncs
+                    // The per-member value check now lives inside
+                    // SnipeMutableCollection::add() as one array walk, and the
+                    // parent ensure() below adds a `max:` guardrail so a truly
+                    // runaway payload still gets rejected with a clean 400.
                     (new SnipeMutableCollection('members'))->withSubAttributes(
-                        eloquent('value', 'id')->ensure('required'),
+                        eloquent('value', 'id'),
                         (new class('$ref') extends Eloquent
                         {
                             protected function doRead(&$object, $attributes = [])
@@ -908,7 +945,7 @@ class SnipeSCIMConfig
                             }
                         }),
                         eloquent('display', 'name')
-                    )->ensure('nullable', 'array')
+                    )->ensure('nullable', 'array', 'max:200000')
                 )
             ),
         ];

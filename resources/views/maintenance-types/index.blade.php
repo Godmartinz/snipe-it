@@ -10,6 +10,11 @@
 @section('content')
     <x-container>
         <x-box>
+
+            <x-slot:bulkactions>
+                <x-table.bulk-maintenance-types />
+            </x-slot:bulkactions>
+
             <x-table
                     name="maintenancetype"
                     buttons="maintenanceTypeButtons"

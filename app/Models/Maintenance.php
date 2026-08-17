@@ -20,6 +20,15 @@ use Watson\Validating\ValidatingTrait;
  * Model for Asset Maintenances.
  *
  * @version v1.0
+ *
+ * @property-read \App\Models\Asset|null $asset
+ * @property-read \App\Models\Actionlog|null $assetlog
+ * @property-read \App\Models\Supplier|null $supplier
+ * @property-read \App\Models\MaintenanceType|null $maintenanceType
+ * @property-read \App\Models\User|null $adminuser
+ * @property-read \App\Models\User|null $responsibleParty
+ * @property-read \App\Models\User|null $completedByUser
+ * @property-read \Illuminate\Database\Eloquent\Model|null $item
  */
 class Maintenance extends SnipeModel implements ICompanyableChild
 {
@@ -37,7 +46,11 @@ class Maintenance extends SnipeModel implements ICompanyableChild
     protected $table = 'maintenances';
 
     protected $rules = [
-        'asset_id' => 'required|integer',
+        // item_id is the polymorphic FK. Legacy asset_id keeps working
+        // via the accessor / mutator pair below. Both mutators set
+        // item_id so the validator's item_id rule catches either.
+        'item_id' => 'required|integer',
+        'item_type' => 'required|string',
         'supplier_id' => 'nullable|integer',
         'maintenance_type_id' => 'required|integer|exists:maintenance_types,id',
         'name' => 'required|max:100',
@@ -65,6 +78,13 @@ class Maintenance extends SnipeModel implements ICompanyableChild
      */
     protected $fillable = [
         'name',
+        // Polymorphic item FK. Legacy asset_id is kept fillable so
+        // Maintenance::create(['asset_id' => ...]) still works via the
+        // setAssetIdAttribute mutator that forwards to item_id +
+        // item_type=Asset. New callers should pass item_id + item_type
+        // directly.
+        'item_id',
+        'item_type',
         'asset_id',
         'supplier_id',
         'asset_maintenance_type',
@@ -216,10 +236,57 @@ class Maintenance extends SnipeModel implements ICompanyableChild
      *
      * @version v1.0
      */
+    /**
+     * Polymorphic parent - an Asset (historically), and potentially
+     * an Accessory or other checkoutable model going forward. Every
+     * new caller should use ->item; ->asset() below stays as a
+     * backward-compat alias that returns the parent only when it IS
+     * an Asset (returns null for other item_types).
+     */
+    public function item()
+    {
+        return $this->morphTo()->withTrashed();
+    }
+
+    /**
+     * Legacy alias for ->item kept so existing blades, transformers,
+     * and controllers using $maintenance->asset or ->with('asset')
+     * keep working during the transition to polymorphic items.
+     * No item_type WHERE guard here because it would attach to the
+     * assets-table subquery during eager loading (Eloquent scopes the
+     * belongsTo child query at the parent side) and reference a
+     * non-existent maintenances.item_type column from the assets
+     * table context. Every existing maintenance has item_type = Asset
+     * per the rename migration's backfill, so the plain belongsTo
+     * still returns the right rows today. Once accessories actually
+     * carry maintenances, callers should switch to ->item.
+     */
     public function asset()
     {
-        return $this->belongsTo(Asset::class, 'asset_id')
+        return $this->belongsTo(Asset::class, 'item_id')
             ->withTrashed();
+    }
+
+    /**
+     * Legacy accessor for the old asset_id column. Returns item_id
+     * only when the polymorphic parent is an Asset so it doesn't
+     * misrepresent a maintenance attached to an accessory as an
+     * asset-scoped one.
+     */
+    public function getAssetIdAttribute()
+    {
+        return $this->item_type === Asset::class ? $this->attributes['item_id'] ?? null : null;
+    }
+
+    /**
+     * Legacy mutator - Maintenance::create(['asset_id' => X]) still
+     * works. Sets item_id + pins item_type to Asset since callers
+     * using asset_id are, by definition, targeting an Asset.
+     */
+    public function setAssetIdAttribute($value): void
+    {
+        $this->attributes['item_id'] = $value;
+        $this->attributes['item_type'] = Asset::class;
     }
 
     /**
@@ -265,6 +332,28 @@ class Maintenance extends SnipeModel implements ICompanyableChild
     public function checkedOutTo()
     {
         return $this->morphTo('checked_out_to');
+    }
+
+    /**
+     * Fields published to the calendar_events index table via the
+     * HasCalendarEvents trait. A single range event per maintenance
+     * anchored on start_date -> expected_completion_date. The
+     * completed_at column is intentionally NOT its own event today -
+     * "completed" is a state, not a scheduled item, and the read
+     * path can flip a completed marker via the source model. Add
+     * more entries here if a maintenance ever needs multiple event
+     * markers on the calendar.
+     */
+    public function calendarEventDefinitions(): array
+    {
+        return [
+            [
+                'field' => 'start_date',
+                'event_type' => 'maintenance.start',
+                'end_field' => 'expected_completion_date',
+                'all_day' => true,
+            ],
+        ];
     }
 
     public function journal()

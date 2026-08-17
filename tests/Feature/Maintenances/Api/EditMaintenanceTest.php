@@ -118,7 +118,8 @@ class EditMaintenanceTest extends TestCase
 
         $this->assertDatabaseHas('maintenances', [
             'id' => $maintenance->id,
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => \App\Models\Asset::class,
             'name' => 'Updated Name',
         ]);
     }
@@ -143,7 +144,8 @@ class EditMaintenanceTest extends TestCase
 
         $this->assertDatabaseHas('maintenances', [
             'id' => $maintenance->id,
-            'asset_id' => $assetB->id,
+            'item_id' => $assetB->id,
+            'item_type' => \App\Models\Asset::class,
         ]);
     }
 
@@ -168,7 +170,8 @@ class EditMaintenanceTest extends TestCase
 
         $this->assertDatabaseHas('maintenances', [
             'id' => $maintenance->id,
-            'asset_id' => $assetA->id,
+            'item_id' => $assetA->id,
+            'item_type' => \App\Models\Asset::class,
         ]);
     }
 }

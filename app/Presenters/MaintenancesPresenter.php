@@ -3,7 +3,9 @@
 namespace App\Presenters;
 
 /**
- * Class AssetModelPresenter
+ * Class MaintenancesPresenter
+ *
+ * @property \App\Models\Maintenance $model
  */
 class MaintenancesPresenter extends Presenter
 {
@@ -133,13 +135,14 @@ class MaintenancesPresenter extends Presenter
                 'title' => trans('general.location'),
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
-                'field' => 'maintenance_type',
+                'field' => 'maintenance_type_details',
                 'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/maintenances/form.asset_maintenance_type'),
                 'visible' => true,
+                'formatter' => 'maintenanceTypesLinkObjFormatter',
             ], [
                 'field' => 'responsible_party',
                 'scope' => 'col',
@@ -356,13 +359,14 @@ class MaintenancesPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('general.location'),
             ], [
-                'field' => 'maintenance_type',
+                'field' => 'maintenance_type_details',
                 'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/maintenances/form.asset_maintenance_type'),
                 'visible' => true,
+                'formatter' => 'maintenanceTypesLinkObjFormatter',
             ], [
                 'field' => 'responsible_party',
                 'scope' => 'col',
@@ -475,5 +479,40 @@ class MaintenancesPresenter extends Presenter
         ];
 
         return json_encode($layout);
+    }
+
+    /**
+     * Display name for the unified calendar. Renders as
+     * "<maintenance name> - <asset name or unknown>" so the event
+     * tile carries enough context to identify what and where without
+     * clicking through.
+     */
+    public function name()
+    {
+        $itemLabel = $this->model->item
+            ? ($this->model->item->display_name ?? $this->model->item->name ?? '')
+            : trans('general.unknown');
+
+        return sprintf('%s - %s', $this->model->name, $itemLabel);
+    }
+
+    /**
+     * Deep link used by the calendar event tile. Routes to the
+     * maintenance show page.
+     */
+    public function calendarUrl(): ?string
+    {
+        return route('maintenances.show', $this->model->id);
+    }
+
+    /**
+     * Color precedence for the calendar tile: maintenance type's
+     * tag_color when the admin has set one so tenants can color-code
+     * by "recall vs upgrade vs routine service". Otherwise null and
+     * the frontend paints from a per-event_type CSS palette.
+     */
+    public function calendarColor(): ?string
+    {
+        return $this->model->maintenanceType?->tag_color;
     }
 }

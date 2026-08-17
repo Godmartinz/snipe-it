@@ -27,7 +27,8 @@ class CreateMaintenanceTrackingTest extends TestCase
             ->assertRedirect(route('maintenances.index'));
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
             'checked_out_to_id' => $assignedUser->id,
             'checked_out_to_type' => User::class,
         ]);
@@ -49,7 +50,8 @@ class CreateMaintenanceTrackingTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
             'checked_out_to_id' => null,
             'checked_out_to_type' => null,
         ]);
@@ -79,7 +81,8 @@ class CreateMaintenanceTrackingTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
             'responsible_party_id' => null,
         ]);
     }
@@ -102,7 +105,8 @@ class CreateMaintenanceTrackingTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
             'responsible_party_id' => $technician->id,
         ]);
     }
@@ -123,7 +127,8 @@ class CreateMaintenanceTrackingTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
             'maintenance_type_id' => $type->id,
             'asset_maintenance_type' => 'Custom Calibration',
         ]);

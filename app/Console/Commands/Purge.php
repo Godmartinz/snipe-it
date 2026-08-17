@@ -213,8 +213,16 @@ class Purge extends Command
         // soft-deletable models, but a trashed License with live
         // LicenseSeats or a trashed Asset with live Maintenances would
         // leave orphans behind if we only nuked soft-deleted rows.
+        // Two shapes: a plain FK column name (`license_seats.license_id`)
+        // or a `[column, type_column, expected_type]` triple for
+        // polymorphic child tables (`maintenances.item_id` paired with
+        // `item_type='App\Models\Asset'`). The polymorphic form is needed
+        // now that maintenances live on `item_id`/`item_type` and could
+        // point at non-Asset parents; without the type guard, purging a
+        // trashed Asset would also delete accessory-owned maintenances
+        // that happen to share the same numeric id.
         $childTables = [
-            Asset::class => ['maintenances' => 'asset_id'],
+            Asset::class => ['maintenances' => ['item_id', 'item_type', Asset::class]],
             License::class => ['license_seats' => 'license_id'],
         ];
         $childCounts = [];
@@ -222,7 +230,13 @@ class Purge extends Command
             foreach ($childTables[$modelClass] as $childTable => $foreignKey) {
                 $count = 0;
                 foreach ($ids as $id) {
-                    $q = DB::table($childTable)->where($foreignKey, $id);
+                    $q = DB::table($childTable);
+                    if (is_array($foreignKey)) {
+                        [$idColumn, $typeColumn, $expectedType] = $foreignKey;
+                        $q->where($idColumn, $id)->where($typeColumn, $expectedType);
+                    } else {
+                        $q->where($foreignKey, $id);
+                    }
                     $count += $dryRun ? $q->count() : $q->delete();
                 }
                 if ($count > 0) {

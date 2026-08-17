@@ -16,7 +16,9 @@ class MaintenanceTypesController extends Controller
     {
         $this->authorize('view', MaintenanceType::class);
 
-        $types = MaintenanceType::select(['id', 'name', 'created_at', 'updated_at', 'deleted_at']);
+        $types = MaintenanceType::select(['id', 'name', 'tag_color', 'created_by', 'created_at', 'updated_at', 'deleted_at'])
+            ->with('adminuser')
+            ->withCount('maintenances as maintenances_count');
 
         if ($request->input('deleted') == 'true') {
             $types->onlyTrashed();
@@ -34,7 +36,7 @@ class MaintenanceTypesController extends Controller
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort = in_array($request->input('sort'), ['id', 'name', 'created_at', 'updated_at']) ? $request->input('sort') : 'name';
+        $sort = in_array($request->input('sort'), ['id', 'name', 'maintenances_count', 'created_by', 'created_at', 'updated_at']) ? $request->input('sort') : 'name';
 
         $types = $types->orderBy($sort, $order)->skip($offset)->take($limit)->get();
 
@@ -54,6 +56,7 @@ class MaintenanceTypesController extends Controller
 
         $type = new MaintenanceType;
         $type->name = $request->input('name');
+        $type->tag_color = $request->input('tag_color');
         $type->created_by = auth()->id();
 
         if ($type->save()) {
@@ -68,6 +71,7 @@ class MaintenanceTypesController extends Controller
         $this->authorize('update', $maintenanceType);
 
         $maintenanceType->name = $request->input('name');
+        $maintenanceType->tag_color = $request->input('tag_color');
 
         if ($maintenanceType->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new MaintenanceTypesTransformer)->transformMaintenanceType($maintenanceType), trans('admin/maintenance_types/message.update.success')));
@@ -79,6 +83,23 @@ class MaintenanceTypesController extends Controller
     public function destroy(MaintenanceType $maintenanceType): JsonResponse
     {
         $this->authorize('delete', $maintenanceType);
+
+        // Refuse the delete if any maintenance rows still reference this
+        // type. Enforced here as well as at the UI layer so the API
+        // doesn't strand orphaned maintenance_type_id values pointing
+        // at a soft-deleted row. Message uses the shared
+        // general.bulk_delete_associations.assoc_maintenances key so
+        // the reason surfaces the current in-use count.
+        if (! $maintenanceType->isDeletable()) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('general.bulk_delete_associations.assoc_maintenances', [
+                    'item_name' => $maintenanceType->name,
+                    'maintenance_count' => $maintenanceType->maintenances()->count(),
+                    'item' => trans('admin/maintenance_types/general.maintenance_type'),
+                ])),
+                409,
+            );
+        }
 
         $maintenanceType->delete();
 

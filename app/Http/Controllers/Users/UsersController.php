@@ -415,12 +415,8 @@ class UsersController extends Controller
         }
 
         if ($user->restore()) {
-            $logaction = new Actionlog;
-            $logaction->item_type = User::class;
-            $logaction->item_id = $user->id;
-            $logaction->created_at = date('Y-m-d H:i:s');
-            $logaction->created_by = auth()->id();
-            $logaction->logaction('restore');
+            // The `restore` action_log entry is written by
+            // UserObserver::restoring - no manual write here.
 
             // Redirect them to the deleted page if there are more, otherwise the section index
             $deleted_users = User::onlyTrashed()->count();

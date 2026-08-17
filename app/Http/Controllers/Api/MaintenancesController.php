@@ -52,7 +52,13 @@ class MaintenancesController extends Controller
         }
 
         if ($request->filled('asset_id')) {
-            $maintenances->where('asset_id', '=', $request->input('asset_id'));
+            // asset_id request param stays for API back-compat but
+            // filters against the polymorphic (item_id, item_type)
+            // pair now that maintenances can attach to accessories
+            // too. Callers filtering by asset_id are, by definition,
+            // scoping to items of type Asset.
+            $maintenances->where('item_id', '=', $request->input('asset_id'))
+                ->where('item_type', '=', Asset::class);
         }
 
         // Polymorphic filter — used by the user detail Maintenances tab to

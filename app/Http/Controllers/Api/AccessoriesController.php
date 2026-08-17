@@ -113,6 +113,10 @@ class AccessoriesController extends Controller
             $accessories->where('accessories.manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
+        if ($request->input('requestable') == 'true') {
+            $accessories->where('accessories.requestable', '=', '1');
+        }
+
         if ($request->filled('supplier_id')) {
             $accessories->where('accessories.default_supplier_id', '=', $request->input('supplier_id'));
         }

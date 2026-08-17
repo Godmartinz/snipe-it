@@ -17,7 +17,7 @@
      Linking is handled in snipeit.js by pairing .js-date-range-start with
      the .js-date-range-end sibling under the same .js-date-range parent. --}}
 <div {{ $attributes->merge(['class' => 'row js-date-range']) }} @if ($id) id="{{ $id }}" @endif>
-    <div class="col-xs-6" style="padding-right: 5px;">
+    <div class="col-xs-5" style="padding-right: 3px;">
         <div
             class="input-group date js-date-range-start"
             data-provide="datetimepicker"
@@ -29,7 +29,10 @@
             <span class="input-group-addon"><x-icon type="calendar" /></span>
         </div>
     </div>
-    <div class="col-xs-6" style="padding-left: 5px;">
+    <div class="col-xs-1 text-center js-date-range-separator" style="padding-top: 7px;" aria-hidden="true">
+        -
+    </div>
+    <div class="col-xs-5" style="padding-left: 3px;">
         <div
             class="input-group date js-date-range-end"
             data-provide="datetimepicker"

@@ -2216,4 +2216,41 @@ class Helper
 
         return $html;
     }
+
+    /**
+     * Force equal timing between 'success' and 'failure' to not expose open ports
+     */
+    public static function EqualTiming(int $seconds, callable $function)
+    {
+        $start = microtime(true);
+        $thrown_exception = null;
+        $result = null;
+        try {
+            $result = $function();
+            if (is_bool($result)) {
+                if ($result) {
+                    return; //instant return on success
+                }
+            } //Fall-through on failure - $result is false so the next 'if' will not fire
+            if ($result && $result->getStatusCode() == 200) {
+                //succesful responses should return 'fast'
+                return $result;
+            }
+        } catch (\Throwable $exception) {
+            $thrown_exception = $exception;
+        }
+        // on *any* transaction(?), make sure we don't do a 'fast fail' -
+        // it needs to take $seconds seconds.
+        $end = microtime(true);
+        $duration = $end - $start;
+        $remaining = $seconds - $duration;
+        if ($remaining > 0) {
+            sleep((int) $remaining);
+        }
+        if ($thrown_exception) {
+            throw $thrown_exception;
+        }
+        return $result;
+
+    }
 }

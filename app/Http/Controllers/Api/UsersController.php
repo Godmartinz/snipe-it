@@ -17,7 +17,6 @@ use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Http\Transformers\UsersTransformer;
 use App\Models\Accessory;
-use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Consumable;
@@ -487,7 +486,7 @@ class UsersController extends Controller
         // saved the user first, then filtered company IDs after the fact
         // (see syncCompaniesWithLogging below). A non-superuser could
         // submit a company_id belonging to another company they were not
-        // a member of; the user row was persisted before the filter ran,
+        // a member of, and the user row was persisted before the filter ran,
         // producing an unauthorized cross-tenant record even when the
         // pivot ended up empty (leaving the account as a floater under
         // null_company_is_floater installs). Reject the whole request if
@@ -666,7 +665,7 @@ class UsersController extends Controller
         }
 
         // Pull out sensitive fields that require extra permission. The
-        // GATED_AUTH_FIELDS constant covers user-editable secrets; the
+        // GATED_AUTH_FIELDS constant covers user-editable secrets. The
         // additional keys below are internal state (2FA secrets, remember
         // tokens, activation codes) that must never be settable from a
         // request payload regardless of caller privilege.
@@ -1015,14 +1014,8 @@ class UsersController extends Controller
             }
 
             if ($user->restore()) {
-
-                $logaction = new Actionlog;
-                $logaction->item_type = User::class;
-                $logaction->item_id = $user->id;
-                $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->created_by = auth()->id();
-                $logaction->logaction('restore');
-
+                // The `restore` action_log entry is written by
+                // UserObserver::restoring, no manual write here.
                 return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.restored')), 200);
             }
 

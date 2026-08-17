@@ -92,6 +92,9 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
         return $this->license->getEula();
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function name(): Attribute
     {
         return Attribute::make(
@@ -99,6 +102,9 @@ class LicenseSeat extends SnipeModel implements ICompanyableChild
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function displayName(): Attribute
     {
         return Attribute::make(

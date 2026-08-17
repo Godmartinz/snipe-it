@@ -151,6 +151,24 @@ class AccessoriesController extends Controller
         $cloned->id = null;
         $cloned->deleted_at = '';
 
+        // Restore the pre-Orders clone-as-fast-entry workflow: carry
+        // the source item's most recent acquisition context onto the
+        // cloned entry's create form so operators cloning a stock row
+        // to restock don't have to copy-paste supplier / order # /
+        // date / price from another tab. Field names match the
+        // create-form input names so enrichInitialOrderFromRequest
+        // in store() picks them up on save and writes them onto the
+        // observer-created initial Order + OrderItem for the new row.
+        // Explicit assignments (not a foreach) so each typed value from
+        // lastOrderPrefill() lands on the matching typed model property
+        // without going through a mixed intermediate that would fail
+        // larastan's assign.propertyType check.
+        $prefill = $accessory->lastOrderPrefill();
+        $cloned->supplier_id = $prefill['supplier_id'];
+        $cloned->purchase_date = $prefill['purchase_date'];
+        $cloned->purchase_cost = $prefill['purchase_cost'];
+        $cloned->order_number = $prefill['order_number'];
+
         return view('accessories/edit')
             ->with('cloned_model', $accessory_to_clone)
             ->with('item', $cloned);

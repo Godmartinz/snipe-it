@@ -47,43 +47,13 @@
                 <!-- Horizontal Form -->
                 <div class="box box-default">
                     <div class="box-header with-border">
-                        @if (request()->routeIs('reports.custom.component', 'report-templates.show'))
-                            <h2 class="box-title" style="padding-top: 7px;">
+                        <h2 class="box-title" style="padding-top: 7px;">
+                            @if (request()->routeIs('report-templates.edit'))
+                                {{ trans('general.customize_report') }}: {{ $template->name }}
+                            @else
                                 {{ trans('general.customize_report') }}
-                            </h2>
-
-                        @endif
-
-                        @if (request()->routeIs('report-templates.edit'))
-                            <div class="form-group {{ $errors->has('name') ? ' has-error' : '' }}">
-                                <label
-                                    for="name"
-                                    class="col-md-2 control-label"
-                                >
-                                    {{ trans('admin/reports/general.template_name') }}
-                                </label>
-                                <div class="col-md-5">
-                                    <input
-                                        class="form-control"
-                                        placeholder=""
-                                        name="name"
-                                        type="text"
-                                        id="name"
-                                        value="{{ $template->name }}"
-                                        required
-                                    >
-                                    <x-form.error name="name" />
-                                </div>
-                                @if ($template->created_by == auth()->id())
-                                    <div class="col-md-3">
-                                        <label class="form-control">
-                                            <input type="checkbox" name="is_shared" value="1" @checked($template->is_shared) />
-                                            {{ trans('admin/reports/general.share_template') }}
-                                        </label>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
+                            @endif
+                        </h2>
 
                     </div><!-- /.box-header -->
 
@@ -92,7 +62,7 @@
                         <div class="col-md-4" id="included_fields_wrapper">
 
                             <label class="form-control">
-                                <input type="checkbox" id="checkAll" checked="checked">
+                                <input type="checkbox" data-toggle="check-all" data-check-scope="#included_fields_wrapper" checked="checked">
                                 {{ trans('general.select_all') }}
                             </label>
 
@@ -278,27 +248,6 @@
                                 </div>
                             </div>
 
-                            <!-- Purchase Date -->
-                            <div class="form-group purchase-range{{ ($errors->has('purchase_start') || $errors->has('purchase_end')) ? ' has-error' : '' }}">
-                                <label for="purchase_start" class="col-md-3 control-label">{{ trans('general.purchase_date') }}</label>
-                                <x-input.date-range
-                                    class="col-md-7"
-                                    id="purchase-range-datepicker"
-                                    name_start="purchase_start"
-                                    name_end="purchase_end"
-                                    :value_start="$template->textValue('purchase_start', old('purchase_start'))"
-                                    :value_end="$template->textValue('purchase_end', old('purchase_end'))"
-                                    max_date="today"
-                                />
-
-                                @if ($errors->has('purchase_start') || $errors->has('purchase_end'))
-                                    <div class="col-md-9 col-lg-offset-3">
-                                        <x-form.error name="purchase_start" />
-                                        <x-form.error name="purchase_end" />
-                                    </div>
-                                @endif
-                            </div>
-
                             <!-- Quantity -->
                             <div class="form-group quantity-range{{ ($errors->has('quantity_start') || $errors->has('quantity_end')) ? ' has-error' : '' }}">
                                 <label for="quantity_start" class="col-md-3 control-label">{{ trans('general.quantity') }}</label>
@@ -350,11 +299,32 @@
                                 @endif
                             </div>
 
+                            <!-- Purchase Date -->
+                            <div class="form-group purchase-range{{ ($errors->has('purchase_start') || $errors->has('purchase_end')) ? ' has-error' : '' }}">
+                                <label for="purchase_start" class="col-md-3 control-label">{{ trans('general.purchase_date') }}</label>
+                                <x-input.date-range
+                                    class="col-md-8"
+                                    id="purchase-range-datepicker"
+                                    name_start="purchase_start"
+                                    name_end="purchase_end"
+                                    :value_start="$template->textValue('purchase_start', old('purchase_start'))"
+                                    :value_end="$template->textValue('purchase_end', old('purchase_end'))"
+                                    max_date="today"
+                                />
+
+                                @if ($errors->has('purchase_start') || $errors->has('purchase_end'))
+                                    <div class="col-md-9 col-lg-offset-3">
+                                        <x-form.error name="purchase_start"/>
+                                        <x-form.error name="purchase_end"/>
+                                    </div>
+                                @endif
+                            </div>
+
                             <!-- Checkout Date -->
                             <div class="form-group checkout-range{{ ($errors->has('checkout_date_start') || $errors->has('checkout_date_end')) ? ' has-error' : '' }}">
                                 <label for="checkout_date" class="col-md-3 control-label">{{ trans('general.checkout') }} </label>
                                 <x-input.date-range
-                                    class="col-md-7"
+                                    class="col-md-8"
                                     id="checkout-range-datepicker"
                                     name_start="checkout_date_start"
                                     name_end="checkout_date_end"
@@ -375,7 +345,7 @@
                             <div class="form-group created-range{{ ($errors->has('created_start') || $errors->has('created_end')) ? ' has-error' : '' }}">
                                 <label for="created_start" class="col-md-3 control-label">{{ trans('general.created_at') }} </label>
                                 <x-input.date-range
-                                    class="col-md-7"
+                                    class="col-md-8"
                                     id="created-range-datepicker"
                                     name_start="created_start"
                                     name_end="created_end"
@@ -396,7 +366,7 @@
                             <div class="form-group last_updated-range{{ ($errors->has('last_updated_start') || $errors->has('last_updated_end')) ? ' has-error' : '' }}">
                                 <label for="last_updated_start" class="col-md-3 control-label">{{ trans('general.updated_at') }}</label>
                                 <x-input.date-range
-                                    class="col-md-7"
+                                    class="col-md-8"
                                     id="last_updated-range-datepicker"
                                     name_start="last_updated_start"
                                     name_end="last_updated_end"
@@ -416,9 +386,9 @@
                             <!-- Last Updated before -->
                             <div class="form-group">
                                 <label for="last_updated_before" class="col-md-3 control-label">{{ trans('general.updated_before') }}</label>
-                                <div class="input-group col-md-2">
+                                <div class="input-group col-md-3">
                                     <input class="form-control input-group" type="number" min="0" name="last_updated_before" value="{{ $template->textValue('last_updated_before', old('last_updated_before')) }}" aria-label="last_updated_before">
-                                    {{ trans('general.days_ago') }}
+                                    <span class="input-group-addon">{{ trans('general.days_ago') }}</span>
                                 </div>
 
                                 @if ($errors->has('last_updated_before'))
@@ -447,138 +417,26 @@
                         </div>
 
                     </div> <!-- /.box-body-->
-                    <div class="box-footer text-right">
-                        @if(request()->routeIs('report-templates.edit'))
+                    @unless (request()->routeIs('report-templates.edit'))
+                        {{-- See consumable blade for the edit-mode footer
+                             rationale (sidebar Save is the affordance
+                             there; download button belongs to preview). --}}
+                        <div class="box-footer text-right">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-download icon-white" aria-hidden="true"></i>
-                                {{ trans('general.save') }}
+                                {{ trans('general.download') }}
                             </button>
-                        @else
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-download icon-white" aria-hidden="true"></i>
-                                {{ trans('general.generate') }}
-                            </button>
-                        @endif
-                    </div>
+                        </div>
+                    @endunless
                 </div> <!--/.box.box-default-->
             </form>
         </div>
 
         <!-- Saved Reports right column -->
         <div class="col-md-3">
-            @if (! request()->routeIs('report-templates.edit'))
-                <livewire:report-template-select type="component" />
-
-                <div class="row">
-                    <div class="col-md-12">
-
-                        <div style="margin-bottom: 5px;">
-                            @if($template->name)
-                                @if($template->created_by == auth()->id())
-                                    <span class="text-center">{!!  ($template->is_shared ? '<i class="fa fa-users"></i>'." ".(trans('admin/reports/general.template_shared_with_others')) : '<i class="fa fa-user"></i>'." ".(trans('admin/reports/general.template_not_shared')) )!!}</span>
-                                @else
-                                    <span class="text-center">{!!  ($template->is_shared ? '<i class="fa fa-users"></i>'." ".(trans('admin/reports/general.template_shared')) : '<i class="fa fa-user"></i>'." ".(trans('admin/reports/general.template_not_shared')) )!!}</span>
-                                @endif
-                            @endif
-                        </div>
-
-
-                        @if($template->created_by == auth()->id())
-                            @if (request()->routeIs('report-templates.show'))
-                                <a
-                                    href="{{ route('report-templates.edit', $template) }}"
-                                    class="btn btn-sm btn-warning btn-social btn-block"
-                                    data-tooltip="true"
-                                    title="{{ trans('admin/reports/general.update_template') }}"
-                                    style="margin-bottom: 5px;"
-                                >
-                                    <x-icon type="edit" />
-                                    {{ trans('general.update') }}
-                                </a>
-                                <span data-tooltip="true" title="{{ trans('general.delete') }}">
-                            <a href="#"
-                               class="btn btn-sm btn-danger btn-social btn-block delete-component"
-                               data-toggle="modal"
-                               data-title="{{ trans('general.delete') }}"
-                               data-content="{{ trans('general.delete_confirm', ['item' => $template->name]) }}"
-                               data-target="#dataConfirmModal"
-                               type="button"
-                            >
-                                <x-icon type="delete" />
-                                {{ trans('general.delete') }}
-                            </a>
-                        </span>
-                            @endif
-                        @endif
-                    </div>
-                </div>
-            @endif
-            @if (request()->routeIs('reports/custom', 'reports.custom.component'))
-                <hr>
-                <div class="form-group">
-                    <form method="post" id="savetemplateform" action="{{ route("report-templates.store") }}">
-                        @csrf
-                        <input type="hidden" id="savetemplateform" name="options">
-                        <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-                            <label for="name">{{ trans('admin/reports/general.template_name') }}</label>
-                            <input
-                                class="form-control"
-                                placeholder=""
-                                name="name"
-                                type="text"
-                                id="name"
-                                value="{{ $template->name }}"
-                                required
-                            >
-                            <x-form.error name="name" />
-                        </div>
-                        <button class="btn btn-primary" style="width: 100%">
-                            {{ trans('admin/reports/general.save_template') }}
-                        </button>
-                    </form>
-                </div>
-                <div class="box box-success">
-                    <div class="box-header with-border">
-                        <h4>{{ trans('admin/reports/message.about_templates') }}</h4>
-                    </div>
-                    <div class="box-body">
-                        <p>{!!  trans('admin/reports/message.saving_templates_description')  !!}</p>
-                    </div>
-                </div>
-            @endif
+            <x-reports.custom-template-panel type="component" :template="$template"/>
         </div>
     </div>
 
 @stop
 
-@section('moar_scripts')
-    <script>
-        $("#checkAll").change(function () {
-            $("#included_fields_wrapper input:checkbox").prop('checked', $(this).prop("checked"));
-        });
-
-        $("#savetemplateform").submit(function(e) {
-            e.preventDefault(e);
-
-            let form = $('#custom-report-form');
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'name',
-                value: $('#name').val(),
-            }).appendTo(form);
-
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'type',
-                value: 'component',
-            }).appendTo(form);
-
-            form.attr('action', '{{ route('report-templates.store') }}').submit();
-        });
-
-        $('#saved_report_select').on('select2:select', function (event) {
-            window.location.href = event.params.data.element.dataset.route;
-        });
-
-    </script>
-@stop

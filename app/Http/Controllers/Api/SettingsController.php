@@ -29,13 +29,13 @@ class SettingsController extends Controller
 
             return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
+        return Helper::EqualTiming(5, function () {
 
-        Log::debug('Preparing to test LDAP connection');
+            Log::debug('Preparing to test LDAP connection');
 
-        $message = []; // where we collect together test messages
-        try {
-            $connection = Ldap::connectToLdap();
+            $message = []; // where we collect together test messages
             try {
+                $connection = Ldap::connectToLdap();
                 $message['bind'] = ['message' => 'Successfully bound to LDAP server.'];
                 Log::debug('attempting to bind to LDAP for LDAP test');
                 Ldap::bindAdminToLdap($connection);
@@ -52,8 +52,7 @@ class SettingsController extends Controller
                     return is_int($key);
                 })->slice(0, 10)->map(function ($item) {
                     $mapped = Ldap::parseAndMapLdapAttributes($item);
-
-                    return (object) array_map(fn ($value) => $value === '' ? null : $value, $mapped);
+                    return (object) array_map(fn($value) => $value === '' ? null : $value, $mapped);
                 });
                 if ($users->count() > 0) {
                     // `fields` is the ordered internal_key => translated
@@ -63,7 +62,7 @@ class SettingsController extends Controller
                     // consistent as attributeMap() grows.
                     $labels = Ldap::attributeLabels();
                     $fields = collect(array_keys(Ldap::parseAndMapLdapAttributes([])))
-                        ->mapWithKeys(fn ($key) => [$key => $labels[$key] ?? $key])
+                        ->mapWithKeys(fn($key) => [$key => $labels[$key] ?? $key])
                         ->all();
                     $message['user_sync'] = [
                         'fields' => $fields,
@@ -79,18 +78,11 @@ class SettingsController extends Controller
 
                 return response()->json($message, 200);
             } catch (\Exception $e) {
-                Log::debug('Bind failed');
-                Log::debug('Exception was: '.$e->getMessage());
+                Log::debug('Connection failed but we cannot debug it any further on our end.');
 
                 return response()->json(['message' => $e->getMessage()], 400);
-                // return response()->json(['message' => $e->getMessage()], 500);
             }
-        } catch (\Exception $e) {
-            Log::debug('Connection failed but we cannot debug it any further on our end.');
-
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
-
+        });
     }
 
     public function ldaptestlogin(Request $request): JsonResponse

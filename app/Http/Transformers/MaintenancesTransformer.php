@@ -87,8 +87,23 @@ class MaintenancesTransformer
                 'id' => (int) $assetmaintenance->adminuser->id,
                 'name' => e($assetmaintenance->adminuser->display_name),
             ] : null,
+            // DEPRECATED: bare-string maintenance_type. Kept for API
+            // back-compat with callers reading this as a plain type
+            // name. New consumers should read maintenance_type_details
+            // below for id/name/tag_color, which the bootstrap-table
+            // linker formatter uses to render the type as a link to
+            // its Maintenance Types detail page.
             'maintenance_type' => $assetmaintenance->maintenanceType
                 ? e($assetmaintenance->maintenanceType->name)
+                : null,
+            'maintenance_type_details' => $assetmaintenance->maintenanceType
+                ? [
+                    'id' => (int) $assetmaintenance->maintenanceType->id,
+                    'name' => e($assetmaintenance->maintenanceType->name),
+                    'tag_color' => $assetmaintenance->maintenanceType->tag_color
+                        ? e($assetmaintenance->maintenanceType->tag_color)
+                        : null,
+                ]
                 : null,
             'responsible_party' => ($assetmaintenance->responsibleParty) ? [
                 'id' => (int) $assetmaintenance->responsibleParty->id,
@@ -132,26 +147,54 @@ class MaintenancesTransformer
 
     public function transformMaintenanceForReport(Maintenance $assetmaintenance)
     {
+        // Hoist chained relation values into locals so the array literal is
+        // one nullsafe chain per lookup (returning scalar-or-null) rather
+        // than the same chain twice inside a `X ? e(X) : null` ternary.
+        // Same runtime, quiet on larastan's nullsafe.neverNull warnings.
+        $asset = $assetmaintenance->asset;
+        $modelName = $asset?->model?->name;
+        $modelNumber = $asset?->model?->model_number;
+        $statusName = $asset?->status?->display_name;
+        $assignedTo = $asset?->assignedTo?->display_name;
+        $companyName = $asset?->company?->name;
+        $locationName = $asset?->location?->name;
+        $supplierName = $assetmaintenance->supplier?->name;
+
         $array = [
             'id' => (int) $assetmaintenance->id,
-            'asset_name' => ($assetmaintenance->asset->name) ? e($assetmaintenance->asset->name) : null,
-            'asset_tag' => ($assetmaintenance->asset->asset_tag) ? e($assetmaintenance->asset->asset_tag) : null,
-            'serial' => ($assetmaintenance->asset?->serial) ? e($assetmaintenance->asset->serial) : null,
+            'asset_name' => $asset?->name ? e($asset->name) : null,
+            'asset_tag' => $asset?->asset_tag ? e($asset->asset_tag) : null,
+            'serial' => $asset?->serial ? e($asset->serial) : null,
             'image' => ($assetmaintenance->image != '') ? Storage::disk('public')->url('maintenances/'.e($assetmaintenance->image)) : null,
-            'model' => ($assetmaintenance->asset?->model?->name) ? e($assetmaintenance->asset?->model?->name) : null,
-            'model_number' => ($assetmaintenance->asset?->model?->model_number) ? e($assetmaintenance->asset?->model?->model_number) : null,
-            'status_label' => ($assetmaintenance->asset?->status) ? e($assetmaintenance->asset?->status?->display_name) : null,
-            'assigned_to' => ($assetmaintenance->asset?->assigned) ? e($assetmaintenance->asset?->assigned?->display_name) : null,
-            'company' => ($assetmaintenance->asset?->company?->name) ? e($assetmaintenance->asset->company->name) : null,
+            'model' => $modelName ? e($modelName) : null,
+            'model_number' => $modelNumber ? e($modelNumber) : null,
+            'status_label' => $statusName ? e($statusName) : null,
+            'assigned_to' => $assignedTo ? e($assignedTo) : null,
+            'company' => $companyName ? e($companyName) : null,
             'name' => ($assetmaintenance->name) ? e($assetmaintenance->name) : null,
             'title' => ($assetmaintenance->name) ? e($assetmaintenance->name) : null, // legacy to not change the shape of the API
-            'location' => (($assetmaintenance->asset) && ($assetmaintenance->asset->location)) ? e($assetmaintenance->asset->location->name) : null,
+            'location' => $locationName ? e($locationName) : null,
             'notes' => ($assetmaintenance->notes) ? Helper::parseEscapedMarkedownInline($assetmaintenance->notes) : null,
-            'supplier' => ($assetmaintenance->supplier) ? e($assetmaintenance->supplier?->name) : null,
+            'supplier' => $supplierName ? e($supplierName) : null,
             'url' => ($assetmaintenance->url) ? e($assetmaintenance->url) : null,
             'cost' => Helper::formatCurrencyOutput($assetmaintenance->cost),
+            // DEPRECATED: bare-string maintenance_type. Kept for API
+            // back-compat with callers reading this as a plain type
+            // name. New consumers should read maintenance_type_details
+            // below for id/name/tag_color, which the bootstrap-table
+            // linker formatter uses to render the type as a link to
+            // its Maintenance Types detail page.
             'maintenance_type' => $assetmaintenance->maintenanceType
                 ? e($assetmaintenance->maintenanceType->name)
+                : null,
+            'maintenance_type_details' => $assetmaintenance->maintenanceType
+                ? [
+                    'id' => (int) $assetmaintenance->maintenanceType->id,
+                    'name' => e($assetmaintenance->maintenanceType->name),
+                    'tag_color' => $assetmaintenance->maintenanceType->tag_color
+                        ? e($assetmaintenance->maintenanceType->tag_color)
+                        : null,
+                ]
                 : null,
             'asset_maintenance_type' => e($assetmaintenance->asset_maintenance_type),
             'start_date' => Helper::getFormattedDateObject($assetmaintenance->start_date, 'date'),

@@ -142,6 +142,7 @@ class IndexMaintenanceTest extends TestCase
             ->assertOk();
 
         $this->assertEquals('Annual Checkup', $response->json('maintenance_type'));
+        $this->assertEquals('Annual Checkup', $response->json('maintenance_type_details.name'));
     }
 
     public function test_sort_by_maintenance_type_does_not_error()

@@ -182,6 +182,9 @@ class License extends Depreciable
             && ($this->deleted_at == '');
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function terminatesFormattedDate(): Attribute
     {
         return Attribute::make(
@@ -189,6 +192,9 @@ class License extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function terminatesDiffInDays(): Attribute
     {
         return Attribute::make(
@@ -196,6 +202,9 @@ class License extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function terminatesDiffForHumans(): Attribute
     {
         return Attribute::make(

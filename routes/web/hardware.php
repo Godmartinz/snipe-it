@@ -7,6 +7,7 @@ use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\BulkMaintenancesController;
 use App\Http\Controllers\MaintenancesController;
 use App\Models\Asset;
+use App\Models\Maintenance;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
@@ -208,10 +209,48 @@ Route::resource('hardware',
     ])->parameters(['hardware' => 'asset'])->withTrashed();
 
 // Asset Maintenances
-Route::resource('maintenances',
-    MaintenancesController::class,
-    ['middleware' => ['auth'],
-    ])->parameters(['maintenance' => 'maintenance', 'asset' => 'asset_id']);
+//
+// Expanded from a Route::resource so per-route breadcrumbs can chain.
+// maintenances.show is parented through the maintenance's type so the
+// trail reads: Maintenance Types → {type name} → {maintenance name}.
+// That matches the sidebar reshuffle that moved MT under Settings and
+// positioned it as the drill-down entry point for related maintenances.
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('maintenances', [MaintenancesController::class, 'index'])
+        ->name('maintenances.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home', route('home'))
+            ->push(trans('admin/maintenances/general.maintenances'), route('maintenances.index'))
+        );
+
+    Route::get('maintenances/create', [MaintenancesController::class, 'create'])
+        ->name('maintenances.create')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('maintenances.index')
+            ->push(trans('admin/maintenances/general.create'))
+        );
+
+    Route::post('maintenances', [MaintenancesController::class, 'store'])
+        ->name('maintenances.store');
+
+    Route::get('maintenances/{maintenance}', [MaintenancesController::class, 'show'])
+        ->name('maintenances.show')
+        ->breadcrumbs(fn (Trail $trail, Maintenance $maintenance) => $trail->parent('maintenances.index')
+            ->push($maintenance->name, route('maintenances.show', $maintenance))
+        );
+
+    Route::get('maintenances/{maintenance}/edit', [MaintenancesController::class, 'edit'])
+        ->name('maintenances.edit')
+        ->breadcrumbs(fn (Trail $trail, Maintenance $maintenance) => $trail->parent('maintenances.show', $maintenance)
+            ->push(trans('admin/maintenances/general.edit'))
+        );
+
+    Route::put('maintenances/{maintenance}', [MaintenancesController::class, 'update'])
+        ->name('maintenances.update');
+
+    Route::patch('maintenances/{maintenance}', [MaintenancesController::class, 'update']);
+
+    Route::delete('maintenances/{maintenance}', [MaintenancesController::class, 'destroy'])
+        ->name('maintenances.destroy');
+});
 
 Route::post('maintenances/{maintenance}/complete',
     [MaintenancesController::class, 'complete']

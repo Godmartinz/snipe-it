@@ -36,7 +36,7 @@ class ReportTemplate extends Model
     protected $rules = [
         'type' => [
             'required',
-            'in:asset,component',
+            'in:asset,component,consumable',
         ],
         'name' => [
             'required',
@@ -212,6 +212,7 @@ class ReportTemplate extends Model
         return match ($this->type) {
             'asset' => 'reports.custom.asset',
             'component' => 'reports.custom.component',
+            'consumable' => 'reports.custom.consumable',
         };
     }
 }

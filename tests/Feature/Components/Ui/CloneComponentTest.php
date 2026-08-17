@@ -3,6 +3,7 @@
 namespace Tests\Feature\Components\Ui;
 
 use App\Models\Component;
+use App\Models\Supplier;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -33,5 +34,34 @@ class CloneComponentTest extends TestCase
             ->assertSee([
                 'Component to clone',
             ], false);
+    }
+
+    /**
+     * See tests/Feature/Accessories/Ui/CloneAccessoryTest for the
+     * Orders-refactor rationale behind the clone-prefill fix.
+     */
+    public function test_clone_prefills_supplier_and_order_context_from_last_order(): void
+    {
+        $supplier = Supplier::factory()->create();
+        $source = Component::factory()
+            ->withInitialAcquisition($supplier, 12.34, '2026-04-01')
+            ->create(['qty' => 5]);
+
+        $source->orderItems()->latest('id')->first()->order()->update([
+            'order_number' => 'PO-COMP-CLONE-9',
+        ]);
+
+        $response = $this->actingAs(User::factory()->createComponents()->create())
+            ->get(route('components.clone.create', $source))
+            ->assertOk();
+
+        $response->assertSee('name="supplier_id"', false);
+        $response->assertSee('value="'.$supplier->id.'"', false);
+        $response->assertSee('name="order_number"', false);
+        $response->assertSee('value="PO-COMP-CLONE-9"', false);
+        $response->assertSee('name="purchase_date"', false);
+        $response->assertSee('value="2026-04-01"', false);
+        $response->assertSee('name="purchase_cost"', false);
+        $response->assertSee('value="12.34"', false);
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\BulkCategoriesController;
 use App\Http\Controllers\BulkCompaniesController;
 use App\Http\Controllers\BulkDepartmentsController;
 use App\Http\Controllers\BulkDepreciationsController;
+use App\Http\Controllers\BulkMaintenanceTypesController;
 use App\Http\Controllers\BulkManufacturersController;
 use App\Http\Controllers\BulkStatuslabelsController;
 use App\Http\Controllers\BulkSuppliersController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\Reports\CustomComponentReportController;
+use App\Http\Controllers\Reports\CustomConsumableReportController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\SettingsController;
@@ -38,6 +40,7 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\UploadedFilesController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Livewire\Importer;
+use App\Models\MaintenanceType;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
@@ -146,8 +149,51 @@ Route::group(['middleware' => 'auth'], function () {
 
     /*
     * Maintenance Types
+    *
+    * Expanded from a Route::resource so per-route breadcrumbs can hang
+    * off each GET action. The four GET routes get an explicit
+    * ->breadcrumbs(); the write routes (POST / PUT / PATCH / DELETE)
+    * don't render a page and don't need trails. Route names match what
+    * Route::resource('maintenance-types', ...) would have generated so
+    * every existing route() lookup keeps working.
     */
-    Route::resource('maintenance-types', MaintenanceTypesController::class);
+    Route::get('maintenance-types', [MaintenanceTypesController::class, 'index'])
+        ->name('maintenance-types.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('maintenances.index')
+            ->push(trans('admin/maintenance_types/general.maintenance_types'), route('maintenance-types.index'))
+        );
+
+    Route::get('maintenance-types/create', [MaintenanceTypesController::class, 'create'])
+        ->name('maintenance-types.create')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('maintenance-types.index')
+            ->push(trans('admin/maintenance_types/general.create'))
+        );
+
+    Route::post('maintenance-types', [MaintenanceTypesController::class, 'store'])
+        ->name('maintenance-types.store');
+
+    Route::get('maintenance-types/{maintenance_type}', [MaintenanceTypesController::class, 'show'])
+        ->name('maintenance-types.show')
+        ->breadcrumbs(fn (Trail $trail, MaintenanceType $maintenanceType) => $trail->parent('maintenance-types.index')
+            ->push($maintenanceType->name, route('maintenance-types.show', $maintenanceType))
+        );
+
+    Route::get('maintenance-types/{maintenance_type}/edit', [MaintenanceTypesController::class, 'edit'])
+        ->name('maintenance-types.edit')
+        ->breadcrumbs(fn (Trail $trail, MaintenanceType $maintenanceType) => $trail->parent('maintenance-types.show', $maintenanceType)
+            ->push(trans('admin/maintenance_types/general.update'))
+        );
+
+    Route::put('maintenance-types/{maintenance_type}', [MaintenanceTypesController::class, 'update'])
+        ->name('maintenance-types.update');
+
+    Route::patch('maintenance-types/{maintenance_type}', [MaintenanceTypesController::class, 'update']);
+
+    Route::delete('maintenance-types/{maintenance_type}', [MaintenanceTypesController::class, 'destroy'])
+        ->name('maintenance-types.destroy');
+
+    Route::post('maintenance-types/bulk/delete', [BulkMaintenanceTypesController::class, 'destroy'])
+        ->name('maintenance-types.bulk.delete');
 
     /*
     * Depreciations
@@ -632,6 +678,15 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
         Route::post('component', [CustomComponentReportController::class, 'run'])
             ->name('reports.custom.component.run');
+
+        Route::get('consumable', [CustomConsumableReportController::class, 'show'])
+            ->name('reports.custom.consumable')
+            ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+                ->push(trans('general.reports'), route('reports.index'))
+                ->push(trans('general.custom_consumable_report'), route('reports.custom.consumable')));
+
+        Route::post('consumable', [CustomConsumableReportController::class, 'run'])
+            ->name('reports.custom.consumable.run');
     });
 
     Route::prefix('templates')
@@ -647,11 +702,11 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
                     $parent = match ($reportTemplate->type) {
                         'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
+                        'consumable' => 'reports.custom.consumable',
                     };
 
                     return $trail->parent($parent)
-                        ->push($reportTemplate->name, null)
-                        ->push(trans('general.customize_report'), '');
+                        ->push($reportTemplate->name, null);
                 });
 
             Route::get('/{reportTemplate}/edit', [ReportTemplatesController::class, 'edit'])
@@ -660,11 +715,12 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
                     $parent = match ($reportTemplate->type) {
                         'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
+                        'consumable' => 'reports.custom.consumable',
                     };
 
                     return $trail->parent($parent)
                         ->push($reportTemplate->name, route('report-templates.show', $reportTemplate))
-                        ->push(trans('general.customize_report'), '');
+                        ->push(trans('general.update'), '');
                 });
 
             Route::post('/{reportTemplate}', [ReportTemplatesController::class, 'update'])

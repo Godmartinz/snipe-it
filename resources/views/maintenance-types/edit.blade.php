@@ -10,11 +10,6 @@
     @parent
 @stop
 
-@section('header_right')
-    <a href="{{ URL::previous() }}" class="btn btn-primary pull-right">
-        {{ trans('general.back') }}
-    </a>
-@stop
 
 {{-- Page content --}}
 @section('content')
@@ -31,6 +26,18 @@
                     name="name"
                     required
                 />
+
+                    <fieldset name="color-preferences">
+                        <x-form.legend help_text="{{ trans('general.tag_color_help') }}">
+                            {{ trans('general.tag_color') }}
+                        </x-form.legend>
+                        <x-form.row
+                            :label="trans('general.tag_color')"
+                            :$item
+                            name="tag_color"
+                            type="colorpicker"
+                        />
+                    </fieldset>
             </x-box>
         </x-form>
     </x-container>

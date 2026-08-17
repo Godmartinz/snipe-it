@@ -55,7 +55,8 @@ class CreateMaintenanceTest extends TestCase
         Storage::disk('public')->assertExists(app('maintenances_path').$maintenance->image);
 
         $this->assertDatabaseHas('maintenances', [
-            'asset_id' => $asset->id,
+            'item_id' => $asset->id,
+            'item_type' => \App\Models\Asset::class,
             'supplier_id' => $supplier->id,
             'maintenance_type_id' => $type->id,
             'asset_maintenance_type' => $type->name,
@@ -93,7 +94,8 @@ class CreateMaintenanceTest extends TestCase
         foreach ($assets as $asset) {
             $this->assertDatabaseHas('maintenances', [
                 'name' => 'Bulk Test',
-                'asset_id' => $asset->id,
+                'item_id' => $asset->id,
+                'item_type' => \App\Models\Asset::class,
                 'maintenance_type_id' => $type->id,
             ]);
         }
@@ -122,8 +124,8 @@ class CreateMaintenanceTest extends TestCase
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('payload.total', 1);
 
-        $this->assertDatabaseHas('maintenances', ['asset_id' => $ownAsset->id, 'name' => 'FMCS Bulk Test']);
-        $this->assertDatabaseMissing('maintenances', ['asset_id' => $otherAsset->id, 'name' => 'FMCS Bulk Test']);
+        $this->assertDatabaseHas('maintenances', ['item_id' => $ownAsset->id, 'item_type' => \App\Models\Asset::class, 'name' => 'FMCS Bulk Test']);
+        $this->assertDatabaseMissing('maintenances', ['item_id' => $otherAsset->id, 'item_type' => \App\Models\Asset::class, 'name' => 'FMCS Bulk Test']);
     }
 
     public function test_bulk_create_returns_error_when_all_assets_inaccessible()

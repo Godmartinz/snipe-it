@@ -13,14 +13,11 @@
 @section('content')
 
 <div><!-- livewire div - do not remove -->
-    <form class="form-horizontal" role="form" wire:submit="submit">
+    <form class="form-horizontal" role="form" wire:submit.prevent="submit">
         {{csrf_field()}}
-        @if (session()->has('warning'))
+        @if ($warning)
             <x-alert type="warning">
-                {!! session('warning') !!}
-                @php
-                    session()->forget('warning'); // Clear the session flash immediately
-                @endphp
+                {!! $warning !!}
             </x-alert>
         @endif
         <div class="row">
@@ -47,17 +44,16 @@
 
                     <div class="col-md-12" style="border-top: 0px;">
 
-                        @if(session()->has('success'))
+                        @if($success)
                             <x-alert type="success">
-                                {{session('success')}}
+                                {{$success}}
                             </x-alert>
                         @endif
-                        @if(session()->has('error'))
+                        @if($error)
                             <x-alert type="danger">
-                                {{session('error')}}
+                                {{$error}}
                             </x-alert>
                         @endif
-
                         <div class="form-group">
                             <div class="col-md-2">
                                 <label for="webhook_selected">
@@ -140,7 +136,7 @@
                             @if($webhook_endpoint != null && $webhook_channel != null)
                                 <div class="form-group">
                                     <div class="col-md-offset-2 col-md-9">
-                                        <a href="#" wire:click.prevent="{{$webhook_test}}"
+                                        <a href="#" wire:click.prevent="universalWebhookTest"
                                            class="btn btn-default btn-sm pull-left">
                                             <i class="{{$webhook_icon}}" aria-hidden="true"></i>
                                                 {!! trans('admin/settings/general.webhook_test',['app' => ucwords($webhook_selected) ]) !!}
