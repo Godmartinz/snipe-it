@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ImportCustomLabelRequest;
 use App\Models\Asset;
 use App\Models\CustomField;
 use App\Models\Labels\CustomLabels\PreviewSheetLabel;
@@ -105,9 +104,23 @@ class LabelsController extends Controller
 
     }
 
-    public function edit(CustomUserLabel $label)
+    public function edit(CustomUserLabel $label, CustomLabelImportValidator $configValidator)
     {
-        $config = $label->config_snapshot;
+        $config = $label->config_snapshot ?? [];
+        $config = $configValidator->normalizeFonts($config);
+
+        try {
+            $config = $configValidator->validate(
+                json_encode($config)
+            );
+        } catch (ValidationException $e) {
+            return redirect()
+                ->route('settings.labels.index')
+                ->with(
+                    'error',
+                    trans('admin/labels/general.invalid_config')
+                );
+        }
 
         $selectedType = $label->type
             ?? data_get($config, 'type')
@@ -147,6 +160,10 @@ class LabelsController extends Controller
             'type' => ['required', Rule::in(['sheet', 'tape'])],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
+            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
         ];
 
         if (!$isTape) {
@@ -258,7 +275,12 @@ class LabelsController extends Controller
             'type' => ['required', Rule::in(['sheet', 'tape'])],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
+            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
         ];
+
         if ($type === 'sheet') {
             $rules += [
                 'page' => ['required', 'array'],
@@ -364,10 +386,10 @@ class LabelsController extends Controller
             ->with('success', $customLabel->name . ' created successfully.');
     }
 
-    public function create(Request $request)
+    public function create(Request $request, CustomLabelImportValidator $validator)
     {
         if ($request->filled('custom_label_id') || $request->filled('label') || session()->has('imported_label_config')) {
-            return $this->createFromExisting($request);
+            return $this->createFromExisting($request, $validator);
         }
 
         $validated = $request->validate([
@@ -509,37 +531,21 @@ class LabelsController extends Controller
             ->with('count', 0);
     }
 
-
-    public function import(ImportCustomLabelRequest $request, CustomLabelImportValidator $importValidator)
-    {
-        try {
-            $config = $importValidator->validate($request->rawConfigJson());
-        } catch (ValidationException $e) {
-            $messages = collect($e->validator->errors()->all())
-                ->map(fn($message) => '<i class="fa-solid fa-xmark text-danger"></i> ' . $message)
-                ->toArray();
-
-            return back()
-                ->withErrors([
-                    'config_snapshot' => $messages,
-                ])
-                ->withInput();
-        }
-
-        return redirect()->route('settings.labels.create', [
-            'label' => $config['template'] ?? null,
-        ])->with('imported_label_config', $config);
-
-    }
-
-    public function createFromExisting(Request $request)
+    public function createFromExisting(Request $request, CustomLabelImportValidator $configValidator)
     {
         if ($request->filled('custom_label_id')) {
             $customLabel = CustomUserLabel::findOrFail(
                 $request->get('custom_label_id')
             );
 
-            $config = $customLabel->config_snapshot;
+            $config = $customLabel->config_snapshot ?? [];
+
+            $config = $configValidator->normalizeFonts($config);
+
+            $config = $configValidator->validate(
+                json_encode($config)
+            );
+
             $config['name'] = 'Copy of ' . $customLabel->name;
 
             $previewLabel = $customLabel->type === 'tape'

@@ -84,6 +84,7 @@ return [
     ],
     'create_label' => 'Create Label',
     'import_label_config' => 'Import Label Configuration',
+    'invalid_config' => 'Invalid Label Configuration',
     'import_method' => 'Import Method',
     'import_json_help' => 'Select Label Json file to import.',
     'import_paste_json' => 'Paste Label JSON Data',

@@ -190,6 +190,27 @@ class CustomLabelImportValidator
         );
     }
 
+    public function normalizeFonts(array $config): array
+    {
+        foreach ([
+                     'tag_font',
+                     'title_font',
+                     'field_label_font',
+                     'field_value_font',
+                 ] as $key) {
+            $font = data_get($config, "content.{$key}");
+
+            if (
+                $font !== null
+                && !in_array($font, CustomLabelFonts::ALLOWED, true)
+            ) {
+                data_set($config, "content.{$key}", 'freesans');
+            }
+        }
+
+        return $config;
+    }
+
     protected function attributes(): array
     {
         return [
