@@ -17,8 +17,6 @@ Every API controller returns data through a **Transformer** in `app/Http/Transfo
 return (new AssetsTransformer)->transformAssets($assets, $assets->count());
 ```
 
-This supersedes the generic advice to reach for Eloquent API Resources — follow the existing transformer convention.
-
 ## Authorization
 
 - All authorization goes through **Policies** in `app/Policies/`.
@@ -55,10 +53,6 @@ After checkout, `Helper::getRedirectOption()` reads `$request->redirect_option`.
 - `redirect_option=target`
 - `checkout_to_type=user`
 - `assigned_user={{ $user->id }}`
-
-## Translations
-
-UI strings are translation keys in `resources/lang/en-US/general.php` and its sibling files. Always add a new key rather than hard-coding English in a view.
 
 ## Global View Variables
 

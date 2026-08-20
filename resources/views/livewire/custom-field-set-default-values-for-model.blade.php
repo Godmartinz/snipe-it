@@ -86,15 +86,21 @@
 
                                 @elseif($field->element == "listbox")
 
-
+                                        {{-- Iterate CustomField::formatFieldValuesAsArray so line-ending
+                                             handling and the `key|label` split flow through the same
+                                             helper the asset-edit form uses. Skip the '' key the helper
+                                             prepends for listbox ("Select <format>") because on the
+                                             model default-values page we want a truly blank "no default
+                                             set" option, not a "please pick one" prompt. See #19429. --}}
                                         <select class="form-control" name="default_values[{{ $field->id }}]" wire:model="selectedValues.{{ $field->db_column }}">
                                             <option value=""></option>
-                                            @foreach(explode("\r\n", $field->field_values) as $field_value)
+                                            @foreach($field->formatFieldValuesAsArray() as $field_value => $field_label)
+                                                @continue($field_value === '')
                                                 <option
-                                                    value="{{$field_value}}"
+                                                    value="{{ $field_value }}"
                                                     wire:key="listbox-{{ $field_value }}"
                                                 >
-                                                    {{ $field_value }}
+                                                    {{ $field_label }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -102,14 +108,18 @@
 
                                 @elseif($field->element == "radio")
 
-                                    @foreach(explode("\r\n", $field->field_values) as $field_value)
+                                    {{-- Radio/checkbox mirror the asset-edit form's convention:
+                                         use the display label as both the submitted value and the
+                                         visible text, so stored defaults match what the asset form
+                                         will render as pre-selected. --}}
+                                    @foreach($field->formatFieldValuesAsArray() as $field_value)
                                         <label class="col-md-3 form-control" for="{{ $field->db_column }}_{{ str_slug($field_value) }}" wire:key="radio-{{ $field_value }}">
                                             <input
                                                 id="{{ $field->db_column }}_{{ str_slug($field_value) }}"
                                                 aria-label="{{ str_slug($field->name) }}"
                                                 type="radio"
                                                 name="default_values[{{ $field->id }}]"
-                                                value="{{$field_value}}"
+                                                value="{{ $field_value }}"
                                                 wire:model="selectedValues.{{ $field->db_column }}"
                                             />{{ $field_value }}
                                         </label>
@@ -117,7 +127,7 @@
 
                                 @elseif($field->element == "checkbox")
 
-                                     @foreach(explode("\r\n", $field->field_values) as $field_value)
+                                     @foreach($field->formatFieldValuesAsArray() as $field_value)
                                         <label class="col-md-3 form-control" for="{{ $field->db_column }}_{{ str_slug($field_value) }}" wire:key="checkbox-{{ $field_value }}">
                                             <input
                                                 id="{{ $field->db_column }}_{{ str_slug($field_value) }}"

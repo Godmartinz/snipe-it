@@ -757,7 +757,7 @@ class LdapSettings extends Component
         $bindOk = @ldap_bind($conn, $uname, $pword);
         if (! $bindOk) {
             $errno = ldap_errno($conn);
-            $ldapError = ldap_error($conn);
+            $ldapError = Ldap::bindError($conn);
             @ldap_unbind($conn);
 
             if ($errno === -1) {
@@ -1223,6 +1223,19 @@ class LdapSettings extends Component
             putenv('LDAPTLS_REQCERT=never');
         }
 
+        // Client TLS cert/key MUST be set on the global (null-handle) LDAP
+        // context BEFORE ldap_connect(), the same way Ldap::connectToLdap
+        // does at runtime. Without this, mTLS-required directories (e.g.
+        // Google Secure LDAP) reject the wizard's bind test with a
+        // generic "Invalid credentials" even when everything the admin
+        // entered is correct, and since saveStep2 gates persistence on the
+        // test passing, the wizard becomes impossible to complete against
+        // those servers. See #19519.
+        if ($settings->ldap_client_tls_cert && $settings->ldap_client_tls_key) {
+            ldap_set_option(null, LDAP_OPT_X_TLS_CERTFILE, Setting::get_client_side_cert_path());
+            ldap_set_option(null, LDAP_OPT_X_TLS_KEYFILE, Setting::get_client_side_key_path());
+        }
+
         $conn = @ldap_connect($server);
         if (! $conn) {
             $this->recordTestResult(
@@ -1278,7 +1291,7 @@ class LdapSettings extends Component
 
         $bindOk = $uname !== '' ? @ldap_bind($conn, $uname, $pword) : @ldap_bind($conn);
         if (! $bindOk) {
-            $ldapError = ldap_error($conn);
+            $ldapError = Ldap::bindError($conn);
             @ldap_unbind($conn);
             $this->recordTestResult(
                 'error',

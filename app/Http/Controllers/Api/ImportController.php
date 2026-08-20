@@ -320,12 +320,32 @@ class ImportController extends Controller
             ]);
 
         if ($acquired === 0) {
+            // No extra SELECT here to fetch the current holder: this
+            // path fires exactly when the DB is under pressure (that's
+            // why the slice is blocked in the first place), and adding
+            // a query would compound the problem for the reporter.
+            // Log::debug() also evaluates its arguments even when debug
+            // logging is off, so any extra work here would fire in
+            // every prod install regardless of LOG_LEVEL. The current
+            // holder can be read straight from the imports row during
+            // triage.
+            Log::debug('Import mutex reject', [
+                'import_id' => $import_id,
+                'requesting_user_id' => auth()->id(),
+            ]);
+
             return response()->json(Helper::formatStandardApiResponse(
                 'error',
                 null,
                 trans('admin/hardware/message.import.already_processing')
             ), 409);
         }
+
+        Log::debug('Import mutex acquired', [
+            'import_id' => $import_id,
+            'user_id' => auth()->id(),
+            'acquired_at' => $now->toDateTimeString(),
+        ]);
 
         try {
             $errors = $request->import($import);
@@ -401,13 +421,19 @@ class ImportController extends Controller
             // 5-minute stale-timeout branch of the acquire WHERE remains as
             // a safety net for the case where this release never runs
             // (fatal error, request killed mid-flight).
-            DB::table('imports')
+            $released = DB::table('imports')
                 ->where('id', $import_id)
                 ->where('processing_by', auth()->id())
                 ->update([
                     'processing_by' => null,
                     'processing_started_at' => null,
                 ]);
+
+            Log::debug('Import mutex released', [
+                'import_id' => $import_id,
+                'user_id' => auth()->id(),
+                'rows_updated' => $released,
+            ]);
         }
     }
 

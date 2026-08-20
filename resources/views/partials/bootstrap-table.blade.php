@@ -2555,6 +2555,37 @@
         }
     }
 
+    // Compact display for the `orders` array on Accessory / Consumable /
+    // Component rows. These items can be tied to many orders as quantity
+    // is re-ordered over time, so a raw list would overwhelm the table
+    // on high-volume rows. Renders based on count:
+    //   0    empty cell
+    //   1    the single order number
+    //   2-3  comma-separated list
+    //   4+   first order number + "(+N more)" with the full list as tooltip
+    // Every rendered order number is passed through jQuery text() to
+    // defuse any HTML in the order_number string.
+    function ordersSummaryFormatter(value) {
+        if (!Array.isArray(value) || value.length === 0) {
+            return '';
+        }
+
+        var esc = function (v) {
+            return $('<div/>').text(v == null ? '' : v).html();
+        };
+
+        if (value.length === 1) {
+            return esc(value[0]);
+        }
+
+        if (value.length <= 3) {
+            return value.map(esc).join(', ');
+        }
+
+        var tooltip = esc(value.join(', '));
+        return esc(value[0]) + ' <span class="text-muted" data-tooltip="true" title="' + tooltip + '">(+' + (value.length - 1) + ' more)</span>';
+    }
+
     // Check if checkbox should be selectable
     // Selectability is determined by the API field "selectable" which is set at the Presenter/API Transformer
     // However since different bulk actions have different requirements, we have to walk through the available_actions object

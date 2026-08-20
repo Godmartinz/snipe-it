@@ -25,6 +25,7 @@
                 :route="route('api.licenses.index', ['status' => e(request('status'))])"/>
 
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

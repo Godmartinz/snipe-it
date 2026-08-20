@@ -62,3 +62,4 @@
         "ignoreColumn": ["actions","available_actions", "image","change","checkbox","checkincheckout","icon"]
     }'>
 </table>
+

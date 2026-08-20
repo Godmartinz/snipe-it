@@ -65,6 +65,7 @@
                 :status_type="is_scalar($requestStatusType) ? $requestStatusType : null"
             />
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

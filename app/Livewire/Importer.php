@@ -405,9 +405,12 @@ class Importer extends Component
             'supplier' => trans('general.supplier'),
             'warranty_months' => trans('admin/hardware/form.warranty'),
             /**
-             * Checkout fields:
-             * Assets can be checked out to other assets, people, or locations, but we currently
-             * only support checkout to people and locations in the importer
+             * Checkout fields. Assets can be checked out to other assets, people, or
+             * locations. Which target the importer picks is inferred from which of the
+             * three target-shape columns has a value on the row (checkout_asset,
+             * checkout_location, or the user-identity columns). checkout_class stays
+             * available as an explicit override when a row has more than one populated
+             * and needs disambiguation, or for backward-compat with pre-inference CSVs.
              **/
             'checkout_class' => trans('general.importer.checkout_type'),
             'first_name' => trans('general.importer.checked_out_to_first_name'),
@@ -416,6 +419,8 @@ class Importer extends Component
             'email' => trans('general.importer.checked_out_to_email'),
             'username' => trans('general.importer.checked_out_to_username'),
             'checkout_location' => trans('general.importer.checkout_location'),
+            'checkout_asset' => trans('general.importer.checkout_asset'),
+            'checkout_user' => trans('general.importer.checkout_user'),
             /**
              * These are here so users can import history, to replace the dinosaur that
              * was the history importer
@@ -1279,6 +1284,41 @@ class Importer extends Component
     public function uploadFailed(): void
     {
         //
+    }
+
+    /**
+     * True when the current field_map maps any user-identifying column
+     * (username, email, first/last/full/display name, or checkout_user).
+     * Asset / accessory / consumable / license imports may check items
+     * out to users, in which case the wizard should surface the
+     * send-welcome checkbox even though the import type isn't 'user'.
+     * The welcome email itself only fires when a new user is actually
+     * created; existing-user matches don't retrigger it.
+     */
+    #[Computed]
+    public function hasUserCheckoutMapping(): bool
+    {
+        if (empty($this->field_map) || ! is_array($this->field_map)) {
+            return false;
+        }
+
+        $userIdentityFields = [
+            'username',
+            'checkout_user',
+            'email',
+            'first_name',
+            'last_name',
+            'full_name',
+            'display_name',
+        ];
+
+        foreach ($this->field_map as $mapped) {
+            if (in_array($mapped, $userIdentityFields, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     #[Computed]

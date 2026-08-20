@@ -422,7 +422,15 @@
                                 </div>
                             @endif
 
-                            @if ($typeOfImport === 'user')
+                            @if ($typeOfImport === 'user' || $this->hasUserCheckoutMapping)
+                                {{-- Also shown for non-user imports (asset,
+                                     accessory, etc.) when the current column
+                                     mapping includes any user-identifying
+                                     field, since those imports may check
+                                     items out to users. The welcome email
+                                     only fires for users that are actually
+                                     created by the importer; existing-user
+                                     matches don't retrigger it. --}}
                                 <x-form.checkbox-row
                                     name="send_welcome"
                                     :label="trans('general.send_welcome_email_to_users')"

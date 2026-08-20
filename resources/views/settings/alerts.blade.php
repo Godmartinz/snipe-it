@@ -70,14 +70,17 @@
                                     input_group_addon="right"
                                 />
 
-                                <!-- Admin CC Email -->
+                                <!-- Admin CC Email. Do not switch back to type="email":
+                                     HTML5 native validation rejects comma-separated input,
+                                     which blocks operators from entering multiple recipients
+                                     even though the server-side email_array validator and the
+                                     send paths accept them. See #19426. -->
                                 <x-form.row
                                     name="admin_cc_email"
-                                    type="email"
                                     :item="$setting"
                                     :label="trans('admin/settings/general.admin_cc_email')"
                                     :help_text="trans('admin/settings/general.admin_cc_email_help')"
-                                    placeholder="admin@yourcompany.com"
+                                    placeholder="admin@yourcompany.com,it@yourcompany.com"
                                     input_icon="email"
                                     input_group_addon="right"
                                 />

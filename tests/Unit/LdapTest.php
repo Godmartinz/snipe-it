@@ -44,9 +44,25 @@ class LdapTest extends TestCase
         $this->settings->enableLdap();
         $this->getFunctionMock('App\\Models', 'ldap_bind')->expects($this->once())->willReturn(false);
         $this->getFunctionMock('App\\Models', 'ldap_error')->expects($this->once())->willReturn('exception');
+        // bindError now also queries LDAP_OPT_DIAGNOSTIC_MESSAGE to surface
+        // the server's real reason (see #19519). Mocked as returning true
+        // without populating the by-ref $diag arg so the composed error
+        // stays just the ldap_error message.
+        $this->getFunctionMock('App\\Models', 'ldap_get_option')->expects($this->once())->willReturn(true);
         $this->expectExceptionMessage('Could not bind to LDAP:');
 
         $this->assertNull(Ldap::bindAdminToLdap('dummy'));
+    }
+
+    public function test_bind_error_returns_just_ldap_error_when_diagnostic_is_empty()
+    {
+        // Regression for #19519 secondary issue: bindError should NEVER
+        // suppress ldap_error; if no diagnostic is present, the composed
+        // string is just the ldap_error text.
+        $this->getFunctionMock('App\\Models', 'ldap_error')->expects($this->once())->willReturn('Server Down');
+        $this->getFunctionMock('App\\Models', 'ldap_get_option')->expects($this->once())->willReturn(true);
+
+        $this->assertSame('Server Down', Ldap::bindError('dummy'));
     }
     // other test cases - test donked password?
 
@@ -63,6 +79,8 @@ class LdapTest extends TestCase
         $this->settings->enableAnonymousLdap();
         $this->getFunctionMock('App\\Models', 'ldap_bind')->expects($this->once())->willReturn(false);
         $this->getFunctionMock('App\\Models', 'ldap_error')->expects($this->once())->willReturn('exception');
+        // bindError now also queries LDAP_OPT_DIAGNOSTIC_MESSAGE; see test_bind_bad.
+        $this->getFunctionMock('App\\Models', 'ldap_get_option')->expects($this->once())->willReturn(true);
         $this->expectExceptionMessage('Could not bind to LDAP:');
 
         $this->assertNull(Ldap::bindAdminToLdap('dummy'));

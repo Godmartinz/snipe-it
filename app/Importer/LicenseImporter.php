@@ -285,6 +285,8 @@ class LicenseImporter extends ItemImporter
             }
             $targetLicense->save();
 
+            $this->maybeSendWelcomeEmail($checkout_target);
+
             return;
         }
 

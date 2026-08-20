@@ -646,6 +646,8 @@ return [
         'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Checkout Type',
         'checkout_location' => 'Checkout to Location',
+        'checkout_asset' => 'Checkout to Asset Tag',
+        'checkout_user' => 'Checkout to Username',
         'image_filename' => 'Image Filename',
         'do_not_import' => 'Do Not Import',
         'vip' => 'VIP',

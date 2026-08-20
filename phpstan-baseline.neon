@@ -2023,12 +2023,6 @@ parameters:
 			path: app/Http/Controllers/Api/UploadedFilesController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Api/UsersController.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:withoutTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2069,12 +2063,6 @@ parameters:
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Http/Controllers/Api/UsersController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/AssetModelsController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AssetModel\:\:\$created_by\.$#'
@@ -3403,6 +3391,18 @@ parameters:
 			path: app/Http/Controllers/Reports/CustomComponentReportController.php
 
 		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:withTrashed\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Reports/CustomComponentReportController.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Http/Controllers/Reports/CustomComponentReportController.php
+
+		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:onlyTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3412,20 +3412,7 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:withTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/Http/Controllers/Reports/CustomComponentReportController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:withTrashed\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: app/Http/Controllers/Reports/CustomConsumableReportController.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Http/Controllers/Reports/CustomComponentReportController.php
-
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Asset\:\:\$assigned\.$#'
@@ -3844,7 +3831,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Http/Controllers/Users/UsersController.php
 
 		-
@@ -4226,12 +4213,6 @@ parameters:
 			path: app/Http/Transformers/MaintenancesTransformer.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 3
-			path: app/Http/Transformers/MaintenancesTransformer.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$accessories_count\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4562,12 +4543,6 @@ parameters:
 			path: app/Importer/Importer.php
 
 		-
-			message: '#^Access to an undefined property App\\Importer\\Importer\:\:\$send_welcome\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Importer/Importer.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 5
@@ -4768,13 +4743,13 @@ parameters:
 		-
 			message: '#^Method App\\Importer\\ItemImporter\:\:determineCheckout\(\) should return App\\Importer\\SnipeModel\|null but returns App\\Models\\Location\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Location\>\.$#'
 			identifier: return.type
-			count: 1
+			count: 2
 			path: app/Importer/ItemImporter.php
 
 		-
 			message: '#^Method App\\Importer\\ItemImporter\:\:determineCheckout\(\) should return App\\Importer\\SnipeModel\|null but returns App\\Models\\User\.$#'
 			identifier: return.type
-			count: 1
+			count: 2
 			path: app/Importer/ItemImporter.php
 
 		-
@@ -9268,13 +9243,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
+			count: 2
 			path: app/Notifications/CheckinAssetNotification.php
 
 		-
@@ -11030,6 +10999,12 @@ parameters:
 			path: app/Services/PredefinedKitCheckoutService.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Services/PredefinedKitCheckoutService.php
+
+		-
 			message: '#^Call to method getAttributes\(\) on an unknown class App\\Services\\OneLogin\\Saml2\\Auth\.$#'
 			identifier: class.notFound
 			count: 1
@@ -11760,4 +11735,3 @@ parameters:
 			identifier: match.unhandled
 			count: 2
 			path: routes/web.php
-

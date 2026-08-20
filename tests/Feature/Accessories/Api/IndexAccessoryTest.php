@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -191,5 +193,63 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
         $ascNames = array_column($ascRows, 'name');
         $ascRelevant = array_values(array_intersect($ascNames, ['Lots left', 'Some left', 'None left']));
         $this->assertSame(['None left', 'Some left', 'Lots left'], $ascRelevant);
+    }
+
+    public function test_index_response_includes_distinct_order_numbers_per_accessory()
+    {
+        // The Accessory observer writes one Order + OrderItem per create()
+        // with a null order_number. Set explicit order numbers on those
+        // seed rows so the transformer's `orders` array has non-null
+        // values to surface. Multiple orders on one accessory must land
+        // in the output as a distinct list (feeds ordersSummaryFormatter).
+        $user = User::factory()->viewAccessories()->create();
+
+        $accessory = Accessory::factory()->create(['name' => 'Accessory With Orders']);
+        $accessory->orderItems()->first()->order->update(['order_number' => 'ORD-1001']);
+
+        $secondOrder = Order::create(['order_number' => 'ORD-1002']);
+        OrderItem::create([
+            'order_id' => $secondOrder->id,
+            'item_type' => Accessory::class,
+            'item_id' => $accessory->id,
+            'qty' => 5,
+            'price' => 10,
+        ]);
+
+        $rows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index'))
+            ->assertOk()
+            ->json('rows');
+
+        $row = collect($rows)->firstWhere('id', $accessory->id);
+
+        $this->assertNotNull($row);
+        $this->assertIsArray($row['orders']);
+        $this->assertEqualsCanonicalizing(['ORD-1001', 'ORD-1002'], $row['orders']);
+    }
+
+    public function test_advanced_search_filter_on_order_number_returns_only_matching_accessories()
+    {
+        // Column is wired to searchableRelations['orders' => ['order_number']],
+        // so a `filter[orders]=X` query threads through the Searchable
+        // trait to a whereHas('orders') LIKE match on orders.order_number.
+        // Prefix operators (is:, not:, is:null, is:not_null) are honored
+        // by the same code path; this test pins the default LIKE path so
+        // the relation is provably wired.
+        $user = User::factory()->superuser()->create();
+
+        $targetAccessory = Accessory::factory()->create(['name' => 'Target']);
+        $otherAccessory = Accessory::factory()->create(['name' => 'Other']);
+
+        $targetAccessory->orderItems()->first()->order->update(['order_number' => 'ADV-SEARCH-777']);
+        $otherAccessory->orderItems()->first()->order->update(['order_number' => 'UNRELATED-999']);
+
+        $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', [
+                'filter' => json_encode(['orders' => 'ADV-SEARCH-777']),
+            ]))
+            ->assertOk()
+            ->assertResponseContainsInRows($targetAccessory)
+            ->assertResponseDoesNotContainInRows($otherAccessory);
     }
 }

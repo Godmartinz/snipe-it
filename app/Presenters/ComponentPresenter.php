@@ -153,6 +153,16 @@ class ComponentPresenter extends Presenter
                 'class' => 'text-right',
                 'footerFormatter' => 'sumFormatter',
             ], [
+                // Field name matches transformer key + HasOrders relation).
+                'field' => 'orders',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'visible' => true,
+                'title' => trans('general.order_number'),
+                'formatter' => 'ordersSummaryFormatter',
+            ], [
                 'field' => 'total_cost',
                 'scope' => 'col',
                 'searchable' => false,

@@ -269,8 +269,8 @@ class SnipeMutableCollection extends MutableCollection
     {
         $missing = [];
         foreach ((array) $value as $index => $entry) {
-            if (!is_array($entry)
-                || !array_key_exists('value', $entry)
+            if (! is_array($entry)
+                || ! array_key_exists('value', $entry)
                 || $entry['value'] === null
                 || $entry['value'] === ''
             ) {
@@ -279,7 +279,7 @@ class SnipeMutableCollection extends MutableCollection
         }
         if ($missing !== []) {
             throw new SCIMException(
-                'Every members entry must include a "value" field. Missing at indices: ' . implode(',', $missing),
+                'Every members entry must include a "value" field. Missing at indices: '.implode(',', $missing),
                 400
             );
         }
@@ -423,7 +423,7 @@ class SCIMMultiCompanyArray extends Attribute
                 // This seems to be how Okta does it?
                 $names[] = $company;
             } else {
-                throw new SCIMException("Unknown 'companies' value: '" . print_r($company, true) . "' of type: " . get_debug_type($company), 400);
+                throw new SCIMException("Unknown 'companies' value: '".print_r($company, true)."' of type: ".get_debug_type($company), 400);
             }
         }
 
@@ -434,25 +434,25 @@ class SCIMMultiCompanyArray extends Attribute
         if ($object->exists) {
             $object->companies()->sync($ids);
         } else {
-            $object->saved(fn() => $object->companies()->sync($ids));
+            $object->saved(fn () => $object->companies()->sync($ids));
         }
     }
 
     public function add($value, Model &$object)
     {
-        \Log::debug('MC ADD VALUE IS: ' . print_r($value, true));
+        \Log::debug('MC ADD VALUE IS: '.print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 
     public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
     {
-        \Log::debug('MC REPLACE VALUE IS: ' . print_r($value, true));
+        \Log::debug('MC REPLACE VALUE IS: '.print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 
     public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
     {
-        \Log::debug('MC PATCH VALUE IS: ' . print_r($value, true));
+        \Log::debug('MC PATCH VALUE IS: '.print_r($value, true));
         $this->applyCompanies($value, $object);
     }
 }
@@ -506,7 +506,11 @@ class SnipeSCIMConfig
 
     public function getGroupClass()
     {
-        return Group::class;
+        // Route SCIM group operations through SCIMGroup so that the
+        // upstream library's create-path firstOrNew([]) call resolves
+        // to a fresh Group instance rather than the first existing row.
+        // See SCIMGroup and #19493 for the underlying library bug.
+        return SCIMGroup::class;
     }
 
     const ENTERPRISE = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
@@ -737,7 +741,7 @@ class SnipeSCIMConfig
                             } else {
                                 // Okta hits this one for creating a user - it does a full PUT for their ID
                                 \Log::debug("GetValuePAthFilter is null for path: $path");
-                                \Log::debug('GetValuePathFilter is now null and trying to set value of: ' . print_r($value, true));
+                                \Log::debug('GetValuePathFilter is now null and trying to set value of: '.print_r($value, true));
                                 // the Addresses object is a 'list' (array with numeric indices) by definition...
                                 if (is_array($value) && array_is_list($value)) {
                                     foreach ($value as $address) {
@@ -745,7 +749,7 @@ class SnipeSCIMConfig
                                         if (@$address['type'] == 'work') {
                                             foreach ($address as $key => $v) {
                                                 if (array_key_exists($key, self::$addressmap)) {
-                                                    \Log::debug('Addresses: Setting ' . self::$addressmap[$key] . " to '$v'");
+                                                    \Log::debug('Addresses: Setting '.self::$addressmap[$key]." to '$v'");
                                                     $object->{self::$addressmap[$key]} = $v;
                                                 }
                                             }
@@ -755,8 +759,8 @@ class SnipeSCIMConfig
                                         }
                                     }
                                 } else {
-                                    \Log::debug('Unknown Address Object: ' . print_r($value, true));
-                                    throw new SCIMException('Unknown Address object of type: ' . gettype($value), 422);
+                                    \Log::debug('Unknown Address Object: '.print_r($value, true));
+                                    throw new SCIMException('Unknown Address object of type: '.gettype($value), 422);
                                 }
                             }
                         }
@@ -809,7 +813,7 @@ class SnipeSCIMConfig
                             }
 
                             return [
-                                'value' => $object->manager->id, // TODO - ID's aren't unique like they're supposed to be :/
+                                'value' => (string) $object->manager->id, // TODO - ID's aren't unique like they're supposed to be :/
                                 '$ref' => route('scim.resource', ['resourceType' => 'User', 'resourceObject' => $object->manager->id]),
                                 'displayName' => $object->manager->display_name,
                             ];

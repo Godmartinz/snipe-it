@@ -17,6 +17,7 @@
                  has always supported. --}}
             <x-table.locations :route="route('api.locations.index', ['company_id' => e(request('company_id')), 'status' => e(request('status'))])" />
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

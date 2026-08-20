@@ -13,8 +13,13 @@
         <x-box name="accessory">
             <x-table.accessories name="accessories" :route="route('api.accessories.index')" fixed_right_number="3" />
         </x-box>
+        <x-shiftclick/>
     </x-container>
-@can('update', \App\Models\Accessory::class)
+
+
+
+
+    @can('update', \App\Models\Accessory::class)
     <x-modals.adjust-quantity />
 @endcan
 @stop

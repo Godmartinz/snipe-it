@@ -198,9 +198,12 @@ class LdapTroubleshooter extends Command
             ($major == 8 && $minor == 4 && $patch < 7)
         ) {
             $this->warn("PHP Version: $php_version WARNING - Versions before 8.3.21 or 8.4.7 will return INCONSISTENT results!");
-            if (! $this->confirm('Are you sure you wish to continue?')) {
-                $this->warn('ABORTING');
-                exit(-1);
+            if (! $this->option('force')) {
+                $confirmation = $this->confirm('Are you sure you wish to continue?');
+                if (! $confirmation) {
+                    $this->warn('ABORTING');
+                    exit(-1);
+                }
             }
         }
 

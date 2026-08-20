@@ -91,7 +91,5 @@ storage/ldap_client_tls.key
 /.kiro
 /.pi
 /.zed
-AGENTS.md
 boost.json
-CLAUDE.md
 opencode.json

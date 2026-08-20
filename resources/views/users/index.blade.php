@@ -41,6 +41,7 @@
                     'activated' => is_scalar(request('activated')) ? request('activated') : null,
                ])"/>
         </x-box>
+        <x-shiftclick/>
     </x-container>
 
 

@@ -63,6 +63,12 @@ class ConsumablesTransformer
             'percent_remaining' => round($consumable->percentRemaining()),
             // See AccessoriesTransformer for why order_number is no longer
             // in the parent-level output.
+            //
+            // Distinct order numbers this consumable has been purchased on,
+            // pulled from the eager-loaded orderItems.order relation
+            // (Api\ConsumablesController::index preloads it). Feeds the
+            // datatable's ordersSummaryFormatter.
+            'orders' => $consumable->orderItems->pluck('order.order_number')->filter()->unique()->values()->all(),
             'purchase_cost' => Helper::formatCurrencyOutput($lastDefaults['unit_cost'] ?? null),
             'total_cost' => Helper::formatCurrencyOutput($consumable->totalCostSum()),
             'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,

@@ -80,7 +80,9 @@ jobs:
           DB_PASSWORD: password
           LOG_CHANNEL: single
           LOG_LEVEL: debug
-        run: php artisan test
+        # -d memory_limit=1G: see comment in tests-sqlite.yml. Same reason,
+        # same headroom.
+        run: php -d memory_limit=1G artisan test
 
       - name: Upload Laravel logs as artifacts
         if: always()

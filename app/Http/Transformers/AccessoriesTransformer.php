@@ -66,11 +66,14 @@ class AccessoriesTransformer
             'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,
             'purchase_cost' => Helper::formatCurrencyOutput($lastDefaults['unit_cost'] ?? null),
             'total_cost' => Helper::formatCurrencyOutput($accessory->totalCostSum()),
-            // Parent-level order_number was renamed to legacy_order_number
-            // and dropped from the transformer output. Historical order
-            // numbers now live on QuantityAdjust action_log rows. API
-            // consumers looking up a PO should query action_logs directly
-            // or search via free-text (searchableRelations covers it).
+            // Distinct order numbers this accessory has been purchased on,
+            // pulled from the eager-loaded orderItems.order relation
+            // (Api\AccessoriesController::index preloads it). Replaces
+            // the removed parent-level order_number attribute. Feeds the
+            // datatable's ordersSummaryFormatter which renders empty /
+            // single / comma-list / first + "(+N more)" depending on
+            // count.
+            'orders' => $accessory->orderItems->pluck('order.order_number')->filter()->unique()->values()->all(),
             'min_qty' => ($accessory->min_amt) ? (int) $accessory->min_amt : null, // Legacy - should phase out - replaced by below, for the bootstrap table formatter
             'min_amt' => ($accessory->min_amt) ? (int) $accessory->min_amt : null,
             'remaining_qty' => (int) ($accessory->qty - $accessory->checkouts_count), // Legacy - should phase out - replaced by below, for the bootstrap table formatter

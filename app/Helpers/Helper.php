@@ -852,41 +852,45 @@ class Helper
         // Push the "below threshold" filter into SQL via havingRaw on the
         // withCount alias, so only rows that will actually alert get
         // hydrated. Previous shape loaded every row with min_amt set and
-        // filtered in PHP — on a 1000-item deployment with 5 low-inventory
-        // items that meant 200× more rows than needed. Also select only
+        // filtered in PHP. On a 1000-item deployment with 5 low-inventory
+        // items that meant 200x more rows than needed. Also select only
         // the columns the foreach uses (id / name / qty / min_amt),
         // avoiding hydration of long text columns like License::serial.
         // select() must come BEFORE withCount(): withCount uses addSelect
         // under the hood, so a select() after would wipe the count alias.
-        // GROUP BY primary key satisfies SQLite's strict "HAVING requires
-        // an aggregated query" check — MariaDB allows bare HAVING but the
-        // test suite runs SQLite. Grouping by a unique key is a no-op for
-        // row cardinality (functional dependency), so nothing else shifts.
+        //
+        // GROUP BY every selected column, not just the primary key. Under
+        // ONLY_FULL_GROUP_BY, MySQL and MariaDB are supposed to accept
+        // "GROUP BY <PK>, SELECT <other cols>" via functional-dependency
+        // detection, but that detection fails on some MariaDB versions
+        // when a correlated subquery is in the SELECT list (withCount
+        // generates one). Since id is unique, adding the other columns
+        // is a cardinality no-op and works on every engine + sql_mode.
         $consumables = Consumable::select('id', 'name', 'qty', 'min_amt')
             ->withCount('consumableAssignments as consumables_users_count')
             ->whereNotNull('min_amt')
-            ->groupBy('consumables.id')
+            ->groupBy('consumables.id', 'consumables.name', 'consumables.qty', 'consumables.min_amt')
             ->havingRaw('(qty - consumables_users_count) < (min_amt + ?)', [$alert_threshold])
             ->get();
 
         $accessories = Accessory::select('id', 'name', 'qty', 'min_amt')
             ->withCount('checkouts as checkouts_count')
             ->whereNotNull('min_amt')
-            ->groupBy('accessories.id')
+            ->groupBy('accessories.id', 'accessories.name', 'accessories.qty', 'accessories.min_amt')
             ->havingRaw('(qty - checkouts_count) < (min_amt + ?)', [$alert_threshold])
             ->get();
 
         $components = Component::select('id', 'name', 'qty', 'min_amt')
             ->withCount('assets as sum_unconstrained_assets')
             ->whereNotNull('min_amt')
-            ->groupBy('components.id')
+            ->groupBy('components.id', 'components.name', 'components.qty', 'components.min_amt')
             ->havingRaw('(qty - sum_unconstrained_assets) < (min_amt + ?)', [$alert_threshold])
             ->get();
 
         $asset_models = AssetModel::select('id', 'name', 'min_amt')
             ->where('min_amt', '>', 0)
             ->withCount(['availableAssets', 'assets'])
-            ->groupBy('models.id')
+            ->groupBy('models.id', 'models.name', 'models.min_amt')
             ->havingRaw('available_assets_count < (min_amt + ?)', [$alert_threshold])
             ->get();
 
@@ -900,7 +904,7 @@ class Helper
         $licenses = License::select('id', 'name', 'min_amt')
             ->withCount('availCount as licenses_available')
             ->where('min_amt', '>', 0)
-            ->groupBy('licenses.id')
+            ->groupBy('licenses.id', 'licenses.name', 'licenses.min_amt')
             ->havingRaw('licenses_available < (min_amt + ?)', [$alert_threshold])
             ->get();
 
@@ -2229,11 +2233,11 @@ class Helper
             $result = $function();
             if (is_bool($result)) {
                 if ($result) {
-                    return; //instant return on success
+                    return; // instant return on success
                 }
-            } //Fall-through on failure - $result is false so the next 'if' will not fire
+            } // Fall-through on failure - $result is false so the next 'if' will not fire
             if ($result && $result->getStatusCode() == 200) {
-                //succesful responses should return 'fast'
+                // succesful responses should return 'fast'
                 return $result;
             }
         } catch (\Throwable $exception) {
@@ -2250,6 +2254,7 @@ class Helper
         if ($thrown_exception) {
             throw $thrown_exception;
         }
+
         return $result;
 
     }

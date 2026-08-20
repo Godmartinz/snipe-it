@@ -8,7 +8,7 @@ return [
     'ad_append_domain' => 'Append domain name to username field',
     'ad_append_domain_help' => 'User isn\'t required to write "username@domain.local", they can just type "username".',
     'admin_cc_email' => 'CC Email',
-    'admin_cc_email_help' => 'Send a copy of checkin/checkout emails to this address.',
+    'admin_cc_email_help' => 'Send a copy of checkin/checkout emails to this address. Multiple recipients can be specified comma-separated.',
     'admin_cc_always' => 'Always send copy upon checkin/checkout',
     'admin_cc_when_acceptance_required' => 'Only send copy upon checkout if acceptance is required',
     'admin_settings' => 'Admin Settings',

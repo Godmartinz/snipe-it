@@ -120,11 +120,88 @@ class ItemImporter extends Importer
             return;
         }
 
-        if (strtolower($this->item['checkout_class']) === 'location' && $this->findCsvMatch($row, 'checkout_location') != null) {
-            return Location::findOrFail($this->createOrFetchLocation($this->findCsvMatch($row, 'checkout_location')));
+        $checkoutClass = strtolower((string) $this->item['checkout_class']);
+        $checkoutLocation = $this->findCsvMatch($row, 'checkout_location');
+        $checkoutAsset = $this->findCsvMatch($row, 'checkout_asset');
+        // checkout_user is not read locally: createOrFetchUser looks it up
+        // via findCsvMatch as a username fallback, so the user path picks it
+        // up whether we reach it via the explicit checkout_class=user branch
+        // or the default fall-through. Populating $this->item here is
+        // deliberate so subclasses that inspect the item array see it.
+
+        // Checkout intent is inferred from which target-shape column has a
+        // value: checkout_asset (asset tag of parent asset), checkout_location
+        // (location name), checkout_user (username), or the multi-column
+        // user-identity path (email / username / full_name / etc.).
+        // checkout_class is only required as an explicit override when a row
+        // has more than one populated and needs disambiguation, or for
+        // backward-compat with pre-inference CSVs. Prior behavior required
+        // both a checkout_location AND a checkout_class column set to
+        // "Location" on every row; when checkout_class was missing the code
+        // silently fell through to user lookup, produced a null target, and
+        // no checkout event fired with no error surfaced. checkout_user is
+        // keyed on username specifically because email is not enforced as
+        // unique on the users table (the unique index was dropped in the
+        // 2015_07_25_055415 migration) and would silently match the wrong
+        // user in installs with duplicates. createOrFetchUser reads
+        // checkout_user as a username fallback, so the user path (lookup
+        // OR create when the row has enough identity data) works whether
+        // the operator maps username, checkout_user, or both.
+
+        // Explicit checkout_class wins when set and has a matching target
+        // column populated. Preserves the disambiguation escape hatch
+        // (e.g. checkout_class=user beats a populated checkout_location).
+        if ($checkoutClass === 'asset' && $checkoutAsset) {
+            return $this->findAssetCheckoutTarget($checkoutAsset);
+        }
+        if ($checkoutClass === 'location' && $checkoutLocation) {
+            return Location::findOrFail($this->createOrFetchLocation($checkoutLocation));
+        }
+        if (in_array($checkoutClass, ['user', 'person'], true)) {
+            return $this->createOrFetchUser($row);
         }
 
+        // Inference paths. Any target-shape column populated is enough to
+        // route to that target type when no checkout_class contradicted it.
+        if ($checkoutAsset) {
+            return $this->findAssetCheckoutTarget($checkoutAsset);
+        }
+
+        if ($checkoutLocation) {
+            return Location::findOrFail($this->createOrFetchLocation($checkoutLocation));
+        }
+
+        // User path handles both checkout_user (single-column shortcut) and
+        // the multi-column user-identity shape. createOrFetchUser looks up
+        // by username first and creates a new user if the row has enough
+        // additional identity data (full_name / first_name / email).
         return $this->createOrFetchUser($row);
+    }
+
+    /**
+     * Look up an existing asset by tag to use as a checkout target. We do
+     * NOT auto-create assets here the way createOrFetchLocation does. A
+     * checkout target is an existing physical thing; creating a phantom
+     * asset just to satisfy a checkout row would mask CSV typos and
+     * pollute the inventory. Returns null when the tag doesn't resolve,
+     * which the caller in AssetImporter surfaces as a per-row warning
+     * (see the checkoutColumnPopulated block there).
+     */
+    protected function findAssetCheckoutTarget($assetTag)
+    {
+        if (empty($assetTag)) {
+            return null;
+        }
+
+        $asset = \App\Models\Asset::where('asset_tag', (string) $assetTag)->first();
+
+        if (! $asset) {
+            $this->log('WARNING: checkout_asset "'.$assetTag.'" does not match any existing asset tag. The checkout will be skipped.');
+
+            return null;
+        }
+
+        return $asset;
     }
 
     /**

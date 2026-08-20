@@ -31,6 +31,49 @@ abstract class Importer
     protected $updating;
 
     /**
+     * True when the operator ticked the "send welcome email to users"
+     * wizard checkbox. Set by setShouldNotify from ItemImportRequest.
+     * UserImporter overrides this default in its own class body; the
+     * base declaration here means subclasses like AssetImporter can
+     * read the flag without triggering PHPStan property-not-found on
+     * the dynamic assignment.
+     *
+     * @var bool
+     */
+    protected $send_welcome = false;
+
+    /**
+     * Send the "welcome to Snipe-IT" email to a user that was JUST
+     * created as a checkout target in this row, if the operator opted
+     * in on the wizard. wasRecentlyCreated is only true on the model
+     * instance that a save() call minted, so matched existing users
+     * don't retrigger the email on subsequent imports. Guarded on
+     * email + activated for parity with UserImporter's welcome path.
+     * Called from AssetImporter / AccessoryImporter / ConsumableImporter
+     * / LicenseImporter after a successful checkout to a user target.
+     */
+    protected function maybeSendWelcomeEmail($target): void
+    {
+        if (! $this->send_welcome) {
+            return;
+        }
+
+        if (! ($target instanceof User) || ! $target->wasRecentlyCreated) {
+            return;
+        }
+
+        if (! $target->email || $target->activated != '1') {
+            return;
+        }
+
+        try {
+            $target->notify(new \App\Notifications\WelcomeNotification($target));
+        } catch (\Exception $e) {
+            Log::warning('Could not send welcome notification for imported user: '.$e->getMessage());
+        }
+    }
+
+    /**
      * Default Map of item fields->csv names
      *
      * This has been moved into app/Http/Livewire/Importer.php to be more granular.
@@ -45,8 +88,10 @@ abstract class Importer
         'asset_tag' => 'asset tag',
         'activated' => 'activated',
         'category' => 'category',
-        'checkout_class' => 'checkout type', // Supports Location or User for assets.  Using checkout_class instead of checkout_type because type exists on asset already.
+        'checkout_class' => 'checkout type', // Supports Location, User, or Asset for assets. Using checkout_class instead of checkout_type because type exists on asset already.
         'checkout_location' => 'checkout location',
+        'checkout_asset' => 'checkout asset',
+        'checkout_user' => 'checkout user',
         'company' => 'company',
         'item_name' => 'item name',
         'item_number' => 'item number',
@@ -600,7 +645,12 @@ abstract class Importer
             // can flow through to the user record. Previously this value
             // was hard-coded to '' and the Department was orphaned.
             'department_id' => $this->item['department_id'] ?? '',
-            'username' => $this->findCsvMatch($row, 'username'),
+            // Prefer an explicit username column; fall back to checkout_user
+            // (single-column shortcut for asset checkout to an existing or
+            // newly-created user, keyed on username). This preserves the
+            // create-or-fetch path when the operator only maps checkout_user
+            // and does not add a separate username column.
+            'username' => $this->findCsvMatch($row, 'username') ?: $this->findCsvMatch($row, 'checkout_user'),
             'activated' => $this->fetchHumanBoolean($this->findCsvMatch($row, 'activated')),
             'remote' => $this->fetchHumanBoolean(($this->findCsvMatch($row, 'remote'))),
         ];

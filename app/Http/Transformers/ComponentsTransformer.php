@@ -58,6 +58,12 @@ class ComponentsTransformer
             'model_number' => ($component->model_number) ? e($component->model_number) : null,
             // See AccessoriesTransformer for why order_number is no longer
             // in the parent-level output.
+            //
+            // Distinct order numbers this component has been purchased on,
+            // pulled from the eager-loaded orderItems.order relation
+            // (Api\ComponentsController::index preloads it). Feeds the
+            // datatable's ordersSummaryFormatter.
+            'orders' => $component->orderItems->pluck('order.order_number')->filter()->unique()->values()->all(),
             'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,
             'purchase_cost' => Helper::formatCurrencyOutput($lastDefaults['unit_cost'] ?? null),
             'total_cost' => Helper::formatCurrencyOutput($component->totalCostSum()),

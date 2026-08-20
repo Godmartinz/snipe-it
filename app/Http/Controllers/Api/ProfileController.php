@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\RefreshTokenRepository;
 use Laravel\Passport\TokenRepository;
 
 class ProfileController extends Controller
@@ -157,6 +158,39 @@ class ProfileController extends Controller
 
         return new Response('', Response::HTTP_NO_CONTENT);
 
+    }
+
+    /**
+     * Bearer-authenticated self-logout. Revokes the access token that
+     * authenticated THIS request and any refresh token that was issued
+     * alongside it, so a client cannot silently renew after logging
+     * out. Does not touch the user's other tokens (other devices,
+     * personal-access tokens, tokens under different OAuth clients) -
+     * scope is exactly the current session.
+     *
+     * Deliberately distinct from Passport's UI-shaped
+     * DELETE /oauth/tokens/{id} route, which is session-cookie
+     * authenticated for the Passport-Vue self-service page and can't
+     * answer a bearer-only client. Passport does not ship a
+     * bearer-self-revoke endpoint because RFC 7009 revocation uses
+     * client credentials rather than bearer auth, so this
+     * "log me out of this session" affordance is a Snipe-IT addition.
+     */
+    public function logout(RefreshTokenRepository $refreshTokens): Response
+    {
+        $token = auth()->user()?->token();
+
+        // auth:api on the route guarantees a bearer-authenticated user,
+        // but session-cookie / personal-access flows leave token() null.
+        // Return 401 for those instead of a 500 on a null property read.
+        if ($token === null) {
+            return new Response('', Response::HTTP_UNAUTHORIZED);
+        }
+
+        $this->tokenRepository->revokeAccessToken($token->id);
+        $refreshTokens->revokeRefreshTokensByAccessTokenId($token->id);
+
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**

@@ -53,6 +53,18 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
     )->name('api.order-items.index');
 
     /**
+     * Bearer-authenticated self-logout. Revokes the access token that
+     * authenticated this request and any refresh token issued with it,
+     * so a client (custom SPA / mobile app) can call this on logout
+     * and be sure the token cannot silently renew. See
+     * ProfileController::logout for the design rationale and why we
+     * ship this rather than pointing callers at Passport's session-
+     * cookie-shaped DELETE /oauth/tokens/{id} route.
+     */
+    Route::post('logout', [Api\ProfileController::class, 'logout'])
+        ->name('api.logout');
+
+    /**
      * Account routes
      */
     Route::group(['prefix' => 'account'], function () {

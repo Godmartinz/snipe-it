@@ -28,6 +28,7 @@
                 />
 
             </x-box>
+            <x-shiftclick/>
         </x-page-column>
         <x-page-column class="col-md-3">
 

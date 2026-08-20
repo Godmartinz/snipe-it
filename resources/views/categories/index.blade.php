@@ -27,7 +27,9 @@
                     export_filename="export-categories-{{ date('Y-m-d') }}"
             />
         </x-box>
+        <x-shiftclick/>
     </x-container>
+
 @stop
 
 @section('moar_scripts')

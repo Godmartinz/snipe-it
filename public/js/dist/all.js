@@ -75780,6 +75780,43 @@ $(function () {
     $container.find('input[type="checkbox"]').not($master).not(':disabled').prop('checked', $master.prop('checked'));
   });
 
+  // Shift-click a row checkbox to apply its new state to every visible,
+  // enabled checkbox between it and the last checkbox clicked in the same
+  // table and checkbox group.
+  var lastListCheckbox = null;
+  var updatingCheckboxRange = false;
+  document.addEventListener('click', function (event) {
+    var $checkbox = $(event.target);
+    if (updatingCheckboxRange || !$checkbox.is('table tbody input[type="checkbox"]') || $checkbox.is('[data-toggle="check-all"]')) {
+      return;
+    }
+    var checkbox = $checkbox[0];
+    var $table = $checkbox.closest('table');
+    var $checkboxes = $table.find('tbody input[type="checkbox"]').not(':disabled').not('[data-toggle="check-all"]').filter(':visible').filter(function () {
+      return !checkbox.name || this.name === checkbox.name;
+    });
+    var start = $checkboxes.index(lastListCheckbox);
+    var end = $checkboxes.index(checkbox);
+    if (event.shiftKey && start !== -1 && end !== -1 && start !== end) {
+      updatingCheckboxRange = true;
+      try {
+        $checkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).each(function () {
+          if (this !== checkbox && this.checked !== checkbox.checked) {
+            var rowIndex = $(this).data('index');
+            if ($table.data('bootstrap.table') && rowIndex !== undefined) {
+              $table.bootstrapTable(checkbox.checked ? 'check' : 'uncheck', rowIndex);
+            } else {
+              $(this).trigger('click');
+            }
+          }
+        });
+      } finally {
+        updatingCheckboxRange = false;
+      }
+    }
+    lastListCheckbox = checkbox;
+  }, true);
+
   // Custom-report "save template" flow. The three custom reports
   // (asset / component / consumable) each have a small side-panel
   // form that captures a template name and posts to the templates

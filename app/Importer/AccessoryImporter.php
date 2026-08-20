@@ -210,6 +210,7 @@ class AccessoryImporter extends ItemImporter
                 false,
             ));
             $this->log('Accessory '.$accessory->name.' checked out to '.($target->name ?? $target->username ?? $target->id));
+            $this->maybeSendWelcomeEmail($target);
         } else {
             $this->logError($checkout, 'AccessoryCheckout');
         }

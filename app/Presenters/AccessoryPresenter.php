@@ -166,6 +166,18 @@ class AccessoryPresenter extends Presenter
                 'title' => trans('general.last_unit_cost'),
                 'class' => 'text-right text-padding-number-cell',
             ], [
+                // Field name matches the transformer key
+                // ('orders') and the HasOrders relation name so advanced
+                // search resolves straight through $searchableRelations.
+                'field' => 'orders',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'visible' => true,
+                'title' => trans('general.order_number'),
+                'formatter' => 'ordersSummaryFormatter',
+            ], [
                 'field' => 'total_cost',
                 'scope' => 'col',
                 'searchable' => true,

@@ -208,5 +208,6 @@ class ConsumableImporter extends ItemImporter
         ));
 
         $this->log('Consumable '.$consumable->name.' checked out to '.($target->username ?? $target->id));
+        $this->maybeSendWelcomeEmail($target);
     }
 }

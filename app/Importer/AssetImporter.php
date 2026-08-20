@@ -267,6 +267,24 @@ class AssetImporter extends ItemImporter
             $target = $this->item['checkout_target'];
         }
 
+        // Log a warning when the operator populated a checkout column for
+        // this row but no target could be resolved. Prior behavior silently
+        // no-op'd the checkout side of the import in this case, so the
+        // row's other fields updated but no checkout event fired and
+        // nothing surfaced to the operator. Common triggers: the named
+        // location doesn't exist yet AND autocreate failed, or the older
+        // two-column shape where checkout_class was required and not
+        // mapped. See the determineCheckout comment.
+        $checkoutColumnPopulated = $this->findCsvMatch($row, 'checkout_location')
+            || $this->findCsvMatch($row, 'checkout_asset')
+            || $this->findCsvMatch($row, 'checkout_user')
+            || $this->findCsvMatch($row, 'checkout_class')
+            || $this->findCsvMatch($row, 'email')
+            || $this->findCsvMatch($row, 'username');
+        if ($checkoutColumnPopulated && empty($target)) {
+            $this->log('WARNING: A checkout column was populated for asset tag "'.$asset_tag.'" but no checkout target could be resolved from the row. The asset will be updated but no checkout event will fire.');
+        }
+
         $item = $this->sanitizeItemForStoring($asset, $editingAsset);
 
         // The location id fetched by the csv reader is actually the rtd_location_id.
@@ -364,6 +382,8 @@ class AssetImporter extends ItemImporter
                         }
 
                         $asset->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer', $asset->name);
+
+                        $this->maybeSendWelcomeEmail($target);
                     }
                 }
             }

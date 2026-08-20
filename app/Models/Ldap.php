@@ -282,7 +282,7 @@ class Ldap extends Model
             }
 
             if (! $ldapbind = @ldap_bind($connection, $ldap_username, $ldap_pass)) {
-                throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
+                throw new Exception('Could not bind to LDAP: '.self::bindError($connection));
             }
             // TODO - this just "falls off the end" but the function states that it should return true or false
             // unfortunately, one of the use cases for this function is wrong and *needs* for that failure mode to fire
@@ -292,9 +292,26 @@ class Ldap extends Model
         } else {
             // LDAP should also work with anonymous bind (no dn, no password available)
             if (! $ldapbind = @ldap_bind($connection)) {
-                throw new Exception('Could not bind to LDAP: '.ldap_error($connection));
+                throw new Exception('Could not bind to LDAP: '.self::bindError($connection));
             }
         }
+    }
+
+    /**
+     * Return "<ldap_error message> (<diagnostic message>)" for a failed
+     * operation on the given LDAP connection, or just the ldap_error
+     * message when no diagnostic is available. Servers often put the
+     * real cause (bad DN, missing client cert, expired password, etc.)
+     * in LDAP_OPT_DIAGNOSTIC_MESSAGE while ldap_error stays at the
+     * generic "Invalid credentials", so surfacing both is the difference
+     * between "credentials rejected" and knowing WHY they were rejected.
+     */
+    public static function bindError($connection): string
+    {
+        $diag = '';
+        @ldap_get_option($connection, LDAP_OPT_DIAGNOSTIC_MESSAGE, $diag);
+
+        return ldap_error($connection).($diag !== '' ? ' ('.$diag.')' : '');
     }
 
     /**

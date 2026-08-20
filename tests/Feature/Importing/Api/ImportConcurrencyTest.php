@@ -119,6 +119,39 @@ class ImportConcurrencyTest extends ImportDataTestCase
     }
 
     #[Test]
+    public function two_sequential_slices_from_the_same_admin_both_succeed()
+    {
+        // Regression for #19510: reporter hit "already processing" on the
+        // second slice of a two-slice import even though nobody else was
+        // touching the system. Simulate exactly that: same admin, two
+        // sequential process() calls with offset/limit shaped like the
+        // real wizard sends them.
+        $admin = User::factory()->superuser()->create();
+
+        $file = AssetsImportFileBuilder::times(3);
+        $import = Import::factory()->asset()->create(['file_path' => $file->saveToImportsDirectory()]);
+
+        $this->actingAsForApi($admin);
+
+        $sliceOne = $this->importFileResponse([
+            'import' => $import->id,
+            'offset' => 0,
+            'limit' => 2,
+        ]);
+        $this->assertNotEquals(409, $sliceOne->status(), 'First slice should not hit the mutex.');
+
+        $sliceTwo = $this->importFileResponse([
+            'import' => $import->id,
+            'offset' => 2,
+            'limit' => 2,
+        ]);
+        $this->assertNotEquals(409, $sliceTwo->status(), 'Second slice should not hit the mutex after the first slice released it.');
+
+        $row = DB::table('imports')->where('id', $import->id)->first();
+        $this->assertNull($row->processing_by, 'Lock should be clear after the second slice.');
+    }
+
+    #[Test]
     public function stale_lock_older_than_five_minutes_is_taken_over()
     {
         // A prior slice from admin A crashed mid-import, leaving
