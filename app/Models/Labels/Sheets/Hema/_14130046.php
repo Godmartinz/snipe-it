@@ -179,9 +179,11 @@ class _14130046 extends RectangleSheet
 
             'field_label_font_size' => self::FIELD_SIZE,
             'field_label_margin' => 0,
+            'field_label_font' => 'freesans',
 
             'field_value_font_size' => 1.4,
             'field_value_margin' => self::FIELD_MARGIN,
+            'field_value_font' => 'freesans',
         ];
     }
 
