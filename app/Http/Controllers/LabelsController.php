@@ -19,6 +19,7 @@ use Illuminate\Validation\Rule;
 use App\Models\Labels\RectangleSheet;
 use App\Models\Labels\LabelPreviewAsset;
 use App\Models\Labels\LabelGeometryRules;
+use App\Models\Labels\CustomLabelFonts;
 
 class LabelsController extends Controller
 {
@@ -430,38 +431,28 @@ class LabelsController extends Controller
 
     public function customLabelPreview(Request $request, string $labelName)
     {
+        $request->validate([
+            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
+        ]);
         $labelName = str_replace('/', '\\', $labelName);
 
-        $customLabel = null;
-
-        if (str_starts_with($labelName, 'custom:')) {
-            $customLabelId = (int)str_replace('custom:', '', $labelName);
-
-            $customLabel = CustomUserLabel::find($customLabelId);
-        }
         $baseTemplate = match (true) {
-            $customLabel !== null => null,
             $labelName === 'DefaultLabel' => new DefaultLabel,
             $labelName === 'StandardTape' => null,
             default => Label::find($labelName),
         };
 
-        $isTape = $customLabel
-            ? $customLabel->type === 'tape'
-            : (
+        $isTape =
                 $request->input('type') === 'tape'
                 || str_starts_with($labelName, 'Tapes\\')
-                || $labelName === 'StandardTape'
-            );
-
-        if ($customLabel) {
-            $editorConfig = $customLabel->config_snapshot;
-        } else {
-            $editorConfig = [
-                'content' => $request->input('content', []),
-                'supports' => $request->input('supports', []),
-            ];
-        }
+                || $labelName === 'StandardTape';
+        $editorConfig = [
+            'content' => $request->input('content', []),
+            'supports' => $request->input('supports', []),
+        ];
         if ($isTape) {
             $editorConfig['dimensions'] = $request->input('dimensions', []);
             $template = new PreviewTapeLabel;

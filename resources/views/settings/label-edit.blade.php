@@ -153,7 +153,7 @@
                                         type="text"
                                         name="name"
                                         class="form-control"
-                                        value="{{ old('name', data_get($importedConfig ?? [], 'name', $defaultName)) }}"
+                                        value="{{ old('name', data_get($config ?? [], 'name', $defaultName)) }}"
                                         placeholder="Enter label name"
                                         style="max-width: 320px;"
                                 >
