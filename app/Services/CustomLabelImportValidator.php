@@ -172,11 +172,11 @@ class CustomLabelImportValidator
                 'label' => ['required', 'array'],
                 'label.width' => ['required', 'numeric', 'gt:0'],
                 'label.height' => ['required', 'numeric', 'gt:0'],
-                'label.border' => ['required', 'numeric', 'gt:0'],
-                'label.padding_top' => ['required', 'numeric', 'gt:0'],
-                'label.padding_right' => ['required', 'numeric', 'gt:0'],
-                'label.padding_bottom' => ['required', 'numeric', 'gt:0'],
-                'label.padding_left' => ['required', 'numeric', 'gt:0'],
+                'label.border' => ['required', 'numeric', 'min:0'],
+                'label.padding_top' => ['required', 'numeric', 'min:0'],
+                'label.padding_right' => ['required', 'numeric', 'min:0'],
+                'label.padding_bottom' => ['required', 'numeric', 'min:0'],
+                'label.padding_left' => ['required', 'numeric', 'min:0'],
 
                 /*
                 |--------------------------------------------------------------------------
