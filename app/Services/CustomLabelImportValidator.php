@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Labels\LabelGeometryRules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 use App\Models\Labels\CustomLabelFonts;
@@ -137,6 +138,7 @@ class CustomLabelImportValidator
     {
         return array_merge(
             $this->printableAreaRules(),
+            LabelGeometryRules::sheet(),
             [
                 /*
                 |--------------------------------------------------------------------------
@@ -144,8 +146,8 @@ class CustomLabelImportValidator
                 |--------------------------------------------------------------------------
                 */
                 'page' => ['required', 'array'],
-                'page.width' => ['required', 'numeric'],
-                'page.height' => ['required', 'numeric'],
+                'page.width' => ['required', 'numeric', 'gt:0'],
+                'page.height' => ['required', 'numeric', 'gt:0'],
                 'page.margin_top' => ['required', 'numeric'],
                 'page.margin_right' => ['required', 'numeric'],
                 'page.margin_bottom' => ['required', 'numeric'],
@@ -157,10 +159,10 @@ class CustomLabelImportValidator
                 |--------------------------------------------------------------------------
                 */
                 'grid' => ['required', 'array'],
-                'grid.columns' => ['required', 'integer'],
-                'grid.rows' => ['required', 'integer'],
-                'grid.column_spacing' => ['required', 'numeric'],
-                'grid.row_spacing' => ['required', 'numeric'],
+                'grid.columns' => ['required', 'integer', 'min:1'],
+                'grid.rows' => ['required', 'integer', 'min:1'],
+                'grid.row_spacing' => ['required', 'numeric', 'min:0'],
+                'grid.column_spacing' => ['required', 'numeric', 'min:0'],
 
                 /*
                 |--------------------------------------------------------------------------
@@ -168,13 +170,13 @@ class CustomLabelImportValidator
                 |--------------------------------------------------------------------------
                 */
                 'label' => ['required', 'array'],
-                'label.width' => ['required', 'numeric'],
-                'label.height' => ['required', 'numeric'],
-                'label.border' => ['required', 'numeric'],
-                'label.padding_top' => ['required', 'numeric'],
-                'label.padding_right' => ['required', 'numeric'],
-                'label.padding_bottom' => ['required', 'numeric'],
-                'label.padding_left' => ['required', 'numeric'],
+                'label.width' => ['required', 'numeric', 'gt:0'],
+                'label.height' => ['required', 'numeric', 'gt:0'],
+                'label.border' => ['required', 'numeric', 'gt:0'],
+                'label.padding_top' => ['required', 'numeric', 'gt:0'],
+                'label.padding_right' => ['required', 'numeric', 'gt:0'],
+                'label.padding_bottom' => ['required', 'numeric', 'gt:0'],
+                'label.padding_left' => ['required', 'numeric', 'gt:0'],
 
                 /*
                 |--------------------------------------------------------------------------

@@ -3334,7 +3334,7 @@
                 + '</button>&nbsp;';
 
             // Delete button
-            var safeName = $('<div>').text(row.name || 'this label').html();
+            var safeName = $('<div>').text(row.name || 'this label').html().replace(/"/g, '&quot;');
             var deleteUrl = deleteLabelUrlTemplate.replace('label_id', row.custom_label_id);
 
             actions += '<a href="' + deleteUrl + '" '
@@ -3354,12 +3354,8 @@
 
     function labelNameFormatter(value) {
         if (!value) return '';
-
-        // Normalize slashes just in case
-        value = value.replace(/\//g, '\\');
-
-        // Remove "Sheets\" or "Tapes\" from the beginning
-        return value.replace(/^(Sheets|Tapes)\\/, '');
+        value = String(value).replace(/\//g, '\\').replace(/^(Sheets|Tapes)\\/, '');
+        return $('<div/>').text(value).html();
     }
 
     function labelPerPageFormatter(value, row, index, field) {

@@ -18,6 +18,7 @@ use App\Services\CustomLabelImportValidator;
 use Illuminate\Validation\Rule;
 use App\Models\Labels\RectangleSheet;
 use App\Models\Labels\LabelPreviewAsset;
+use App\Models\Labels\LabelGeometryRules;
 
 class LabelsController extends Controller
 {
@@ -142,15 +143,18 @@ class LabelsController extends Controller
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['nullable', 'string'],
+            'type' => ['required', Rule::in(['sheet', 'tape'])],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
         ];
 
         if (!$isTape) {
-            $rules['page'] = ['required', 'array'];
-            $rules['grid'] = ['required', 'array'];
-            $rules['label'] = ['required', 'array'];
+            $rules += [
+                'page' => ['required', 'array'],
+                'grid' => ['required', 'array'],
+                'label' => ['required', 'array'],
+            ];
+            $rules += LabelGeometryRules::sheet();
         }
 
         $validated = $request->validate($rules);
@@ -250,14 +254,17 @@ class LabelsController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'template' => ['nullable', 'string'],
-            'type' => ['nullable', 'string'],
+            'type' => ['required', Rule::in(['sheet', 'tape'])],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
         ];
         if ($type === 'sheet') {
-            $rules['page'] = ['required', 'array'];
-            $rules['grid'] = ['required', 'array'];
-            $rules['label'] = ['required', 'array'];
+            $rules += [
+                'page' => ['required', 'array'],
+                'grid' => ['required', 'array'],
+                'label' => ['required', 'array'],
+            ];
+            $rules += LabelGeometryRules::sheet();
         }
         if ($type === 'tape') {
             $rules['dimensions'] = ['required', 'array'];
