@@ -2,7 +2,7 @@
 
 use Illuminate\Pagination\BootstrapPresenter;
 
-$presenter = new BootstrapPresenter($paginator);
+    $presenter = new BootstrapPresenter($paginator);
 
 $trans = $environment->getTranslator();
 ?>
