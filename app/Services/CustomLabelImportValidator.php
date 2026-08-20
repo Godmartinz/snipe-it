@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
+use App\Models\Labels\CustomLabelFonts;
 class CustomLabelImportValidator
 {
     public function validate(?string $rawJson): array
@@ -100,10 +102,10 @@ class CustomLabelImportValidator
             'content.field_value_font_size' => ['required', 'numeric'],
             'content.field_value_margin' => ['required', 'numeric'],
 
-            'content.tag_font' => ['nullable', 'string'],
-            'content.title_font' => ['nullable', 'string'],
-            'content.field_label_font' => ['nullable', 'string'],
-            'content.field_value_font' => ['nullable', 'string'],
+            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED)],
+            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED)],
+            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED)],
+            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED)],
         ];
     }
 
