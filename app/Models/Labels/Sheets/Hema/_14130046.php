@@ -25,7 +25,7 @@ class _14130046 extends RectangleSheet
 
     private const PAGE_MARGIN_TOP = 4.0;
 
-    private const PAGE_MARGIN_LEFT = 1.0;
+    private const PAGE_MARGIN_LEFT = 2.0;
 
     private const LABEL_WIDTH = 38.0;
 
@@ -166,6 +166,23 @@ class _14130046 extends RectangleSheet
     public function getSupportTitle()
     {
         return true;
+    }
+
+    protected function getContentEditorConfig(): array
+    {
+        return [
+            'barcode_2d_size' => $this->getLabelHeight() - (2 * self::CONTENT_MARGIN),
+            'barcode_margin' => self::QR_GUTTER,
+
+            'title_font_size' => self::TITLE_SIZE,
+            'title_margin' => self::TITLE_MARGIN,
+
+            'field_label_font_size' => self::FIELD_SIZE,
+            'field_label_margin' => 0,
+
+            'field_value_font_size' => 1.4,
+            'field_value_margin' => self::FIELD_MARGIN,
+        ];
     }
 
     public function preparePDF($pdf) {}
