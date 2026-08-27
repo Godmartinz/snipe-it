@@ -118,6 +118,7 @@ class Asset extends Depreciable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'warranty_expires' => 'datetime',
     ];
 
     /**
@@ -281,6 +282,16 @@ class Asset extends Depreciable
         static::softDeleted(function (Asset $asset) {
             $asset->requests()->delete();
         });
+
+        static::saving(function ($asset) {
+            if ($asset->isDirty(['purchase_date', 'warranty_months'])) {
+                $asset->warranty_expires =
+                    $asset->purchase_date && $asset->warranty_months
+                        ? Carbon::parse($asset->purchase_date)
+                        ->addMonths((int)$asset->warranty_months)
+                        : null;
+            }
+        });
     }
 
     public function setExpectedCheckinAttribute($value)
@@ -357,7 +368,7 @@ class Asset extends Depreciable
     protected function warrantyExpires(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => (! empty($attributes['warranty_months']) && ! empty($attributes['purchase_date'])) ? Carbon::parse($attributes['purchase_date'])->addMonths((int) $attributes['warranty_months']) : null,
+            get: fn($value) => $value ? Carbon::parse($value) : null,
         );
     }
 
@@ -368,7 +379,7 @@ class Asset extends Depreciable
     {
 
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => Helper::getFormattedDateObject($this->warrantyExpires, 'date', false)
+            get: fn() => $this->warranty_expires ? Helper::getFormattedDateObject($this->warranty_expires, 'date', false) : null,
         );
     }
 
@@ -378,7 +389,7 @@ class Asset extends Depreciable
     protected function warrantyExpiresDiff(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->warrantyExpires ? round((Carbon::now()->diffInDays($this->warrantyExpires))) : null,
+            get: fn() => $this->warranty_expires ? round((Carbon::now()->diffInDays($this->warranty_expires))) : null,
         );
 
     }
@@ -389,7 +400,7 @@ class Asset extends Depreciable
     protected function warrantyExpiresDiffForHumans(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->warrantyExpires ? Carbon::parse($this->warrantyExpires)->diffForHumans() : null,
+            get: fn() => $this->warranty_expires ? Carbon::parse($this->warranty_expires)->diffForHumans() : null,
         );
 
     }
@@ -1141,40 +1152,19 @@ class Asset extends Depreciable
      *
      * @return mixed
      */
-    public static function getExpiringWarrantyOrEol($days = 30)
+    public static function getExpiringWarrantyOrEol($query, $days = 30)
     {
         $now = now();
         $end = now()->addDays($days);
 
-        $expired_assets = self::query()
-            ->where('archived', '=', '0')
-            ->NotArchived()
+        return self::query()
+            ->where('archived', '0')
             ->whereNull('deleted_at')
-            ->whereNotNull('asset_eol_date')
-            ->whereBetween('asset_eol_date', [$now, $end])
-            ->get();
-
-        $assets_with_warranties = self::query()
-            ->where('archived', '=', '0')
-            ->NotArchived()
-            ->whereNull('deleted_at')
-            ->whereNotNull('purchase_date')
-            ->whereNotNull('warranty_months')
-            ->get();
-
-        $expired_warranties = $assets_with_warranties->filter(function ($asset) use ($now, $end) {
-            $expiration_window = Carbon::parse($asset->purchase_date)->addMonths((int) $asset->warranty_months);
-
-            return $expiration_window->betweenIncluded($now, $end);
-        });
-
-        return $expired_assets->concat($expired_warranties)
-            ->unique('id')
-            ->sortBy([
-                ['asset_eol_date', 'ASC'],
-                ['purchase_date', 'ASC'],
-            ])
-            ->values();
+            ->where(function ($query) use ($now, $end) {
+                $query
+                    ->whereBetween('asset_eol_date', [$now, $end])
+                    ->orWhereBetween('warranty_expires', [$now, $end]);
+            });
     }
 
     /**

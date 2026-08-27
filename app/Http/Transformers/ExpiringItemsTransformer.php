@@ -39,6 +39,7 @@ class ExpiringItemsTransformer
             $rows[] = [
                 'id' => $license->id,
                 'name' => $license->name,
+                'serial' => $license,
                 'purchase_date' => $license->purchase_date_formatted ?? null,
                 'expiration' => $license->expires_formatted_date ? $license->expires_formatted_date . ($license->expires_diff_for_humans ? ' ('.$license->expires_diff_for_humans.')' : '') : null,
                 'termination_date' => $license->terminates_formatted_date ? $license->terminates_formatted_date . ($license->terminates_diff_for_humans ? ' ('.$license->terminates_diff_for_humans.')' : '') : null,

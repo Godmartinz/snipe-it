@@ -34,14 +34,14 @@ class ExpiringItemsPresenter extends Presenter
             [
                 'field' => 'model',
                 'searchable' => true,
-                'sortable' => true,
+                'sortable' => false,
                 'title' => trans('admin/hardware/form.model'),
                 'visible' => true,
             ],
             [
                 'field' => 'model_number',
                 'searchable' => true,
-                'sortable' => true,
+                'sortable' => false,
                 'title' => trans('general.model_no'),
                 'visible' => true,
             ],
@@ -100,6 +100,13 @@ class ExpiringItemsPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.name'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'serial',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.license_serial'),
                 'visible' => true,
             ],
             [
