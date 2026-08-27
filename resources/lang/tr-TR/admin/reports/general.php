@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Kabul talebi silindi',
     'acceptance_request' => 'Kabul talebi',
     'custom_export' => [
+        'asset_company' => 'Demirbaş Şirketi',
+        'asset_serial' => 'Demirbaş Seri Numarası',
+        'assigned_asset_tag' => 'Çıkış Yapılan Demirbaş Etiketi',
         'user_address' => 'Kullanıcı Adresi',
         'user_company' => 'Kullanıcı Şirketi',
         'user_city' => 'Kullanıcı Şehri',

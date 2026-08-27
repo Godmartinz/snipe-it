@@ -3,7 +3,9 @@
 namespace App\Presenters;
 
 /**
- * Class AssetModelPresenter
+ * Class MaintenancesPresenter
+ *
+ * @property \App\Models\Maintenance $model
  */
 class MaintenancesPresenter extends Presenter
 {
@@ -16,7 +18,17 @@ class MaintenancesPresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+            [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -24,6 +36,7 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -33,6 +46,7 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -42,6 +56,7 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -50,24 +65,28 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'companiesLinkObjFormatter',
             ], [
                 'field' => 'asset_name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/table.asset_name'),
                 'formatter' => 'assetNameLinkFormatter',
             ], [
                 'field' => 'asset_tag',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.asset_tag'),
                 'formatter' => 'assetTagLinkFormatter',
             ], [
                 'field' => 'serial',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.serial'),
                 'formatter' => 'assetSerialLinkFormatter',
             ], [
                 'field' => 'status_label',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.status'),
@@ -75,6 +94,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'statuslabelsLinkObjFormatter',
             ], [
                 'field' => 'model',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -83,6 +103,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'modelsLinkObjFormatter',
             ], [
                 'field' => 'model.model_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -90,6 +111,7 @@ class MaintenancesPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'assigned_to',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/form.checkedout_to'),
@@ -98,6 +120,7 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'supplier',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -106,19 +129,23 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'suppliersLinkObjFormatter',
             ], [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.location'),
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
-                'field' => 'maintenance_type',
+                'field' => 'maintenance_type_details',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/maintenances/form.asset_maintenance_type'),
                 'visible' => true,
+                'formatter' => 'maintenanceTypesLinkObjFormatter',
             ], [
                 'field' => 'responsible_party',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => false,
                 'switchable' => true,
@@ -127,6 +154,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'checked_out_to_at_creation',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -134,6 +162,7 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'completed_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -142,6 +171,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'completed_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -150,35 +180,41 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'start_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.start_date'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
-                'field' => 'completion_date',
+                'field' => 'expected_completion_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.completion_date'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'url',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.url'),
                 'formatter' => 'externalLinkFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.notes'),
             ], [
                 'field' => 'is_warranty',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/table.is_warranty'),
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.cost'),
@@ -186,6 +222,7 @@ class MaintenancesPresenter extends Presenter
                 'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -193,6 +230,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -201,6 +239,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -209,6 +248,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -227,6 +267,7 @@ class MaintenancesPresenter extends Presenter
         $layout = [
             [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -235,18 +276,21 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'asset_tag',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.asset_tag'),
             ],
             [
                 'field' => 'asset_name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/table.asset_name'),
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -255,6 +299,7 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -264,17 +309,20 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'serial',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.serial'),
             ], [
                 'field' => 'status_label',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.status'),
                 'visible' => true,
             ], [
                 'field' => 'model',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -282,6 +330,7 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'model_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -289,6 +338,7 @@ class MaintenancesPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'assigned_to',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/form.checkedout_to'),
@@ -296,6 +346,7 @@ class MaintenancesPresenter extends Presenter
             ],
             [
                 'field' => 'supplier',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -303,18 +354,22 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.location'),
             ], [
-                'field' => 'maintenance_type',
+                'field' => 'maintenance_type_details',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/maintenances/form.asset_maintenance_type'),
                 'visible' => true,
+                'formatter' => 'maintenanceTypesLinkObjFormatter',
             ], [
                 'field' => 'responsible_party',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => false,
                 'switchable' => true,
@@ -323,6 +378,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'checked_out_to_at_creation',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -330,23 +386,27 @@ class MaintenancesPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'start_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.start_date'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
-                'field' => 'completion_date',
+                'field' => 'expected_completion_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.completion_date'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'asset_maintenance_time',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.asset_maintenance_time'),
             ], [
                 'field' => 'completed_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -355,6 +415,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'completed_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -363,23 +424,27 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'url',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.url'),
                 'formatter' => 'externalLinkFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.notes'),
             ], [
                 'field' => 'is_warranty',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/table.is_warranty'),
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/maintenances/form.cost'),
@@ -387,12 +452,14 @@ class MaintenancesPresenter extends Presenter
                 'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
                 'visible' => false,
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -401,6 +468,7 @@ class MaintenancesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -411,5 +479,40 @@ class MaintenancesPresenter extends Presenter
         ];
 
         return json_encode($layout);
+    }
+
+    /**
+     * Display name for the unified calendar. Renders as
+     * "<maintenance name> - <asset name or unknown>" so the event
+     * tile carries enough context to identify what and where without
+     * clicking through.
+     */
+    public function name()
+    {
+        $itemLabel = $this->model->item
+            ? ($this->model->item->display_name ?? $this->model->item->name ?? '')
+            : trans('general.unknown');
+
+        return sprintf('%s - %s', $this->model->name, $itemLabel);
+    }
+
+    /**
+     * Deep link used by the calendar event tile. Routes to the
+     * maintenance show page.
+     */
+    public function calendarUrl(): ?string
+    {
+        return route('maintenances.show', $this->model->id);
+    }
+
+    /**
+     * Color precedence for the calendar tile: maintenance type's
+     * tag_color when the admin has set one so tenants can color-code
+     * by "recall vs upgrade vs routine service". Otherwise null and
+     * the frontend paints from a per-event_type CSS palette.
+     */
+    public function calendarColor(): ?string
+    {
+        return $this->model->maintenanceType?->tag_color;
     }
 }

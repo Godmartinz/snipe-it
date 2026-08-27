@@ -32,8 +32,8 @@ return [
         ],
 
         'checkin_selected' => [
-            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
-            'no_seats_selected' => 'No seats were selected.',
+            'success' => ':count место успешно выдано | :count мест было успешно выдано.',
+            'no_seats_selected' => 'Места не выбраны.',
         ],
 
         'checkout_all' => [
@@ -47,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Нечего делать. Нет пользователей, у которых еще нет этой лицензии.',
             'log_msg' => 'Выдано через массовую выдачу лицензий в GUI',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

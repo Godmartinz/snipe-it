@@ -1,12 +1,12 @@
 <div>
     @if ($authorizationError)
-        <div class="alert alert-danger">
+        <x-alert type="danger">
             <p>
                 {{ trans('admin/users/message.insufficient_permissions') }}
                 <br>
                 {{ $authorizationError }}
             </p>
-        </div>
+        </x-alert>
     @endif
 
     @if ($this->showOauthClients())
@@ -27,16 +27,16 @@
             >
                 <thead>
                     <tr>
-                        <th data-field="id" data-sortable="true">{{ trans('general.id') }}</th>
-                        <th data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
-                        <th data-field="client_type" data-sortable="true">{{ trans('admin/settings/general.oauth_client_type') }}</th>
-                        <th data-field="revoked" data-sortable="true">{{ trans('general.status') }}</th>
-                        <th data-field="redirect" data-sortable="true">{{ trans('admin/settings/general.oauth_redirect_url') }}</th>
-                        <th data-field="secret" data-sortable="true">{{ trans('admin/settings/general.oauth_secret') }}</th>
-                        <th data-field="associated_token_count" data-sortable="true">{{ trans('admin/settings/general.oauth_associated_token_count') }}</th>
-                        <th data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
-                        <th data-field="updated_at" data-sortable="true">{{ trans('general.updated_at') }}</th>
-                        <th>
+                        <th scope="col" data-field="id" data-sortable="true">{{ trans('general.id') }}</th>
+                        <th scope="col" data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
+                        <th scope="col" data-field="client_type" data-sortable="true">{{ trans('admin/settings/general.oauth_client_type') }}</th>
+                        <th scope="col" data-field="revoked" data-sortable="true">{{ trans('general.status') }}</th>
+                        <th scope="col" data-field="redirect" data-sortable="true">{{ trans('admin/settings/general.oauth_redirect_url') }}</th>
+                        <th scope="col" data-field="secret" data-sortable="true">{{ trans('admin/settings/general.oauth_secret') }}</th>
+                        <th scope="col" data-field="associated_token_count" data-sortable="true">{{ trans('admin/settings/general.oauth_associated_token_count') }}</th>
+                        <th scope="col" data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
+                        <th scope="col" data-field="updated_at" data-sortable="true">{{ trans('general.updated_at') }}</th>
+                        <th scope="col">
                             <span class="sr-only">{{ trans('general.actions') }}</span>
                         </th>
                     </tr>
@@ -126,12 +126,12 @@
             >
                 <thead>
                     <tr>
-                        <th data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
-                        <th data-field="client_owner" data-sortable="true">{{ trans('general.created_by') }}</th>
-                        <th data-field="oauth_scopes" data-sortable="true">{{ trans('admin/settings/general.oauth_scopes') }}</th>
-                        <th data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
-                        <th data-field="expires" data-sortable="true">{{ trans('general.expires') }}</th>
-                        <th>
+                        <th scope="col" data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
+                        <th scope="col" data-field="client_owner" data-sortable="true">{{ trans('general.created_by') }}</th>
+                        <th scope="col" data-field="oauth_scopes" data-sortable="true">{{ trans('admin/settings/general.oauth_scopes') }}</th>
+                        <th scope="col" data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
+                        <th scope="col" data-field="expires" data-sortable="true">{{ trans('general.expires') }}</th>
+                        <th scope="col">
                             <span class="sr-only">{{ trans('general.actions') }}</span>
                         </th>
                     </tr>
@@ -192,7 +192,7 @@
                 <div class="modal-body">
                     <!-- Form Errors -->
                     @if($errors->has('name') || $errors->has('redirect'))
-                        <div class="alert alert-danger">
+                        <x-alert type="danger">
                             <p><strong>Whoops!</strong> Something went wrong!</p>
                             <br>
                             <ul>
@@ -203,7 +203,7 @@
                                     <li>{{ $errors->first('redirect') }}</li>
                                 @endif
                             </ul>
-                        </div>
+                        </x-alert>
                     @endif
 
                     <!-- Create Client Form -->
@@ -279,7 +279,7 @@
 
                 <div class="modal-body">
                     @if($errors->has('newName') || $errors->has('newRedirect'))
-                        <div class="alert alert-danger">
+                        <x-alert type="danger">
                             <p><strong>Whoops!</strong> Something went wrong!</p>
                             <br>
                             <ul>
@@ -293,7 +293,7 @@
                                     <li>{{ $authorizationError }}</li>
                                 @endif
                             </ul>
-                        </div>
+                        </x-alert>
                     @endif
 
                     <!-- Edit Client Form -->

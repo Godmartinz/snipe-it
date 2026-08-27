@@ -195,9 +195,9 @@ class BulkCheckinSelectedLicenseSeatsTest extends TestCase implements TestsPermi
 
         [$myCompany, $otherCompany] = Company::factory()->count(2)->create();
 
-        $actor = User::factory()->checkinLicenses()->create(['company_id' => $myCompany->id]);
+        $actor = User::factory()->checkinLicenses()->forCompany($myCompany->id)->create();
         $otherLicense = License::factory()->create(['company_id' => $otherCompany->id, 'seats' => 2]);
-        $targetUser = User::factory()->create(['company_id' => $otherCompany->id]);
+        $targetUser = User::factory()->forCompany($otherCompany->id)->create();
         $seat = LicenseSeat::factory()->assignedToUser($targetUser)->create(['license_id' => $otherLicense->id]);
 
         $this->settings->enableMultipleFullCompanySupport();

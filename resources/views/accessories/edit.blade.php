@@ -13,11 +13,14 @@
 {{-- Page content --}}
 @section('content')
 
-<x-container class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<x-container class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
 
     <x-form :$item route="{{ isset($item->id) ? route('accessories.update', ['accessory' => $item->id]) : route('accessories.store') }}">
 
-        <x-box>
+        <x-box top_submit>
+            @if ($item->id)
+                <x-slot:header>{{ $item->name }}</x-slot:header>
+            @endif
 
             <x-input.company-select
                 :label="trans('general.company')"
@@ -39,12 +42,6 @@
                 categoryType="accessory"
             />
 
-            <x-input.supplier-select
-                :label="trans('general.supplier')"
-                name="supplier_id"
-                :selected="old('supplier_id', $item->supplier_id)"
-            />
-
             <x-input.manufacturer-select
                 :label="trans('general.manufacturer')"
                 name="manufacturer_id"
@@ -63,31 +60,66 @@
                 name="model_number"
             />
 
-            <x-form.row
-                :label="trans('general.order_number')"
-                :$item
-                name="order_number"
+            {{-- Acquisition metadata is create-only. Post-create qty
+                 changes flow through the adjust-quantity modal so each
+                 change becomes a QuantityAdjust action_log entry (with
+                 its own note / order_number / supplier / date / price)
+                 instead of a silent parent-column overwrite. Every
+                 later acquisition lives on its own Order + OrderItem. --}}
+            @if (! $item->id)
+                <x-input.supplier-select
+                    :label="trans('general.supplier')"
+                    name="supplier_id"
+                    :selected="old('supplier_id', $item->supplier_id)"
+                />
+
+                <x-form.row
+                    :label="trans('general.order_number')"
+                    :$item
+                    name="order_number"
+                />
+
+                <x-form.row
+                    :label="trans('general.purchase_date')"
+                    name="purchase_date"
+                    type="datepicker"
+                    :item="$item"
+                    input_div_class="col-md-4"
+                />
+
+                <x-input.purchase-cost
+                    :label="trans('general.unit_cost')"
+                    :item="$item"
+                    :currencyType="$item->location->currency ?? null"
+                />
+
+                <x-form.row
+                    :label="trans('general.currency')"
+                    name="currency"
+                    input_div_class="col-md-3"
+                    :help_text="trans('general.currency_prefilled_hint')"
+                >
+                    <x-slot:input>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="currency"
+                            name="currency"
+                            maxlength="10"
+                            value="{{ old('currency', $item->location->currency ?? $snipeSettings->default_currency) }}"
+                            aria-label="{{ trans('general.currency') }}"
+                        />
+                    </x-slot:input>
+                </x-form.row>
+
+                <x-input.quantity :item="$item" min="0" />
+            @endif
+
+            <x-input.supplier-select
+                :label="trans('general.default_supplier')"
+                name="default_supplier_id"
+                :selected="old('default_supplier_id', $item->default_supplier_id)"
             />
-
-            <div class="form-group {{ $errors->has('purchase_date') ? 'has-error' : '' }}">
-                <label for="purchase_date" class="col-md-3 control-label">{{ trans('general.purchase_date') }}</label>
-                <div class="input-group col-md-4">
-                    <x-input.datepicker
-                        name="purchase_date"
-                        id="purchase_date"
-                        :value="old('purchase_date', $item->purchase_date ? date('Y-m-d', strtotime($item->purchase_date)) : '')"
-                    />
-                    {!! $errors->first('purchase_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                </div>
-            </div>
-
-            <x-input.purchase-cost
-                :label="trans('general.unit_cost')"
-                :item="$item"
-                :currencyType="$item->location->currency ?? null"
-            />
-
-            <x-input.quantity :item="$item" min="0" />
 
             <x-input.minimum-quantity :item="$item" />
 
@@ -98,7 +130,13 @@
                 type="textarea"
             />
 
-            @include ('partials.forms.edit.image-upload', ['image_path' => app('accessories_upload_path')])
+            <x-input.image-upload :item="$item" :imagePath="app('accessories_upload_path')" :clonedModel="$cloned_model ?? null" />
+
+            <x-form.checkbox-row
+                name="requestable"
+                :label="trans('admin/accessories/general.requestable')"
+                :item="$item"
+            />
 
             <x-slot:customfooter>
                 <x-redirect_submit_options

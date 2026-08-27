@@ -404,11 +404,11 @@ class BulkDelete extends Command
             ->where('activated', 1)
             ->where(function (Builder $q) use ($companyIds, $includeNull) {
                 if (! empty($companyIds)) {
-                    $q->whereIn('company_id', $companyIds);
+                    $q->whereHas('companies', fn (Builder $sub) => $sub->whereIn('companies.id', $companyIds));
                 }
                 if ($includeNull) {
-                    $method = ! empty($companyIds) ? 'orWhereNull' : 'whereNull';
-                    $q->{$method}('company_id');
+                    $method = ! empty($companyIds) ? 'orWhereDoesntHave' : 'whereDoesntHave';
+                    $q->{$method}('companies');
                 }
             });
     }
@@ -875,9 +875,10 @@ class BulkDelete extends Command
             // companies outside the selected scope. If so, only remove the selected-company
             // associations and skip full deletion to avoid orphaning them from their other companies.
             if (! empty($companyIds)) {
-                $allUserCompanyIds = array_unique(array_filter(array_merge(
+                // Pivot is the authoritative source of membership; the legacy
+                // users.company_id scalar is no longer consulted.
+                $allUserCompanyIds = array_values(array_unique(array_filter(
                     $user->companies()->pluck('companies.id')->toArray(),
-                    $user->company_id ? [$user->company_id] : [],
                 )));
                 $outsideCompanyIds = array_values(array_diff($allUserCompanyIds, $companyIds));
 
@@ -889,6 +890,7 @@ class BulkDelete extends Command
                         $this->reportLines[] = "Would partially disassociate user {$user->username} — also belongs to: {$outsideNames}";
                     } else {
                         $user->companies()->detach($companyIds);
+                        $user->syncLegacyCompanyIdMirror();
                         warning("  Skipped full deletion of {$user->username}: they also belong to {$outsideNames}. Removed selected company associations only.");
                         $this->reportLines[] = "Partially disassociated user {$user->username} — also belongs to: {$outsideNames}. Full deletion skipped.";
                     }

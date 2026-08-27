@@ -16,5 +16,7 @@ return [
         'confirm' => 'Uqinisekile ukuthi ufisa ukususa le nkampani?',
         'error' => 'Kube nenkinga yokususa inkampani. Ngicela uzame futhi.',
         'success' => 'INkampani isuliwe ngempumelelo.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

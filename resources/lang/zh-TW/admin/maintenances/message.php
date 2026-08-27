@@ -19,8 +19,10 @@ return [
     'warranty' => '保固',
     'not_warranty' => '無保固',
     'complete' => [
-        'confirm' => 'Are you sure you want to mark this maintenance as complete? This cannot be undone.',
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'confirm' => '您確定要將此維護標記為已完成嗎？此操作無法撤銷。',
+        'success' => '維護已標記為完成。',
+        'error' => '將此維護標記為完成時發生問題，請重試。',
     ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

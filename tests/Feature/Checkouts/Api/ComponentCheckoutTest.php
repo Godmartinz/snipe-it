@@ -129,7 +129,7 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $userForCompanyA = User::factory()->for($companyA)->create();
+        $userForCompanyA = User::factory()->forCompany($companyA)->create();
         $assetForCompanyB = Asset::factory()->for($companyB)->create();
         $componentForCompanyB = Component::factory()->for($companyB)->create();
 
@@ -147,7 +147,7 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $userInCompanyA = User::factory()->checkoutComponents()->for($companyA)->create();
+        $userInCompanyA = User::factory()->checkoutComponents()->forCompany($companyA)->create();
         $componentInCompanyA = Component::factory()->for($companyA)->create(['qty' => 1]);
         $assetInCompanyB = Asset::factory()->for($companyB)->create();
 
@@ -183,7 +183,7 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $superuser = User::factory()->superuser()->withoutCompany()->create();
         $componentInCompanyA = Component::factory()->for($companyA)->create(['qty' => 1]);
         $assetInCompanyB = Asset::factory()->for($companyB)->create();
 
@@ -211,5 +211,41 @@ class ComponentCheckoutTest extends TestCase implements TestsFullMultipleCompani
         ]);
 
         $this->assertEquals(1, $componentInCompanyA->fresh()->numRemaining());
+    }
+
+    /**
+     * Security regression pin: sibling to the consumable/accessory race
+     * tests. Two racing checkouts for a qty=1 component both used to see
+     * "1 available", both attach pivot rows, register lands at -1. Fix
+     * wraps writes in DB::transaction with a lockForUpdate re-check.
+     * Pre-drain the pivot to simulate the "someone else grabbed it"
+     * moment and assert we refuse.
+     */
+    public function test_checkout_refuses_when_inventory_is_already_exhausted(): void
+    {
+        $asset = Asset::factory()->create();
+        $component = Component::factory()->create(['qty' => 1]);
+        $actor = User::factory()->superuser()->create();
+
+        // Drain via a direct pivot insert.
+        $component->assets()->attach($component->id, [
+            'component_id' => $component->id,
+            'assigned_qty' => 1,
+            'created_by' => $actor->id,
+            'asset_id' => $asset->id,
+            'created_at' => Carbon::now(),
+        ]);
+
+        $this->assertEquals(0, $component->fresh()->numRemaining());
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.components.checkout', $component), [
+                'assigned_to' => $asset->id,
+                'assigned_qty' => 1,
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertEquals(1, $component->assets()->count(), 'A second pivot row would mean the register went negative');
+        $this->assertEquals(0, $component->fresh()->numRemaining());
     }
 }

@@ -91,7 +91,7 @@ return [
     'password' => 'Hasło',
     'password_reset' => 'Resetowanie hasła',
     'read_the_terms' => 'Proszę przeczytać warunki użytkowania przedstawione poniżej.',
-    'read_the_terms_and_click' => 'Please read the terms of use below, and click on the link at the bottom to confirm that you read and agree to the terms of use, and have received the item.',
+    'read_the_terms_and_click' => 'Proszę, zapoznaj się z warunkami korzystania poniżej. Następnie kliknij link, aby potwierdzić znajomość zasad i fakt otrzymania środka.',
     'click_here_to_review_terms_and_accept_item' => 'Click here to review the terms of use and accept the item|Click here to review the terms of use and accept the items',
     'requested' => 'Wymagane',
     'reset_link' => 'Link resetujący Twoje hasło',

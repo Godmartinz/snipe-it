@@ -27,7 +27,7 @@ function ip_in_range($ip, $range)
     $wildcard_decimal = pow(2, (32 - $netmask)) - 1;
     $netmask_decimal = ~$wildcard_decimal;
 
-    return  ($ip_decimal & $netmask_decimal) == ($range_decimal & $netmask_decimal);
+    return ($ip_decimal & $netmask_decimal) == ($range_decimal & $netmask_decimal);
 }
 // NOTE - this function was shamelessly stolen from this gist: https://gist.github.com/tott/7684443
 
@@ -170,7 +170,7 @@ class LdapTroubleshooter extends Command
             $output[] = '-D '.escapeshellarg($settings->ldap_uname);
 
             try {
-                $w = Crypt::Decrypt($settings->ldap_pword);
+                $w = Crypt::decrypt($settings->ldap_pword);
             } catch (Exception $e) {
                 $this->warn('Could not decrypt password. This usually means an LDAP password was not set or the APP_KEY was changed since the LDAP pasword was last saved.  Aborting.');
                 exit(0);
@@ -198,9 +198,12 @@ class LdapTroubleshooter extends Command
             ($major == 8 && $minor == 4 && $patch < 7)
         ) {
             $this->warn("PHP Version: $php_version WARNING - Versions before 8.3.21 or 8.4.7 will return INCONSISTENT results!");
-            if (! $this->confirm('Are you sure you wish to continue?')) {
-                $this->warn('ABORTING');
-                exit(-1);
+            if (! $this->option('force')) {
+                $confirmation = $this->confirm('Are you sure you wish to continue?');
+                if (! $confirmation) {
+                    $this->warn('ABORTING');
+                    exit(-1);
+                }
             }
         }
 
@@ -384,7 +387,7 @@ class LdapTroubleshooter extends Command
         $this->line('STAGE 4: Test Administrative Bind for LDAP Sync');
         foreach ($ldap_urls as $ldap_url) {
             try {
-                $w = Crypt::Decrypt($settings->ldap_pword);
+                $w = Crypt::decrypt($settings->ldap_pword);
             } catch (Exception $e) {
                 $this->warn('Could not decrypt password. This usually means an LDAP password was not set or the APP_KEY was changed since the LDAP pasword was last saved.  Aborting.');
                 exit(0);
@@ -405,7 +408,7 @@ class LdapTroubleshooter extends Command
 
         foreach ($ldap_urls as $ldap_url) {
             try {
-                $w = Crypt::Decrypt($settings->ldap_pword);
+                $w = Crypt::decrypt($settings->ldap_pword);
             } catch (Exception $e) {
                 $this->warn('Could not decrypt password. This usually means an LDAP password was not set or the APP_KEY was changed since the LDAP pasword was last saved.  Aborting.');
                 exit(0);

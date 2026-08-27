@@ -17,6 +17,8 @@ return [
         'confirm' => '您確定要刪除此部門嗎？',
         'error' => '刪除部門時發生問題，請重試。',
         'success' => '刪除部門成功。',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

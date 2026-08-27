@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Licenses;
 
+use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LicenseCheckoutRequest;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\CheckoutRequest;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Setting;
@@ -16,6 +18,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -36,7 +39,7 @@ class LicenseCheckoutController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function create(License $license)
+    public function create(Request $request, License $license)
     {
         $this->authorize('checkout', $license);
 
@@ -57,8 +60,21 @@ class LicenseCheckoutController extends Controller
                 session()->put(['checkout_to_type' => 'user']);
             }
 
-            // Return the checkout view
-            return view('licenses/checkout', compact('license'));
+            // Optional ?request_id hint. Present when the admin
+            // reached this screen from a /requests row. Drives the
+            // side-panel context box (who asked + waiting list).
+            // CheckoutRequest::contextForCheckout handles the URL-
+            // twiddle guards; a miss returns nulls / empty so the
+            // panel renders nothing.
+            $context = CheckoutRequest::contextForCheckout(
+                $request->integer('request_id') ?: null,
+                License::class,
+                $license->id,
+            );
+
+            return view('licenses/checkout', compact('license'))
+                ->with('checkoutRequest', $context['checkoutRequest'])
+                ->with('otherPendingRequests', $context['otherPendingRequests']);
         }
 
         // Invalid category
@@ -99,13 +115,21 @@ class LicenseCheckoutController extends Controller
         if (Setting::getSettings()->full_multiple_companies_support == '1') {
             if ($request->filled('asset_id')) {
                 $fmcsTarget = Asset::find($request->input('asset_id'));
-                if ($fmcsTarget && $license->company_id && $license->company_id !== $fmcsTarget->company_id) {
-                    return redirect()->route('licenses.index')->with('error', trans('general.error_user_company'));
+                if ($fmcsTarget && ! $license->canCheckoutTo($fmcsTarget)) {
+                    return redirect()->route('licenses.index')->with('error', trans('general.error_checkout_company_mismatch', [
+                        'item' => trans('general.license').' "'.$license->name.'"',
+                        'item_company' => $license->company?->name ?? trans('general.unassigned'),
+                        'target' => trans('general.asset').' "'.$fmcsTarget->display_name.'"',
+                    ]));
                 }
             } elseif ($request->filled('assigned_to')) {
                 $fmcsTarget = User::find($request->input('assigned_to'));
-                if ($fmcsTarget && ! $fmcsTarget->companies()->where('companies.id', $license->company_id)->exists()) {
-                    return redirect()->route('licenses.index')->with('error', trans('general.error_user_company'));
+                if ($fmcsTarget && ! $license->canCheckoutTo($fmcsTarget)) {
+                    return redirect()->route('licenses.index')->with('error', trans('general.error_checkout_company_mismatch', [
+                        'item' => trans('general.license').' "'.$license->name.'"',
+                        'item_company' => $license->company?->name ?? trans('general.unassigned'),
+                        'target' => trans('general.user').' "'.$fmcsTarget->username.'"',
+                    ]));
                 }
             }
         }
@@ -157,10 +181,7 @@ class LicenseCheckoutController extends Controller
 
                 // If requireAcceptance() is false the listener won't have created one; create it now.
                 if (! $acceptance) {
-                    $acceptance = new CheckoutAcceptance;
-                    $acceptance->checkoutable()->associate($licenseSeat);
-                    $acceptance->assignedTo()->associate($checkoutTarget);
-                    $acceptance->save();
+                    $acceptance = CreateCheckoutAcceptanceAction::run($licenseSeat, $checkoutTarget);
                 }
 
                 session([
@@ -270,7 +291,14 @@ class LicenseCheckoutController extends Controller
 
         $usersQuery = User::whereNull('deleted_at')->where('autoassign_licenses', '=', 1)->with('licenses');
         if (Setting::getSettings()->full_multiple_companies_support && $license->company_id) {
-            $usersQuery->where('company_id', '=', $license->company_id);
+            // Filter to users pivoted to the license's company. The scalar
+            // users.company_id column is deprecated; membership lives in the
+            // company_user pivot only.
+            $usersQuery->whereIn('users.id', function ($sub) use ($license) {
+                $sub->select('user_id')
+                    ->from('company_user')
+                    ->where('company_id', $license->company_id);
+            });
         }
         $users = $usersQuery->get();
         Log::debug($avail_count.' will be assigned');
@@ -290,16 +318,36 @@ class LicenseCheckoutController extends Controller
                 continue;
             }
 
-            $licenseSeat = $license->freeSeat();
-
-            // Update the seat with checkout info
-            $licenseSeat->assigned_to = $user->id;
-
-            if ($licenseSeat->save()) {
+            // Concurrency guard, same shape as Api\LicensesController::checkout.
+            // freeSeat() without $lock=true returns the first-available
+            // LicenseSeat unlocked; two racing bulkCheckout runs on the same
+            // license could each grab the same seat, both call save(), and
+            // both assigned_to writes land (second wins). The visible
+            // assignment is fine but logCheckout below runs twice and the
+            // decrement of $avail_count double-counts. Wrap each iteration
+            // in a transaction with freeSeat(lock: true) so the seat is
+            // pinned to this iteration until the save + log commit.
+            $seatClaimed = DB::transaction(function () use ($license, $user, &$avail_count, &$assigned_count) {
+                $licenseSeat = $license->freeSeat(lock: true);
+                if (! $licenseSeat) {
+                    return false;
+                }
+                $licenseSeat->assigned_to = $user->id;
+                if (! $licenseSeat->save()) {
+                    return false;
+                }
                 $avail_count--;
                 $assigned_count++;
                 $licenseSeat->logCheckout(trans('admin/licenses/general.bulk.checkout_all.log_msg'), $user);
                 Log::debug('License '.$license->name.' seat '.$licenseSeat->id.' checked out to '.$user->username);
+
+                return true;
+            });
+
+            if (! $seatClaimed) {
+                Log::debug('No free seat available for '.$user->username.'. Skipping...');
+
+                continue;
             }
 
             if ($avail_count == 0) {
@@ -313,5 +361,189 @@ class LicenseCheckoutController extends Controller
 
         return redirect()->back()->with('success', trans_choice('admin/licenses/general.bulk.checkout_all.success', 2, ['count' => $assigned_count]));
 
+    }
+
+    /**
+     * Bulk-fulfill screen for a license's pending-request queue.
+     * Mirrors AccessoryCheckoutController::bulkFulfillCreate - see
+     * there for the design rationale. Qty on a license request is
+     * the number of seats the requester asked for; the per-row
+     * fulfillment claims that many free seats via freeSeat(lock:true)
+     * in a loop.
+     */
+    public function bulkFulfillCreate(License $license)
+    {
+        $this->authorize('checkout', $license);
+
+        if ($license->availCount()->count() < 1) {
+            return redirect()->route('licenses.show', $license)
+                ->with('error', trans('admin/licenses/message.checkout.not_enough_seats'));
+        }
+
+        if ($license->isInactive()) {
+            return redirect()->route('licenses.show', $license)
+                ->with('error', trans('admin/licenses/message.checkout.license_is_inactive'));
+        }
+
+        $pendingRequests = CheckoutRequest::pending()
+            ->where('requestable_type', License::class)
+            ->where('requestable_id', $license->id)
+            ->with('user')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (CheckoutRequest $r) => $r->user !== null)
+            ->values();
+
+        if ($pendingRequests->isEmpty()) {
+            return redirect()->route('licenses.show', $license)
+                ->with('info', trans('admin/hardware/message.requests.no_active'));
+        }
+
+        return view('checkouts/fulfill-multiple', [
+            'item' => $license,
+            'pendingRequests' => $pendingRequests,
+            'formRoute' => route('licenses.fulfill-requests.store', $license),
+            'remaining' => (int) $license->availCount()->count(),
+            // License requests are one-seat-per-requester by
+            // convention (nobody realistically asks for 3 Photoshop
+            // seats for themselves), so hide the qty input on each
+            // row. The recipient-row component still emits a hidden
+            // qty=1 field so the controller's per-row shape stays
+            // uniform across every type.
+            'hideQty' => true,
+        ]);
+    }
+
+    /**
+     * Iterate the ticked rows. For each, claim `qty` free seats
+     * via freeSeat(lock: true) in its own transaction (partial-
+     * success semantics matching the existing license bulk-
+     * checkout-to-all-users pattern above). Fires CheckoutableCheckedOut
+     * per seat so the state-machine listener closes the request.
+     */
+    public function bulkFulfillStore(Request $request, License $license): RedirectResponse
+    {
+        $this->authorize('checkout', $license);
+
+        // Checkboxes post as enabled_requests[<request_id>]="1",
+        // keyed by request id (unchecked boxes don't post at all).
+        $enabledIds = collect(array_keys((array) $request->input('enabled_requests', [])))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($enabledIds->isEmpty()) {
+            return redirect()->route('licenses.fulfill-requests.create', $license)
+                ->with('error', trans('admin/hardware/message.requests.no_selection'));
+        }
+
+        $userInputs = (array) $request->input('user_id', []);
+        $noteInputs = (array) $request->input('notes', []);
+
+        $requests = CheckoutRequest::pending()
+            ->where('requestable_type', License::class)
+            ->where('requestable_id', $license->id)
+            ->whereIn('id', $enabledIds)
+            ->with('user')
+            ->get()
+            ->keyBy('id');
+
+        $adminUser = auth()->user();
+        $fulfilledSeats = 0;
+        $fulfilledRows = 0;
+        $errors = [];
+
+        foreach ($enabledIds as $requestId) {
+            /** @var CheckoutRequest|null $checkoutRequest */
+            $checkoutRequest = $requests->get($requestId);
+            if (! $checkoutRequest) {
+                $errors[] = trans('admin/hardware/message.requests.row_stale', ['id' => $requestId]);
+
+                continue;
+            }
+
+            $targetUserId = (int) ($userInputs[$requestId] ?? $checkoutRequest->user_id);
+            // License requests are one-seat-per-requester by
+            // convention (see bulkFulfillCreate for the rationale).
+            // Server-side pin to 1 regardless of what the form
+            // sends so a hand-crafted POST can't over-allocate.
+            $qty = 1;
+            $note = $noteInputs[$requestId] ?? $checkoutRequest->notes;
+
+            $targetUser = User::find($targetUserId);
+            if (! $targetUser) {
+                $errors[] = trans('admin/hardware/message.requests.row_user_missing', ['id' => $requestId]);
+
+                continue;
+            }
+
+            if (! $license->canCheckoutTo($targetUser)) {
+                $errors[] = trans('admin/hardware/message.requests.row_company_mismatch', [
+                    'id' => $requestId,
+                    'user' => $targetUser->display_name,
+                ]);
+
+                continue;
+            }
+
+            $claimed = 0;
+
+            for ($i = 0; $i < $qty; $i++) {
+                $seatClaimed = DB::transaction(function () use ($license, $targetUser, $note): ?LicenseSeat {
+                    $seat = $license->freeSeat(lock: true);
+                    if (! $seat) {
+                        return null;
+                    }
+                    $seat->assigned_to = $targetUser->id;
+                    $seat->created_by = auth()->id();
+                    $seat->notes = $note;
+                    if (! $seat->save()) {
+                        return null;
+                    }
+
+                    return $seat;
+                });
+
+                if (! $seatClaimed) {
+                    break;
+                }
+
+                try {
+                    event(new CheckoutableCheckedOut(
+                        $seatClaimed,
+                        $targetUser,
+                        $adminUser,
+                        $note,
+                        [],
+                        1,
+                        false,
+                    ));
+                } catch (\Throwable $e) {
+                    Log::warning('Bulk-fulfill event dispatch failed for request '.$requestId.' seat '.$seatClaimed->id.': '.$e->getMessage());
+                }
+
+                $claimed++;
+                $fulfilledSeats++;
+            }
+
+            if ($claimed === 0) {
+                $errors[] = trans('admin/hardware/message.requests.row_over_allocated', ['id' => $requestId]);
+
+                continue;
+            }
+
+            $fulfilledRows++;
+        }
+
+        $summary = trans('admin/hardware/message.requests.bulk_summary', [
+            'fulfilled' => $fulfilledRows,
+            'total' => $enabledIds->count(),
+        ]);
+
+        return redirect()->route('requests.index')
+            ->with($fulfilledRows > 0 ? 'success' : 'warning', $summary)
+            ->with('multi_error_messages', $errors);
     }
 }

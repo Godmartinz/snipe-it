@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Nije pronadjena nijedna standardna EULA. Dodaj jednu u Postavke.',
     'total' => 'Ukupno',
     'remaining' => 'Raspoloživo',
+    'requestable' => 'Korisnici mogu da zatraže ovu dodatnu opremu',
     'update' => 'Ažuriraj pribore',
     'use_default_eula' => 'Umesto ovoga upotrebite <a href="#" data-toggle="modal" data-target="#eulaModal">primarnu postavku EULA</a>.',
     'use_default_eula_disabled' => '<del>Koristi osnovnu, default EULA.</del> Nema primarne, default EULA. Dodajte jednu u Postavke.',

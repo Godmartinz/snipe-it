@@ -13,7 +13,7 @@ class UserCompanyLoggingTest extends TestCase
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $user = User::factory()->create(['company_id' => $companyA->id, 'jobtitle' => 'Engineer']);
+        $user = User::factory()->forCompany($companyA->id)->create(['jobtitle' => 'Engineer']);
         $user->companies()->sync([$companyA->id]);
 
         $actor = User::factory()->superuser()->create();
@@ -49,7 +49,7 @@ class UserCompanyLoggingTest extends TestCase
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $user = User::factory()->create(['company_id' => $companyA->id]);
+        $user = User::factory()->forCompany($companyA->id)->create();
         $user->companies()->sync([$companyA->id]);
 
         $actor = User::factory()->superuser()->create();
@@ -84,7 +84,7 @@ class UserCompanyLoggingTest extends TestCase
     {
         [$companyA, $companyB, $companyC] = Company::factory()->count(3)->create();
 
-        $user = User::factory()->create(['company_id' => $companyA->id]);
+        $user = User::factory()->forCompany($companyA->id)->create();
         $user->companies()->sync([$companyA->id, $companyB->id]);
 
         $actor = User::factory()->superuser()->create();
@@ -122,7 +122,7 @@ class UserCompanyLoggingTest extends TestCase
     {
         $company = Company::factory()->create();
 
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->forCompany($company->id)->create();
         $user->companies()->sync([$company->id]);
 
         $actor = User::factory()->superuser()->create();
@@ -147,5 +147,62 @@ class UserCompanyLoggingTest extends TestCase
             ->count();
 
         $this->assertEquals(0, $newLogs, 'No changes should produce no new log entries');
+    }
+
+    /**
+     * Regression for a Rollbar "Array to string conversion" on
+     * /api/v1/users/{id} update. When a malformed payload landed a
+     * nested array inside company_ids and the API path's intval coercion
+     * didn't fully flatten it, ->sync() bound the sub-array as a query
+     * param and PHP tripped array-to-string conversion. The method now
+     * coerces to a flat list of positive-int scalar ids up front.
+     */
+    public function test_sync_coerces_non_scalar_company_ids()
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $user = User::factory()->create();
+
+        // Deliberately hostile payload: nested array, string that intvals
+        // to a real id, string that intvals to zero (should drop), null,
+        // boolean, plus real ints. sync() must never see the non-scalars.
+        $user->syncCompaniesWithLogging([
+            $companyA->id,
+            [$companyB->id, 999],
+            (string) $companyB->id,
+            'not-a-number',
+            null,
+            true,
+            $companyA->id,
+        ]);
+
+        $this->assertEqualsCanonicalizing(
+            [$companyA->id, $companyB->id],
+            $user->companies()->pluck('companies.id')->toArray(),
+            'Only the scalar-coerceable real company ids should end up on the pivot'
+        );
+    }
+
+    public function test_sync_with_only_non_scalar_ids_detaches_all()
+    {
+        $company = Company::factory()->create();
+
+        $user = User::factory()->create();
+        $user->companies()->sync([$company->id]);
+
+        // Nothing scalar-coerceable to a positive int → an empty sync,
+        // which detaches every existing pivot row. Verifies the coercion
+        // reduces to [] rather than silently keeping the old set.
+        $user->syncCompaniesWithLogging([
+            [1, 2],
+            null,
+            'x',
+            false,
+        ]);
+
+        $this->assertEmpty(
+            $user->companies()->pluck('companies.id')->toArray(),
+            'Payload with no scalar-coerceable ids should detach all pivot rows'
+        );
     }
 }

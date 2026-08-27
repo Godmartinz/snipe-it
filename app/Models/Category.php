@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\Helper;
 use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\CategoryPresenter;
@@ -77,7 +76,6 @@ class Category extends SnipeModel
         'require_acceptance',
         'alert_on_response',
         'use_default_eula',
-        'created_by',
         'tag_color',
         'notes',
     ];
@@ -214,17 +212,23 @@ class Category extends SnipeModel
             return $this->{Str::plural($this->category_type).'_count'};
         }
 
+        // Use the relation method (->assets()) instead of property access
+        // (->assets) — the property form hydrates the entire collection
+        // just to read its size. On an asset category with thousands of
+        // rows that's thousands of model instances allocated for a single
+        // count comparison (visible as huge "Retrieved Models" totals in
+        // Debugbar). Method-style emits a single SELECT count(*).
         switch ($this->category_type) {
             case 'asset':
-                return $this->assets->count();
+                return $this->assets()->count();
             case 'accessory':
-                return $this->accessories->count();
+                return $this->accessories()->count();
             case 'component':
-                return $this->components->count();
+                return $this->components()->count();
             case 'consumable':
-                return $this->consumables->count();
+                return $this->consumables()->count();
             case 'license':
-                return $this->licenses->count();
+                return $this->licenses()->count();
             default:
                 return 0;
         }
@@ -291,14 +295,19 @@ class Category extends SnipeModel
      */
     public function getEula()
     {
-
+        // Route through SnipeModel::sanitizeEulaForRender (protected on
+        // the parent) so this override matches SnipeModel::getEula's
+        // rendered-output shape: parseEscapedMarkedown + <img> tag strip.
+        // Without the strip, callsites that render this method's output
+        // (users/print.blade.php, etc.) would emit <img> tags the parent
+        // path deliberately blocks per the mail-context LFR/SSRF hardening.
         if ($this->eula_text) {
-            return Helper::parseEscapedMarkedown($this->eula_text);
+            return $this->sanitizeEulaForRender($this->eula_text);
         } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula == '1')) {
-            return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
-        } else {
-            return null;
+            return $this->sanitizeEulaForRender(Setting::getSettings()->default_eula_text);
         }
+
+        return null;
     }
 
     /**

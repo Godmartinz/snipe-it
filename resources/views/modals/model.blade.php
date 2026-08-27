@@ -7,8 +7,8 @@
         </div>
         <div class="modal-body">
             <form action="{{ route('api.models.store') }}" onsubmit="return false">
-                <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-                </div>
+                <x-alert type="danger" id="modal_error_msg" style="display:none">
+                </x-alert>
                 @include('modals.partials.name', ['required' => 'true'])
                 @include('modals.partials.categories-select', ['required' => 'true'])
                 @include('modals.partials.manufacturer-select')

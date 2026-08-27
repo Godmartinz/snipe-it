@@ -13,4 +13,7 @@ return [
     'total' => 'Ընդհանուր',
     'update' => 'Թարմացնել բաղադրիչ',
     'checkin_limit' => 'Մուտքագրված գումարը պետք է հավասար կամ փոքր լինի :assigned_qty-ից',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

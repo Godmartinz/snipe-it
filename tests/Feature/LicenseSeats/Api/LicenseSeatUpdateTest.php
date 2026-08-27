@@ -451,7 +451,7 @@ class LicenseSeatUpdateTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $superuser = User::factory()->superuser()->withoutCompany()->create();
         $licenseInCompanyA = License::factory()->for($companyA)->create();
         $seatForCompanyA = LicenseSeat::factory()->create([
             'license_id' => $licenseInCompanyA->id,
@@ -459,7 +459,7 @@ class LicenseSeatUpdateTest extends TestCase
             'asset_id' => null,
             'notes' => null,
         ]);
-        $userInCompanyB = User::factory()->for($companyB)->create();
+        $userInCompanyB = User::factory()->forCompany($companyB)->create();
 
         $this->actingAsForApi($superuser)
             ->patchJson($this->route($seatForCompanyA), [

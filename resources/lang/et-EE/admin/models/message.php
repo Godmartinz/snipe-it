@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Mudeleid ei valitud, nii et midagi ei kustutatud.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count mudel(it) kustutati, kuid :fail_count ei õnnestunud kustutada kuna nendega on ikka veel vara seotud.',
     ],

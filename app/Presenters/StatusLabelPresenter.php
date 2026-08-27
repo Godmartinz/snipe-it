@@ -16,7 +16,16 @@ class StatusLabelPresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -24,6 +33,7 @@ class StatusLabelPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -32,6 +42,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'statuslabelsLinkFormatter',
             ], [
                 'field' => 'type',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -40,6 +51,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'statusLabelTypeFormatter',
             ], [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => false,
@@ -47,6 +59,7 @@ class StatusLabelPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'color',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -55,6 +68,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'colorTagFormatter',
             ],  [
                 'field' => 'show_in_nav',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -63,6 +77,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'default_label',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -71,6 +86,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -78,6 +94,7 @@ class StatusLabelPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -85,6 +102,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -93,6 +111,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -101,6 +120,7 @@ class StatusLabelPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

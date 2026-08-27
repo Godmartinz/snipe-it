@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => 'Полето :attribute мора да биде уникатно низ :table1 и :table2. ',
     'unique_undeleted' => ':attribute мора да биде уникатен.',
     'non_circular' => 'Полето :attribute не смее да создава циркуларна референца.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute не смее да биде низа.',
     'disallow_same_pwd_as_user_fields' => 'Лозинката не смее да биде иста со корисничкото име.',
     'letters' => 'Лозинката мора да содржи најмалку една буква.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute не е прикачен.',
     'uppercase' => 'Полето :attribute мора да биде големи букви.',
     'url' => 'Полето :attribute мора да биде валидна URL.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => 'Полето :attribute мора да биде валидна ULID.',
     'uuid' => 'Полето :attribute мора да биде валидна UUID.',
-    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
 
     /*

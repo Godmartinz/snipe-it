@@ -20,7 +20,7 @@ return [
         'error' => 'Podczas usuwania dostawcy napotkano błąd. Spróbuj ponownie.',
         'success' => 'Dostawca usunięty pomyślnie.',
         'not_found' => 'Dostawca nie został odnaleziony.',
-        'bulk_success' => 'Pomyślnie usunięto dostawcę.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -37,6 +37,7 @@
             />
 
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

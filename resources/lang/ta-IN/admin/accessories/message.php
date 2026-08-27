@@ -20,6 +20,8 @@ return [
         'confirm' => 'நிச்சயமாக இந்த துணை நீக்க விரும்புகிறீர்களா?',
         'error' => 'துணை நீக்குவதில் ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'துணை வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

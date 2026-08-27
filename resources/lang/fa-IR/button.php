@@ -3,6 +3,7 @@
 return [
     'actions' => 'اقدامات',
     'add' => 'افزودن جدید',
+    'back' => 'بازگشت',
     'cancel' => 'انصراف',
     'checkin_and_delete' => 'بررسی همه و حذف کاربر',
     'delete' => 'حذف',

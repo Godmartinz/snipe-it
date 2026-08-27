@@ -13,6 +13,7 @@ return [
     'pending' => 'Under arbeid',
     'status_type' => 'Statustype',
     'show_in_nav' => 'Vis i sidenavigasjon',
+    'status_label' => 'Status Label',
     'title' => 'Statusmerke',
     'undeployable' => 'Ikke utleverbar',
     'update' => 'Oppdater statusmerke',

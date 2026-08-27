@@ -109,7 +109,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->forCompany($company->id)->create();
         $asset = Asset::factory()->for($company)->assignedToUser($user)->create();
 
         $this->assertNotNull($asset->assigned_to);
@@ -212,7 +212,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->forCompany($company->id)->create();
         $asset = Asset::factory()->for($company)->assignedToUser($user)->create();
         $seat = LicenseSeat::factory()->create(['asset_id' => $asset->id, 'assigned_to' => $user->id]);
 
@@ -384,7 +384,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
 
         $this->runCommand($admin, [$company->id], ['users'])
             ->assertExitCode(0);
@@ -396,7 +396,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
         $seat = LicenseSeat::factory()->create(['assigned_to' => $user->id]);
 
         $this->runCommand($admin, [$company->id], ['users'])
@@ -409,7 +409,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
         Accessory::factory()->for($company)->checkedOutToUser($user)->create();
 
         $this->assertDatabaseHas('accessories_checkout', ['assigned_to' => $user->id]);
@@ -424,7 +424,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
         Consumable::factory()->for($company)->checkedOutToUser($user)->create();
 
         $this->assertDatabaseHas('consumables_users', ['assigned_to' => $user->id]);
@@ -439,7 +439,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
 
         CheckoutAcceptance::factory()->create(['assigned_to_id' => $user->id]);
 
@@ -452,7 +452,7 @@ class BulkDeleteTest extends TestCase
     public function test_admin_user_is_skipped_during_user_deletion(): void
     {
         $company = Company::factory()->create();
-        $admin = User::factory()->superuser()->create(['company_id' => $company->id, 'activated' => 1]);
+        $admin = User::factory()->superuser()->forCompany($company->id)->create(['activated' => 1]);
 
         $this->runCommand($admin, [$company->id], ['users'])
             ->assertExitCode(0);
@@ -585,7 +585,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->forCompany($company->id)->create();
         $asset = Asset::factory()->for($company)->assignedToUser($user)->create();
 
         $this->runCommand($admin, [$company->id], ['assets'], dryRun: true)
@@ -636,7 +636,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id]);
+        $user = User::factory()->forCompany($company->id)->create();
         $asset = Asset::factory()->for($company)->assignedToUser($user)->create();
 
         $this->runCommand($admin, [$company->id], ['assets'], deleteType: 'none')
@@ -694,7 +694,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         [$companyA, $companyB] = Company::factory()->count(2)->create();
-        $user = User::factory()->create(['company_id' => $companyA->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($companyA->id)->create(['activated' => 1]);
         $user->companies()->syncWithoutDetaching([$companyA->id, $companyB->id]);
 
         $this->runCommand($admin, [$companyA->id], ['users'])
@@ -712,7 +712,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
         $user->companies()->syncWithoutDetaching([$company->id]);
 
         $this->runCommand($admin, [$company->id], ['users'])
@@ -725,7 +725,7 @@ class BulkDeleteTest extends TestCase
     {
         $admin = User::factory()->superuser()->create();
         $company = Company::factory()->create();
-        $user = User::factory()->create(['company_id' => $company->id, 'activated' => 1]);
+        $user = User::factory()->forCompany($company->id)->create(['activated' => 1]);
         $user->companies()->syncWithoutDetaching([$company->id]);
 
         $this->assertDatabaseHas('company_user', ['user_id' => $user->id, 'company_id' => $company->id]);

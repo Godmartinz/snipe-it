@@ -193,6 +193,25 @@ class RestoreFromBackup extends Command
     protected $description = 'Restore from a previously created Snipe-IT backup file';
 
     /**
+     * File-path patterns under public/uploads that the restore should extract
+     * back to disk. Wildcard entries end in `*`; the classifier trims the
+     * wildcard and matches via strrpos. The Setting- and setting- entries
+     * catch the branding filename shape produced by ImageUploadRequest
+     * (Setting-<field><id>-<random>.<ext>). Both cases are listed because
+     * the classifier is case-sensitive and either case can appear depending
+     * on when the backup was created and which filesystem it came from.
+     * The default_avatar file lives in avatars/ and is caught by the
+     * public_dirs list, not here.
+     */
+    public const PUBLIC_FILES = [
+        'public/uploads/Setting-*',
+        'public/uploads/setting-*',
+        'public/uploads/logo.*',
+        'public/uploads/favicon.*',
+        'public/uploads/favicon-uploaded.*',
+    ];
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -200,6 +219,28 @@ class RestoreFromBackup extends Command
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /**
+     * Pick the DB client binary to invoke for a given driver. Prefers the
+     * driver-native name (mariadb for the mariadb driver, mysql otherwise),
+     * falls back to the other name if the preferred binary is missing.
+     * Returns null if neither exists in the given path.
+     */
+    public static function pickDbClientBinary(string $driver, string $binaryPath): ?string
+    {
+        $ext = \DIRECTORY_SEPARATOR === '\\' ? '.exe' : '';
+        $preferred = $driver === 'mariadb' ? 'mariadb' : 'mysql';
+        $fallback = $preferred === 'mariadb' ? 'mysql' : 'mariadb';
+
+        foreach ([$preferred, $fallback] as $name) {
+            $candidate = rtrim($binaryPath, \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR.$name.$ext;
+            if (file_exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -225,15 +266,19 @@ class RestoreFromBackup extends Command
             return $this->error('Data loss not confirmed');
         }
 
-        if (config('database.default') != 'mysql') {
-            return $this->error('DB_CONNECTION must be MySQL in order to perform a restore. Detected: '.config('database.default'));
+        $connectionName = config('database.default');
+        $connectionConfig = config("database.connections.$connectionName");
+        $driver = $connectionConfig['driver'] ?? null;
+
+        if (! in_array($driver, ['mysql', 'mariadb'], true)) {
+            return $this->error('DB_CONNECTION must be MySQL or MariaDB in order to perform a restore. Detected driver: '.($driver ?? 'unknown')." (connection: $connectionName)");
         }
 
         $za = new ZipArchive;
 
         $errcode = $za->open($filename/* , ZipArchive::RDONLY */); // that constant only exists in PHP 7.4 and higher
         if ($errcode !== true) {
-            $errors = [
+            $error_msg = match ($errcode) {
                 ZipArchive::ER_EXISTS => 'File already exists.',
                 ZipArchive::ER_INCONS => 'Zip archive inconsistent.',
                 ZipArchive::ER_INVAL => 'Invalid argument.',
@@ -243,9 +288,10 @@ class RestoreFromBackup extends Command
                 ZipArchive::ER_OPEN => "Can't open file.",
                 ZipArchive::ER_READ => 'Read error.',
                 ZipArchive::ER_SEEK => 'Seek error.',
-            ];
+                default => "Unknown reason: $errcode",
+            };
 
-            return $this->error('Could not access file: '.$filename.' - '.array_key_exists($errcode, $errors) ? $errors[$errcode] : " Unknown reason: $errcode");
+            return $this->error('Could not access file: '.$filename.' - '.$error_msg);
         }
 
         $private_dirs = [
@@ -286,14 +332,7 @@ class RestoreFromBackup extends Command
             'public/uploads/suppliers',
         ];
 
-        $public_files = [
-            'public/uploads/logo.*',
-            'public/uploads/setting-email_logo*',
-            'public/uploads/setting-label_logo*',
-            'public/uploads/setting-logo*',
-            'public/uploads/favicon.*',
-            'public/uploads/favicon-uploaded.*',
-        ];
+        $public_files = self::PUBLIC_FILES;
 
         $sqlfiles = [];
         $sqlfile_indices = [];
@@ -421,11 +460,18 @@ class RestoreFromBackup extends Command
         if (strpos($sqlfiles[0], 'db-dumps') === false) {
             // return $this->error("SQL backup file is missing 'db-dumps' component of full pathname: ".$sqlfiles[0]);
             // older Snipe-IT installs don't have the db-dumps subdirectory component
+            $this->warn("Did not find the 'db-dumps' directory - is this really a Snipe-IT backup file? Continuing anyways...");
         }
 
         $sql_stat = $za->statIndex($sqlfile_indices[0]);
         // $this->info("SQL Stat is: ".print_r($sql_stat,true));
         $sql_contents = $za->getStream($sql_stat['name']); // maybe copy *THIS* thing?
+
+        if ($sql_contents === false) {
+            $this->error('Unable to open SQL file: '.$sql_stat['name']);
+
+            return -1;
+        }
 
         // OKAY, now that we *found* the sql file if we're doing just the guess-prefix thing, we can do that *HERE* I think?
         if ($this->option('sanitize-guess-prefix')) {
@@ -449,47 +495,31 @@ class RestoreFromBackup extends Command
         $pipes = [];
 
         $env_vars = getenv();
-        $env_vars['MYSQL_PWD'] = config('database.connections.mysql.password');
-        // TODO notes: we are stealing the dump_binary_path (which *probably* also has your copy of the mysql binary in it. But it might not, so we might need to extend this)
-        //             we unilaterally prepend a slash to the `mysql` command. This might mean your path could look like /blah/blah/blah//mysql - which should be fine. But maybe in some environments it isn't?
-        $mysql_binary = config('database.connections.mysql.dump.dump_binary_path').\DIRECTORY_SEPARATOR.'mysql'.(\DIRECTORY_SEPARATOR == '\\' ? '.exe' : '');
-        if (! file_exists($mysql_binary)) {
-            return $this->error("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
+        $env_vars['MYSQL_PWD'] = $connectionConfig['password'];
+
+        $binaryPath = $connectionConfig['dump']['dump_binary_path'] ?? '';
+        $client_binary = static::pickDbClientBinary($driver, $binaryPath);
+        if ($client_binary === null) {
+            $preferred = $driver === 'mariadb' ? 'mariadb' : 'mysql';
+
+            return $this->error("DB client binary '$preferred' not found in DB_DUMP_PATH ('$binaryPath'). Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysql/mariadb client binary.");
         }
-        $proc_results = proc_open("$mysql_binary -h " .
-            escapeshellarg(config('database.connections.mysql.host')) .
-            ' -u ' . escapeshellarg(config('database.connections.mysql.username')) . ' ' .
-            ' -P ' . escapeshellarg(config('database.connections.mysql.port')) . ' ' .
-            escapeshellarg(config('database.connections.mysql.database')), // yanked -p since we pass via ENV
+
+        $proc_results = proc_open(escapeshellarg($client_binary).' -h '.
+            escapeshellarg($connectionConfig['host']).
+            ' --batch '.
+            ' --binary-mode '.
+            ' -u '.escapeshellarg($connectionConfig['username']).' '.
+            (empty($connectionConfig['unix_socket'])
+                ? ' -P '.escapeshellarg($connectionConfig['port'])
+                : ' -S '.escapeshellarg($connectionConfig['unix_socket'])). ' '.
+            escapeshellarg($connectionConfig['database']), // yanked -p since we pass via ENV
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             null,
             $env_vars); // this is not super-duper awesome-secure, but definitely more secure than showing it on the CLI, or dropping temporary files with passwords in them.
         if ($proc_results === false) {
-            return $this->error('Unable to invoke mysql via CLI');
-        }
-
-        // I'm not sure about these?
-        stream_set_blocking($pipes[1], false); // use non-blocking reads for stdout
-        stream_set_blocking($pipes[2], false); // use non-blocking reads for stderr
-
-        // $this->info("Stdout says? ".fgets($pipes[1])); //FIXME: I think we might need to set non-blocking mode to use this properly?
-        // $this->info("Stderr says? ".fgets($pipes[2])); //FIXME: ditto, same.
-        // should we read stdout?
-        // fwrite($pipes[0],config("database.connections.mysql.password")."\n"); //this doesn't work :(
-
-        // $sql_contents = fopen($sqlfiles[0], "r"); //NOPE! This isn't a real file yet, silly-billy!
-
-        // FIXME - this feels like it wants to go somewhere else?
-        // and it doesn't seem 'right' - if you can't get a stream to the .sql file,
-        // why do we care what's happening with pipes and stdout and stderr?!
-        if ($sql_contents === false) {
-            $stdout = fgets($pipes[1]);
-            $this->info($stdout);
-            $stderr = fgets($pipes[2]);
-            $this->info($stderr);
-
-            return false;
+            return $this->error('Unable to invoke DB client via CLI');
         }
 
         try {
@@ -511,17 +541,32 @@ class RestoreFromBackup extends Command
             }
         } catch (\Exception $e) {
             Log::error('Error during restore!!!! '.$e->getMessage());
-            // FIXME - put these back and/or put them in the right places?!
-            $err_out = fgets($pipes[1]);
-            $err_err = fgets($pipes[2]);
+            // Drain both pipes fully so the DB client's own diagnostic ends up in
+            // the log instead of just the downstream "broken pipe". Then include
+            // the process exit code so root-cause is visible without strace.
+            // The deprecation warning about maria-db is a red herring, and not the actual problem.
+            // "Deprecated program name. It will be removed in a future release, use '/usr/bin/mariadb' instead"
+            // was drowning out the actual problem.
+            stream_set_blocking($pipes[1], false);
+            stream_set_blocking($pipes[2], false);
+            $err_out = stream_get_contents($pipes[1]) ?: '';
+            $err_err = stream_get_contents($pipes[2]) ?: '';
+            fclose($pipes[0]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            $exit_code = proc_close($proc_results);
             Log::error('Error OUTPUT: '.$err_out);
             $this->info($err_out);
             Log::error('Error ERROR : '.$err_err);
             $this->error($err_err);
+            Log::error("DB client exited with code $exit_code");
+            $this->error("DB client exited with code $exit_code");
             throw $e;
         }
         if (! feof($sql_contents) || $bytes_read == 0) {
-            return $this->error('Not at end of file for sql file, or zero bytes read. aborting!');
+            $this->error('Not at end of file for sql file, or zero bytes read. aborting!');
+
+            return -1;
         }
 
         fclose($pipes[0]);

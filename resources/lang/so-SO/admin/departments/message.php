@@ -17,6 +17,8 @@ return [
         'confirm' => 'Ma hubtaa inaad rabto inaad tirtirto waaxdan?',
         'error' => 'Waxaa jirtay arin tir-tireysay waaxda. Fadlan isku day mar kale.',
         'success' => 'Waaxda waa lagu guuleystay in la tir-tiro.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

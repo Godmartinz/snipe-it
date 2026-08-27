@@ -228,7 +228,8 @@ class LocationFileTest extends TestCase
         $superUser = User::factory()->superuser()->create();
         $normalUser = User::factory()
             ->manageLocationFiles()
-            ->create(['company_id' => $company->id]);
+            ->forCompany($company)
+            ->create();
 
         $this->actingAsForApi($superUser)
             ->post(
@@ -255,7 +256,8 @@ class LocationFileTest extends TestCase
         $superUser = User::factory()->superuser()->create();
         $userInCompanyB = User::factory()
             ->manageLocationFiles()
-            ->create(['company_id' => $companyB->id]);
+            ->forCompany($companyB)
+            ->create();
 
         $this->actingAsForApi($superUser)
             ->post(

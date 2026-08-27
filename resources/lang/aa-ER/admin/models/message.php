@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'crwdns1975:0crwdne1975:0',
+        'nothing_deletable' => 'crwdns15197:0crwdne15197:0',
         'success' => 'crwdns11513:0crwdne11513:0',
         'success_partial' => 'crwdns1977:0crwdne1977:0',
     ],

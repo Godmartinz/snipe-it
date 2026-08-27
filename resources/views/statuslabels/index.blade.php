@@ -13,6 +13,10 @@
         <x-page-column class="col-md-9">
             <x-box>
 
+                <x-slot:bulkactions>
+                    <x-table.bulk-statuslabels />
+                </x-slot:bulkactions>
+
                 <x-table
                     name="statuslabel"
                     buttons="statuslabelButtons"
@@ -24,6 +28,7 @@
                 />
 
             </x-box>
+            <x-shiftclick/>
         </x-page-column>
         <x-page-column class="col-md-3">
 

@@ -15,6 +15,7 @@ class AssetModelPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
                 'titleTooltip' => trans('general.select_all_none'),
                 'printIgnore' => true,
@@ -22,6 +23,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -29,14 +31,16 @@ class AssetModelPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
-                'sortable' => true,
+                'sortable' => false,
                 'switchable' => true,
                 'title' => trans('admin/companies/table.title'),
                 'visible' => false,
                 'formatter' => 'companiesLinkObjFormatter',
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -46,6 +50,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -55,6 +60,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'manufacturer',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -64,6 +70,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'model_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -72,6 +79,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'min_amt',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -83,6 +91,7 @@ class AssetModelPresenter extends Presenter
 
             [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -93,6 +102,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'assets_assigned_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -103,6 +113,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'remaining',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -113,6 +124,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'percent_remaining',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -122,6 +134,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'assets_archived_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -132,6 +145,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'depreciation',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -141,6 +155,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'category',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -150,6 +165,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'eol',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -158,6 +174,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'fieldset',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -167,6 +184,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'requestable',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => false,
@@ -175,6 +193,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'require_serial',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => false,
@@ -183,6 +202,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -192,6 +212,7 @@ class AssetModelPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -199,6 +220,7 @@ class AssetModelPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -207,6 +229,7 @@ class AssetModelPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -219,6 +242,7 @@ class AssetModelPresenter extends Presenter
 
         $layout[] = [
             'field' => 'actions',
+            'scope' => 'col',
             'searchable' => false,
             'sortable' => false,
             'switchable' => false,
@@ -330,5 +354,58 @@ class AssetModelPresenter extends Presenter
         }
 
         return '<span class="'.(($this->deleted_at != '') ? 'deleted' : '').'">'.e($this->display_name).'</span>';
+    }
+
+    /**
+     * Column layout for the models tab on /account/requestable. Feeds
+     * <x-table> via api.assetmodels.requestable. Row shape comes from
+     * AssetModelsTransformer with assigned_to_self +
+     * available_actions.request/cancel/view populated so the
+     * assetmodelRequestable*Formatter JS helpers can render the
+     * request/cancel button-swap and link-vs-plain-text decision
+     * without a compile-time @can.
+     */
+    public static function dataTableLayoutRequestable(): string
+    {
+        return json_encode([
+            [
+                'field' => 'image',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.image'),
+                'formatter' => 'imageFormatter',
+            ], [
+                'field' => 'name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.asset_model'),
+                'formatter' => 'assetmodelRequestableNameFormatter',
+            ], [
+                'field' => 'category',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.category'),
+                'formatter' => 'categoriesLinkObjFormatter',
+            ], [
+                'field' => 'remaining',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('admin/accessories/general.remaining'),
+            ], [
+                'field' => 'actions',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'assetmodelRequestableActionsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+        ]);
     }
 }

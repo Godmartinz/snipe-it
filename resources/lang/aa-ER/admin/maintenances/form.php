@@ -15,6 +15,7 @@ return [
     'responsible_party' => 'crwdns14861:0crwdne14861:0',
     'checked_out_to_at_creation' => 'crwdns14863:0crwdne14863:0',
     'completed_at' => 'crwdns14865:0crwdne14865:0',
+    'completed_at_help' => 'crwdns15213:0crwdne15213:0',
     'completed_by' => 'crwdns14867:0crwdne14867:0',
     'mark_complete' => 'crwdns14869:0crwdne14869:0',
     'already_complete' => 'crwdns14871:0crwdne14871:0',

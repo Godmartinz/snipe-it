@@ -16,5 +16,7 @@ return [
         'confirm' => 'האם אתה בטוח שברצונך למחוק חברה זו?',
         'error' => 'היתה בעיה במחיקת החברה. בבקשה נסה שוב.',
         'success' => 'החברה נמחקה בהצלחה.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

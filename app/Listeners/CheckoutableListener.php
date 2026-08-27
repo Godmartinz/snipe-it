@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
 use App\Events\CheckoutableCheckedOut;
 use App\Mail\CheckinAccessoryMail;
 use App\Mail\CheckinAssetMail;
@@ -277,8 +278,17 @@ class CheckoutableListener
      */
     private function getCheckoutAcceptance($event)
     {
-        $checkedOutToType = get_class($event->checkedOutTo);
-        if ($checkedOutToType != "App\Models\User") {
+        // Resolve the acceptance target: the user who actually needs
+        // to accept. When the checkoutable was handed to a User
+        // directly, that's the target. When the checkoutable was
+        // handed to an Asset (which happens for Components checked
+        // out to an asset that's already assigned to a user), the
+        // asset's assigned User is the effective target, so they can
+        // accept the component from their profile. Any other target
+        // shape (Location, unassigned Asset, etc.) has no user on the
+        // hook, so no acceptance row is written. See GH #19570.
+        $acceptanceTarget = $this->resolveAcceptanceTarget($event->checkedOutTo);
+        if ($acceptanceTarget === null) {
             return null;
         }
 
@@ -286,25 +296,35 @@ class CheckoutableListener
             return null;
         }
 
-        $acceptance = new CheckoutAcceptance;
-        $acceptance->checkoutable()->associate($event->checkoutable);
-        $acceptance->assignedTo()->associate($event->checkedOutTo);
-
-        $acceptance->qty = 1;
-
-        if (isset($event->checkoutable->checkout_qty)) {
-            $acceptance->qty = $event->checkoutable->checkout_qty;
-        }
-
         $category = $this->getCategoryFromCheckoutable($event->checkoutable);
+        $alertOnResponseId = $category?->alert_on_response ? auth()->id() : null;
 
-        if ($category?->alert_on_response) {
-            $acceptance->alert_on_response_id = auth()->id();
+        return CreateCheckoutAcceptanceAction::run(
+            $event->checkoutable,
+            $acceptanceTarget,
+            $event->checkoutable->checkout_qty ?? 1,
+            $alertOnResponseId,
+        );
+    }
+
+    /**
+     * Walks a checkout target down to the User who should sign the
+     * acceptance. Direct-user targets pass through. Asset targets
+     * unwrap to the asset's currently-assigned User (if any). Any
+     * other target shape returns null and the caller skips the
+     * acceptance write.
+     */
+    private function resolveAcceptanceTarget($checkedOutTo): ?User
+    {
+        if ($checkedOutTo instanceof User) {
+            return $checkedOutTo;
         }
 
-        $acceptance->save();
+        if ($checkedOutTo instanceof Asset && $checkedOutTo->assignedto instanceof User) {
+            return $checkedOutTo->assignedto;
+        }
 
-        return $acceptance;
+        return null;
     }
 
     /**

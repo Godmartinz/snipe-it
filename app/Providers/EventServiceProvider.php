@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\CheckoutableListener;
 use App\Listeners\CheckoutablesCheckedOutInBulkListener;
+use App\Listeners\FulfillCheckoutRequestListener;
 use App\Listeners\LogFailedLogin;
 use App\Listeners\LogListener;
 use App\Listeners\LogSuccessfulLogin;
@@ -33,6 +34,10 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $subscribe = [
         LogListener::class,
+        // Runs AFTER LogListener so the checkout Actionlog row it
+        // just wrote is available for the checkout_actionlog_id
+        // back-link on the CheckoutRequest.
+        FulfillCheckoutRequestListener::class,
         CheckoutableListener::class,
         CheckoutablesCheckedOutInBulkListener::class,
     ];

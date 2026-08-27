@@ -15,7 +15,7 @@ return [
 
     'more_info_title' => '자세한 정보',
 
-    'audit_help' => 'Checking this box will edit the asset record to reflect this new location. Leaving it unchecked will simply note the location in the audit log.<br><br>Note that if this asset is checked out, it will not change the location of the person, asset or location it is checked out to.',
+    'audit_help' => '이 확인란을 선택하면 자산 기록이 새 위치를 반영하도록 수정됩니다. 선택하지 않으면 위치 정보가 감사 로그에만 기록됩니다.<br><br>이 자산이 반출된 상태인 경우, 반출 대상자, 자산 또는 위치는 변경되지 않습니다.',
 
     'assets' => '자산은 일련 번호나 자산 꼬리표로 추적되는 품목들입니다. 특정 품목의 상황을 파악하는 것이 더 높은 가치를 갖는 추세입니다.',
 
@@ -31,5 +31,5 @@ return [
 
     'depreciations' => '가치가 하락하는 자산들을 직선법에 의한 감가상각 설정을 할 수 있습니다.',
 
-    'empty_file' => 'The importer detects that this file is empty.',
+    'empty_file' => '가져오기 도구에서 이 파일이 비어 있음을 감지했습니다.',
 ];

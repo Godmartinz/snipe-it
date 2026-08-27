@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ActionType;
+use App\Helpers\Helper;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\UploadFileRequest;
 use App\Models\Actionlog;
@@ -103,15 +104,35 @@ class MaintenancesController extends Controller
             $maintenance->maintenance_type_id = $request->input('maintenance_type_id');
             $maintenance->name = $request->input('name');
             $maintenance->start_date = $request->input('start_date');
-            $maintenance->completion_date = $request->input('completion_date');
-            $maintenance->responsible_party_id = $request->input('responsible_party_id') ?: auth()->id();
+            $maintenance->expected_completion_date = $request->input('expected_completion_date', $request->input('completion_date'));
+            // Honor an explicit clear: an empty submission means "no
+            // responsible party," not "default to the creator." The
+            // create form pre-selects the current user as a UX default
+            // (edit.blade.php), so a submitted null here is a
+            // deliberate deselection by the user. Matches update()'s
+            // behavior. Fixes issue #19452.
+            $maintenance->responsible_party_id = $request->input('responsible_party_id');
             $maintenance->created_by = auth()->id();
+
+            // Backfilled completion: user is recording a maintenance that
+            // was already finished. Same transition logic as update() —
+            // null-blank submissions stay null, a supplied date marks the
+            // row complete and stamps who did it plus how long it took.
+            $shouldLogComplete = $this->applyCompletionState(
+                $maintenance,
+                $request->filled('completed_at') ? $request->input('completed_at') : null,
+                wasCompletedBefore: false,
+            );
 
             $request->handleImages($maintenance);
 
             // Was the asset maintenance created?
             if (! $maintenance->save()) {
                 return redirect()->back()->withInput()->withErrors($maintenance->getErrors());
+            }
+
+            if ($shouldLogComplete) {
+                $this->logMaintenanceCompleteAction($maintenance);
             }
 
             $this->storeUploadedFiles($request, $maintenance);
@@ -137,6 +158,15 @@ class MaintenancesController extends Controller
     {
         $this->authorize('update', Asset::class);
         $this->authorize('update', $maintenance->asset);
+
+        // Capture the referring page (filtered index, asset-detail tab)
+        // server-side so update() can restore the caller's context via
+        // redirect()->intended() without trusting a hidden form field.
+        // Same-origin gated on write; also host-validated on read in
+        // update() below.
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
 
         return view('maintenances/edit')
             ->with('selected_assets', $maintenance->asset->pluck('id')->toArray())
@@ -174,19 +204,95 @@ class MaintenancesController extends Controller
         $maintenance->maintenance_type_id = $request->input('maintenance_type_id');
         $maintenance->name = $request->input('name');
         $maintenance->start_date = $request->input('start_date');
-        $maintenance->completion_date = $request->input('completion_date');
+        $maintenance->expected_completion_date = $request->input('expected_completion_date', $request->input('completion_date'));
         $maintenance->responsible_party_id = $request->input('responsible_party_id');
         $maintenance->url = $request->input('url');
         $request->handleImages($maintenance);
 
+        $shouldLogComplete = $this->applyCompletionState(
+            $maintenance,
+            $request->filled('completed_at') ? $request->input('completed_at') : null,
+            wasCompletedBefore: $maintenance->completed_at !== null,
+        );
+
         if ($maintenance->save()) {
             $this->storeUploadedFiles($request, $maintenance);
 
-            return redirect()->route('maintenances.index')
+            if ($shouldLogComplete) {
+                $this->logMaintenanceCompleteAction($maintenance);
+            }
+
+            // url.intended was seeded from url()->previous() in edit();
+            // sanitize through Helper::sameOriginUrl() (rejects off-host
+            // and non-http(s) schemes) so an attacker-controlled referrer
+            // can't turn this into an open-redirect. Falls back to the
+            // plain index when the stored URL is missing or unsafe.
+            $target = Helper::sameOriginUrl(session()->pull('url.intended')) ?? route('maintenances.index');
+
+            return redirect($target)
                 ->with('success', trans('admin/maintenances/message.edit.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($maintenance->getErrors());
+    }
+
+    /**
+     * Apply the null / date / cleared transitions of `completed_at` on
+     * either create or edit. Returns true when the transition is
+     * "not-completed → completed" so the caller knows to fire the
+     * MaintenanceComplete action log AFTER the row is saved (and thus
+     * has an id).
+     *
+     * asset_maintenance_time uses start_date → completed_at (not
+     * created_at → completed_at). For a real-time completion the two are
+     * effectively the same; for a backfill (start_date well in the past,
+     * created_at just now) using start_date is the truthful duration of
+     * the actual maintenance work.
+     */
+    private function applyCompletionState(Maintenance $maintenance, ?string $submittedCompletedAt, bool $wasCompletedBefore): bool
+    {
+        if ($submittedCompletedAt !== null) {
+            $maintenance->completed_at = $submittedCompletedAt;
+            if (! $wasCompletedBefore) {
+                $maintenance->completed_by = auth()->id();
+                $maintenance->asset_maintenance_time = $this->computeMaintenanceDurationDays($maintenance);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        $maintenance->completed_at = null;
+        $maintenance->completed_by = null;
+        $maintenance->asset_maintenance_time = null;
+
+        return false;
+    }
+
+    /**
+     * Days between start_date and completed_at, absolute so ordering of
+     * inputs doesn't matter. Falls back to now() for start_date when the
+     * caller somehow submitted a completion without a start (shouldn't
+     * happen — start_date is required by the model — but guards against
+     * a null-deref if a future validation change lets one through).
+     */
+    private function computeMaintenanceDurationDays(Maintenance $maintenance): int
+    {
+        $start = $maintenance->start_date ?? now();
+
+        return (int) $start->diffInDays($maintenance->completed_at, true);
+    }
+
+    private function logMaintenanceCompleteAction(Maintenance $maintenance): void
+    {
+        $logAction = new Actionlog;
+        $logAction->item_type = Maintenance::class;
+        $logAction->item_id = $maintenance->id;
+        $logAction->target_type = Asset::class;
+        $logAction->target_id = $maintenance->asset_id;
+        $logAction->created_by = auth()->id();
+        $logAction->logaction(ActionType::MaintenanceComplete);
     }
 
     /**
@@ -199,7 +305,7 @@ class MaintenancesController extends Controller
         }
 
         $objectType = 'maintenances';
-        $storagePath = self::$map_storage_path[$objectType];
+        $storagePath = parent::getMapStoragePath()[$objectType];
 
         if (! Storage::exists($storagePath)) {
             Storage::makeDirectory($storagePath, 775);
@@ -214,7 +320,7 @@ class MaintenancesController extends Controller
 
             $fileName = $uploadFileRequest->handleFile(
                 $storagePath,
-                self::$map_file_prefix[$objectType].'-'.$maintenance->id,
+                parent::getMapFilePrefix()[$objectType].'-'.$maintenance->id,
                 $file
             );
 
@@ -305,6 +411,8 @@ class MaintenancesController extends Controller
      */
     public function show(Maintenance $maintenance): View|RedirectResponse
     {
+        $this->authorize('view', $maintenance->asset);
+
         return view('maintenances.view')->with('maintenance', $maintenance);
     }
 }

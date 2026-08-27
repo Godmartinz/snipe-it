@@ -44,6 +44,30 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
     });
 
     /**
+     * OrderItems (acquisition line-items). Standard REST index, filter
+     * by item_type + item_id for a specific parent, or asset_model_id
+     * for the AssetModel aggregate.
+     */
+    Route::get('order-items',
+        [Api\OrderItemsController::class, 'index']
+    )->name('api.order-items.index');
+
+    /**
+     * Bearer-authenticated self-logout. Revokes the access token that
+     * authenticated this request and any refresh token issued with it,
+     * so a client (custom SPA / mobile app) can call this on logout
+     * and be sure the token cannot silently renew. See
+     * ProfileController::logout for the design rationale and why we
+     * ship this rather than pointing callers at Passport's session-
+     * cookie-shaped DELETE /oauth/tokens/{id} route.
+     */
+    Route::post('logout', [Api\ProfileController::class, 'logout'])
+        ->name('api.logout');
+
+    Route::get('requests', [Api\CheckoutRequest::class, 'index'])
+        ->name('api.requests.index');
+
+    /**
      * Account routes
      */
     Route::group(['prefix' => 'account'], function () {
@@ -65,12 +89,49 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         Route::post('request/{asset}', [Api\CheckoutRequest::class, 'store'])->name('api.assets.requests.store');
         Route::post('request/{asset}/cancel', [Api\CheckoutRequest::class, 'destroy'])->name('api.assets.requests.destroy');
 
+        // Consumable + Component request/cancel. Kept as type-prefixed
+        // routes rather than a polymorphic /request/{type}/{id} pattern
+        // so the existing /request/{asset} URL stays backwards-compat
+        // for API consumers already wired to it.
+        Route::post('request/consumable/{consumable}', [Api\CheckoutRequest::class, 'storeConsumable'])
+            ->name('api.consumables.requests.store');
+        Route::post('request/consumable/{consumable}/cancel', [Api\CheckoutRequest::class, 'destroyConsumable'])
+            ->name('api.consumables.requests.destroy');
+        Route::post('request/component/{component}', [Api\CheckoutRequest::class, 'storeComponent'])
+            ->name('api.components.requests.store');
+        Route::post('request/component/{component}/cancel', [Api\CheckoutRequest::class, 'destroyComponent'])
+            ->name('api.components.requests.destroy');
+        Route::post('request/license/{license}', [Api\CheckoutRequest::class, 'storeLicense'])
+            ->name('api.licenses.requests.store');
+        Route::post('request/license/{license}/cancel', [Api\CheckoutRequest::class, 'destroyLicense'])
+            ->name('api.licenses.requests.destroy');
+
         Route::get('requestable/hardware',
             [
                 Api\AssetsController::class,
                 'requestable',
             ]
         )->name('api.assets.requestable');
+
+        // Requestable-item endpoints for the /account/requestable
+        // tabs. Each returns just the requestable rows the caller can
+        // see (RequestableFoos() scope + CompanyableTrait global scope
+        // handle the FMCS + location gating).
+        Route::get('requestable/models',
+            [Api\AssetModelsController::class, 'requestable']
+        )->name('api.assetmodels.requestable');
+        Route::get('requestable/accessories',
+            [Api\AccessoriesController::class, 'requestable']
+        )->name('api.accessories.requestable');
+        Route::get('requestable/consumables',
+            [Api\ConsumablesController::class, 'requestable']
+        )->name('api.consumables.requestable');
+        Route::get('requestable/components',
+            [Api\ComponentsController::class, 'requestable']
+        )->name('api.components.requestable');
+        Route::get('requestable/licenses',
+            [Api\LicensesController::class, 'requestable']
+        )->name('api.licenses.requestable');
 
         Route::post('personal-access-tokens',
             [
@@ -127,6 +188,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'checkin',
             ]
         )->name('api.accessories.checkin');
+
+        Route::post('{accessory}/adjust-quantity',
+            [
+                Api\AccessoriesController::class,
+                'adjustQuantity',
+            ]
+        )->name('api.accessories.adjust-quantity');
 
         Route::get('selectlist',
             [
@@ -247,13 +315,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.components.history')->withTrashed();
 
-        Route::get('selectlist',
-            [
-                Api\ComponentsController::class,
-                'selectlist',
-            ]
-        )->name('api.components.selectlist');
-
         Route::get('{component}/assets',
             [
                 Api\ComponentsController::class,
@@ -275,6 +336,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'checkout',
         ]
     )->name('api.components.checkout');
+
+    Route::post('components/{component}/adjust-quantity',
+        [
+            Api\ComponentsController::class,
+            'adjustQuantity',
+        ]
+    )->name('api.components.adjust-quantity');
 
     Route::resource('components',
         Api\ComponentsController::class,
@@ -322,6 +390,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'checkout',
             ]
         )->name('api.consumables.checkout');
+
+        Route::post('{consumable}/adjust-quantity',
+            [
+                Api\ConsumablesController::class,
+                'adjustQuantity',
+            ]
+        )->name('api.consumables.adjust-quantity');
 
     });
 
@@ -535,7 +610,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         )->name('api.assets.list-upcoming')
             ->where(['action' => 'audit|audits|checkins', 'upcoming_status' => 'due|overdue|due-or-overdue']);
 
-        // Legacy URL for audit
+        // Legacy URL for audit (body-based lookup via audit_key/asset_tag).
         Route::post('audit',
             [
                 Api\AssetsController::class,
@@ -543,7 +618,17 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.asset.audit.legacy');
 
-        // Newer url for audit
+        // Bulk audit: `ids` array in the request body, per-row envelope response.
+        // Declared BEFORE `{asset}/audit` so /hardware/audit/bulk matches this
+        // route instead of being interpreted as {asset}=audit.
+        Route::post('audit/bulk',
+            [
+                Api\AssetsController::class,
+                'bulkAudit',
+            ]
+        )->name('api.asset.bulk-audit');
+
+        // Single-asset audit. Route-model-binding on {asset}; legacy response shape.
         Route::post('{asset}/audit',
             [
                 Api\AssetsController::class,
@@ -596,11 +681,17 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         /** End assigned routes */
     });
 
-    // pulling this out of resource route group to begin normalizing for route-model binding.
-    // this would probably keep working with the resource route group, but the general practice is for
-    // the model name to be the parameter - and i think it's a good differentiation in the code while we convert the others.
-    Route::patch('/hardware/{asset}', [Api\AssetsController::class, 'update'])->name('api.assets.update');
-    Route::put('/hardware/{asset}', [Api\AssetsController::class, 'update'])->name('api.assets.put-update');
+    // Bulk update: `ids` array in the request body, per-row envelope response.
+    // Declared BEFORE the singular {asset} routes so PATCH /hardware/bulk hits
+    // this handler instead of trying to bind "bulk" as an Asset.
+    Route::patch('/hardware/bulk', [Api\AssetsController::class, 'bulkUpdate'])
+        ->name('api.assets.bulk-update');
+
+    // Single-asset update. Route-model-binding on {asset}, legacy response shape.
+    Route::patch('/hardware/{asset}', [Api\AssetsController::class, 'update'])
+        ->name('api.assets.update');
+    Route::put('/hardware/{asset}', [Api\AssetsController::class, 'update'])
+        ->name('api.assets.put-update');
 
     Route::resource('hardware',
         Api\AssetsController::class,
@@ -614,6 +705,24 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'parameters' => ['asset' => 'asset_id'],
         ]
     ); // end assets API routes
+
+    /**
+     * Unified calendar events API. Reads from the calendar_events
+     * index (populated by every HasCalendarEvents source model)
+     * and hydrates titles / urls / colors live from the source.
+     */
+    Route::get('/calendar/events',
+        [Api\CalendarEventsController::class, 'index']
+    )->name('api.calendar.events');
+
+    /**
+     * Low-stock unified endpoint for the dashboard widget. Delegates to
+     * Helper::checkLowInventory so this and the top-nav alert bell
+     * share a single source of truth.
+     */
+    Route::get('/low-stock',
+        [Api\LowStockController::class, 'index']
+    )->name('api.low-stock.index');
 
     /**
      * Asset maintenances API routes
@@ -780,14 +889,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.locations.selectlist');
 
-        // Users within a location
-        Route::get('{location}/users',
-            [
-                Api\LocationsController::class,
-                'getDataViewUsers',
-            ]
-        )->name('api.locations.viewusers');
-
         // Get list of assets with a default location
         Route::get('{location}/assets',
             [
@@ -903,7 +1004,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'restore',
             ]
         )->name('api.models.restore');
-
     });
 
     Route::resource('models',
@@ -953,7 +1053,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\SettingsController::class,
                 'ldaptest',
             ]
-        )->name('api.settings.ldaptest');
+        )->middleware('throttle:5,1')->name('api.settings.ldaptest');
 
         Route::post('purge_barcodes',
             [
@@ -974,14 +1074,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\SettingsController::class,
                 'ldaptestlogin',
             ]
-        )->name('api.settings.ldaptestlogin');
-
-        Route::post('slacktest',
-            [
-                Api\SettingsController::class,
-                'slacktest',
-            ]
-        )->name('api.settings.slacktest');
+        )->middleware('throttle:5,1')->name('api.settings.ldaptestlogin');
 
         Route::post('mailtest',
             [
@@ -1141,13 +1234,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.users.ldapsync');
 
-        Route::post('two_factor_reset',
-            [
-                Api\UsersController::class,
-                'postTwoFactorReset',
-            ]
-        )->name('api.users.two_factor_reset');
-
         Route::get('me',
             [
                 Api\UsersController::class,
@@ -1161,13 +1247,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'eulas',
             ]
         )->name('api.user.eulas');
-
-        Route::get('list/{status?}',
-            [
-                Api\UsersController::class,
-                'getDatatable',
-            ]
-        )->name('api.users.list');
 
         Route::get('{user}/assets',
             [
@@ -1286,14 +1365,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         Route::put('models/{model_id}',
             [
                 Api\PredefinedKitsController::class,
-                'updateModels',
+                'updateModel',
             ]
         )->name('api.kits.models.update');
 
         Route::delete('models/{model_id}',
             [
                 Api\PredefinedKitsController::class,
-                'detachModels',
+                'detachModel',
             ]
         )->name('api.kits.models.destroy');
 

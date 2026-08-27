@@ -70,8 +70,13 @@
                           class="form-control  {{ str_slug($main_section) }} inherit"
                           data-checker-group="{{ str_slug($main_section) }}"
                           aria-label="{{ str_slug($main_section) }}"
-                          name="permission[{{ str_slug($main_section) }}]"
-                          @checked((array_key_exists(str_slug($main_section), $groupPermissions) && $groupPermissions[str_slug($main_section)] == '0') || (!array_key_exists(str_slug($main_section), $groupPermissions)))
+                          {{-- $section_name (not str_slug($main_section)) so this radio joins the same
+                               name group as allow/deny, and so the fallback pre-check for "unset" reads
+                               the correct key. See #18830: reports remaps to `reports.view`, and the
+                               old str_slug('reports') = 'reports' key never exists in $groupPermissions,
+                               which fired the fallback and left inherit checked in the DENY state. --}}
+                          name="permission[{{ $section_name }}]"
+                          @checked((array_key_exists($section_name, $groupPermissions) && $groupPermissions[$section_name] == '0') || (!array_key_exists($section_name, $groupPermissions)))
                           type="radio"
                           value="0"
                           id="{{ str_slug($main_section) }}_inherit"
@@ -91,7 +96,11 @@
                         data-checker-group="{{ str_slug($main_section) }}"
                         aria-label="{{ str_slug($main_section) }}"
                         name="permission[{{ $section_name }}]"
-                        @checked(array_key_exists(str_slug($main_section), $groupPermissions) && $groupPermissions[str_slug($main_section)] == '-1')
+                        {{-- $section_name (not str_slug($main_section)) to match how allow (line 54)
+                             looks up $groupPermissions. See #18830: for the reports section, the actual
+                             stored key is `reports.view`, and the old lookup on `reports` never matched
+                             so the deny radio never pre-checked when the permission was set to -1. --}}
+                        @checked(array_key_exists($section_name, $groupPermissions) && $groupPermissions[$section_name] == '-1')
                         type="radio"
                         value="-1"
                         id="{{ str_slug($main_section) }}_deny"

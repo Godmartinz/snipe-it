@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Non è stata trovata EULA predefinita. Aggiungine una nelle impostazioni.',
     'total' => 'Totale',
     'remaining' => 'Disponibili',
+    'requestable' => 'Gli utenti potrebbero richiedere questo accessorio',
     'update' => 'Aggiorna Accessorio',
     'use_default_eula' => 'Usa <a href="#" data-toggle="modal" data-target="#eulaModal">L\'EULA predefinita</a> invece.',
     'use_default_eula_disabled' => '<del>Usa L\'EULA predefinita.</del> Nessuna EULA predefinita è in uso. Per favore aggiungine una nelle Impostazioni.',

@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => 'Turtas',
-        'note' => 'Suteikia prieigą prie programos Turto skilties.',
+        'note' => 'Suteikia prieigą prie programos Turto skilties. ',
     ],
 
     'assetsview' => [
         'name' => 'Peržiūrėti turtą',
+        'note' => 'Atkreipkite dėmesį, kad naudotojai, turintys šią teisę, taip pat galės peržiūrėti (bet ne keisti ar ištrinti) į turto modelį įkeltus failus. Tai daroma siekiant palengvinti bendrų dokumentų, pvz., naudotojo vadovų, dalijimąsi tarp turto vienetų, nereikalaujant jų įkelti į kiekvieną turto vienetą, ir siekiant išvengti būtinybės suteikti naudotojui teisę redaguoti turto failus.',
     ],
 
     'assetscreate' => [

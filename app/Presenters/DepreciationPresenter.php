@@ -16,7 +16,16 @@ class DepreciationPresenter extends Presenter
     {
         $layout = [
             [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -24,6 +33,7 @@ class DepreciationPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -34,6 +44,7 @@ class DepreciationPresenter extends Presenter
 
             [
                 'field' => 'months',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/depreciations/table.term'),
@@ -42,6 +53,7 @@ class DepreciationPresenter extends Presenter
 
             [
                 'field' => 'depreciation_min',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/depreciations/table.depreciation_min'),
@@ -49,6 +61,7 @@ class DepreciationPresenter extends Presenter
             ],
             [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.assets'),
@@ -56,18 +69,21 @@ class DepreciationPresenter extends Presenter
             ],
             [
                 'field' => 'models_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.asset_models'),
                 'visible' => true,
             ], [
                 'field' => 'licenses_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.licenses'),
                 'visible' => true,
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -75,6 +91,7 @@ class DepreciationPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -83,6 +100,7 @@ class DepreciationPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -91,6 +109,7 @@ class DepreciationPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

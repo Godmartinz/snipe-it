@@ -13,6 +13,9 @@
             <x-table.consumables :route="route('api.consumables.index')" />
         </x-box>
     </x-container>
+@can('update', \App\Models\Consumable::class)
+    <x-modals.adjust-quantity />
+@endcan
 @stop
 
 @section('moar_scripts')

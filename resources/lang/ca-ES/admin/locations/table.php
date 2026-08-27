@@ -32,7 +32,7 @@ return [
     'asset_model' => 'Model',
     'asset_serial' => 'Número de sèrie',
     'asset_location' => 'Ubicació',
-    'asset_checked_out' => 'Checked Out',
+    'asset_checked_out' => 'Assignat',
     'asset_expected_checkin' => 'Expected Checkin',
     'date' => 'Date:',
     'phone' => 'Location Phone',

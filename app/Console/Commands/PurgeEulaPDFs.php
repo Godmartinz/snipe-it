@@ -71,7 +71,7 @@ class PurgeEulaPDFs extends Command
                     $q->withTrashed()->whereNotNull('deleted_at');
 
                     if ($companyId) {
-                        $q->where('company_id', $companyId);
+                        $q->whereHas('companies', fn ($sub) => $sub->where('companies.id', $companyId));
                     }
                 });
 
@@ -80,7 +80,7 @@ class PurgeEulaPDFs extends Command
         } else {
             if ($companyId) {
                 $query->whereHas('assignedTo', function ($query) use ($companyId) {
-                    $query->withTrashed()->where('company_id', $companyId);
+                    $query->withTrashed()->whereHas('companies', fn ($sub) => $sub->where('companies.id', $companyId));
                 });
             }
         }

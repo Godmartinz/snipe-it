@@ -17,6 +17,8 @@ return [
         'confirm' => 'Anda yakin akan mengahpus komponen ini?',
         'error' => 'Ada masalah untuk hapus komponen, silahkan coba kembali.',
         'success' => 'Komponen berhasil dihapus.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

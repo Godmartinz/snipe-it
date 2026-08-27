@@ -7,6 +7,8 @@ return [
     'asset' => 'สินทรัพย์',
     'bulk_checkout' => 'Checkout เป็นกลุ่ม',
     'bulk_checkin' => 'ส่งคืนแบบหลายรายการ',
+    'bulk_audit' => 'การตรวจสอบเป็นกลุ่ม',
+    'bulk_audit_location_hidden_mixed_companies' => 'The audit location field is hidden because the selected assets belong to multiple companies. With location scoping enabled, one shared audit location can\'t apply to assets from different companies. Audit each company\'s assets in a separate batch to set an audit location.',
     'checkin' => 'เช็คอินสินทรัพย์',
     'checkin_assets' => 'Checkin Assets',
     'checkout' => 'ตรวจสอบสินทรัพย์',

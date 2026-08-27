@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Attribué via l\'outil d\'attribution de licences en volume',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Il ne reste que :remaining_count places pour cette licence avec une quantité minimale de :min_amt. Vous pouvez envisager d\'acheter plus de sièges.',

@@ -20,6 +20,8 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang Status Label na ito?',
         'error' => 'Mayroong isyu sa pag-delete ng Status Label. Mangyaring subukang muli.',
         'success' => 'Matagumpay na nai-delete ang Status Label.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

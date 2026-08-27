@@ -20,7 +20,7 @@ return [
         'error' => '仕入先を削除する際に問題が発生しました。もう一度試して下さい。',
         'success' => '仕入先が削除されました。',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

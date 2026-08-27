@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ar tikrai norite panaikinti šį priedą?',
         'error' => 'Bandant panaikinti priedą įvyko klaida. Bandykite dar kartą.',
         'success' => 'Priedas sėkmingai panaikintas.',
+        'bulk_success' => 'Priedas sėkmingai ištrintas.|Priedai (:count) sėkmingai ištrinti.',
+        'partial_success' => ':count priedas buvo sėkmingai ištrintas, tačiau kitų ištrinti nepavyko. Daugiau informacijos rasite žemiau.|Priedai (:count) buvo sėkmingai ištrinti, tačiau kitų ištrinti nepavyko. Daugiau informacijos rasite žemiau.',
     ],
 
     'checkout' => [

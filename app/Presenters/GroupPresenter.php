@@ -15,6 +15,7 @@ class GroupPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -23,6 +24,7 @@ class GroupPresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -32,6 +34,7 @@ class GroupPresenter extends Presenter
             ],
             [
                 'field' => 'users_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -40,12 +43,14 @@ class GroupPresenter extends Presenter
                 'class' => 'css-users',
             ],  [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => true,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -54,6 +59,7 @@ class GroupPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ],  [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -62,6 +68,7 @@ class GroupPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

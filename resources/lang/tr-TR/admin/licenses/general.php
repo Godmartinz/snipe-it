@@ -32,8 +32,8 @@ return [
         ],
 
         'checkin_selected' => [
-            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
-            'no_seats_selected' => 'No seats were selected.',
+            'success' => ':count lisans koltuğu başarıyla zimmetten düşüldü. | :count lisans koltuğu başarıyla zimmetten düşüldü.',
+            'no_seats_selected' => 'Hiçbir koltuk seçilmedi.',
         ],
 
         'checkout_all' => [
@@ -47,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Yapacak bir şey yok. Henüz kendisine bu lisans atanmamış kullanıcı yok.',
             'log_msg' => 'Lisans GUI\'sinde toplu lisans ödemesi yoluyla teslim alındı',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

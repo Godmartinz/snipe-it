@@ -6,6 +6,7 @@ use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
+use App\Models\CheckoutRequest;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -26,6 +27,7 @@ use App\Policies\AccessoryPolicy;
 use App\Policies\AssetModelPolicy;
 use App\Policies\AssetPolicy;
 use App\Policies\CategoryPolicy;
+use App\Policies\CheckoutRequestPolicy;
 use App\Policies\CompanyPolicy;
 use App\Policies\ComponentPolicy;
 use App\Policies\ConsumablePolicy;
@@ -64,6 +66,7 @@ class AuthServiceProvider extends ServiceProvider
         Asset::class => AssetPolicy::class,
         AssetModel::class => AssetModelPolicy::class,
         Category::class => CategoryPolicy::class,
+        CheckoutRequest::class => CheckoutRequestPolicy::class,
         Component::class => ComponentPolicy::class,
         Consumable::class => ConsumablePolicy::class,
         CustomField::class => CustomFieldPolicy::class,
@@ -178,6 +181,28 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->hasAccess('import')) {
                 return true;
             }
+        });
+
+        // True when the user has checkout permission on at least
+        // one of the five checkoutable types. Named for the
+        // underlying question ("can this user check out anything
+        // at all?") rather than a specific consumer surface, so
+        // it reads sensibly at every callsite:
+        //   - /requests page + API endpoint + nav link + bulk-
+        //     cancel bulk-actions widget: gate on this
+        //   - future consumers (any per-type checkout screen that
+        //     wants a "can this admin fulfill anything?" check)
+        //     inherit the same shape
+        // AssetModel isn't in the list because it has no
+        // models.checkout permission - model requests fulfill via
+        // checking out an Asset, so admins with assets.checkout
+        // implicitly cover both.
+        Gate::define('canCheckoutAtLeastOneItemType', function ($user) {
+            return $user->can('checkout', Asset::class)
+                || $user->can('checkout', Accessory::class)
+                || $user->can('checkout', Consumable::class)
+                || $user->can('checkout', Component::class)
+                || $user->can('checkout', License::class);
         });
 
         Gate::define('assets.view.encrypted_custom_fields', function ($user) {

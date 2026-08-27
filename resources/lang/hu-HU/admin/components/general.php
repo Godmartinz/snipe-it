@@ -13,4 +13,7 @@ return [
     'total' => 'Összesen',
     'update' => 'Alkatrész frissítés',
     'checkin_limit' => 'A visszavett mennyiségnek egyenlőnek, vagy kisebbnek kell lennie, mint: :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

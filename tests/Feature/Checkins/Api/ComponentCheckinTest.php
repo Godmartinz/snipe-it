@@ -126,7 +126,7 @@ class ComponentCheckinTest extends TestCase implements TestsFullMultipleCompanie
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $componentInCompanyA = Component::factory()->for($companyA)->checkedOutToAsset()->create();
-        $userInCompanyB = User::factory()->for($companyB)->create();
+        $userInCompanyB = User::factory()->forCompany($companyB)->create();
         $pivotId = $componentInCompanyA->assets->first()->pivot->id;
 
         $this->actingAsForApi($userInCompanyB)

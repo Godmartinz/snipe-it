@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute mora biti jedinstven kako u :table1 tako i u :table2. ',
     'unique_undeleted' => ':attribute mora biti jedinstven.',
     'non_circular' => ':attribute ne sme da kreira cirkularnu referencu.',
+    'parent_must_be_top_level' => 'Izabrani :attribute mora sam biti vrhovna stavka. Dozvoljen je samo jedan nivo gneždenja.',
+    'must_have_no_children' => 'Ova stavka već ima svoje naslednike, pa joj se ne može dodeliti roditelj.',
     'not_array' => ':attribute ne može biti niz.',
     'disallow_same_pwd_as_user_fields' => 'Lozinka ne može biti ista kao korisničko ime.',
     'letters' => 'Lozinka mora da sadrži barem jedno slovo.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute nije prenet.',
     'uppercase' => 'Polje :attribute mora da sadrži sve velika slova.',
     'url' => 'Polje :attribute mora biti ispravna URL adresa.',
+    'external_url' => 'Polje :attribute mora biti ispravna eksterna adresa (http:// ili https://) koja ne upućuje na privatnu ili lokalnu adresu.',
     'ulid' => 'Polje :attribute mora biti ispravan ULID.',
     'uuid' => 'Polje :attribute mora biti ispravan UUID.',
-    'fmcs_location' => 'Puna podrška za višestruko kompanija i opsezi lokacija je omogućeno u administratorskim podešavanjima, a izabrana lokacija i kompanija nisu kompatibilne.',
+    'valid_css_color' => ':attribute polje mora biti ispravna CSS boja (hex, rgb, rgba, hsl, ili hsla).',
+    'fmcs_company' => ':attribute polje je obavezno jer je omogućena puna podrška za višestruko kompanija i šetajući nisu dozvoljeni.',
+    'fmcs_location' => 'Lokacija ":location" pripada :location_company, koja se ne poklapa sa izabranom kompanijom.',
     'is_unique_across_company_and_location' => ':attribute mora biti jedinstven u okviru izabrane kompanije i lokacije.',
 
     /*

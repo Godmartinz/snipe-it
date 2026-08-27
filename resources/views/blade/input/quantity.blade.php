@@ -8,6 +8,7 @@
     'max' => null,
     'value' => null,
     'help_text' => null,
+    'help_icon' => null,
 ])
 
 <div
@@ -27,6 +28,7 @@
                 name="{{ $name }}"
                 id="{{ $name }}"
                 aria-label="{{ $label ?? trans('general.quantity') }}"
+                @if ($help_text) aria-describedby="{{ $name }}-help" @endif
                 value="{{ old($name, $value ?? $item?->{$name} ?? '') }}"
                 min="{{ $min }}"
                 @if ($max) max="{{ $max }}" @endif
@@ -35,9 +37,9 @@
             />
         </div>
         <div class="col-md-12" style="padding-left: 0">
-            {!! $errors->first($name, '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error :name="$name" />
             @if ($help_text)
-                <p class="help-block">{{ $help_text }}</p>
+                <x-form.help :name="$name" :icon="$help_icon">{{ $help_text }}</x-form.help>
             @endif
         </div>
     </div>

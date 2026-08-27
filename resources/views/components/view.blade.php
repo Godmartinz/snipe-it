@@ -25,6 +25,7 @@
                     />
 
                     <x-tabs.files-tab :item="$snipe_component" count="{{ $snipe_component->uploads()->count() }}"/>
+                    <x-tabs.orders-tab count="{{ $snipe_component->ordersCount() }}"/>
                     <x-tabs.history-tab count="{{ $snipe_component->history()->count() }}" :model="$snipe_component"/>
                     <x-tabs.upload-tab :item="$snipe_component"/>
 
@@ -50,6 +51,11 @@
                         <x-table.files object_type="components" :object="$snipe_component"/>
                     </x-tabs.pane>
 
+                    <!-- start orders tab pane -->
+                    <x-tabs.pane name="orders">
+                        <x-table.orders :route="route('api.order-items.index', ['item_type' => \App\Models\Component::class, 'item_id' => $snipe_component->id])"/>
+                    </x-tabs.pane>
+
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
                         <x-table.history :model="$snipe_component" :route="route('api.components.history', $snipe_component)"/>
@@ -61,12 +67,28 @@
         <x-page-column class="col-md-3">
 
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$snipe_component" img_path="{{ app('components_upload_url') }}">
+                <x-info-panel :infoPanelObj="$snipe_component" img_path="{{ app('components_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'components', 'id' => $snipe_component->id])">
 
                     <x-slot:buttons>
                         <x-button.edit :item="$snipe_component" :route="route('components.edit', $snipe_component->id)"/>
                         <x-button.clone :item="$snipe_component" :route="route('components.clone.create', $snipe_component->id)"/>
                         <x-button.checkout :item="$snipe_component" :route="route('components.checkout.show', $snipe_component->id)" />
+                        @can('update', $snipe_component)
+                            @php $lastOrder = $snipe_component->lastOrderDefaults(); @endphp
+                            <button type="button"
+                                class="btn btn-sm btn-primary adjust-quantity"
+                                data-tooltip="true"
+                                title="{{ trans('general.adjust_quantity') }}"
+                                data-adjust-url="{{ route('components.adjust-quantity', $snipe_component) }}"
+                                data-item-name="{{ e($snipe_component->name) }}"
+                                data-available="{{ (int) $snipe_component->numRemaining() }}"
+                                @if ($lastOrder && $lastOrder['unit_cost'] !== null) data-last-unit-cost="{{ $lastOrder['unit_cost'] }}" @endif
+                                @if ($lastOrder && $lastOrder['currency'] !== null) data-last-currency="{{ e($lastOrder['currency']) }}" @endif
+                            >
+                                <x-icon type="plus-minus" class="fa-fw" />
+                                <span class="sr-only">{{ trans('general.adjust_quantity') }}</span>
+                            </button>
+                        @endcan
                         <x-button.delete :item="$snipe_component" />
                     </x-slot:buttons>
 
@@ -83,5 +105,10 @@
     @can('files', $snipe_component)
         @include ('modals.upload-file', ['item_type' => 'components', 'item_id' => $snipe_component->id])
     @endcan
+
+    @can('update', $snipe_component)
+        <x-modals.adjust-quantity />
+    @endcan
+
     @include ('partials.bootstrap-table', ['exportFile' => 'component' . $snipe_component->name . '-export', 'search' => false])
 @endsection

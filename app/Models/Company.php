@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Watson\Validating\ValidatingTrait;
 
 /**
@@ -29,16 +32,34 @@ final class Company extends SnipeModel
     use HasUploads;
     use Loggable;
     use SoftDeletes;
+    use UniqueUndeletedTrait;
 
     protected $table = 'companies';
 
     // Declare the rules for the model validation
     protected $rules = [
-        'name' => 'required|max:255|unique:companies,name',
+        'name' => 'required|max:255|unique_undeleted_in_scope:parent_id',
         'fax' => 'min:7|max:35|nullable',
         'phone' => 'min:7|max:35|nullable',
         'email' => 'email|max:150|nullable',
+        'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id',
     ];
+
+    protected $casts = [
+        'parent_id' => 'integer',
+    ];
+
+    /**
+     * A company with no parent stores NULL, never 0 — the empty string from an
+     * unselected select2 and a literal 0 would otherwise survive the integer
+     * cast and break the `exists:` validation + parent/child queries.
+     */
+    public function setParentIdAttribute($value): void
+    {
+        $this->attributes['parent_id'] = ($value === '' || $value === null || (int) $value === 0)
+            ? null
+            : (int) $value;
+    }
 
     protected $presenter = CompanyPresenter::class;
 
@@ -77,6 +98,7 @@ final class Company extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [
+        'parent' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];
 
@@ -87,13 +109,24 @@ final class Company extends SnipeModel
      */
     protected $fillable = [
         'name',
+        'parent_id',
         'phone',
         'fax',
         'email',
-        'created_by',
         'tag_color',
         'notes',
     ];
+
+    /**
+     * Per-request memoization for getCurrentUserCompanyIds(), keyed by user id.
+     * CompanyableScope::apply() calls that method on every Eloquent query against
+     * a Companyable model, and the index/transformer hot path runs hundreds of
+     * such queries per page — without memoization we issue thousands of redundant
+     * pivot reads. Cleared explicitly in tests via flushCompanyIdsCache().
+     *
+     * @var array<int, array<int>>
+     */
+    private static array $companyIdsCache = [];
 
     /**
      * Return the current user's company IDs by querying the pivot table directly.
@@ -101,6 +134,11 @@ final class Company extends SnipeModel
      * We deliberately bypass the Eloquent companies() relationship here because
      * loading that relationship triggers CompanyableScope on the Company model,
      * which calls this method again — infinite recursion.
+     *
+     * If a user is a member of a parent company, they implicitly have access to
+     * all of that company's children too. We expand the direct pivot set by
+     * pulling in children of any directly-assigned company. The one-level-deep
+     * constraint enforced by validation means a single child lookup is sufficient.
      */
     private static function getCurrentUserCompanyIds(): array
     {
@@ -108,10 +146,122 @@ final class Company extends SnipeModel
             return [];
         }
 
-        return DB::table('company_user')
-            ->where('user_id', auth()->id())
+        $userId = auth()->id();
+
+        if (array_key_exists($userId, self::$companyIdsCache)) {
+            return self::$companyIdsCache[$userId];
+        }
+
+        $directIds = DB::table('company_user')
+            ->where('user_id', $userId)
             ->pluck('company_id')
             ->toArray();
+
+        if (empty($directIds)) {
+            return self::$companyIdsCache[$userId] = [];
+        }
+
+        $childIds = DB::table('companies')
+            ->whereIn('parent_id', $directIds)
+            ->pluck('id')
+            ->toArray();
+
+        return self::$companyIdsCache[$userId] = array_values(array_unique(array_merge($directIds, $childIds)));
+    }
+
+    /**
+     * Reset the per-user company-ids memoization. Called from TestCase::setUp()
+     * so that test isolation isn't broken by static state surviving across tests
+     * (RefreshDatabase rolls back the DB but not PHP static properties).
+     */
+    public static function flushCompanyIdsCache(): void
+    {
+        self::$companyIdsCache = [];
+    }
+
+    /**
+     * Return the set of company IDs a user viewing $companyId should see items
+     * from when "hierarchy expansion" is requested — the company itself, its
+     * direct parent (if any), and any of its direct children.
+     *
+     * Used by the company show-page tabs (users / assets / licenses / etc.) so
+     * that viewing a child company also surfaces items inherited from the
+     * parent, and viewing a parent surfaces items from its children. The
+     * one-level-deep validator caps the chain at depth 2, so this is at most
+     * three rows.
+     *
+     * Returns the original id alone if the company can't be found, so callers
+     * can pass the result straight into a whereIn without special-casing.
+     */
+    public static function reachableCompanyIds(int|string $companyId): array
+    {
+        $companyId = (int) $companyId;
+        if ($companyId <= 0) {
+            return [];
+        }
+
+        $row = DB::table('companies')->where('id', $companyId)->first(['id', 'parent_id']);
+        if (! $row) {
+            return [$companyId];
+        }
+
+        $ids = [(int) $row->id];
+        if ($row->parent_id) {
+            $ids[] = (int) $row->parent_id;
+        }
+
+        $childIds = DB::table('companies')
+            ->where('parent_id', $companyId)
+            ->pluck('id')
+            ->map(fn ($v) => (int) $v)
+            ->all();
+
+        return array_values(array_unique(array_merge($ids, $childIds)));
+    }
+
+    /**
+     * Walk the companies-by-parent map, emitting each company with a `use_text`
+     * prefix that reflects its depth. Children appear directly under their
+     * parent; orphans (children whose parent isn't in the visible set — can
+     * happen under FMCS scoping) are surfaced as top-level so they aren't lost.
+     *
+     * The map's keys are parent_id values, with `0` used for "no parent / top-
+     * level". Using 0 (not null) avoids PHP 8.4's deprecation of null array
+     * offsets when callers build the map from `$company->parent_id`.
+     *
+     * `$prefix` is the accumulated breadcrumb path of the current node's
+     * ancestors. Mirrors Location::indenter so both dropdowns share the same
+     * `Parent › Child` visual style, unified with the parent-chain
+     * breadcrumb rendered by the location info-panel.
+     */
+    public static function indenter(array $companies_by_parent, int $parent_id = 0, string $prefix = ''): array
+    {
+        $results = [];
+
+        if (! array_key_exists($parent_id, $companies_by_parent)) {
+            return [];
+        }
+
+        foreach ($companies_by_parent[$parent_id] as $company) {
+            $breadcrumb = $prefix === ''
+                ? $company->name
+                : $prefix.' › '.$company->name;
+
+            $company->use_text = $breadcrumb;
+            $company->use_image = ($company->image)
+                ? Storage::disk('public')->url('companies/'.$company->image)
+                : null;
+            $results[] = $company;
+
+            if (array_key_exists($company->id, $companies_by_parent)) {
+                $results = array_merge(
+                    $results,
+                    self::indenter($companies_by_parent, $company->id, $breadcrumb),
+                );
+            }
+        }
+
+        return $results;
     }
 
     public static function isFullMultipleCompanySupportEnabled()
@@ -155,11 +305,27 @@ final class Company extends SnipeModel
             if ($current_user->isSuperUser()) {
                 return self::getIdFromInput($unescaped_input);
             } else {
-                if ($current_user->company_id != null) {
-                    return $current_user->company_id;
-                } else {
-                    return null;
+                $userCompanyIds = self::getCurrentUserCompanyIds();
+                $submittedId = (int) self::getIdFromInput($unescaped_input);
+
+                // Company membership is now determined entirely by the pivot (company_user table).
+                // If the submitted value is a company the user actually belongs to, honour it.
+                if ($submittedId && in_array($submittedId, $userCompanyIds)) {
+                    return $submittedId;
                 }
+
+                // A user with pivot memberships who submits a company they don't belong to is
+                // attempting cross-tenant assignment — reject outright rather than silently
+                // overriding or storing null.
+                if ($submittedId && ! empty($userCompanyIds)) {
+                    throw ValidationException::withMessages([
+                        'company_id' => [trans('validation.in', ['attribute' => 'company_id'])],
+                    ]);
+                }
+
+                // No company submitted (or user has no pivot memberships) — fall back to the
+                // user's single company if unambiguous, otherwise null.
+                return count($userCompanyIds) === 1 ? $userCompanyIds[0] : null;
             }
         }
     }
@@ -203,34 +369,47 @@ final class Company extends SnipeModel
                 return true;
             }
 
-            $userCompanyIds = self::getCurrentUserCompanyIds();
-
-            // Empty pivot = unrestricted only for true legacy "no-company" users
-            // (those whose scalar company_id is also null). Users who had their
-            // pivot cleared via the API retain their scalar company_id, so they
-            // do NOT qualify for this bypass.
-            if (empty($userCompanyIds) && is_null(auth()->user()->company_id)) {
-                return true;
+            // For User targets the visibility rule is already encoded in the
+            // CompanyableScope. If the actor can see this user in their scoped
+            // list, they can act on it (the role-permission check that runs
+            // after this still has final say). Doing this here keeps per-target
+            // access in lockstep with list visibility — the back-patch for
+            // #19187 tightened the bypass branch below but never updated the
+            // per-target path, which left actors able to see users they
+            // couldn't then edit. One check, one query, same logic as the list.
+            if ($companyable instanceof User) {
+                return User::where('users.id', $companyable->id)->exists();
             }
 
-            // Users are scoped by pivot membership, not company_id, so check the pivot directly.
-            if ($companyable instanceof User) {
-                $companyableCompanyIds = DB::table('company_user')
-                    ->where('user_id', $companyable->id)
-                    ->pluck('company_id')
-                    ->toArray();
+            $userCompanyIds = self::getCurrentUserCompanyIds();
 
-                // A user with no pivot rows is a null-company user; no intersection is possible.
-                if (empty($companyableCompanyIds)) {
-                    return false;
+            // Empty-pivot actor: route through null_company_is_floater to match
+            // the query scope's behavior for pivotless callers. Previously this
+            // branch returned true unconditionally, which let empty-pivot users
+            // act on rows their list queries would have hidden — the actual
+            // GHSA-8hq6-r8cw-gqwh bypass. This mirrors
+            // scopeCompanyablesDirectly()'s empty-pivot branches for
+            // companyable-table queries:
+            //   - Floater on: unrestricted (matches `return $query`).
+            //   - Floater off: null-company items only (matches `whereNull($column)`).
+            // Company targets never reach here — the tables-without-company_id
+            // early exit above returns true regardless of actor state.
+            if (empty($userCompanyIds)) {
+                if (Setting::getSettings()->null_company_is_floater) {
+                    return true;
                 }
 
-                return ! empty(array_intersect($userCompanyIds, $companyableCompanyIds));
+                return is_null($companyable->company_id ?? null);
             }
 
             $companyable_company_id = ($companyable instanceof Company)
                 ? $companyable->id
                 : $companyable->company_id;
+
+            // Null-company items are accessible to company-scoped users only when floater is on.
+            if (is_null($companyable_company_id)) {
+                return (bool) Setting::getSettings()->null_company_is_floater;
+            }
 
             return in_array($companyable_company_id, $userCompanyIds);
         }
@@ -290,8 +469,8 @@ final class Company extends SnipeModel
             && (($this->licenses_count ?? $this->licenses()->count()) === 0)
             && (($this->components_count ?? $this->components()->count()) === 0)
             && (($this->consumables_count ?? $this->consumables()->count()) === 0)
-            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
-            && (($this->users_count ?? $this->users()->count()) === 0);
+            && (($this->users_count ?? $this->users()->count()) === 0)
+            && (($this->children_count ?? $this->children()->count()) === 0);
     }
 
     /**
@@ -309,6 +488,46 @@ final class Company extends SnipeModel
     public function users()
     {
         return $this->belongsToMany(User::class, 'company_user');
+    }
+
+    /**
+     * Parent company (one level only — children cannot themselves have children).
+     *
+     * Bypasses CompanyableScope because the scope hardcodes `companies.id` in its
+     * where clause, which collides with Eloquent's self-relation auto-alias
+     * (`laravel_reserved_0`) and produces "Unknown column 'laravel_reserved_0.parent_id'"
+     * on the index page. Hierarchy is metadata about a row the user already sees,
+     * not an access decision, so unscoping here is semantically correct too.
+     */
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes();
+    }
+
+    /**
+     * Child companies. The one-level-deep validator on parent_id guarantees
+     * children of a child cannot be created, so this is the full descendant set.
+     * See parent() above for why the global scope is dropped.
+     */
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id')->withoutGlobalScopes();
+    }
+
+    /**
+     * Sort the company list by the parent company's name. Left join so that
+     * top-level companies (parent_id IS NULL) still appear in the results.
+     *
+     * Use addSelect (not select) so prior withCount subqueries on the query
+     * survive — select() replaces the whole columns list and would strip the
+     * eager *_count columns, forcing isDeletable() and the transformer into a
+     * 7-query-per-row N+1.
+     */
+    public function scopeOrderParent($query, $order)
+    {
+        return $query->leftJoin('companies as parent_co', 'companies.parent_id', '=', 'parent_co.id')
+            ->addSelect('companies.*')
+            ->orderBy('parent_co.name', $order);
     }
 
     public function assets()
@@ -372,6 +591,21 @@ final class Company extends SnipeModel
     {
         $companyIds = self::getCurrentUserCompanyIds();
 
+        // Location scoping is opt-in even under FMCS: setting
+        // scope_locations_fmcs = 0 tells Snipe-IT that locations are meant
+        // to be shared across tenants. Without this short-circuit the
+        // global scope still filters locations by the caller's pivot
+        // memberships, which hides null-company locations from every
+        // non-superuser (strict mode) and breaks Location::find() lookups
+        // on the checkin / checkout / audit paths that were tightened in
+        // v8.7.0. CompanyableTrait::canCheckoutTo() and
+        // LocationsController::store already respect this setting; the
+        // global scope needs to as well.
+        if ($query->getModel()->getTable() === 'locations'
+            && ! Setting::getSettings()->scope_locations_fmcs) {
+            return $query;
+        }
+
         // If we are scoping the companies table itself, look for the company.id
         if ($query->getModel()->getTable() == 'companies') {
             if (empty($companyIds)) {
@@ -381,17 +615,54 @@ final class Company extends SnipeModel
             return $query->whereIn('companies.id', $companyIds);
         }
 
+        $floater = Setting::getSettings()->null_company_is_floater;
+
         // Users are scoped by pivot membership (company_user), not by company_id column,
         // since a user may belong to multiple companies and company_id alone is insufficient.
         if ($query->getModel()->getTable() == 'users') {
             if (empty($companyIds)) {
-                // No pivot memberships: mirror old null-company behavior — show only users
-                // who are also not in any company via the pivot.
+                // Floater: null-company actor is unrestricted — see everyone.
+                if ($floater) {
+                    return $query;
+                }
+
+                // No pivot memberships and floater off: show only other null-company users.
                 return $query->whereNotIn('users.id', function ($sub) {
                     $sub->select('user_id')->from('company_user');
                 });
             }
 
+            // Floater mode on: a company-scoped caller also sees null-company
+            // (floater) users. This mirrors the item-level floater rule
+            // documented at https://snipe-it.readme.io/docs/multi-tenancy-ish
+            // and is required so checkout dropdowns can offer floater users
+            // as valid targets under the "items from any company can be
+            // checked out to targets with no company assignment" policy.
+            //
+            // The "no pivot rows" branch queries the company_user pivot
+            // directly. Going through the Eloquent relation instead would
+            // apply the companies-table CompanyableScope to the subquery,
+            // restricting the JOIN to the caller's own companies. A user
+            // whose only pivot rows point at OTHER companies would then
+            // look pivot-less under that scoping and get picked up by the
+            // floater branch, leaking cross-company users into the caller's
+            // list. Reading the pivot directly bypasses that recursive
+            // scope and matches the intended "genuinely no pivot rows at
+            // all" semantics. This is the original bug fix from support
+            // ticket 56305. Floater visibility itself is deliberate per
+            // docs; only the cross-company leak was wrong.
+            if ($floater) {
+                return $query->where(function ($q) use ($companyIds) {
+                    $q->whereIn('users.id', function ($sub) use ($companyIds) {
+                        $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+                    })->orWhereNotIn('users.id', function ($sub) {
+                        $sub->select('user_id')->from('company_user');
+                    });
+                });
+            }
+
+            // Floater mode off (strict): only users pivoted to one of the
+            // caller's companies. Null-company users are not visible.
             return $query->whereIn('users.id', function ($sub) use ($companyIds) {
                 $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
             });
@@ -402,13 +673,53 @@ final class Company extends SnipeModel
             $table = ($table_name) ? $table_name.'.' : $query->getModel()->getTable().'.';
 
             if (empty($companyIds)) {
+                // Floater: null-company actor sees all items (they are unrestricted for assets/etc).
+                if ($floater) {
+                    return $query;
+                }
+
                 return $query->whereNull($table.$column);
             }
 
-            // action_logs: a NULL company_id means the logged object (AssetModel, Company, etc.)
-            // has no company_id column of its own. Those are global objects, visible to all users,
-            // so their log entries should not be hidden by the company filter.
+            // action_logs: a NULL company_id means the logged object's table has no
+            // company_id column. For most of those (AssetModel, Category, Manufacturer,
+            // Statuslabel, Location, etc.) the row is admin-authored global config
+            // that is safe to show cross-company. But User is also a table without a
+            // scalar company_id column (users belong to companies via the company_user
+            // pivot), and User-item action_logs carry PII in their log_meta diff
+            // (email, phone, employee_num, notes, address, jobtitle, etc.) written by
+            // UserObserver on every profile edit. Treating those as globally visible
+            // leaks cross-company PII, per GHSA-mch3-g6rh-gj22.
+            //
+            // Split by item_type: non-User rows keep the existing "null is safe" rule;
+            // User-item rows only fall through when the viewer shares at least one
+            // company with the target user via the company_user pivot (same visibility
+            // rule the users list itself applies under FMCS).
             if ($query->getModel()->getTable() === 'action_logs') {
+                $userClass = User::class;
+
+                return $query->where(function ($q) use ($table, $column, $companyIds, $userClass) {
+                    $q->whereIn($table.$column, $companyIds)
+                        ->orWhere(function ($null) use ($table, $column, $companyIds, $userClass) {
+                            $null->whereNull($table.$column)
+                                ->where(function ($check) use ($companyIds, $userClass) {
+                                    // Non-User item (or null item_type): safe global config, existing behavior.
+                                    $check->where('action_logs.item_type', '!=', $userClass)
+                                        ->orWhereNull('action_logs.item_type')
+                                        // User-item: viewer must share a company with the target user via pivot.
+                                        ->orWhere(function ($userItem) use ($companyIds, $userClass) {
+                                            $userItem->where('action_logs.item_type', $userClass)
+                                                ->whereIn('action_logs.item_id', function ($sub) use ($companyIds) {
+                                                    $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+                                                });
+                                        });
+                                });
+                        });
+                });
+            }
+
+            // Floater: null-company items are visible to users from any company.
+            if ($floater) {
                 return $query->where(function ($q) use ($table, $column, $companyIds) {
                     $q->whereIn($table.$column, $companyIds)
                         ->orWhereNull($table.$column);
@@ -417,6 +728,34 @@ final class Company extends SnipeModel
 
             return $query->whereIn($table.$column, $companyIds);
         }
+    }
+
+    /**
+     * Scope a users query to those belonging to the given company IDs, respecting floater mode.
+     *
+     * Extracted from controller-level inline logic so the same rule is enforced consistently
+     * everywhere users are filtered by a specific set of company IDs (e.g. select2 dropdowns).
+     */
+    public static function scopeUsersByCompanyIds($query, array $companyIds): mixed
+    {
+        if (Setting::getSettings()->null_company_is_floater) {
+            // The "no pivot rows" branch queries the company_user pivot
+            // directly, for the same reason as scopeCompanyablesDirectly
+            // above: walking the Eloquent companies relation would apply
+            // the companies-table CompanyableScope to the subquery and let
+            // cross-company users leak in as apparent floaters. See ticket 56305.
+            return $query->where(function ($q) use ($companyIds) {
+                $q->whereIn('users.id', function ($sub) use ($companyIds) {
+                    $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+                })->orWhereNotIn('users.id', function ($sub) {
+                    $sub->select('user_id')->from('company_user');
+                });
+            });
+        }
+
+        return $query->whereIn('users.id', function ($sub) use ($companyIds) {
+            $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+        });
     }
 
     /**
@@ -455,10 +794,16 @@ final class Company extends SnipeModel
     }
 
     /**
-     * Query builder scope to order on the user that created it
+     * Query builder scope to order on the user that created it.
+     *
+     * Use addSelect (not select) so prior withCount subqueries on the query
+     * survive — see scopeOrderParent() for the same rationale.
      */
     public function scopeOrderByCreatedBy($query, $order)
     {
-        return $query->leftJoin('users as admin_sort', 'companies.created_by', '=', 'admin_sort.id')->select('companies.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+        return $query->leftJoin('users as admin_sort', 'companies.created_by', '=', 'admin_sort.id')
+            ->addSelect('companies.*')
+            ->orderBy('admin_sort.first_name', $order)
+            ->orderBy('admin_sort.last_name', $order);
     }
 }

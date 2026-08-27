@@ -37,7 +37,13 @@ class AssetFactory extends Factory
                 return Statuslabel::where('name', 'Ready to Deploy')->first() ?? Statuslabel::factory()->rtd()->create(['name' => 'Ready to Deploy']);
             },
             'created_by' => User::factory()->superuser(),
-            'asset_tag' => $this->faker->unixTime('now'),
+            // Guaranteed unique per faker instance rather than relying on
+            // wall-clock seconds. The previous `unixTime('now')` default
+            // collided with `unique_undeleted:assets,asset_tag` when a
+            // test created assets back-to-back within one second, which
+            // showed up as off-by-one flakiness on GH's slower runners
+            // (e.g. MergeUsersTest asserting 9 but getting 8).
+            'asset_tag' => $this->faker->unique()->numerify('##########'),
             'notes' => 'Created by DB seeder',
             'purchase_date' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get())->format('Y-m-d'),
             'purchase_cost' => $this->faker->randomFloat(2, '299.99', '2999.99'),
@@ -46,9 +52,14 @@ class AssetFactory extends Factory
             'requestable' => $this->faker->boolean(),
             'assigned_to' => null,
             'assigned_type' => null,
+            // Populated in configure() below so the seeded demo shows
+            // audit-due / warranty-expiration events on the calendar
+            // instead of every asset having null dates. Tests that pin
+            // specific values on a state override these.
             'next_audit_date' => null,
             'last_checkout' => null,
             'asset_eol_date' => null,
+            'warranty_months' => null,
         ];
     }
 
@@ -60,6 +71,29 @@ class AssetFactory extends Factory
             $asset->asset_eol_date = $this->faker->boolean(5)
                 ? CarbonImmutable::parse($asset->purchase_date)->addMonths(rand(0, 20))->format('Y-m-d')
                 : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model?->eol ?? rand(12, 60))->format('Y-m-d');
+
+            // Only sprinkle demo-friendly dates on factory instances that
+            // didn't get pinned by a state / attribute override. Callers
+            // that pass an explicit value (tests, targeted seeds) keep
+            // control; the plain factory-default path picks up a mix so
+            // the calendar page and audit / warranty widgets aren't empty
+            // in a fresh demo.
+
+            // ~20% of assets get an audit_due date in a range spanning the
+            // recent past through six months out. Skews toward "soon" so
+            // the calendar's default visible window has enough content.
+            if ($asset->next_audit_date === null && $this->faker->boolean(20)) {
+                $asset->next_audit_date = CarbonImmutable::now()
+                    ->addDays($this->faker->numberBetween(-30, 180))
+                    ->format('Y-m-d');
+            }
+
+            // ~60% of assets get a warranty. Range covers laptops (12mo)
+            // through longer-cycle desktops (up to 60mo). warranty_expires
+            // is a computed accessor: purchase_date + warranty_months.
+            if ($asset->warranty_months === null && $this->faker->boolean(60)) {
+                $asset->warranty_months = $this->faker->randomElement([12, 24, 36, 48, 60]);
+            }
         });
     }
 

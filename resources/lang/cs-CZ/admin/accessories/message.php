@@ -20,6 +20,8 @@ return [
         'confirm' => 'Jste si jisti, že chcete odstranit toto příslušenství?',
         'error' => 'Vyskytl se problém při mazání kategorie. Zkuste to znovu prosím.',
         'success' => 'Příslušenství bylo úspěšně odstraněno.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

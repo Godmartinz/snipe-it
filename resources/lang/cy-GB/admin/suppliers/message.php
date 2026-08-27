@@ -20,7 +20,7 @@ return [
         'error' => 'Roedd problem wrth ceisio dileu\'r cyflenwr. Ceisiwch eto o. g. y. dd.',
         'success' => 'Cyflenwr wedi dileu\'n llwyddiannus.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -67,7 +67,7 @@ class ComponentTest extends TestCase
         $this->actingAs(User::factory()->admin()->create());
         $this->assertEquals(4, $componentForCompanyA->fresh()->numCheckedOut());
 
-        $this->actingAs(User::factory()->for($companyA)->create());
+        $this->actingAs(User::factory()->forCompany($companyA)->create());
         $this->assertEquals(4, $componentForCompanyA->fresh()->numCheckedOut());
     }
 
@@ -94,7 +94,7 @@ class ComponentTest extends TestCase
         $this->actingAs(User::factory()->admin()->create());
         $this->assertEquals(1, $componentForCompanyA->fresh()->numRemaining());
 
-        $this->actingAs(User::factory()->for($companyA)->create());
+        $this->actingAs(User::factory()->forCompany($companyA)->create());
         $this->assertEquals(1, $componentForCompanyA->fresh()->numRemaining());
     }
 

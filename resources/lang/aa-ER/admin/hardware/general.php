@@ -7,6 +7,8 @@ return [
     'asset' => 'crwdns755:0crwdne755:0',
     'bulk_checkout' => 'crwdns12902:0crwdne12902:0',
     'bulk_checkin' => 'crwdns12904:0crwdne12904:0',
+    'bulk_audit' => 'crwdns15517:0crwdne15517:0',
+    'bulk_audit_location_hidden_mixed_companies' => 'crwdns15519:0crwdne15519:0',
     'checkin' => 'crwdns756:0crwdne756:0',
     'checkin_assets' => 'crwdns14883:0crwdne14883:0',
     'checkout' => 'crwdns1905:0crwdne1905:0',

@@ -17,6 +17,8 @@ return [
         'confirm' => 'Bạn có chắc chắn muốn xóa bộ phận này?',
         'error' => 'Đã xảy ra sự cố khi xóa bộ phận. Vui lòng thử lại.',
         'success' => 'Bộ đã bị xóa thành công.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

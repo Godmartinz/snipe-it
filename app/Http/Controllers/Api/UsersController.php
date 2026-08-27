@@ -17,7 +17,6 @@ use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Http\Transformers\UsersTransformer;
 use App\Models\Accessory;
-use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Consumable;
@@ -30,6 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -101,6 +101,10 @@ class UsersController extends Controller
                 'consumables as consumables_count',
                 'managesUsers as manages_users_count',
                 'managedLocations as manages_locations_count',
+                // Count of maintenances whose polymorphic checked_out_to points
+                // at this user. Used by the users index sort + filter and by
+                // the user detail Maintenances tab badge.
+                'assignedMaintenances as assigned_maintenances_count',
             ]);
 
         $allowed_columns =
@@ -125,6 +129,7 @@ class UsersController extends Controller
                 'accessories_count',
                 'manages_users_count',
                 'manages_locations_count',
+                'assigned_maintenances_count',
                 'phone',
                 'mobile',
                 'address',
@@ -191,7 +196,15 @@ class UsersController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $users = $users->whereHas('companies', fn ($q) => $q->where('companies.id', $request->input('company_id')));
+            // When the caller is the company show-page (expand_company_hierarchy=1),
+            // include users who belong to the company's parent or any of its
+            // direct children — they inherit access via the one-level hierarchy.
+            // Other callers (select2 dropdowns, etc.) keep exact-id semantics.
+            $companyIds = $request->boolean('expand_company_hierarchy')
+                ? Company::reachableCompanyIds($request->input('company_id'))
+                : [(int) $request->input('company_id')];
+
+            $users = $users->whereHas('companies', fn ($q) => $q->whereIn('companies.id', $companyIds));
         }
 
         if ($request->filled('phone')) {
@@ -306,6 +319,10 @@ class UsersController extends Controller
             $users->has('accessories', '=', $request->input('accessories_count'));
         }
 
+        if ($request->filled('assigned_maintenances_count')) {
+            $users->has('assignedMaintenances', '=', $request->input('assigned_maintenances_count'));
+        }
+
         if ($request->filled('manages_users_count')) {
             $users->has('managesUsers', '=', $request->input('manages_users_count'));
         }
@@ -361,10 +378,10 @@ class UsersController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $users->count()) ? $users->count() : app('api_offset_value');
+        $total = $users->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $users->count();
         $users = $users->skip($offset)->take($limit)->get();
 
         return (new UsersTransformer)->transformUsers($users, $total);
@@ -401,10 +418,16 @@ class UsersController extends Controller
         $users = Company::scopeCompanyables($users, 'company_id', 'users');
 
         // Allow further narrowing to a specific company passed via data-company-ids on the select.
-        if ((Setting::getSettings()->full_multiple_companies_support == '1') && $request->filled('companyId')) {
+        // Superusers MUST bypass this filter — they manage across companies and need to see every
+        // user on checkout dropdowns. Scoping superusers to the item's company breaks the umbrella-
+        // corp / service-provider workflow where one admin checks items out to users in any sub-company.
+        // See: https://github.com/snipe/snipe-it/issues/ (v8.6.3 regression report)
+        if ((Setting::getSettings()->full_multiple_companies_support == '1')
+            && $request->filled('companyId')
+            && ! auth()->user()->isSuperUser()) {
             $companyIds = array_values(array_filter(array_map('intval', explode(',', $request->input('companyId')))));
             if (! empty($companyIds)) {
-                $users->whereHas('companies', fn ($q) => $q->whereIn('companies.id', $companyIds));
+                $users = Company::scopeUsersByCompanyIds($users, $companyIds);
             }
         }
 
@@ -457,6 +480,45 @@ class UsersController extends Controller
         $this->authorize('create', User::class);
 
         $authenticatedUser = auth()->user();
+
+        // Resolve requested company memberships up front, BEFORE any user
+        // record or pivot row lands on the DB. Prior behavior filled and
+        // saved the user first, then filtered company IDs after the fact
+        // (see syncCompaniesWithLogging below). A non-superuser could
+        // submit a company_id belonging to another company they were not
+        // a member of, and the user row was persisted before the filter ran,
+        // producing an unauthorized cross-tenant record even when the
+        // pivot ended up empty (leaving the account as a floater under
+        // null_company_is_floater installs). Reject the whole request if
+        // any requested id fails the actor's permitted-companies filter.
+        $requestedCompanyIds = array_values(array_filter(array_map(
+            'intval',
+            (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : [])),
+        )));
+        $permittedCompanyIds = Company::getIdsForCurrentUser($requestedCompanyIds);
+
+        if (count($requestedCompanyIds) !== count($permittedCompanyIds)) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/users/message.error.company_not_permitted'),
+            ), 403);
+        }
+
+        // Groups validation runs BEFORE save so the transaction below is a
+        // straight-line succeed-or-rollback. Doing it after save (as the
+        // pre-refactor version did) meant a bad groups payload persisted a
+        // user record even though the response reported "error".
+        if (($request->has('groups')) && (auth()->user()->isSuperUser())) {
+            $groupsValidator = Validator::make($request->only('groups'), [
+                'groups.*' => 'integer|exists:permission_groups,id',
+            ]);
+
+            if ($groupsValidator->fails()) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, $groupsValidator->errors()));
+            }
+        }
+
         $user = new User;
         $user->fill($request->all());
         $user->created_by = auth()->id();
@@ -468,7 +530,6 @@ class UsersController extends Controller
             ));
         }
 
-        //
         if ($request->filled('password')) {
             $user->password = bcrypt($request->input('password'));
         } else {
@@ -477,7 +538,19 @@ class UsersController extends Controller
 
         app('App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
 
-        if ($user->save()) {
+        // Wrap save + groups + company sync in a single transaction so a
+        // failure anywhere in the create sequence rolls back the whole
+        // thing. Without this, an exception in syncCompaniesWithLogging()
+        // or groups()->sync() would leave a partially-created user record
+        // on the DB with unfiltered attribute state from $request->all().
+        $saveFailed = false;
+
+        DB::transaction(function () use ($request, $user, $permittedCompanyIds, &$saveFailed) {
+            if (! $user->save()) {
+                $saveFailed = true;
+
+                return;
+            }
 
             if (($user->activated == '1') && ($user->email != '') && ($request->input('send_welcome') == '1')) {
 
@@ -490,29 +563,17 @@ class UsersController extends Controller
             }
 
             if (($request->has('groups')) && (auth()->user()->isSuperUser())) {
-
-                $validator = Validator::make($request->only('groups'), [
-                    'groups.*' => 'integer|exists:permission_groups,id',
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()));
-                }
-
-                // Sync the groups since the user is a superuser and the groups pass validation
                 $user->groups()->sync($request->input('groups'));
             }
 
-            // Sync company memberships from company_ids[] or fall back to scalar company_id
-            $companyIds = array_filter(
-                (array) ($request->input('company_ids') ?? ($request->filled('company_id') ? [$request->input('company_id')] : []))
-            );
-            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser(array_map('intval', $companyIds)));
+            $user->syncCompaniesWithLogging($permittedCompanyIds);
+        });
 
-            return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.create')));
+        if ($saveFailed) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $user->getErrors()));
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $user->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.create')));
     }
 
     /**
@@ -526,7 +587,7 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        if ($user = User::withCount('assets as assets_count', 'licenses as licenses_count', 'accessories as accessories_count', 'consumables as consumables_count', 'managesUsers as manages_users_count', 'managedLocations as manages_locations_count')->find($id)) {
+        if ($user = User::withCount('assets as assets_count', 'licenses as licenses_count', 'accessories as accessories_count', 'consumables as consumables_count', 'managesUsers as manages_users_count', 'managedLocations as manages_locations_count', 'assignedMaintenances as assigned_maintenances_count')->find($id)) {
             $this->authorize('view', $user);
 
             return (new UsersTransformer)->transformUser($user);
@@ -561,10 +622,62 @@ class UsersController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Permission denied. You cannot update user information via API on the demo.'));
         }
 
-        // Pull out sensitive fields that require extra permission
-        $user->fill($request->except(['password', 'username', 'email', 'activated', 'permissions', 'activation_code', 'remember_token', 'two_factor_secret', 'two_factor_enrolled', 'two_factor_optin']));
+        // Resolve requested company memberships up front, BEFORE any DB
+        // write. Same reasoning as store(): the pre-refactor update path
+        // filled the user record from $request->all() and saved it, then
+        // filtered the company IDs afterward. A non-superuser could
+        // therefore relocate an existing user into a different company
+        // via a scalar company_id or company_ids[] payload. Reject the
+        // whole request if any requested id fails the actor's permitted
+        // companies filter.
+        if ($request->has('company_ids') || $request->filled('company_id')) {
+            $requestedCompanyIds = array_values(array_filter(array_map(
+                'intval',
+                (array) ($request->input('company_ids') ?? [$request->input('company_id')]),
+            )));
+            $permittedCompanyIds = Company::getIdsForCurrentUser($requestedCompanyIds);
 
-        if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+            if (count($requestedCompanyIds) !== count($permittedCompanyIds)) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/users/message.error.company_not_permitted'),
+                ), 403);
+            }
+        }
+
+        // User::GATED_AUTH_FIELDS enter through the canEditAuthFields branch
+        // below. If the caller does not hold that gate against this target
+        // but their request nevertheless carries any of those fields, fail
+        // loud rather than persisting a partial write while returning a
+        // success response. Prior behavior silently dropped the auth-field
+        // writes and returned `success`, which misrepresented what
+        // actually persisted.
+        $requestedAuthFields = array_values(array_intersect(User::GATED_AUTH_FIELDS, array_keys($request->all())));
+        $canEditAuthFields = auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo');
+
+        if (! empty($requestedAuthFields) && ! $canEditAuthFields) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/users/message.auth_fields_denied', ['fields' => implode(', ', $requestedAuthFields)]),
+            ));
+        }
+
+        // Pull out sensitive fields that require extra permission. The
+        // GATED_AUTH_FIELDS constant covers user-editable secrets. The
+        // additional keys below are internal state (2FA secrets, remember
+        // tokens, activation codes) that must never be settable from a
+        // request payload regardless of caller privilege.
+        $user->fill($request->except(array_merge(User::GATED_AUTH_FIELDS, [
+            'activation_code',
+            'remember_token',
+            'two_factor_secret',
+            'two_factor_enrolled',
+            'two_factor_optin',
+        ])));
+
+        if ($canEditAuthFields) {
 
             if ($request->filled('password')) {
                 $user->password = bcrypt($request->input('password'));
@@ -626,15 +739,19 @@ class UsersController extends Controller
                 $user->groups()->sync($request->input('groups'));
             }
 
-            // company_ids (new format) = full replacement sync.
+            // company_ids (new format) = full replacement sync, with
+            // the target's invisible-to-editor memberships preserved
+            // so a scoped editor's save can't detach the target from
+            // tenants outside the editor's own membership.
             // Legacy company_id = add without removing other associations.
             if ($request->has('company_ids')) {
-                $companyIds = array_filter(array_map('intval', (array) $request->input('company_ids')));
-                $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+                $companyIds = array_values(array_filter(array_map('intval', (array) $request->input('company_ids'))));
+                $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
             } elseif ($request->filled('company_id')) {
                 $filtered = Company::getIdsForCurrentUser([(int) $request->input('company_id')]);
                 if (! empty($filtered)) {
                     $user->companies()->syncWithoutDetaching($filtered);
+                    $user->syncLegacyCompanyIdMirror();
                 }
             }
 
@@ -723,9 +840,13 @@ class UsersController extends Controller
                 $assets = $assets->InModelList($model_ids);
             }
 
-            $assets = $assets->get();
+            $total = $assets->count();
+            $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+            $limit = app('api_limit_value');
 
-            return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
+            $assets = $assets->skip($offset)->take($limit)->get();
+
+            return (new AssetsTransformer)->transformAssets($assets, $total, $request);
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))));
@@ -788,15 +909,22 @@ class UsersController extends Controller
      *
      * @param  $userId
      */
-    public function accessories($id): array
+    public function accessories(Request $request, $id): array
     {
         $this->authorize('view', User::class);
         $user = User::findOrFail($id);
         $this->authorize('view', $user);
         $this->authorize('view', Accessory::class);
-        $accessories = $user->accessories;
 
-        return (new AccessoriesTransformer)->transformAccessories($accessories, $accessories->count());
+        $accessories = $user->accessories();
+
+        $total = $accessories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $accessories = $accessories->skip($offset)->take($limit)->get();
+
+        return (new AccessoriesTransformer)->transformAccessories($accessories, $total);
     }
 
     /**
@@ -808,65 +936,24 @@ class UsersController extends Controller
      *
      * @param  $userId
      */
-    public function licenses($id): JsonResponse|array
+    public function licenses(Request $request, $id): JsonResponse|array
     {
         $this->authorize('view', User::class);
         $this->authorize('view', License::class);
 
         if ($user = User::where('id', $id)->withTrashed()->first()) {
-            $licenses = $user->licenses()->get();
+            $licenses = $user->licenses();
 
-            return (new LicensesTransformer)->transformLicenses($licenses, $licenses->count());
+            $total = $licenses->count();
+            $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+            $limit = app('api_limit_value');
+
+            $licenses = $licenses->skip($offset)->take($limit)->get();
+
+            return (new LicensesTransformer)->transformLicenses($licenses, $total);
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))));
-
-    }
-
-    /**
-     * Reset the user's two-factor status
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since [v3.0]
-     *
-     * @param  $userId
-     */
-    public function postTwoFactorReset(Request $request): JsonResponse
-    {
-        $this->authorize('update', User::class);
-
-        if ($request->filled('id')) {
-            try {
-                $user = User::find($request->input('id'));
-                $this->authorize('update', $user);
-
-                if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
-
-                    $user->two_factor_secret = null;
-                    $user->two_factor_enrolled = 0;
-                    $user->saveQuietly();
-
-                    // Log the reset
-                    $logaction = new Actionlog;
-                    $logaction->target_type = User::class;
-                    $logaction->target_id = $user->id;
-                    $logaction->item_type = User::class;
-                    $logaction->item_id = $user->id;
-                    $logaction->created_at = date('Y-m-d H:i:s');
-                    $logaction->created_by = auth()->id();
-                    $logaction->logaction('2FA reset');
-
-                    return response()->json(['message' => trans('admin/settings/general.two_factor_reset_success')], 200);
-                }
-
-                return response()->json(['message' => trans('general.unauthorized')], 500);
-            } catch (\Exception $e) {
-                return response()->json(['message' => trans('admin/settings/general.two_factor_reset_error')], 500);
-            }
-        }
-
-        return response()->json(['message' => 'No ID provided'], 500);
 
     }
 
@@ -891,14 +978,20 @@ class UsersController extends Controller
      *
      * @author [Godfrey Martinez] [<gmartinez@grokability.com>]
      */
-    public function eulas(User $user, ActionlogsTransformer $transformer)
+    public function eulas(Request $request, User $user, ActionlogsTransformer $transformer)
     {
-        $this->authorize('view', User::class);
+        $this->authorize('view', $user);
 
-        $eulas = $user->eulas;
+        $eulas = $user->eulas();
+
+        $total = $eulas->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $eulas = $eulas->skip($offset)->take($limit)->get();
 
         return response()->json(
-            $transformer->transformActionlogs($eulas, $eulas->count())
+            $transformer->transformActionlogs($eulas, $total)
         );
     }
 
@@ -924,14 +1017,8 @@ class UsersController extends Controller
             }
 
             if ($user->restore()) {
-
-                $logaction = new Actionlog;
-                $logaction->item_type = User::class;
-                $logaction->item_id = $user->id;
-                $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->created_by = auth()->id();
-                $logaction->logaction('restore');
-
+                // The `restore` action_log entry is written by
+                // UserObserver::restoring, no manual write here.
                 return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.restored')), 200);
             }
 
@@ -952,7 +1039,13 @@ class UsersController extends Controller
      */
     public function syncLdapUsers(Request $request)
     {
-        $this->authorize('update', User::class);
+        // Superuser-only: a bulk LDAP sync surfaces users from across
+        // the entire directory (all companies, all OUs), so anyone with
+        // "users.edit" but no full-directory access shouldn't be able
+        // to run it or read the summary that lists them.
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
+        }
         // Call Artisan LDAP import command.
 
         Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('location_id'), '--json_summary' => true]);

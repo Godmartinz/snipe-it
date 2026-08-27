@@ -20,6 +20,8 @@ return [
         'confirm' => 'Sigur doriți să ștergeți această etichetă de stare?',
         'error' => 'A apărut o problemă la ștergerea etichetei de stare. Vă rugăm să încercați din nou.',
         'success' => 'Eticheta de stare a fost șters cu succes.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

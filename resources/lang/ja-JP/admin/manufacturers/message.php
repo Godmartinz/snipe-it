@@ -25,7 +25,7 @@ return [
         'confirm' => '本当にこの製造元を削除しますか？',
         'error' => '製造元を削除する際に問題が発生しました。もう一度試して下さい。',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

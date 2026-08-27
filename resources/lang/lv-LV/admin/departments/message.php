@@ -17,6 +17,8 @@ return [
         'confirm' => 'Vai tiešām vēlaties dzēst šo nodaļu?',
         'error' => 'Radās problēma, izdzēšot nodaļu. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Departaments tika veiksmīgi dzēsts.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -41,7 +41,7 @@
                             :value="old('checkin_at', date('Y-m-d'))"
                             end_date="0d"
                         />
-                        {!! $errors->first('checkin_at', '<span class="alert-msg"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        <x-form.error name="checkin_at" />
                     </div>
                 </div>
             </div>

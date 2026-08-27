@@ -4,10 +4,10 @@ return [
 
     'deleted' => '삭제된 자산 모델',
     'does_not_exist' => '모델이 존재하지 않습니다.',
-    'no_association' => 'WARNING! The asset model for this item is invalid or missing!',
-    'no_association_fix' => 'This will break things in weird and horrible ways. Edit this asset now to assign it a model.',
+    'no_association' => '경고! 이 항목의 자산 모델이 잘못되었거나 누락되었습니다!',
+    'no_association_fix' => '이상하고 심각한 문제를 일으킬 수 있습니다. 지금 이 자산을 편집하여 모델을 지정하세요.',
     'assoc_users' => '이 모델은 현재 하나 이상의 자산들과 연결되어 있기에 삭제 할 수 없습니다. 자산들을 삭제하고 다시 삭제하길 시도하세요. ',
-    'invalid_category_type' => 'This category must be an asset category.',
+    'invalid_category_type' => '이 카테고리는 자산 카테고리여야 합니다.',
 
     'create' => [
         'error' => '모델이 생성되지 않았습니다. 다시 시도하세요.',
@@ -33,14 +33,15 @@ return [
 
     'bulkedit' => [
         'error' => '변경된 항목이 없어서, 갱신되지 않습니다.',
-        'success' => 'Model successfully updated. |:model_count models successfully updated.',
-        'warn' => 'You are about to update the properties of the following model:|You are about to edit the properties of the following :model_count models:',
+        'success' => '모델이 업데이트되었습니다.|:model_count개의 모델이 업데이트되었습니다.',
+        'warn' => '다음 모델의 속성을 업데이트하려고 합니다:|다음 :model_count개 모델의 속성을 편집하려고 합니다:',
 
     ],
 
     'bulkdelete' => [
         'error' => '선택된 모델이 없기에, 삭제되지 않습니다.',
-        'success' => 'Model deleted!|:success_count models deleted!',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
+        'success' => '모델이 삭제되었습니다!|:success_count개의 모델이 삭제되었습니다!',
         'success_partial' => ': success_count개의 모델이 삭제되었지만, fail_count 개는 관련된 자산이 있기에 삭제할 수 없습니다.',
     ],
 

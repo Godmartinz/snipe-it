@@ -12,9 +12,12 @@ use ArieTimmerman\Laravel\SCIMServer\Attribute\Meta;
 use ArieTimmerman\Laravel\SCIMServer\Attribute\MutableCollection;
 use ArieTimmerman\Laravel\SCIMServer\Attribute\Schema as AttributeSchema;
 use ArieTimmerman\Laravel\SCIMServer\Exceptions\SCIMException;
+use ArieTimmerman\Laravel\SCIMServer\Parser\Parser;
 use ArieTimmerman\Laravel\SCIMServer\Parser\Path;
 use ArieTimmerman\Laravel\SCIMServer\SCIM\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Tmilos\ScimFilterParser\Error\FilterException;
 
 function a($name = null): Attribute
 {
@@ -31,11 +34,262 @@ function eloquent($name, $attribute = null): Attribute
     return new Eloquent($name, $attribute);
 }
 
-class EloquentWithRemove extends Eloquent
+// Extends Complex to handle schema-qualified attribute keys in PATCH add/replace operations.
+// Azure Entra ID sends PATCH without a "path" field, putting the full URN as the value dict key
+// e.g. {"op":"add","value":{"urn:...grokability...:location":"Head Office"}}.
+// The upstream library's add() only searches the default (core) schema, silently dropping grokability attrs.
+class SnipeRootComplex extends Complex
 {
-    public function remove($value, Model &$object, ?Path $path = null)
+    private function findInSchema(string $schemaUrn, string $attrName): ?object
     {
-        $object->{$this->attribute} = null;
+        $schemaNode = $this->getSubNode($schemaUrn);
+
+        return ($schemaNode instanceof AttributeSchema) ? $schemaNode->getSubNode($attrName) : null;
+    }
+
+    public function add($value, Model &$object)
+    {
+        $match = false;
+        $this->dirty = true;
+
+        if ($this->mutability == 'readOnly') {
+            return;
+        }
+
+        foreach ($value as $key => $v) {
+            if (is_numeric($key)) {
+                throw new SCIMException('Invalid key: '.$key.' for complex object '.$this->getFullKey());
+            }
+
+            // Malformed keys like `[type eq "work"]` (a value-path filter
+            // with no leading attribute name) make the Tmilos parser throw
+            // FilterException before we can inspect the parsed shape.
+            // Same class of misconfigured-client problem as the null-guard
+            // below, one layer further back. Turn it into a 400 so the
+            // caller sees "your key is malformed" instead of a 500 that
+            // looks like our fault.
+            try {
+                $path = Parser::parse($key);
+            } catch (FilterException $e) {
+                throw new SCIMException('SnipeRootComplex::add: Malformed SCIM key: '.$key.' ('.$e->getMessage().')', 400);
+            }
+
+            if ($path->isNotEmpty()) {
+                // Path::isNotEmpty() returns true when EITHER the
+                // attribute-path OR the value-path is populated. A body
+                // key that's only a value-path filter expression (e.g.
+                // `emails[type eq "work"]`) makes it past this check
+                // but has getAttributePath() === null, which the
+                // library's shiftAttributePathAttributes() will null-
+                // deref on. Route-level replace/add here only
+                // dispatches by simple attribute name — a filter-key at
+                // this layer is a misconfigured SCIM client that we
+                // can't honor, and this will return a 400 so the user knows
+                // the misconfiguration is on their end, versus the previous 500,
+                // which made it look like it was on our end.
+                if ($path->getAttributePath() === null) {
+                    throw new SCIMException('SnipeRootComplex::add: Cannot route SCIM key with no attribute path: '.$key, 400);
+                }
+
+                $attributeNames = $path->getAttributePathAttributes();
+                $schema = $path->getAttributePath()?->path?->schema;
+                $path = $path->shiftAttributePathAttributes();
+
+                $subNode = ($schema !== null) ? $this->findInSchema($schema, $attributeNames[0]) : null;
+                if ($subNode === null) {
+                    $subNode = $this->getSubNode($attributeNames[0]);
+                }
+
+                $match = true;
+
+                $newValue = $v;
+                if ($path->isNotEmpty()) {
+                    $newValue = [implode('.', $path->getAttributePathAttributes()) => $v];
+                }
+
+                if ($subNode !== null) {
+                    $subNode->add($newValue, $object);
+                }
+            }
+        }
+
+        if (! $match && $this->parent == null) {
+            foreach ($this->subAttributes as $attribute) {
+                if ($attribute instanceof AttributeSchema) {
+                    $attribute->add($value, $object);
+                }
+            }
+        }
+    }
+
+    public function replace($value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
+    {
+        $this->dirty = true;
+
+        if ($this->mutability == 'readOnly') {
+            return;
+        }
+
+        foreach ($value as $key => $v) {
+            if (is_numeric($key)) {
+                throw new SCIMException('Invalid key: '.$key.' for complex object '.$this->getFullKey());
+            }
+
+            $subNode = null;
+            $path = null;
+            $key = trim($key);
+
+            if (strpos($key, ':') !== false) {
+                try {
+                    $parsed = Parser::parse($key);
+                } catch (FilterException $e) {
+                    throw new SCIMException('SnipeRootComplex::replace: Malformed SCIM key: '.$key.' ('.$e->getMessage().')', 400);
+                }
+                $schemaUrn = $parsed->getAttributePath()?->path?->schema;
+                $attrName = $parsed->getAttributePathAttributes()[0] ?? null;
+                if ($schemaUrn !== null && $attrName !== null) {
+                    $subNode = $this->findInSchema($schemaUrn, $attrName);
+                }
+                if ($subNode === null) {
+                    $subNode = $this->getSubNode($key);
+                }
+            } else {
+                // See the matching try/catch in add(). Malformed keys
+                // starting with `[` throw FilterException from the parser
+                // itself, before any of our null-guards fire.
+                try {
+                    $path = Parser::parse($key);
+                } catch (FilterException $e) {
+                    throw new SCIMException('SnipeRootComplex::replace: Malformed SCIM key: '.$key.' ('.$e->getMessage().')', 400);
+                }
+                if ($path->isNotEmpty()) {
+                    // See the matching guard in add() — isNotEmpty() lets
+                    // a value-path-only key through (e.g. emails[type eq
+                    // "work"]) but shiftAttributePathAttributes() null-
+                    // derefs on getAttributePath() when it's not present.
+                    // Trace: null-deref on Path.php:79 seen in the
+                    // wild for misconfigured SCIM clients sending
+                    // filter-key bodies to PUT /Users/{id}.
+                    if ($path->getAttributePath() === null) {
+                        throw new SCIMException('SnipeRootComplex::replace: Cannot route SCIM key with no attribute path: '.$key, 400);
+                    }
+
+                    $attributeNames = $path->getAttributePathAttributes();
+                    $path = $path->shiftAttributePathAttributes();
+                    $subNode = $this->getSubNode($attributeNames[0] ?? $path->getAttributePath()?->path?->schema);
+                }
+            }
+
+            if ($subNode !== null) {
+                $newValue = $v;
+                if ($path !== null && $path->isNotEmpty()) {
+                    $newValue = [implode('.', $path->getAttributePathAttributes()) => $v];
+                }
+                $subNode->replace($newValue, $object, $path);
+            }
+        }
+
+        if ($subNode == null && $this->parent == null) {
+            foreach ($this->subAttributes as $attribute) {
+                if ($attribute instanceof AttributeSchema) {
+                    $attribute->replace($value, $object, $path);
+                }
+            }
+        }
+
+        if ($removeIfNotSet) {
+            foreach ($this->subAttributes as $attribute) {
+                if (! $attribute->isDirty()) {
+                    $attribute->remove(null, $object);
+                }
+            }
+        }
+    }
+
+    // #19347: Complex::applyComparison ignores the schema URN on the
+    // filter path and always falls back to the FIRST schema node (core).
+    // A filter like:
+    //   ?filter=urn:...enterprise:2.0:User:employeeNumber eq "1234567"
+    // parses with schema=<enterprise URN> and attributeNames=['employeeNumber'],
+    // but the library calls getSubNode('employeeNumber') on root, misses,
+    // then dispatches to getSchemaNode() (always core) which reports
+    // "Unknown path" since employeeNumber lives on the enterprise schema.
+    // Same shape of bug as the URN-blind add()/replace() routing above.
+    // If the path carries a schema URN and we have a schema node for it,
+    // dispatch the whole path there so its own applyComparison finds the
+    // attribute; otherwise defer to the library.
+    public function applyComparison(Builder &$query, Path $path, $parentAttribute = null)
+    {
+        $schemaUrn = $path->getAttributePath()?->path?->schema;
+
+        if ($schemaUrn !== null) {
+            $schemaNode = $this->getSubNode($schemaUrn);
+            if ($schemaNode instanceof AttributeSchema) {
+                $schemaNode->applyComparison($query, $path, $parentAttribute);
+
+                return;
+            }
+        }
+
+        parent::applyComparison($query, $path, $parentAttribute);
+    }
+}
+
+// Azure Entra ID sends op=replace with path=members and only the single user being provisioned,
+// not the full member list. Using sync() would wipe all other members on every user update.
+// Override replace() to use syncWithoutDetaching() so it behaves like add(); op=remove with a
+// filter path still handles explicit removals correctly.
+class SnipeMutableCollection extends MutableCollection
+{
+    public function replace($value, Model &$object, ?Path $path = null)
+    {
+        $this->add($value, $object);
+    }
+
+    // POST /scim/v2/Groups with an initial `members` array arrives here with
+    // an unsaved parent: the SCIM library runs attribute mappers before it
+    // calls save() on the new resource. Letting parent::add() fire on an
+    // unsaved model makes Eloquent's pivot INSERT bind NULL for group_id
+    // (since $parent->getKey() is null) and blow up with a MySQL 23000 integrity
+    // violation. Persist first so the pivot row has a real parent id, then
+    // stash the object into the request so the displayName uniqueness closure
+    // (which re-runs after mapping) can recognize its own row instead of
+    // treating it as an existing name collision.
+    //
+    // Missing-value guard: the per-member `required` rule that used to live on
+    // the SCIM config was dropped because it caused ValidationRuleParser to
+    // allocate O(N) rule stacks on the flattened payload, which OOMed on
+    // large group syncs (see the docblock above the members mapping in
+    // SnipeSCIMConfig::getGroupConfig). The check now happens here in a
+    // single walk so clients get a clean 400 pointing at the bad indices
+    // instead of the parent library's misleading 500 with an empty
+    // "One or more members are unknown: " message from findMany() eating
+    // the nulls.
+    public function add($value, Model &$object)
+    {
+        $missing = [];
+        foreach ((array) $value as $index => $entry) {
+            if (! is_array($entry)
+                || ! array_key_exists('value', $entry)
+                || $entry['value'] === null
+                || $entry['value'] === ''
+            ) {
+                $missing[] = $index;
+            }
+        }
+        if ($missing !== []) {
+            throw new SCIMException(
+                'Every members entry must include a "value" field. Missing at indices: '.implode(',', $missing),
+                400
+            );
+        }
+
+        if (! $object->exists) {
+            $object->save();
+            request()->attributes->set('scim_in_flight_resource', $object);
+        }
+
+        parent::add($value, $object);
     }
 }
 
@@ -46,8 +300,8 @@ class MappedTable extends Attribute
         private string $relationship_name,
         private string $relationship_class,
         private string $relationship_id_field,
-        private string $relationship_field)
-    {
+        private string $relationship_field
+    ) {
         parent::__construct($this->scim_attribute_name);
     }
 
@@ -58,17 +312,156 @@ class MappedTable extends Attribute
 
     public function add($value, Model &$object)
     {
+        $value = $this->coerceScalar($value);
         $object->{$this->relationship_id_field} = $value ? $this->relationship_class::firstOrCreate([$this->relationship_field => $value])->id : null;
     }
 
     public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
     {
+        $value = $this->coerceScalar($value);
         $object->{$this->relationship_id_field} = $value ? $this->relationship_class::firstOrCreate([$this->relationship_field => $value])->id : null;
     }
 
     public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
     {
+        $value = $this->coerceScalar($value);
         $object->{$this->relationship_id_field} = $value ? $this->relationship_class::firstOrCreate([$this->relationship_field => $value])->id : null;
+    }
+
+    // SCIM clients may send scalar-mapped attributes like `department`
+    // and `location` as complex objects — {"value": "Engineering"} or
+    // {"displayName": "Engineering"} — and SnipeRootComplex::replace()
+    // additionally wraps sub-attribute values ({"remaining.path" => v})
+    // when descending. MappedTable is a leaf that maps ONE relationship
+    // field, so anything arriving as an array must be unwrapped before
+    // firstOrCreate() gets it — otherwise Grammar::parameterize()
+    // throws when the WHERE binding receives an array. Prefer the SCIM
+    // conventional keys "value" and "displayName", then fall back to
+    // any scalar leaf; return null if no usable value exists so the
+    // caller nulls the relationship (matching the empty-string branch).
+    private function coerceScalar($value)
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        foreach (['value', 'displayName'] as $key) {
+            if (isset($value[$key]) && is_scalar($value[$key])) {
+                return $value[$key];
+            }
+        }
+
+        foreach ($value as $v) {
+            if (is_scalar($v) && $v !== '') {
+                return $v;
+            }
+        }
+
+        return null;
+    }
+}
+
+// Company is stored only in the company_user pivot, not company_id. Read from the pivot
+// and sync it on write. For new users (not yet saved) defer the sync via a saved() callback.
+class SCIMCompanyAttribute extends Attribute
+{
+    protected function doRead(&$object, $attributes = [])
+    {
+        return $object->companies->first()?->name;
+    }
+
+    private function applyCompany(?int $companyId, Model &$object): void
+    {
+        $ids = $companyId ? [$companyId] : [];
+
+        if ($object->exists) {
+            $object->companies()->sync($ids);
+            if (method_exists($object, 'syncLegacyCompanyIdMirror')) {
+                $object->syncLegacyCompanyIdMirror();
+            }
+        } else {
+            $object->saved(function () use ($object, $ids) {
+                $object->companies()->sync($ids);
+                if (method_exists($object, 'syncLegacyCompanyIdMirror')) {
+                    $object->syncLegacyCompanyIdMirror();
+                }
+            });
+        }
+    }
+
+    public function add($value, Model &$object)
+    {
+        $this->applyCompany($value ? Company::firstOrCreate(['name' => $value])->id : null, $object);
+    }
+
+    public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
+    {
+        $this->applyCompany($value ? Company::firstOrCreate(['name' => $value])->id : null, $object);
+    }
+
+    public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
+    {
+        $this->applyCompany($value ? Company::firstOrCreate(['name' => $value])->id : null, $object);
+    }
+}
+
+class SCIMMultiCompanyArray extends Attribute
+{
+    protected function doRead(&$object, $attributes = [])
+    {
+        return $object->companies()->pluck('name')->toArray();
+    }
+
+    private function applyCompanies(array $company_names, Model &$object): void
+    {
+        $names = [];
+        foreach ($company_names as $company) {
+            if (is_array($company) && isset($company['value'])) {
+                // this is how Entra ID does it
+                $names[] = $company['value'];
+            } elseif (is_string($company)) {
+                // This seems to be how Okta does it?
+                $names[] = $company;
+            } else {
+                throw new SCIMException("Unknown 'companies' value: '".print_r($company, true)."' of type: ".get_debug_type($company), 400);
+            }
+        }
+
+        $ids = [];
+        foreach ($names as $company_name) {
+            $ids[] = Company::firstOrCreate(['name' => $company_name])->id;
+        }
+        if ($object->exists) {
+            $object->companies()->sync($ids);
+        } else {
+            $object->saved(fn () => $object->companies()->sync($ids));
+        }
+    }
+
+    public function add($value, Model &$object)
+    {
+        \Log::debug('MC ADD VALUE IS: '.print_r($value, true));
+        $this->applyCompanies($value, $object);
+    }
+
+    public function replace($value, Model &$object, $path = null, $removeIfNotSet = false)
+    {
+        \Log::debug('MC REPLACE VALUE IS: '.print_r($value, true));
+        $this->applyCompanies($value, $object);
+    }
+
+    public function patch($operation, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
+    {
+        \Log::debug('MC PATCH VALUE IS: '.print_r($value, true));
+        $this->applyCompanies($value, $object);
+    }
+}
+
+class EloquentWithRemove extends Eloquent
+{
+    public function remove($value, Model &$object, ?Path $path = null)
+    {
+        $object->{$this->attribute} = null;
     }
 }
 
@@ -113,7 +506,11 @@ class SnipeSCIMConfig
 
     public function getGroupClass()
     {
-        return Group::class;
+        // Route SCIM group operations through SCIMGroup so that the
+        // upstream library's create-path firstOrNew([]) call resolves
+        // to a fresh Group instance rather than the first existing row.
+        // See SCIMGroup and #19493 for the underlying library bug.
+        return SCIMGroup::class;
     }
 
     const ENTERPRISE = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
@@ -132,7 +529,7 @@ class SnipeSCIMConfig
             'withRelations' => [],
             'description' => 'User Account',
 
-            'map' => complex()->withSubAttributes(
+            'map' => (new SnipeRootComplex)->withSubAttributes(
                 new class('schemas', ['urn:ietf:params:scim:schemas:core:2.0:User', self::ENTERPRISE, self::GROKABILITY]) extends Constant
                 {
                     public function replace($value, &$object, $path = null)
@@ -177,20 +574,33 @@ class SnipeSCIMConfig
                     {
                         protected function doRead(&$object, $attributes = [])
                         {
-                            return collect([$object->email])->map(function ($email) {
-                                return [
-                                    'value' => $email,
-                                    'type' => 'work', // TODO - is this how we always have done it?
-                                    'primary' => true,
-                                ];
-                            })->toArray();
+                            if (! $object->email) {
+                                return null;
+                            }
+
+                            // RFC 7643 §4.1.2: multi-valued attributes MUST be
+                            // JSON arrays even when they hold a single element.
+                            // Return an array-of-objects so `emails` serializes
+                            // as `[{...}]`. Previously returned a bare
+                            // associative array and Rollbar surfaced downstream
+                            // clients constructing malformed filter keys against
+                            // the scalar shape.
+                            return [[
+                                'value' => $object->email,
+                                'type' => 'work',
+                                'primary' => true,
+                            ]];
                         }
 
                         public function doWrite($operation, $subop, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
                         {
                             if ($value) {
                                 try {
-                                    $object->email = $value[0]['value'];
+                                    if (is_string($value)) {
+                                        $object->email = $value; // Weird MS-SCIM stuff :/
+                                    } else {
+                                        $object->email = $value[0]['value'];
+                                    }
                                 } catch (\Throwable $e) {
                                     \Log::debug($e);
                                     throw new SCIMException("Unknown email object:  '".print_r($value, true)."'", 422);
@@ -298,8 +708,11 @@ class SnipeSCIMConfig
                                 $address['type'] = 'work';
                                 $address['primary'] = true;
                             }
-
-                            return $address;
+                            if ($address) {
+                                return [(object) $address]; // cast-to-object forces "squiggly-brackets" in JSON
+                            } else {
+                                return null; // this should remove the addresses block entirely
+                            }
                         }
 
                         public function doWrite($operation, $subop, $value, Model &$object, ?Path $path = null, $removeIfNotSet = false)
@@ -325,6 +738,30 @@ class SnipeSCIMConfig
                                 }
 
                                 throw new SCIMException("Could not handle path for update $path", 422);
+                            } else {
+                                // Okta hits this one for creating a user - it does a full PUT for their ID
+                                \Log::debug("GetValuePAthFilter is null for path: $path");
+                                \Log::debug('GetValuePathFilter is now null and trying to set value of: '.print_r($value, true));
+                                // the Addresses object is a 'list' (array with numeric indices) by definition...
+                                if (is_array($value) && array_is_list($value)) {
+                                    foreach ($value as $address) {
+                                        // we just need to check if this is a 'work' address, we don't really care about "primary => true"
+                                        if (@$address['type'] == 'work') {
+                                            foreach ($address as $key => $v) {
+                                                if (array_key_exists($key, self::$addressmap)) {
+                                                    \Log::debug('Addresses: Setting '.self::$addressmap[$key]." to '$v'");
+                                                    $object->{self::$addressmap[$key]} = $v;
+                                                }
+                                            }
+                                        } else {
+                                            // should we throw if you give us a 'home' address? I don't know.
+                                            // what if you gave us _both_ ?
+                                        }
+                                    }
+                                } else {
+                                    \Log::debug('Unknown Address Object: '.print_r($value, true));
+                                    throw new SCIMException('Unknown Address object of type: '.gettype($value), 422);
+                                }
                             }
                         }
                     })->withSubAttributes(
@@ -376,7 +813,7 @@ class SnipeSCIMConfig
                             }
 
                             return [
-                                'value' => $object->manager->id, // TODO - ID's aren't unique like they're supposed to be :/
+                                'value' => (string) $object->manager->id, // TODO - ID's aren't unique like they're supposed to be :/
                                 '$ref' => route('scim.resource', ['resourceType' => 'User', 'resourceObject' => $object->manager->id]),
                                 'displayName' => $object->manager->display_name,
                             ];
@@ -422,7 +859,8 @@ class SnipeSCIMConfig
                 ),
                 (new AttributeSchema(self::GROKABILITY, false))->withSubAttributes(
                     new MappedTable('location', 'location', Location::class, 'location_id', 'name'),
-                    new MappedTable('company', 'company', Company::class, 'company_id', 'name'),
+                    new SCIMCompanyAttribute('company'),
+                    (new SCIMMultiCompanyArray('companies'))->ensure('array')->setMultiValued(true),
                 )
             ),
         ];
@@ -467,12 +905,36 @@ class SnipeSCIMConfig
                     eloquent('displayName', 'name')->ensure('required', 'min:3', function ($attribute, $value, $fail) {
                         // check if group does not exist or if it exists, it is the same group
                         $group = $this->getGroupClass()::where('name', $value)->first();
-                        if ($group && (request()->route('resourceObject') == null || $group->id != request()->route('resourceObject')->id)) {
-                            $fail('The name has already been taken.');
+                        if (! $group) {
+                            return;
                         }
+                        // PATCH/PUT: the group being edited is route-bound.
+                        $routeResource = request()->route('resourceObject');
+                        if ($routeResource && $group->id == $routeResource->id) {
+                            return;
+                        }
+                        // POST create with an initial members[] triggers SnipeMutableCollection
+                        // to save the parent early (so the pivot INSERT has a valid group_id),
+                        // which puts a row in the DB before this closure re-runs. Recognize the
+                        // just-saved row as ours so validation doesn't false-positive.
+                        $inFlight = request()->attributes->get('scim_in_flight_resource');
+                        if ($inFlight && $group->id == $inFlight->id) {
+                            return;
+                        }
+                        $fail('The name has already been taken.');
                     }),
-                    (new MutableCollection('members'))->withSubAttributes(
-                        eloquent('value', 'id')->ensure('required'),
+                    // The per-member `required` rule on `value` used to live
+                    // on the eloquent() below. Removed intentionally: Laravel's
+                    // ValidationRuleParser::mergeRulesForAttribute allocates one
+                    // rule stack per attribute path in the flattened payload, so
+                    // an incoming members array of N entries produced O(N) rule
+                    // stacks and blew the PHP memory_limit on large group syncs
+                    // The per-member value check now lives inside
+                    // SnipeMutableCollection::add() as one array walk, and the
+                    // parent ensure() below adds a `max:` guardrail so a truly
+                    // runaway payload still gets rejected with a clean 400.
+                    (new SnipeMutableCollection('members'))->withSubAttributes(
+                        eloquent('value', 'id'),
                         (new class('$ref') extends Eloquent
                         {
                             protected function doRead(&$object, $attributes = [])
@@ -487,7 +949,7 @@ class SnipeSCIMConfig
                             }
                         }),
                         eloquent('display', 'name')
-                    )->ensure('nullable', 'array')
+                    )->ensure('nullable', 'array', 'max:200000')
                 )
             ),
         ];

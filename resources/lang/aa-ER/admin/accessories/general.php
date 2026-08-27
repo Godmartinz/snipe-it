@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'crwdns1213:0crwdne1213:0',
     'total' => 'crwdns1215:0crwdne1215:0',
     'remaining' => 'crwdns1216:0crwdne1216:0',
+    'requestable' => 'crwdns15151:0crwdne15151:0',
     'update' => 'crwdns1386:0crwdne1386:0',
     'use_default_eula' => 'crwdns1218:0crwdne1218:0',
     'use_default_eula_disabled' => 'crwdns1219:0crwdne1219:0',

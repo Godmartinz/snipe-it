@@ -60,10 +60,16 @@ class ImportTest extends TestCase
         // 0xC0 makes it 'not unicode', and 0xFF makes it 'likely WINDOWS-1251', and 0x98 at the end makes it 'not-valid-Windows-1251'
         $evil_content = $evil_maker([0xC0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x01, 0x02, 0x03, 0x98]);
 
+        // PR #19418 added the iconv //IGNORE flag so real-world CJK CSVs
+        // with a stray invalid byte still import instead of aborting on
+        // the first bad byte. That is the desired UX. As a result, this
+        // specific 19-byte payload (18 valid Windows-1251 bytes plus one
+        // invalid 0x98) is now accepted through the store path rather
+        // than rejected with transliterate_failure. The loss-ratio safety
+        // net added in the same PR only fires when //IGNORE drops more
+        // than half the input, which does not apply to this shape.
         $this->actingAsForApi(User::factory()->superuser()->create());
-        $results = $this->post(route('api.imports.store'), ['files' => [UploadedFile::fake()->createWithContent('myname.csv', $evil_content)]])
-            ->assertStatus(422)
-            ->assertStatusMessageIs('error')
-            ->assertMessagesAre(trans('admin/hardware/message.import.transliterate_failure', ['encoding' => 'windows-1251']));
+        $this->post(route('api.imports.store'), ['files' => [UploadedFile::fake()->createWithContent('myname.csv', $evil_content)]])
+            ->assertOk();
     }
 }

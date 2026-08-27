@@ -3,6 +3,7 @@
 return [
     'actions' => 'Hareketler',
     'add' => 'Yeni ekle',
+    'back' => 'Geri',
     'cancel' => 'İptal',
     'checkin_and_delete' => 'Tümünü Kontrol Et / Kullanıcıyı Sil',
     'delete' => 'Sil',

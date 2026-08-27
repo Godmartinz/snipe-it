@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Lagu hubiyay iyada oo loo marayo hubinta shatiga badan ee GUI shatiga',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Kama banaana kuraastan waxaan ka ahayn :remaining_count waxaa dhici karta inaad ku fakareyso iibashada boosas kale.',

@@ -17,6 +17,8 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang departamentong ito?',
         'error' => 'Mayroong isyu sa pag-delete ng departamento. Mangayring subukang muli.',
         'success' => 'Matagumpay na nai-delete ang departamento.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

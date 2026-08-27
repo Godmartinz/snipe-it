@@ -20,6 +20,8 @@ return [
         'confirm' => 'Viltu örugglega eyða þessum tiltekna aukabúnaði?',
         'error' => 'Það var eitthvað smá vesen að eyða aukabúnaðinum, vinsamlegast reyndu aftur.',
         'success' => 'Aukabúnaðinum var eytt.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -13,13 +13,13 @@
             >
                 <thead>
                     <tr>
-                        <th data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
-                        <th data-field="user" data-sortable="true">{{ trans('general.created_by') }}</th>
-                        <th data-field="client" data-sortable="true">{{ trans('admin/settings/general.oauth_client') }}</th>
-                        <th data-field="status" data-sortable="true">{{ trans('general.status') }}</th>
-                        <th data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
-                        <th data-field="expires_at" data-sortable="true">{{ trans('general.expires') }}</th>
-                        <th data-field="actions" data-sortable="false">
+                        <th scope="col" data-field="name" data-sortable="true">{{ trans('general.name') }}</th>
+                        <th scope="col" data-field="user" data-sortable="true">{{ trans('general.created_by') }}</th>
+                        <th scope="col" data-field="client" data-sortable="true">{{ trans('admin/settings/general.oauth_client') }}</th>
+                        <th scope="col" data-field="status" data-sortable="true">{{ trans('general.status') }}</th>
+                        <th scope="col" data-field="created_at" data-sortable="true">{{ trans('general.created_at') }}</th>
+                        <th scope="col" data-field="expires_at" data-sortable="true">{{ trans('general.expires') }}</th>
+                        <th scope="col" data-field="actions" data-sortable="false">
                             <span class="sr-only">{{ trans('general.actions') }}</span>
                         </th>
                     </tr>

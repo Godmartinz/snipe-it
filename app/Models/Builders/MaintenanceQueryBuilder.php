@@ -23,9 +23,9 @@ class MaintenanceQueryBuilder extends Builder
         $interval = (int) ($settings->audit_warning_days ?? 0);
         $today = Carbon::now();
 
-        return $this->whereNotNull('maintenances.completion_date')
+        return $this->whereNotNull('maintenances.expected_completion_date')
             ->whereNull('maintenances.completed_at')
-            ->whereBetween('maintenances.completion_date', [
+            ->whereBetween('maintenances.expected_completion_date', [
                 $today->format('Y-m-d'),
                 $today->copy()->addDays($interval)->format('Y-m-d'),
             ]);
@@ -33,9 +33,9 @@ class MaintenanceQueryBuilder extends Builder
 
     public function overdueForCompletion(): static
     {
-        return $this->whereNotNull('maintenances.completion_date')
+        return $this->whereNotNull('maintenances.expected_completion_date')
             ->whereNull('maintenances.completed_at')
-            ->where('maintenances.completion_date', '<', Carbon::now()->format('Y-m-d'));
+            ->where('maintenances.expected_completion_date', '<', Carbon::now()->format('Y-m-d'));
     }
 
     public function dueOrOverdueForCompletion(Setting $settings): static
@@ -52,32 +52,32 @@ class MaintenanceQueryBuilder extends Builder
 
     public function orderByTag(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.asset_tag', $order);
     }
 
     public function orderByAssetName(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.name', $order);
     }
 
     public function orderByAssetSerial(string $order): static
     {
-        return $this->leftJoin('assets', 'maintenances.asset_id', '=', 'assets.id')
+        return $this->leftJoin('assets', 'maintenances.item_id', '=', 'assets.id')
             ->orderBy('assets.serial', $order);
     }
 
     public function orderStatusName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('status_labels as maintained_asset_status', 'maintained_asset_status.id', '=', 'maintained_asset.status_id')
             ->orderBy('maintained_asset_status.name', $order);
     }
 
     public function orderLocationName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('locations as maintained_asset_location', 'maintained_asset_location.id', '=', 'maintained_asset.location_id')
             ->orderBy('maintained_asset_location.name', $order);
     }
@@ -92,14 +92,14 @@ class MaintenanceQueryBuilder extends Builder
 
     public function orderByAssetModelName(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
             ->orderBy('maintained_asset_model.name', $order);
     }
 
     public function orderByAssetModelNumber(string $order): static
     {
-        return $this->join('assets as maintained_asset', 'maintenances.asset_id', '=', 'maintained_asset.id')
+        return $this->join('assets as maintained_asset', 'maintenances.item_id', '=', 'maintained_asset.id')
             ->leftJoin('models as maintained_asset_model', 'maintained_asset_model.id', '=', 'maintained_asset.model_id')
             ->orderBy('maintained_asset_model.model_number', $order);
     }

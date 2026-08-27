@@ -20,6 +20,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class LicensesController extends Controller
 {
@@ -34,26 +35,42 @@ class LicensesController extends Controller
     {
         $this->authorize('view', License::class);
 
-        $licenses = License::with('company', 'manufacturer', 'supplier', 'category', 'adminuser', 'licenseSeatsRelation', 'assignedCount')->withCount('freeSeats as free_seats_count');
+        // Callers without viewKeys must not be able to filter or search on
+        // licenses.serial. The transformer masks the value in the response
+        // body, but a filter/search hit still leaks key existence through
+        // the row count and result presence.
+        $canViewKeys = Gate::allows('viewKeys', License::class);
+
+        $licenses = License::with('company', 'manufacturer', 'supplier', 'category', 'adminuser', 'licenseSeatsRelation', 'assignedCount')
+            ->withCount([
+                'freeSeats as free_seats_count',
+                'licenseseats as unreassignable_seats_count' => fn ($q) => $q->where('unreassignable_seat', true),
+            ]);
         $settings = Setting::getSettings();
 
         if ($request->input('status') == 'inactive') {
             $licenses->ExpiredLicenses();
         } elseif ($request->input('status') == 'expiring') {
             $licenses->ExpiringLicenses($settings->alert_interval);
-        } elseif ($request->input('status') == 'active') {
+        } else {
             $licenses->ActiveLicenses();
         }
 
         if ($request->filled('company_id')) {
-            $licenses->where('licenses.company_id', '=', $request->input('company_id'));
+            // expand_company_hierarchy=1 opts the company show-page tabs into the
+            // parent/child rollup so a child shows items inherited from its parent.
+            if ($request->boolean('expand_company_hierarchy')) {
+                $licenses->whereIn('licenses.company_id', Company::reachableCompanyIds($request->input('company_id')));
+            } else {
+                $licenses->where('licenses.company_id', '=', $request->input('company_id'));
+            }
         }
 
         if ($request->filled('name')) {
             $licenses->where('licenses.name', '=', $request->input('name'));
         }
 
-        if ($request->filled('product_key')) {
+        if ($request->filled('product_key') && $canViewKeys) {
             $licenses->where('licenses.serial', '=', $request->input('product_key'));
         }
 
@@ -105,17 +122,24 @@ class LicensesController extends Controller
             $licenses->whereNull('expiration_date');
         }
 
-        // This invokes the Searchable model trait and will handle input by search or by advanced search filter
+        // This invokes the Searchable model trait and will handle input by search or by advanced search filter.
+        // Callers without viewKeys go through TextSearchWithoutSerial, which strips
+        // licenses.serial out of the searchable attribute set for the duration of the call.
         if ($request->filled('filter') || $request->filled('search')) {
-            $licenses->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
+            $searchTerm = $request->input('filter') ? $request->input('filter') : $request->input('search');
+            $canViewKeys
+                ? $licenses->TextSearch($searchTerm)
+                : $licenses->TextSearchWithoutSerial($searchTerm);
         }
 
         if ($request->input('deleted') == 'true') {
             $licenses->onlyTrashed();
         }
 
+        $total = $licenses->count();
+
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $licenses->count()) ? $licenses->count() : app('api_offset_value');
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -139,34 +163,42 @@ class LicensesController extends Controller
             case 'created_by':
                 $licenses = $licenses->OrderByCreatedBy($order);
                 break;
+            case 'product_key':
+                $licenses = $licenses->orderBy('licenses.serial', $order);
+                break;
+            case 'percent_remaining':
+                $licenses = $licenses->OrderPercentRemaining($order);
+                break;
             default:
                 $allowed_columns =
                     [
-                        'id',
-                        'name',
-                        'purchase_cost',
-                        'expiration_date',
-                        'purchase_order',
-                        'order_number',
-                        'notes',
-                        'purchase_date',
-                        'serial',
-                        'company',
                         'category',
-                        'license_name',
-                        'license_email',
-                        'free_seats_count',
-                        'seats',
-                        'termination_date',
+                        'company',
+                        'created_at',
                         'depreciation_id',
+                        'expiration_date',
+                        'free_seats_count',
+                        'id',
+                        'license_email',
+                        'license_name',
+                        'maintained',
                         'min_amt',
+                        'name',
+                        'notes',
+                        'order_number',
+                        'purchase_cost',
+                        'purchase_date',
+                        'purchase_order',
+                        'reassignable',
+                        'seats',
+                        'serial',
+                        'termination_date',
+                        'updated_at',
                     ];
                 $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
                 $licenses = $licenses->orderBy($sort, $order);
                 break;
         }
-
-        $total = $licenses->count();
 
         $licenses = $licenses->skip($offset)->take($limit)->get();
 
@@ -186,6 +218,7 @@ class LicensesController extends Controller
         $this->authorize('create', License::class);
         $license = new License;
         $license->fill($request->all());
+        $license->created_by = auth()->id();
         $license->company_id = Company::getIdForCurrentUser($request->input('company_id'));
 
         if ($license->save()) {
@@ -205,7 +238,10 @@ class LicensesController extends Controller
     public function show($id): JsonResponse|array
     {
         $this->authorize('view', License::class);
-        $license = License::withCount('freeSeats as free_seats_count')->findOrFail($id);
+        $license = License::withCount([
+            'freeSeats as free_seats_count',
+            'licenseseats as unreassignable_seats_count' => fn ($q) => $q->where('unreassignable_seat', true),
+        ])->findOrFail($id);
         $license = $license->load('assignedusers', 'licenseSeats.user', 'licenseSeats.asset');
 
         return (new LicensesTransformer)->transformLicense($license);
@@ -461,5 +497,32 @@ class LicensesController extends Controller
         $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * List licenses that are requestable AND reachable by the current
+     * caller (per FMCS + location scoping). Hydrates the licenses tab
+     * on /account/requestable. See the sibling
+     * AccessoriesController::requestable for design rationale.
+     */
+    public function requestable(Request $request): array
+    {
+        $query = License::with('category', 'company', 'manufacturer', 'requests')
+            ->Requestable();
+
+        if ($request->filled('search')) {
+            $query->TextSearch($request->input('search'));
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), ['name', 'created_at'], true) ? $request->input('sort') : 'name';
+
+        $rows = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+        return (new LicensesTransformer)->transformLicenses($rows, $total);
     }
 }

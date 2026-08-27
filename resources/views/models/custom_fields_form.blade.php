@@ -34,21 +34,21 @@
                   <x-input.select
                       :name="$field->db_column_name()"
                       :options="$field->formatFieldValuesAsArray()"
-                      :selected="old($field->db_column_name(), (isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id)))"
+                      :selected="old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model))"
                       :required="$field->pivot->required == '1'"
                       class="format form-control"
                   />
 
               @elseif ($field->element=='textarea')
                   <!-- Textarea -->
-                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
+                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model)) }}</textarea>
 
                 @elseif ($field->element=='markdown-textarea')
                     <!-- Markdown Textarea -->
-                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
-                    <p class="help-block">
-                        <i class="fab fa-markdown" aria-hidden="true"></i> {{ trans('admin/custom_fields/general.markdown_supported') }}
-                    </p>
+                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model)) }}</textarea>
+                    <x-form.help :name="$field->db_column_name()" icon="markdown">
+                        {{ trans('general.markdown') }}
+                    </x-form.help>
 
               @elseif ($field->element=='checkbox')
                   <!-- Checkbox -->
@@ -71,6 +71,33 @@
                           </label>
                       </div>
                   @endforeach
+
+              @elseif ($field->element=='date_picker')
+                  {{-- Datepicker widget on a plain TEXT column (allows the
+                       field to be encrypted). Format DATE uses a separate
+                       native-column path below. --}}
+                  <div class="input-group col-md-5" style="padding-left: 0px;">
+                      <x-input.datepicker
+                          id="{{ $field->db_column_name() }}"
+                          name="{{ $field->db_column_name() }}"
+                          :value="old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model))"
+                          required="{{ ($field->pivot->required=='1') ? '1' : '' }}"
+                      />
+                  </div>
+
+              @elseif ($field->element=='datetime_picker')
+                  {{-- Datetimepicker widget on a plain TEXT column (allows
+                       the field to be encrypted). Format DATETIME uses a
+                       separate native-column path below. --}}
+                  <div class="input-group col-md-6" style="padding-left: 0px;">
+                      <x-input.datetimepicker
+                          id="{{ $field->db_column_name() }}"
+                          name="{{ $field->db_column_name() }}"
+                          :value="old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model))"
+                          required="{{ ($field->pivot->required=='1') ? '1' : '' }}"
+                          :default_now="false"
+                      />
+                  </div>
               @endif
 
 
@@ -79,18 +106,69 @@
                 @if ($field->format=='DATE')
 
                         <div class="input-group col-md-5" style="padding-left: 0px;">
-                            <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
-                                <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="{{ $field->db_column_name() }}" id="{{ $field->db_column_name() }}" readonly value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}"  style="background-color:inherit"{{ ($field->pivot->required=='1') ? ' required' : '' }}>
-                                <span class="input-group-addon"><x-icon type="calendar" /></span>
-                            </div>
+                            <x-input.datepicker
+                                id="{{ $field->db_column_name() }}"
+                                name="{{ $field->db_column_name() }}"
+                                :value="old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model))"
+                                required="{{ ($field->pivot->required=='1') ? '1' : '' }}"
+                            />
+                        </div>
+
+
+                @elseif ($field->format=='DATETIME')
+
+                        {{-- Outer wrapper with inline padding-left: 0 to
+                             match the DATE case above. Later duplicate
+                             .input-group[class*="col-"] CSS rules re-apply
+                             15px padding that would otherwise indent the
+                             widget; the inline style forces it to zero. --}}
+                    <div class="input-group col-md-6" style="padding-left: 0px;">
+                            <x-input.datetimepicker
+                                id="{{ $field->db_column_name() }}"
+                                name="{{ $field->db_column_name() }}"
+                                :value="old($field->db_column_name(), Helper::customFieldFormValue($field, $item ?? null, $model))"
+                                required="{{ ($field->pivot->required=='1') ? '1' : '' }}"
+                                :default_now="false"
+                            />
                         </div>
 
 
                 @else
                     @if (($field->field_encrypted=='0') || (Gate::allows('assets.view.encrypted_custom_fields')))
-                    <input type="text" value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}" id="{{ $field->db_column_name() }}" class="form-control" name="{{ $field->db_column_name() }}" placeholder="Enter {{ strtolower($field->format) }} text"{{ ($field->pivot->required=='1') ? ' required' : '' }}>
+                        @php
+                            $format_icon = \App\Models\CustomField::iconForFormat($field->format);
+                            // MAC fields get a client-side input mask (see
+                            // window.snipeitInitMacAddressMask in snipeit.js)
+                            // that normalizes any hex-shaped paste to the
+                            // colon-separated AA:BB:CC:DD:EE:FF form the
+                            // backend rule enforces. Both branches below
+                            // (with and without $format_icon) need the class
+                            // + shared placeholder / maxlength / inputmode /
+                            // autocomplete attrs, so they're built once here
+                            // and interpolated.
+                            $isMac = strtoupper($field->format) === 'MAC';
+                            $macClass = $isMac ? ' mac-address-input' : '';
+                            // No maxlength: browser-side length caps run
+                            // BEFORE the input event fires, so a slightly-
+                            // over-length paste (e.g. a stray leading quote
+                            // from a copied cell) would get truncated by
+                            // the browser and lose a trailing hex char
+                            // before the mask's substring(0, 12) had a
+                            // chance to normalize. The mask itself is the
+                            // authoritative cap.
+                            $macAttrs = $isMac ? ' inputmode="text" autocomplete="off"' : '';
+                            $placeholder = $isMac ? 'AA:BB:CC:DD:EE:FF' : 'Enter '.strtolower($field->format).' text';
+                        @endphp
+                        @if ($format_icon)
+                            <div class="input-group">
+                                <input type="text" value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}" id="{{ $field->db_column_name() }}" class="form-control{{ $macClass }}" name="{{ $field->db_column_name() }}" placeholder="{{ $placeholder }}"{!! $macAttrs !!}{{ ($field->pivot->required=='1') ? ' required' : '' }}>
+                                <span class="input-group-addon"><x-icon :type="$format_icon" /></span>
+                            </div>
                         @else
-                            <input type="text" value="{{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}" class="form-control disabled" disabled>
+                            <input type="text" value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}" id="{{ $field->db_column_name() }}" class="form-control{{ $macClass }}" name="{{ $field->db_column_name() }}" placeholder="{{ $placeholder }}"{!! $macAttrs !!}{{ ($field->pivot->required=='1') ? ' required' : '' }}>
+                        @endif
+                    @else
+                        <input type="text" value="{{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}" class="form-control disabled" disabled>
                     @endif
                 @endif
 
@@ -115,7 +193,7 @@
                   $errormessage = $errors->first($field->db_column_name());
                   if ($errormessage) {
                       $errormessage = preg_replace('/ snipeit /', '', $errormessage);
-                      print('<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> '.$errormessage.'</span>');
+                      echo '<span class="alert-msg" role="alert" aria-live="assertive">'.$errormessage.'</span>';
                   }
                   ?>
       </div>

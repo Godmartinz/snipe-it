@@ -17,10 +17,12 @@ class LabelPresenter extends Presenter
         $layout = [
             [
                 'field' => 'radio',
+                'scope' => 'col',
                 'radio' => true,
                 'formatter' => 'labelRadioFormatter',
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => false,
                 'switchable' => true,
@@ -28,6 +30,7 @@ class LabelPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'size',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -36,6 +39,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'labelSizeFormatter',
             ], [
                 'field' => 'labels_per_page',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -44,6 +48,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'labelPerPageFormatter',
             ], [
                 'field' => 'support_fields',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -51,6 +56,7 @@ class LabelPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'support_asset_tag',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -59,6 +65,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'support_1d_barcode',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -67,6 +74,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'support_2d_barcode',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -75,6 +83,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'support_logo',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -83,6 +92,7 @@ class LabelPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'support_title',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,

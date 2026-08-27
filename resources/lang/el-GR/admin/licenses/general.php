@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Έγινε έλεγχος μέσω μαζικού checkout άδειας χρήσης στο GUI άδειας',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Υπάρχουν μόνο :remaining_count θέσεις που έχουν απομείνει για αυτή την άδεια με ελάχιστη ποσότητα :min_amt. Μπορεί να θέλετε να εξετάσετε το ενδεχόμενο αγοράς περισσότερων θέσεων.',

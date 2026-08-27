@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Herausgegeben über Massen-Herausgeben in Lizenzübersicht',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Für diese Lizenz gibt es nur noch :remaining_count Sitze mit einer Mindestanzahl von :min_amt. Sie können erwägen, mehr Sitze zu kaufen.',

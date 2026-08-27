@@ -108,4 +108,30 @@ class ImportUsersMultiCompanyTest extends ImportDataTestCase
 
         $this->assertCount(0, $user->companies, 'Blank company column should leave user with no companies');
     }
+
+    public function test_non_superuser_cannot_create_floater_user_via_import()
+    {
+        // #19200: non-superuser importing a new user with no resolvable
+        // company while floater mode is on would have minted a floater
+        // account — exploitable via the welcome-email + activated columns
+        // to hand the attacker valid credentials. Importer must skip the row
+        // and leave no user behind.
+        $this->settings->enableFloaterMode();
+
+        $importerCompany = Company::factory()->create();
+        $importer = $importerCompany->users()->save(
+            User::factory()->editUsers()->createUsers()->canImport()->create(),
+        );
+
+        $importFileBuilder = ImportFileBuilder::new(['companyName' => '']);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi($importer)
+            ->importFileResponse(['import' => $import->id]);
+
+        $this->assertDatabaseMissing('users', [
+            'username' => $row['username'],
+        ]);
+    }
 }

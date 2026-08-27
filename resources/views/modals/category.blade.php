@@ -9,8 +9,8 @@
         <div class="modal-body">
             <form action="{{ route('api.categories.store') }}" onsubmit="return false">
                 {{ csrf_field() }}
-                <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-                </div>
+                <x-alert type="danger" id="modal_error_msg" style="display:none">
+                </x-alert>
                 @include('modals.partials.name', ['required' => 'true'])
                 <input type="hidden" name='category_type' id="modal-category_type" value="{{ request('category_type') }}" />
             </form>

@@ -21,7 +21,7 @@ return [
         'confirm' => 'Ste si istý, že chceete odstrániť túto kategóriu?',
         'error' => 'Pri odstraňovaní kategórie sa vyskytla chyba. Skúste prosím znovu.',
         'success' => 'Kategória bola úspešne odstránená.',
-        'bulk_success' => 'Kategórie boli úspešne odstránené.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Kategória bola úspešne odstránená. Podrobné informácie nižšie. | :count kategórií bolo úspešne odstránených. Podrobné informácie nižšie.',
     ],
 

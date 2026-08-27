@@ -102,6 +102,8 @@ class IconHelper
             case 'request':
             case 'requested':
                 return 'fa-solid fa-bell-concierge';
+            case 'fulfill_multiple':
+                return 'fa-solid fa-arrows-down-to-people';
             case 'reports':
                 return 'fas fa-chart-bar';
             case 'heart':
@@ -122,6 +124,12 @@ class IconHelper
                 return 'fa-solid fa-key';
             case 'api-key':
                 return 'fas fa-user-secret';
+            case 'impersonate':
+                return 'fa-solid fa-user-ninja';
+            case 'transfer':
+                return 'fa-solid fa-person-walking-arrow-right';
+            case 'undo':
+                return 'fas fa-arrow-left';
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':
@@ -137,6 +145,10 @@ class IconHelper
                 return 'fa fa-caret-down';
             case 'arrow-circle-right':
                 return 'fa fa-arrow-circle-right';
+            case 'arrow-right':
+                return 'fas fa-arrow-right';
+            case 'arrow-left':
+                return 'fas fa-arrow-left';
             case 'minus':
                 return 'fas fa-minus';
             case 'spinner':
@@ -163,7 +175,11 @@ class IconHelper
                 return 'far fa-life-ring';
             case 'plus':
                 return 'fas fa-plus';
+            case 'plus-minus':
+            case 'adjust-quantity':
+                return 'fa-solid fa-plus-minus';
             case 'history':
+            case 'assetHistory':
                 return 'fa-solid fa-timeline';
             case 'more-files':
                 return 'fa-solid fa-laptop-file';
@@ -181,6 +197,8 @@ class IconHelper
                 return 'fas fa-map-marker-alt';
             case 'location':
                 return 'fas fa-map-marker-alt';
+            case 'markdown':
+                return 'fab fa-markdown';
             case 'superadmin':
             case 'admin':
                 return 'fas fa-crown';
@@ -202,10 +220,10 @@ class IconHelper
                 return 'fas fa-list-ol';
             case 'labels':
                 return 'fas fa-tags';
+            case 'signature':
+                return 'fa-solid fa-signature';
             case 'ldap':
                 return 'fas fa-sitemap';
-            case 'google':
-                return 'fa-brands fa-google';
             case 'saml':
                 return 'fas fa-sign-in-alt';
             case 'backups':
@@ -277,6 +295,7 @@ class IconHelper
                 return 'fa-regular fa-square-caret-left';
             case 'square':
                 return 'fa-solid fa-square';
+            case 'assetModel':
             case 'models':
             case 'model':
                 return 'fa-solid fa-boxes-stacked';

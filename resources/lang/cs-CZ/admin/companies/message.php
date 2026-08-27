@@ -16,5 +16,7 @@ return [
         'confirm' => 'Opravdu si přejete odstranit tuto společnost?',
         'error' => 'Nepodařilo se nám zvolenou společnost odstranit. Zkuste to prosím znovu.',
         'success' => 'Společnost byla v pořádku odstraněna.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Helpers\Helper;
 use App\Http\Traits\ConvertsBase64ToFiles;
+use App\Rules\AllowedUploadExtension;
 use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -29,10 +30,21 @@ class UploadFileRequest extends Request
      */
     public function rules()
     {
-        $max_file_size = Helper::file_upload_max_size();
-
+        // AllowedUploadExtension replaces Laravel's `mimes:` rule because
+        // `mimes:` content-sniffs, reverse-maps the detected MIME to a
+        // single extension, and rejects anything the guesser can't map,
+        // even when the client extension is on the allowlist. That was
+        // rejecting legitimate uploads (empty .txt, INI-shaped text,
+        // Windows-sniffed .csv reporting octet-stream) with a generic
+        // "check the form below" error. See issues #12460 and #10387.
         return [
-            'file.*' => 'required|mimes:'.config('filesystems.allowed_upload_extensions_for_validator').'|max:'.$max_file_size,
+            'file.*' => [
+                'bail',
+                'required',
+                'file',
+                new AllowedUploadExtension(config('filesystems.allowed_upload_extensions_array')),
+                'max:'.Helper::file_upload_max_size(),
+            ],
         ];
     }
 
@@ -44,7 +56,13 @@ class UploadFileRequest extends Request
     {
 
         $extension = $file->getClientOriginalExtension();
-        $file_name = $name_prefix.'-'.str_random(8).'-'.str_slug(basename($file->getClientOriginalName(), '.'.$extension)).'.'.$file->guessExtension();
+        // Prefer the content-sniffed extension for the stored name so a
+        // rename can't hide the real content type from the filesystem.
+        // Fall back to the client extension when finfo returns nothing,
+        // otherwise the stored filename ends in a bare "." and the
+        // eventual download has no extension.
+        $stored_extension = $file->guessExtension() ?: strtolower($extension);
+        $file_name = $name_prefix.'-'.str_random(8).'-'.str_slug(basename($file->getClientOriginalName(), '.'.$extension)).'.'.$stored_extension;
 
         // Check for SVG and sanitize it
         if ($file->getMimeType() === 'image/svg+xml') {

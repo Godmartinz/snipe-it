@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'Tento záložní soubor nebyl na serveru nalezen.',
         'restore_warning' => 'Ano, obnovit. Potvrzuji, že toto přepíše existující data v databázi. Tato akce taky odhlásí všechny uživatele (včetně vás).',
         'restore_confirm' => 'Jste si jisti, že chcete obnovit databázi z :filename?',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => 'Vaše záloha systému byla obnovena. Přihlaste se prosím znovu.',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Během čištění došlo k chybě. ',

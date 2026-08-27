@@ -13,4 +13,7 @@ return [
     'total' => 'ทั้งหมด',
     'update' => 'อัพเดตคอมโพเนนต์',
     'checkin_limit' => 'จำนวนเงินที่เช็คอินจะต้องเท่ากับหรือน้อยกว่า :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

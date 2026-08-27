@@ -117,11 +117,17 @@ class AcceptanceReminderTest extends TestCase
 
         $this->createActionLogEntry($accessory, $this->admin, $this->assignee, $acceptance);
 
+        // Match the pivot's created_at to the acceptance's so the reminder
+        // controller's `WHERE created_at = ?` join lands. Accessory::checkouts()
+        // reads the accessories_checkouts pivot (unlike Asset/Consumable/License
+        // which read action_logs), and DATETIME second precision means two
+        // separate `now()` calls straddle a boundary often enough under PHP
+        // 8.2 CI load to flake the equality check.
         AccessoryCheckout::factory()
             ->for($this->admin, 'adminuser')
             ->for($accessory)
             ->for($this->assignee, 'assignedTo')
-            ->create();
+            ->create(['created_at' => $acceptance->created_at]);
 
         $this->actingAs($this->admin)
             ->post(route('reports/unaccepted_assets_sent_reminder', [

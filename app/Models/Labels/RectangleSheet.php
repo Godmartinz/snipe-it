@@ -19,16 +19,22 @@ abstract class RectangleSheet extends Sheet
     abstract public function getRows();
 
     /**
-     * Returns the spacing between columns
+     * Returns the spacing between columns. Docblock only (no PHP
+     * native return type) so subclasses that don't declare return
+     * types stay compatible. Widened from int to int|float because
+     * some sheet layouts (Hema/_14130046, Hema/_38310012) define
+     * fractional spacings (2.0, 3.0, 4.0 mm) that would round
+     * incorrectly if coerced to int.
      *
-     * @return int
+     * @return int|float
      */
     abstract public function getLabelColumnSpacing();
 
     /**
-     * Returns the spacing between rows
+     * Returns the spacing between rows. See getLabelColumnSpacing for
+     * the int|float rationale.
      *
-     * @return int
+     * @return int|float
      */
     abstract public function getLabelRowSpacing();
 

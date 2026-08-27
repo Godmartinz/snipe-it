@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Ldap;
 use App\Models\SamlNonce;
@@ -56,7 +57,17 @@ class LoginController extends Controller
     {
         parent::__construct();
         $this->middleware('guest', ['except' => ['logout', 'postTwoFactorAuth', 'getTwoFactorAuth', 'getTwoFactorEnroll']]);
-        Session::put('backUrl', \URL::previous());
+
+        // backUrl feeds redirectTo(), which Laravel hands to the
+        // post-login Redirector without host validation. URL::previous()
+        // is Referer-derived and login endpoints are often the loosest
+        // on CSRF, so sanitize before storing. If the referrer isn't
+        // safe we leave backUrl unset and redirectTo() falls back to
+        // $this->redirectTo.
+        if ($safeReferer = Helper::sameOriginUrl(\URL::previous())) {
+            Session::put('backUrl', $safeReferer);
+        }
+
         $this->saml = $saml;
     }
 
@@ -173,6 +184,7 @@ class LoginController extends Controller
 
         // Check if the user already exists in the database and was imported via LDAP
         $user = User::where('username', '=', $request->input('username'))->whereNull('deleted_at')->where('ldap_import', '=', 1)->where('activated', '=', '1')->first(); // FIXME - if we get more than one we should fail. and we sure about this ldap_import thing?
+        $user = User::verifyExactUsernameMatch($user, (string) $request->input('username'));
         Log::debug('Local auth lookup complete');
 
         // The user does not exist in the database. Try to get them from LDAP.
@@ -193,16 +205,22 @@ class LoginController extends Controller
             Log::debug('Local user '.$request->input('username').' exists in database. Updating existing user against LDAP.');
 
             $ldap_attr = Ldap::parseAndMapLdapAttributes($ldap_user);
+            $settings = Setting::getSettings();
 
             $user->password = $user->noPassword();
-            if (Setting::getSettings()->ldap_pw_sync == '1') {
+            if ($settings->ldap_pw_sync == '1') {
                 $user->password = bcrypt($request->input('password'));
             }
 
             $user->last_login = \Carbon::now();
-            $user->email = $ldap_attr['email'];
-            $user->first_name = $ldap_attr['firstname'];
-            $user->last_name = $ldap_attr['lastname']; // FIXME (or TODO?) - do we need to map additional fields that we now support? E.g. country, phone, etc.
+
+            // Refresh every mapped field from the LDAP payload. Shared
+            // with Ldap::createUserFromLdap so the field list lives in
+            // one place. Bulk sync via snipe-it:ldap-sync remains the
+            // canonical path for the fields that need a re-bind
+            // (manager, active_flag, etc.).
+            Ldap::applyLdapAttributesToUser($user, $ldap_attr);
+
             $user->saveQuietly();
         } // End if(!user)
 
@@ -243,7 +261,9 @@ class LoginController extends Controller
 
             try {
                 $user = User::where('username', '=', $remote_user)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+                $user = User::verifyExactUsernameMatch($user, (string) $remote_user);
                 Log::debug('Remote user auth lookup complete');
+
                 if (! is_null($user)) {
                     Auth::login($user, $request->input('remember'));
                 }
@@ -280,7 +300,7 @@ class LoginController extends Controller
             return redirect()->back()->withInput()->withErrors($validator);
         }
 
-        // Set the custom lockout attempts from the env and sett the custom lockout throttle from the env.
+        // Set the custom lockout attempts from the env and set the custom lockout throttle from the env.
         // We divide decayMinutes by 60 here to get minutes, since Laravel changed the default from minutes
         // to seconds, and we don't want to break limits on existing systems
         $this->maxAttempts = config('auth.passwords.users.throttle.max_attempts');
@@ -294,8 +314,12 @@ class LoginController extends Controller
 
         $user = null;
 
-        // Should we even check for LDAP users?
-        if (Setting::getSettings()->ldap_enabled) { // avoid hitting the $this->ldap
+        // Should we even check for LDAP users? Skip LDAP entirely when
+        // the app is in demo mode. The LDAP wizard's
+        // demo seed points at Forumsys as a reference config for
+        // visitors to click through, we don't want the login form to
+        // actually try to bind against it on every demo sign-in.
+        if (Setting::getSettings()->ldap_enabled && !config('app.lock_passwords')) { // avoid hitting the $this->ldap
             Log::debug('LDAP is enabled.');
             try {
                 Log::debug('Attempting to log user in by LDAP authentication.');
@@ -522,6 +546,6 @@ class LoginController extends Controller
 
     public function redirectTo()
     {
-        return Session::get('backUrl') ? Session::get('backUrl') : $this->redirectTo;
+        return Helper::sameOriginUrl(Session::get('backUrl')) ?? $this->redirectTo;
     }
 }

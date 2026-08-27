@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasOrders;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\ComponentPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -28,13 +32,17 @@ class Component extends SnipeModel
 
     protected $presenter = ComponentPresenter::class;
 
+    use AdjustsQuantity;
     use CompanyableTrait;
+    use HasOrders;
     use HasUploads;
     use Loggable, Presentable;
+    use Requestable;
     use SoftDeletes;
 
     protected $casts = [
         'purchase_date' => 'datetime',
+        'requestable' => 'boolean',
     ];
 
     protected $table = 'components';
@@ -47,12 +55,15 @@ class Component extends SnipeModel
         'qty' => 'required|integer|min:1',
         'category_id' => 'required|integer|exists:categories,id',
         'supplier_id' => 'nullable|integer|exists:suppliers,id',
-        'company_id' => 'integer|nullable|exists:companies,id',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
         'min_amt' => 'integer|min:0|nullable',
         'purchase_date' => 'date_format:Y-m-d|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
         'manufacturer_id' => 'integer|exists:manufacturers,id|nullable',
+        'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
+        'default_purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
+        'requestable' => 'nullable|boolean',
     ];
 
     /**
@@ -71,21 +82,24 @@ class Component extends SnipeModel
      *
      * @var array
      */
+    // supplier_id / purchase_date / purchase_cost are intentionally
+    // absent. See Accessory::$fillable for the full rationale.
+    // default_supplier_id / default_purchase_cost are parent-level
+    // "template" values that seed the adjust-quantity modal.
     protected $fillable = [
         'category_id',
         'company_id',
-        'supplier_id',
         'location_id',
         'manufacturer_id',
         'model_number',
         'name',
-        'purchase_cost',
-        'purchase_date',
         'min_amt',
-        'order_number',
         'qty',
         'serial',
         'notes',
+        'default_supplier_id',
+        'default_purchase_cost',
+        'requestable',
     ];
 
     use Searchable;
@@ -97,10 +111,7 @@ class Component extends SnipeModel
      */
     protected $searchableAttributes = [
         'name',
-        'order_number',
         'serial',
-        'purchase_cost',
-        'purchase_date',
         'notes',
         'model_number',
     ];
@@ -114,9 +125,15 @@ class Component extends SnipeModel
         'category' => ['name'],
         'company' => ['name'],
         'location' => ['name'],
-        'supplier' => ['name'],
+        // Search by the parent's "typical supplier" template — see the
+        // Accessory model for the rationale.
+        'defaultSupplier' => ['name'],
         'manufacturer' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
+        // See Accessory::$searchableRelations. Search hits order_number
+        // through the HasOrders trait's orders() HasManyThrough into
+        // the Orders table so historical order references still match.
+        'orders' => ['order_number'],
     ];
 
     public static function booted()
@@ -136,6 +153,31 @@ class Component extends SnipeModel
         return Gate::allows('delete', $this)
             && ($this->numCheckedOut() === 0)
             && ($this->deleted_at == '');
+    }
+
+    /**
+     * Normalize the requestable form input so an empty string from an
+     * unchecked checkbox lands as false rather than a truthy "0" cast
+     * (matches Accessory / Consumable setRequestableAttribute).
+     */
+    public function setRequestableAttribute($value)
+    {
+        if ($value == '') {
+            $value = null;
+        }
+        $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable components. FMCS + location
+     * scoping falls out of the CompanyableTrait global scope, so the
+     * usual "user only sees rows in their reachable companies" rule
+     * applies without any additional wrapping here (matches the
+     * Accessory scope's shape and rationale).
+     */
+    public function scopeRequestable($query)
+    {
+        return $query->where('components.requestable', '1');
     }
 
     /**
@@ -166,11 +208,18 @@ class Component extends SnipeModel
         return $this->belongsToMany(Asset::class, 'components_assets')->withPivot('id', 'assigned_qty', 'created_at', 'created_by', 'note');
     }
 
+    /**
+     * Per-pivot line cost for components-assets. Pulls the per-unit
+     * price from the last acquisition (with the same default_* fallback
+     * that lastOrderDefaults() applies) and multiplies by pivot qty.
+     *
+     * @return Attribute<float|null, never>
+     */
     protected function calculatedPurchaseCost(): Attribute
     {
         return Attribute::make(
             get: function ($value) {
-                $unitPurchaseCost = $this->getRawOriginal('purchase_cost');
+                $unitPurchaseCost = $this->lastOrderDefaults()['unit_cost'] ?? null;
                 $assignedQty = $this->pivot?->assigned_qty;
 
                 if ($unitPurchaseCost === null) {
@@ -223,9 +272,16 @@ class Component extends SnipeModel
      *
      * @return Relation
      */
-    public function supplier()
+    // No `supplier()` relation, no `supplier_id` / `purchase_date` /
+    // `purchase_cost` accessors — see Accessory model for rationale.
+    // Callers use `$component->orders` or `$component->lastOrderDefaults()`.
+
+    /**
+     * Parent-level "typical supplier" template — see Accessory model.
+     */
+    public function defaultSupplier(): BelongsTo
     {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
+        return $this->belongsTo(Supplier::class, 'default_supplier_id');
     }
 
     /**
@@ -310,6 +366,18 @@ class Component extends SnipeModel
     }
 
     /**
+     * AdjustsQuantity trait hook: units currently assigned to assets.
+     * Passes true to numCheckedOut to force a fresh count instead of
+     * trusting the cached sum_unconstrained_assets attribute, since the
+     * adjust-quantity flow can be entered without withCount() priming
+     * that value.
+     */
+    public function currentlyInUseCount(): int
+    {
+        return (int) $this->numCheckedOut(true);
+    }
+
+    /**
      * @return BelongsToMany
      *
      * This allows us to get the assets with assigned components without the company restriction
@@ -381,11 +449,6 @@ class Component extends SnipeModel
         return $this->qty - $this->numCheckedOut();
     }
 
-    public function totalCostSum()
-    {
-
-        return $this->purchase_cost !== null ? $this->qty * $this->purchase_cost : null;
-    }
     /**
      * -----------------------------------------------
      * BEGIN MUTATORS
@@ -461,7 +524,7 @@ class Component extends SnipeModel
      */
     public function scopeOrderSupplier($query, $order)
     {
-        return $query->leftJoin('suppliers', 'components.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+        return $query->leftJoin('suppliers', 'components.default_supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
     }
 
     /**
@@ -479,5 +542,41 @@ class Component extends SnipeModel
     public function scopeOrderByCreatedBy($query, $order)
     {
         return $query->leftJoin('users as admin_sort', 'components.created_by', '=', 'admin_sort.id')->select('components.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Mirrors Component::percentRemaining(): (qty - numCheckedOut) / qty * 100.
+     * sum_unconstrained_assets is added by withSum() in the API index()
+     * as the total checked-out quantity. Guards against division by zero
+     * for components with qty of 0.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN components.qty = 0 THEN 0 ELSE ((components.qty - COALESCE(sum_unconstrained_assets, 0)) * 100.0 / components.qty) END '.$direction);
+    }
+
+    /**
+     * Query builder scope to sort by the raw `remaining` column
+     * (qty minus current checkouts). Same sum_unconstrained_assets
+     * alias as scopeOrderPercentRemaining above; the difference is
+     * that this one sorts by absolute count rather than percentage,
+     * so items with the same absolute stock left group together
+     * regardless of their total qty.
+     */
+    public function scopeOrderRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('(components.qty - COALESCE(sum_unconstrained_assets, 0)) '.$direction);
     }
 }

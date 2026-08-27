@@ -23,7 +23,7 @@ class DeleteConsumableTest extends TestCase
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $consumableForCompanyA = Consumable::factory()->for($companyA)->create();
-        $userForCompanyB = User::factory()->deleteConsumables()->for($companyB)->create();
+        $userForCompanyB = User::factory()->deleteConsumables()->forCompany($companyB)->create();
 
         $this->actingAs($userForCompanyB)
             ->delete(route('consumables.destroy', $consumableForCompanyA->id))

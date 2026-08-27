@@ -10,6 +10,9 @@ use App\Http\Middleware\CheckLocale;
 use App\Http\Middleware\CheckPermissions;
 use App\Http\Middleware\CheckUserIsActivated;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnforceApiTwoFactorEnrollment;
+use App\Http\Middleware\EnforceApiUserAgent;
+use App\Http\Middleware\IssueFreshApiTokenIfTwoFactorComplete;
 use App\Http\Middleware\LogAuthedUserHeader;
 use App\Http\Middleware\NoSessionStore;
 use App\Http\Middleware\PreventBackHistory;
@@ -26,6 +29,7 @@ use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -33,7 +37,6 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 
 class Kernel extends HttpKernel
 {
@@ -57,6 +60,7 @@ class Kernel extends HttpKernel
         SecurityHeaders::class,
         PreventBackHistory::class,
         HandleCors::class,
+        InvokeDeferredCallbacks::class,
 
     ];
 
@@ -73,7 +77,7 @@ class Kernel extends HttpKernel
             CheckLocale::class,
             CheckUserIsActivated::class,
             CheckForTwoFactor::class,
-            CreateFreshApiToken::class,
+            IssueFreshApiTokenIfTwoFactorComplete::class,
             CheckColorSettings::class,
             AuthenticateSession::class,
             SubstituteBindings::class,
@@ -81,6 +85,9 @@ class Kernel extends HttpKernel
 
         'api' => [
             'auth:api',
+            CheckUserIsActivated::class,
+            EnforceApiTwoFactorEnrollment::class,
+            EnforceApiUserAgent::class,
             CheckLocale::class,
             LogAuthedUserHeader::class,
             SetPaginationDefaults::class,

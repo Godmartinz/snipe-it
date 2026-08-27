@@ -37,6 +37,7 @@ class DashboardController extends Controller
         if (auth()->user()->hasAccess('admin')) {
             $asset_stats = null;
 
+            $counts = [];
             $counts['asset'] = Asset::count();
             $counts['accessory'] = Accessory::count();
             $counts['license'] = License::assetcount();
@@ -50,7 +51,9 @@ class DashboardController extends Controller
                 Artisan::call('passport:install', ['--no-interaction' => true]);
             }
 
-            return view('dashboard')->with('asset_stats', $asset_stats)->with('counts', $counts);
+            return view('dashboard')
+                ->with('asset_stats', $asset_stats)
+                ->with('counts', $counts);
         } else {
             Session::reflash();
 

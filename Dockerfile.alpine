@@ -44,6 +44,9 @@ RUN mkdir -p /run/apache2 && chown apache:apache /run/apache2
 
 RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php84/php.ini
 COPY  docker/000-default-2.4.conf /etc/apache2/conf.d/default.conf
+# Apache Limits Defaults
+COPY  docker/apache-limits.conf /etc/apache2/conf.d/limits.conf
+
 
 # Enable mod_rewrite
 RUN sed -i '/LoadModule rewrite_module/s/^#//g' /etc/apache2/httpd.conf

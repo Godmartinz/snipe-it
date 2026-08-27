@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Fann enga sjálfgefna notendaskilmála. Vinsamlegast bættu þeim við í undir "Stillingar"',
     'total' => 'Samtals',
     'remaining' => 'Gagnslaust',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Uppfæra endabúnað',
     'use_default_eula' => 'Notaðu frekar <a href="#" data-toggle="modal" data-target="#eulaModal">',
     'use_default_eula_disabled' => '<del>Notaðu frekar sjálfgefna notendaskilmálana.</del>Sjálfgefnu notendaskilmálarnir eru ekki í notkun. Vinsamlegast bættu einhverjum notendaskilmálum við í undir "Stillingar"',

@@ -13,15 +13,12 @@
 @section('content')
 
 <div><!-- livewire div - do not remove -->
-    <form class="form-horizontal" role="form" wire:submit="submit">
+    <form class="form-horizontal" role="form" wire:submit.prevent="submit">
         {{csrf_field()}}
-        @if (session()->has('warning'))
-            <div class="alert alert-warning">
-                {!! session('warning') !!}
-                @php
-                    session()->forget('warning'); // Clear the session flash immediately
-                @endphp
-            </div>
+        @if ($warning)
+            <x-alert type="warning">
+                {!! $warning !!}
+            </x-alert>
         @endif
         <div class="row">
 
@@ -47,17 +44,16 @@
 
                     <div class="col-md-12" style="border-top: 0px;">
 
-                        @if(session()->has('success'))
-                            <div class="alert alert-success fade in">
-                                {{session('success')}}
-                            </div>
+                        @if($success)
+                            <x-alert type="success">
+                                {{$success}}
+                            </x-alert>
                         @endif
-                        @if(session()->has('error'))
-                            <div class="alert alert-danger fade in">
-                                {{session('error')}}
-                            </div>
+                        @if($error)
+                            <x-alert type="danger">
+                                {{$error}}
+                            </x-alert>
                         @endif
-
                         <div class="form-group">
                             <div class="col-md-2">
                                 <label for="webhook_selected">
@@ -92,7 +88,7 @@
                             </div>
                             <div class="col-md-9 required">
                                     <input type="url" wire:model.change.live="webhook_endpoint" class="form-control" placeholder="{{$webhook_placeholder}}" value="{{old('webhook_endpoint', $webhook_endpoint)}}"{{ Helper::isDemoMode() ? ' disabled' : ''}}>
-                                {!! $errors->first('webhook_endpoint', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                <x-form.error name="webhook_endpoint" />
                             </div>
                         </div>
 
@@ -110,7 +106,7 @@
                                 <div class="col-md-9 required">
                                         <input type="text" wire:model.change.live="webhook_channel" class="form-control" placeholder="#IT-Ops" value="{{ old('webhook_channel', $webhook_channel) }}"{{ Helper::isDemoMode() ? ' disabled' : ''}}>
 
-                                    {!! $errors->first('webhook_channel', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                    <x-form.error name="webhook_channel" />
                                 </div>
                             </div>
                         @endif
@@ -127,7 +123,7 @@
                                 </div>
                                 <div class="col-md-9">
                                         <input type="text" wire:model.change.live="webhook_botname" class='form-control' placeholder="Snipe-Bot" {{ old('webhook_botname', $webhook_botname)}}{{ Helper::isDemoMode() ? ' disabled' : ''}}>
-                                    {!! $errors->first('webhook_botname', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                    <x-form.error name="webhook_botname" />
                                 </div><!--col-md-10-->
                             </div>
                         @endif
@@ -140,7 +136,7 @@
                             @if($webhook_endpoint != null && $webhook_channel != null)
                                 <div class="form-group">
                                     <div class="col-md-offset-2 col-md-9">
-                                        <a href="#" wire:click.prevent="{{$webhook_test}}"
+                                        <a href="#" wire:click.prevent="universalWebhookTest"
                                            class="btn btn-default btn-sm pull-left">
                                             <i class="{{$webhook_icon}}" aria-hidden="true"></i>
                                                 {!! trans('admin/settings/general.webhook_test',['app' => ucwords($webhook_selected) ]) !!}

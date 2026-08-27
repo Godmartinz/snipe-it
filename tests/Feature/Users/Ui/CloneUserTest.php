@@ -19,7 +19,7 @@ class CloneUserTest extends TestCase
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $user = User::factory()->create(['company_id' => $companyA->id]);
+        $user = User::factory()->forCompany($companyA->id)->create();
         $user->companies()->sync([$companyA->id, $companyB->id]);
 
         $response = $this->actingAs(User::factory()->superuser()->create())

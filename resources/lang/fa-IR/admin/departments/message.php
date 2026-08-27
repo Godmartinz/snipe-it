@@ -17,6 +17,8 @@ return [
         'confirm' => 'آیا مطمئن هستید که می خواهید این بخش را حذف کنید؟',
         'error' => 'یک مسئله حذف بخش وجود داشت. لطفا دوباره تلاش کنید.',
         'success' => 'بخش با موفقیت حذف شد.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

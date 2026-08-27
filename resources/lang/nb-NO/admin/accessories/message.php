@@ -20,6 +20,8 @@ return [
         'confirm' => 'Er du sikker på at du vil slette denne leverandøren?',
         'error' => 'Det oppstod et problem under sletting av leverandør. Prøv igjen.',
         'success' => 'Sletting av leverandør vellykket.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

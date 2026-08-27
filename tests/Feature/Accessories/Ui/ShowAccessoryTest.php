@@ -22,7 +22,7 @@ class ShowAccessoryTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
         $accessoryForCompanyA = Accessory::factory()->for($companyA)->create();
-        $userForCompanyB = User::factory()->for($companyB)->viewAccessories()->create();
+        $userForCompanyB = User::factory()->forCompany($companyB)->viewAccessories()->create();
 
         $this->actingAs($userForCompanyB)
             ->get(route('accessories.show', $accessoryForCompanyA))

@@ -20,6 +20,8 @@ return [
         'confirm' => 'Is jy seker jy wil hierdie toebehore uitvee?',
         'error' => 'Daar was \'n probleem met die verwydering van die bykomstigheid. Probeer asseblief weer.',
         'success' => 'Die bykomstigheid is suksesvol verwyder.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

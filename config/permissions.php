@@ -74,11 +74,6 @@ return [
         ],
 
         [
-            'permission' => 'assets.view.requestable',
-            'display' => true,
-        ],
-
-        [
             'permission' => 'assets.view.encrypted_custom_fields',
             'display' => true,
         ],
@@ -492,6 +487,10 @@ return [
 
         [
             'permission' => 'self.view_purchase_cost',
+            'display' => true,
+        ],
+        [
+            'permission' => 'assets.view.requestable',
             'display' => true,
         ],
 

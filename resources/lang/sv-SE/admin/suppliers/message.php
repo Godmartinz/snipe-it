@@ -20,7 +20,7 @@ return [
         'error' => 'Det uppstod ett problem vid radering av leverantör. Var god försök igen.',
         'success' => 'Leverantör raderad.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

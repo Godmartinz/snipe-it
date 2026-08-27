@@ -13,8 +13,7 @@ trait ProvidesDataForFullMultipleCompanySupportTesting
         yield "User in a company should result in user's company_id being used" => [
             function () {
                 $jedi = Company::factory()->create();
-                $sith = Company::factory()->create();
-                $luke = User::factory()->for($jedi)
+                $luke = User::factory()->forCompany($jedi)
                     ->createAccessories()
                     ->createAssets()
                     ->createComponents()
@@ -24,8 +23,9 @@ trait ProvidesDataForFullMultipleCompanySupportTesting
 
                 return [
                     'actor' => $luke,
-                    'company_attempting_to_associate' => $sith,
+                    'company_attempting_to_associate' => $jedi,
                     'assertions' => function ($model) use ($jedi) {
+                        // Luke submits his own company (Jedi) — it is in his pivot so it is honoured.
                         self::assertEquals($jedi->id, $model->company_id);
                     },
                 ];
@@ -35,12 +35,13 @@ trait ProvidesDataForFullMultipleCompanySupportTesting
         yield 'User without a company should result in company_id being null' => [
             function () {
                 $userInNoCompany = User::factory()
+                    ->withoutCompany()
                     ->createAccessories()
                     ->createAssets()
                     ->createComponents()
                     ->createConsumables()
                     ->createLicenses()
-                    ->create(['company_id' => null]);
+                    ->create();
 
                 return [
                     'actor' => $userInNoCompany,
@@ -54,7 +55,7 @@ trait ProvidesDataForFullMultipleCompanySupportTesting
 
         yield 'Super-User assigning across companies should result in company_id being set to what was provided' => [
             function () {
-                $superUser = User::factory()->superuser()->create(['company_id' => null]);
+                $superUser = User::factory()->superuser()->withoutCompany()->create();
                 $company = Company::factory()->create();
 
                 return [

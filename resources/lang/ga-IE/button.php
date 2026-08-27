@@ -3,6 +3,7 @@
 return [
     'actions' => 'Gníomhartha',
     'add' => 'Cuir Nua',
+    'back' => 'Ar ais',
     'cancel' => 'Cealaigh',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Scrios',

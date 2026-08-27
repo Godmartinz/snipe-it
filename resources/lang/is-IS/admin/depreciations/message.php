@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ertu viss um að þú viljir eyða þessum fyrningarflokki?',
         'error' => 'Það kom upp vandamál þegar reynt var að eyða fyrningarflokknum. Vinsamlegast reyndu aftur.',
         'success' => 'Fyrningarflokknum var eytt.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -13,4 +13,7 @@ return [
     'total' => 'Σύνολο',
     'update' => 'Αναβάθμιση εξαρτήματος',
     'checkin_limit' => 'Το ποσό που έχει επιλεγεί πρέπει να είναι ίσο ή μικρότερο από :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

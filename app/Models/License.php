@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Console\Commands\SendExpiringLicenseNotifications;
 use App\Helpers\Helper;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\LicensePresenter;
 use App\Presenters\Presentable;
@@ -28,8 +30,10 @@ class License extends Depreciable
     protected $presenter = LicensePresenter::class;
 
     use CompanyableTrait;
+    use HasCalendarEvents;
     use HasUploads;
     use Loggable, Presentable;
+    use Requestable;
     use SoftDeletes;
 
     protected $injectUniqueIdentifier = true;
@@ -44,12 +48,20 @@ class License extends Depreciable
 
     protected $table = 'licenses';
 
+    /**
+     * Placeholder emitted anywhere a license product key would appear for a
+     * caller who lacks the viewKeys gate. Kept as a single source of truth
+     * so the API transformer, CSV export, and any future surface stay in sync.
+     */
+    public const PRODUCT_KEY_MASK = '------------';
+
     protected $casts = [
         'purchase_date' => 'date',
         'expiration_date' => 'date',
         'termination_date' => 'date',
         'category_id' => 'integer',
         'company_id' => 'integer',
+        'requestable' => 'boolean',
     ];
 
     protected $rules = [
@@ -59,12 +71,13 @@ class License extends Depreciable
         'license_name' => 'string|nullable|max:100',
         'notes' => 'string|nullable',
         'category_id' => 'required|exists:categories,id',
-        'company_id' => 'integer|nullable|exists:companies,id',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
         'purchase_date' => 'date_format:Y-m-d|nullable|max:10|required_with:depreciation_id',
         'expiration_date' => 'date_format:Y-m-d|nullable|max:10',
         'termination_date' => 'date_format:Y-m-d|nullable|max:10',
         'min_amt' => 'numeric|nullable|gte:0',
+        'requestable' => 'nullable|boolean',
     ];
 
     /**
@@ -92,8 +105,8 @@ class License extends Depreciable
         'serial',
         'supplier_id',
         'termination_date',
-        'created_by',
         'min_amt',
+        'requestable',
     ];
 
     use Searchable;
@@ -176,6 +189,48 @@ class License extends Depreciable
             && ($this->deleted_at == '');
     }
 
+    public function calendarEventDefinitions(): array
+    {
+        return [
+            [
+                'field' => 'expiration_date',
+                'event_type' => 'license.expiration',
+            ],
+            [
+                'field' => 'termination_date',
+                'event_type' => 'license.termination',
+            ],
+        ];
+    }
+
+    /**
+     * Normalize the requestable form input so an empty string from an
+     * unchecked checkbox lands as false rather than a truthy "0" cast
+     * (matches Accessory / Consumable / Component setRequestableAttribute).
+     */
+    public function setRequestableAttribute($value)
+    {
+        if ($value == '') {
+            $value = null;
+        }
+        $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable licenses. FMCS + location
+     * scoping falls out of the CompanyableTrait global scope, so the
+     * usual "user only sees rows in their reachable companies" rule
+     * applies without any additional wrapping here (matches the
+     * Accessory / Consumable / Component scope shape).
+     */
+    public function scopeRequestable($query)
+    {
+        return $query->where('licenses.requestable', '1');
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function terminatesFormattedDate(): Attribute
     {
         return Attribute::make(
@@ -183,6 +238,9 @@ class License extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function terminatesDiffInDays(): Attribute
     {
         return Attribute::make(
@@ -190,6 +248,9 @@ class License extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function terminatesDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -831,6 +892,28 @@ class License extends Depreciable
         return $this->hasMany(LicenseSeat::class)->whereNull('assigned_to')->whereNull('deleted_at')->whereNull('asset_id');
     }
 
+    /**
+     * TextSearch variant that removes `serial` from the searchable attribute
+     * set for the duration of the call. Used by the API index for callers
+     * who lack the `viewKeys` permission, so search / filter parameters
+     * cannot be used as an existence oracle against license product keys.
+     */
+    public function scopeTextSearchWithoutSerial($query, $search)
+    {
+        $original = $this->searchableAttributes;
+
+        $this->searchableAttributes = array_values(array_filter(
+            $original,
+            fn ($attribute) => $attribute !== 'serial'
+        ));
+
+        try {
+            return $query->TextSearch($search);
+        } finally {
+            $this->searchableAttributes = $original;
+        }
+    }
+
     public function scopeActiveLicenses($query)
     {
 
@@ -958,5 +1041,26 @@ class License extends Depreciable
     public function scopeOrderByCreatedBy($query, $order)
     {
         return $query->leftJoin('users as admin_sort', 'licenses.created_by', '=', 'admin_sort.id')->select('licenses.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Mirrors License::percentRemaining(): available_seats / total_seats * 100.
+     * free_seats_count is added by withCount() in the API index() as the
+     * count of unassigned seats; seats is a real column on licenses.
+     * Guards against division by zero for licenses with no seats.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN licenses.seats = 0 THEN 0 ELSE (free_seats_count * 100.0 / licenses.seats) END '.$direction);
     }
 }

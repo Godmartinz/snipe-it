@@ -13,4 +13,7 @@ return [
     'total' => 'Total',
     'update' => 'Actualizar componente',
     'checkin_limit' => 'La cantidad ingresada debe ser igual o menor que :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

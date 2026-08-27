@@ -90,6 +90,36 @@ class ConsumableCheckoutTest extends TestCase
         });
     }
 
+    public function test_pivot_row_created_by_is_the_actor_not_the_target()
+    {
+        // Regression: previously the pivot's created_by was set to $user->id
+        // (the checkout target), so audit surfaces that read consumables_users
+        // (e.g. "who checked this consumable out to me") would show the target
+        // as their own creator. The action_logs stream separately recorded the
+        // correct actor, which is why the pivot bug survived.
+        $consumable = Consumable::factory()->create();
+        $actor = User::factory()->checkoutConsumables()->create();
+        $target = User::factory()->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.consumables.checkout', $consumable), [
+                'assigned_to' => $target->id,
+                'note' => 'created_by attribution regression',
+            ]);
+
+        $this->assertDatabaseHas('consumables_users', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'created_by' => $actor->id,
+        ]);
+
+        $this->assertDatabaseMissing('consumables_users', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'created_by' => $target->id,
+        ]);
+    }
+
     public function test_action_log_created_upon_checkout()
     {
         $consumable = Consumable::factory()->create();
@@ -123,9 +153,9 @@ class ConsumableCheckoutTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+        $superuser = User::factory()->superuser()->withoutCompany()->create();
         $consumableInCompanyA = Consumable::factory()->for($companyA)->create(['qty' => 1]);
-        $userInCompanyB = User::factory()->for($companyB)->create();
+        $userInCompanyB = User::factory()->forCompany($companyB)->create();
 
         $this->actingAsForApi($superuser)
             ->postJson(route('api.consumables.checkout', $consumableInCompanyA), [
@@ -195,5 +225,45 @@ class ConsumableCheckoutTest extends TestCase
             ])
             ->assertOk()
             ->assertStatusMessageIs('success');
+    }
+
+    /**
+     * Security regression pin: the checkout endpoint used to read
+     * numRemaining() outside any transaction/lock. Two racing requests
+     * for a qty=1 consumable both saw "1 available", both attached
+     * pivot rows, and the register landed at -1. The fix wraps the
+     * pivot writes in a DB::transaction that begins with a
+     * lockForUpdate re-fetch + re-check of numRemaining. This test
+     * simulates the "someone else already grabbed the last one"
+     * moment by pre-attaching pivot rows to drain the consumable to
+     * zero before the checkout request runs, and asserts the endpoint
+     * refuses instead of over-allocating.
+     */
+    public function test_checkout_refuses_when_inventory_is_already_exhausted(): void
+    {
+        $target = User::factory()->create();
+        $consumable = Consumable::factory()->create(['qty' => 1]);
+
+        // Drain the consumable via a direct pivot insert. Same state a
+        // concurrent request would have left mid-transaction.
+        $consumable->users()->attach($consumable->id, [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'created_by' => User::factory()->superuser()->create()->id,
+        ]);
+
+        $this->assertSame(0, $consumable->fresh()->numRemaining());
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.consumables.checkout', $consumable), [
+                'assigned_to' => $target->id,
+                'checkout_qty' => 1,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        // The pre-drained row is the only pivot; no second row got added.
+        $this->assertSame(1, $consumable->users()->count(), 'A second pivot row would mean the register went negative');
+        $this->assertSame(0, $consumable->fresh()->numRemaining());
     }
 }

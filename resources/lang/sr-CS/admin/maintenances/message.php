@@ -23,4 +23,6 @@ return [
         'success' => 'Održavanje je označeno kao završeno.',
         'error' => 'Pojavio se problem pri označavanju ovog održavanja završenim. Molim vas pokušajte ponovo.',
     ],
+    'bulk_delete' => 'Nije obrisan nijedan zapis održavanja (:skipped preskočeno).|Obrisano :count zapisa održavanja. (:skipped preskočeno)|Obrisano :count zapisa održavanja. (:skipped preskočeno)',
+    'bulk_complete' => 'Nijedan zapis održavanja nije označen kao završen (:skipped preskočeno ili već završeno).|Označeno je :count zapisa održavanja kao završeno. (:skipped preskočeno ili već završeno)|Označeno :count zapisa održavanja kao završeno. (:skipped preskočeno ili već završeno)',
 ];

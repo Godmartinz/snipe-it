@@ -21,7 +21,9 @@ require('jquery-slimscroll');
 require('jquery.iframe-transport'); //probably not needed anymore, if I'm honest
 require('blueimp-file-upload')
 require('bootstrap-colorpicker')
-require('bootstrap-datepicker')
+// eonasdan-bootstrap-datetimepicker (BS3) needs moment on window before it loads
+window.moment = require('moment')
+require('eonasdan-bootstrap-datetimepicker')
 require('ekko-lightbox') //TODO - this doesn't seem jquery-ish, we might need to do something weird here
                          // it *does* require Bootstrap, which requires jquery, so maybe that's OK
                          // it seems to work...
@@ -137,11 +139,207 @@ $(function () {
         return false;
     });
 
+    // Mark-a-maintenance-complete modal (green checkmark button in the
+    // maintenances table actions column). Sets the modal form's action to
+    // the row's completion URL and opens it.
+    $el.on('click', '.complete-maintenance', function () {
+        var url = $(this).data('url');
+        $('#completeMaintenanceForm').attr('action', url);
+        $('#completionNote').val('');
+        $('#completeMaintenanceModal').modal('show');
+    });
+
+    // Adjust-quantity modal (plus-minus button on accessory/consumable/
+    // component list and view pages). Sets the modal form's action from
+    // the trigger's data-adjust-url and populates the header + current
+    // quantity display from the trigger's data attributes. Clears the
+    // signed amount + note + order every open so nothing bleeds between
+    // clicks.
+    $el.on('click', '.adjust-quantity', function () {
+        var $btn = $(this);
+        var $modal = $('#adjustQuantityModal');
+        var $amount = $modal.find('#adjustQuantityAmount');
+
+        // data-available is the trigger's authoritative floor for a decrement
+        // (available = qty - currentlyInUseCount). A delta smaller than
+        // -available would decrement the on-hand qty below what's already
+        // checked out, and AdjustsQuantity::adjustQuantity throws
+        // DomainException. Mirror that server-side floor on the input's min
+        // attribute so the browser stepper refuses to go below and the
+        // constraint-validation message surfaces before submit.
+        var available = parseInt($btn.data('available'), 10);
+
+        $('#adjustQuantityForm').attr('action', $btn.data('adjust-url'));
+        $modal.find('.adjust-quantity-item-name').text($btn.data('item-name') || '');
+        $modal.find('.adjust-quantity-available').text(!isNaN(available) ? available : '');
+
+        if (!isNaN(available)) {
+            $amount.attr('min', -available);
+        } else {
+            $amount.removeAttr('min');
+        }
+
+        $amount.val('');
+        $modal.find('#adjustQuantityOrder').val('');
+        // Reset the acquisition-metadata fields between opens so an
+        // order left half-filled by one operator doesn't bleed into the
+        // next click. Supplier is a select2, so use .val('').trigger('change')
+        // rather than setting the raw <select>; currency reverts to
+        // whatever the modal was originally rendered with (its DOM value
+        // attribute, i.e. the system default_currency).
+        $modal.find('#adjustQuantitySupplier').val('').trigger('change');
+        // Reset purchase_date to today on every open (server-rendered
+        // default is today too). Prevents an operator's earlier
+        // backdate from bleeding into the next event.
+        var todayIso = new Date().toISOString().slice(0, 10);
+        $modal.find('#adjustQuantityPurchaseDate').val(todayIso);
+
+        // Pre-populate unit_cost + currency from the trigger's data-last-*
+        // attrs (server-rendered from the item's most recent OrderItem).
+        // When both are present the "pre-populated from last order" hint
+        // shows underneath the row; the hint gets hidden as soon as the
+        // operator edits either field so it disappears the moment they
+        // override the pre-fill.
+        var lastUnitCost = $btn.data('last-unit-cost');
+        var lastCurrency = $btn.data('last-currency');
+        var $unitCost = $modal.find('#adjustQuantityUnitCost');
+        var $currency = $modal.find('#adjustQuantityCurrency');
+        var $costHint = $modal.find('#adjustQuantityCostHint');
+
+        $unitCost.val(lastUnitCost !== undefined && lastUnitCost !== '' ? lastUnitCost : '');
+        $currency.val(lastCurrency !== undefined && lastCurrency !== '' ? lastCurrency : ($currency.prop('defaultValue') || ''));
+
+        if ((lastUnitCost !== undefined && lastUnitCost !== '') || (lastCurrency !== undefined && lastCurrency !== '')) {
+            $costHint.show();
+        } else {
+            $costHint.hide();
+        }
+
+        // Rebind on every open so multiple modal opens don't stack listeners.
+        $unitCost.off('input.adjustCostHint').on('input.adjustCostHint', function () { $costHint.hide(); });
+        $currency.off('input.adjustCostHint').on('input.adjustCostHint', function () { $costHint.hide(); });
+
+        $modal.find('#adjustQuantityNote').val('');
+        $modal.find('#adjustQuantityFile').val('');
+        // js-uploadFile paints selected filenames into #{id}-info; clear it too
+        // so stale filenames from a previous open don't linger in the new modal.
+        $modal.find('#adjustQuantityFile-info').empty();
+
+        // Acquisition-metadata fields (order number, supplier, unit cost,
+        // currency) only make sense when the qty change is a positive
+        // addition (a purchase). Zero or negative amounts represent
+        // corrections / consumption / losses, not acquisitions, so hide
+        // those fields — and blank their values so a submit from that
+        // state doesn't ship stale purchase metadata alongside the log
+        // entry. Show them again the moment the operator types a
+        // positive number. The date label swaps to a generic "Date"
+        // when the event isn't a purchase.
+        //
+        // On modal open the amount is empty ("we don't know yet"), so
+        // stay in the default acquisition-visible state — prefilled
+        // supplier / cost / currency from the last order are preserved
+        // and the hint stays visible if it was shown. We only clear
+        // when the operator actually commits to a 0/negative value.
+        var $acquisitionFields = $modal.find('#adjustQuantityAcquisitionFields');
+        var $costRow = $modal.find('#adjustQuantityCostRow');
+        var $dateLabel = $modal.find('#adjustQuantityPurchaseDateLabel');
+        var purchaseLabel = $dateLabel.data('label-purchase');
+        var genericLabel = $dateLabel.data('label-generic');
+        var syncAcquisitionFieldsVisibility = function () {
+            var raw = $amount.val();
+            // Treat "no value yet" as still-a-purchase for the visibility
+            // toggle: prefilled acquisition metadata stays intact until
+            // the operator explicitly types a non-positive number.
+            if (raw === '' || raw === null || raw === undefined) {
+                $acquisitionFields.show();
+                $costRow.show();
+                $dateLabel.text(purchaseLabel);
+                return;
+            }
+            var num = parseFloat(raw);
+            var isPurchase = !isNaN(num) && num > 0;
+            $acquisitionFields.toggle(isPurchase);
+            $costRow.toggle(isPurchase);
+            $costHint.toggle(isPurchase && $costHint.data('has-prefill') === true);
+            $dateLabel.text(isPurchase ? purchaseLabel : genericLabel);
+            if (!isPurchase) {
+                $modal.find('#adjustQuantityOrder').val('');
+                $modal.find('#adjustQuantitySupplier').val('').trigger('change');
+                $modal.find('#adjustQuantityUnitCost').val('');
+                $modal.find('#adjustQuantityCurrency').val('');
+            }
+        };
+        // Track the prefill state on the hint so the visibility toggle
+        // can restore it correctly when qty flips positive again.
+        $costHint.data('has-prefill', $costHint.is(':visible'));
+        $amount.off('input.adjustAcquisition').on('input.adjustAcquisition', syncAcquisitionFieldsVisibility);
+        // Initial call keeps everything in the default "purchase" state
+        // (empty amount) so the prefill logic above stays authoritative.
+        syncAcquisitionFieldsVisibility();
+
+        $modal.modal('show');
+    });
+
+    // Request-item modal (on /account/requestable-assets). Trigger
+    // buttons carry data-request-url + data-item-name + data-current-qty
+    // so the modal can post to the correct endpoint and reset its
+    // qty/date fields between opens. Cancel case (the item is already
+    // requested by this user) POSTs synchronously via a small inline
+    // form on the row instead of routing through this modal, so a
+    // requested row never opens it.
+    $el.on('click', '.request-item', function () {
+        var $btn = $(this);
+        var $modal = $('#requestItemModal');
+        var $form = $('#requestItemForm');
+
+        $form.attr('action', $btn.data('request-url'));
+        $modal.find('.request-item-name').text($btn.data('item-name') || '');
+
+        var currentQty = parseInt($btn.data('current-qty'), 10);
+        $modal.find('#requestItemQuantity').val(!isNaN(currentQty) && currentQty > 0 ? currentQty : 1);
+
+        // Hide the qty row for types where qty is meaningless.
+        // Assets are 1:1 (you request THE asset, not N of it).
+        // Licenses are one-seat-per-request by convention (nobody
+        // realistically asks for 3 seats of Photoshop for
+        // themselves). The input stays in the DOM with value=1 so
+        // the POST shape stays uniform across every requestable
+        // type; only the row is display:none.
+        var itemType = ($btn.data('item-type') || '').toString().toLowerCase();
+        var hidesQty = itemType === 'asset' || itemType === 'license';
+        $modal.find('#requestItemQuantityRow').toggle(!hidesQty);
+        if (hidesQty) {
+            $modal.find('#requestItemQuantity').val(1);
+        }
+
+        // Reset dates + notes every open so state left in the modal
+        // by an earlier click can't leak into the next request.
+        $modal.find('#requestItemStartDate').val('');
+        $modal.find('#requestItemEndDate').val('');
+        $modal.find('#requestItemNotes').val('');
+
+        // Snapshot the tab the requester is on so the controller can
+        // restore it on the post-submit redirect. Walks up to the
+        // enclosing .tab-pane and reads its id; the assets tab uses
+        // an API-backed row-formatter that emits the same
+        // data-active-tab attr on its request button (see
+        // assetRequestActionsFormatter) so this handler works there
+        // too without needing the DOM parent.
+        var explicitTab = $btn.data('active-tab');
+        var $tabPane = $btn.closest('.tab-pane');
+        var activeTab = explicitTab || ($tabPane.length ? $tabPane.attr('id') : '');
+        $modal.find('#requestItemActiveTab').val(activeTab || '');
+
+        $modal.modal('show');
+    });
+
     // confirm delete modal
     $el.on('click', '.delete-asset', function (evnt) {
         var $context = $(this);
         var $dataConfirmModal = $('#dataConfirmModal');
-        var href = $context.attr('href');
+        // Anchors keep the URL in href; buttons keep it in data-href
+        // (buttons don't semantically support href per HTML5).
+        var href = $context.attr('data-href') || $context.attr('href');
         var message = $context.attr('data-content');
         var headericon = $context.attr('data-icon');
         var title = $context.attr('data-title');
@@ -212,6 +410,21 @@ $(function () {
                         statusType: link.data("asset-status-type"),
                         companyId: link.data("company-ids") || link.data("company-id"),
                         excludeId: link.data("exclude-id"),
+                        // Pre-scope the hardware picker to a user's
+                        // assigned assets. Currently used by the
+                        // components-checkout screen when reached via
+                        // a /requests row (see the requesting_user
+                        // wiring in ComponentsController + the checkout
+                        // blade). The API endpoint gracefully falls
+                        // back to the unfiltered list when the target
+                        // user has no assigned assets, so an empty
+                        // pre-filter doesn't lock the admin out.
+                        assignedTo: link.data("assigned-to"),
+                        // When true, the companies selectlist marks child companies
+                        // (those with a parent of their own) as disabled — used by
+                        // the parent-company picker so users can't choose options
+                        // that would fail the parent_must_be_top_level validator.
+                        onlyTopLevel: link.data("only-top-level"),
                     };
                     return data;
                 },
@@ -469,13 +682,22 @@ $(function () {
             syncCheckoutToTypeUi(true);
         });
 
-        // Apply the current radio selection on initial render, but only when the
-        // selector row itself is already visible. On the asset create page the selector
-        // starts hidden (display:none) and user_add() reveals it after a deployability
-        // AJAX check — running here would prematurely show a panel before the radio
-        // group is visible. On the standalone checkout page the selector is visible
-        // from the start, so the sync runs normally there.
-        if ($('#assignto_selector').is(':visible')) {
+        // Expose so pages that reveal #assignto_selector later (asset edit's
+        // user_add() flow, etc.) can trigger the sync once the selector is
+        // visible. Standalone checkout pages don't need to call this — the
+        // initial-render block below handles them.
+        window.snipeitSyncCheckoutToTypeUi = syncCheckoutToTypeUi;
+
+        // Apply the current radio selection on initial render unless the page
+        // has explicitly hidden the selector via an inline style="display:none"
+        // (asset create/edit start that way and reveal it from user_add() after
+        // a deployability AJAX call). Using getAttribute('style') instead of
+        // jQuery's :visible avoids false negatives on pages like the standalone
+        // /hardware/{id}/checkout, where the selector is visible from the start
+        // but :visible can transiently return false during select2 boot — that
+        // was what hid the acceptance-options callout until a radio was toggled.
+        var selectorStyle = ($('#assignto_selector').attr('style') || '').toLowerCase();
+        if (selectorStyle.indexOf('display:none') === -1 && selectorStyle.indexOf('display: none') === -1) {
             syncCheckoutToTypeUi(false);
         }
     });
@@ -506,6 +728,38 @@ $(function () {
         history.pushState(null, null, href);
         e.preventDefault();
         $('a[href="' + $(this).attr('href') + '"]').tab('show');
+    });
+
+    // Tables inside a hidden tab pane initialize with a zero-width
+    // container, so their column widths and any sticky-column offsets
+    // computed from those widths never recover on their own once the
+    // pane becomes visible. Force a resetView on any snipe-tables
+    // inside the newly-shown pane so column widths + sticky offsets
+    // re-measure against the now-visible container.
+    $('body').on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+        var pane = $(e.target).attr('href');
+        if (!pane) return;
+        $(pane).find('.snipe-table').each(function () {
+            if ($(this).data('bootstrap.table')) {
+                $(this).bootstrapTable('resetView');
+            }
+        });
+    });
+
+    // Same story for viewport resizes: bootstrap-table caches column
+    // widths from the initial layout and doesn't recompute when the
+    // window width changes. Debounce so a drag-resize doesn't fire
+    // resetView on every intermediate pixel.
+    var snipeTableResizeTimer;
+    $(window).on('resize', function () {
+        clearTimeout(snipeTableResizeTimer);
+        snipeTableResizeTimer = setTimeout(function () {
+            $('.snipe-table').each(function () {
+                if ($(this).data('bootstrap.table')) {
+                    $(this).bootstrapTable('resetView');
+                }
+            });
+        }, 150);
     });
 
     // ------------------------------------------------
@@ -605,15 +859,179 @@ function htmlEntities(str) {
 })(jQuery);
 
 $(document).ready(function () {
-    $(".toggle-password").click(function () {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $($(this).attr("data-toggle"));
-        if (input.attr("type") === "password") {
-            input.attr("type", "text");
-        } else {
-            input.attr("type", "password");
-        }
+    // Password-reveal eye. data-toggle is a jQuery selector — usually one
+    // input id, but a multi-selector like "#password, #password_confirm"
+    // lets a single click flip every matched input at once (the confirm
+    // field on the user create/edit form uses this so revealing the
+    // password reveals its confirmation too). Every .toggle-password
+    // sharing the same data-toggle string flips its icon together so the
+    // eye state doesn't visually drift between the two addons.
+    $(document).on('click', '.toggle-password', function () {
+        var toggleTarget = $(this).attr('data-toggle');
+        var $inputs = $(toggleTarget);
+        var reveal = $inputs.first().attr('type') === 'password';
+        $inputs.attr('type', reveal ? 'text' : 'password');
+        var $eyes = $('.toggle-password[data-toggle="' + toggleTarget + '"]');
+        $eyes.toggleClass('fa-eye', ! reveal);
+        $eyes.toggleClass('fa-eye-slash', reveal);
     });
+
+    // Auto-init eonasdan datetimepickers. bootstrap-datepicker has a native
+    // data-provide auto-init; eonasdan does not, so we do it ourselves.
+    // Options are read from data-attributes on the wrapper so blade components
+    // can tune format/side-by-side without touching this JS.
+    //
+    // Icon set is overridden to Font Awesome — the picker defaults to
+    // Glyphicon classes, which we do not ship, so up/down arrows and clock
+    // glyphs would otherwise render as empty boxes.
+    // Exposed so callers who insert new [data-provide="datetimepicker"]
+    // wrappers into the DOM post-load (e.g., AJAX-loaded custom fields on
+    // asset create/edit when the model changes) can re-run the init on the
+    // freshly-inserted elements. Pass a jQuery scope to narrow the search;
+    // omit to init every uninitialised picker on the page.
+    window.snipeitInitDatetimepickers = function (scope) {
+        var $targets = scope ? $(scope).find('[data-provide="datetimepicker"]') : $('[data-provide="datetimepicker"]');
+        $targets.each(initDatetimepicker);
+    };
+
+    function initDatetimepicker() {
+        var $wrapper = $(this);
+        // Skip if this wrapper already has an eonasdan instance attached
+        // (data('DateTimePicker') is set by the library on init).
+        if ($wrapper.data('DateTimePicker')) {
+            return;
+        }
+        var $input = $wrapper.find('input');
+        var existingValue = ($input.val() || '').trim();
+
+        var options = {
+            format: $wrapper.data('format') || 'YYYY-MM-DD HH:mm:ss',
+            // Default to the compact (collapsed) view — calendar shows first
+            // and a small clock icon toggles the time view. Callers that want
+            // date + time visible side by side can set data-side-by-side="true".
+            sideBySide: $wrapper.data('side-by-side') === true,
+            showClear: true,
+            showClose: true,
+            showTodayButton: true,
+            // In sideBySide mode the toolbar row (Today/Clear/Close) is only
+            // rendered when placement is explicitly 'top' or 'bottom'; the
+            // library drops it entirely on the default 'default' placement.
+            toolbarPlacement: 'bottom',
+            // Open the popup on any focus/click of the input (not just the
+            // calendar addon icon), matching the behavior of the bootstrap
+            // datepicker used elsewhere in the app.
+            allowInputToggle: true,
+            locale: $wrapper.data('locale') || 'en',
+            icons: {
+                time: 'fa-regular fa-clock',
+                date: 'fa-regular fa-calendar',
+                up: 'fa-solid fa-chevron-up',
+                down: 'fa-solid fa-chevron-down',
+                previous: 'fa-solid fa-chevron-left',
+                next: 'fa-solid fa-chevron-right',
+                today: 'fa-solid fa-calendar-day',
+                clear: 'fa-solid fa-trash',
+                close: 'fa-solid fa-xmark',
+            },
+        };
+
+        // Pre-fill empty inputs with the user's current local datetime by
+        // default. Callers that render a picker where "now" is NOT a safe
+        // default (e.g., user-defined custom fields) can opt out by setting
+        // data-default-now="false" on the wrapper.
+        var wantsDefaultNow = $wrapper.data('default-now') !== false;
+        if (existingValue === '' && wantsDefaultNow) {
+            options.defaultDate = moment();
+        }
+
+        // data-max-date="today" caps the picker at today (replaces the
+        // bootstrap-datepicker era's data-date-end-date="0d"); any other
+        // value is parsed as a moment-compatible date string.
+        var maxDate = $wrapper.data('max-date');
+        if (maxDate) {
+            options.maxDate = maxDate === 'today' ? moment().endOf('day') : moment(maxDate);
+        }
+
+        $wrapper.datetimepicker(options);
+    }
+
+    // Wires up the linked-pickers pattern for <x-input.date-range>. Each
+    // .js-date-range wrapper holds a .js-date-range-start and .js-date-range-end
+    // datetimepicker; changing one bounds the other so a user can't pick an
+    // end date before the start (or vice versa). Runs after the plain
+    // datetimepicker init above so both instances already exist.
+    function initDateRangeLinking() {
+        $('.js-date-range').each(function () {
+            var $start = $(this).find('.js-date-range-start');
+            var $end = $(this).find('.js-date-range-end');
+            if (!$start.length || !$end.length) {
+                return;
+            }
+            $start.off('dp.change.snipeitDateRange').on('dp.change.snipeitDateRange', function (e) {
+                var picker = $end.data('DateTimePicker');
+                if (picker) {
+                    picker.minDate(e.date);
+                }
+            });
+            $end.off('dp.change.snipeitDateRange').on('dp.change.snipeitDateRange', function (e) {
+                var picker = $start.data('DateTimePicker');
+                if (picker) {
+                    picker.maxDate(e.date);
+                }
+            });
+        });
+    }
+
+    // Push the app's "week starts on" setting into moment's active locale so
+    // the eonasdan datetimepicker (which reads firstDayOfWeek from moment
+    // locale data, not from its own options) opens with the calendar column
+    // order the admin picked in Localization settings. Runs once before any
+    // picker is initialized; downstream code that formats using moment's w/W
+    // tokens will pick up the same value.
+    if (window.snipeit && window.snipeit.settings && typeof window.snipeit.settings.first_day_of_week === 'number') {
+        moment.updateLocale(moment.locale(), { week: { dow: window.snipeit.settings.first_day_of_week } });
+    }
+
+    // MAC-address input mask. Custom fields with format=MAC render as
+    // plain text inputs; without a mask the user only discovers the
+    // required colon-separated shape (see \App\Rules\MacEncrypted)
+    // after a failed submit. The mask strips every non-hex character
+    // on input, uppercases A-F, and re-inserts a colon after every
+    // second character, so common paste shapes (hyphen-separated from
+    // Windows ipconfig, Cisco-dotted aabb.ccdd.eeff, bare hex,
+    // space-separated) all normalize to the canonical AA:BB:CC:DD:EE:FF
+    // form the backend expects.
+    //
+    // Exposed on window (matching snipeitInitDatetimepickers above) so
+    // the asset edit form's AJAX custom-fields-reload handler can
+    // re-init the mask on inputs that only exist after the model
+    // changes and a fresh custom_fields_form.blade.php partial is
+    // swapped into place. Pass a jQuery selector or DOM node to narrow
+    // the scope; omit to init every .mac-address-input on the page.
+    //
+    // The .mac-address-input class is applied in resources/views/models/
+    // custom_fields_form.blade.php on both text-input branches
+    // (format-icon wrapper AND bare input) when $field->format === 'MAC'.
+    window.snipeitInitMacAddressMask = function (scope) {
+        var $targets = scope ? $(scope).find('.mac-address-input') : $('.mac-address-input');
+        $targets
+            .off('input.snipeitMacMask')
+            .on('input.snipeitMacMask', function () {
+                // Trim leading/trailing whitespace first so a paste like
+                // "  AA:BB:CC:DD:EE:FF\n" from a spreadsheet cell doesn't
+                // eat one of the trailing hex chars into the substring cap.
+                var hex = this.value
+                    .trim()
+                    .toUpperCase()
+                    .replace(/[^0-9A-F]/g, '')
+                    .substring(0, 12);
+                this.value = hex.match(/.{1,2}/g)?.join(':') || '';
+            });
+    };
+
+    window.snipeitInitDatetimepickers();
+    initDateRangeLinking();
+    window.snipeitInitMacAddressMask();
 });
 
 
@@ -628,8 +1046,34 @@ $(document).ready(function () {
  * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
  *    or just $this->getId() if not).
  */
+// Any livewire-select2 that lives inside a Bootstrap 3 modal has to be
+// initialized with dropdownParent set to the modal, or the search input
+// gets appended to <body> where Bootstrap 3's modal enforceFocus handler
+// immediately steals focus away from it - the dropdown opens, the search
+// field renders, but typing does nothing because focus keeps snapping
+// back into the modal on every keydown. Elements not in a modal get a
+// plain init. Callers with fussier requirements (custom width, template,
+// etc.) can still init select2 manually; this handler only touches
+// elements that don't already have select2 wired up (guarded by the
+// .select2-hidden-accessible class select2 adds after init).
+function initLivewireSelect2($scope) {
+    var $root = $scope && $scope.length ? $scope : $(document);
+    $root.find('.livewire-select2').each(function () {
+        var $el = $(this);
+        if ($el.hasClass('select2-hidden-accessible')) {
+            return;
+        }
+        var opts = {};
+        var $modal = $el.closest('.modal');
+        if ($modal.length) {
+            opts.dropdownParent = $modal;
+        }
+        $el.select2(opts);
+    });
+}
+
 document.addEventListener('livewire:init', () => {
-    $('.livewire-select2').select2()
+    initLivewireSelect2();
 
     $(document).on('select2:select', '.livewire-select2', function (event) {
         var target = $(event.target)
@@ -648,9 +1092,13 @@ document.addEventListener('livewire:init', () => {
 
   Livewire.interceptMessage(({ onFinish }) => {
     onFinish(() => {
-      // Runs after DOM morph completes (or on error/cancel)
+      // Runs after DOM morph completes (or on error/cancel). Livewire
+      // replaces the plain <select> nodes on morph, so a re-init picks
+      // up any that lost their select2 wrapper in the swap. The
+      // already-init guard inside initLivewireSelect2 keeps unchanged
+      // elements untouched.
         queueMicrotask(() => {
-          $(".livewire-select2").select2();
+          initLivewireSelect2();
         });
       });
     }
@@ -829,3 +1277,524 @@ $.fn.sort_select_box = function(){
     // clearing any selections
     $("#"+this.attr('id')+" option").attr('selected', true);
 }
+
+
+/*
+ * Data-attribute driven initializers. Blades attach behavior by adding
+ * `data-toggle="..."` (plus supporting data-* attributes) to elements
+ * instead of shipping an inline <script> block. Add new handlers here
+ * as inline scripts get migrated out of blades.
+ */
+$(function () {
+
+    // Sound preview on account/profile. Fires the URL in data-sound-url
+    // when the user toggles the checkbox on.
+    $(document).on('click', '[data-toggle="sound-test"]', function () {
+        if (!$(this).is(':checked')) return;
+        var url = $(this).data('sound-url');
+        if (!url) return;
+        new Audio(url).play();
+    });
+
+    // Confetti preview on account/profile. Same shape as sound-test.
+    $(document).on('click', '[data-toggle="confetti-test"]', function () {
+        if (!$(this).is(':checked')) return;
+
+        var duration = 1500;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function () {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+            var particleCount = 50 * (timeLeft / duration);
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+            });
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+            });
+        }, 250);
+    });
+
+    // Live color preview for the nav-link colorpicker on account/profile.
+    // The colorpicker widget itself is initialized by $(".color").colorpicker()
+    // in the default layout; this just wires the changeColor listener.
+    if ($('#nav-link-color').length) {
+        $('#nav-link-color').on('changeColor', function (e) {
+            var color = e.color.toString('rgba');
+            $('.navbar-nav > li > a:link').attr('style', 'color: ' + color + ' !important');
+            $('.btn-theme').attr('style', 'color: ' + color + ' !important');
+        });
+    }
+
+    // Branding settings page: live preview + reset for the four tenant
+    // colorpickers. The pickers themselves are initialized by the global
+    // $(".color").colorpicker() call in the default layout; this only wires
+    // the changeColor listeners and the reset button. Guarded on the reset
+    // button ID so it only runs on Settings > Branding, not on every page
+    // that happens to have a #header-color or #nav-link-color widget.
+    //
+    // Only header + nav-link get live preview. Link light/dark previews are
+    // deliberately skipped: they would recolor the buttons and other UI on
+    // this form itself, which can make it unreadable if the operator picks
+    // a low-contrast color. Those two settings just save and take effect on
+    // reload.
+    if (document.getElementById('branding-colors-reset')) {
+        var BRANDING_DEFAULTS = {
+            header_color: '#3c8dbc',
+            nav_link_color: '#ffffff',
+            link_light_color: '#296282',
+            link_dark_color: '#5fa4cc',
+        };
+
+        // Live preview works by writing the tenant CSS variables inline on
+        // <html>. Inline element style beats the :root and [data-theme]
+        // declarations in overrides.less on specificity, so this works even
+        // for the many rules those declarations lock in with !important.
+        var applyBrandingHeader = function (color) {
+            document.documentElement.style.setProperty('--main-theme-color', color);
+        };
+
+        var applyBrandingNavLink = function (color) {
+            document.documentElement.style.setProperty('--btn-theme-text-color', color);
+            document.documentElement.style.setProperty('--nav-hover-text-color', color);
+            document.documentElement.style.setProperty('--nav-primary-text-color', color);
+        };
+
+        $('#header-color').on('changeColor', function (e) {
+            applyBrandingHeader(e.color.toString('rgba'));
+        });
+
+        $('#nav-link-color').on('changeColor', function (e) {
+            applyBrandingNavLink(e.color.toString('rgba'));
+        });
+
+        // Reset: restore each picker's swatch and input to the stock
+        // defaults. Using setValue on the plugin (not just .val() on the
+        // input) fires the plugin's internal changeColor event, which
+        // re-runs applyBrandingHeader / applyBrandingNavLink automatically.
+        $('#branding-colors-reset').on('click', function () {
+            $('#header-color').colorpicker('setValue', BRANDING_DEFAULTS.header_color);
+            $('#nav-link-color').colorpicker('setValue', BRANDING_DEFAULTS.nav_link_color);
+            $('#link-light-color').colorpicker('setValue', BRANDING_DEFAULTS.link_light_color);
+            $('#link-dark-color').colorpicker('setValue', BRANDING_DEFAULTS.link_dark_color);
+        });
+    }
+
+    // Reset the localStorage theme override when the user clicks the
+    // "system default" link (any element carrying data-theme-toggle-clear).
+    document.querySelectorAll('[data-theme-toggle-clear]').forEach(function (el) {
+        el.addEventListener('click', function () {
+            localStorage.removeItem('theme');
+        });
+    });
+
+    // Master checkbox → target field disabled state. Callers pair a
+    // <input type="checkbox" data-toggle="disable-when-unchecked"
+    // data-disable-target="#some-field"> with a target rendered
+    // server-side with the matching @disabled state (avoids FOUC).
+    // Handler keeps them in sync on change.
+    $(document).on('change', '[data-toggle="disable-when-unchecked"]', function () {
+        var target = $(this).data('disable-target');
+        if (target) {
+            $(target).prop('disabled', !$(this).is(':checked'));
+        }
+    });
+
+    // Disable empty REQUIRED inputs on submit so browser HTML5 validation
+    // doesn't block the request before Laravel's form-request validator
+    // gets a chance to return a nicer error. Non-required empties (like a
+    // "Do not change" select with an explicit value="" option) are left
+    // enabled so they submit their intentional empty value. Opt in per
+    // form with data-disable-empty-on-submit.
+    $(document).on('submit', 'form[data-disable-empty-on-submit]', function () {
+        $(this).find(':input[required]').filter(function () { return !this.value; }).attr('disabled', 'disabled');
+    });
+
+    // Master checkbox → toggle every non-disabled checkbox in the closest
+    // form or table (or a caller-specified selector via data-check-scope).
+    // Used by bulk-delete confirmation pages to select or deselect the
+    // whole list of rows at once.
+    $(document).on('change', '[data-toggle="check-all"]', function () {
+        var $master = $(this);
+        var scope = $master.data('check-scope');
+        var $container = scope ? $(scope) : $master.closest('form, table');
+        $container.find('input[type="checkbox"]').not($master).not(':disabled').prop('checked', $master.prop('checked'));
+    });
+
+    // Shift-click a row checkbox to apply its new state to every visible,
+    // enabled checkbox between it and the last checkbox clicked in the same
+    // table and checkbox group.
+    var lastListCheckbox = null;
+    var updatingCheckboxRange = false;
+
+    document.addEventListener('click', function (event) {
+        var $checkbox = $(event.target);
+
+        if (updatingCheckboxRange
+            || !$checkbox.is('table tbody input[type="checkbox"]')
+            || $checkbox.is('[data-toggle="check-all"]')) {
+            return;
+        }
+
+        var checkbox = $checkbox[0];
+        var $table = $checkbox.closest('table');
+        var $checkboxes = $table.find('tbody input[type="checkbox"]')
+            .not(':disabled')
+            .not('[data-toggle="check-all"]')
+            .filter(':visible')
+            .filter(function () {
+                return !checkbox.name || this.name === checkbox.name;
+            });
+        var start = $checkboxes.index(lastListCheckbox);
+        var end = $checkboxes.index(checkbox);
+
+        if (event.shiftKey && start !== -1 && end !== -1 && start !== end) {
+            updatingCheckboxRange = true;
+
+            try {
+                $checkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).each(function () {
+                    if (this !== checkbox && this.checked !== checkbox.checked) {
+                        var rowIndex = $(this).data('index');
+
+                        if ($table.data('bootstrap.table') && rowIndex !== undefined) {
+                            $table.bootstrapTable(checkbox.checked ? 'check' : 'uncheck', rowIndex);
+                        } else {
+                            $(this).trigger('click');
+                        }
+                    }
+                });
+            } finally {
+                updatingCheckboxRange = false;
+            }
+        }
+
+        lastListCheckbox = checkbox;
+    }, true);
+
+    // Custom-report "save template" flow. The three custom reports
+    // (asset / component / consumable) each have a small side-panel
+    // form that captures a template name and posts to the templates
+    // store endpoint carrying the current field selections of the
+    // report configuration form. This handler forwards the template
+    // name + report type into the main report form as hidden inputs,
+    // then submits the main form to templates.store. Report type comes
+    // from the save form's data-report-type attribute so a single JS
+    // path covers all three pages.
+    $(document).on('submit', 'form[data-report-save-template]', function (event) {
+        event.preventDefault();
+        var $saveForm = $(this);
+        var reportType = $saveForm.data('report-type');
+        var targetSelector = $saveForm.data('report-form') || '#custom-report-form';
+        var storeUrl = $saveForm.data('store-url') || $saveForm.attr('action');
+        var $targetForm = $(targetSelector);
+        var nameValue = $saveForm.find('[name="name"]').val();
+
+        $('<input>').attr({ type: 'hidden', name: 'name', value: nameValue }).appendTo($targetForm);
+        $('<input>').attr({ type: 'hidden', name: 'type', value: reportType }).appendTo($targetForm);
+
+        $targetForm.attr('action', storeUrl).submit();
+    });
+
+    // Custom-report saved-template select2: navigate to the route stored
+    // on the selected <option>'s data-route attribute. Shared by all
+    // three custom report pages.
+    $(document).on('select2:select', '#saved_report_select', function (event) {
+        window.location.href = event.params.data.element.dataset.route;
+    });
+
+    // When the "This user can login" (activated) checkbox is off, the
+    // password + confirmation fields are functionally useless because
+    // login is gated by the activated flag. Hide the whole form-group
+    // (or dynamic-form-row in the modal) so the form doesn't show
+    // fields the user can't meaningfully fill in, and also drop the
+    // HTML `required` attribute so the browser doesn't block submission.
+    // The server side already skips the password rule for this case
+    // via SaveUserRequest::rules(), and the controller stores
+    // User::noPassword() raw so no Hash::check can ever match.
+    // Applies to both the main users/edit create form and the
+    // users/modal form since they share the input names.
+    //
+    // Required-state preservation: the server renders password/password_
+    // confirmation with `required` only on create (see users/edit.blade.php
+    // and modals/user.blade.php). We cache that server-rendered state on
+    // the first call so subsequent activated-toggles only ever re-apply
+    // the ORIGINAL server intent — otherwise editing an existing
+    // (activated) user would silently flip password to required on page
+    // load and jQuery Validate would block Save with the password empty.
+    var syncPasswordFields = function ($checkbox) {
+        var $form = $checkbox.closest('form');
+        var $passwords = $form.find(
+            'input[name="password"], input[name="password_confirmation"]'
+        );
+        var activated = $checkbox.is(':checked');
+        $passwords.each(function () {
+            if (this.dataset.serverRequired === undefined) {
+                this.dataset.serverRequired = this.required ? '1' : '0';
+            }
+            this.required = activated && this.dataset.serverRequired === '1';
+            var $wrap = $(this).closest('.form-group, .dynamic-form-row');
+            if (activated) {
+                $wrap.show();
+            } else {
+                $wrap.hide();
+            }
+        });
+    };
+
+    // Sensitive fields (username, email, password) ship with a
+    // `readonly` + onfocus-removes-readonly anti-autofill trick to
+    // stop password managers from prefilling or overwriting the
+    // operator's own login credentials on user-create forms. The
+    // side-effect is that HTML5 `required` constraint validation is
+    // SILENTLY skipped for readonly inputs, so hitting submit without
+    // ever focusing a required field lets the empty form through the
+    // browser check entirely.
+    //
+    // On submit-button click we strip `readonly` from any
+    // required+readonly input inside the form. The browser then runs
+    // its normal constraint check (all fields participating) and
+    // shows the "please fill in this field" popup on empties. Autofill
+    // was already prevented at page load, so removing readonly at
+    // click time doesn't reopen that hole.
+    $(document).on('click', 'button[type="submit"], input[type="submit"]', function () {
+        var $form = $(this).closest('form');
+        if (! $form.length) {
+            return;
+        }
+        $form.find('input[required][readonly]').each(function () {
+            this.removeAttribute('readonly');
+        });
+    });
+    $('input[name="activated"][type="checkbox"]').each(function () {
+        syncPasswordFields($(this));
+    });
+    $(document).on('change', 'input[name="activated"][type="checkbox"]', function () {
+        syncPasswordFields($(this));
+    });
+
+    // Generic "typing into input A enables checkbox B" pattern. Server
+    // marks the input with data-toggles-checkbox="{selector-of-target}".
+    // Threshold is 6 chars, which matches the legacy user-create
+    // behaviour of only enabling the send-welcome checkbox once the
+    // email is plausibly valid. Server omits the data-attribute when
+    // the enable-side should never fire (e.g. app.lock_passwords is on)
+    // so the target stays permanently disabled.
+    $(document).on('keyup', 'input[data-toggles-checkbox]', function () {
+        var $target = $($(this).data('toggles-checkbox'));
+        if (! $target.length) {
+            return;
+        }
+        if (this.value.length > 5) {
+            $target.prop('disabled', false);
+            $target.closest('.form-control').removeClass('form-control--disabled');
+        } else {
+            $target.prop('disabled', true).prop('checked', false);
+            $target.closest('.form-control').addClass('form-control--disabled');
+        }
+    });
+
+    // Bootstrap tooltips on any element carrying .tooltip-base.
+    // Attaching to body avoids clipping inside overflow-hidden panels.
+    $('.tooltip-base').tooltip({ container: 'body' });
+
+    // Password generator button. Server puts the desired length on the
+    // button as data-password-length (typically pwd_secure_min + 9) so
+    // this JS doesn't have to know about app settings. Falls back to 16
+    // if the attribute is missing.
+    $('a[id="genPassword"], button[id="genPassword"]').each(function () {
+        var $btn = $(this);
+        if (typeof $btn.pGenerator !== 'function' || ! $('#password').length) {
+            return;
+        }
+        $btn.pGenerator({
+            bind: 'click',
+            passwordElement: '#password',
+            passwordLength: parseInt($btn.data('password-length') || '16', 10),
+            uppercase: true,
+            lowercase: true,
+            numbers: true,
+            specialChars: true,
+            onPasswordGenerated: function () {
+                $('#password_confirm').val($('#password').val());
+            },
+        });
+    });
+
+    // A <select data-gates-submit> disables the submit button(s) in its
+    // form until a value is chosen. Used by users/confirm-bulk-delete
+    // where the operator must pick a status for the deleted users' assets
+    // before the form can be submitted. Runs once on load to reflect
+    // whatever value was pre-selected (old input after a validation
+    // redirect) and re-syncs on change and on select2's own event.
+    $('select[data-gates-submit]').each(function () {
+        var $select = $(this);
+        var $submits = $select.closest('form').find(':submit');
+        var sync = function () {
+            $submits.prop('disabled', ! $select.val());
+        };
+        sync();
+        $select.on('change select2:select', sync);
+    });
+
+    // Auto-focus the first select2 search input on pages that ask for it.
+    // Bulk-checkout uses this so the operator lands directly on the
+    // assets-to-checkout picker and can start typing immediately. Results
+    // are hidden until the first keystroke so the operator doesn't see a
+    // full-list flash on open.
+    if ($('[data-autofocus-select2-search]').length) {
+        setTimeout(function () {
+            var $searchField = $('.select2-search__field');
+            var $results = $('.select2-results');
+            $searchField.focus();
+            $results.hide();
+            $searchField.on('input', function () {
+                $results.show();
+            });
+        }, 0);
+    }
+
+    // Hardware bulk edit: clear-radio buttons blank every input of a
+    // named radio group so the caller can back out of a picked value.
+    // The .clear-radio button carries a data-target-name matching the
+    // radio group's name attribute.
+    document.querySelectorAll('.clear-radio').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var name = this.dataset.targetName;
+            var radios = document.querySelectorAll('input[type="radio"][name="' + name + '"]');
+            radios.forEach(function (radio) { radio.checked = false; });
+        });
+    });
+
+    // Hardware bulk edit: live status-deployable check. When the user
+    // picks a status, hit the deployable API and update the inline
+    // status indicator so the operator knows whether that status will
+    // pull an asset out of active service. Translated labels ride on
+    // the element's data attributes so this handler doesn't need to be
+    // a Blade-compiled inline script. Guarded on the data-deployable-
+    // label attribute (not just the id) because #selected_status_status
+    // also appears in partials/forms/edit/status.blade.php — used by
+    // hardware/edit — which has its own inline user_add() handler and
+    // doesn't render the labels, so we'd otherwise double-fire and
+    // overwrite that handler's output with an icon-only string.
+    var statusStatusEl = document.getElementById('selected_status_status');
+    if (statusStatusEl && statusStatusEl.dataset.deployableLabel) {
+        var deployableLabel = statusStatusEl.dataset.deployableLabel || '';
+        var notDeployableLabel = statusStatusEl.dataset.notDeployableLabel || '';
+
+        var runStatusDeployableCheck = function () {
+            var statusId = $('select[name="status_id"]').val();
+            if (statusId === '') {
+                return;
+            }
+            $('.status_spinner').css('display', 'inline');
+            $.ajax({
+                url: '/api/v1/statuslabels/' + statusId + '/deployable',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                },
+                success: function (data) {
+                    $('.status_spinner').css('display', 'none');
+                    $('#selected_status_status').fadeIn();
+                    if (data == true) {
+                        $('#selected_status_status')
+                            .removeClass('text-danger')
+                            .addClass('text-success')
+                            .html('<i class="fa-solid fa-check" aria-hidden="true"></i> ' + deployableLabel);
+                    } else {
+                        $('#assignto_selector').hide();
+                        $('#selected_status_status')
+                            .removeClass('text-success')
+                            .addClass('text-danger')
+                            .html('<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ' + notDeployableLabel);
+                    }
+                },
+            });
+        };
+
+        $('select[name="status_id"]').on('change', runStatusDeployableCheck);
+    }
+
+    // Hardware checkin: requestable-toggle wrapper. Show or hide the
+    // "make this asset requestable after checkin" checkbox depending on
+    // whether the currently-selected status is deployable. Preserve the
+    // checkbox state when hiding so a status bounce doesn't blow it
+    // away — the server only applies the value when the status is
+    // deployable anyway.
+    var requestableWrapper = document.getElementById('requestable-wrapper');
+    if (requestableWrapper) {
+        var deployableStatusIds = [];
+        try {
+            deployableStatusIds = JSON.parse(requestableWrapper.dataset.deployableStatusIds || '[]');
+        } catch (e) {
+            // Malformed data — leave the wrapper in its server-rendered state.
+        }
+
+        var statusSelect = document.getElementById('modal-statuslabel_types')
+            || document.querySelector('select[name="status_id"]');
+
+        if (statusSelect) {
+            var toggleRequestableWrapper = function () {
+                var value = statusSelect.value;
+                var statusId = Number.parseInt(value, 10);
+                var isDeployable = value !== ''
+                    && Number.isInteger(statusId)
+                    && deployableStatusIds.indexOf(statusId) !== -1;
+                requestableWrapper.style.display = isDeployable ? '' : 'none';
+            };
+
+            statusSelect.addEventListener('change', toggleRequestableWrapper);
+            if (window.jQuery) {
+                window.jQuery(statusSelect).on('select2:select select2:clear', toggleRequestableWrapper);
+            }
+            toggleRequestableWrapper();
+        }
+    }
+
+    // Hardware checkin: per-user localStorage preference for the
+    // requestable-checkbox default. Namespaced by user id so a shared
+    // browser doesn't leak one user's habit to another. Bypassed when
+    // the checkbox was repopulated from a validation-error redirect —
+    // old() beats the stored preference. On submit, save whatever the
+    // user actually chose so the preference tracks their real habit.
+    var requestableCheckbox = document.getElementById('requestable');
+    if (requestableCheckbox && requestableCheckbox.dataset.userPreferenceKey) {
+        var storageKey = requestableCheckbox.dataset.userPreferenceKey;
+        var hadOldInput = requestableCheckbox.dataset.hadOldInput === '1';
+        var form = requestableCheckbox.closest('form');
+
+        if (form) {
+            if (!hadOldInput) {
+                var stored = null;
+                try {
+                    stored = window.localStorage.getItem(storageKey);
+                } catch (e) {
+                    // localStorage may be unavailable (private mode, disabled).
+                }
+                if (stored === '1' || stored === '0') {
+                    requestableCheckbox.checked = stored === '1';
+                }
+            }
+
+            form.addEventListener('submit', function () {
+                try {
+                    window.localStorage.setItem(storageKey, requestableCheckbox.checked ? '1' : '0');
+                } catch (e) {
+                    // Non-fatal: preference just won't persist this time.
+                }
+            });
+        }
+    }
+});

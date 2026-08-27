@@ -3,7 +3,7 @@
     'name' => 'default',
     'presenter' => \App\Presenters\AccessoryPresenter::dataTableLayout(),
     'fixed_right_number' => 2,
-    'fixed_number' => 1,
+    'fixed_number' => 2,
     'table_header' => trans('general.accessories'),
 ])
 
@@ -15,7 +15,11 @@
     <x-slot:table_header>
         {{ $table_header }}
     </x-slot:table_header>
-    
+
+    <x-slot:bulkactions>
+        <x-table.bulk-accessories />
+    </x-slot:bulkactions>
+
     <x-table
         :$presenter
         :$fixed_right_number

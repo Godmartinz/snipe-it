@@ -64,7 +64,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'sendPasswordReset',
         ]
-    )->name('users.password');
+    )->where('userId', '[0-9]+')
+        ->name('users.password');
 
     Route::get(
         '{userId}/print',
@@ -72,7 +73,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'printInventory',
         ]
-    )->name('users.print');
+    )->where('userId', '[0-9]+')
+        ->name('users.print');
 
     Route::post(
         '{userId}/email',
@@ -80,7 +82,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'emailAssetList',
         ]
-    )->name('users.email');
+    )->where('userId', '[0-9]+')
+        ->name('users.email');
 
     Route::post(
         '{user}/acceptance-reminder',
@@ -91,14 +94,51 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('users.acceptance_reminder')->withTrashed();
 
     Route::post(
+        '{user}/impersonate',
+        [
+            Users\ImpersonateController::class,
+            'start',
+        ]
+    )->name('users.impersonate.start');
+
+    Route::post(
+        'impersonate/stop',
+        [
+            Users\ImpersonateController::class,
+            'stop',
+        ]
+    )->name('users.impersonate.stop');
+
+    Route::post(
+        '{user}/two-factor-reset',
+        [
+            Users\UsersController::class,
+            'twoFactorReset',
+        ]
+    )->name('users.two_factor_reset');
+
+    Route::post(
         'bulkedit',
         [
             Users\BulkUsersController::class,
             'edit',
         ]
     )->name('users/bulkedit')
-        ->breadcrumbs(fn (Trail $trail) => $trail->parent('users.index')
-            ->push(trans('general.bulk_checkin_delete'), route('users.index')));
+        ->breadcrumbs(function (Trail $trail) {
+            // Single POST endpoint fans out to several bulk-action confirmation
+            // views (edit, delete, merge, print). Pick the breadcrumb label to
+            // match the action the caller submitted so the user sees the same
+            // wording on the confirmation page and in the crumb.
+            $label = match (request()->input('bulk_actions')) {
+                'edit' => trans('general.bulk_edit'),
+                'delete' => trans('general.bulk_checkin_delete'),
+                'merge' => trans('general.merge_users'),
+                'print' => trans('admin/users/general.print_assigned'),
+                default => trans('general.bulk_actions'),
+            };
+
+            return $trail->parent('users.index')->push($label, route('users.index'));
+        });
 
     Route::post(
         'merge',
@@ -123,6 +163,19 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             'update',
         ]
     )->name('users/bulkeditsave');
+
+    Route::get(
+        '{user}/transfer',
+        [Users\UserItemTransferController::class, 'show'],
+    )->name('users.transfer.show')
+        ->breadcrumbs(fn (Trail $trail, $user) => $trail
+            ->parent('users.show', $user)
+            ->push(trans('admin/users/general.transfer.title'), route('users.transfer.show', $user)));
+
+    Route::post(
+        '{user}/transfer',
+        [Users\UserItemTransferController::class, 'store'],
+    )->name('users.transfer.store');
 
 });
 

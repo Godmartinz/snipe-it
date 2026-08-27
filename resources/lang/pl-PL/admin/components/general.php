@@ -13,4 +13,7 @@ return [
     'total' => 'Suma',
     'update' => 'Aktualizacja składnika',
     'checkin_limit' => 'Ilość przyjęta musi być równa lub mniejsza niż :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

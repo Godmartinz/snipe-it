@@ -17,6 +17,8 @@ return [
         'confirm' => 'Bu bölümü silmek istediğinizden emin misiniz?',
         'error' => 'Bölüm silinirken bir sorun oluştu. Lütfen yeniden deneyin.',
         'success' => 'Bölüm başarıyla silindi.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

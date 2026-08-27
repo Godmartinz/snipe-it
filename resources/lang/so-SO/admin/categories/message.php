@@ -21,7 +21,7 @@ return [
         'confirm' => 'Ma hubtaa inaad doonayso inaad tirtirto qaanadan?',
         'error' => 'Waxaa jirtay arrin tir-tireysay qaanadda. Fadlan isku day mar kale.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

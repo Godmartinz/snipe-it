@@ -16,16 +16,22 @@ enum ActionType: string
     case ForceCheckin = 'force checkin';
     case Requested = 'requested';
     case RequestCanceled = 'request canceled';
+    // Note: no RequestFulfilled - fulfillment piggybacks on the
+    // existing Checkout actionlog via CheckoutRequest::checkout_actionlog_id,
+    // so writing a separate row here would double the item's history.
     case Accepted = 'accepted';
     case Declined = 'declined';
     case Audit = 'audit';
     case NoteAdded = 'note added';
+    case QuantityAdjust = 'adjusted quantity';
 
     // Users
     case TwoFactorReset = '2FA reset';
     case Merged = 'merged';
     case TokenRevoked = 'token revoked';
     case TokenUnrevoked = 'token unrevoked';
+    case Impersonated = 'impersonated';
+    case StoppedImpersonating = 'stopped impersonating';
 
     // Licenses
     case DeleteSeats = 'delete seats';

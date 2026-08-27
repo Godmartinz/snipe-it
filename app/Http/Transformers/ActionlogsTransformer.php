@@ -55,7 +55,13 @@ class ActionlogsTransformer
 
         $icon = $actionlog->present()->icon();
 
-        if (($actionlog->filename != '') && ($actionlog->action_type != 'upload deleted')) {
+        // File-type icon only wins for events that are inherently ABOUT
+        // a file (`uploaded`). Other events that happen to carry a
+        // receipt attachment (QuantityAdjust with an invoice PDF,
+        // checkouts with a signed acceptance form, etc.) keep their
+        // semantic icon so the history tab telegraphs what happened, not
+        // that a file was attached.
+        if ($actionlog->action_type === ActionType::Uploaded->value && $actionlog->filename != '') {
             $icon = Helper::filetype_icon($actionlog->filename);
         }
 
@@ -66,6 +72,7 @@ class ActionlogsTransformer
         }
 
         // This is necessary since we can't escape special characters within a JSON object
+        $meta_array = null;
         if (($actionlog->log_meta) && ($actionlog->log_meta != '')) {
             $meta_array = json_decode($actionlog->log_meta);
 
@@ -74,6 +81,22 @@ class ActionlogsTransformer
             if ($meta_array) {
 
                 foreach ($meta_array as $fieldname => $fieldata) {
+
+                    // Snapshot of audit-visible custom field values — handled separately below.
+                    if ($fieldname === '_audit_snapshot') {
+                        continue;
+                    }
+
+                    // Some log_meta entries carry a scalar value rather than the
+                    // {old, new} field-diff shape (e.g. the "reason" attached to
+                    // an impersonation start). Copy scalars through untouched so
+                    // the transformer doesn't blow up trying to read ->old on a
+                    // string.
+                    if (! is_object($fieldata)) {
+                        $clean_meta[$fieldname] = $fieldata;
+
+                        continue;
+                    }
 
                     $clean_meta[$fieldname]['old'] = $this->clean_field($fieldata->old);
                     $clean_meta[$fieldname]['new'] = $this->clean_field($fieldata->new);
@@ -184,6 +207,14 @@ class ActionlogsTransformer
                 'type' => e($actionlog->targetType()),
             ] : null,
             'quantity' => $this->getQuantity($actionlog),
+            // action_logs.order_number was replaced by action_logs.order_item_id
+            // pointing at the specific OrderItem line. The parent Order
+            // is one hop away. Null for log rows with no OrderItem
+            // attached (checkouts, edits, anything that isn't a
+            // QuantityAdjust with an order supplied).
+            'order_number' => $actionlog->orderItem?->order?->order_number
+                ? e($actionlog->orderItem->order->order_number)
+                : null,
             'note' => ($actionlog->note) ? Helper::parseEscapedMarkedownInline($actionlog->note) : null,
             'signature_file' => (($actionlog->accept_signature) && Storage::exists('private_uploads/signatures/'.$actionlog->accept_signature)) ? route('log.signature.view', ['filename' => $actionlog->accept_signature]) : null,
             'log_meta' => ((isset($clean_meta)) && (is_array($clean_meta))) ? $clean_meta : null,
@@ -193,8 +224,26 @@ class ActionlogsTransformer
             'action_date' => ($actionlog->action_date) ? Helper::getFormattedDateObject($actionlog->action_date, 'datetime') : Helper::getFormattedDateObject($actionlog->created_at, 'datetime'),
         ];
 
-        //        Log::info("Clean Meta is: ".print_r($clean_meta,true));
-        // dd($array);
+        // Expose audit-visible custom field values as top-level keys so the
+        // audits datatable can bind each column directly to its field name.
+        if ($actionlog->action_type === 'audit' && isset($meta_array->_audit_snapshot)) {
+            foreach ($meta_array->_audit_snapshot as $fieldname => $value) {
+                $field = $custom_fields->firstWhere('db_column', $fieldname);
+                if ($field && $field->field_encrypted == '1') {
+                    if (Gate::allows('assets.view.encrypted_custom_fields')) {
+                        try {
+                            $array[$fieldname] = e(Crypt::decryptString($value));
+                        } catch (\Exception $e) {
+                            $array[$fieldname] = '************';
+                        }
+                    } else {
+                        $array[$fieldname] = '************';
+                    }
+                } else {
+                    $array[$fieldname] = e($value);
+                }
+            }
+        }
 
         return $array;
     }
@@ -364,6 +413,8 @@ class ActionlogsTransformer
             ActionType::CheckinFrom->value,
             ActionType::AddSeats->value,
             ActionType::DeleteSeats->value,
+            ActionType::QuantityAdjust->value,
+            ActionType::Create->value,
         ])) {
             return null;
         }

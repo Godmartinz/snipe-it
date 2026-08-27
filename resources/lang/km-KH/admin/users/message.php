@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'អ្នកប្រើប្រាស់របស់អ្នកត្រូវបានអាប់ដេតដោយជោគជ័យ ទោះជាយ៉ាងណាក៏ដោយ ធាតុគ្រប់គ្រងរបស់អ្នកមិនត្រូវបានរក្សាទុកទេ ដោយសារអ្នកគ្រប់គ្រងដែលអ្នកបានជ្រើសរើសក៏ស្ថិតនៅក្នុងបញ្ជីអ្នកប្រើប្រាស់ដែលត្រូវកែសម្រួលដែរ ហើយអ្នកប្រើប្រាស់ប្រហែលជាមិនមែនជាអ្នកគ្រប់គ្រងផ្ទាល់របស់ពួកគេទេ។ សូមជ្រើសរើសអ្នកប្រើប្រាស់របស់អ្នកម្តងទៀត ដោយមិនរាប់បញ្ចូលអ្នកគ្រប់គ្រង។',
     'user_exists' => 'អ្នកប្រើប្រាស់មានហើយ!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'User does not exist or you do not have permission to view them.',
     'user_login_required' => 'វាលចូលត្រូវបានទាមទារ',
     'user_has_no_assets_assigned' => 'មិន​មាន​ទ្រព្យ​សកម្ម​ដែល​ត្រូវ​បាន​ផ្ដល់​ឱ្យ​អ្នក​ប្រើ​នា​ពេល​បច្ចុប្បន្ន​នេះ​។',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'ពាក្យសម្ងាត់គឺត្រូវបានទាមទារ។',
     'insufficient_permissions' => 'ការអនុញ្ញាតមិនគ្រប់គ្រាន់។',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'អ្នក​ប្រើ​នេះ​ត្រូវ​បាន​លុប។ អ្នកនឹងត្រូវស្តារអ្នកប្រើប្រាស់នេះឡើងវិញ ដើម្បីកែសម្រួលពួកគេ ឬផ្តល់ទ្រព្យសម្បត្តិថ្មី។',
     'ldap_not_configured' => 'ការរួមបញ្ចូល LDAP មិនត្រូវបានកំណត់រចនាសម្ព័ន្ធសម្រាប់ការដំឡើងនេះទេ។',
     'password_resets_sent' => 'អ្នកប្រើប្រាស់ដែលបានជ្រើសរើសដែលត្រូវបានធ្វើឱ្យសកម្ម និងមានអាសយដ្ឋានអ៊ីមែលត្រឹមត្រូវត្រូវបានផ្ញើតំណកំណត់ពាក្យសម្ងាត់ឡើងវិញ។',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'តំណ​កំណត់​ពាក្យ​សម្ងាត់​ឡើងវិញ​ត្រូវ​បាន​ផ្ញើ​ទៅ៖ អ៊ីមែល!',
     'user_has_no_email' => 'អ្នកប្រើប្រាស់នេះមិនមានអាសយដ្ឋានអ៊ីមែលនៅក្នុងកម្រងព័ត៌មានរបស់ពួកគេទេ។',
     'log_record_not_found' => 'រកមិនឃើញកំណត់ហេតុដែលត្រូវគ្នាសម្រាប់អ្នកប្រើប្រាស់នេះទេ។',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'អ្នកប្រើប្រាស់ត្រូវបានបង្កើតដោយជោគជ័យ។',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'ពាក្យសម្ងាត់សម្រាប់គណនីនេះត្រូវបានគ្រប់គ្រងដោយ LDAP/Active Directory។ សូមទាក់ទងផ្នែក IT របស់អ្នក ដើម្បីផ្លាស់ប្តូរពាក្យសម្ងាត់របស់អ្នក។ ',
         'multi_company_items_assigned' => 'អ្នក​ប្រើ​នេះ​មាន​ធាតុ​ដែល​ត្រូវ​បាន​កំណត់​ជា​របស់​ក្រុមហ៊ុន​ផ្សេង។ សូមពិនិត្យមើលពួកគេនៅក្នុង ឬកែសម្រួលក្រុមហ៊ុនរបស់ពួកគេ។',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

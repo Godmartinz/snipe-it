@@ -26,7 +26,12 @@ class StoreConsumableRequest extends ImageUploadRequest
             $this->merge(['purchase_cost' => Helper::ParseCurrency($this->input('purchase_cost'))]);
         }
 
-        if ($this->category_id) {
+        // Scalar-guard: Category::find() on an array/object arg returns
+        // a Collection (whereIn semantics) which does not expose
+        // ->category_type and blows up. Non-scalar inputs land the row
+        // in the standard validator with the model's category_id rule
+        // (integer|exists), which cleanly rejects with 422.
+        if ($this->category_id && is_scalar($this->category_id)) {
             if ($category = Category::find($this->category_id)) {
                 $this->merge([
                     'category_type' => $category->category_type ?? null,
@@ -42,8 +47,20 @@ class StoreConsumableRequest extends ImageUploadRequest
      */
     public function rules(): array
     {
+        // FK type rules live at the FormRequest layer so a malformed
+        // payload (array/object where an int is expected) trips a
+        // clean 422 before the controller reaches DB write. The
+        // model's own $rules cover the ->save() path (factories,
+        // seeders) but don't intercept the HTTP boundary.
         return array_merge(
-            ['category_type' => 'in:consumable'],
+            [
+                'category_type' => 'in:consumable',
+                'category_id' => 'integer|nullable',
+                'company_id' => 'integer|nullable',
+                'manufacturer_id' => 'integer|nullable',
+                'location_id' => 'integer|nullable',
+                'default_supplier_id' => 'integer|nullable',
+            ],
             parent::rules(),
         );
     }

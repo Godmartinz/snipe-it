@@ -2,9 +2,9 @@
 
 namespace App\Notifications;
 
-use AllowDynamicProperties;
 use App\Models\Setting;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Channels\SlackWebhookChannel;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
@@ -18,21 +18,16 @@ use NotificationChannels\GoogleChat\Widgets\KeyValue;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsChannel;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
-#[AllowDynamicProperties]
-class AuditNotification extends Notification
+class AuditNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-
-    private $params;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($params)
-    {
-        //
-        $this->settings = Setting::getSettings();
-        $this->params = $params;
+    public function __construct(
+        public $params
+    ) {
         $item = $params['item'];
         if (! $item || ! is_object($item)) {
             throw new \InvalidArgumentException('Notification requires a valid item.');
@@ -65,12 +60,12 @@ class AuditNotification extends Notification
 
     public function toSlack()
     {
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $channel = (Setting::getSettings()->webhook_channel) ? Setting::getSettings()->webhook_channel : '';
 
         return (new SlackMessage)
             ->success()
             ->content(class_basename(get_class($this->params['item'])).' '.trans('general.audited'))
-            ->from(($this->settings->webhook_botname) ? $this->settings->webhook_botname : 'Snipe-Bot')
+            ->from((Setting::getSettings()->webhook_botname) ? Setting::getSettings()->webhook_botname : 'Snipe-Bot')
             ->to($channel)
             ->attachment(function ($attachment) {
                 $item = $this->params['item'] ?? null;
@@ -92,16 +87,16 @@ class AuditNotification extends Notification
         $admin_user = $params['admin'] ?? null;
         $note = $params['note'] ?? '';
         $location = $params['location'] ?? '';
-        $setting = Setting::getSettings();
 
         // if somehow a notification triggers without an item, bail out.
         if (! $item || ! is_object($item)) {
             return null;
         }
 
-        if (! Str::contains($setting->webhook_endpoint, 'workflows')) {
+        $webhookEndpoint = Setting::getSettings()->webhook_endpoint;
+        if (! Str::contains($webhookEndpoint, 'workflows')) {
             return MicrosoftTeamsMessage::create()
-                ->to($setting->webhook_endpoint)
+                ->to($webhookEndpoint)
                 ->type('success')
                 ->title(class_basename($item).' '.trans('general.audited'))
                 ->addStartGroupToSection('activityText')
@@ -123,7 +118,6 @@ class AuditNotification extends Notification
         $item = $this->params['item'] ?? null;
         $admin_user = $this->params['admin'] ?? null;
         $note = $this->params['note'] ?? '';
-        $setting = $this->settings ?? Setting::getSettings();
 
         $title = '<strong>'.class_basename($item).' '.trans('general.audited').'</strong>';
         $subtitle = htmlspecialchars_decode($item->display_name ?? '');
@@ -135,7 +129,7 @@ class AuditNotification extends Notification
         ]);
 
         return GoogleChatMessage::create()
-            ->to($setting->webhook_endpoint)
+            ->to(Setting::getSettings()->webhook_endpoint)
             ->card(
                 Card::create()
                     ->header($title, $subtitle)

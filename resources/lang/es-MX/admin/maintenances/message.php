@@ -19,8 +19,10 @@ return [
     'warranty' => 'Garantía',
     'not_warranty' => 'Sin garantía',
     'complete' => [
-        'confirm' => 'Are you sure you want to mark this maintenance as complete? This cannot be undone.',
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'confirm' => '¿Está seguro de que desea marcar este mantenimiento como completado? Esto no se puede deshacer.',
+        'success' => 'Mantenimiento marcado como completado.',
+        'error' => 'Hubo un problema al marcar este mantenimiento como completado. Por favor, inténtalo de nuevo.',
     ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

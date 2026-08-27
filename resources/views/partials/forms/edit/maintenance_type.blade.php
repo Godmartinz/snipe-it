@@ -30,7 +30,7 @@
                           aria-label="asset_maintenance_type"
                       />
                   @endif
-                  {!! $errors->first('maintenance_type_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                  <x-form.error name="maintenance_type_id" />
               </div>
 
               <div class="col-md-1 col-sm-1 text-left">

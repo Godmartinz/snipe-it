@@ -17,6 +17,7 @@ class CategoryPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
                 'formatter' => 'checkboxEnabledFormatter',
                 'titleTooltip' => trans('general.select_all_none'),
@@ -25,6 +26,7 @@ class CategoryPresenter extends Presenter
             ],
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -32,6 +34,7 @@ class CategoryPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -40,6 +43,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'categoriesLinkFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.image'),
@@ -47,18 +51,23 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'category_type',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.type'),
                 'visible' => true,
             ], [
                 'field' => 'item_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.qty'),
                 'visible' => true,
+                'class' => 'text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'has_eula',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/categories/table.eula_text'),
@@ -67,6 +76,7 @@ class CategoryPresenter extends Presenter
             ],
             [
                 'field' => 'use_default_eula',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/settings/general.default_eula_text'),
@@ -74,14 +84,16 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'checkin_email',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'class' => 'css-envelope',
-                'title' => 'Send Email',
+                'title' => trans('general.send_email'),
                 'visible' => true,
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'require_acceptance',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/categories/table.require_acceptance'),
@@ -89,6 +101,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'tag_color',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -97,12 +110,14 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'colorTagFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -110,6 +125,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -118,6 +134,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -126,6 +143,7 @@ class CategoryPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

@@ -1,22 +1,22 @@
 <?php
 
 return [
-    'not_found' => 'Maintenance type not found.',
+    'not_found' => '找不到維護類型。',
     'create' => [
-        'error' => 'Maintenance type was not created, please try again.',
-        'success' => 'Maintenance type created successfully.',
+        'error' => '新增維護類型失敗，請重試。',
+        'success' => '新增維護類型成功。',
     ],
     'update' => [
-        'error' => 'Maintenance type was not updated, please try again.',
-        'success' => 'Maintenance type updated successfully.',
+        'error' => '更新維護類型失敗，請重試。',
+        'success' => '更新維護類型成功。',
     ],
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this maintenance type?',
-        'error' => 'There was an issue deleting this maintenance type. Please try again.',
-        'success' => 'The maintenance type was deleted successfully.',
+        'confirm' => '您確定要刪除此維護類型嗎？',
+        'error' => '刪除此維護類型時發生問題，請重試。',
+        'success' => '維護類型已成功刪除。',
     ],
     'complete' => [
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'success' => '維護已標記為完成。',
+        'error' => '將此維護標記為完成時發生問題，請重試。',
     ],
 ];

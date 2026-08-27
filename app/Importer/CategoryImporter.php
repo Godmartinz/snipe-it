@@ -22,8 +22,48 @@ class CategoryImporter extends ItemImporter
 
     protected function handle($row)
     {
-        parent::handle($row);
+        // CategoryImporter deliberately does NOT call parent::handle(). See
+        // the other subclass migrations for the same pattern: absent CSV
+        // columns stay out of $this->item so update mode preserves the DB
+        // value, and present-but-empty cells land as null so update mode
+        // clears the DB value. The base sanitize's reject-empty pass is
+        // suppressed via the sanitizeItemForStoring override below.
+        $this->item = [];
+
+        $this->setItemFromCsvIfPresent($row, 'name');
+        $this->setItemFromCsvIfPresent($row, 'notes');
+        $this->setItemFromCsvIfPresent($row, 'eula_text');
+        $this->setItemFromCsvIfPresent($row, 'tag_color');
+
+        // category_type is required-in-list-of-5 validation. Lowercase it so
+        // "Asset" from a human-authored CSV lands as "asset". Present-empty
+        // stays as null (which will fail validation with a clear message).
+        if ($this->csvRowHas($row, 'category_type')) {
+            $raw = $this->findCsvMatch($row, 'category_type');
+            $this->item['category_type'] = ($raw !== '') ? strtolower($raw) : null;
+        }
+
+        // Boolean flags. Present-empty maps to 0; present-with-value uses
+        // fetchHumanBoolean; absent leaves the DB value alone on update.
+        foreach (['use_default_eula', 'require_acceptance', 'checkin_email', 'alert_on_response'] as $flag) {
+            if ($this->csvRowHas($row, $flag)) {
+                $raw = $this->findCsvMatch($row, $flag);
+                $this->item[$flag] = ($this->fetchHumanBoolean($raw) == 1) ? 1 : 0;
+            }
+        }
+
         $this->createCategoryIfNotExists($row);
+    }
+
+    /**
+     * Override the base sanitize to skip the reject-empty pass. See handle()
+     * above for the matching item-population.
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    protected function sanitizeItemForStoring($model, $updating = false)
+    {
+        return collect($this->item)->only($model->getFillable())->toArray();
     }
 
     /**
@@ -37,10 +77,10 @@ class CategoryImporter extends ItemImporter
      */
     public function createCategoryIfNotExists(array $row)
     {
-
         $editingCategory = false;
+        $name = trim($this->item['name'] ?? '');
 
-        $category = Category::where('name', '=', $this->findCsvMatch($row, 'name'))->first();
+        $category = Category::where('name', '=', $name)->first();
 
         if ($this->findCsvMatch($row, 'id') != '') {
             // Override category if an ID was given
@@ -50,7 +90,8 @@ class CategoryImporter extends ItemImporter
 
         if ($category) {
             if (! $this->updating) {
-                $this->log('A matching Category '.$this->item['name'].' already exists');
+                $this->log('A matching Category '.$name.' already exists');
+                $this->recordSkipped();
 
                 return;
             }
@@ -60,18 +101,8 @@ class CategoryImporter extends ItemImporter
         } else {
             $this->log('No Matching Category, Create a new one');
             $category = new Category;
-            $category->created_by = auth()->id();
+            $category->created_by = $this->created_by;
         }
-
-        // Pull the records from the CSV to determine their values
-        $this->item['name'] = trim($this->findCsvMatch($row, 'name'));
-        $this->item['notes'] = trim($this->findCsvMatch($row, 'notes'));
-        $this->item['eula_text'] = trim($this->findCsvMatch($row, 'eula_text'));
-        $this->item['category_type'] = trim(strtolower($this->findCsvMatch($row, 'category_type')));
-        $this->item['use_default_eula'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'use_default_eula'))) == 1) ? 1 : 0;
-        $this->item['require_acceptance'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'require_acceptance'))) == 1) ? 1 : 0;
-        $this->item['checkin_email'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'checkin_email'))) == 1) ? 1 : 0;
-        $this->item['tag_color'] = trim($this->findCsvMatch($row, 'tag_color'));
 
         Log::debug('Item array is: ');
         Log::debug(print_r($this->item, true));
@@ -86,12 +117,18 @@ class CategoryImporter extends ItemImporter
 
         if ($category->save()) {
             $this->log('Category '.$category->name.' created or updated from CSV import');
+            if ($editingCategory) {
+                $this->recordUpdated();
+            } else {
+                $this->recordCreated();
+            }
 
             return $category;
 
         } else {
             Log::debug($category->getErrors());
-            $this->logError($category, 'Category "'.$this->item['name'].'"');
+            $this->recordErrored();
+            $this->logError($category, 'Category "'.$name.'"');
 
             return $category->errors;
         }

@@ -35,6 +35,7 @@ class StatuslabelsController extends Controller
             'color',
             'notes',
             'default_label',
+            'show_in_nav',
         ];
 
         $statuslabels = Statuslabel::with('adminuser')->withCount('assets as assets_count');
@@ -62,7 +63,8 @@ class StatuslabelsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $statuslabels->count()) ? $statuslabels->count() : app('api_offset_value');
+        $total = $statuslabels->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -77,7 +79,6 @@ class StatuslabelsController extends Controller
                 break;
         }
 
-        $total = $statuslabels->count();
         $statuslabels = $statuslabels->skip($offset)->take($limit)->get();
 
         return (new StatuslabelsTransformer)->transformStatuslabels($statuslabels, $total);
@@ -107,9 +108,14 @@ class StatuslabelsController extends Controller
         $statuslabel->deployable = $statusType['deployable'];
         $statuslabel->pending = $statusType['pending'];
         $statuslabel->archived = $statusType['archived'];
-        $statuslabel->color = $request->input('color');
-        $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
-        $statuslabel->default_label = $request->input('default_label', 0);
+        // Coerce boolean-shaped columns through $request->boolean()
+        // so a malformed payload (nested object / array) can't slam
+        // an object into a tinyint column and blow up at save() with
+        // a 500. Non-scalar payloads land as false, which the caller
+        // can correct on retry with a proper boolean value.
+        $statuslabel->color = is_scalar($request->input('color')) ? $request->input('color') : null;
+        $statuslabel->show_in_nav = $request->boolean('show_in_nav');
+        $statuslabel->default_label = $request->boolean('default_label');
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.create.success')));
@@ -131,7 +137,10 @@ class StatuslabelsController extends Controller
     public function show($id): array
     {
         $this->authorize('view', Statuslabel::class);
-        $statuslabel = Statuslabel::findOrFail($id);
+        // Match index()'s eager load so isDeletable() (via available_actions.delete
+        // and bulk_selectable.delete) reads the preloaded count instead of firing
+        // a fallback assets()->count() query.
+        $statuslabel = Statuslabel::withCount('assets as assets_count')->findOrFail($id);
 
         return (new StatuslabelsTransformer)->transformStatuslabel($statuslabel);
     }
@@ -162,9 +171,14 @@ class StatuslabelsController extends Controller
         $statuslabel->deployable = $statusType['deployable'];
         $statuslabel->pending = $statusType['pending'];
         $statuslabel->archived = $statusType['archived'];
-        $statuslabel->color = $request->input('color');
-        $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
-        $statuslabel->default_label = $request->input('default_label', 0);
+        // Coerce boolean-shaped columns through $request->boolean()
+        // so a malformed payload (nested object / array) can't slam
+        // an object into a tinyint column and blow up at save() with
+        // a 500. Non-scalar payloads land as false, which the caller
+        // can correct on retry with a proper boolean value.
+        $statuslabel->color = is_scalar($request->input('color')) ? $request->input('color') : null;
+        $statuslabel->show_in_nav = $request->boolean('show_in_nav');
+        $statuslabel->default_label = $request->boolean('default_label');
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.update.success')));
@@ -307,6 +321,7 @@ class StatuslabelsController extends Controller
      */
     public function checkIfDeployable($id): string
     {
+        $this->authorize('view', Statuslabel::class);
         $statuslabel = Statuslabel::findOrFail($id);
         if (($statuslabel->getStatuslabelType() == 'pending') || ($statuslabel->getStatuslabelType() == 'deployable')) {
             return '1';

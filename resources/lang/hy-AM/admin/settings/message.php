@@ -14,10 +14,15 @@ return [
 ',
         'restore_warning' => 'Այո, վերականգնել այն։ Ես հասկանում եմ, որ սա կվերագրի տվյալների բազայում ներկայումս առկա բոլոր տվյալները։',
         'restore_confirm' => 'Վստա՞հ եք, որ ցանկանում եք վերականգնել ձեր տվյալների բազան :filename-ից։',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => '
 Ձեր համակարգի պահուստավորումը վերականգնվել է։ Խնդրում ենք կրկին մուտք գործել։',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Մաքրման ժամանակ սխալ է տեղի ունեցել։',

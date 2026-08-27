@@ -1,22 +1,22 @@
 <?php
 
 return [
-    'not_found' => 'Maintenance type not found.',
+    'not_found' => 'Bakım türü bulunamadı.',
     'create' => [
-        'error' => 'Maintenance type was not created, please try again.',
-        'success' => 'Maintenance type created successfully.',
+        'error' => 'Bakım türü oluşturulamadı, lütfen tekrar deneyin.',
+        'success' => 'Bakım türü başarıyla oluşturuldu.',
     ],
     'update' => [
-        'error' => 'Maintenance type was not updated, please try again.',
-        'success' => 'Maintenance type updated successfully.',
+        'error' => 'Bakım türü güncellenemedi, lütfen tekrar deneyin.',
+        'success' => 'Bakım türü başarıyla güncellendi.',
     ],
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this maintenance type?',
-        'error' => 'There was an issue deleting this maintenance type. Please try again.',
-        'success' => 'The maintenance type was deleted successfully.',
+        'confirm' => 'Bu bakım türünü silmek istediğinize emin misiniz?',
+        'error' => 'Bu bakım türünü silerken bir sorun oluştu. Lütfen tekrar deneyin.',
+        'success' => 'Bakım türü başarıyla silindi.',
     ],
     'complete' => [
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'success' => 'Bakım tamamlandı olarak işaretlendi.',
+        'error' => 'Bu bakımı tamamlandı olarak işaretlerken bir sorun oluştu. Lütfen tekrar deneyin.',
     ],
 ];

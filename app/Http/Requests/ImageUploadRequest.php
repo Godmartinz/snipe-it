@@ -89,7 +89,15 @@ class ImageUploadRequest extends Request
 
         }
 
-        if (! Storage::disk('public')->exists($path)) {
+        // SettingsController passes '' to mean "disk root".
+        // Normalize and use a single prefix so we never have a leading-slash
+        // key (S3 stores `/foo.png` and `foo.png` as distinct objects) and
+        // never HEAD an empty key (which S3's HeadObject validator rejects
+        // outright — the bug behind #18267).
+        $path = trim((string) $path, '/');
+        $prefix = $path === '' ? '' : $path.'/';
+
+        if ($path !== '' && ! Storage::disk('public')->exists($path)) {
             Storage::disk('public')->makeDirectory($path);
         }
 
@@ -104,10 +112,19 @@ class ImageUploadRequest extends Request
             $ext = $image->guessExtension();
             $file_name = $type.'-'.$form_fieldname.($item->id ?? '-'.$item->id).'-'.str_random(10).'.'.$ext;
 
+            // Track whether the new file actually landed on disk. Storage::put
+            // can return false without throwing (disks default to non-throwing
+            // mode). Before, the ordering was put -> deleteExistingImage ->
+            // reassign, all unconditional, so a failed put still destroyed
+            // the current image and left the model referencing a file that
+            // was never written. Keep the old image intact unless we confirm
+            // the new one is there.
+            $wroteNewFile = false;
+
             if (($image->getMimeType() == 'image/vnd.microsoft.icon') || ($image->getMimeType() == 'image/x-icon') || ($image->getMimeType() == 'image/avif') || ($image->getMimeType() == 'image/webp')) {
                 // If the file is an icon, webp or avif, we need to just move it since gd doesn't support resizing
                 // icons or avif, and webp support and needs to be compiled into gd for resizing to be available
-                Storage::disk('public')->put($path.'/'.$file_name, file_get_contents($image));
+                $wroteNewFile = (bool) Storage::disk('public')->put($prefix.$file_name, file_get_contents($image));
 
             } elseif ($image->getMimeType() == 'image/svg+xml') {
                 // If the file is an SVG, we need to clean it and NOT encode it
@@ -116,7 +133,7 @@ class ImageUploadRequest extends Request
                 $cleanSVG = $sanitizer->sanitize($dirtySVG);
 
                 try {
-                    Storage::disk('public')->put($path.'/'.$file_name, $cleanSVG);
+                    $wroteNewFile = (bool) Storage::disk('public')->put($prefix.$file_name, $cleanSVG);
                 } catch (\Exception $e) {
                     Log::debug($e);
                 }
@@ -137,13 +154,25 @@ class ImageUploadRequest extends Request
                 }
 
                 // This requires a string instead of an object, so we use ($string)
-                Storage::disk('public')->put($path.'/'.$file_name, (string) $upload->encode());
+                $wroteNewFile = (bool) Storage::disk('public')->put($prefix.$file_name, (string) $upload->encode());
 
             }
 
-            // Remove Current image if exists
-            $item = $this->deleteExistingImage($item, $path, $db_fieldname);
-            $item->{$db_fieldname} = $file_name;
+            if ($wroteNewFile) {
+                // Only touch the existing image and the model reference AFTER
+                // confirming the new file is on disk. deleteExistingImage
+                // itself now also refuses to null the model when the delete
+                // fails, so a partial cleanup does not leave the model
+                // pointing at a phantom file either way.
+                $item = $this->deleteExistingImage($item, $path, $db_fieldname);
+                $item->{$db_fieldname} = $file_name;
+            } else {
+                Log::warning('Image upload failed to write to disk; keeping existing image reference intact.', [
+                    'item_type' => $type,
+                    'item_id' => $item->id ?? null,
+                    'target_path' => $prefix.$file_name,
+                ]);
+            }
 
             // If the user isn't uploading anything new but wants to delete their old image, do so
         } elseif ($this->input('image_delete') == '1') {
@@ -158,8 +187,28 @@ class ImageUploadRequest extends Request
 
         if ($item->{$db_fieldname} != '') {
             try {
-                Storage::disk('public')->delete($path.'/'.$item->{$db_fieldname});
-                $item->{$db_fieldname} = null;
+                // Same path normalization as handleImages. Branding callers
+                // pass '' for the disk root, and we don't want to produce a
+                // leading-slash key on S3.
+                $path = trim((string) $path, '/');
+                $key = $path === '' ? $item->{$db_fieldname} : $path.'/'.$item->{$db_fieldname};
+                $deleted = Storage::disk('public')->delete($key);
+
+                // Only null the model reference if the delete actually
+                // succeeded. Before, the field was cleared unconditionally
+                // even when Storage::delete returned false (silent-fail
+                // mode on the default local disk). The result was a model
+                // row that reported "no image" while the file remained on
+                // disk, orphaned.
+                if ($deleted) {
+                    $item->{$db_fieldname} = null;
+                } else {
+                    Log::warning('Storage delete returned false; keeping model reference so operators can retry.', [
+                        'item_type' => class_basename(get_class($item)),
+                        'item_id' => $item->id ?? null,
+                        'key' => $key,
+                    ]);
+                }
             } catch (\Exception $e) {
                 Log::debug($e);
             }

@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -111,6 +112,10 @@ class LicensesController extends Controller
         $license->termination_date = $request->input('termination_date');
         $license->created_by = auth()->id();
         $license->min_amt = $request->input('min_amt');
+        // Unchecked checkboxes are omitted from the POST body; coerce
+        // absence to false so the flag really flips off. The setter
+        // normalizes the truthy branch.
+        $license->requestable = $request->input('requestable', false);
 
         if ($request->input('redirect_option') === 'back') {
             session()->put(['redirect_option' => 'index']);
@@ -143,7 +148,9 @@ class LicensesController extends Controller
     {
 
         $this->authorize('update', $license);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
         $maintained_list = [
             '' => 'Maintained',
             '1' => 'Yes',
@@ -195,6 +202,9 @@ class LicensesController extends Controller
         $license->supplier_id = $request->input('supplier_id');
         $license->category_id = $request->input('category_id');
         $license->min_amt = $request->input('min_amt');
+        // Unchecked checkbox is omitted from the POST body; coerce
+        // absence to false so unchecking really turns the flag off.
+        $license->requestable = $request->input('requestable', false);
 
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
@@ -342,7 +352,9 @@ class LicensesController extends Controller
 
         $this->disableDebugbar();
 
-        $response = new StreamedResponse(function () {
+        $canViewKeys = Gate::allows('viewKeys', License::class);
+
+        $response = new StreamedResponse(function () use ($canViewKeys) {
             // Open output stream
             $handle = fopen('php://output', 'w');
             $licenses = License::with('company',
@@ -356,7 +368,7 @@ class LicensesController extends Controller
             }
             $licenses = $licenses->orderBy('created_at', 'DESC');
             Company::scopeCompanyables($licenses)
-                ->chunk(500, function ($licenses) use ($handle) {
+                ->chunk(500, function ($licenses) use ($handle, $canViewKeys) {
                     $headers = [
                         // strtolower to prevent Excel from trying to open it as a SYLK file
                         strtolower(trans('general.id')),
@@ -397,7 +409,7 @@ class LicensesController extends Controller
                             $license->id,
                             $license->company ? $license->company->name : '',
                             $license->name,
-                            $license->serial,
+                            $canViewKeys ? $license->serial : License::PRODUCT_KEY_MASK,
                             $license->purchase_date,
                             $license->purchase_cost,
                             $license->order_number,

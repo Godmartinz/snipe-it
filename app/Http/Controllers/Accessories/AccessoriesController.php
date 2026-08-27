@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Accessories;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Models\Accessory;
 use App\Models\Company;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 /** This controller handles all actions related to Accessories for
  * the Snipe-IT Asset Management application.
@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class AccessoriesController extends Controller
 {
+    use HandlesAdjustQuantity;
+
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the accessories listing, which is generated in getDatatable.
@@ -68,15 +70,20 @@ class AccessoriesController extends Controller
         $accessory->location_id = request('location_id');
         $accessory->min_amt = request('min_amt');
         $accessory->company_id = Company::getIdForCurrentUser(request('company_id'));
-        $accessory->order_number = request('order_number');
+        // order_number + currency don't live on the Accessory parent
+        // column any more — the AccessoryObserver::created hook writes
+        // the initial Order + OrderItem, and we enrich that Order below
+        // (after save) with the form-supplied order_number / currency.
         $accessory->manufacturer_id = request('manufacturer_id');
         $accessory->model_number = request('model_number');
-        $accessory->purchase_date = request('purchase_date');
-        $accessory->purchase_cost = request('purchase_cost');
         $accessory->qty = request('qty');
         $accessory->created_by = auth()->id();
-        $accessory->supplier_id = request('supplier_id');
         $accessory->notes = request('notes');
+        $accessory->requestable = request('requestable', 0);
+        // Seed the template supplier from the initial-acquisition
+        // supplier on the create form so newly-created items already
+        // have a "typical" supplier pre-populated. Editable afterwards.
+        $accessory->default_supplier_id = request('default_supplier_id', request('supplier_id'));
 
         if ($request->has('use_cloned_image')) {
             $cloned_model_img = Accessory::select('image')->find($request->input('clone_image_from_id'));
@@ -99,6 +106,8 @@ class AccessoriesController extends Controller
 
         // Was the accessory created?
         if ($accessory->save()) {
+            $this->enrichInitialOrderFromRequest($request, $accessory);
+
             // Redirect to the new accessory  page
             return Helper::getRedirectOption($request, $accessory->id, 'Accessories')
                 ->with('success', trans('admin/accessories/message.create.success'));
@@ -117,7 +126,9 @@ class AccessoriesController extends Controller
     public function edit(Accessory $accessory): View|RedirectResponse
     {
         $this->authorize('update', $accessory);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
 
         return view('accessories.edit')->with('item', $accessory)->with('category_type', 'accessory');
     }
@@ -140,6 +151,24 @@ class AccessoriesController extends Controller
         $cloned->id = null;
         $cloned->deleted_at = '';
 
+        // Restore the pre-Orders clone-as-fast-entry workflow: carry
+        // the source item's most recent acquisition context onto the
+        // cloned entry's create form so operators cloning a stock row
+        // to restock don't have to copy-paste supplier / order # /
+        // date / price from another tab. Field names match the
+        // create-form input names so enrichInitialOrderFromRequest
+        // in store() picks them up on save and writes them onto the
+        // observer-created initial Order + OrderItem for the new row.
+        // Explicit assignments (not a foreach) so each typed value from
+        // lastOrderPrefill() lands on the matching typed model property
+        // without going through a mixed intermediate that would fail
+        // larastan's assign.propertyType check.
+        $prefill = $accessory->lastOrderPrefill();
+        $cloned->supplier_id = $prefill['supplier_id'];
+        $cloned->purchase_date = $prefill['purchase_date'];
+        $cloned->purchase_cost = $prefill['purchase_cost'];
+        $cloned->order_number = $prefill['order_number'];
+
         return view('accessories/edit')
             ->with('cloned_model', $accessory_to_clone)
             ->with('item', $cloned);
@@ -157,32 +186,34 @@ class AccessoriesController extends Controller
     {
         $this->authorize('update', $accessory);
 
-        if ($accessory = Accessory::withCount('checkouts as checkouts_count')->find($accessory->id)) {
+        if ($accessory = Accessory::find($accessory->id)) {
 
-            $validator = Validator::make($request->all(), [
-                'qty' => "required|numeric|min:$accessory->checkouts_count",
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            // Update the accessory data
+            // qty and order_number are intentionally NOT accepted on
+            // update. On-hand qty is managed via the adjust-quantity
+            // modal (see AdjustsQuantity trait); each change becomes a
+            // QuantityAdjust action_log entry rather than a silent
+            // overwrite. order_number is captured onto the create
+            // action_log at create time and onto QuantityAdjust log
+            // entries thereafter — a single value on multi-batch
+            // inventory is misleading, so the model accessor hides it.
+            // supplier_id remains editable (imperfect single-value
+            // semantics accepted for the info-panel display).
             $accessory->name = request('name');
             $accessory->location_id = request('location_id');
             $accessory->min_amt = request('min_amt');
             $accessory->category_id = request('category_id');
             $accessory->company_id = Company::getIdForCurrentUser(request('company_id'));
             $accessory->manufacturer_id = request('manufacturer_id');
-            $accessory->order_number = request('order_number');
             $accessory->model_number = request('model_number');
-            $accessory->purchase_date = request('purchase_date');
-            $accessory->purchase_cost = request('purchase_cost');
-            $accessory->qty = request('qty');
-            $accessory->supplier_id = request('supplier_id');
+            // supplier_id, purchase_date, purchase_cost are create-only
+            // on the parent. Post-create acquisitions live as Orders +
+            // OrderItems (each with its own supplier / date / price).
+            // default_supplier_id remains editable — it's the parent's
+            // "typical supplier" template that seeds new Orders when
+            // the item has no order history yet.
+            $accessory->default_supplier_id = request('default_supplier_id');
             $accessory->notes = request('notes');
+            $accessory->requestable = request('requestable', 0);
 
             $accessory = $request->handleImages($accessory);
 
@@ -216,14 +247,11 @@ class AccessoriesController extends Controller
         $accessory->loadCount('checkouts as checkouts_count');
 
         if ($accessory->isDeletable()) {
-            if ($accessory->image) {
-                try {
-                    Storage::disk('public')->delete('accessories'.'/'.$accessory->image);
-                } catch (\Exception $e) {
-                    Log::debug($e);
-                }
-            }
-
+            // Note: the image file is deliberately preserved across this
+            // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+            // removes it later when the row is force-deleted. Keeping
+            // the file here means a restored soft-deleted row still has
+            // its image.
             $accessory->delete();
 
             return redirect()->route('accessories.index')->with('success', trans('admin/accessories/message.delete.success'));
@@ -250,5 +278,15 @@ class AccessoriesController extends Controller
         $accessory->load(['adminuser' => fn ($query) => $query->withTrashed()]);
 
         return view('accessories.view', compact('accessory'));
+    }
+
+    /**
+     * Apply an on-hand quantity delta (+/-) and log the change. Route
+     * exists here so route-model binding resolves against Accessory,
+     * everything else lives on HandlesAdjustQuantity.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Accessory $accessory): RedirectResponse
+    {
+        return $this->adjustQuantityAsRedirect($request, $accessory);
     }
 }

@@ -70,7 +70,7 @@ class BulkDeleteLicensesTest extends TestCase implements TestsPermissionsRequire
     {
         [$myCompany, $otherCompany] = Company::factory()->count(2)->create();
 
-        $actor = User::factory()->deleteLicenses()->create(['company_id' => $myCompany->id]);
+        $actor = User::factory()->deleteLicenses()->forCompany($myCompany->id)->create();
         $otherLicense = License::factory()->create(['company_id' => $otherCompany->id, 'seats' => 1]);
 
         $this->settings->enableMultipleFullCompanySupport();

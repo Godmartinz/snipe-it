@@ -29,13 +29,13 @@ class SettingsController extends Controller
 
             return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
+        return Helper::EqualTiming(5, function () {
 
-        Log::debug('Preparing to test LDAP connection');
+            Log::debug('Preparing to test LDAP connection');
 
-        $message = []; // where we collect together test messages
-        try {
-            $connection = Ldap::connectToLdap();
+            $message = []; // where we collect together test messages
             try {
+                $connection = Ldap::connectToLdap();
                 $message['bind'] = ['message' => 'Successfully bound to LDAP server.'];
                 Log::debug('attempting to bind to LDAP for LDAP test');
                 Ldap::bindAdminToLdap($connection);
@@ -43,31 +43,29 @@ class SettingsController extends Controller
                     'message' => 'Successfully connected to LDAP server.',
                 ];
 
+                // Shape is driven by Ldap::parseAndMapLdapAttributes so
+                // this endpoint stays in sync with the sync command and
+                // the first-login create path. Blank fields collapse to
+                // null in the JSON so the JS side's `?? NULL` fallback
+                // renders "NULL" for missing values.
                 $users = collect(Ldap::findLdapUsers(null, 10))->filter(function ($value, $key) {
                     return is_int($key);
-                })->slice(0, 10)->map(function ($item) use ($settings) {
-                    return (object) [
-                        'username' => $item[$settings['ldap_username_field']][0] ?? null,
-                        'display_name' => $item[$settings['ldap_display_name']][0] ?? null,
-                        'employee_number' => $item[$settings['ldap_emp_num']][0] ?? null,
-                        'lastname' => $item[$settings['ldap_lname_field']][0] ?? null,
-                        'firstname' => $item[$settings['ldap_fname_field']][0] ?? null,
-                        'email' => $item[$settings['ldap_email']][0] ?? null,
-                        'phone' => $item[$settings['ldap_phone_field']][0] ?? null,
-                        'mobile' => $item[$settings['ldap_mobile']][0] ?? null,
-                        'jobtitle' => $item[$settings['ldap_jobtitle']][0] ?? null,
-                        'department' => $item[$settings['ldap_department']][0] ?? null,
-                        'manager' => $item[$settings['ldap_manager']][0] ?? null,
-                        'address' => $item[$settings['ldap_address']][0] ?? null,
-                        'city' => $item[$settings['ldap_city']][0] ?? null,
-                        'state' => $item[$settings['ldap_state']][0] ?? null,
-                        'zip' => $item[$settings['ldap_zip']][0] ?? null,
-                        'country' => $item[$settings['ldap_country']][0] ?? null,
-                        'location' => $item[$settings['ldap_location']][0] ?? null,
-                    ];
+                })->slice(0, 10)->map(function ($item) {
+                    $mapped = Ldap::parseAndMapLdapAttributes($item);
+                    return (object) array_map(fn($value) => $value === '' ? null : $value, $mapped);
                 });
                 if ($users->count() > 0) {
+                    // `fields` is the ordered internal_key => translated
+                    // label map the JS iterates to build the results
+                    // table's header + per-row cells. Same shape drives
+                    // the LDAP wizard's step-3 preview, so both stay
+                    // consistent as attributeMap() grows.
+                    $labels = Ldap::attributeLabels();
+                    $fields = collect(array_keys(Ldap::parseAndMapLdapAttributes([])))
+                        ->mapWithKeys(fn($key) => [$key => $labels[$key] ?? $key])
+                        ->all();
                     $message['user_sync'] = [
+                        'fields' => $fields,
                         'users' => $users,
                     ];
                 } else {
@@ -80,18 +78,11 @@ class SettingsController extends Controller
 
                 return response()->json($message, 200);
             } catch (\Exception $e) {
-                Log::debug('Bind failed');
-                Log::debug('Exception was: '.$e->getMessage());
+                Log::debug('Connection failed but we cannot debug it any further on our end.');
 
                 return response()->json(['message' => $e->getMessage()], 400);
-                // return response()->json(['message' => $e->getMessage()], 500);
             }
-        } catch (\Exception $e) {
-            Log::debug('Connection failed but we cannot debug it any further on our end.');
-
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
-
+        });
     }
 
     public function ldaptestlogin(Request $request): JsonResponse

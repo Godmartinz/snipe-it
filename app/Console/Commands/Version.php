@@ -62,12 +62,17 @@ class Version extends Command
         );
 
         $git_branch = trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
-        $build_version = trim(shell_exec('git rev-list --count '.$use_branch));
         $versionFile = 'config/version.php';
-        $full_hash_version = str_replace("\n", '', shell_exec('git describe master --tags'));
+
+        // Describe off the selected branch so build_version and the
+        // count/hash suffix of full_hash refer to the same commit lineage.
+        // Prior shape mixed use_branch's rev-count with master's describe
+        // output, which produced a mismatch between build_version and the
+        // number embedded in full_hash.
+        $build_version = trim(shell_exec('git rev-list --count '.escapeshellarg($use_branch)));
+        $full_hash_version = str_replace("\n", '', shell_exec('git describe '.escapeshellarg($use_branch).' --tags'));
 
         $version = explode('-', $full_hash_version);
-        $app_version = $version[0];
         $hash_version = (array_key_exists('2', $version)) ? $version[2] : '';
         $prerelease_version = '';
 
@@ -76,7 +81,12 @@ class Version extends Command
             $hash_version = $version[3];
         }
 
-        $app_version_raw = explode('.', $app_version);
+        // Base semver bumps off the latest tag reachable from master.
+        // develop can be branched from an older release lineage, so
+        // deriving the starting version from `git describe <use_branch>`
+        // would start the count from a stale tag.
+        $latest_master_tag = trim(shell_exec('git describe master --tags --abbrev=0'));
+        $app_version_raw = explode('.', $latest_master_tag);
 
         $maj = str_replace('v', '', $app_version_raw[0]);
         $min = $app_version_raw[1];
@@ -99,10 +109,13 @@ class Version extends Command
             $app_version = 'v'.($maj + 1).'.0.0-pre';
         } elseif ($use_type === 'patch') {
             $app_version = 'v'."$maj.$min.".($patch + 1);
-        }
-
-        if ($use_branch === 'develop' && ! str_ends_with($app_version, '-pre')) {
-            $app_version = $app_version.'-pre';
+        } elseif ($use_type === 'hash') {
+            // Hash-only bump preserves whatever version is currently in
+            // the config so the semver doesn't reset back to the last
+            // released tag. Only build_version, hash_version, and the
+            // derived display strings get refreshed below.
+            $app_version = config('version.app_version');
+            $prerelease_version = config('version.prerelease_version');
         }
 
         $full_hash_version = str_replace($version[0], $app_version, $full_hash_version);
@@ -126,8 +139,13 @@ class Version extends Command
         \File::put($versionFile, $content);
         info('New version: '.$full_app_version.' ('.$git_branch.')');
 
-        info('Building JS/CSS assets...');
-        passthru('npm run prod', $exitCode);
+        // Master ships production-minified assets; develop / topic
+        // branches ship the dev-build artifacts so partial merges
+        // don't drop into master with mismatched compiled JS/CSS.
+        $npmScript = $use_branch === 'master' ? 'npm run prod' : 'npm run dev';
+
+        info('Building JS/CSS assets ('.$npmScript.')...');
+        passthru($npmScript, $exitCode);
 
         if ($exitCode !== 0) {
             $this->error('Asset build failed with exit code '.$exitCode);

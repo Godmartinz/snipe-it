@@ -17,6 +17,8 @@ return [
         'confirm' => 'האם אתה בטוח שברצונך למחוק מחלקה זו?',
         'error' => 'היתה בעיה במחיקת המחלקה. בבקשה נסה שוב.',
         'success' => 'המחלקה נמחקה בהצלחה.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

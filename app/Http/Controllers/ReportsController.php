@@ -16,6 +16,7 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Checkoutable;
 use App\Models\CheckoutAcceptance;
+use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\CustomField;
@@ -487,8 +488,8 @@ class ReportsController extends Controller
     public function getCustomReport(Request $request): View
     {
         $this->authorize('reports.view');
-        $customfields = CustomField::get();
-        $report_templates = ReportTemplate::orderBy('name')->get();
+        $customfields = CustomField::has('fieldset')->get();
+        $report_templates = ReportTemplate::where('type', 'asset')->orderBy('name')->get();
 
         // The view needs a template to render correctly, even if it is empty...
         $template = new ReportTemplate;
@@ -500,7 +501,7 @@ class ReportsController extends Controller
             $template->options = $request->old();
         }
 
-        return view('reports/custom', [
+        return view('reports.custom.asset', [
             'customfields' => $customfields,
             'report_templates' => $report_templates,
             'template' => $template,
@@ -522,7 +523,7 @@ class ReportsController extends Controller
 
         $this->disableDebugbar();
 
-        $customfields = CustomField::get();
+        $customfields = CustomField::has('fieldset')->get();
         $response = new StreamedResponse(function () use ($customfields, $request) {
             Log::debug('Starting streamed response');
             Log::debug('CSV escaping is set to: '.config('app.escape_formulas'));
@@ -548,7 +549,15 @@ class ReportsController extends Controller
             }
 
             if ($request->filled('asset_name')) {
-                $header[] = trans('admin/hardware/form.name');
+                // Use the same trans key the import wizard uses for the
+                // Name target label so a custom-report CSV round-trips
+                // through the importer's auto-mapper. Prior key
+                // (admin/hardware/form.name) resolves to "Nombre del
+                // activo" in Spanish while the importer's Name label
+                // resolves to "Activo Nombre" via item_name_var, so the
+                // exact-label auto-map silently misses in every non-
+                // English locale where item_name_var reorders the words.
+                $header[] = trans('general.item_name_var', ['item' => trans('general.asset')]);
             }
 
             if ($request->filled('asset_tag')) {
@@ -630,6 +639,10 @@ class ReportsController extends Controller
             if ($request->filled('assigned_to')) {
                 $header[] = trans('admin/hardware/table.checkoutto');
                 $header[] = trans('general.type');
+            }
+
+            if ($request->filled('assigned_asset_tag')) {
+                $header[] = trans('admin/reports/general.custom_export.assigned_asset_tag');
             }
 
             if ($request->filled('username')) {
@@ -749,9 +762,16 @@ class ReportsController extends Controller
                 // do we scope here or??
             }
 
-            $assets = Asset::select('assets.*')->with(
-                'location', 'status', 'company', 'defaultLoc', 'assignedTo',
-                'model.category', 'model.manufacturer', 'supplier');
+            $assets = Asset::select('assets.*')->with([
+                'location', 'status', 'company', 'defaultLoc',
+                'model.category', 'model.manufacturer', 'model.fieldset.fields', 'supplier',
+                // assignedTo is a morphTo. The user_company column below
+                // reads $assignee->companies when the assignee is a User,
+                // and only User has a companies pivot. morphWith constrains
+                // the .companies load to User targets so Assets / Locations
+                // resolving through assignedTo don't blow up. See #19568.
+                'assignedTo' => fn ($morph) => $morph->morphWith([\App\Models\User::class => ['companies']]),
+            ]);
 
             if ($request->filled('by_location_id')) {
                 $assets->whereIn('assets.location_id', $request->input('by_location_id'));
@@ -801,7 +821,11 @@ class ReportsController extends Controller
                 if ($request->filled('purchase_cost_end')) {
                     $assets->whereBetween('assets.purchase_cost', [$request->input('purchase_cost_start'), $request->input('purchase_cost_end')]);
                 } else {
-                    $assets->where('assets.purchase_cost', '>', $request->input('purchase_cost_start'));
+                    // >= for consistency with the whereBetween branch above,
+                    // which is inclusive on both sides. Previously '>', so a
+                    // user filtering "cost >= 0" got nothing at exactly 0, and
+                    // "cost >= 100" quietly hid assets bought for 100.
+                    $assets->where('assets.purchase_cost', '>=', $request->input('purchase_cost_start'));
                 }
             }
 
@@ -816,12 +840,22 @@ class ReportsController extends Controller
                 $checkout_start = Carbon::parse($request->input('checkout_date_start'))->startOfDay();
                 $checkout_end = Carbon::parse($request->input('checkout_date_end', now()))->endOfDay();
 
-                $actionlogassets = Actionlog::where('action_type', '=', 'checkout')
-                    ->where('item_type', 'LIKE', '%Asset%')
-                    ->whereBetween('action_date', [$checkout_start, $checkout_end])
-                    ->pluck('item_id');
-
-                $assets->whereIn('assets.id', $actionlogassets);
+                // Inline closure rather than a pre-built Eloquent Builder so
+                // the subquery's `select('item_id')` clause is preserved. When
+                // passed an Eloquent Builder as the second whereIn argument,
+                // Laravel doesn't always propagate the SELECT to the subquery
+                // and falls back to `select id`, which is wrong here (we want
+                // action_logs.item_id, not action_logs.id) and additionally
+                // combines with the InCategory scope's models/categories joins
+                // to produce an ambiguous outer `id` in the generated SQL.
+                $assets->whereIn('assets.id', function ($q) use ($checkout_start, $checkout_end) {
+                    $q->select('item_id')
+                        ->from('action_logs')
+                        ->where('action_type', '=', 'checkout')
+                        ->where('item_type', '=', Asset::class)
+                        ->whereBetween('action_date', [$checkout_start, $checkout_end])
+                        ->whereNull('deleted_at');
+                });
             }
 
             if (($request->filled('checkin_date_start'))) {
@@ -853,7 +887,15 @@ class ReportsController extends Controller
             }
 
             if (($request->filled('last_updated_start')) && ($request->filled('last_updated_end'))) {
-                $assets->whereBetween('assets.updated_at', [$request->input('last_updated_start'), $request->input('last_updated_end')]);
+                // updated_at is a timestamp, not a DATE, so a raw string
+                // whereBetween is silently exclusive on the end side (the picker
+                // returns Y-m-d which MySQL widens to Y-m-d 00:00:00, dropping
+                // everything on the end day after midnight). Match the created_at
+                // handling above and normalize to start/end of day.
+                $last_updated_start = Carbon::parse($request->input('last_updated_start'))->startOfDay();
+                $last_updated_end = Carbon::parse($request->input('last_updated_end'))->endOfDay();
+
+                $assets->whereBetween('assets.updated_at', [$last_updated_start, $last_updated_end]);
             }
 
             if (($request->filled('last_updated_before'))) {
@@ -989,6 +1031,14 @@ class ReportsController extends Controller
                         $row[] = ($asset->assigned) ? $asset->assignedType() : '';
                     }
 
+                    if ($request->filled('assigned_asset_tag')) {
+                        // #18281: only populated when the assignee is another
+                        // Asset — empty for user/location assignees and for
+                        // unassigned rows, matching how username/email already
+                        // behave when the assignee isn't a user.
+                        $row[] = ($asset->assigned instanceof Asset) ? $asset->assigned->asset_tag : '';
+                    }
+
                     if ($request->filled('username')) {
                         // Only works if we're checked out to a user, not anything else.
                         if ($asset->checkedOutToUser()) {
@@ -1000,7 +1050,15 @@ class ReportsController extends Controller
 
                     if ($request->filled('user_company')) {
                         if ($asset->checkedOutToUser()) {
-                            $row[] = ($asset->assignedto?->company) ? $asset->assignedto?->company?->display_name : '';
+                            // Under FMCS a user can belong to multiple companies via
+                            // the company_user pivot. Legacy $user->company reads the
+                            // scalar users.company_id mirror, which only holds ONE.
+                            // Report the full pivot set, alphabetized, pipe-joined.
+                            // See GH #19568.
+                            $row[] = $asset->assignedto?->companies
+                                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                                ->pluck('name')
+                                ->join(' | ') ?? '';
                         } else {
                             $row[] = ''; // Empty string if unassigned
                         }
@@ -1150,12 +1208,16 @@ class ReportsController extends Controller
                         $row[] = config('app.url').'/hardware/'.$asset->id;
                     }
 
+                    $modelFieldIds = $asset->model?->fieldset?->fields->pluck('id') ?? collect();
+
                     foreach ($customfields as $customfield) {
                         $column_name = $customfield->db_column_name();
                         if ($request->filled($customfield->db_column_name())) {
-                            $value = $asset->$column_name;
+                            $value = $modelFieldIds->contains($customfield->id)
+                                ? $asset->$column_name
+                                : null;
 
-                            if (($customfield->field_encrypted == '1') && Gate::allows('assets.view.encrypted_custom_fields')) {
+                            if ($value !== null && $customfield->field_encrypted == '1' && Gate::allows('assets.view.encrypted_custom_fields')) {
                                 $value = Helper::gracefulDecrypt($customfield, $value);
                             }
 
@@ -1226,12 +1288,22 @@ class ReportsController extends Controller
                 trans('admin/maintenances/form.title'),
                 trans('admin/maintenances/form.start_date'),
                 trans('admin/maintenances/form.completion_date'),
+                trans('admin/maintenances/form.completed_at'),
+                trans('admin/maintenances/form.completed_by'),
                 trans('admin/maintenances/form.asset_maintenance_time'),
                 trans('admin/maintenances/form.cost'),
+                trans('admin/maintenances/form.is_warranty'),
+                trans('admin/maintenances/form.notes'),
             ];
             fputcsv($handle, $header);
 
-            Maintenance::with('asset', 'supplier')
+            // No completed-filter here — exports every maintenance, active
+            // or completed. Eager-load the four relations the row loop
+            // dereferences so a 10K-row export doesn't fan out into 40K+
+            // queries. maintenanceType replaces the pre-#19039
+            // `improvement_type` accessor that no longer exists on the
+            // model (would silently write empty cells otherwise).
+            Maintenance::with('asset', 'supplier', 'maintenanceType', 'completedByUser')
                 ->orderBy('created_at', 'DESC')
                 ->chunk(500, function ($maintenances) use ($handle, $formatter) {
                     foreach ($maintenances as $maintenance) {
@@ -1240,15 +1312,19 @@ class ReportsController extends Controller
                             : (int) $maintenance->asset_maintenance_time;
 
                         $row = [
-                            $maintenance->asset->asset_tag,
-                            $maintenance->asset->name,
-                            $maintenance->supplier->name,
-                            $maintenance->improvement_type,
+                            $maintenance->asset?->asset_tag,
+                            $maintenance->asset?->name,
+                            $maintenance->supplier?->name,
+                            $maintenance->maintenanceType?->name,
                             $maintenance->name,
                             $maintenance->start_date,
-                            $maintenance->completion_date,
+                            $maintenance->expected_completion_date,
+                            $maintenance->completed_at,
+                            $maintenance->completedByUser?->display_name,
                             $improvementTime,
                             trans('general.currency').Helper::formatCurrencyOutput($maintenance->cost),
+                            $maintenance->is_warranty ? trans('general.yes') : trans('general.no'),
+                            $maintenance->notes,
                         ];
 
                         if (config('app.escape_formulas') === false) {
@@ -1305,6 +1381,15 @@ class ReportsController extends Controller
 
         $itemsForReport = $query->get()
             ->filter(fn ($unaccepted) => $unaccepted->checkoutable)
+            // FMCS scope, mirrors sentAssetAcceptanceReminder + deleteAssetAcceptance.
+            // CheckoutAcceptance has no company_id column and does not use
+            // CompanyableTrait / CompanyableChildTrait, so it is not covered
+            // by the CompanyableScope global scope. Without this per-row
+            // check, a reports.view user scoped to Company A sees pending
+            // acceptances for items owned by Company B in both the page
+            // render and the CSV export. Same helper the two mutating
+            // actions already use.
+            ->filter(fn ($unaccepted) => $this->currentUserCanAccessAcceptance($unaccepted))
             ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
 
         return view('reports/unaccepted_assets', compact('itemsForReport', 'showDeleted'));
@@ -1342,6 +1427,11 @@ class ReportsController extends Controller
             // Redirect to the unaccepted items report page with error
             return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
         }
+
+        if (! $this->currentUserCanAccessAcceptance($acceptance)) {
+            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.insufficient_permissions'));
+        }
+
         $item = $acceptance->checkoutable;
         $assignee = $acceptance->assignedTo ?? $item->assignedTo ?? null;
         $email = $assignee?->email;
@@ -1376,6 +1466,28 @@ class ReportsController extends Controller
         return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.reminder_sent'));
     }
 
+    private function currentUserCanAccessAcceptance(CheckoutAcceptance $acceptance): bool
+    {
+        if (! Company::isFullMultipleCompanySupportEnabled()) {
+            return true;
+        }
+
+        if (auth()->user()->isSuperUser()) {
+            return true;
+        }
+
+        // Bypass Eloquent global scopes so cross-company items are still resolved for the check.
+        $checkoutableType = $acceptance->checkoutable_type;
+        $checkoutable = $checkoutableType::withoutGlobalScopes()->find($acceptance->checkoutable_id);
+
+        // LicenseSeat has no company_id of its own; the parent License carries the company.
+        if ($checkoutable instanceof LicenseSeat) {
+            $checkoutable = License::withoutGlobalScopes()->find($checkoutable->license_id);
+        }
+
+        return Company::isCurrentUserHasAccess($checkoutable);
+    }
+
     private function getCheckoutMailType(CheckoutAcceptance $acceptance, $logItem): Mailable
     {
         $lookup = [
@@ -1408,9 +1520,19 @@ class ReportsController extends Controller
     {
         $this->authorize('reports.view');
 
-        if (! $acceptance = CheckoutAcceptance::pending()->find($acceptanceId)) {
+        $acceptance = CheckoutAcceptance::pending()
+            ->with(['checkoutable' => function (MorphTo $morphTo) {
+                $morphTo->morphWith([LicenseSeat::class => ['license']]);
+            }])
+            ->find($acceptanceId);
+
+        if (! $acceptance) {
             // Redirect to the unaccepted assets report page with error
             return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+        }
+
+        if (! $this->currentUserCanAccessAcceptance($acceptance)) {
+            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.insufficient_permissions'));
         }
 
         if ($acceptance->delete()) {
@@ -1455,6 +1577,11 @@ class ReportsController extends Controller
 
         $itemsForReport = $acceptances->get()
             ->filter(fn ($unaccepted) => $unaccepted->checkoutable)
+            // FMCS scope, same rationale as getAssetAcceptanceReport.
+            // The CSV export path had the same missing filter as the page
+            // render, so a reports.view user scoped to Company A could
+            // download pending acceptances for Company B items.
+            ->filter(fn ($unaccepted) => $this->currentUserCanAccessAcceptance($unaccepted))
             ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
 
         $rows = [];
@@ -1473,6 +1600,16 @@ class ReportsController extends Controller
         $header = array_map('trim', $header);
         $rows[] = implode(',', $header);
 
+        // Formula-escape data rows using the same helper + setting as the
+        // sibling exports in this file. Row values (company / category /
+        // model / item name / asset tag / assignee display name) are all
+        // user-editable free-text fields that a low-privilege user could
+        // set to a spreadsheet formula. Without escaping, the payload
+        // evaluates when a reports.view user opens the downloaded CSV in
+        // Excel / LibreOffice / Google Sheets. Same backtick prefix used
+        // by every other export in ReportsController.
+        $formatter = new EscapeFormula('`');
+
         foreach ($itemsForReport as $item) {
 
             if ($item != null) {
@@ -1486,6 +1623,11 @@ class ReportsController extends Controller
                 $row[] = str_replace(',', '', $item->plain_text_name);
                 $row[] = str_replace(',', '', $item->asset_tag);
                 $row[] = str_replace(',', '', ($item->acceptance->assignedto) ? $item->acceptance->assignedto->display_name : trans('admin/reports/general.deleted_user'));
+
+                if (config('app.escape_formulas') !== false) {
+                    $row = $formatter->escapeRecord($row);
+                }
+
                 $rows[] = implode(',', $row);
             }
         }

@@ -26,7 +26,7 @@ class AccessoryCheckinTest extends TestCase implements TestsFullMultipleCompanie
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $superUser = $companyA->users()->save(User::factory()->superuser()->make());
-        $userInCompanyA = User::factory()->for($companyA)->checkinAccessories()->create();
+        $userInCompanyA = User::factory()->forCompany($companyA)->checkinAccessories()->create();
         $accessoryForCompanyB = Accessory::factory()->for($companyB)->checkedOutToUser()->create();
         $anotherAccessoryForCompanyB = Accessory::factory()->for($companyB)->checkedOutToUser()->create();
 

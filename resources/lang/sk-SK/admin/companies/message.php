@@ -16,5 +16,7 @@ return [
         'confirm' => 'Ste si istý, že chcete zmazať túto spoločnosť?',
         'error' => 'Pri mazaní spoločnosti nastal problém. Skúste znovu.',
         'success' => 'Spoločnosť bola úspešne zmazaná.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

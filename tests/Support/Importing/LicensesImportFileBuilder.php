@@ -39,6 +39,9 @@ class LicensesImportFileBuilder extends FileBuilder
     {
         return [
             'category' => 'Category',
+            'checkoutEmail' => 'Email',
+            'checkoutFullName' => 'Full Name',
+            'checkoutUsername' => 'Username',
             'companyName' => 'Company',
             'expirationDate' => 'expiration date',
             'isMaintained' => 'maintained',
@@ -54,6 +57,7 @@ class LicensesImportFileBuilder extends FileBuilder
             'seats' => 'seats',
             'serialNumber' => 'Serial number',
             'supplierName' => 'supplier',
+            'requestable' => 'Requestable',
         ];
     }
 
@@ -66,6 +70,9 @@ class LicensesImportFileBuilder extends FileBuilder
 
         return [
             'category' => Str::random(),
+            'checkoutEmail' => '',
+            'checkoutFullName' => '',
+            'checkoutUsername' => '',
             'companyName' => Str::random()." {$faker->companySuffix}",
             'expirationDate' => $faker->date,
             'isMaintained' => $faker->randomElement(['TRUE', 'FALSE']),
@@ -81,6 +88,7 @@ class LicensesImportFileBuilder extends FileBuilder
             'seats' => rand(1, 10),
             'serialNumber' => 'SN:LIC:'.Str::random(),
             'supplierName' => $faker->company,
+            'requestable' => '',
         ];
     }
 }

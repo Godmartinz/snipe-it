@@ -10,11 +10,15 @@ use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
 use App\Mail\UnacceptedAssetReminderMail;
+use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Component;
+use App\Models\Consumable;
 use App\Models\Group;
+use App\Models\License;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
@@ -112,6 +116,14 @@ class UsersController extends Controller
         $user->display_name = $request->input('display_name');
         if ($request->filled('password')) {
             $user->password = bcrypt($request->input('password'));
+        } else {
+            // SaveUserRequest only skips password validation when the
+            // user is being created deactivated. If we got here with no
+            // password, the user cannot log in anyway, so store the
+            // noPassword placeholder raw. Hash::check at login always
+            // fails against a plain string, so no authentication path
+            // can ever match this value.
+            $user->password = $user->noPassword();
         }
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
@@ -206,7 +218,9 @@ class UsersController extends Controller
     {
 
         $this->authorize('update', $user);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
         $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
@@ -292,15 +306,14 @@ class UsersController extends Controller
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
 
-        // Set this here so that we can overwrite it later if the user is an admin or superadmin
-        $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
-
-        // Update the location of any assets checked out to this user
-        Asset::where('assigned_type', User::class)
-            ->where('assigned_to', $user->id)
-            ->update(['location_id' => $request->input('location_id', null)]);
-
-        // check for permissions related fields and only set them if the user has permission to edit them
+        // Permission-gated fields: `activated` lives inside this gate too.
+        // An earlier version of this method assigned `activated` right
+        // before the gate on the theory that the gate would overwrite it.
+        // That let anyone with users.edit toggle an admin's activated flag
+        // by POSTing a full edit payload — the gate would deny the second
+        // assignment but the first had already stuck. Every auth-field
+        // write must live inside this branch so an unauthorized caller
+        // can't reach past the gate on any of them.
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
             $user->username = trim($request->input('username'));
@@ -337,7 +350,7 @@ class UsersController extends Controller
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
-            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+            $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
 
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -402,12 +415,8 @@ class UsersController extends Controller
         }
 
         if ($user->restore()) {
-            $logaction = new Actionlog;
-            $logaction->item_type = User::class;
-            $logaction->item_id = $user->id;
-            $logaction->created_at = date('Y-m-d H:i:s');
-            $logaction->created_by = auth()->id();
-            $logaction->logaction('restore');
+            // The `restore` action_log entry is written by
+            // UserObserver::restoring - no manual write here.
 
             // Redirect them to the deleted page if there are more, otherwise the section index
             $deleted_users = User::onlyTrashed()->count();
@@ -702,9 +711,37 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        $user = User::withInventoryRelations($id)->first();
+        $actor = auth()->user();
+        $canViewAssets = $actor->can('view', Asset::class);
+        $canViewLicenses = $actor->can('view', License::class);
+        $canViewAccessories = $actor->can('view', Accessory::class);
+        $canViewConsumables = $actor->can('view', Consumable::class);
+        $canViewComponents = $actor->can('view', Component::class);
 
-        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count() + $user?->assets?->flatMap->components->count() + $user?->assets?->flatMap->licenses->count() + $user?->assets?->flatMap->assignedAccessories->count();
+        $user = User::withInventoryRelations(
+            $id,
+            $canViewAssets,
+            $canViewLicenses,
+            $canViewAccessories,
+            $canViewConsumables,
+            $canViewComponents,
+        )->first();
+
+        $indirectItemsCount = 0;
+        if ($canViewAssets && $user?->assets) {
+            foreach ($user->assets as $asset) {
+                $indirectItemsCount += $asset->assignedAssets->count();
+                if ($canViewComponents) {
+                    $indirectItemsCount += $asset->components->count();
+                }
+                if ($canViewLicenses) {
+                    $indirectItemsCount += $asset->licenses->count();
+                }
+                if ($canViewAccessories) {
+                    $indirectItemsCount += $asset->assignedAccessories->count();
+                }
+            }
+        }
 
         if ($user) {
             $this->authorize('view', $user);
@@ -822,5 +859,41 @@ class UsersController extends Controller
         }
 
         return redirect()->back()->with('error', trans('general.pwd_reset_not_sent'));
+    }
+
+    public function twoFactorReset(User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        if (! $user->twoFactorResettable()) {
+            return redirect()->back()->with('error', trans('general.unauthorized'));
+        }
+
+        if (! auth()->user()->can('canEditAuthFields', $user) || ! auth()->user()->can('editableOnDemo')) {
+            return redirect()->back()->with('error', trans('general.unauthorized'));
+        }
+
+        try {
+            $user->two_factor_secret = null;
+            $user->two_factor_enrolled = 0;
+            $user->saveQuietly();
+
+            $log = new Actionlog;
+            $log->target_type = User::class;
+            $log->target_id = $user->id;
+            $log->item_type = User::class;
+            $log->item_id = $user->id;
+            $log->created_at = date('Y-m-d H:i:s');
+            $log->created_by = auth()->id();
+            $log->logaction('2FA reset');
+
+            return redirect()->route('users.show', $user)
+                ->with('success', trans('admin/settings/general.two_factor_reset_success'));
+        } catch (\Exception $e) {
+            Log::error($e);
+
+            return redirect()->route('users.show', $user)
+                ->with('error', trans('admin/settings/general.two_factor_reset_error'));
+        }
     }
 }

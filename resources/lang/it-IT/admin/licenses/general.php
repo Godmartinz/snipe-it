@@ -32,8 +32,8 @@ return [
         ],
 
         'checkin_selected' => [
-            'success' => ':count seat checked in successfully. | :count seats checked in successfully.',
-            'no_seats_selected' => 'No seats were selected.',
+            'success' => ':count slot licenza restituito con successo. | :count slot licenza restituiti con successo.',
+            'no_seats_selected' => 'Nessuno slot licenza selezionato.',
         ],
 
         'checkout_all' => [
@@ -47,6 +47,11 @@ return [
             'warn_no_avail_users' => 'Non ho fatto nulla: Non ci sono utenti senza questa licenza.',
             'log_msg' => 'Assegnazione effettuato tramite GUI di assegnazione massiva di licenze',
 
+        ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
         ],
     ],
 

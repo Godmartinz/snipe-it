@@ -108,8 +108,8 @@ class DeleteUsersTest extends TestCase implements TestsFullMultipleCompaniesSupp
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
         $superuser = User::factory()->superuser()->create();
-        $userFromA = User::factory()->deleteUsers()->for($companyA)->create();
-        $userFromB = User::factory()->deleteUsers()->for($companyB)->create();
+        $userFromA = User::factory()->deleteUsers()->forCompany($companyA)->create();
+        $userFromB = User::factory()->deleteUsers()->forCompany($companyB)->create();
 
         $this->actingAsForApi($userFromA)
             ->deleteJson(route('api.users.destroy', $userFromB))

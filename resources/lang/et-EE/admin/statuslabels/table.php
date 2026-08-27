@@ -13,6 +13,7 @@ return [
     'pending' => 'Ootel',
     'status_type' => 'Saatuse tüüp',
     'show_in_nav' => 'Näita külgmenüüs',
+    'status_label' => 'Oleku silt',
     'title' => 'Staatuse sildid',
     'undeployable' => 'Kasutuselevõtmatu',
     'update' => 'Uuenda staatuse silti',

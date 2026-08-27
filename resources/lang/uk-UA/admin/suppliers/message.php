@@ -20,7 +20,7 @@ return [
         'error' => 'Виникла проблема при видаленні постачальника. Будь ласка, спробуйте ще раз.',
         'success' => 'Постачальника успішно видалено.',
         'not_found' => 'Постачальника не знайдено.',
-        'bulk_success' => 'Постачальники успішно видалені.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

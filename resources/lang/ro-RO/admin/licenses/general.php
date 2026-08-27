@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Verificat prin licenta de verificare in Licenta GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Mai sunt doar :remaining_count seats pentru această licență cu o cantitate minimă de :min_amt. Poate doriți să luați în considerare achiziționarea mai multor locuri.',

@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Zamówione za pomocą licencji masowej w interfejsie licencyjnym',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Istnieją tylko :remaining_count miejsc dla tej licencji z minimalną ilością :min_amt. Możesz rozważyć zakup większej liczby miejsc.',

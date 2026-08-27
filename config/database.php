@@ -21,10 +21,50 @@ $dump_options = [
 // that require --single-transaction (e.g. no LOCK TABLES privilege).
 $dump_options['use_single_transaction'] = (env('DB_DUMP_SINGLE_TRANSACTION', 'false') === 'true');
 
-// For modern versions of mysqldump, use --ssl-mode=DISABLED
-if (env('DB_DUMP_SKIP_SSL') == 'true') {
-    // Correctly add the option as a string to the 'add_extra_option' key.
-    $dump_options['add_extra_option'] = '--ssl-mode=DISABLED';
+// Opt-in flag for skipping SSL on the dump connection. Only add the key when
+// it's true - spatie's processExtraDumpParameters has a bug where a `false`
+// value routes through callMethodOnDumper's `if (!$methodValue)` branch, which
+// calls setSkipSsl() with no args, and that setter defaults to true. So an
+// explicit false would silently become true. When opted in, spatie emits the
+// correct per-DBMS flag: --ssl-mode=DISABLED for MySQL 8.4+, --skip-ssl for
+// older MySQL and MariaDB. Do NOT set this via add_extra_option; that route
+// ships the raw flag as-is and mariadb-dump rejects ssl-mode.
+if (env('DB_DUMP_SKIP_SSL') === 'true') {
+    $dump_options['skip_ssl'] = true;
+}
+
+// PDO SSL options for the app database connection. Each entry is only added
+// when its env var is actually set - passing PDO::MYSQL_ATTR_SSL_* options
+// with a null value is NOT the same as omitting them. libmysql / libmariadb
+// tries to negotiate SSL against a null spec and the connect fails with
+// "Cannot connect to MySQL using SSL".
+// This shape also lets a user legitimately configure CA-only SSL by
+// leaving KEY / CERT unset without breaking the client-cert branch below.
+$ssl_options = [];
+if (env('DB_SSL')) {
+    if (env('DB_SSL_IS_PAAS')) {
+        // Managed cloud DB flow (RDS, Azure Database, Cloud SQL): server CA
+        // only, no client cert.
+        if (env('DB_SSL_CA_PATH') !== null) {
+            $ssl_options[PDO::MYSQL_ATTR_SSL_CA] = env('DB_SSL_CA_PATH');
+        }
+        $ssl_options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = (bool) env('DB_SSL_VERIFY_SERVER', false);
+    } else {
+        // Self-hosted flow: full mutual TLS with client key / cert.
+        if (env('DB_SSL_KEY_PATH') !== null) {
+            $ssl_options[PDO::MYSQL_ATTR_SSL_KEY] = env('DB_SSL_KEY_PATH');
+        }
+        if (env('DB_SSL_CERT_PATH') !== null) {
+            $ssl_options[PDO::MYSQL_ATTR_SSL_CERT] = env('DB_SSL_CERT_PATH');
+        }
+        if (env('DB_SSL_CA_PATH') !== null) {
+            $ssl_options[PDO::MYSQL_ATTR_SSL_CA] = env('DB_SSL_CA_PATH');
+        }
+        if (env('DB_SSL_CIPHER') !== null) {
+            $ssl_options[PDO::MYSQL_ATTR_SSL_CIPHER] = env('DB_SSL_CIPHER');
+        }
+        $ssl_options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = (bool) env('DB_SSL_VERIFY_SERVER', false);
+    }
 }
 
 return [
@@ -101,16 +141,30 @@ return [
             'dump' => $dump_options,
             'dump_command_timeout' => 60 * 5, // 5 minute timeout
             'dump_using_single_transaction' => true, // perform dump using a single transaction
-            'options' => (env('DB_SSL')) ? ((env('DB_SSL_IS_PAAS')) ? [
-                PDO::MYSQL_ATTR_SSL_CA => env('DB_SSL_CA_PATH'),   // /path/to/ca.pem
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('DB_SSL_VERIFY_SERVER', false), // true/false
-            ] : [
-                PDO::MYSQL_ATTR_SSL_KEY => env('DB_SSL_KEY_PATH'),  // /path/to/key.pem
-                PDO::MYSQL_ATTR_SSL_CERT => env('DB_SSL_CERT_PATH'), // /path/to/cert.pem
-                PDO::MYSQL_ATTR_SSL_CA => env('DB_SSL_CA_PATH'),   // /path/to/ca.pem
-                PDO::MYSQL_ATTR_SSL_CIPHER => env('DB_SSL_CIPHER'),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('DB_SSL_VERIFY_SERVER', false), // true/false
-            ]) : [],
+            'options' => $ssl_options,
+        ],
+
+        // Use this connection (DB_CONNECTION=mariadb) when the server is
+        // MariaDB. Spatie's backup picks the MariaDb dumper for this driver,
+        // which invokes mariadb-dump instead of the deprecated mysqldump
+        // symlink and uses --skip-ssl instead of --ssl-mode=DISABLED.
+        'mariadb' => [
+            'driver' => 'mariadb',
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => (int) env('DB_PORT', 3306),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => env('DB_PREFIX', null),
+            'strict' => false,
+            'engine' => 'InnoDB',
+            'unix_socket' => env('DB_SOCKET', ''),
+            'dump' => $dump_options,
+            'dump_command_timeout' => 60 * 5,
+            'dump_using_single_transaction' => true,
+            'options' => $ssl_options,
         ],
 
         'pgsql' => [

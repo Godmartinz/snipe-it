@@ -24,7 +24,7 @@
 @endif
 
 @if ((isset($expected_checkin)) && ($expected_checkin!=''))
-**{{ trans('mail.expecting_checkin_date') }}**: {{ Helper::getFormattedDateObject($expected_checkin, 'date', false) }}
+**{{ trans('mail.expecting_checkin_date') }}**: {{ Helper::getFormattedDateObject($expected_checkin, 'datetime', false) }}
 @endif
 
 @if ($note)
@@ -68,7 +68,12 @@
 
 @if (!$singular_eula && $group->first()->eula)
 <hr>
-{{ $group->first()->eula }}
+{{-- eula is pre-sanitized by SnipeModel::getEula (strip_tags + Parsedown
+     safe mode + <img> strip) before being loaded into $asset->eula in
+     BulkAssetCheckoutMail::content, so emitting the resulting HTML raw
+     preserves formatting without reintroducing the mail-auto-embed
+     LFR/SSRF vector. --}}
+{!! $group->first()->eula !!}
 @endif
 
 </x-mail::panel>
@@ -76,7 +81,7 @@
 
 @if ($singular_eula)
 <x-mail::panel>
-{{ $singular_eula }}
+{!! $singular_eula !!}
 </x-mail::panel>
 @endif
 

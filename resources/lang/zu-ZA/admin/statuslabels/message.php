@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ingabe uqinisekile ukuthi ufisa ukususa le Label Yesimo?',
         'error' => 'Kube khona inkinga yokusula i-Label Status. Ngicela uzame futhi.',
         'success' => 'Ilebula Label isusiwe ngempumelelo.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

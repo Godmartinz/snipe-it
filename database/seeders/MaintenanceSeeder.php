@@ -12,17 +12,17 @@ class MaintenanceSeeder extends Seeder
     public function run()
     {
         Maintenance::truncate();
-        Maintenance::factory()->create(['image' => '1.png']);
-        Maintenance::factory()->create(['image' => '2.png']);
-        Maintenance::factory()->create(['image' => '3.png']);
-        Maintenance::factory()->create(['image' => '4.png']);
-        Maintenance::factory()->create(['image' => '5.png']);
-        Maintenance::factory()->create(['image' => '6.png']);
-        Maintenance::factory()->create(['image' => '7.png']);
-        Maintenance::factory()->create(['image' => '8.png']);
-        Maintenance::factory()->create(['image' => '9.png']);
-        Maintenance::factory()->create(['image' => '10.png']);
-        Maintenance::factory()->create(['image' => '11.png']);
+        Maintenance::factory()->realistic()->create(['image' => '1.png']);
+        Maintenance::factory()->realistic()->create(['image' => '2.png']);
+        Maintenance::factory()->realistic()->create(['image' => '3.png']);
+        Maintenance::factory()->realistic()->create(['image' => '4.png']);
+        Maintenance::factory()->realistic()->create(['image' => '5.png']);
+        Maintenance::factory()->realistic()->create(['image' => '6.png']);
+        Maintenance::factory()->realistic()->create(['image' => '7.png']);
+        Maintenance::factory()->realistic()->create(['image' => '8.png']);
+        Maintenance::factory()->realistic()->create(['image' => '9.png']);
+        Maintenance::factory()->realistic()->create(['image' => '10.png']);
+        Maintenance::factory()->realistic()->create(['image' => '11.png']);
 
         $src = public_path('/img/demo/maintenances/');
         $dst = 'maintenances'.'/';

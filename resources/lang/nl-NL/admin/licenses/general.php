@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Uitgecheckt via bulklicentie-checkout in licentie GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Er zijn nog :remaining_count zitplaatsen over voor deze licentie met een minimale hoeveelheid van :min_amt. Misschien wilt u overwegen om meer zitplaatsen te kopen.',

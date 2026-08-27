@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasOrders;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\AccessoryPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
@@ -24,11 +28,14 @@ use Watson\Validating\ValidatingTrait;
 class Accessory extends SnipeModel
 {
     use Acceptable;
+    use AdjustsQuantity;
     use CompanyableTrait;
     use HasFactory;
+    use HasOrders;
     use HasUploads;
     use Loggable;
     use Presentable;
+    use Requestable;
     use Searchable;
     use SoftDeletes;
     use ValidatingTrait;
@@ -51,9 +58,6 @@ class Accessory extends SnipeModel
         'model_number',
         'name',
         'notes',
-        'order_number',
-        'purchase_cost',
-        'purchase_date',
     ];
 
     /**
@@ -66,7 +70,16 @@ class Accessory extends SnipeModel
         'company' => ['name'],
         'location' => ['name'],
         'manufacturer' => ['name'],
-        'supplier' => ['name'],
+        // Search by the parent's "typical supplier" template. Historical
+        // per-order supplier lookups belong on the Orders tab; this join
+        // keeps parent-level list-page search predictable.
+        'defaultSupplier' => ['name'],
+        // Order numbers moved to a dedicated Orders / OrderItems data
+        // model when the parent order_number column was removed.
+        // Free-text search on an order-number string walks the HasOrders
+        // trait's orders() HasManyThrough into orders.order_number so
+        // any accessory ever acquired under that order still surfaces.
+        'orders' => ['order_number'],
     ];
 
     protected $searchableCounts = [
@@ -80,11 +93,13 @@ class Accessory extends SnipeModel
         'name' => 'required|max:255',
         'qty' => 'nullable|integer|min:0',
         'category_id' => 'required|integer|exists:categories,id',
-        'company_id' => 'integer|nullable|exists:companies,id',
+        'company_id' => 'integer|nullable|exists:companies,id|fmcs_company',
         'location_id' => 'exists:locations,id|nullable|fmcs_location',
         'min_amt' => 'integer|min:0|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
         'purchase_date' => 'date_format:Y-m-d|nullable',
+        'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
+        'default_purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
     ];
 
     /**
@@ -101,36 +116,48 @@ class Accessory extends SnipeModel
      *
      * @var array
      */
+    // supplier_id / purchase_date / purchase_cost are intentionally
+    // absent. Post-Orders acquisitions record their own values per event
+    // on Order + OrderItem; writing to the old names hard-fails at the
+    // DB (column renamed) which is the intended guard against divergent
+    // parent-vs-Orders state.
+    //
+    // default_supplier_id / default_purchase_cost are parent-level
+    // "template" values that pre-populate the adjust-quantity modal for
+    // items with no order history yet. See lastOrderDefaults() on the
+    // HasOrders trait for the merge behavior.
     protected $fillable = [
         'category_id',
         'company_id',
         'location_id',
         'name',
-        'order_number',
-        'purchase_cost',
-        'purchase_date',
         'model_number',
         'manufacturer_id',
-        'supplier_id',
         'image',
         'qty',
         'min_amt',
         'requestable',
         'notes',
+        'default_supplier_id',
+        'default_purchase_cost',
     ];
 
+    // No `supplier()` relation, no `supplier_id` / `purchase_date` /
+    // `purchase_cost` accessors on the parent. Those concepts are
+    // per-transaction now. Callers use `$accessory->orders` (all Orders
+    // over the lifetime) or `$accessory->lastOrderDefaults()` (most
+    // recent acquisition context, falling back to the parent's
+    // default_* template fields on items with no order history yet).
+
     /**
-     * Establishes the accessory -> supplier relationship
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v3.0]
-     *
-     * @return Relation
+     * Parent-level "typical supplier" template. Distinct from
+     * per-acquisition supplier (which lives on Order.supplier_id).
+     * Used by the searchable-relation join for list-page search and by
+     * lastOrderDefaults() as the fallback for items with no orders yet.
      */
-    public function supplier()
+    public function defaultSupplier(): BelongsTo
     {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
+        return $this->belongsTo(Supplier::class, 'default_supplier_id');
     }
 
     public function isDeletable()
@@ -153,6 +180,15 @@ class Accessory extends SnipeModel
             $value = null;
         }
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable accessories. Unlike assets, accessories
+     * have no deployable status to check, so the flag is all we need here.
+     */
+    public function scopeRequestable($query)
+    {
+        return $query->where('accessories.requestable', '1');
     }
 
     /**
@@ -381,6 +417,16 @@ class Accessory extends SnipeModel
     }
 
     /**
+     * AdjustsQuantity trait hook: units currently checked out to users.
+     * The adjust-quantity modal uses this to reject decrements that
+     * would leave the on-hand qty below what's already assigned out.
+     */
+    public function currentlyInUseCount(): int
+    {
+        return (int) $this->numCheckedOut();
+    }
+
+    /**
      * Check how many items of an accessory remain.
      *
      * In order to use this model method, you MUST call withCount('checkouts as checkouts_count')
@@ -416,12 +462,6 @@ class Accessory extends SnipeModel
         }
 
         $accessory_checkout->limit(1)->delete();
-    }
-
-    public function totalCostSum()
-    {
-
-        return $this->purchase_cost !== null ? $this->qty * $this->purchase_cost : null;
     }
 
     /**
@@ -522,6 +562,42 @@ class Accessory extends SnipeModel
      */
     public function scopeOrderSupplier($query, $order)
     {
-        return $query->leftJoin('suppliers', 'accessories.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+        return $query->leftJoin('suppliers', 'accessories.default_supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Mirrors Accessory::percentRemaining(): (qty - checkouts_count) / qty * 100.
+     * checkouts_count is added by withCount() in the API index() before
+     * this scope runs. Guards against division by zero for accessories
+     * with qty of 0.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN accessories.qty = 0 THEN 0 ELSE ((accessories.qty - checkouts_count) * 100.0 / accessories.qty) END '.$direction);
+    }
+
+    /**
+     * Query builder scope to sort by the raw `remaining` column
+     * (qty minus current checkouts). Same withCount-added alias as
+     * scopeOrderPercentRemaining above; the difference is that this
+     * one sorts by absolute count rather than percentage, so items
+     * with the same absolute stock left group together regardless
+     * of their total qty.
+     */
+    public function scopeOrderRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('(accessories.qty - checkouts_count) '.$direction);
     }
 }

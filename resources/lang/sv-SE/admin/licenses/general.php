@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Utcheckad via massincheckning av licenser i licensgränssnittet',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Det finns bara :remaining_count säten kvar för denna licens med en minsta mängd :min_amt. Du kanske vill överväga att köpa fler säten.',

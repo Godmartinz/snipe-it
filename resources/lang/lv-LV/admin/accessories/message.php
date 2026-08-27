@@ -20,6 +20,8 @@ return [
         'confirm' => 'Vai tiešām vēlaties dzēst šo piederumu?',
         'error' => 'Radās problēma, noņemot piederumu. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Piederums tika veiksmīgi izdzēsts.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

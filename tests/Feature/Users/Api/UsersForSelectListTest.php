@@ -139,7 +139,13 @@ class UsersForSelectListTest extends TestCase
         $userInB = User::factory()->create(['first_name' => 'Darth', 'last_name' => 'Vader', 'username' => 'dvader_fmcs1']);
         $companyB->users()->attach($userInB);
 
-        $actor = User::factory()->superuser()->create();
+        // The companyId filter is intentionally bypassed for superusers (v8.6.3 regression fix),
+        // so this test uses a non-superuser admin who is a member of both companies — that gives
+        // them visibility to all candidates, leaving the explicit companyId filter as the only
+        // active narrowing.
+        $actor = User::factory()->createAssets()->create();
+        $companyA->users()->attach($actor);
+        $companyB->users()->attach($actor);
 
         $response = $this->actingAsForApi($actor)
             ->getJson(route('api.users.selectlist', ['companyId' => $companyA->id]))
@@ -165,7 +171,12 @@ class UsersForSelectListTest extends TestCase
         $userInC = User::factory()->create(['first_name' => 'Darth', 'last_name' => 'Vader', 'username' => 'dvader_fmcs2']);
         $companyC->users()->attach($userInC);
 
-        $actor = User::factory()->superuser()->create();
+        // Non-superuser actor — filter applies. Actor is a member of all three companies so
+        // their own FMCS scoping doesn't hide anyone; only the explicit companyId narrows the set.
+        $actor = User::factory()->createAssets()->create();
+        $companyA->users()->attach($actor);
+        $companyB->users()->attach($actor);
+        $companyC->users()->attach($actor);
 
         $response = $this->actingAsForApi($actor)
             ->getJson(route('api.users.selectlist', ['companyId' => $companyA->id.','.$companyB->id]))
@@ -175,5 +186,39 @@ class UsersForSelectListTest extends TestCase
         $this->assertTrue($results->pluck('text')->contains(fn ($t) => str_contains($t, 'Luke')));
         $this->assertTrue($results->pluck('text')->contains(fn ($t) => str_contains($t, 'Obi-Wan')));
         $this->assertFalse($results->pluck('text')->contains(fn ($t) => str_contains($t, 'Darth')));
+    }
+
+    /**
+     * v8.6.3 regression fix: superusers must bypass the companyId filter on user selectlists.
+     *
+     * Background: in v8.6.3, superusers checking out an item to a cross-company user
+     * stopped seeing that user in the dropdown because the filter scoped to the item's
+     * company even for superusers. UsersController::selectlist now skips that filter
+     * when the requester is a superuser, matching pre-v8.6.3 behavior.
+     */
+    public function test_superuser_bypasses_company_id_filter_on_users_selectlist()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $userInA = User::factory()->create(['first_name' => 'Luke', 'username' => 'lskywalker_su_bypass']);
+        $companyA->users()->attach($userInA);
+
+        $userInB = User::factory()->create(['first_name' => 'Darth', 'username' => 'dvader_su_bypass']);
+        $companyB->users()->attach($userInB);
+
+        $superuser = User::factory()->superuser()->create();
+
+        $response = $this->actingAsForApi($superuser)
+            ->getJson(route('api.users.selectlist', ['companyId' => $companyA->id]))
+            ->assertOk();
+
+        $results = collect($response->json('results'));
+        $this->assertTrue($results->pluck('text')->contains(fn ($t) => str_contains($t, 'Luke')));
+        $this->assertTrue(
+            $results->pluck('text')->contains(fn ($t) => str_contains($t, 'Darth')),
+            'Superuser must still see cross-company users when a companyId filter is passed'
+        );
     }
 }

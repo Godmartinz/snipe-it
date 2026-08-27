@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Components\Api;
 
+use App\Models\Asset;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Component;
@@ -77,9 +78,8 @@ class ComponentIndexTest extends TestCase
         $targetComponent = Component::factory()->create([
             'name' => 'Target Component',
             'company_id' => $targetCompany->id,
-            'order_number' => 'COMP-ORDER-A',
             'category_id' => $targetCategory->id,
-            'supplier_id' => $targetSupplier->id,
+            'default_supplier_id' => $targetSupplier->id,
             'manufacturer_id' => $targetManufacturer->id,
             'model_number' => 'COMP-MODEL-A',
             'location_id' => $targetLocation->id,
@@ -89,19 +89,20 @@ class ComponentIndexTest extends TestCase
         $otherComponent = Component::factory()->create([
             'name' => 'Other Component',
             'company_id' => $otherCompany->id,
-            'order_number' => 'COMP-ORDER-B',
             'category_id' => $otherCategory->id,
-            'supplier_id' => $otherSupplier->id,
+            'default_supplier_id' => $otherSupplier->id,
             'manufacturer_id' => $otherManufacturer->id,
             'model_number' => 'COMP-MODEL-B',
             'location_id' => $otherLocation->id,
             'notes' => 'COMP-NOTES-B',
         ]);
 
+        // order_number was dropped from the filters list when the parent
+        // column was renamed to legacy_order_number and current order
+        // numbers moved to the QuantityAdjust action_log per event.
         $filters = [
             'name' => 'Target Component',
             'company_id' => $targetCompany->id,
-            'order_number' => 'COMP-ORDER-A',
             'category_id' => $targetCategory->id,
             'supplier_id' => $targetSupplier->id,
             'manufacturer_id' => $targetManufacturer->id,
@@ -117,5 +118,46 @@ class ComponentIndexTest extends TestCase
                 ->assertResponseContainsInRows($targetComponent)
                 ->assertResponseDoesNotContainInRows($otherComponent);
         }
+    }
+
+    public function test_can_sort_components_by_raw_remaining_count()
+    {
+        // Requested in issue #18505 alongside the percent_remaining sort:
+        // sort by absolute stock left (qty - active assignments). The
+        // scope references the withSum-added `sum_unconstrained_assets`
+        // alias, so a regression in the API's eager-load order would
+        // surface here as a SQL error or a null-count sort.
+        $user = User::factory()->viewComponents()->create();
+
+        $lots = Component::factory()->create(['name' => 'Lots left', 'qty' => 10]);
+        $some = Component::factory()->create(['name' => 'Some left', 'qty' => 10]);
+        $none = Component::factory()->create(['name' => 'None left', 'qty' => 10]);
+
+        $asset = Asset::factory()->create();
+
+        // assigned_qty on the pivot is what withSum('unconstrainedAssets')
+        // sums into sum_unconstrained_assets, so one pivot row per
+        // component with a distinct qty gives distinct remaining counts.
+        $lots->assets()->attach($asset->id, ['assigned_qty' => 1, 'created_at' => now(), 'created_by' => $user->id]);  // remaining = 9
+        $some->assets()->attach($asset->id, ['assigned_qty' => 5, 'created_at' => now(), 'created_by' => $user->id]);  // remaining = 5
+        $none->assets()->attach($asset->id, ['assigned_qty' => 10, 'created_at' => now(), 'created_by' => $user->id]); // remaining = 0
+
+        $descRows = $this->actingAsForApi($user)
+            ->getJson(route('api.components.index', ['sort' => 'remaining', 'order' => 'desc']))
+            ->assertOk()
+            ->json('rows');
+
+        $descNames = array_column($descRows, 'name');
+        $descRelevant = array_values(array_intersect($descNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['Lots left', 'Some left', 'None left'], $descRelevant);
+
+        $ascRows = $this->actingAsForApi($user)
+            ->getJson(route('api.components.index', ['sort' => 'remaining', 'order' => 'asc']))
+            ->assertOk()
+            ->json('rows');
+
+        $ascNames = array_column($ascRows, 'name');
+        $ascRelevant = array_values(array_intersect($ascNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['None left', 'Some left', 'Lots left'], $ascRelevant);
     }
 }

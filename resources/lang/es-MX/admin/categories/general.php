@@ -17,9 +17,11 @@ return [
     'name' => 'Nombre de la categoría',
     'require_acceptance' => 'Requerir a los usuarios que confirmen la aceptación de los elementos en esta categoría.',
     'required_acceptance' => 'Este usuario recibirá un correo electrónico con un enlace para confirmar la aceptación de este elemento.',
-    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
+    'global_signature_required_notice' => 'Las firmas de los usuarios son requeridas globalmente a través de la configuración del administrador, así que las firmas seguirán siendo requeridas independientemente de esta configuración de categoría si el artículo está reservado a un usuario (contrario a una ubicación, etc).',
     'required_eula' => 'Se enviará un correo electrónico a este usuario con una copia del acuerdo de uso',
-    'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
+    'required_signature' => 'Este usuario tendrá que firmar para confirmar la aceptación de este artículo.',
     'no_default_eula' => 'No se encontró una definición del acuerdo de uso por defecto. Agregue uno en Configuración.',
     'update' => 'Actualizar categoría',
     'use_default_eula' => 'En su lugar, utilice el <a href="#" data-toggle="modal" data-target="#eulaModal">acuerdo de uso predeterminado</a>.',
@@ -29,6 +31,6 @@ return [
     'import_checkin_email' => 'Enviar correo de recepción',
     'import_eula_text' => 'Texto del EULA',
     'import_category_type' => 'Tipo de categoría',
-    'import_alert_on_response' => 'Alert on Response',
+    'import_alert_on_response' => 'Alerta al responder',
 
 ];

@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Prevzeto prek množične prevzemnice licenc v grafičnem uporabniškem vmesniku za licence',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Za to licenco je na voljo le še :remaining_count sedežev z minimalno količino :min_amt. Morda boste želeli razmisliti o nakupu dodatnih sedežev.',

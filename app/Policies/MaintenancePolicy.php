@@ -80,10 +80,22 @@ final class MaintenancePolicy
     }
 
     /**
-     * Determine whether the user can upload or manage files attached to a maintenance record.
+     * Determine whether the user can view files attached to a maintenance record.
      * Allowed if the user can edit the associated asset.
      */
     public function files(User $user, Maintenance $maintenance): bool
+    {
+        return Gate::allows('update', $maintenance->asset);
+    }
+
+    /**
+     * Determine whether the user can upload or delete files attached to a
+     * maintenance record. Mirrors files() here because maintenance file
+     * management follows the same asset-edit gate for both read and write.
+     * MaintenancePolicy is standalone (does not extend SnipePermissionsPolicy)
+     * so the base class fallback for manageFiles does not apply.
+     */
+    public function manageFiles(User $user, Maintenance $maintenance): bool
     {
         return Gate::allows('update', $maintenance->asset);
     }

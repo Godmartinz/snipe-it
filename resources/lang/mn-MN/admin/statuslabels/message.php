@@ -20,6 +20,8 @@ return [
         'confirm' => 'Та энэ Статус шошгыг устгахыг хүсч байна уу?',
         'error' => 'Статусын шошгыг устгахад асуудал гарлаа. Дахин оролдоно уу.',
         'success' => 'Статусын шошго амжилттай устгагдсан байна.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

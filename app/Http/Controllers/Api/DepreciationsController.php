@@ -46,7 +46,8 @@ class DepreciationsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $depreciations->count()) ? $depreciations->count() : app('api_offset_value');
+        $total = $depreciations->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -61,7 +62,6 @@ class DepreciationsController extends Controller
                 break;
         }
 
-        $total = $depreciations->count();
         $depreciations = $depreciations->skip($offset)->take($limit)->get();
 
         return (new DepreciationsTransformer)->transformDepreciations($depreciations, $total);
@@ -99,7 +99,13 @@ class DepreciationsController extends Controller
     public function show($id): JsonResponse|array
     {
         $this->authorize('view', Depreciation::class);
-        $depreciation = Depreciation::findOrFail($id);
+        // Match index()'s eager load so isDeletable() (via available_actions.delete
+        // and bulk_selectable.delete) reads the preloaded counts instead of firing
+        // three fallback ->count() queries per show call.
+        $depreciation = Depreciation::withCount('assets as assets_count')
+            ->withCount('models as models_count')
+            ->withCount('licenses as licenses_count')
+            ->findOrFail($id);
 
         return (new DepreciationsTransformer)->transformDepreciation($depreciation);
     }

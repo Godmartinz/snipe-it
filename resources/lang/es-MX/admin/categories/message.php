@@ -21,7 +21,7 @@ return [
         'confirm' => '¿Está seguro de que desea eliminar esta categoría?',
         'error' => 'Hubo un problema eliminando la categoría. Inténtelo de nuevo.',
         'success' => 'La categoría fue eliminada exitosamente.',
-        'bulk_success' => 'Las categorías fueron eliminadas exitosamente.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'La categoría fue eliminada exitosamente. Ve abajo para más información. | :count categorías fueron eliminadas exitosamente. Ve abajo para más información.',
     ],
 

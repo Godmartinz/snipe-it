@@ -19,7 +19,7 @@
     <label for="name" class="col-md-3 control-label">{{ trans('admin/groups/titles.group_name') }}</label>
     <div class="col-md-8 required">
         <input class="form-control" type="text" name="name" id="name" value="{{ old('name', $group->name) }}" required />
-        {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="name" />
     </div>
 </div>
 
@@ -35,7 +35,7 @@
                 rows="2"
         />
 
-        {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="notes" />
     </div>
 </div>
 

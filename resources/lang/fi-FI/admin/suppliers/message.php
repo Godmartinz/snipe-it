@@ -20,7 +20,7 @@ return [
         'error' => 'Toimittajan poistossa tapahtui virhe. Yritä uudelleen.',
         'success' => 'Toimittaja poistettiin onnistuneesti.',
         'not_found' => 'Toimittajaa ei löydy.',
-        'bulk_success' => 'Toimittajat poistettiin onnistuneesti.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

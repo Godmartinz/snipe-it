@@ -13,6 +13,7 @@ return [
     'pending' => 'Во чекање',
     'status_type' => 'Тип на статус',
     'show_in_nav' => 'Покажи во странично мени',
+    'status_label' => 'Status Label',
     'title' => 'Етикети со статус',
     'undeployable' => 'Нераспоредливи',
     'update' => 'Ажурирај етикета за статус',

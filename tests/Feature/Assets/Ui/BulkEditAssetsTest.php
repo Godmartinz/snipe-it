@@ -85,7 +85,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 1234.90,
             'supplier_id' => $supplier1->id,
             'company_id' => $company1->id,
-            'order_number' => '123456',
             'warranty_months' => 24,
             'next_audit_date' => '2024-06-01',
             'requestable' => false,
@@ -95,7 +94,10 @@ class BulkEditAssetsTest extends TestCase
         // gets the ids together to submit to the endpoint
         $id_array = $assets->pluck('id')->toArray();
 
-        // submits the ids and new values for each attribute
+        // submits the ids and new values for each attribute. order_number
+        // was dropped from the payload when the parent Asset column moved
+        // to the Orders / OrderItems data model; the bulk-edit path no
+        // longer touches it.
         $this->actingAs(User::factory()->editAssets()->create())->post(route('hardware/bulksave'), [
             'ids' => $id_array,
             'name' => 'New Asset Name',
@@ -106,7 +108,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 5678.92,
             'supplier_id' => $supplier2->id,
             'company_id' => $company2->id,
-            'order_number' => '7890',
             'warranty_months' => 36,
             'next_audit_date' => '2025-01-01',
             'requestable' => true,
@@ -125,7 +126,6 @@ class BulkEditAssetsTest extends TestCase
             $this->assertEquals(5678.92, $asset->purchase_cost);
             $this->assertEquals($supplier2->id, $asset->supplier_id);
             $this->assertEquals($company2->id, $asset->company_id);
-            $this->assertEquals(7890, $asset->order_number);
             $this->assertEquals(36, $asset->warranty_months);
             $this->assertEquals('2025-01-01', $asset->next_audit_date);
             // shouldn't requestable be cast as a boolean??? it's not.
@@ -156,7 +156,6 @@ class BulkEditAssetsTest extends TestCase
             'purchase_cost' => 1234.90,
             'supplier_id' => $supplier1->id,
             'company_id' => $company1->id,
-            'order_number' => '123456',
             'warranty_months' => 24,
             'next_audit_date' => '2024-06-01',
             'requestable' => false,
@@ -326,5 +325,79 @@ class BulkEditAssetsTest extends TestCase
         Asset::findMany($standard_id_array)->each(function (Asset $asset) use ($encrypted) {
             $this->assertEquals('Original Encrypted Text', Crypt::decrypt($asset->{$encrypted->db_column}));
         });
+    }
+
+    public function test_same_origin_referer_is_stored_as_bulk_back_url()
+    {
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $assets = Asset::factory()->count(2)->create();
+        $originUrl = route('hardware.index').'?status_type=Deployed';
+
+        $this->actingAs($user)
+            ->from($originUrl)
+            ->post('/hardware/bulkedit', [
+                'ids' => $assets->pluck('id')->toArray(),
+                'bulk_actions' => 'edit',
+                'sort' => 'id',
+                'order' => 'asc',
+            ])
+            ->assertSessionHas('bulk_back_url', $originUrl);
+    }
+
+    public function test_offsite_referer_is_not_stored_as_bulk_back_url()
+    {
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $assets = Asset::factory()->count(2)->create();
+
+        $this->actingAs($user)
+            ->from('https://evil.example.com/phish')
+            ->post('/hardware/bulkedit', [
+                'ids' => $assets->pluck('id')->toArray(),
+                'bulk_actions' => 'edit',
+                'sort' => 'id',
+                'order' => 'asc',
+            ])
+            ->assertSessionMissing('bulk_back_url');
+    }
+
+    public function test_bulk_update_redirects_to_stashed_same_origin_url()
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $originUrl = route('hardware.index').'?status_type=Deployed';
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => $originUrl])
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect($originUrl);
+    }
+
+    public function test_bulk_update_falls_back_to_hardware_index_when_stashed_url_is_missing()
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect(route('hardware.index'));
+    }
+
+    public function test_bulk_update_ignores_poisoned_stashed_url()
+    {
+        // If the write-side gate were ever bypassed, the read-side
+        // helper coalescing must still keep the redirect on-domain.
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->withSession(['bulk_back_url' => 'https://evil.example.com/steal-session'])
+            ->post('/hardware/bulksave', [
+                'ids' => [$asset->id => '1'],
+            ])
+            ->assertRedirect(route('hardware.index'));
     }
 }

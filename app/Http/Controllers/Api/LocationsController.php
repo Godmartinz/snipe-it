@@ -19,7 +19,6 @@ use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class LocationsController extends Controller
@@ -58,7 +57,9 @@ class LocationsController extends Controller
             'ldap_ou',
             'company_id',
             'manager_id',
+            'fax',
             'name',
+            'phone',
             'rtd_assets_count',
             'state',
             'updated_at',
@@ -103,11 +104,17 @@ class LocationsController extends Controller
             'locations.created_by',
             'locations.deleted_at',
         ])
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
+            // Asset counts thread through AssetsForShow so the API totals
+            // agree with the tab counts in resources/views/locations/view.blade.php,
+            // which use ->assets()->AssetsForShow() etc. Without the scope,
+            // rtd_assets_count in particular ignores the show_archived_in_list
+            // setting because the rtd_assets() relation has no built-in status
+            // filter. See #17565.
+            ->withCount(['assignedAssets as assigned_assets_count' => fn ($q) => $q->AssetsForShow()])
+            ->withCount(['assets as assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('assignedAccessories as assigned_accessories_count')
             ->withCount('accessories as accessories_count')
-            ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount(['rtd_assets as rtd_assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('children as children_count')
             ->withCount('users as users_count')
             ->withCount('consumables as consumables_count')
@@ -211,12 +218,19 @@ class LocationsController extends Controller
         $location->fill($request->all());
         $location = $request->handleImages($location);
 
-        // Only scope location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-            // check if parent is set and has a different company
-            if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
+        }
+
+        // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
+        if (Setting::getSettings()->full_multiple_companies_support) {
+            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            if ($parent && $parent->company_id != $location->company_id) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_location_parent_company', [
+                    'parent' => $parent->name,
+                    'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+                    'location_company' => $location->company?->name ?? trans('general.unassigned'),
+                ])));
             }
         }
 
@@ -271,11 +285,12 @@ class LocationsController extends Controller
                 'locations.notes',
                 'locations.tag_color',
             ])
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
+            // See index() for why the asset counts thread AssetsForShow. #17565.
+            ->withCount(['assignedAssets as assigned_assets_count' => fn ($q) => $q->AssetsForShow()])
+            ->withCount(['assets as assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('assignedAccessories as assigned_accessories_count')
             ->withCount('accessories as accessories_count')
-            ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount(['rtd_assets as rtd_assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('children as children_count')
             ->withCount('users as users_count')
             ->withCount('consumables as consumables_count')
@@ -303,19 +318,33 @@ class LocationsController extends Controller
         $location = $request->handleImages($location);
 
         if ($request->filled('company_id')) {
-            // Only scope location if the setting is enabled
             if (Setting::getSettings()->scope_locations_fmcs) {
                 $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
                 // check if there are related objects with different company
-                if (Helper::test_locations_fmcs(false, $id, $location->company_id)) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, 'error scoped locations'));
-                }
-                // check if parent is set and has a different company
-                if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
+                if ($mismatched = Helper::test_locations_fmcs(false, $id, $location->company_id)) {
+                    $first = $mismatched[0];
+
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_location_scoped_items', [
+                        'item_type' => trans('general.'.strtolower($first[0])),
+                        'item_name' => $first[2],
+                        'item_company' => $first[5] ?? trans('general.unassigned'),
+                    ])));
                 }
             } else {
                 $location->company_id = $request->input('company_id');
+            }
+        }
+
+        // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
+        // Runs outside the company_id gate so a parent_id-only update is also validated.
+        if (Setting::getSettings()->full_multiple_companies_support) {
+            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            if ($parent && $parent->company_id != $location->company_id) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_location_parent_company', [
+                    'parent' => $parent->name,
+                    'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+                    'location_company' => $location->company?->name ?? trans('general.unassigned'),
+                ])));
             }
         }
 
@@ -361,10 +390,10 @@ class LocationsController extends Controller
         $this->authorize('view', $location);
         $accessory_checkouts = AccessoryCheckout::LocationAssigned()->where('assigned_to', $location->id)->with('adminuser')->with('accessories');
 
-        $offset = ($request->input('offset') > $accessory_checkouts->count()) ? $accessory_checkouts->count() : app('api_offset_value');
+        $total = $accessory_checkouts->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $accessory_checkouts->count();
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
 
         return (new LocationsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
@@ -450,11 +479,6 @@ class LocationsController extends Controller
             'locations.tag_color',
         ]);
 
-        $page = 1;
-        if ($request->filled('page')) {
-            $page = $request->input('page');
-        }
-
         if ($request->filled('search')) {
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
         }
@@ -463,27 +487,55 @@ class LocationsController extends Controller
             $locations->where('locations.id', '!=', (int) $request->input('excludeId'));
         }
 
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && $request->filled('companyId')) {
+            $companyId = (int) $request->input('companyId');
+
+            if (Setting::getSettings()->null_company_is_floater) {
+                // Floater mode: include null-company (floater) locations too,
+                // matching the "items from any company can be checked out
+                // to targets with no company assignment" policy. Without
+                // this the strict equality below hid all floaters from the
+                // checkout dropdown while the server-side canCheckoutTo
+                // still permitted the checkout (#19394).
+                $locations->where(function ($q) use ($companyId) {
+                    $q->where('locations.company_id', '=', $companyId)
+                        ->orWhereNull('locations.company_id');
+                });
+            } else {
+                $locations->where('locations.company_id', '=', $companyId);
+            }
+        }
+
         $locations = $locations->orderBy('name', 'ASC')->get();
 
         $locations_with_children = [];
 
+        // Use 0 (not null) for the top-level bucket — null array offsets are
+        // deprecated in PHP 8.4 and Location::indenter expects an int key.
         foreach ($locations as $location) {
-            if (! array_key_exists($location->parent_id, $locations_with_children)) {
-                $locations_with_children[$location->parent_id] = [];
+            $parentKey = (int) $location->parent_id;
+            if (! array_key_exists($parentKey, $locations_with_children)) {
+                $locations_with_children[$parentKey] = [];
             }
-            $locations_with_children[$location->parent_id][] = $location;
+            $locations_with_children[$parentKey][] = $location;
         }
 
         if ($request->filled('search')) {
+            // Search results are cherry-picked out of the tree — no useful
+            // indent depth to apply — so just use the plain name. The user
+            // is filtering by typed text so context comes from the search
+            // term rather than dropdown position (see #19398 for why we
+            // stopped inlining the parent chain here too).
+            foreach ($locations as $location) {
+                $location->use_text = $location->name;
+            }
             $locations_formatted = $locations;
         } else {
             $location_options = Location::indenter($locations_with_children);
             $locations_formatted = new Collection($location_options);
         }
 
-        $paginated_results = new LengthAwarePaginator($locations_formatted->forPage($page, 500), $locations_formatted->count(), 500, $page, []);
-
-        return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+        return (new SelectlistTransformer)->transformSelectlist(Helper::paginateCollection($locations_formatted));
     }
 
     public function history(Request $request, Location $location): JsonResponse|array

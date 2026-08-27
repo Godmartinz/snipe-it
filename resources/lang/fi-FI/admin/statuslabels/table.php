@@ -13,6 +13,7 @@ return [
     'pending' => 'Odottaa',
     'status_type' => 'Tilatyyppi',
     'show_in_nav' => 'Näytä sivupalkissa',
+    'status_label' => 'Status Label',
     'title' => 'Tilamerkinnät',
     'undeployable' => 'Ei käytettävissä',
     'update' => 'Päivitä tilamerkinnät',

@@ -65,9 +65,35 @@ class ItemImportRequest extends FormRequest
             ->setShouldNotify($this->input('send-welcome'))
             ->setUsernameFormat('firstname.lastname')
             ->setFieldMappings($fieldMappings);
-        $importer->import();
+
+        // Matcher options only apply to the asset history importer, which
+        // resolves rows to existing users by name (not by creating new
+        // users). Any other importer ignores these switches.
+        if ($importer instanceof \App\Importer\AssetHistoryImporter) {
+            $importer->setMatchUsername((bool) $this->input('match_username'))
+                ->setMatchEmail((bool) $this->input('match_email'))
+                ->setMatchFirstnameLastname((bool) $this->input('match_firstnamelastname'))
+                ->setMatchFlastname((bool) $this->input('match_flastname'))
+                ->setMatchFirstname((bool) $this->input('match_firstname'));
+        }
+
+        // Sliced import: caller passes offset+limit for chunked
+        // processing (large-CSV timeout workaround). Each slice is its
+        // own Importer::import() call and therefore its own DB
+        // transaction, so a failure in one slice rolls back only that
+        // slice. Both params null = original all-at-once behavior.
+        $offset = $this->filled('offset') ? (int) $this->input('offset') : null;
+        $limit = $this->filled('limit') ? (int) $this->input('limit') : null;
+
+        $importer->import($offset, $limit);
+        $this->tally = $importer->getTally();
 
         return $this->errors;
+    }
+
+    public function getTally(): array
+    {
+        return $this->tally ?? ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 0];
     }
 
     public function log($string)
@@ -86,4 +112,6 @@ class ItemImportRequest extends FormRequest
     }
 
     private $errors;
+
+    private array $tally;
 }

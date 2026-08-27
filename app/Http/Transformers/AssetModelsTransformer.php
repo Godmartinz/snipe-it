@@ -48,6 +48,7 @@ class AssetModelsTransformer
                 'tag_color' => ($assetmodel->manufacturer->tag_color) ? e($assetmodel->manufacturer->tag_color) : null,
             ] : null,
             'image' => ($assetmodel->image != '') ? Storage::disk('public')->url('models/'.e($assetmodel->image)) : null,
+            'qr_code_url' => route('qr_code/common', ['object_type' => 'models', 'id' => $assetmodel->id]),
             'model_number' => ($assetmodel->model_number ? e($assetmodel->model_number) : null),
             'min_amt' => ($assetmodel->min_amt) ? (int) $assetmodel->min_amt : null,
 
@@ -84,12 +85,40 @@ class AssetModelsTransformer
 
         ];
 
+        // Whether the current caller has an open request against this
+        // model. Drives the request/cancel button-swap on the
+        // requestable tab. Only populates when the relation was
+        // preloaded (which the requestable() endpoint does); the
+        // standard index endpoint doesn't preload requests, so the
+        // relationLoaded gate keeps a per-row query out of that path.
+        // Mirrors the shape AccessoriesTransformer uses.
+        $userHasOpenRequest = auth()->check() && $assetmodel->relationLoaded('requests') && $assetmodel->requests->contains(
+            fn (\App\Models\CheckoutRequest $request) => $request->user_id === auth()->id() && $request->canceled_at === null
+        );
+
+        $array['assigned_to_self'] = $userHasOpenRequest;
+
         $permissions_array['available_actions'] = [
             'create_asset' => (Gate::allows('create', Asset::class) && ($assetmodel->deleted_at == '')),
+            // The requestable-tab JS reads this to decide whether to
+            // render the name as an <a> link or as plain text. Keeps
+            // the permission check server-side so the JS doesn't need
+            // a compile-time @can inside its Blade-hosted formatter.
+            'view' => Gate::allows('view', AssetModel::class),
             'update' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
             'delete' => $assetmodel->isDeletable(),
             'clone' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at == '')),
             'restore' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at != '')),
+            // Request / cancel: if the requestable flag is off the row
+            // never surfaces on /account/requestable anyway (scoped
+            // out by Requestable()), but honor it here too for
+            // any consumer hitting the standard index endpoint.
+            'request' => (bool) $assetmodel->requestable && ! $userHasOpenRequest,
+            'cancel' => (bool) $assetmodel->requestable && $userHasOpenRequest,
+            'bulk_selectable' => [
+                'edit' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
+                'delete' => (Gate::allows('delete', AssetModel::class) && $assetmodel->isDeletable()),
+            ],
         ];
 
         $array += $permissions_array;

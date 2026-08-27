@@ -8,6 +8,14 @@ mix
     processCssUrls: false,
     processFontUrls: true,
     clearConsole: false,
+    // Turn off postcss-calc (bundled into cssnano-preset-default). It
+    // chokes on CSS Level 5 relative color syntax such as
+    // `hsl(from var(--foo) h s calc(l - 10))`, misreading the color-channel
+    // keyword `l` as an undefined variable and emitting a "Lexical error"
+    // warning per calc() expression.
+    cssNano: {
+        calc: false,
+    },
   })
   .less("./node_modules/admin-lte/build/less/AdminLTE.less", "css/build")
   .less("./resources/assets/less/app.less", "css/build")
@@ -18,7 +26,7 @@ mix
       "./node_modules/bootstrap/dist/css/bootstrap.css",
       "./node_modules/@fortawesome/fontawesome-free/css/all.css",
       "./public/css/build/AdminLTE.css",
-      "./node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css",
+      "./node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css",
       "./node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css",
       "./node_modules/blueimp-file-upload/css/jquery.fileupload.css",
       "./node_modules/blueimp-file-upload/css/jquery.fileupload-ui.css",
@@ -81,6 +89,21 @@ mix
       "./public/js/dist/all.js"
   ).sourceMaps(true, 'source-map', 'source-map').version();
 
+/**
+ * Standalone chunk for calendar pages. FullCalendar v6 is
+ * ES-module-first and ~200KB; keeping it out of the always-loaded
+ * all.js bundle so pages that don't render a calendar don't pay the
+ * cost. Exposes window.snipeitCalendar.init(elementId, config) so
+ * per-entity calendar blades (maintenances, upcoming audits, expected
+ * checkins, user end-dates, etc.) share the same init path and only
+ * differ in which JSON events endpoint they hit.
+ */
+mix
+  .js(
+    './resources/assets/js/snipeit-calendar.js',
+    './public/js/dist/snipeit-calendar.js'
+  ).sourceMaps(true, 'source-map', 'source-map').version();
+
 
 
 /**
@@ -91,7 +114,6 @@ mix
     [
       "./node_modules/bootstrap-table/dist/bootstrap-table.css",
       "./node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.css",
-      "./node_modules/bootstrap-table/dist/extensions/fixed-columns/bootstrap-table-fixed-columns.css",
      "./resources/assets/css/dragtable.css",
     ],
     "public/css/dist/bootstrap-table.css"
@@ -110,13 +132,17 @@ mix
             './node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
             './node_modules/bootstrap-table/dist/extensions/cookie/bootstrap-table-cookie.js',
             './node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.js',
-            './node_modules/bootstrap-table/dist/extensions/fixed-columns/bootstrap-table-fixed-columns.min.js',
             './node_modules/bootstrap-table/dist/extensions/addrbar/bootstrap-table-addrbar.js',
             './node_modules/bootstrap-table/dist/extensions/print/bootstrap-table-print.min.js',
             './node_modules/bootstrap-table/dist/extensions/custom-view/bootstrap-table-custom-view.js',
             './resources/assets/js/extensions/jquery.base64.js',
             './node_modules/tableexport.jquery.plugin/tableExport.min.js',
             './node_modules/tableexport.jquery.plugin/libs/jsPDF/jspdf.umd.min.js',
+            // DejaVuSans (regular + bold) registered into jsPDF's VFS so PDF
+            // exports render Cyrillic / Greek / Hebrew / Arabic / etc. Must be
+            // included AFTER jspdf.umd.min.js — the loader reaches into
+            // window.jspdf.jsPDF.API.events to hook the font registration.
+            './resources/assets/js/jspdf-dejavu-fonts.js',
             './resources/assets/js/FileSaver.min.js',
             './node_modules/xlsx/dist/xlsx.core.min.js',
             './node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.js',

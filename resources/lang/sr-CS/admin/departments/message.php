@@ -17,6 +17,8 @@ return [
         'confirm' => 'Da li ste sigurni da želite izbrisati ovaj dep.?',
         'error' => 'Došlo je do problema s brisanjem dep. Molim pokušaj te ponovo.',
         'success' => 'Dep. je uspešno izbrisan.',
+        'bulk_success' => 'Sektor je uspešno izbrisan.|:count sektora su uspešno izbrisani.',
+        'partial_success' => 'Sektor je uspešno izbrisan. Detaljne informacije pogledajte ispod. | :count sektora su uspešno izbrisani. Detaljne informacije pogledajte ispod.',
     ],
 
 ];

@@ -13,4 +13,7 @@ return [
     'total' => 'Tổng số',
     'update' => 'Cập nhật Hợp phần',
     'checkin_limit' => 'Số lượng kiểm tra phải bằng hoặc tháp hơn giá trị :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

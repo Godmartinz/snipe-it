@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Nav atlasītu modeļu, tāpēc nekas netika izdzēsts.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count modeļi dzēsti, tomēr :fail_count nevarēja tik dzēsti, jo tiem ir piesaistītas aparatūras.',
     ],

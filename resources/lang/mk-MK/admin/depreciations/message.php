@@ -19,6 +19,8 @@ return [
         'confirm' => 'Дали сте сигурни дека сакате да го избришете овој амортизационен план?',
         'error' => 'Имаше проблем при бришење на амортизациониот план. Обидете се повторно.',
         'success' => 'Амортизациониот план е успешно избришан.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

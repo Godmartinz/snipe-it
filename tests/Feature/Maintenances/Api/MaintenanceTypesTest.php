@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Maintenances\Api;
 
+use App\Models\Asset;
+use App\Models\Maintenance;
 use App\Models\MaintenanceType;
 use App\Models\User;
 use Tests\TestCase;
@@ -74,5 +76,37 @@ class MaintenanceTypesTest extends TestCase
             ->assertStatusMessageIs('success');
 
         $this->assertSoftDeleted($type);
+    }
+
+    public function test_cannot_delete_maintenance_type_that_is_in_use()
+    {
+        $type = MaintenanceType::factory()->create();
+        Maintenance::factory()->create([
+            'maintenance_type_id' => $type->id,
+            'item_id' => Asset::factory()->create()->id,
+            'item_type' => Asset::class,
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->deleteJson(route('api.maintenance-types.destroy', $type))
+            ->assertStatus(409)
+            ->assertStatusMessageIs('error');
+
+        $this->assertDatabaseHas('maintenance_types', ['id' => $type->id, 'deleted_at' => null]);
+    }
+
+    public function test_index_exposes_maintenances_count()
+    {
+        $type = MaintenanceType::factory()->create();
+        Maintenance::factory()->count(2)->create([
+            'maintenance_type_id' => $type->id,
+            'item_id' => Asset::factory()->create()->id,
+            'item_type' => Asset::class,
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.maintenance-types.index'))
+            ->assertOk()
+            ->assertJsonFragment(['id' => $type->id, 'maintenances_count' => 2]);
     }
 }

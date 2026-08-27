@@ -20,8 +20,7 @@ class MaintenanceFileTest extends TestCase
         $company = Company::factory()->create();
 
         $user = User::factory()
-            ->editAssets()
-            ->create(['company_id' => $company->id]);
+            ->editAssets()->forCompany($company)->create();
 
         $asset = Asset::factory()->create(['company_id' => $company->id]);
 
@@ -54,8 +53,8 @@ class MaintenanceFileTest extends TestCase
         $company = Company::factory()->create();
 
         $user = User::factory()
-            ->editAssets()
-            ->create(['company_id' => $company->id]);
+            ->viewAssets()
+            ->editAssets()->forCompany($company)->create();
 
         $asset = Asset::factory()->create(['company_id' => $company->id]);
 

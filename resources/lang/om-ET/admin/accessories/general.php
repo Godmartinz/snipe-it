@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'EULA duraa sirrii tokko hin argamne. Kaayyoo keessatti tokko dabalata.',
     'total' => 'Ida\'am Walii galaa',
     'remaining' => 'Ka jiru',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Gabaadaa Uumuu',
     'use_default_eula' => 'Ulaagaalee <a href="#" data-toggle="modal" data-target="#eulaModal">durii sirrii</a> itti fayyadami.',
     'use_default_eula_disabled' => '<del>Ulaagaalee duraa sirrii itti fayyadami.</del> EULA duraa sirrii tokko hin qophaa\'in. Mee kaayyoo keessatti tokko dabaladhu.',

@@ -17,6 +17,8 @@ return [
         'confirm' => 'Наистина ли искате да изтриете този отдел?',
         'error' => 'Имаше проблем с изтриването на отдела. Моля, опитайте отново.',
         'success' => 'Отделът бе изтрит успешно.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

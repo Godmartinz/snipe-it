@@ -49,6 +49,11 @@ return [
             'log_msg' => 'Տրամադրվել է լիցենզիաների GUI-ում զանգվածային տրամադրման միջոցով',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Այս լիցենզիայի համար մնացել է ընդամենը :remaining_count տեղ՝ նվազագույն քանակ :min_amt-ի դեպքում։ Հնարավոր է՝ արժե մտածել լրացուցիչ տեղեր ձեռք բերելու մասին։',

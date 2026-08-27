@@ -20,7 +20,7 @@ return [
         'error' => 'Có vấn đề xảy ra khi xóa nhà cung cấp. Xin thử lại.',
         'success' => 'Nhà cung cấp đã xóa thành công.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

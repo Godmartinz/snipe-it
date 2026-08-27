@@ -21,7 +21,7 @@ return [
         'confirm' => 'هل أنت متأكد أنك تريد حذف هذا التصنيف؟',
         'error' => 'حدث خطأ أثناء محاولة حذف التصنيف. الرجاء المحاولة مرة أخرى.',
         'success' => 'تم حذف التصنيف بنجاح',
-        'bulk_success' => 'تم حذف التصنيفات بنجاح',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

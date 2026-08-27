@@ -16,12 +16,12 @@
                 <input type="hidden" name="id" value="{{$id}}"/>
 
                 <div class="modal-body">
-                    <div class="alert alert-danger" id="modal_error_msg" style="display:none"></div>
+                    <x-alert type="danger" id="modal_error_msg" style="display:none"></x-alert>
 
                     <div class="row">
                         <div class="col-md-12">
                             <textarea class="form-control" id="note" name="note" required>{{ old('note') }}</textarea>
-                            {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <x-form.error name="note" />
                         </div>
                     </div>
                 </div>

@@ -23,6 +23,7 @@ use App\Observers\LocationObserver;
 use App\Observers\MaintenanceObserver;
 use App\Observers\SettingObserver;
 use App\Observers\UserObserver;
+use App\View\Composers\ImpersonationBannerComposer;
 use App\View\Composers\SidebarComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\UrlGenerator;
@@ -78,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         View::composer('layouts.default', SidebarComposer::class);
+        View::composer('partials.impersonation-banner', ImpersonationBannerComposer::class);
 
         Schema::defaultStringLength(191);
         Accessory::observe(AccessoryObserver::class);

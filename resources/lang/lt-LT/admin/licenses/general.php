@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Išduota naudojant masinio licencijų išdavimo sąsają',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Liko tik :remaining_count šios licencijos vietos, kai mažiausias kiekis yra :min_amt. Apsvarstykite galimybę įsigyti daugiau vietų.',

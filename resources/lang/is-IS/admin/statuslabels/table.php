@@ -13,6 +13,7 @@ return [
     'pending' => 'Á bið',
     'status_type' => 'Tegund stöðu',
     'show_in_nav' => 'Sýna í hliðarvalmynd',
+    'status_label' => 'Status Label',
     'title' => 'Stöðu merkingar',
     'undeployable' => 'Ónothæfar',
     'update' => 'Update Status Label',

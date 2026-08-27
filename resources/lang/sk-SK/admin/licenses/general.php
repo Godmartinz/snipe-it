@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Hromadne odovzdať v rozhraní pre správu licencií',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Zostáva už iba :remaining_count voľných slotov pre túto licenciu s nastaveným minimálnym množstvom :min_amt. Mali by ste zvážiť dokúpenie ďalších slotov.',

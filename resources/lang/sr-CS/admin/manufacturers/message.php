@@ -25,7 +25,7 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovog proizvodjača?',
         'error' => 'Došlo je do problema sa brisanjem proizvodjača. Molim pokušajte ponovo.',
         'success' => 'Proizvođač je uspešno izbrisan.',
-        'bulk_success' => 'Proizvođači su uspešno izbrisani.',
+        'bulk_success' => 'Proizvođaj je uspešno izbrisan.|:count proizvođača su uspešno izbrisani.',
         'partial_success' => 'Proizvođač je uspešno izbrisan. Detaljne informacije pogledajte ispod. | :count proizvođača je uspešno izbrisano. Detaljne informacije pogledajte ispod.',
     ],
 

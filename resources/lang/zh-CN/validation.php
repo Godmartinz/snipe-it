@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => ':attribute 在 :table1 和 :table2 中必须是唯一的。 ',
     'unique_undeleted' => ':attribute 属性必须唯一。',
     'non_circular' => ':attribute 不能创建循环引用。',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute 不能是一个数组。',
     'disallow_same_pwd_as_user_fields' => '密码不能和用户名相同。',
     'letters' => '密码必须包含至少一个字母。',
@@ -171,9 +173,12 @@ return [
     'uploaded' => ':attribute 无法上传。',
     'uppercase' => ':attribute 字段必须是大写。',
     'url' => ':attribute 字段必须是一个有效的 URL。',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => ':attribute 字段必须是个有效的 ULID。',
     'uuid' => ':attribute 字段必须是一个有效的 UUID。',
-    'fmcs_location' => '管理设置中已启用完整的多公司支持及位置范围限定功能，但当前选择的位置与公司不兼容。',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => '在所选的公司和地点范围内，:attribute 必须是唯一的。',
 
     /*

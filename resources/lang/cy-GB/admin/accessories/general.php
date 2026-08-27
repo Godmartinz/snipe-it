@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Wedi methu darganfod CTDT, Ychwanegwch un yn gosodiadau.',
     'total' => 'Cyfanswm',
     'remaining' => 'Yn weddill',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Diweddaru Ategolyn',
     'use_default_eula' => 'Defnyddio\'r <a href="#" data-toggle="modal" data-target="#eulaModal">prif CTDT diofyn</a> yn lle.',
     'use_default_eula_disabled' => '<del>Defnyddio\'r CTDT diofn yn lle\'r un presennol.</del>Nid oes prif CTDT diofyn wedi gosod. Ychwanegwch un yn gosodiadau os gwelwch yn dda.',

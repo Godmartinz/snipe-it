@@ -25,7 +25,7 @@ return [
         'confirm' => 'Дали сте сигурни дека сакате да го избришете овој производител?',
         'error' => 'Имаше проблем со бришење на производителот. Обидете се повторно.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

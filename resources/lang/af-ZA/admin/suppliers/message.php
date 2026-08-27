@@ -20,7 +20,7 @@ return [
         'error' => 'Daar was \'n probleem met die verwydering van die verskaffer. Probeer asseblief weer.',
         'success' => 'Verskaffer is suksesvol verwyder.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

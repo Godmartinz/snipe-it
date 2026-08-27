@@ -20,6 +20,8 @@ return [
         'confirm' => 'Weet je zeker dat je dit accessoire wilt verwijderen?',
         'error' => 'Er is een probleem opgetreden bij het verwijderen van het accessoire. Probeer het opnieuw.',
         'success' => 'Het accessoire is verwijderd.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

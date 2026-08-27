@@ -3,22 +3,35 @@
 return [
 
     'accepted' => 'Вы успешно приняли этот элемент.',
-    'declined' => 'You have successfully declined this item.',
+    'declined' => 'Вы успешно отклонили этот элемент.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Ваши пользователи были успешно обновлены, однако запись менеджера не была сохранена, потому что выбранный менеджер также присутствовал в редактируемом списке пользователей, и пользователи не могут быть менеджерами самим себе. Пожалуйста выберите ваших пользователей снова, за исключением их менеджера.',
     'user_exists' => 'Пользователь уже существует!',
     'cannot_delete' => 'Пользователь не существует или у вас нет прав на его удаление.',
     'user_not_found' => 'Пользователь не существует или у вас нет разрешения на его просмотр.',
     'user_login_required' => 'Поле "Логин" является обязательным',
     'user_has_no_assets_assigned' => 'Нет активов закреплённых за этим пользователем.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Поле "Пароль" является обязательным.',
     'insufficient_permissions' => 'Недостаточно прав.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Этот пользователь был удален. Вы должны его восстановить чтобы иметь возможность его редактировать или привязывать новые активы.',
     'ldap_not_configured' => 'Интеграция с LDAP не настроена для этой инсталляции.',
     'password_resets_sent' => 'Ссылка для сброса пароля была отправлена выбранным пользователям которые имеют действительный адрес электронной почты а активированы.',
-    'not_activated' => 'This user cannot login, so they cannot accept assets via email.',
+    'not_activated' => 'Этот пользователь не может войти в систему, поэтому он не может принимать активы по электронной почте.',
     'password_reset_sent' => 'Ссылка для сброса пароля была отправлена на адрес :email!',
     'user_has_no_email' => 'У этого пользователя нет адреса электронной почты в его профиле.',
     'log_record_not_found' => 'Соответствующая запись журнала для этого пользователя не найдена.',
+
+    'impersonate' => [
+        'started' => 'Теперь вы вошли как :name.',
+        'stopped' => 'Вы вернулись к своему аккаунту.',
+        'cannot_impersonate_self' => 'Вы не можете войти в систему под своим именем.',
+        'cannot_impersonate_superuser' => 'Вы не можете войти как другой суперпользователь.',
+        'target_not_active' => 'Этот пользователь деактивирован или удалён и не может быть авторизован.',
+        'impersonator_missing' => 'Оригинальная учетная запись для работы от имени другого пользователя больше не существует. Пожалуйста, войдите снова.',
+    ],
 
     'success' => [
         'create' => 'Пользователь успешно создан.',
@@ -31,7 +44,7 @@ return [
         'unsuspend' => 'Пользователь успешно разморожен.',
         'restored' => 'Пользователь успешно восстановлен.',
         'import' => 'Пользователи успешно импортированы.',
-        'acceptance_reminder_sent' => 'Acceptance reminder sent for :count pending item.|Acceptance reminder sent for :count pending items.',
+        'acceptance_reminder_sent' => 'Напоминание о подтверждении отправлено для :count ожидающего подтверждения элемента.| Напоминание о подтверждении отправлено для :count ожидающих подтверждения элементов.',
     ],
 
     'error' => [
@@ -46,7 +59,7 @@ return [
         'delete_has_users_var' => 'Этот пользователь все еще является руководителем другого пользователя. Сначала выберите другого руководителя для этого пользователя.|Этот пользователь все является руководителем :count пользователей. Сначала выберите для них другого руководителя.',
         'unsuspend' => 'При разморозке пользователя возникла проблема. Пожалуйста попробуйте снова.',
         'import' => 'При импорте пользователей произошла ошибка. Попробуйте еще раз.',
-        'asset_already_accepted' => 'This item has already been accepted.',
+        'asset_already_accepted' => 'Этот элемент уже был принят.',
         'accept_or_decline' => 'Примите или отклоните актив.',
         'cannot_delete_yourself' => 'Нам было бы очень жаль, если бы вы удалили себя. Пожалуйста, подумайте еще раз.',
         'incorrect_user_accepted' => 'Актив, который вы попытались принять, не был записан на вас.',
@@ -56,7 +69,8 @@ return [
         'ldap_could_not_get_entries' => 'Не могу загрузить записи с сервера LDAP. Проверьте настройки LDAP сервера в файле конфигурации LDAP.<br>Ошибка от LDAP сервера:',
         'password_ldap' => 'Пароль для этой учетной записи управляется LDAP/Active Directory. Пожалуйста, свяжитесь с департаментом ИТ, чтобы изменить свой пароль. ',
         'multi_company_items_assigned' => 'У этого пользователя есть назначенные ему элементы, принадлежащие другой компании. Пожалуйста, зарегистрируйте их или отредактируйте название компании.',
-        'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'no_pending_acceptances' => 'У этого пользователя нет ожидающих подтверждения заявок, о которых нужно напомнить.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

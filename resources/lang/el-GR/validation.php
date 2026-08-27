@@ -160,6 +160,8 @@ return [
     'two_column_unique_undeleted' => 'Το :attribute πρέπει να είναι μοναδικό σε :table1 και :table2. ',
     'unique_undeleted' => 'Το :χαρακτηριστικό πρέπει να είναι μοναδικό.',
     'non_circular' => 'Το χαρακτηριστικό: δεν πρέπει να δημιουργήσει μια κυκλική αναφορά.',
+    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
+    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
     'not_array' => ':attribute δεν μπορεί να είναι ένας πίνακας.',
     'disallow_same_pwd_as_user_fields' => 'Ο κωδικός πρόσβασης δεν μπορεί να είναι ο ίδιος με το όνομα χρήστη.',
     'letters' => 'Ο κωδικός πρόσβασης πρέπει να περιέχει τουλάχιστον ένα γράμμα.',
@@ -171,9 +173,12 @@ return [
     'uploaded' => 'Το χαρακτηριστικό:: απέτυχε να μεταφορτωθεί.',
     'uppercase' => 'The :attribute field must be uppercase.',
     'url' => 'The :attribute field must be a valid URL.',
+    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
-    'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
+    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
+    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
     'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
 
     /*

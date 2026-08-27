@@ -13,4 +13,7 @@ return [
     'total' => 'Celkem',
     'update' => 'Upravit díl',
     'checkin_limit' => 'Přijaté množství musí odpovídat, nebo být nižší než :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

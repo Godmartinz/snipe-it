@@ -20,6 +20,8 @@ return [
         'confirm' => 'Tem certeza que deseja deletar este Rótulo de Situação?',
         'error' => 'Ocorreu um problema ao deletar o Rótulo de Situação. Por favor tente novamente.',
         'success' => 'O Rótulo de Situação foi deletado com sucesso.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

@@ -171,6 +171,25 @@ class BulkCheckoutEmailTest extends TestCase
         });
     }
 
+    public function test_sent_to_multiple_cc_addresses_when_admin_cc_email_is_comma_separated()
+    {
+        // Regression for #19426. Bulk checkout used to pass the raw
+        // admin_cc_email string to Mail::to, so a comma-separated value
+        // hit Symfony Mailer as a single mangled recipient. Both
+        // addresses must land as individual recipients on the send.
+        $this->assets = Asset::factory()->requiresAcceptance()->count(2)->create();
+
+        $this->settings->enableAdminCC('cc-one@example.org, cc-two@example.org')->disableAdminCCAlways();
+
+        $this->sendRequest();
+
+        $this->assertSingularCheckoutEmailNotSent();
+
+        Mail::assertSent(BulkAssetCheckoutMail::class, function (BulkAssetCheckoutMail $mail) {
+            return $mail->hasTo('cc-one@example.org') && $mail->hasTo('cc-two@example.org');
+        });
+    }
+
     public function test_sent_to_cc_address_when_assets_do_not_require_acceptance_or_have_eula_but_admin_cc_always_enabled()
     {
         $this->settings->enableAdminCC('cc@example.com')->enableAdminCCAlways();

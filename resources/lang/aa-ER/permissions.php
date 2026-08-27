@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => 'crwdns13928:0crwdne13928:0',
-        'note' => 'crwdns13930:0crwdne13930:0',
+        'note' => 'crwdns15199:0crwdne15199:0',
     ],
 
     'assetsview' => [
         'name' => 'crwdns13932:0crwdne13932:0',
+        'note' => 'crwdns15201:0crwdne15201:0',
     ],
 
     'assetscreate' => [

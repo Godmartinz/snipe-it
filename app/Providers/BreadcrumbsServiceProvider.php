@@ -170,14 +170,16 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push(trans('general.create'), route('companies.create'))
         );
 
-        Breadcrumbs::for('companies.show', fn (Trail $trail, Company $company) => $trail->parent('companies.index', route('companies.index'))
-            ->push($company->name, route('companies.show', $company))
-        );
+        Breadcrumbs::for('companies.show', function (Trail $trail, Company $company) {
+            $trail->parent('companies.index', route('companies.index'));
+            $this->pushCompanyHierarchy($trail, $company);
+        });
 
-        Breadcrumbs::for('companies.edit', fn (Trail $trail, Company $company) => $trail->parent('companies.index', route('companies.index'))
-            ->push($company->display_name, route('companies.show', $company))
-            ->push(trans('general.update'))
-        );
+        Breadcrumbs::for('companies.edit', function (Trail $trail, Company $company) {
+            $trail->parent('companies.index', route('companies.index'));
+            $this->pushCompanyHierarchy($trail, $company);
+            $trail->push(trans('general.update'));
+        });
 
         /**
          * Components Breadcrumbs
@@ -590,5 +592,19 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         foreach ($ancestorChain as $node) {
             $trail->push($node->name, route('locations.show', $node));
         }
+    }
+
+    /**
+     * Append parent -> child breadcrumbs for a company. The one-level-deep
+     * validator on parent_id caps the chain at depth 2, so this is always
+     * either [company] or [parent, company].
+     */
+    private function pushCompanyHierarchy(Trail $trail, Company $company): void
+    {
+        if ($company->parent) {
+            $trail->push($company->parent->name, route('companies.show', $company->parent));
+        }
+
+        $trail->push($company->display_name, route('companies.show', $company));
     }
 }

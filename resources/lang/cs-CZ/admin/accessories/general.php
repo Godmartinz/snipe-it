@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Žádná primární EULA. Přidat novou v Nastavení.',
     'total' => 'CELKEM',
     'remaining' => 'Dostupný',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Aktualizace příslušenství',
     'use_default_eula' => 'Použít <a href="#" data-toggle="modal" data-target="#eulaModal">primární výchozí EULA</a>.',
     'use_default_eula_disabled' => '<del>Použít výchozí EULA.</del>

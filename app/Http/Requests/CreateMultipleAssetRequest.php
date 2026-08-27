@@ -32,7 +32,15 @@ class CreateMultipleAssetRequest extends ImageUploadRequest // should I extend f
         }
 
         if (Setting::getSettings()->full_multiple_companies_support == '1' && ! $this->user()->isSuperUser()) {
-            $this->mergeIfMissing(['company_id' => $this->user()->company_id]);
+            // Default the new asset's company to the first company the actor is
+            // pivoted to. The pivot is the source of truth for membership; the
+            // legacy users.company_id scalar is no longer consulted for scoping.
+            $primaryCompanyId = $this->user()->companies()
+                ->orderBy('companies.id')
+                ->value('companies.id');
+            if ($primaryCompanyId) {
+                $this->mergeIfMissing(['company_id' => (int) $primaryCompanyId]);
+            }
         }
     }
 

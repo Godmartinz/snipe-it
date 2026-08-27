@@ -13,58 +13,47 @@
 
 {{-- Page content --}}
 @section('content')
-    <div class="row">
-        <!-- left column -->
-        <div class="col-md-8 col-md-offset-2">
-            <form class="form-horizontal" method="post" action="{{ route('locations.bulkdelete.store') }}" autocomplete="off" role="form">
-                {{csrf_field()}}
-                <div class="box box-default">
-                    <div class="box-header with-border">
-                        <h2 class="box-title" style="color: red">{{ trans_choice('general.bulk.delete.warn', $valid_count, ['count' => $valid_count,'object_type' => trans_choice('general.location_plural', $valid_count)]) }}</h2>
-                    </div>
+    <x-container class="col-md-8 col-md-offset-2">
+        <x-form route="{{ route('locations.bulkdelete.store') }}">
+            <x-box>
+                <x-slot:header>
+                    <span style="color: red">
+                        {{ trans_choice('general.bulk.delete.warn', $valid_count, ['count' => $valid_count, 'object_type' => trans_choice('general.location_plural', $valid_count)]) }}
+                    </span>
+                </x-slot:header>
 
-                    <div class="box-body">
-                        <table class="table table-striped table-condensed">
-                            <thead>
-                            <tr>
-                                <td class="col-md-1">
-                                    <label>
-                                        <input type="checkbox" id="checkAll" checked="checked">
-                                    </label>
+                <table class="table table-striped table-condensed">
+                    <thead>
+                        <tr>
+                            <td class="col-md-1">
+                                <label>
+                                    <input type="checkbox" id="checkAll" checked data-toggle="check-all">
+                                </label>
+                            </td>
+                            <td class="col-md-10">{{ trans('general.name') }}</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($locations as $location)
+                            <tr{!! (($location->assets_count > 0) ? ' class="danger"' : '') !!}>
+                                <td>
+                                    <input type="checkbox" name="ids[]" value="{{ $location->id }}" {!! (($location->isDeletable()) ? ' checked="checked"' : ' disabled') !!}>
                                 </td>
-                                <td class="col-md-10">{{ trans('general.name') }}</td>
+                                <td>{{ $location->name }}</td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            @foreach ($locations as $location)
-                                <tr{!!  (($location->assets_count > 0 ) ? ' class="danger"' : '') !!}>
-                                    <td>
-                                        <input type="checkbox" name="ids[]" class="{  ($location->isDeletable() ? '' : ' disabled') }}" value="{{ $location->id }}" {!!  (($location->isDeletable()) ? ' checked="checked"' : ' disabled') !!}>
-                                    </td>
-                                    <td>{{ $location->name }}</td>
+                        @endforeach
+                    </tbody>
+                </table>
 
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div><!-- /.box-body -->
-
+                <x-slot:customfooter>
                     <div class="box-footer text-right">
                         <a class="btn btn-link pull-left" href="{{ URL::previous() }}">{{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-success" id="submit-button"><x-icon type="checkmark" /> {{ trans('general.delete') }}</button>
-                    </div><!-- /.box-footer -->
-                </div><!-- /.box -->
-            </form>
-        </div> <!-- .col-md-12-->
-    </div><!--.row-->
-@stop
-@section('moar_scripts')
-    <script>
-
-
-        $("#checkAll").change(function () {
-            $("input:checkbox").prop('checked', $(this).prop("checked"));
-        });
-
-    </script>
+                        <button type="submit" class="btn btn-success" id="submit-button">
+                            <x-icon type="checkmark" /> {{ trans('general.delete') }}
+                        </button>
+                    </div>
+                </x-slot:customfooter>
+            </x-box>
+        </x-form>
+    </x-container>
 @stop

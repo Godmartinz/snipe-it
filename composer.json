@@ -26,7 +26,7 @@
     "ext-mbstring": "*",
     "ext-pdo": "*",
     "alek13/slack": "^2.0",
-    "arietimmerman/laravel-scim-server": "dev-scimv2_with_logging",
+    "arietimmerman/laravel-scim-server": "dev-main",
     "bacon/bacon-qr-code": "^2.0",
     "doctrine/cache": "^1.10",
     "doctrine/dbal": "^3.1",
@@ -36,6 +36,7 @@
     "erusev/parsedown": "^1.7",
     "fakerphp/faker": "^1.24",
     "guzzlehttp/guzzle": "^7.0.1",
+    "innoge/laravel-msgraph-mail": "^2.0",
     "intervention/image": "^2.5",
     "javiereguiluz/easyslugger": "^1.0",
     "laravel-notification-channels/google-chat": "^3.0",
@@ -47,6 +48,7 @@
     "laravel/socialite": "^5.6",
     "laravel/tinker": "^2.6",
     "laravel/ui": "^4.0",
+    "league/commonmark": "^2.9.0",
     "league/csv": "^9.7",
     "league/flysystem-aws-s3-v3": "^3.0",
     "livewire/livewire": "^4.0",
@@ -78,15 +80,21 @@
     "ext-exif": "*"
   },
   "require-dev": {
+    "brianium/paratest": "^7.8",
     "fruitcake/laravel-debugbar": "^4.0",
     "larastan/larastan": "^3.0",
+    "laravel/boost": "^2.5",
     "laravel/pint": "^1.29",
     "laravel/telescope": "^5.11",
     "mockery/mockery": "^1.4",
     "nunomaduro/phpinsights": "^2.11",
     "php-mock/php-mock-phpunit": "^2.10",
+    "phpmd/phpmd": "^2.15",
     "phpunit/phpunit": "^11.0",
     "squizlabs/php_codesniffer": "^3.5"
+  },
+  "conflict": {
+    "laravel/prompts": "<0.3.19"
   },
   "extra": {
     "laravel": {
@@ -121,11 +129,22 @@
       "@php artisan package:discover --ansi",
       "@php artisan vendor:publish --force --tag=livewire:assets --ansi"
     ],
+    "post-update-cmd": [
+      "@php artisan boost:update --ansi"
+    ],
     "post-create-project-cmd": [
       "php artisan key:generate"
     ],
     "coverage:herd:clover": "herd coverage vendor/bin/phpunit --coverage-clover tests/coverage/clover.xml",
-    "coverage:herd:html": "herd coverage vendor/bin/phpunit --coverage-html tests/coverage/html"
+    "coverage:herd:html": "herd coverage vendor/bin/phpunit --coverage-html tests/coverage/html",
+    "analyse": [
+      "@analyse:phpstan",
+      "@analyse:phpmd"
+    ],
+    "analyse:phpstan": "phpstan analyse --memory-limit=2G",
+    "analyse:phpstan:baseline": "phpstan analyse --memory-limit=2G --generate-baseline=phpstan-baseline.neon",
+    "analyse:phpmd": "phpmd app text phpmd-ruleset.xml --baseline-file phpmd.baseline.xml",
+    "analyse:phpmd:baseline": "phpmd app xml phpmd-ruleset.xml --generate-baseline"
   },
   "config": {
     "preferred-install": "dist",

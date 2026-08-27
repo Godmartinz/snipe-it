@@ -3,6 +3,7 @@
 return [
     'actions' => 'Gweithredoedd',
     'add' => 'Ychwanegu newydd',
+    'back' => 'Yn ôl',
     'cancel' => 'Canslo',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Dileu',

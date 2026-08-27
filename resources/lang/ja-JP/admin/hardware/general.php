@@ -7,6 +7,8 @@ return [
     'asset' => '資産',
     'bulk_checkout' => '一括チェックアウト',
     'bulk_checkin' => 'Bulk Checkin',
+    'bulk_audit' => '一括監査',
+    'bulk_audit_location_hidden_mixed_companies' => 'The audit location field is hidden because the selected assets belong to multiple companies. With location scoping enabled, one shared audit location can\'t apply to assets from different companies. Audit each company\'s assets in a separate batch to set an audit location.',
     'checkin' => '資産をチェックイン',
     'checkin_assets' => '資産をチェックイン',
     'checkout' => '資産をチェックアウト',

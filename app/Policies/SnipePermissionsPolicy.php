@@ -108,6 +108,21 @@ abstract class SnipePermissionsPolicy
     }
 
     /**
+     * Determine whether the user can upload or delete files on the resource.
+     * Callers should use this for write actions (POST/DELETE on the files
+     * endpoint) and `files()` for read actions (index/show). Defaults to the
+     * same check as `files()` so most resources need no override. Subclasses
+     * override this when the read ability is deliberately broader than the
+     * write ability, e.g. AssetModelPolicy where asset viewers can see model
+     * files inline but must not be able to upload or delete them without the
+     * dedicated `models.files` grant.
+     */
+    public function manageFiles(User $user, $item = null)
+    {
+        return $this->files($user, $item);
+    }
+
+    /**
      * Determine whether the user can create model.
      *
      * @return mixed

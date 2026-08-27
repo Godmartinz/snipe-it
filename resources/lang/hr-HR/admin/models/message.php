@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Nijedan model nije odabran, tako da ništa nije izbrisano.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count model(a) je izbrisano, no :fail_count nije bilo moguće izbrisati jer još uvijek imaju imovinu povezanu s njima.',
     ],

@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use App\Exceptions\MissingLogTarget;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CompanyableScope;
@@ -73,7 +74,12 @@ trait Loggable
 
         // Start with the polymorphic history relation so all filters and
         // ordering are applied to the same query instance.
-        $history = $this->history();
+        //
+        // 'orderItem.order' eager-loaded because ActionlogsTransformer
+        // renders order_number / purchase_order via the OrderItem line
+        // to its parent Order. Without this the transformer fires an
+        // N+1 subquery per row in the history tab.
+        $history = $this->history()->with('orderItem.order');
 
         if ($request->filled('search')) {
             $history = $history->TextSearch(e($request->input('search')));
@@ -126,6 +132,13 @@ trait Loggable
      * @since  [v3.4]
      *
      * @return Actionlog
+     *
+     * @throws MissingLogTarget When the caller couldn't hand us a valid
+     *                          target. Deliberately typed so callers wrapping
+     *                          their work in a DB::transaction can catch it
+     *                          specifically, roll the transaction back, and
+     *                          return a proper 4xx response body instead of
+     *                          letting an unhandled 500 leak into the caller.
      */
     public function logCheckout($note, $target, $action_date = null, $originalValues = [], $quantity = 1)
     {
@@ -140,15 +153,11 @@ trait Loggable
         }
 
         if (! isset($target)) {
-            throw new \Exception('All checkout logs require a target.');
-
-            return;
+            throw new MissingLogTarget('All checkout logs require a target.');
         }
 
         if (! isset($target->id)) {
-            throw new \Exception('That target seems invalid (no target ID available).');
-
-            return;
+            throw new MissingLogTarget('That target seems invalid (no target ID available).');
         }
 
         $log->target_type = get_class($target);
@@ -378,16 +387,11 @@ trait Loggable
 
         $log = new Actionlog;
 
-        if (static::class == Asset::class) {
-            if ($asset = Asset::find($log->item_id)) {
-                // add the custom fields that were changed
-                if ($asset->model->fieldset) {
-                    $fields_array = [];
-                    foreach ($asset->model->fieldset->fields as $field) {
-                        if ($field->display_audit == 1) {
-                            $fields_array[$field->db_column] = $asset->{$field->db_column};
-                        }
-                    }
+        $fields_array = [];
+        if (static::class == Asset::class && $this->model && $this->model->fieldset) {
+            foreach ($this->model->fieldset->fields as $field) {
+                if ($field->display_audit == 1) {
+                    $fields_array[$field->db_column] = $this->{$field->db_column};
                 }
             }
         }
@@ -401,6 +405,10 @@ trait Loggable
                 $changed[$key]['old'] = $value;
                 $changed[$key]['new'] = $this->getAttributes()[$key];
             }
+        }
+
+        if (! empty($fields_array)) {
+            $changed['_audit_snapshot'] = $fields_array;
         }
 
         if (! empty($changed)) {
@@ -449,7 +457,7 @@ trait Loggable
 
             } catch (ServerException $e) {
 
-                Log::error('Teams webhook server error', [
+                Log::warning('Teams webhook server error', [
                     'endpoint' => $endpoint,
                     'status' => $e->getResponse()?->getStatusCode(),
                     'error' => $e->getMessage(),
@@ -464,19 +472,28 @@ trait Loggable
                 ]);
             } catch (RequestException $e) {
 
-                Log::error('Teams webhook request failure', [
+                Log::warning('Teams webhook request failure', [
                     'endpoint' => $endpoint,
                     'error' => $e->getMessage(),
                 ]);
             } catch (Throwable $e) {
-                Log::error('Teams webhook failed unexpectedly', [
+                Log::warning('Teams webhook failed unexpectedly', [
                     'endpoint' => $endpoint,
                     'exception' => get_class($e),
                     'error' => $e->getMessage(),
                 ]);
             }
         } else {
-            Setting::getSettings()->notify(new AuditNotification($params));
+            try {
+                Setting::getSettings()->notify(new AuditNotification($params));
+            } catch (Throwable $e) {
+                Log::warning('Audit webhook notification failed', [
+                    'endpoint' => Setting::getSettings()->webhook_endpoint,
+                    'channel' => Setting::getSettings()->webhook_selected,
+                    'exception' => get_class($e),
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $log;

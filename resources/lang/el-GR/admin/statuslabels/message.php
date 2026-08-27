@@ -20,6 +20,8 @@ return [
         'confirm' => 'Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ετικέτα κατάστασης;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας την ετικέτα κατάστασης. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Η ετικέτα κατάστασης διαγράφηκε με επιτυχία.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

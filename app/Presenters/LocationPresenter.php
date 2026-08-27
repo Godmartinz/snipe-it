@@ -17,6 +17,7 @@ class LocationPresenter extends Presenter
         $layout = [
             [
                 'field' => 'bulk_selectable',
+                'scope' => 'col',
                 'checkbox' => true,
                 'formatter' => 'checkboxEnabledFormatter',
                 'titleTooltip' => trans('general.select_all_none'),
@@ -24,6 +25,7 @@ class LocationPresenter extends Presenter
                 'class' => 'hidden-print',
             ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -32,6 +34,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -41,6 +44,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -49,6 +53,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'locationsLinkFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -57,6 +62,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'parent',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -65,24 +71,29 @@ class LocationPresenter extends Presenter
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
                 'field' => 'users_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.people'),
                 'titleTooltip' => trans('general.people'),
                 'visible' => true,
-                'class' => 'css-house-user',
+                'class' => 'css-house-user text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/locations/message.current_location'),
                 'titleTooltip' => trans('admin/locations/message.current_location'),
                 'visible' => true,
-                'class' => 'css-house-laptop',
+                'class' => 'css-house-laptop text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'rtd_assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -90,65 +101,79 @@ class LocationPresenter extends Presenter
                 'titleTooltip' => trans('admin/hardware/form.default_location'),
                 'tooltip' => 'true',
                 'visible' => false,
-                'class' => 'css-house-flag',
+                'class' => 'css-house-flag text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assigned_assets_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/locations/message.assigned_assets'),
                 'titleTooltip' => trans('admin/locations/message.assigned_assets'),
                 'visible' => true,
-                'class' => 'css-house-laptop',
+                'class' => 'css-house-laptop text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'accessories_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.accessories'),
                 'titleTooltip' => trans('general.accessories'),
                 'visible' => true,
-                'class' => 'css-accessory',
+                'class' => 'css-accessory text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'assigned_accessories_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.accessories_assigned'),
                 'titleTooltip' => trans('general.accessories_assigned'),
                 'visible' => true,
-                'class' => 'css-accessory-alt',
+                'class' => 'css-accessory-alt text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'components_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.components'),
                 'titleTooltip' => trans('general.components'),
                 'visible' => true,
-                'class' => 'css-component',
+                'class' => 'css-component text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'consumables_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.consumables'),
                 'titleTooltip' => trans('general.consumables'),
                 'visible' => true,
-                'class' => 'css-consumable',
+                'class' => 'css-consumable text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ],
             [
                 'field' => 'children_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('general.child_locations'),
                 'titleTooltip' => trans('general.child_locations'),
                 'visible' => true,
-                'class' => 'css-child-locations',
+                'class' => 'css-child-locations text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'currency',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -158,6 +183,7 @@ class LocationPresenter extends Presenter
                 'class' => 'css-currency',
             ], [
                 'field' => 'address',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -165,6 +191,7 @@ class LocationPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'address2',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -172,6 +199,7 @@ class LocationPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'city',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -179,6 +207,7 @@ class LocationPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'state',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -186,6 +215,7 @@ class LocationPresenter extends Presenter
                 'visible' => true,
             ], [
                 'field' => 'zip',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -193,6 +223,7 @@ class LocationPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'country',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -200,6 +231,7 @@ class LocationPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'phone',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -208,6 +240,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'fax',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -216,6 +249,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'phoneFormatter',
             ], [
                 'field' => 'ldap_ou',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -223,6 +257,7 @@ class LocationPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'manager',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -231,6 +266,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'tag_color',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -239,12 +275,14 @@ class LocationPresenter extends Presenter
                 'formatter' => 'colorTagFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -254,6 +292,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -262,6 +301,7 @@ class LocationPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -281,6 +321,7 @@ class LocationPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -289,6 +330,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'accessory',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -298,6 +340,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -307,6 +350,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -315,6 +359,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -324,6 +369,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.created_by'),
@@ -332,6 +378,7 @@ class LocationPresenter extends Presenter
             ],
             [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

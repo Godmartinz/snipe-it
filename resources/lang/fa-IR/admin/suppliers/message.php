@@ -20,7 +20,7 @@ return [
         'error' => 'در حذف کردن این کارپرداز مشکلی وجود داشت. لطفا دوباره تلاش کنید.',
         'success' => 'کارپرداز با موفقیت حذف شد.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

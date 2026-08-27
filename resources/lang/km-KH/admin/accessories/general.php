@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'រកមិនឃើញ EULA លំនាំដើមចម្បងទេ។ បន្ថែមមួយនៅក្នុងការកំណត់។',
     'total' => 'សរុប',
     'remaining' => 'Avail',
+    'requestable' => 'Users may request this accessory',
     'update' => 'ធ្វើបច្ចុប្បន្នភាពគ្រឿងបន្លាស់',
     'use_default_eula' => 'ប្រើ <a href="#" data-toggle="modal" data-target="#eulaModal">លំនាំដើមចម្បង EULA</a> ជំនួសវិញ។',
     'use_default_eula_disabled' => '<del>ប្រើ EULA លំនាំដើមចម្បងជំនួសវិញ។</del> គ្មាន EULA លំនាំដើមចម្បងត្រូវបានកំណត់ទេ។ សូមបន្ថែមមួយនៅក្នុងការកំណត់។',

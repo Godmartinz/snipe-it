@@ -54,6 +54,8 @@ class CheckoutAcceptance extends Model
 
     /**
      * Accessor for the checkoutable item's category name.
+     *
+     * @return Attribute<string|null, never>
      */
     protected function checkoutableCategoryName(): Attribute
     {
@@ -180,6 +182,9 @@ class CheckoutAcceptance extends Model
         return $query->whereNull('accepted_at')->whereNotNull('declined_at');
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function displayCheckoutableType(): Attribute
     {
         return Attribute::make(
@@ -217,7 +222,7 @@ class CheckoutAcceptance extends Model
         if ($data['logo'] != null) {
             $pdf->writeHTML('<img src="@'.$data['logo'].'">', true, 0, true, 0, '');
         } else {
-            $pdf->writeHTML('<h3>'.$data['site_name'].'</h3><br /><br />', true, 0, true, 0, 'C');
+            $pdf->writeHTML('<h3>'.e($data['site_name']).'</h3><br /><br />', true, 0, true, 0, 'C');
         }
 
         $pdf->Ln();
@@ -243,13 +248,13 @@ class CheckoutAcceptance extends Model
         if ($data['item_serial'] != null) {
             $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
         }
-        if (!empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
+        if (! empty($data['custom_fields']) && is_iterable($data['custom_fields'])) {
             foreach ($data['custom_fields'] as $customField) {
                 $label = $customField['label'] ?? null;
                 $value = $customField['value'] ?? null;
 
                 if (($label !== null) && ($value !== null) && ($value !== '')) {
-                    $pdf->writeHTML(e((string) $label) . ': ' . e((string) $value), true, 0, true, 0, '');
+                    $pdf->writeHTML(e((string) $label).': '.e((string) $value), true, 0, true, 0, '');
                 }
             }
         }
@@ -259,7 +264,7 @@ class CheckoutAcceptance extends Model
         }
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
-        $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.$data['employee_num'].')' : ''), true, 0, true, 0, '');
+        $pdf->writeHTML(trans('general.assignee').': '.e($data['assigned_to']).($data['employee_num'] ? ' ('.e($data['employee_num']).')' : ''), true, 0, true, 0, '');
         if ($data['email'] != null) {
             $pdf->writeHTML(trans('general.email').': '.e($data['email']), true, 0, true, 0, '');
         }
@@ -267,14 +272,29 @@ class CheckoutAcceptance extends Model
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
 
-        // Break the EULA into lines based on newlines, and check each line for RTL or CJK characters
-        $eula_lines = preg_split("/\r\n|\n|\r/", $data['eula']);
-
-        foreach ($eula_lines as $eula_line) {
-            Helper::hasRtl($eula_line) ? $pdf->setRTL(true) : $pdf->setRTL(false);
-            Helper::isCjk($eula_line) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
-            $pdf->writeHTML(Helper::parseEscapedMarkedown($eula_line), true, 0, true, 0, '');
-        }
+        // $data['eula'] arrives here as pre-rendered, sanitized HTML
+        // (SnipeModel::getEula routes through sanitizeEulaForRender which
+        // runs parseEscapedMarkedown + strips img tags before returning).
+        // The old block-split + parseEscapedMarkedown-per-block path only
+        // made sense when the input was raw markdown with blank-line block
+        // boundaries. Running parseEscapedMarkedown on already-rendered
+        // HTML double-parses: Parsedown sees the block-level tags as text,
+        // strips them, and re-parses the remaining plaintext, which is why
+        // #19544 reports the PDF EULA rendering as flat text with lists /
+        // headings / bold lost. Regression from a434253a94 which added the
+        // sanitize-at-getEula step in v8.7.0 but did not update this PDF
+        // path.
+        //
+        // The whole EULA gets one RTL/CJK detection pass (looking at the
+        // rendered HTML is fine for the heuristic - the RTL/CJK codepoints
+        // aren't affected by the HTML tags around them). Mixed-script EULAs
+        // pick the whole-document dominant script rather than the per-block
+        // one, which is a small edge-case regression on installs that had
+        // an all-Arabic EULA with a Latin heading, but WAY less broken than
+        // the current double-parse behavior.
+        Helper::hasRtl($data['eula']) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+        Helper::isCjk($data['eula']) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+        $pdf->writeHTML($data['eula'], true, 0, true, 0, '');
         $pdf->Ln();
         $pdf->Ln();
         $pdf->setRTL(false);
@@ -300,6 +320,5 @@ class CheckoutAcceptance extends Model
         $pdf->writeHTML(trans('general.accepted_date').': '.e($data['accepted_date']), true, 0, true, 0, '');
 
         return $pdf->Output($pdf_filename, 'S');
-
     }
 }

@@ -94,7 +94,7 @@ class UserSearchTest extends TestCase
             ->has(User::factory(['first_name' => 'Company B', 'last_name' => 'User']))
             ->create();
 
-        $response = $this->actingAsForApi(User::factory()->for($companyA)->viewUsers()->create())
+        $response = $this->actingAsForApi(User::factory()->forCompany($companyA)->viewUsers()->create())
             ->getJson(route('api.users.index'))
             ->assertOk();
 
@@ -122,7 +122,7 @@ class UserSearchTest extends TestCase
             ->has(User::factory(['first_name' => 'Company B', 'last_name' => 'User']))
             ->create();
 
-        $response = $this->actingAsForApi(User::factory()->for($companyA)->viewUsers()->create())
+        $response = $this->actingAsForApi(User::factory()->forCompany($companyA)->viewUsers()->create())
             ->getJson(route('api.users.index', [
                 'deleted' => 'false',
                 'company_id' => null,

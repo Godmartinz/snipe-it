@@ -20,6 +20,8 @@ return [
         'confirm' => 'Oletko varma että haluat poistaa tämän tilamerkinnän?',
         'error' => 'Tilamerkinnän poistamisessa tapahtui virhe. Yritä uudelleen.',
         'success' => 'Tilamerkintä poistettiin onnistuneesti.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

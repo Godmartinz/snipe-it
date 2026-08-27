@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ydych chi\'n sicr eich bod eisiau dileu\'r label yma?',
         'error' => 'Nid oedd yn bosib dileu\'r label statws. Ceisiwch eto o. g. y. dd.',
         'success' => 'Label wedi dileu\'n llwyddiannus.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

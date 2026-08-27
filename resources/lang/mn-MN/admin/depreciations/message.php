@@ -19,6 +19,8 @@ return [
         'confirm' => 'Та энэ элэгдлийн ангилалыг устгахыг хүсч байгаадаа итгэлтэй байна уу?',
         'error' => 'Элэгдлийн анги устгах асуудал гарлаа. Дахин оролдоно уу.',
         'success' => 'Элэгдэлийн анги амжилттай устгасан.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

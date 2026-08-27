@@ -20,6 +20,8 @@ return [
         'confirm' => 'Apakah anda yakin ingin menghapus Label Status ini?',
         'error' => 'Terjadi masalah saat menghapus Label Status. Silahkan coba lagi.',
         'success' => 'Label Status berhasil dihapus.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

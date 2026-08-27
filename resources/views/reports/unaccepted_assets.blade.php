@@ -42,8 +42,6 @@
                 data-sort-name="created_at"
                 data-advanced-search="false"
                 id="unacceptedAssetsReport"
-                data-fixed-number="false"
-                data-fixed-right-number="false"
                 class="table table-striped snipe-table"
                 data-export-options='{
                     "fileName": "maintenance-report-{{ date('Y-m-d') }}",
@@ -51,15 +49,15 @@
                     }'>
             <thead>
               <tr role="row">
-                <th class="col-sm-1" data-field="created_at" data-searchable="false" data-sortable="true">{{ trans('general.date') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('general.type') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('admin/companies/table.title') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('general.category') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/form.model') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('general.name') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/table.asset_tag') }}</th>
-                <th class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/table.checkoutto') }}</th>
-                <th class="col-md-1"><span class="line"></span>{{ trans('table.actions') }}</th>
+                <th scope="col" class="col-sm-1" data-field="created_at" data-searchable="false" data-sortable="true">{{ trans('general.date') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('general.type') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('admin/companies/table.title') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('general.category') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/form.model') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('general.name') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/table.asset_tag') }}</th>
+                <th scope="col" class="col-sm-1" data-sortable="true" >{{ trans('admin/hardware/table.checkoutto') }}</th>
+                <th scope="col" class="col-md-1"><span class="line"></span>{{ trans('table.actions') }}</th>
               </tr>
             </thead>
             <tbody>

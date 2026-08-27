@@ -48,10 +48,10 @@ class CheckoutAcceptanceFactory extends Factory
             }
 
             if ($acceptance->checkoutable instanceof Asset && $acceptance->assignedTo instanceof User) {
-                $acceptance->checkoutable->update([
-                    'assigned_to' => $acceptance->assigned_to_id,
-                    'assigned_type' => get_class($acceptance->assignedTo),
-                ]);
+                $asset = $acceptance->checkoutable;
+                $asset->assigned_to = $acceptance->assigned_to_id;
+                $asset->assigned_type = get_class($acceptance->assignedTo);
+                $asset->save();
             }
         });
     }
@@ -100,12 +100,22 @@ class CheckoutAcceptanceFactory extends Factory
 
     private function createdAssociatedActionLogEntry(CheckoutAcceptance $acceptance): void
     {
+        // Match the log entry's created_at to the acceptance's created_at
+        // explicitly. ReportsController::sentAssetAcceptanceReminder
+        // joins the two on WHERE created_at = ?, and TIMESTAMP columns
+        // store second precision — so if the acceptance's default
+        // timestamp and this insert's default timestamp straddle a second
+        // boundary (under full-suite load, often enough to matter), the
+        // join returns nothing and the reminder path bails with an error.
+        // Passing the acceptance's created_at through makes the pair
+        // deterministically identical.
         $acceptance->checkoutable->assetlog()->create([
             'action_type' => 'checkout',
             'target_id' => $acceptance->assigned_to_id,
             'target_type' => User::class,
             'item_id' => $acceptance->checkoutable_id,
             'item_type' => $acceptance->checkoutable_type,
+            'created_at' => $acceptance->created_at,
         ]);
     }
 }

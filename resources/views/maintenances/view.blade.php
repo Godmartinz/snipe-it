@@ -1,5 +1,4 @@
 <?php
-use Carbon\Carbon;
 ?>
 @extends('layouts/default')
 
@@ -71,7 +70,7 @@ use Carbon\Carbon;
                             <!-- definition list content -->
                             <x-page-data>
                                 <x-data-row :label="trans('admin/hardware/form.tag')" copy_what="asset_tag">
-                                    {{ $maintenance->asset?->asset_tag }}
+                                    {!!  $maintenance->asset?->present()->formattedTagLink !!}
                                 </x-data-row>
 
                                 <x-data-row :label="trans('general.asset_model')" copy_what="model">
@@ -83,12 +82,12 @@ use Carbon\Carbon;
                                 </x-data-row>
 
                                 <x-data-row :label="trans('general.start_date')" copy_what="start_date">
-                                    {{ Helper::getFormattedDateObject($maintenance->start_date, 'date', false) }}
+                                    {{ Helper::getFormattedDateObject($maintenance->start_date, 'datetime', false) }}
                                 </x-data-row>
 
-                                <x-data-row :label="trans('admin/maintenances/form.completion_date')" copy_what="completion_date">
-                                    @if ($maintenance->completion_date)
-                                        {{ Helper::getFormattedDateObject($maintenance->completion_date, 'date', false) }}
+                                <x-data-row :label="trans('admin/maintenances/form.completion_date')" copy_what="expected_completion_date">
+                                    @if ($maintenance->expected_completion_date)
+                                        {{ Helper::getFormattedDateObject($maintenance->expected_completion_date, 'datetime', false) }}
                                     @else
                                         {{ trans('admin/maintenances/message.asset_maintenance_incomplete') }}
                                     @endif
@@ -155,15 +154,15 @@ use Carbon\Carbon;
                                     @php
 
                                         $startCarbon = $maintenance->start_date ? Carbon::parse($maintenance->start_date) : null;
-                                        $endCarbon   = $maintenance->completion_date
-                                            ? Carbon::parse($maintenance->completion_date)
+                                        $endCarbon   = $maintenance->expected_completion_date
+                                            ? Carbon::parse($maintenance->expected_completion_date)
                                             : null;
 
                                         $maintenancePercent = 0;
                                         if ($startCarbon) {
                                              $progressLabel = App\Helpers\Helper::getFormattedDateObject($maintenance->start_date, 'date', false);
                                             if ($endCarbon) {
-                                                 $progressLabel .= ' - '.App\Helpers\Helper::getFormattedDateObject($maintenance->completion_date, 'date', false);;
+                                                 $progressLabel .= ' - '.App\Helpers\Helper::getFormattedDateObject($maintenance->expected_completion_date, 'date', false);;
                                                 // Completed: show how far through the total duration we are as of today
                                                 $totalDays   = max(1, $startCarbon->diffInDays($endCarbon));
                                                 $elapsedDays = min($totalDays, $startCarbon->diffInDays(Carbon::now()));
@@ -197,12 +196,12 @@ use Carbon\Carbon;
                             :table_header="trans('general.notes')"
                             :model="$maintenance"
                             :route="route('api.activity.index', ['item_id' => $maintenance->id, 'item_type' => 'maintenance', 'action_type' => 'note added'])"
-                            :hide_fields="['id','action_type', 'item', 'changed', 'target','file','file_download','quantity','changed','serial','signature_file','log_meta']"
+                            :hide_fields="['id','action_type', 'item', 'changed', 'target','file','file_download','quantity','changed','serial','signature_file','log_meta','order_number']"
                         />
                     </x-tabs.pane>
 
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$maintenance" :route="route('api.maintenances.history', $maintenance)"/>
+                        <x-table.history :model="$maintenance" :route="route('api.maintenances.history', $maintenance)" :hide_fields="['order_number']"/>
                     </x-tabs.pane>
 
                 </x-slot:tabpanes>

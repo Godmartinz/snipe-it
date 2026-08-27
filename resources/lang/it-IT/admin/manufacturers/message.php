@@ -25,7 +25,7 @@ return [
         'confirm' => 'Sei sicuro di voler eliminare questo produttore?',
         'error' => 'C\'è stato un problema nell\'eliminazione del produttore. Riprova.',
         'success' => 'Produttore eliminato con successo.',
-        'bulk_success' => 'Produttori eliminati con successo.',
+        'bulk_success' => 'Produttore cancellato con successo.|:count produttori sono stati eliminati con successo.',
         'partial_success' => 'Produttore eliminato con successo. Leggi le informazioni aggiuntive qui sotto. | :count produttori eliminati con successo. Leggi le informazioni aggiuntive qui sotto.',
     ],
 

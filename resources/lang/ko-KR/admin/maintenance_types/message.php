@@ -1,22 +1,22 @@
 <?php
 
 return [
-    'not_found' => 'Maintenance type not found.',
+    'not_found' => '유지보수 유형을 찾을 수 없습니다.',
     'create' => [
-        'error' => 'Maintenance type was not created, please try again.',
-        'success' => 'Maintenance type created successfully.',
+        'error' => '유지보수 유형이 생성되지 않았습니다. 다시 시도하세요.',
+        'success' => '유지보수 유형이 성공적으로 생성되었습니다.',
     ],
     'update' => [
-        'error' => 'Maintenance type was not updated, please try again.',
-        'success' => 'Maintenance type updated successfully.',
+        'error' => '유지보수 유형이 업데이트되지 않았습니다. 다시 시도하세요.',
+        'success' => '유지보수 유형이 성공적으로 업데이트되었습니다.',
     ],
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this maintenance type?',
-        'error' => 'There was an issue deleting this maintenance type. Please try again.',
-        'success' => 'The maintenance type was deleted successfully.',
+        'confirm' => '이 유지보수 유형을 삭제하시겠습니까?',
+        'error' => '이 유지보수 유형을 삭제하는 중 문제가 발생했습니다. 다시 시도하세요.',
+        'success' => '유지보수 유형이 성공적으로 삭제되었습니다.',
     ],
     'complete' => [
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'success' => '유지보수가 완료로 표시되었습니다.',
+        'error' => '이 유지보수를 완료로 표시하는 중 문제가 발생했습니다. 다시 시도하세요.',
     ],
 ];

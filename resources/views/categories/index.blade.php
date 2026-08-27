@@ -13,15 +13,7 @@
         <x-box>
 
             <x-slot:bulkactions>
-                <x-table.bulk-actions
-                    name='category'
-                    action_route="{{route('categories.bulk.delete')}}"
-                    model_name="category"
-                >
-                @can('delete', App\Models\Category::class)
-                    <option>Delete</option>
-                @endcan
-                </x-table.bulk-actions>
+                <x-table.bulk-categories />
             </x-slot:bulkactions>
 
             <x-table
@@ -35,7 +27,9 @@
                     export_filename="export-categories-{{ date('Y-m-d') }}"
             />
         </x-box>
+        <x-shiftclick/>
     </x-container>
+
 @stop
 
 @section('moar_scripts')

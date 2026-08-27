@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Checked out via bulk license checkout in license GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Ehhez a licenchez már csak :remaining_count hely maradt, a minimálisan elvárt mennyiség pedig :min_amt. Érdemes lehet további helyeket vásárolni.',

@@ -2,11 +2,14 @@
 
 namespace App\Importer;
 
+use App\Exceptions\ImportRowRejected;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
+use App\Models\CompanyableScope;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
@@ -15,9 +18,12 @@ class ItemImporter extends Importer
 {
     protected $item;
 
+    protected Setting $settings;
+
     public function __construct($filename)
     {
         parent::__construct($filename);
+        $this->settings = Setting::getSettings();
     }
 
     protected function handle($row)
@@ -75,19 +81,26 @@ class ItemImporter extends Importer
 
         $this->item['name'] = $this->findCsvMatch($row, 'item_name');
         $this->item['notes'] = $this->findCsvMatch($row, 'notes');
-        $this->item['order_number'] = $this->findCsvMatch($row, 'order_number');
+        // order_number is no longer a column on the inventory tables —
+        // it moved to the Orders / OrderItems data model. Sub-importers
+        // call ItemImporter::recordOrderForImportedRow() after the row
+        // saves to record the acquisition. Reading the value straight
+        // off the row inside that helper (rather than staging into
+        // $this->item['order_number']) avoids a fillable-drop no-op.
         $this->item['purchase_cost'] = $this->findCsvMatch($row, 'purchase_cost');
         $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
         $this->item['min_amt'] = $this->findCsvMatch($row, 'min_amt');
         $this->item['qty'] = $this->findCsvMatch($row, 'quantity');
         $this->item['requestable'] = $this->findCsvMatch($row, 'requestable');
-        $this->item['created_by'] = auth()->id();
+        $this->item['created_by'] = $this->created_by;
+        $this->item['asset_tag'] = $this->findCsvMatch($row, 'asset_tag');
         $this->item['serial'] = $this->findCsvMatch($row, 'serial');
         $this->item['item_no'] = trim($this->findCsvMatch($row, 'item_no'));
 
         $this->item['purchase_date'] = null;
         if ($this->findCsvMatch($row, 'purchase_date') != '') {
-            $this->item['purchase_date'] = date('Y-m-d', strtotime($this->findCsvMatch($row, 'purchase_date')));
+            $this->item['purchase_date'] = $this->findCsvMatch($row, 'purchase_date');
+            $this->item['purchase_date'] = $this->parseOrNullDate('purchase_date');
         }
 
         // NO need to call this method if we're running the user import.
@@ -112,11 +125,88 @@ class ItemImporter extends Importer
             return;
         }
 
-        if (strtolower($this->item['checkout_class']) === 'location' && $this->findCsvMatch($row, 'checkout_location') != null) {
-            return Location::findOrFail($this->createOrFetchLocation($this->findCsvMatch($row, 'checkout_location')));
+        $checkoutClass = strtolower((string) $this->item['checkout_class']);
+        $checkoutLocation = $this->findCsvMatch($row, 'checkout_location');
+        $checkoutAsset = $this->findCsvMatch($row, 'checkout_asset');
+        // checkout_user is not read locally: createOrFetchUser looks it up
+        // via findCsvMatch as a username fallback, so the user path picks it
+        // up whether we reach it via the explicit checkout_class=user branch
+        // or the default fall-through. Populating $this->item here is
+        // deliberate so subclasses that inspect the item array see it.
+
+        // Checkout intent is inferred from which target-shape column has a
+        // value: checkout_asset (asset tag of parent asset), checkout_location
+        // (location name), checkout_user (username), or the multi-column
+        // user-identity path (email / username / full_name / etc.).
+        // checkout_class is only required as an explicit override when a row
+        // has more than one populated and needs disambiguation, or for
+        // backward-compat with pre-inference CSVs. Prior behavior required
+        // both a checkout_location AND a checkout_class column set to
+        // "Location" on every row; when checkout_class was missing the code
+        // silently fell through to user lookup, produced a null target, and
+        // no checkout event fired with no error surfaced. checkout_user is
+        // keyed on username specifically because email is not enforced as
+        // unique on the users table (the unique index was dropped in the
+        // 2015_07_25_055415 migration) and would silently match the wrong
+        // user in installs with duplicates. createOrFetchUser reads
+        // checkout_user as a username fallback, so the user path (lookup
+        // OR create when the row has enough identity data) works whether
+        // the operator maps username, checkout_user, or both.
+
+        // Explicit checkout_class wins when set and has a matching target
+        // column populated. Preserves the disambiguation escape hatch
+        // (e.g. checkout_class=user beats a populated checkout_location).
+        if ($checkoutClass === 'asset' && $checkoutAsset) {
+            return $this->findAssetCheckoutTarget($checkoutAsset);
+        }
+        if ($checkoutClass === 'location' && $checkoutLocation) {
+            return Location::findOrFail($this->createOrFetchLocation($checkoutLocation));
+        }
+        if (in_array($checkoutClass, ['user', 'person'], true)) {
+            return $this->createOrFetchUser($row);
         }
 
+        // Inference paths. Any target-shape column populated is enough to
+        // route to that target type when no checkout_class contradicted it.
+        if ($checkoutAsset) {
+            return $this->findAssetCheckoutTarget($checkoutAsset);
+        }
+
+        if ($checkoutLocation) {
+            return Location::findOrFail($this->createOrFetchLocation($checkoutLocation));
+        }
+
+        // User path handles both checkout_user (single-column shortcut) and
+        // the multi-column user-identity shape. createOrFetchUser looks up
+        // by username first and creates a new user if the row has enough
+        // additional identity data (full_name / first_name / email).
         return $this->createOrFetchUser($row);
+    }
+
+    /**
+     * Look up an existing asset by tag to use as a checkout target. We do
+     * NOT auto-create assets here the way createOrFetchLocation does. A
+     * checkout target is an existing physical thing; creating a phantom
+     * asset just to satisfy a checkout row would mask CSV typos and
+     * pollute the inventory. Returns null when the tag doesn't resolve,
+     * which the caller in AssetImporter surfaces as a per-row warning
+     * (see the checkoutColumnPopulated block there).
+     */
+    protected function findAssetCheckoutTarget($assetTag)
+    {
+        if (empty($assetTag)) {
+            return null;
+        }
+
+        $asset = \App\Models\Asset::where('asset_tag', (string) $assetTag)->first();
+
+        if (! $asset) {
+            $this->log('WARNING: checkout_asset "'.$assetTag.'" does not match any existing asset tag. The checkout will be skipped.');
+
+            return null;
+        }
+
+        return $asset;
     }
 
     /**
@@ -158,6 +248,127 @@ class ItemImporter extends Importer
     protected function sanitizeItemForUpdating($model)
     {
         return $this->sanitizeItemForStoring($model, true);
+    }
+
+    /**
+     * Apply a sanitized update payload to a model, routing any qty change
+     * through the AdjustsQuantity trait so it becomes a QuantityAdjust
+     * action_log entry rather than a silent update-log overwrite. Only
+     * kicks in for models that use the trait (Accessory, Consumable,
+     * Component). For everything else it's a plain $model->update().
+     *
+     * A DomainException from adjustQuantity (would drop qty below the
+     * currently-in-use count) is logged and the row's non-qty updates
+     * still stick. The AdjustsQuantity trait's `$orderNumber` argument
+     * is passed as null here because the Orders / OrderItems data model
+     * now owns the acquisition record; wiring the importer to also
+     * create an Order for the qty delta is a separate follow-up under
+     * the adjust-quantity flow rework.
+     */
+    protected function applyUpdateWithQtyAdjust($model, array $sanitized): void
+    {
+        $qtyRequested = null;
+
+        if (method_exists($model, 'adjustQuantity') && array_key_exists('qty', $sanitized)) {
+            // Empty CSV cell (present but blank) means "don't touch qty"
+            // on update — not "set qty to 0". Casting '' straight to (int)
+            // 0 produced a delta of -currentQty and silently drained
+            // inventory on any import row that included an empty
+            // quantity column.
+            if ($sanitized['qty'] !== '' && $sanitized['qty'] !== null) {
+                $qtyRequested = (int) $sanitized['qty'];
+            }
+            unset($sanitized['qty']);
+        }
+
+        $qtyBefore = $qtyRequested !== null ? (int) $model->qty : null;
+
+        $model->update($sanitized);
+
+        if ($qtyRequested === null || $qtyRequested === $qtyBefore) {
+            return;
+        }
+
+        try {
+            $model->adjustQuantity(
+                $qtyRequested - $qtyBefore,
+                "Import: qty updated from {$qtyBefore} to {$qtyRequested}",
+                null,
+            );
+        } catch (\DomainException) {
+            $this->log('Skipping qty change for '.($model->name ?? 'row').': would drop on-hand below the currently-checked-out count.');
+        }
+    }
+
+    /**
+     * Record the CSV row's order_number (if any) as an Order + OrderItem
+     * pair against the freshly-saved model. Called from the CREATE
+     * branch of every sub-importer that participates in the Orders data
+     * model (Accessory, Consumable, Component, Asset, License).
+     *
+     * Dedupes on the Order side via (order_number, supplier_id, company_id)
+     * so multiple items in the same CSV that share an order_number all
+     * land under a single Order row. Never dedupes on the OrderItem
+     * side — each imported row is its own line, matching the "one line
+     * per item purchased" semantic.
+     *
+     * Deliberately does not run on UPDATE imports: importer update mode
+     * means "the CSV has a corrected version of an existing row", not
+     * "a new purchase happened". The adjust-quantity flow is the path
+     * that records replenishment events for existing rows and will
+     * grow its own Order-creation wiring when that flow is reworked.
+     */
+    protected function recordOrderForImportedRow($model, array $row): void
+    {
+        $orderNumber = trim((string) $this->findCsvMatch($row, 'order_number'));
+        $currency = trim((string) $this->findCsvMatch($row, 'currency'));
+        $supplierId = $this->item['supplier_id'] ?? null;
+        $purchaseDate = $this->item['purchase_date'] ?? null;
+        $rawCost = $this->item['purchase_cost'] ?? null;
+        $purchaseCost = ($rawCost !== null && $rawCost !== '') ? (float) $rawCost : null;
+
+        if ($orderNumber === ''
+            && $currency === ''
+            && $supplierId === null
+            && $purchaseDate === null
+            && $purchaseCost === null
+        ) {
+            return;
+        }
+
+        // Every accessory / consumable / component / asset create fires
+        // its observer which writes an initial Order + OrderItem from
+        // parent attributes (with null acquisition metadata, parents
+        // don't carry those columns any more). The importer's job here
+        // is to enrich the observer-created rows with the CSV's values.
+        $initialLine = $model->orderItems()->latest('id')->first();
+        if (! $initialLine || ! $initialLine->order) {
+            return;
+        }
+
+        $order = $initialLine->order;
+        $updates = [];
+
+        if ($orderNumber !== '' && $order->order_number !== $orderNumber) {
+            $updates['order_number'] = $orderNumber;
+        }
+        if ($currency !== '' && $order->currency !== $currency) {
+            $updates['currency'] = $currency;
+        }
+        if ($supplierId !== null && (int) $order->supplier_id !== (int) $supplierId) {
+            $updates['supplier_id'] = (int) $supplierId;
+        }
+        if ($purchaseDate !== null && optional($order->purchase_date)->toDateString() !== (string) $purchaseDate) {
+            $updates['purchase_date'] = $purchaseDate;
+        }
+
+        if ($updates !== []) {
+            $order->update($updates);
+        }
+
+        if ($purchaseCost !== null && (float) $initialLine->price !== $purchaseCost) {
+            $initialLine->update(['price' => $purchaseCost]);
+        }
     }
 
     /**
@@ -253,7 +464,7 @@ class ItemImporter extends Importer
 
         $this->log('No Matching Model, Creating a new one');
         $asset_model = new AssetModel;
-        $asset_model->created_by = auth()->id();
+        $asset_model->created_by = $this->created_by;
         $item = $this->sanitizeItemForStoring($asset_model, $editingModel);
         $item['name'] = $asset_model_name;
         $item['model_number'] = $asset_modelNumber;
@@ -310,7 +521,7 @@ class ItemImporter extends Importer
         }
 
         $category = new Category;
-        $category->created_by = auth()->id();
+        $category->created_by = $this->created_by;
         $category->name = $asset_category;
         $category->category_type = $item_type;
 
@@ -327,23 +538,48 @@ class ItemImporter extends Importer
     /**
      * Fetch an existing company, or create new if it doesn't exist
      *
+     * @param  $asset_company_name  string
+     * @return int|null id of company created/found, or null when FMCS rejects the importing user's access to it
+     *
      * @author Daniel Melzter
      *
      * @since 3.0
-     *
-     * @param  $asset_company_name  string
-     * @return int id of company created/found
      */
     public function createOrFetchCompany($asset_company_name)
     {
-        $company = Company::where(['name' => $asset_company_name])->first();
+        // Bypass CompanyableScope so the lookup can see companies the
+        // importer's user isn't FMCS-allowed to see. Without this, a
+        // scoped user hits the create path against a name that already
+        // exists in another tenant, and Watson ValidatingTrait rejects
+        // the save because company.name has to be globally unique.
+        $company = Company::withoutGlobalScope(CompanyableScope::class)
+            ->where('name', $asset_company_name)
+            ->first();
+
+        $importing_user = auth()->user() ?? ($this->created_by ? User::find($this->created_by) : null);
+        $fmcs = (bool) $this->settings->full_multiple_companies_support;
+
         if ($company) {
+            if ($fmcs && $importing_user !== null && ! $importing_user->isSuperUser()) {
+                $userCompanyIds = $importing_user->companies()->pluck('companies.id')->all();
+                // Empty pivot under floater mode is a trusted global-access actor.
+                $isFloater = empty($userCompanyIds) && (bool) $this->settings->null_company_is_floater;
+
+                if (! $isFloater && ! in_array($company->id, $userCompanyIds, true)) {
+                    throw new ImportRowRejected(
+                        'company',
+                        'User is not a member of company "'.$asset_company_name.'". Row rejected.',
+                    );
+                }
+            }
+
             $this->log('A matching Company '.$asset_company_name.' already exists');
 
             return $company->id;
         }
+
         $company = new Company;
-        $company->created_by = auth()->id();
+        $company->created_by = $this->created_by;
         $company->name = $asset_company_name;
 
         if ($company->save()) {
@@ -415,7 +651,7 @@ class ItemImporter extends Importer
         }
         $this->log('Creating a new status');
         $status = new Statuslabel;
-        $status->created_by = auth()->id();
+        $status->created_by = $this->created_by;
         $status->name = trim($asset_statuslabel_name);
 
         $status->deployable = 1;
@@ -459,7 +695,7 @@ class ItemImporter extends Importer
         // Otherwise create a manufacturer.
         $manufacturer = new Manufacturer;
         $manufacturer->name = trim($item_manufacturer);
-        $manufacturer->created_by = auth()->id();
+        $manufacturer->created_by = $this->created_by;
 
         if ($manufacturer->save()) {
             $this->log('Manufacturer '.$manufacturer->name.' was created');
@@ -489,13 +725,43 @@ class ItemImporter extends Importer
             return null;
         }
 
-        $location = Location::where(['name' => $asset_location])->first();
+        // Bypass CompanyableScope so the lookup can see locations the
+        // importer's user isn't FMCS-allowed to see. Falling through
+        // to the create path when a matching row already exists would
+        // just produce a second row with the same name.
+        $location = Location::withoutGlobalScope(CompanyableScope::class)
+            ->where('name', $asset_location)
+            ->first();
+
+        $importing_user = auth()->user() ?? ($this->created_by ? User::find($this->created_by) : null);
+        $fmcs = (bool) $this->settings->full_multiple_companies_support;
+        $locationsFmcs = (bool) $this->settings->scope_locations_fmcs;
 
         if ($location) {
+            // Only enforced when scope_locations_fmcs is on. Otherwise
+            // locations are global and every user can see all of them.
+            if ($fmcs
+                && $locationsFmcs
+                && $importing_user !== null
+                && ! $importing_user->isSuperUser()
+                && $location->company_id
+            ) {
+                $userCompanyIds = $importing_user->companies()->pluck('companies.id')->all();
+                $isFloater = empty($userCompanyIds) && (bool) $this->settings->null_company_is_floater;
+
+                if (! $isFloater && ! in_array($location->company_id, $userCompanyIds, true)) {
+                    throw new ImportRowRejected(
+                        'location',
+                        'User does not have access to location "'.$asset_location.'". Row rejected.',
+                    );
+                }
+            }
+
             $this->log('Location '.$asset_location.' already exists');
 
             return $location->id;
         }
+
         // No matching locations in the collection, create a new one.
         $location = new Location;
         $location->name = $asset_location;
@@ -503,7 +769,7 @@ class ItemImporter extends Importer
         $location->city = '';
         $location->state = '';
         $location->country = '';
-        $location->created_by = auth()->id();
+        $location->created_by = $this->created_by;
 
         if ($location->save()) {
             $this->log('Location '.$asset_location.' was created');
@@ -541,7 +807,7 @@ class ItemImporter extends Importer
 
         $supplier = new Supplier;
         $supplier->name = $item_supplier;
-        $supplier->created_by = auth()->id();
+        $supplier->created_by = $this->created_by;
 
         if ($supplier->save()) {
             $this->log('Supplier '.$item_supplier.' was created');

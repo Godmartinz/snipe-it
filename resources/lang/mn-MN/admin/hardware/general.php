@@ -7,6 +7,8 @@ return [
     'asset' => 'Актив',
     'bulk_checkout' => 'Бөөнөөр Тооцоо хийх',
     'bulk_checkin' => 'Bulk Checkin',
+    'bulk_audit' => 'Бөөн аудит',
+    'bulk_audit_location_hidden_mixed_companies' => 'The audit location field is hidden because the selected assets belong to multiple companies. With location scoping enabled, one shared audit location can\'t apply to assets from different companies. Audit each company\'s assets in a separate batch to set an audit location.',
     'checkin' => 'Checkin Asset',
     'checkin_assets' => 'Checkin Assets',
     'checkout' => 'Тооцоот Хөрөнгийн',

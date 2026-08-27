@@ -148,9 +148,41 @@ class AssetModel extends SnipeModel
         return $this->hasMany(Asset::class, 'model_id')->RTD();
     }
 
+    /**
+     * Bulk-fulfillment eligibility hook. Overrides the Requestable
+     * trait's default (which probes numRemaining) since AssetModel
+     * fulfills by handing out concrete assets of the model rather
+     * than a qty count. Returns true when at least one available
+     * (RTD) asset of this model exists.
+     */
+    protected function hasStockForBulkFulfillment(): bool
+    {
+        return $this->availableAssets()->exists();
+    }
+
     public function assignedAssets()
     {
         return $this->hasMany(Asset::class, 'model_id')->Deployed();
+    }
+
+    /**
+     * How many distinct Orders this asset model has appeared on across
+     * all of its Asset instances. Since each Asset is 1:1 with a
+     * transaction via AssetObserver::created, this is the count of
+     * distinct order_ids on order_items linked to any of this model's
+     * assets. Useful for the info-panel "how many times has this model
+     * been ordered" hint.
+     */
+    public function ordersCount(): int
+    {
+        // Purchases only (positive qty) — see HasOrders::ordersCount for
+        // the rationale on filtering out corrections/consumption events.
+        return (int) OrderItem::query()
+            ->where('item_type', Asset::class)
+            ->whereIn('item_id', $this->assets()->select('id'))
+            ->where('qty', '>', 0)
+            ->distinct()
+            ->count('order_id');
     }
 
     public function archivedAssets()
@@ -160,11 +192,36 @@ class AssetModel extends SnipeModel
 
     public function percentRemaining()
     {
-        if ($this->availableAssets()->count() == 0) {
+        // Prefer the pre-loaded withCount attributes — Api\AssetModelsController
+        // ::index already eager-loads these as `remaining` (available count)
+        // and `assets_count` (total) via correlated subqueries on the parent
+        // models SELECT. Reading them here avoids re-running the same counts
+        // as N+1 queries per model in the transformer loop. Read straight off
+        // getAttributes() rather than via __get so we don't accidentally
+        // trigger a relation load when the attribute isn't there.
+        // Cast to int at read time: PDO with MySQL default emulated prepares
+        // returns COUNT() values as string, and Eloquent doesn't auto-cast
+        // withCount aliases (no $casts entry for `remaining` / `assets_count`).
+        // A string "0" then slips past a strict === 0 guard AND — because PHP
+        // 8's arithmetic operators auto-convert numeric strings — still hits
+        // DivisionByZeroError at the ratio below.
+        $raw = $this->getAttributes();
+        $available = (int) ($raw['remaining'] ?? $this->availableAssets()->count());
+        if ($available === 0) {
             return 0;
         }
 
-        return $this->availableAssets()->count() / $this->assets()->count() * 100;
+        // Also guard the divisor. In principle available > 0 implies
+        // total > 0 (available is a subset of total via the RTD scope), but
+        // a data anomaly — an asset counted by availableAssets but not by
+        // assets, or a race between the two correlated withCount subqueries
+        // — has been observed in production. Return 0 rather than throw.
+        $total = (int) ($raw['assets_count'] ?? $this->assets()->count());
+        if ($total === 0) {
+            return 0;
+        }
+
+        return $available / $total * 100;
     }
 
     /**
@@ -179,6 +236,11 @@ class AssetModel extends SnipeModel
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function requireAcceptance(): bool
+    {
+        return (bool) ($this->category?->require_acceptance ?? false);
     }
 
     /**
@@ -274,7 +336,7 @@ class AssetModel extends SnipeModel
     public function isDeletable()
     {
         return Gate::allows('delete', $this)
-            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && ((int) ($this->assets_count ?? $this->assets()->count()) === 0)
             && ($this->deleted_at == '');
     }
 
@@ -311,7 +373,7 @@ class AssetModel extends SnipeModel
      *
      * @version v3.5
      */
-    public function scopeRequestableModels($query)
+    public function scopeRequestable($query)
     {
         return $query->where('requestable', '1');
     }
@@ -382,5 +444,30 @@ class AssetModel extends SnipeModel
     public function scopeOrderByCreatedByName($query, $order)
     {
         return $query->leftJoin('users as admin_sort', 'models.created_by', '=', 'admin_sort.id')->select('models.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * `% remaining` is (available / total) * 100 — see percentRemaining().
+     * The caller (Api\AssetModelsController::index) already adds the
+     * `remaining` and `assets_count` withCount aliases before applying
+     * this scope, so we reference them directly in ORDER BY. Guarded
+     * against division by zero for models with no assets. Uses
+     * orderByRaw because Laravel's query builder has no arithmetic API
+     * for ORDER BY expressions.
+     *
+     * PostgreSQL note: this expression references SELECT-list aliases
+     * inside a compound ORDER BY expression, which PostgreSQL rejects
+     * per SQL standard. Snipe-IT officially supports MySQL/MariaDB and
+     * tests on SQLite (both allow this); moving to PostgreSQL would
+     * require inlining the subqueries or wrapping the query in an
+     * outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN assets_count = 0 THEN 0 ELSE (remaining * 100.0 / assets_count) END '.$direction);
     }
 }

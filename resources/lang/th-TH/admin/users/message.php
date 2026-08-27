@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'คุณได้ยอมรับสิ่งของนี้แล้ว',
     'declined' => 'คุณได้ปฏิเสธสิ่งของนี้แล้ว',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'ผู้ใช้ของคุณได้รับการอัปเดตแล้วแม้ว่ารายการผู้จัดการจะไม่ได้รับการบันทึกเนื่องจากผู้จัดการที่คุณเลือกอยู่ในรายชื่อผู้ใช้ที่จะแก้ไขและผู้ใช้ต้องไม่เป็นผู้จัดการของตัวเอง โปรดเลือกผู้ใช้ของคุณอีกครั้งโดยไม่รวมผู้จัดการ',
     'user_exists' => 'มีผู้ใช้งานนี้แล้ว',
     'cannot_delete' => 'ไม่มีผู้ใช้นี้ หรือคุณไม่มีสิทธิ์ในการลบ',
     'user_not_found' => 'ไม่มีผู้ใช้นี้ หรือคุณไม่มีสิทธิ์ในการดู',
     'user_login_required' => 'ต้องการชื่อผู้ใช้งาน',
     'user_has_no_assets_assigned' => 'ไม่มีสินทรัพย์ใดอยู่ในความรับผิดชอบของผู้ใช้',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'ต้องการรหัสผ่าน',
     'insufficient_permissions' => 'สิทธิ์การใช้งานไม่เพียงพอ',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'ผู้ใช้งานนี้ถูกลบแล้ว คุณจำเป็นต้องกู้คืนผู้ใช้งานก่อนแก้ไข',
     'ldap_not_configured' => 'การทำงานร่วมกับ LDAP ไม่ได้ถูกตั้งค่าไว้สำหรับการติดตั้งนี้',
     'password_resets_sent' => 'ผู้ใช้งานที่เลือกซึ่งเปิดใช้งานแล้วและมีที่อยู่อีเมลที่ถูกต้อง ได้รับลิงก์สำหรับรีเซ็ตรหัสผ่านแล้ว',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'A password reset link has been sent to :email!',
     'user_has_no_email' => 'ผู้ใช้นี้ยังไม่มีอีเมล์ในโปรไฟล์',
     'log_record_not_found' => 'A matching log record for this user could not be found.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'สร้างผู้ใช้งานเสร็จสมบูรณ์แล้ว',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'รหัสผ่านสำหรับบัญชีนี้ได้รับการจัดการโดย LDAP / Active Directory โปรดติดต่อฝ่ายไอทีของคุณเพื่อเปลี่ยนรหัสผ่านของคุณ',
         'multi_company_items_assigned' => 'ผู้ใช้นี้มีสิ่งของที่ได้รับมอบหมายซึ่งเป็นของบริษัทอื่น โปรดตรวจสอบรายการเหล่านั้นหรือแก้ไขข้อมูลบริษัทของผู้ใช้',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

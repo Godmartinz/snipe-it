@@ -20,6 +20,8 @@ return [
         'confirm' => 'Är du säker på att du vill ta bort det här tillbehöret?',
         'error' => 'Ett fel uppstod när tillbehöret skulle tas bort. Vänligen försök igen.',
         'success' => 'Tillbehör raderat.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

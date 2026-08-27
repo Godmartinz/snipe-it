@@ -13,50 +13,62 @@
     <div class="row" style="padding-bottom: 10px;">
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ route('reports.activity') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="reports"/> {{ trans('general.activity_report') }}
+            <a href="{{ route('reports.activity') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="history" class="fa-fw"/> {{ trans('general.activity_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ url('reports/custom') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="reports"/> {{ trans('general.custom_report') }}
+            <a href="{{ url('reports/custom') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="assets" class="fa-fw"/> {{ trans('general.custom_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ route('reports.audit') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="audit"/> {{ trans('general.audit_report') }}
+            <a href="{{ route('reports.custom.component') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="components" class="fa-fw"/> {{ trans('general.custom_component_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ url('reports/depreciation') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="reports"/> {{ trans('general.depreciation_report') }}
+            <a href="{{ route('reports.custom.consumable') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="consumables" class="fa-fw"/> {{ trans('general.custom_consumable_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ url('reports/licenses') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="licenses"/> {{ trans('general.license_report') }}
+            <a href="{{ route('reports.audit') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="audit" class="fa-fw"/> {{ trans('general.audit_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ route('ui.reports.maintenances') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="maintenances"/> {{ trans('general.asset_maintenance_report') }}
+            <a href="{{ url('reports/depreciation') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="depreciation" class="fa-fw"/> {{ trans('general.depreciation_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ url('reports/unaccepted_assets') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="assets"/> {{ trans('general.unaccepted_asset_report') }}
+            <a href="{{ url('reports/licenses') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="licenses" class="fa-fw"/> {{ trans('general.license_report') }}
             </a>
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <a href="{{ url('reports/accessories') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal;">
-                <x-icon type="accessories"/> {{ trans('general.accessory_report') }}
+            <a href="{{ route('ui.reports.maintenances') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="maintenances" class="fa-fw"/> {{ trans('general.asset_maintenance_report') }}
+            </a>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <a href="{{ url('reports/unaccepted_assets') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="assets" class="fa-fw"/> {{ trans('general.unaccepted_asset_report') }}
+            </a>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <a href="{{ url('reports/accessories') }}" class="btn btn-theme btn-block" style="margin-bottom: 10px; white-space: normal; text-align: left; padding-left: 15px;">
+                <x-icon type="accessories" class="fa-fw"/> {{ trans('general.accessory_report') }}
             </a>
         </div>
 
@@ -79,10 +91,12 @@
                         <option value="365">{{ trans('general.last_n_days', ['days' => 365]) }}</option>
                         <option value="custom">{{ trans('general.custom_range') }}…</option>
                     </select>
-                    <div id="customRangePicker" class="input-daterange input-group" style="display:none; width:auto;">
-                        <input type="text" id="chartStartDate" class="form-control input-sm" placeholder="{{ trans('general.select_date') }}" style="width:110px;" autocomplete="off">
-                        <span class="input-group-addon">–</span>
-                        <input type="text" id="chartEndDate" class="form-control input-sm" placeholder="{{ trans('general.select_date') }}" style="width:110px;" autocomplete="off">
+                    <div id="customRangePicker" style="display:none;">
+                        <x-input.date-range
+                            name_start="chartStartDate"
+                            name_end="chartEndDate"
+                            max_date="today"
+                        />
                     </div>
                 </form>
 
@@ -649,17 +663,14 @@ $('#chartTimeRange').on('change', function() {
     }
 });
 
-$('#customRangePicker').datepicker({
-    clearBtn: true,
-    todayHighlight: true,
-    endDate: '0d',
-    format: 'yyyy-mm-dd',
-    keepEmptyValues: true,
-});
-
-$('#customRangePicker').on('changeDate', function() {
-    var start = $('#chartStartDate').val();
-    var end   = $('#chartEndDate').val();
+// dp.change is eonasdan datetimepicker's equivalent of bootstrap-datepicker's
+// changeDate event. Init is handled automatically by data-provide on the
+// component; we only need the read-both-values-and-reload handler here.
+// The inputs use name attributes to satisfy the component prop; JS still
+// reads by id since chartStartDate / chartEndDate are the id values too.
+$('#customRangePicker').on('dp.change', 'input', function() {
+    var start = $('[name="chartStartDate"]').val();
+    var end   = $('[name="chartEndDate"]').val();
     if (start && end && start <= end) {
         loadCharts({ start_date: start, end_date: end });
     }

@@ -19,6 +19,8 @@ return [
         'confirm' => 'Bạn có chắc muốn xóa loại khấu hao này?',
         'error' => 'Có vấn đề xảy ra khi xóa loại khấu nao. Xin thử lại.',
         'success' => 'Loại khấu hao này đã xóa thành công.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

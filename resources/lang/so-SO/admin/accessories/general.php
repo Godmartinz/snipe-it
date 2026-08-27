@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Ma jiro hannaanka EULA ee aasaasiga ah oo la helay. Mid ku dar Settings.',
     'total' => 'Wadarta',
     'remaining' => 'Ka faaideyso',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Cusbooneysii Agabka',
     'use_default_eula' => 'Isticmaal <a href="#" data-toggle="modal" data-target="#eulaModal">horta u ah EULA</a> beddelkeeda.',
     'use_default_eula_disabled' => '<del>Isticmaal beddelka EULA-ga aasaasiga ah.</del> Ma jiro EULA aasaasiga ah oo la habeeyay. Fadlan hal mid kudar Settings.',

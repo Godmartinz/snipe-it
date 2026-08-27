@@ -37,6 +37,7 @@ class UserObserver
             'locale',
             'two_factor_enrolled',
             'two_factor_optin',
+            'display_name',
             'department_id',
             'address',
             'address2',

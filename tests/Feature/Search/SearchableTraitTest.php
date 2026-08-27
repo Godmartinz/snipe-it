@@ -217,6 +217,11 @@ class SearchableTraitTest extends TestCase
 
     /**
      * Test License structured filter search on attributes
+     *
+     * The serial-key filter case actor holds viewKeys since Api\LicensesController
+     * routes viewKeys-less callers through TextSearchWithoutSerial, which strips
+     * `serial` from the searchable attribute set (see the FD-56674 fix). The
+     * inverse behavior for non-viewKeys callers is pinned in LicenseIndexTest.
      */
     public function test_license_structured_filter_on_attributes()
     {
@@ -230,7 +235,7 @@ class SearchableTraitTest extends TestCase
             ->assertOk()
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 1)->etc());
 
-        $this->actingAsForApi(User::factory()->viewLicenses()->create())
+        $this->actingAsForApi(User::factory()->viewLicenses()->viewKeysLicenses()->create())
             ->getJson(route('api.licenses.index', [
                 'filter' => json_encode(['serial' => 'ADOBE']),
             ]))
@@ -815,19 +820,23 @@ class SearchableTraitTest extends TestCase
      */
     public function test_is_not_null_filter_excludes_blank_string_direct_attributes()
     {
+        // notes was picked as the direct-string attribute exercised here
+        // because order_number moved off the parent Asset column to the
+        // Orders / OrderItems polymorphic pair. The is:not_null semantic
+        // is what the test asserts, not the specific column.
         $populated = Asset::factory()->create([
             'name' => 'Named Asset '.now()->timestamp,
-            'order_number' => 'PO-12345',
+            'notes' => 'has notes',
         ]);
         $blank = Asset::factory()->create([
             'name' => '',
-            'order_number' => '',
+            'notes' => '',
         ]);
 
         $superuser = User::factory()->viewAssets()->create();
 
         $response = $this->actingAsForApi($superuser)
-            ->getJson(route('api.assets.index', ['filter' => json_encode(['order_number' => 'is:not_null'])]))
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['notes' => 'is:not_null'])]))
             ->assertOk();
 
         $returnedIds = collect($response->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();

@@ -20,7 +20,7 @@ return [
         'error' => 'มีปัญหาระหว่างลบซัพพลายเออร์ กรุณาลองใหม่อีกครั้ง',
         'success' => 'ลบซัพพลายเออร์เสร็จสมบูรณ์แล้ว',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

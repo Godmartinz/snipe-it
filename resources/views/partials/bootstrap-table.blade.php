@@ -1,6 +1,21 @@
 @push('css')
     <link rel="stylesheet" href="{{ url(mix('css/dist/bootstrap-table.css')) }}">
 
+    {{-- Bootstrap's default a:hover paints links Bootstrap-blue on hover.
+         For the advanced-search "clear all" pill and the individual
+         tag-remove pills, we want the label chip's white text to stay
+         white on hover (they already carry a colored background). --}}
+    <style>
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all,
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all:hover,
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all:focus,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove:hover,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove:focus {
+            color: #fff !important;
+            text-decoration: none !important;
+        }
+    </style>
 @endpush
 
 @push('js')
@@ -29,10 +44,61 @@
         var advancedSearchOperatorLabel = @json(trans('general.search_operator'));
         var advancedSearchAndText = @json(trans('general.and'));
         var advancedSearchOrText = @json(trans('general.or'));
+        var advancedSearchClearAllText = @json(trans('general.clear_all_filters'));
         var advancedSearchOperatorStorageKey = 'snipeit.bs.table.advancedSearchOperator';
 
         var normalizeAdvancedSearchOperator = function (operator) {
             return (operator || defaultAdvancedSearchOperator).toString().toLowerCase() === 'or' ? 'or' : 'and';
+        };
+
+        // Shared teardown for the transport-error state onLoadError puts up.
+        // Called from onLoadSuccess (retry succeeded), onRefresh (user clicked
+        // the reload button), and any future entry points that should return
+        // the table to its clean baseline.
+        var clearBootstrapTableLoadError = function (instance) {
+            if (!instance || !instance.$el) {
+                return;
+            }
+            var $wrap = instance.$el.closest('.bootstrap-table');
+            $wrap.find('.table-load-error').remove();
+            $wrap.find('.fixed-table-body').show();
+            $wrap.find('.fixed-table-pagination').show();
+        };
+
+        // Both onLoadError banners (session-expired 401/419 and the generic
+        // 500-level failure) share the same DOM shape, insertion point, and
+        // cleanup rules. innerHtml must already be XSS-safe — callers HTML-
+        // encode dynamic pieces before passing them in.
+        //
+        // aria-live=polite is always emitted. role="alert" alone implies
+        // assertive, which interrupts screen readers mid-utterance; a table
+        // that failed to load doesn't warrant that. Polite queues the
+        // announcement for the next natural pause.
+        var renderBootstrapTableLoadErrorCallout = function (options) {
+            var $wrap = options.wrap;
+            $wrap.find('.table-load-error').remove();
+            $wrap.find('.fixed-table-body').hide();
+            $wrap.find('.fixed-table-pagination').hide();
+
+            // Insert below the advanced-search pill container if it's present
+            // (populated by an active filter), otherwise below the toolbar.
+            // Either way the banner ends up above .fixed-table-container.
+            var $tagContainer = $wrap.children('.snipe-advanced-search-tags');
+            var $anchor = $tagContainer.length && $tagContainer.children().length
+                ? $tagContainer
+                : $wrap.find('.fixed-table-toolbar').first();
+
+            // Marker class table-load-error MUST live on the outermost wrapper
+            // so the cleanup selector removes the whole banner in one shot.
+            // A nested layout would leave orphan outer wells behind on each
+            // re-render and stack up.
+            $anchor.after(
+                '<div class="row table-load-error" style="padding-left: 5px;right: 5px;"><div class="well well-sm "' +
+                ' role="alert" aria-live="polite"' +
+                ' style="margin: 10px; position: relative; z-index: 5; text-align: center;">' +
+                options.innerHtml +
+                '</div></div>',
+            );
         };
 
         var getStoredAdvancedSearchOperator = function () {
@@ -55,6 +121,38 @@
 
             var escapeAdvancedSearchValue = function (value) {
                 return $('<div/>').text(value == null ? '' : value).html();
+            };
+
+            // Attribute-context escape. Distinct from escapeAdvancedSearchValue
+            // (text-context) because the text-serializer does NOT encode `"`,
+            // so a value with a raw quote breaks out of `attr="..."` even after
+            // .text().html() "escaping". Any concat like `data-field="' + val + '"`
+            // MUST route through this, not escapeAdvancedSearchValue.
+            var escapeAdvancedSearchAttr = function (value) {
+                return String(value == null ? '' : value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            };
+
+            // Safely decode HTML entities in a string WITHOUT parsing it as HTML.
+            // `<textarea>` innerHTML is RCDATA — the parser decodes entity
+            // references like `&lt;` but does not interpret `<tag>` as an
+            // element. Contrast with the naive `$('<div/>').html(value).text()`
+            // pattern, which parses value as HTML into a detached div — an
+            // entity-encoded payload like `&lt;img src=x onerror=alert(1)&gt;`
+            // decodes into a real <img>, and browsers fire onerror even for
+            // detached images. Using a textarea avoids that DOM instantiation
+            // entirely.
+            var decodeHtmlEntitiesSafely = function (value) {
+                if (value == null) {
+                    return '';
+                }
+                var textarea = document.createElement('textarea');
+                textarea.innerHTML = String(value);
+                return textarea.value;
             };
 
             Object.assign($.fn.bootstrapTable.locales, {
@@ -191,11 +289,32 @@
                     advancedSearchOperatorLabel + ': ' + (op === 'or' ? advancedSearchOrText : advancedSearchAndText) + '</span>';
 
                 Object.keys(filters).forEach(f => {
+                    // The filter name comes from the URL (deeplink hydration in
+                    // the block below), so it is attacker-controllable. Both
+                    // insertion points have to encode: the visible label needs
+                    // text-context encoding, the data-field attribute needs
+                    // attribute-context encoding (which additionally encodes
+                    // the double-quote so a crafted name cannot close the
+                    // attribute early and inject arbitrary HTML that
+                    // jQuery.html() would then parse and execute).
+                    var safeLabel = escapeAdvancedSearchValue(colMap[f] || f);
+                    var safeField = escapeAdvancedSearchAttr(f);
                     html += '<span class="label label-primary" style="font-size: 11px; margin-right:6px;display:inline-block;margin-bottom:6px;"><b>' +
-                        (colMap[f] || f).replace(/<[^>]*>/g, '') + ':</b> ' + escapeAdvancedSearchValue(filters[f]) +
-                        ' <a href="javascript:void(0)" class="snipe-advanced-search-tag-remove" data-field="' + f +
+                        safeLabel + ':</b> ' + escapeAdvancedSearchValue(filters[f]) +
+                        ' <a href="javascript:void(0)" class="snipe-advanced-search-tag-remove" data-field="' + safeField +
                         '" style="color:#fff;margin-left:6px;text-decoration:none;">&times;</a></span>';
                 });
+
+                // "Clear all" pill: same shortcut as opening the modal and hitting
+                // the cancel button, but done from the tags row so the user doesn't
+                // have to open the modal just to wipe every filter.
+                var safeClearAllLabel = escapeAdvancedSearchValue(advancedSearchClearAllText);
+                html += '<a href="javascript:void(0)" class="label label-danger snipe-advanced-search-tags-clear-all"' +
+                    ' title="' + safeClearAllLabel + '"' +
+                    ' aria-label="' + safeClearAllLabel + '"' +
+                    ' style="font-size: 11px; margin-right:6px; display:inline-block; margin-bottom:6px; color:#fff; text-decoration:none; cursor:pointer;">' +
+                    '<i class="fas fa-trash" aria-hidden="true" style="margin-right:4px;"></i>' + safeClearAllLabel +
+                    '</a>';
 
                 $tagContainer
                     .html(html)
@@ -211,6 +330,16 @@
                             _this.trigger('column-advanced-search', _this.filterColumnsPartial, _this.getAdvancedSearchOperator());
 
                             _this.renderAdvancedSearchTags();
+                        }
+                    })
+                    .on('click.snipeAdvancedSearchTags', '.snipe-advanced-search-tags-clear-all', function (e) {
+                        e.preventDefault();
+                        // Reuse cancelAdvancedSearch: it already wipes filterColumnsPartial,
+                        // resets the modal's inputs (in case the user opens it later), fires
+                        // the column-advanced-search event (so our patched updateHistoryState
+                        // strips filter[...] from the URL), and refetches via initSearch.
+                        if (typeof _this.cancelAdvancedSearch === 'function') {
+                            _this.cancelAdvancedSearch();
                         }
                     });
 
@@ -275,19 +404,34 @@
                     var column = this.columns[columnIndex];
 
                     if (!column.checkbox && column.visible && column.searchable) {
-                        var title = $('<div/>').html(column.title).text().trim();
+                        // column.title is presenter-supplied and can be entity-encoded
+                        // user input (e.g. AssetPresenter emits `e($field->name)` for
+                        // custom fields). Decode via a textarea so we get the intended
+                        // display string without ever instantiating an <img>/<script>
+                        // element, then escape when interpolating into the HTML template
+                        // — the label, name, and placeholder all get untrusted content.
+                        var title = decodeHtmlEntitiesSafely(column.title).trim();
                         var value = filterColumnsPartial[column.field] || '';
+                        // Label goes inside <label>...</label> (text context) so
+                        // .text().html() suffices. name / placeholder / value
+                        // all land inside attribute quotes, and the value comes
+                        // from filterColumnsPartial (URL-sourced), so they need
+                        // the attribute-safe encoder that also encodes `"`.
+                        var safeLabelText = escapeAdvancedSearchValue(title);
+                        var safeTitleAttr = escapeAdvancedSearchAttr(title);
+                        var safeFieldAttr = escapeAdvancedSearchAttr(column.field);
+                        var safeValueAttr = escapeAdvancedSearchAttr(value);
 
                         html.push(`
                             <div class="form-group row">
-                                <label class="col-sm-4 control-label">${title}</label>
+                                <label class="col-sm-4 control-label">${safeLabelText}</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="text"
                                         class="form-control ${this.constants.classes.input}"
-                                        name="${column.field}"
-                                        placeholder="${escapeAdvancedSearchValue(title)}"
-                                        value="${escapeAdvancedSearchValue(value)}"
+                                        name="${safeFieldAttr}"
+                                        placeholder="${safeTitleAttr}"
+                                        value="${safeValueAttr}"
                                     >
                                 </div>
                             </div>
@@ -434,6 +578,42 @@
                 this.unsortedData = this.data.slice();
             };
 
+        // Bootstrap-table's "print" extension races Safari's async print
+        // against its own synchronous close(). doPrint calls
+        // newWin.focus(); newWin.print(); newWin.close(); right after
+        // document.write. When the written HTML contains <img> tags,
+        // Safari kicks off fetches for them and treats the popup
+        // document as not-yet-ready-to-print. The queued print() is
+        // waiting on that ready state, but close() fires anyway, tears
+        // down the popup, and the queued print is silently canceled.
+        //
+        // See https://github.com/grokability/snipe-it/issues/19443
+        //
+        // Deferring newWin.close() by 500ms gives Safari enough time
+        // to either finish loading the images or latch the print
+        // dialog against the popup before it disappears.
+        if (BootstrapTable && BootstrapTable.prototype.doPrint) {
+            var origDoPrint = BootstrapTable.prototype.doPrint;
+            BootstrapTable.prototype.doPrint = function (data) {
+                var origOpen = window.open;
+                window.open = function () {
+                    var w = origOpen.apply(window, arguments);
+                    if (w) {
+                        var realClose = w.close.bind(w);
+                        w.close = function () {
+                            setTimeout(realClose, 500);
+                        };
+                    }
+                    return w;
+                };
+                try {
+                    return origDoPrint.call(this, data);
+                } finally {
+                    window.open = origOpen;
+                }
+            };
+        }
+
         var blockedFields = "searchable,sortable,switchable,title,visible,formatter,class".split(",");
 
         var keyBlocked = function(key) {
@@ -475,26 +655,91 @@
 
         /** End handling the responsive tab UI on view detail pages **/
 
+        // Stamp aria-sort on the sorted column's <th> so assistive tech can
+        // announce the current sort direction. Bootstrap-table's own render
+        // draws a visual arrow but doesn't emit aria state. Called from both
+        // onSort (user clicked a header) and onPostHeader (initial paint or
+        // layout re-init), since bootstrap-table doesn't re-render the head
+        // on sort clicks.
+        var updateAriaSort = function ($tableEl, sortName, sortOrder) {
+            // scope="col" is emitted by the column presenters (see e.g.
+            // AssetPresenter::dataTableLayout). aria-sort will move upstream
+            // once we're on a bootstrap-table version that includes
+            // https://github.com/wenzhixin/bootstrap-table/pull/8005; until
+            // then we stamp it here.
+            $tableEl.find('thead th').each(function () {
+                var $th = $(this);
+                if (sortName && $th.data('field') === sortName) {
+                    $th.attr('aria-sort', sortOrder === 'desc' ? 'descending' : 'ascending');
+                } else {
+                    $th.removeAttr('aria-sort');
+                }
+            });
+        };
+
         $('.snipe-table').bootstrapTable('destroy').each(function () {
 
             data_export_options = $(this).attr('data-export-options');
             export_options = data_export_options ? JSON.parse(data_export_options) : {};
             export_options['htmlContent'] = false; // this is already the default; but let's be explicit about it
+            // DejaVuSans is registered into jsPDF's VFS via
+            // jspdf-dejavu-fonts.js (bundled into public/js/dist/bootstrap-table.js
+            // right after jspdf.umd.min.js — see webpack.mix.js). Referencing
+            // it here is what actually swaps out the default Helvetica fallback
+            // and produces readable output for Cyrillic / Greek / Hebrew / etc.
+            // exports. Fixes #19270.
             export_options['jspdf'] = {
                 "orientation": "l",
                 "autotable": {
                         "styles": {
+                            font: 'DejaVuSans',
+                            fontStyle: 'normal',
                             overflow: 'linebreak'
                         },
                         tableWidth: 'wrap'
                 }
             };
             // tableWidth: 'wrap',
-            // the following callback method is necessary to prevent XSS vulnerabilities
-            // (this is taken from Bootstrap Tables's default wrapper around jQuery Table Export)
+            // ⚠️ SECURITY: DO NOT change the wrapping of `.text()` inside
+            //    `htmlEncodeForExport(...)` below without reading this entire
+            //    block. The bare `.text()` was the previous shape and it is
+            //    an XSS.
+            //
+            // XSS defense on export cell data. The tableExport plugin's
+            // E function (see bundled bootstrap-table.js around line 32110)
+            // pipes our return value through jQuery's .html() setter on a
+            // scratch <div> before serializing. If we return raw text that
+            // happens to look like HTML (e.g. a column titled
+            // `<img src=x onerror=alert(1)>`), that .html() call parses it
+            // and instantiates a real <img onerror=...> element, firing the
+            // payload as soon as the user clicks Export.
+            //
+            // Encoding the returned string turns any tag-shaped characters
+            // into entity refs; the downstream .html() call then treats
+            // them as text-content (browser text-decodes back to chars in a
+            // text-node, no elements created), and the final PDF/CSV output
+            // still shows the visible text the header displayed on-screen.
+            //
+            // Repro before the fix (kept as a regression pin):
+            //   1. Create a custom field named `<img src=x onerror=alert(1)>`
+            //   2. Visit the assets index (header shows the string as text)
+            //   3. Export → CSV (or PDF): alert(1) fires because tableExport
+            //      re-injects our returned text via .html() on a scratch div.
+            // If a future edit here reintroduces the bug, that exact repro
+            // will fire alert(1) again.
+            var htmlEncodeForExport = function (value) {
+                if (value == null) return '';
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
             export_options['onCellHtmlData'] = function (cell, rowIndex, colIndex, htmlData) {
                 if (cell.is('th')) {
-                    return cell.find('.th-inner').text()
+                    // ⚠️ MUST stay wrapped in htmlEncodeForExport(). See block above.
+                    return htmlEncodeForExport(cell.find('.th-inner').text());
                 }
                 // Convert <br> tags to newlines so that line breaks in notes and
                 // textarea fields survive HTML-stripping during export
@@ -515,6 +760,25 @@
                 }
             };
 
+            // Tell tableExport how to interpret numbers in the HTML cells so the
+            // XLSX export writes correct numeric values on non-US locales. Without
+            // this the plugin defaults to US format ("," thousands, "." decimal)
+            // and misparses cells that numberWithCommas() rendered in
+            // "1.234,56" shape: 3.854,60 becomes 3.8546 (issue #19415).
+            // Output stays invariant (raw "." decimal, no thousands separator)
+            // because OpenXML numeric cells must be locale-neutral; Excel handles
+            // display formatting from the cell style on open.
+            export_options['numbers'] = {
+                html: {
+                    decimalMark: "{{ $snipeSettings->digit_separator == '1.234,56' ? ',' : '.' }}",
+                    thousandsSeparator: "{{ $snipeSettings->digit_separator == '1.234,56' ? '.' : ',' }}"
+                },
+                output: {
+                    decimalMark: ".",
+                    thousandsSeparator: ""
+                }
+            };
+
             // This allows us to override the table defaults set below using the data-dash attributes
             var table = this;
             var data_with_default = function (key,default_value) {
@@ -530,6 +794,13 @@
             var initialAdvancedSearchOperator = getStoredAdvancedSearchOperator() || normalizeAdvancedSearchOperator(data_with_default('advanced-search-operator', defaultAdvancedSearchOperator));
 
             $(this).data('advanced-search-filter-operator', initialAdvancedSearchOperator);
+
+            // Capture the table element for use inside bootstrap-table callbacks.
+            // bootstrap-table 1.24 invokes those callbacks with `.apply(options, args)`,
+            // so `this` inside them is the options object, not the DOM element —
+            // any $(this).find(...) call silently no-ops. The closure lets the
+            // callbacks reach the real table.
+            var $bootstrapTableEl = $(this);
 
             $(this).bootstrapTable({
 
@@ -587,9 +858,19 @@
                 showSearchClearButton: data_with_default('show-search-clear-button', true),
                 sortName: data_with_default('sort-name', 'created_at'),
                 sortOrder: data_with_default('sort-order', 'desc'),
-                fixedColumns: data_with_default('fixed-columns', 'true'),
-                fixedRightNumber: data_with_default('fixed-right-number', '1'),
-                stickyHeader: true,
+                // Opt-out per table via data-sticky-header="false". The
+                // dashboard widgets in particular set that flag since
+                // they render inside small col-md-4 boxes where a
+                // pinned header clone reads as visual noise rather than
+                // helping navigate a long list.
+                stickyHeader: data_with_default('sticky-header', true),
+                // Push the sticky-header clone down by the top-scrollbar
+                // mirror's height (14px) plus its padding-bottom (4px)
+                // so the .snipe-top-scrollbar (position: sticky top: 0)
+                // can sit above the sticky thead without overlapping it,
+                // matching the natural unscrolled order where the mirror
+                // reads immediately above the thead (#19484 follow-up).
+                stickyHeaderOffsetY: 18,
                 stickyHeaderOffsetLeft: parseInt($('body').css('padding-left'), 10),
                 stickyHeaderOffsetRight: parseInt($('body').css('padding-right'), 10),
                 trimOnSearch: false,
@@ -639,8 +920,111 @@
                 exportTypes: ['xlsx', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
                 onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
+
+                    // Clear any lingering "load failed" banner + restore the table body
+                    // that onLoadError hid. Bootstrap-table appends the table instance as
+                    // the last callback arg and binds `this` to the options bag (not the
+                    // DOM), so reach for the table element via arguments rather than
+                    // $(this).
+                    var instance = arguments[arguments.length - 1];
+                    if (instance && instance.$el) {
+                        clearBootstrapTableLoadError(instance);
+                    }
+                },
+                onRefresh: function () {
+                    // Fires the moment the user clicks the toolbar's refresh button,
+                    // before the retry AJAX call is issued. Clear the callout + restore
+                    // the body/pagination up-front so that even if the retry also
+                    // errors, we're not stacking state on top of the previous error.
+                    // If the retry succeeds, onLoadSuccess is a no-op reassertion.
+                    // If the retry errors, onLoadError re-hides the body and re-shows
+                    // the callout with the new status.
+                    var instance = arguments[arguments.length - 1];
+                    if (instance && instance.$el) {
+                        clearBootstrapTableLoadError(instance);
+                    }
+                },
+                onLoadError: function (status, jqXHR) {
+                    // Fires on any real transport-level failure (500, 502, 504, network
+                    // error, 419 CSRF expiry, 401 unauthenticated, etc). Snipe's API
+                    // convention is to return {status: "error"} at HTTP 200 for
+                    // validation/business errors, so anything reaching this callback
+                    // is a genuine "the request itself failed" case that would
+                    // otherwise render as an empty "No matching records found", a
+                    // silent, misleading empty-state.
+                    //
+                    // Blade's JSON directive below is what makes each translation
+                    // string safe to embed in this JS context. It produces a
+                    // properly quoted JS string literal that handles any characters
+                    // the translation might contain (quotes, backslashes, newlines,
+                    // unicode). Every dynamic value from the server response is then
+                    // HTML-encoded via jQuery's .text().html() idiom before we
+                    // concat it into the callout markup, so a poisoned
+                    // responseJSON.message cannot inject script tags or event handlers.
+                    //
+                    // `this` inside bootstrap-table event callbacks is the options
+                    // bag, not the DOM element. The library appends the table
+                    // instance as the trailing callback arg, so we reach the
+                    // wrapper via arguments[last].$el.
+                    var instance = arguments[arguments.length - 1];
+                    if (!instance || !instance.$el) {
+                        return;
+                    }
+                    var $wrap = instance.$el.closest('.bootstrap-table');
+
+                    // 401 / 419 mean the user's session died; show the session-
+                    // expired message and reload so the login redirect can take over.
+                    if (jqXHR && (jqXHR.status === 401 || jqXHR.status === 419)) {
+                        renderBootstrapTableLoadErrorCallout({
+                            wrap: $wrap,
+                            innerHtml:
+                                '<i class="fa fa-exclamation-triangle text-warning" aria-hidden="true" style="margin-right: 6px;"></i>' +
+                                $('<div/>').text(@json(trans('table.load_error_session_expired'))).html(),
+                        });
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 1500);
+                        return;
+                    }
+
+                    // Deliberately do NOT surface the raw server response body /
+                    // statusText / responseJSON.message. On PHP fatals, Laravel's
+                    // debug renderer can leak PDO DSN strings (with hostnames), file
+                    // paths from the stack trace, and other environment detail that
+                    // shouldn't reach a browser. The HTTP status alone is enough
+                    // signal for the user to know something's wrong and enough
+                    // signal for an admin to correlate in the app log.
+                    var httpStatus = (jqXHR && jqXHR.status) || status || '?';
+
+                    renderBootstrapTableLoadErrorCallout({
+                        wrap: $wrap,
+                        innerHtml:
+                            '<div style="font-size: 1.35em;">' +
+                            '<i class="fa fa-exclamation-triangle text-warning" aria-hidden="true" style="margin-right: 6px;"></i>' +
+                            '<strong>' + $('<div/>').text(@json(trans('table.load_error_title'))).html() + '</strong>' +
+                            '</div>' +
+                            '<div style="margin-top: 8px;">' +
+                            $('<div/>').text(@json(trans('table.load_error_body'))).html() +
+                            ' <code>' + $('<div/>').text(@json(trans('table.load_error_http_status'))).html() + ': ' +
+                            $('<div/>').text(httpStatus).html() + '</code>' +
+                            '</div>',
+                    });
+                },
+                onSort: function (sortName, sortOrder) {
+                    // User-triggered sort: bootstrap-table re-renders the body
+                    // (client-side sort) or re-queries the server, but does
+                    // NOT re-render the <thead>, so onPostHeader won't fire
+                    // and aria-sort would go stale. Update the header directly.
+                    updateAriaSort($bootstrapTableEl, sortName, sortOrder);
                 },
                 onPostHeader: function () {
+                    // Initial header render (and any layout re-init) — reflect
+                    // whatever sort state the table booted with, so a table
+                    // configured with data-sort-name/data-sort-order announces
+                    // correctly on first paint too.
+                    var options = $bootstrapTableEl.bootstrapTable('getOptions');
+                    updateAriaSort($bootstrapTableEl, options && options.sortName, options && options.sortOrder);
+
                     var lookup = {};
                     var lookup_initialized = false;
                     var ths = $('th');
@@ -697,6 +1081,16 @@
 
                 },
                 formatNoMatches: function () {
+                    // Per-table override via `data-empty-message="..."`
+                    // so callers can swap the generic
+                    // "no matching records" line for something more
+                    // reassuring on widgets where empty is a good state
+                    // (e.g. dashboard low-stock: nothing below threshold
+                    // is a happy path, not an error).
+                    var customEmpty = data_with_default('empty-message', null);
+                    if (customEmpty) {
+                        return '<span class="snipe-table-empty-state">' + customEmpty + '</span>';
+                    }
                     return '{{ trans('table.no_matching_records') }}';
                 }
 
@@ -706,6 +1100,176 @@
 
             if (bootstrapTableInstance && typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
                 bootstrapTableInstance.renderAdvancedSearchTags();
+            }
+
+            // -----------------------------------------------------------------
+            // Advanced-search URL deeplink (prototype: assets/hardware only).
+            //
+            // - `?filter[field]=value` per-field + `?filter_operator=and|or`,
+            //   matching the API's own querystring so what the browser shows
+            //   is what the server actually receives.
+            // - Distinct from `?search=` (basic search) so both can coexist.
+            // - Opt-in via `data-advanced-search-deeplink="true"` on the table.
+            //
+            // Two interacting quirks make this non-trivial:
+            //
+            // 1. Snipe's override of applyAdvancedSearch (this file, line ~220)
+            //    is a no-op for sidePagination='server' beyond setting state
+            //    and rendering pills — it never refetches, and never fires the
+            //    `column-advanced-search` event. So a `on('column-advanced-search')`
+            //    listener won't hear anything when the user applies via the
+            //    modal on a server-side table.
+            //
+            // 2. addrbar (bootstrap-table's URL extension) owns the query
+            //    string. It re-pushes `page`/`size`/`order`/`sort`/`search`
+            //    on every onLoadSuccess. If we just replaceState() our own
+            //    `filter[...]`, the next refetch clobbers them.
+            //
+            // Fix: patch two methods on this specific plugin instance.
+            //
+            //   - applyAdvancedSearch: after Snipe's version runs, force a
+            //     refetch + fire the event on server-side. That triggers the
+            //     addrbar → updateHistoryState path, which we've also patched.
+            //
+            //   - updateHistoryState: before addrbar's push, strip any stale
+            //     `filter[...]`/`filter_operator` from its cached URLSearchParams
+            //     and re-serialize from the current filterColumnsPartial. This
+            //     handles adds, edits, and removes (empty filters remove keys).
+            // -----------------------------------------------------------------
+            if (bootstrapTableInstance && data_with_default('advanced-search-deeplink', false)) {
+                var advDeeplinkKeyPrefix = 'filter';
+                var advDeeplinkOpParam = 'filter_operator';
+                var advDeeplinkKeyRegex = new RegExp('^' + advDeeplinkKeyPrefix + '\\[(.+)\\]$');
+
+                // --- Patch updateHistoryState: emit filter[...] alongside addrbar's keys.
+                if (typeof bootstrapTableInstance.updateHistoryState === 'function') {
+                    var origUpdateHistoryState = bootstrapTableInstance.updateHistoryState;
+                    bootstrapTableInstance.updateHistoryState = function (prefix) {
+                        var params = this.searchParams;
+
+                        // Strip stale filter[...] and filter_operator so cleared
+                        // filters don't linger from a previous state.
+                        if (params) {
+                            var toDelete = [];
+                            params.forEach(function (value, key) {
+                                if (key === advDeeplinkOpParam || advDeeplinkKeyRegex.test(key)) {
+                                    toDelete.push(key);
+                                }
+                            });
+                            toDelete.forEach(function (key) { params.delete(key); });
+
+                            // Re-add from current filterColumnsPartial state.
+                            var filters = this.filterColumnsPartial || {};
+                            var count = 0;
+                            Object.keys(filters).forEach(function (field) {
+                                var val = filters[field];
+                                if (val !== undefined && val !== null && val !== '') {
+                                    params.set(advDeeplinkKeyPrefix + '[' + field + ']', val);
+                                    count++;
+                                }
+                            });
+                            if (count > 0 && typeof this.getAdvancedSearchOperator === 'function') {
+                                params.set(advDeeplinkOpParam, this.getAdvancedSearchOperator());
+                            }
+                        }
+
+                        return origUpdateHistoryState.apply(this, arguments);
+                    };
+                }
+
+                // --- Patch applyAdvancedSearch: server-side apply must refetch
+                //     + fire the event so addrbar (and any listeners) run. Also
+                //     clear the basic-search input so the two modes stay mutually
+                //     exclusive (the backend already prefers `filter` over `search`,
+                //     but leaving text in the basic input is a confusing UX and can
+                //     let a stray search word survive into the next state change).
+                if (typeof bootstrapTableInstance.applyAdvancedSearch === 'function') {
+                    var origApplyAdvancedSearch = bootstrapTableInstance.applyAdvancedSearch;
+                    bootstrapTableInstance.applyAdvancedSearch = function () {
+                        origApplyAdvancedSearch.apply(this, arguments);
+                        if (this.options.sidePagination === 'server') {
+                            // Clear basic-search state without going through
+                            // resetSearch()/onSearch() — that path would fire a
+                            // separate refetch, and would re-enter our own
+                            // onSearch override below.
+                            var utils = $.fn.bootstrapTable && $.fn.bootstrapTable.utils;
+                            if (utils && typeof utils.getSearchInput === 'function') {
+                                var $searchInput = utils.getSearchInput(this);
+                                if ($searchInput && $searchInput.length) {
+                                    $searchInput.val('');
+                                }
+                            }
+                            this.searchText = '';
+                            this.options.searchText = '';
+
+                            this.options.pageNumber = 1;
+                            this.refresh();
+                            this.trigger('column-advanced-search', this.filterColumnsPartial, this.getAdvancedSearchOperator());
+                        }
+                    };
+                }
+
+                // --- Patch onSearch: basic search clears advanced filters so the
+                //     two modes stay mutually exclusive. Runs BEFORE the plugin's
+                //     onSearch → initSearch → server refetch, so the AJAX that
+                //     ships in the same tick already has an empty filterColumnsPartial.
+                if (typeof bootstrapTableInstance.onSearch === 'function') {
+                    var origOnSearch = bootstrapTableInstance.onSearch;
+                    bootstrapTableInstance.onSearch = function (event, overwriteSearchText) {
+                        var newText = '';
+                        if (event && event.currentTarget) {
+                            newText = String($(event.currentTarget).val() || '').trim();
+                        }
+                        // Only clear filters when the user is actively typing a
+                        // non-empty search. Empty transitions (resetSearch(''), a
+                        // stray blur on an already-empty input) leave filters alone.
+                        if (
+                            newText !== ''
+                            && this.filterColumnsPartial
+                            && Object.keys(this.filterColumnsPartial).length > 0
+                        ) {
+                            this.filterColumnsPartial = {};
+                            if (typeof this.renderAdvancedSearchTags === 'function') {
+                                this.renderAdvancedSearchTags();
+                            }
+                            if (typeof this.updateAdvancedSearchButtonState === 'function') {
+                                this.updateAdvancedSearchButtonState();
+                            }
+                        }
+                        return origOnSearch.apply(this, arguments);
+                    };
+                }
+
+                // --- Read path: rehydrate from URL if filter[...] is present.
+                var initialFilters = {};
+                var initialOp = null;
+                var initialParams = new URLSearchParams(window.location.search);
+                initialParams.forEach(function (value, key) {
+                    var m = key.match(advDeeplinkKeyRegex);
+                    if (m) {
+                        initialFilters[m[1]] = value;
+                    } else if (key === advDeeplinkOpParam) {
+                        initialOp = value;
+                    }
+                });
+
+                if (Object.keys(initialFilters).length > 0) {
+                    bootstrapTableInstance.filterColumnsPartial = Object.assign({}, initialFilters);
+                    if (initialOp && typeof bootstrapTableInstance.setAdvancedSearchOperator === 'function') {
+                        bootstrapTableInstance.setAdvancedSearchOperator(initialOp);
+                    }
+
+                    // Refetch with the seeded filter. onLoadSuccess → patched
+                    // updateHistoryState → URL is re-emitted with filter[...] intact.
+                    bootstrapTableInstance.refresh();
+
+                    if (typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
+                        bootstrapTableInstance.renderAdvancedSearchTags();
+                    }
+                    if (typeof bootstrapTableInstance.updateAdvancedSearchButtonState === 'function') {
+                        bootstrapTableInstance.updateAdvancedSearchButtonState();
+                    }
+                }
             }
 
             // Add btn-advanced-search class to the advanced search button for styling
@@ -1031,7 +1595,7 @@
     @endcan
 
     @can('create', \App\Models\Component::class)
-    // Compoment table buttons
+    // Component table buttons
     window.componentButtons = () => ({
         btnAdd: {
             text: '{{ trans('general.create') }}',
@@ -1045,6 +1609,16 @@
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
+            }
+        },
+        btnExport: {
+            text: '{{ trans('general.custom_component_report') }}',
+            icon: 'fa-solid fa-file-csv',
+            event () {
+                window.location.href = '{{ route('reports.custom.component') }}';
+            },
+            attributes: {
+                title: '{{ trans('general.custom_component_report') }}',
             }
         },
     });
@@ -1111,6 +1685,26 @@
             icon: 'fa fa-plus',
             event () {
                 window.location.href = '{{ route('suppliers.create') }}';
+            },
+            attributes: {
+                class: 'btn-warning',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+    });
+    @endcan
+
+    @can('create', \App\Models\MaintenanceType::class)
+    // Maintenance Type table buttons
+    window.maintenanceTypeButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('maintenance-types.create') }}';
             },
             attributes: {
                 class: 'btn-warning',
@@ -1383,29 +1977,122 @@
     }
 
 
+    // Use document.getElementById and DOM/jQuery element constructors throughout this block
+    // rather than jQuery selector parsing or HTML string concatenation. The countId value
+    // originates from a data attribute that may contain stored user input (e.g. a manufacturer
+    // or supplier name), and jQuery decodes HTML entities in data attributes before returning
+    // them to JS. Concatenating a decoded attacker-controlled value into an HTML string passed
+    // to .after() would allow stored XSS; setting it via DOM APIs treats it as plain text.
     function updateSelectedCount(table) {
         var countId = $(table).data('selected-count-id');
-        if (!countId || !$(countId).length) return;
+        if (!countId) return;
+        var rawCountId = countId.charAt(0) === '#' ? countId.substring(1) : countId;
+        if (!rawCountId) return;
+        var el = document.getElementById(rawCountId);
+        if (!el) return;
         var count = $(table).bootstrapTable('getSelections').length;
-        $(countId).find('.badge').text(count);
+        $(el).find('.badge').text(count);
         if (count > 0) {
-            $(countId).show();
+            $(el).show();
         } else {
-            $(countId).hide();
+            $(el).hide();
         }
     }
 
     $('.snipe-table').on('post-body.bs.table', function () {
         var countId = $(this).data('selected-count-id');
         if (!countId) return;
+        var rawCountId = countId.charAt(0) === '#' ? countId.substring(1) : countId;
+        if (!rawCountId) return;
         var $paginationDetail = $(this).closest('.bootstrap-table')
             .find('.fixed-table-pagination').first()
             .find('.pagination-detail');
-        if ($paginationDetail.length && $(countId).length === 0) {
-            $paginationDetail.after('<span id="' + countId.substring(1) + '" style="display:none; float:left; margin-top:10px; margin-bottom:10px; margin-left:10px; line-height:34px;">&mdash; <span class="badge">0</span> {{ trans('general.selected') }}</span>');
+        if ($paginationDetail.length && !document.getElementById(rawCountId)) {
+            var $selectedCount = $('<span/>', {
+                id: rawCountId,
+                style: 'display:none; float:left; margin-top:10px; margin-bottom:10px; margin-left:10px; line-height:34px;'
+            });
+            $selectedCount.append(document.createTextNode('— '));
+            $selectedCount.append($('<span/>', { 'class': 'badge', text: '0' }));
+            $selectedCount.append(document.createTextNode(' {{ trans('general.selected') }}'));
+            $paginationDetail.after($selectedCount);
         }
         updateSelectedCount(this);
     });
+
+    // Dynamic bulk actions: when a table's bulk-actions dropdown was rendered with
+    // data-dynamic-actions, its options are populated here from the intersection of
+    // each selected row's available_actions.bulk_selectable. An action shows only
+    // when every currently-selected row supports it. Tables that rendered a static
+    // option list have no data-dynamic-actions attribute and are unaffected.
+    function refreshDynamicBulkActions(table) {
+        var $table = $(table);
+        var formId = $table.data('bulk-form-id');
+        if (!formId) return;
+
+        var $select = $(formId).find('select[data-dynamic-actions]');
+        if ($select.length === 0) return;
+
+        var actions;
+        try {
+            actions = JSON.parse($select.attr('data-dynamic-actions')) || {};
+        } catch (e) {
+            return;
+        }
+
+        var selections = $table.bootstrapTable('getSelections');
+        var $button = $($table.data('bulk-button-id'));
+        var currentValue = $select.val();
+        var placeholder = $select.attr('data-placeholder') || '';
+
+        var eligible = null;
+        for (var i = 0; i < selections.length; i++) {
+            var supported = (selections[i].available_actions && selections[i].available_actions.bulk_selectable) || {};
+            var rowActions = {};
+            for (var k in supported) {
+                if (supported[k] === true) rowActions[k] = true;
+            }
+            if (eligible === null) {
+                eligible = rowActions;
+            } else {
+                var next = {};
+                for (var kk in eligible) if (rowActions[kk]) next[kk] = true;
+                eligible = next;
+            }
+        }
+
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+        $select.empty();
+
+        if (selections.length === 0) {
+            $select.append($('<option/>', { value: '', text: placeholder }));
+            $button.attr('disabled', 'disabled');
+        } else if (!eligible || Object.keys(eligible).length === 0) {
+            $select.append($('<option/>', { value: '', text: '{{ trans('general.bulk_actions_none_available') }}' }));
+            $button.attr('disabled', 'disabled');
+        } else {
+            var appendedAny = false;
+            for (var actionKey in actions) {
+                if (eligible[actionKey] && actions[actionKey] && actions[actionKey].label) {
+                    $select.append($('<option/>', { value: actionKey, text: actions[actionKey].label }));
+                    appendedAny = true;
+                }
+            }
+            if (appendedAny) {
+                if (currentValue && eligible[currentValue]) {
+                    $select.val(currentValue);
+                }
+                $button.removeAttr('disabled');
+            } else {
+                $select.append($('<option/>', { value: '', text: '{{ trans('general.bulk_actions_none_available') }}' }));
+                $button.attr('disabled', 'disabled');
+            }
+        }
+
+        $select.select2({ minimumResultsForSearch: Infinity });
+    }
 
     // These methods dynamically add/remove hidden input values in the bulk actions form
     $('.snipe-table').on('check.bs.table .btSelectItem', function (row, $element) {
@@ -1413,8 +2100,14 @@
         var tableId =  $(this).data('id-table');
 
         $(buttonName).removeAttr('disabled');
-        $(buttonName).after('<input id="' + tableId + '_checkbox_' + $element.id + '" type="hidden" name="ids[]" value="' + $element.id + '">');
+        $(buttonName).after($('<input/>', {
+            id: tableId + '_checkbox_' + $element.id,
+            type: 'hidden',
+            name: 'ids[]',
+            value: $element.id
+        }));
         updateSelectedCount(this);
+        refreshDynamicBulkActions(this);
     });
 
     $('.snipe-table').on('check-all.bs.table', function (event, rowsAfter) {
@@ -1424,8 +2117,13 @@
 
         for (var i in rowsAfter) {
             // Do not select things that were already selected
-            if($('#'+ tableId + '_checkbox_' + rowsAfter[i].id).length == 0) {
-                $(buttonName).after('<input id="' + tableId + '_checkbox_' + rowsAfter[i].id + '" type="hidden" name="ids[]" value="' + rowsAfter[i].id + '">');
+            if (!document.getElementById(tableId + '_checkbox_' + rowsAfter[i].id)) {
+                $(buttonName).after($('<input/>', {
+                    id: tableId + '_checkbox_' + rowsAfter[i].id,
+                    type: 'hidden',
+                    name: 'ids[]',
+                    value: rowsAfter[i].id
+                }));
             }
         }
 
@@ -1433,6 +2131,7 @@
             $(buttonName).removeAttr('disabled');
         }
         updateSelectedCount(this);
+        refreshDynamicBulkActions(this);
     });
 
 
@@ -1451,6 +2150,7 @@
 
             $(buttonName).attr('disabled', 'disabled');
         }
+        refreshDynamicBulkActions(this);
     });
 
     $('.snipe-table').on('uncheck-all.bs.table', function (event, rowsAfter, rowsBefore) {
@@ -1463,7 +2163,7 @@
             $('#' + tableId + "_checkbox_" + rowsBefore[i].id).remove();
         }
         updateSelectedCount(this);
-
+        refreshDynamicBulkActions(this);
     });
 
     // Initialize sort-order for bulk actions (label-generation) for snipe-tables
@@ -1533,6 +2233,14 @@
 
     // This only works for model index pages because it uses the row's model ID
     function genericRowLinkFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here; the formatter
+        // names stay as valid JS identifiers, the URL uses the real
+        // route segment. Matches the groups -> admin/groups precedent
+        // in genericActionsFormatter.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value,row) {
 
             if ((row) && (row.tag_color) && (row.tag_color!='') && (row.tag_color!=undefined)) {
@@ -1583,6 +2291,12 @@
 
     // Use this when we're introspecting into a column object and need to link
     function genericColumnObjLinkFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here. See sibling
+        // formatters for the groups -> admin/groups precedent.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value,row) {
             if ((value) && (value.status_meta)) {
 
@@ -1687,6 +2401,10 @@
                 var dest = 'admin/groups';
             }
 
+            if (dest == 'maintenanceTypes') {
+                dest = 'maintenance-types';
+            }
+
 
             if(element_name != '') {
                 dest = dest + '/' + row.owner_id + '/' + element_name;
@@ -1710,6 +2428,20 @@
                 if ((row.available_actions) && (row.available_actions.update != true)) {
                     actions += '<span data-tooltip="true" title="{{ trans('general.cannot_be_edited') }}"><a class="btn btn-warning btn-sm disabled" onClick="return false;"><x-icon type="edit" class="fa-fw" /></a></span>&nbsp;';
                 }
+            }
+
+            // Plus-minus button opens the shared adjust-quantity modal.
+            // Only rendered when the row's transformer set
+            // available_actions.adjust_quantity (accessories, consumables,
+            // components). The click handler in snipeit.js reads the
+            // data-* attrs and shows blade/modals/adjust-quantity.
+            if ((row.available_actions) && (row.available_actions.adjust_quantity === true)) {
+                actions += window.renderAdjustQuantityButton({
+                    dest: dest,
+                    id: row.id,
+                    name: row.name || '',
+                    available: row.remaining,
+                }) + '&nbsp;';
             }
 
             if ((row.available_actions) && (row.available_actions.delete === true)) {
@@ -1844,6 +2576,325 @@
         }
     }
 
+    // Compact display for the `orders` array on Accessory / Consumable /
+    // Component rows. These items can be tied to many orders as quantity
+    // is re-ordered over time, so a raw list would overwhelm the table
+    // on high-volume rows. Renders based on count:
+    //   0    empty cell
+    //   1    the single order number
+    //   2-3  comma-separated list
+    //   4+   first order number + "(+N more)" with the full list as tooltip
+    // Every rendered order number is passed through jQuery text() to
+    // defuse any HTML in the order_number string.
+    function ordersSummaryFormatter(value) {
+        if (!Array.isArray(value) || value.length === 0) {
+            return '';
+        }
+
+        var esc = function (v) {
+            return $('<div/>').text(v == null ? '' : v).html();
+        };
+
+        if (value.length === 1) {
+            return esc(value[0]);
+        }
+
+        if (value.length <= 3) {
+            return value.map(esc).join(', ');
+        }
+
+        var tooltip = esc(value.join(', '));
+        return esc(value[0]) + ' <span class="text-muted" data-tooltip="true" title="' + tooltip + '">(+' + (value.length - 1) + ' more)</span>';
+    }
+
+    // Formatters for the /requests admin page (paired with
+    // CheckoutRequestPresenter + CheckoutRequestsTransformer). Each row
+    // has a polymorphic requestable (Asset / AssetModel / Accessory /
+    // Consumable / Component) with a pre-resolved image, url, and name,
+    // so these formatters do not need per-type branching the way the
+    // old server-rendered blade did.
+
+    function requestableImageFormatter(value, row) {
+        if (!value || !row || !row.requestable) {
+            return '';
+        }
+        // Transformer already e()'d the name; the &quot; entities
+        // work fine inside an alt="..." attribute (browsers decode
+        // them there). A second $('<div/>').text().html() escape
+        // would double-escape.
+        var altName = row.requestable.name || '';
+        return '<a href="' + value + '" data-toggle="lightbox" data-type="image"><img src="' + value + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt="' + altName + '"></a>';
+    }
+
+    function requestableNameFormatter(value, row) {
+        if (!row || !row.requestable) {
+            return '';
+        }
+        // Transformer already ran e() on the name, so `value` is
+        // already HTML-safe. A second $('<div/>').text().html()
+        // escape here would double-escape (e.g. Macbook Pro 13"
+        // -> &quot; -> &amp;quot; rendered as &quot;).
+        var name = row.requestable.name || '';
+        // Type icon prefix (asset / accessory / consumable / etc).
+        // Sourced from the transformer via IconHelper so the icon
+        // stays consistent with the rest of the app's per-type
+        // iconography. Sits INSIDE the anchor to match how the
+        // rest of Snipe-IT renders icon+text links.
+        var icon = row.requestable.icon
+            ? '<i class="' + row.requestable.icon + ' fa-fw" aria-hidden="true" title="' + (row.requestable.type || '') + '"></i> '
+            : '';
+        if (row.requestable.url) {
+            return '<a href="' + row.requestable.url + '">' + icon + name + '</a>';
+        }
+        return icon + name;
+    }
+
+    function requesterFormatter(value, row) {
+        // value = row.user (object with id/name/url/deleted) or null
+        if (!value) {
+            return '{{ trans('admin/reports/general.deleted_user') }}';
+        }
+        // Same as requestableNameFormatter above - value.name is
+        // already e()'d by the transformer.
+        var name = value.name || '';
+        if (value.deleted || !value.url) {
+            return '{{ trans('admin/reports/general.deleted_user') }}';
+        }
+        return '<a href="' + value.url + '">' + name + '</a>';
+    }
+
+    // Renders the per-row action cluster: admin-cancel form + a
+    // checkout / checkin button per available_actions. All destination
+    // ids come from the transformer output, so no per-type URL
+    // branching lives in the JS.
+    function checkoutRequestActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        var actions = '';
+        var permissions = row.available_actions || {};
+
+        if (permissions.cancel && row.requestable && row.user) {
+            // Route path is /account/request/{itemType} (NOT
+            // /account/request-item, which is the route NAME with
+            // its unusual slash-separator - the path segment is
+            // just "request"). Slug map covers every polymorphic
+            // requestable type since the set is fixed.
+            var typeSlugs = {
+                Asset: 'asset',
+                AssetModel: 'asset_model',
+                Accessory: 'accessory',
+                Consumable: 'consumable',
+                Component: 'component',
+                License: 'license',
+            };
+            var typeSlug = typeSlugs[row.requestable.type];
+            if (!typeSlug) {
+                return actions; // Unknown type, don't render a broken cancel button.
+            }
+            // Same shape the old blade posted to. Includes the fifth
+            // "requestingUser" segment so an admin cancels the
+            // specific user's request rather than their own.
+            var cancelUrl = '{{ config('app.url') }}/account/request/' +
+                typeSlug + '/' + row.requestable.id + '/1/' + row.user.id;
+            // Pipe through the shared dataConfirmModal so this
+            // behaves like every other destructive action in the
+            // app (delete-asset class + data-href + data-content).
+            // The modal's #deleteForm posts with a DELETE method
+            // spoof; the route accepts both POST and DELETE for
+            // this reason.
+            var requesterName = (row.user && row.user.name) ? row.user.name : '';
+            var itemName = (row.requestable && row.requestable.name) ? row.requestable.name : '';
+            var confirmMsg = '{{ trans('admin/hardware/message.requests.confirm_cancel_by_admin') }}'
+                .replace(':user', requesterName)
+                .replace(':item', itemName);
+            actions += ' <a href="' + cancelUrl + '"' +
+                ' class="actions btn btn-danger btn-sm delete-asset"' +
+                ' data-toggle="modal" data-target="#dataConfirmModal"' +
+                ' data-content="' + confirmMsg + '"' +
+                ' data-title="{{ trans('general.cancel_request') }}"' +
+                ' data-icon="fa-trash"' +
+                ' data-tooltip="true" title="{{ trans('general.cancel_request') }}"' +
+                ' onClick="return false;">' +
+                '<x-icon type="delete" class="fa-fw" /><span class="sr-only">{{ trans('general.cancel_request') }}</span>' +
+                '</a>';
+        }
+
+        if (permissions.checkout && row.requestable) {
+            // Route per requestable type. The old code hardcoded
+            // /hardware/{id}/checkout which 404'd (or worse, opened
+            // the wrong asset) for non-Asset rows. Component
+            // additionally carries a ?requesting_user query so the
+            // components-checkout screen can pre-scope its target-
+            // asset picker to that user's assigned assets (see
+            // ComponentCheckoutController::create).
+            // Every single-target checkout URL carries ?request_id so
+            // the destination controller can hydrate the full
+            // request (requester, reservation window, notes) and
+            // pre-populate the form - saves the admin from re-
+            // selecting the user, the expected checkin date, etc.
+            var checkoutBase;
+            var requestQs = row.id ? ('?request_id=' + encodeURIComponent(row.id)) : '';
+            switch (row.requestable.type) {
+                case 'Component':
+                    checkoutBase = '{{ config('app.url') }}/components/' + row.requestable.id + '/checkout' + requestQs;
+                    break;
+                case 'Accessory':
+                    checkoutBase = '{{ config('app.url') }}/accessories/' + row.requestable.id + '/checkout' + requestQs;
+                    break;
+                case 'Consumable':
+                    checkoutBase = '{{ config('app.url') }}/consumables/' + row.requestable.id + '/checkout' + requestQs;
+                    break;
+                case 'License':
+                    checkoutBase = '{{ config('app.url') }}/licenses/' + row.requestable.id + '/checkout' + requestQs;
+                    break;
+                case 'AssetModel':
+                    // AssetModel requests fulfill by picking a
+                    // specific available asset OF the model. The
+                    // bulk-fulfill screen surfaces the picker even
+                    // for a single-row case, so route there instead
+                    // of a per-item checkout page (models have no
+                    // 1:1 checkout screen).
+                    checkoutBase = '{{ config('app.url') }}/models/' + row.requestable.id + '/fulfill-requests';
+                    break;
+                default:
+                    checkoutBase = '{{ config('app.url') }}/hardware/' + row.requestable.id + '/checkout' + requestQs;
+            }
+            // Disable the checkout button when the requested qty
+            // exceeds what's actually on hand. Requesters CAN ask
+            // for more than stock (that's intentional - see the
+            // discussion around the replenish button), but admin
+            // needs a visual "not fulfillable right now" signal
+            // instead of a working checkout link that would fail on
+            // the next screen. Only meaningful when the requestable
+            // exposes a `remaining` count (qty-tracked types); a
+            // null remaining means "not qty-tracked" and the link
+            // stays enabled.
+            var requestedQty = parseInt(row.quantity, 10);
+            var availableQty = (row.requestable && row.requestable.remaining != null)
+                ? parseInt(row.requestable.remaining, 10)
+                : null;
+            var shortStock = availableQty !== null && !isNaN(requestedQty) && requestedQty > availableQty;
+
+            if (shortStock) {
+                actions += ' <button type="button" class="actions btn btn-sm bg-maroon disabled" disabled data-tooltip="true"' +
+                    ' title="{{ trans('admin/hardware/message.requests.insufficient_stock') }}">' +
+                    '<x-icon type="checkout" class="fa-fw" /><span class="sr-only">{{ trans('general.checkout') }}</span>' +
+                    '</button>';
+            }
+            else {
+                actions += ' <a href="' + checkoutBase +
+                    '" class="actions btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_user_tooltip') }}">' +
+                    '<x-icon type="checkout" class="fa-fw" /><span class="sr-only">{{ trans('general.checkout') }}</span>' +
+                    '</a>';
+            }
+
+            // Bulk-fulfill entry-point on rows where >=2 people are
+            // waiting on the same item. pending_requesters is the
+            // list of OTHER open requesters for this row's
+            // requestable (excludes the current row), so a length
+            // >=1 means 2+ total pending on this (type, id) pair.
+            // Only rendered for the five bulk-eligible types -
+            // Asset is 1:1 (can't be bulk-fulfilled), and the
+            // shortStock branch above doesn't gate this since bulk-
+            // fulfill supports partial fulfillment anyway. Every
+            // row for the same requestable shows the same link
+            // (they all resolve to the same bulk-fulfill screen);
+            // one-click cost of the extra row is worth the "admin
+            // can start bulk from any row" ergonomics.
+            var pendingCount = (row.pending_requesters || []).length;
+            if (pendingCount >= 1) {
+                var bulkBase = null;
+                switch (row.requestable.type) {
+                    case 'Accessory':
+                        bulkBase = '{{ config('app.url') }}/accessories/' + row.requestable.id + '/fulfill-requests';
+                        break;
+                    case 'Consumable':
+                        bulkBase = '{{ config('app.url') }}/consumables/' + row.requestable.id + '/fulfill-requests';
+                        break;
+                    case 'Component':
+                        bulkBase = '{{ config('app.url') }}/components/' + row.requestable.id + '/fulfill-requests';
+                        break;
+                    case 'License':
+                        bulkBase = '{{ config('app.url') }}/licenses/' + row.requestable.id + '/fulfill-requests';
+                        break;
+                    case 'AssetModel':
+                        bulkBase = '{{ config('app.url') }}/models/' + row.requestable.id + '/fulfill-requests';
+                        break;
+                }
+                if (bulkBase) {
+                    actions += ' <a href="' + bulkBase +
+                        '" class="actions btn btn-sm btn-warning" data-tooltip="true" title="{{ trans('admin/hardware/general.fulfill_multiple') }}">' +
+                        '<x-icon type="fulfill_multiple" class="fa-fw" />' +
+                        '<span class="sr-only">{{ trans('admin/hardware/general.fulfill_multiple') }}</span>' +
+                        '</a>';
+                }
+            }
+        }
+        else if (permissions.checkin && row.requestable) {
+            actions += ' <a href="{{ config('app.url') }}/hardware/' + row.requestable.id +
+                '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">' +
+                '{{ trans('general.checkin') }}</a>';
+        }
+
+        // Replenish button opens the shared adjust-quantity modal
+        // (via the .adjust-quantity class + snipeit.js handler) so
+        // an admin can top up stock straight from the request queue
+        // instead of hopping to the item's own page. Only rendered
+        // for qty-tracked types with update permission - the
+        // transformer gates both. URL map mirrors the per-type web
+        // adjust-quantity routes.
+        if (permissions.replenish && row.requestable) {
+            var adjustBase;
+            switch (row.requestable.type) {
+                case 'Accessory':
+                    adjustBase = '{{ config('app.url') }}/accessories/' + row.requestable.id + '/adjust-quantity';
+                    break;
+                case 'Consumable':
+                    adjustBase = '{{ config('app.url') }}/consumables/' + row.requestable.id + '/adjust-quantity';
+                    break;
+                case 'Component':
+                    adjustBase = '{{ config('app.url') }}/components/' + row.requestable.id + '/adjust-quantity';
+                    break;
+                default:
+                    adjustBase = null;
+            }
+            if (adjustBase) {
+                // Same plus-minus icon + sr-only label pattern the
+                // other adjust-quantity buttons use across the app
+                // (see the accessory / consumable / component index
+                // formatters), so the button looks familiar and
+                // stays icon-only next to the neighbouring cancel /
+                // checkout affordances. Name is already e()'d by
+                // the transformer, so no extra JS-side escape.
+                actions += ' <button type="button" class="actions btn btn-sm btn-primary adjust-quantity" data-tooltip="true"' +
+                    ' title="{{ trans('general.adjust_quantity') }}"' +
+                    ' data-adjust-url="' + adjustBase + '"' +
+                    ' data-item-name="' + (row.requestable.name || '') + '"' +
+                    ' data-available="' + (row.requestable.remaining != null ? row.requestable.remaining : '') + '">' +
+                    '<x-icon type="plus-minus" class="fa-fw" /><span class="sr-only">{{ trans('general.adjust_quantity') }}</span>' +
+                    '</button> ';
+            }
+        }
+
+        return actions;
+    }
+
+    // Self-cancel button for /account/requested. Row shape carries a
+    // ready-to-POST cancel_url (built server-side so the type/id path
+    // segments stay in sync with the route regex), which the user
+    // owns because ProfileController::requestedAssets scopes to the
+    // authed user in the first place.
+    function userRequestCancelFormatter(value, row) {
+        if (!value) {
+            return '';
+        }
+        return '<form style="display:inline;" method="POST" action="' + value + '" accept-charset="utf-8">' +
+            '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+            '<button class="btn btn-danger btn-sm" data-tooltip="true" title="{{ trans('general.cancel_request') }}">{{ trans('button.cancel') }}</button>' +
+            '</form>';
+    }
+
     // Check if checkbox should be selectable
     // Selectability is determined by the API field "selectable" which is set at the Presenter/API Transformer
     // However since different bulk actions have different requirements, we have to walk through the available_actions object
@@ -1891,6 +2942,13 @@
     }
 
     function genericCheckinCheckoutFormatter(destination) {
+        // camelCase entries in the formatters array whose URL segment
+        // is actually hyphenated need a rewrite here even though
+        // maintenance-types isn't checkoutable, kept for consistency
+        // with the sibling formatters.
+        if (destination == 'maintenanceTypes') {
+            destination = 'maintenance-types';
+        }
         return function (value, row) {
 
             // The user is allowed to check items out, AND the item is deployable
@@ -1924,15 +2982,204 @@
 
     }
 
+    // Requester-facing name column for accessories on the
+    // /account/requestable tabs. Links to the show page only
+    // when the caller has the view permission - otherwise plain
+    // text, so unprivileged requesters can still see what's
+    // requestable without being sent to a 403 on click.
+    //
+    // The name value is already e()'d by the transformer, so no
+    // extra JS-side escape (a second $('<div/>').text().html() would
+    // double-escape - Macbook Pro 13" -> &quot; -> &amp;quot;).
+    function accessoryRequestableNameFormatter(value, row) {
+        var name = value == null ? '' : value;
+        @can('view', \App\Models\Accessory::class)
+            return '<a href="{{ config('app.url') }}/accessories/' + row.id + '">' + name + '</a>';
+        @else
+            return name;
+        @endcan
+    }
+
+    // Action cell for the accessories tab on /account/requestable.
+    // Renders either the request-modal opener (row is requestable +
+    // not already claimed by this user) or an inline cancel form
+    // (row is requestable + this user has an open request). The
+    // requestable-scope on the endpoint guarantees requestable=true
+    // for every row that reaches this formatter.
+    function accessoryRequestableActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        if (row.assigned_to_self === true) {
+            return '<form style="display:inline;" action="{{ config('app.url') }}/account/request/accessory/' + row.id + '" method="POST" accept-charset="utf-8">' +
+                '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+                '<input type="hidden" name="active_tab" value="accessories">' +
+                '<button class="btn btn-danger btn-sm" type="submit">{{ trans('button.cancel') }}</button>' +
+                '</form>';
+        }
+        return '<button type="button" class="btn btn-primary btn-sm request-item"' +
+            ' data-request-url="{{ config('app.url') }}/account/request/accessory/' + row.id + '"' +
+            ' data-item-name="' + (row.name || '') + '"' +
+            ' data-active-tab="accessories"' +
+            ' data-current-qty="1">' +
+            '{{ trans('button.request') }}</button>';
+    }
+
+    // Requester-facing name column for asset models on the
+    // /account/requestable models tab. The link vs. plain-text
+    // decision comes from row.available_actions.view (populated by
+    // AssetModelsTransformer), NOT a compile-time permission gate
+    // inside the formatter - that way the check is one source of
+    // truth (the transformer) instead of split across server + JS.
+    function assetmodelRequestableNameFormatter(value, row) {
+        var name = value == null ? '' : value;
+        if (row && row.available_actions && row.available_actions.view) {
+            return '<a href="{{ config('app.url') }}/models/' + row.id + '">' + name + '</a>';
+        }
+        return name;
+    }
+
+    // Action cell for the models tab on /account/requestable. Same
+    // request/cancel button-swap contract as the accessory version;
+    // the POST goes to /account/request/asset_model/{id} (route
+    // param is asset_model per the itemType regex in web.php).
+    function assetmodelRequestableActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        if (row.assigned_to_self === true) {
+            return '<form style="display:inline;" action="{{ config('app.url') }}/account/request/asset_model/' + row.id + '" method="POST" accept-charset="utf-8">' +
+                '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+                '<input type="hidden" name="active_tab" value="models">' +
+                '<button class="btn btn-danger btn-sm" type="submit">{{ trans('button.cancel') }}</button>' +
+                '</form>';
+        }
+        return '<button type="button" class="btn btn-primary btn-sm request-item"' +
+            ' data-request-url="{{ config('app.url') }}/account/request/asset_model/' + row.id + '"' +
+            ' data-item-name="' + (row.name || '') + '"' +
+            ' data-active-tab="models"' +
+            ' data-current-qty="1">' +
+            '{{ trans('button.request') }}</button>';
+    }
+
+    // Same shape as accessoryRequestable*Formatter; type-specific
+    // so each can carry its own view-permission gate + POST URL
+    // segment without any JS-side branching on the row's type.
+    // See accessoryRequestableNameFormatter for the no-re-escape
+    // rationale.
+    function consumableRequestableNameFormatter(value, row) {
+        var name = value == null ? '' : value;
+        @can('view', \App\Models\Consumable::class)
+            return '<a href="{{ config('app.url') }}/consumables/' + row.id + '">' + name + '</a>';
+        @else
+            return name;
+        @endcan
+    }
+
+    function consumableRequestableActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        if (row.assigned_to_self === true) {
+            return '<form style="display:inline;" action="{{ config('app.url') }}/account/request/consumable/' + row.id + '" method="POST" accept-charset="utf-8">' +
+                '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+                '<input type="hidden" name="active_tab" value="consumables">' +
+                '<button class="btn btn-danger btn-sm" type="submit">{{ trans('button.cancel') }}</button>' +
+                '</form>';
+        }
+        return '<button type="button" class="btn btn-primary btn-sm request-item"' +
+            ' data-request-url="{{ config('app.url') }}/account/request/consumable/' + row.id + '"' +
+            ' data-item-name="' + (row.name || '') + '"' +
+            ' data-active-tab="consumables"' +
+            ' data-current-qty="1">' +
+            '{{ trans('button.request') }}</button>';
+    }
+
+    function componentRequestableNameFormatter(value, row) {
+        var name = value == null ? '' : value;
+        @can('view', \App\Models\Component::class)
+            return '<a href="{{ config('app.url') }}/components/' + row.id + '">' + name + '</a>';
+        @else
+            return name;
+        @endcan
+    }
+
+    function componentRequestableActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        if (row.assigned_to_self === true) {
+            return '<form style="display:inline;" action="{{ config('app.url') }}/account/request/component/' + row.id + '" method="POST" accept-charset="utf-8">' +
+                '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+                '<input type="hidden" name="active_tab" value="components">' +
+                '<button class="btn btn-danger btn-sm" type="submit">{{ trans('button.cancel') }}</button>' +
+                '</form>';
+        }
+        return '<button type="button" class="btn btn-primary btn-sm request-item"' +
+            ' data-request-url="{{ config('app.url') }}/account/request/component/' + row.id + '"' +
+            ' data-item-name="' + (row.name || '') + '"' +
+            ' data-active-tab="components"' +
+            ' data-current-qty="1">' +
+            '{{ trans('button.request') }}</button>';
+    }
+
+    function licenseRequestableNameFormatter(value, row) {
+        var name = value == null ? '' : value;
+        @can('view', \App\Models\License::class)
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '">' + name + '</a>';
+        @else
+            return name;
+        @endcan
+    }
+
+    function licenseRequestableActionsFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+        if (row.assigned_to_self === true) {
+            return '<form style="display:inline;" action="{{ config('app.url') }}/account/request/license/' + row.id + '" method="POST" accept-charset="utf-8">' +
+                '<input type="hidden" name="_token" value="' + $('meta[name="csrf-token"]').attr('content') + '">' +
+                '<input type="hidden" name="active_tab" value="licenses">' +
+                '<button class="btn btn-danger btn-sm" type="submit">{{ trans('button.cancel') }}</button>' +
+                '</form>';
+        }
+        return '<button type="button" class="btn btn-primary btn-sm request-item"' +
+            ' data-request-url="{{ config('app.url') }}/account/request/license/' + row.id + '"' +
+            ' data-item-name="' + (row.name || '') + '"' +
+            ' data-item-type="license"' +
+            ' data-active-tab="licenses"' +
+            ' data-current-qty="1">' +
+            '{{ trans('button.request') }}</button>';
+    }
 
     // This is only used by the requestable assets section
     function assetRequestActionsFormatter (row, value) {
         if (value.assigned_to_self == true){
             return '<button class="btn btn-danger btn-sm btn-block disabled" data-tooltip="true" title="{{ trans('admin/hardware/message.requests.cancel') }}">{{ trans('button.cancel') }}</button>';
         } else if (value.available_actions.cancel == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '/cancel" method="POST">@csrf<button class="btn btn-danger btn-block btn-sm" data-tooltip="true" title="{{ trans('admin/hardware/message.requests.cancel') }}">{{ trans('button.cancel') }}</button></form>';
+            return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '/cancel" method="POST">@csrf<input type="hidden" name="active_tab" value="assets"><button class="btn btn-danger btn-block btn-sm" data-tooltip="true" title="{{ trans('admin/hardware/message.requests.cancel') }}">{{ trans('button.cancel') }}</button></form>';
         } else if (value.available_actions.request == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-block btn-primary btn-sm" data-tooltip="true" title="{{ trans('general.request_item') }}">{{ trans('button.request') }}</button></form>';
+            // Open the request-item modal instead of submitting a
+            // plain form, so the requester can enter a qty (assets
+            // always request qty 1, but the modal also collects the
+            // optional reservation dates that landed with the
+            // start_date / end_date columns on checkout_requests).
+            // data-active-tab is a defensive belt with the closest
+            // .tab-pane walk in snipeit.js: bs-tables re-renders rows
+            // into detached DOM during redraws, and the explicit attr
+            // survives that where the DOM-tree walk would fall short.
+            // Name / asset_tag are already e()'d by the transformer,
+            // so no extra JS-side escape.
+            var itemName = value.name || value.asset_tag || '';
+            var requestUrl = '{{ config('app.url') }}/account/request/asset/' + value.id;
+            return '<button type="button" class="btn btn-block btn-primary btn-sm request-item"' +
+                ' data-tooltip="true" title="{{ trans('general.request_item') }}"' +
+                ' data-request-url="' + requestUrl + '"' +
+                ' data-item-name="' + itemName + '"' +
+                ' data-item-type="asset"' +
+                ' data-active-tab="assets"' +
+                ' data-current-qty="1">' +
+                '{{ trans('button.request') }}</button>';
         }
 
     }
@@ -1954,6 +3201,7 @@
         'licenses',
         'locations',
         'maintenances',
+        'maintenanceTypes',
         'manufacturers',
         'models',
         'statuslabels',
@@ -1967,6 +3215,79 @@
         window[formatters[i] + 'ActionsFormatter'] = genericActionsFormatter(formatters[i]);
         window[formatters[i] + 'InOutFormatter'] = genericCheckinCheckoutFormatter(formatters[i]);
     }
+
+    // Maintenances need a custom actions formatter (adds the green
+    // "mark complete" button between update and delete). Defined AFTER the
+    // generic-formatter loop above so it overrides the auto-generated
+    // maintenancesActionsFormatter.
+    window.maintenancesActionsFormatter = function (value, row) {
+        var actions = '<nobr>';
+
+        if ((row.available_actions) && (row.available_actions.update === true)) {
+            actions += '<a href="{{ config('app.url') }}/maintenances/' + row.id + '/edit" class="actions btn btn-sm btn-warning hidden-print" data-tooltip="true" title="{{ trans('general.update') }}"><x-icon type="edit" class="fa-fw" /><span class="sr-only">{{ trans('general.update') }}</span></a>&nbsp;';
+        }
+
+        if ((row.available_actions) && (row.available_actions.complete === true)) {
+            actions += '<button type="button" class="actions btn btn-sm btn-success hidden-print complete-maintenance" data-tooltip="true" title="{{ trans('admin/maintenances/form.mark_complete') }}" data-url="{{ config('app.url') }}/maintenances/' + row.id + '/complete"><x-icon type="checkmark" class="fa-fw" /><span class="sr-only">{{ trans('admin/maintenances/form.mark_complete') }}</span></button>&nbsp;';
+        } else {
+            actions += '<button type="button" class="actions btn btn-sm btn-default hidden-print disabled" disabled data-tooltip="true" title="{{ trans('admin/maintenances/form.already_complete') }}"><x-icon type="checkmark" class="fa-fw" /><span class="sr-only">{{ trans('admin/maintenances/form.already_complete') }}</span></button>&nbsp;';
+        }
+
+        if ((row.available_actions) && (row.available_actions.delete === true)) {
+            actions += '<a href="{{ config('app.url') }}/maintenances/' + row.id + '" '
+                + ' class="actions btn btn-danger btn-sm delete-asset hidden-print" data-tooltip="true" '
+                + ' data-toggle="modal" data-icon="fa-trash"'
+                + ' data-content="{{ trans('general.sure_to_delete') }}: ' + row.name + '?" '
+                + ' data-title="{{ trans('general.delete') }}" onClick="return false;">'
+                + '<x-icon type="delete" class="fa-fw" /><span class="sr-only">{{ trans('general.delete') }}</span></a>&nbsp;';
+        }
+
+        actions += '</nobr>';
+        return actions;
+    };
+
+    // Shared markup for the adjust-quantity plus-minus button. Used by
+    // genericActionsFormatter's adjust_quantity branch above AND by
+    // lowStockActionsFormatter below so both call sites render an
+    // identical button and open the same shared adjust-quantity modal.
+    // Callers pass the per-row URL segment as `dest` (accessories /
+    // consumables / components), the numeric row id, the display name
+    // for the modal header, and the available count for the modal help
+    // text.
+    window.renderAdjustQuantityButton = function (opts) {
+        return '<button type="button" class="actions btn btn-sm btn-primary hidden-print adjust-quantity" data-tooltip="true" title="{{ trans('general.adjust_quantity') }}"'
+            + ' data-adjust-url="{{ config('app.url') }}/' + opts.dest + '/' + opts.id + '/adjust-quantity"'
+            + ' data-item-name="' + (opts.name || '') + '"'
+            + ' data-available="' + (opts.available != null ? opts.available : '') + '">'
+            + '<x-icon type="plus-minus" class="fa-fw" /><span class="sr-only">{{ trans('general.adjust_quantity') }}</span></button>';
+    };
+
+    // Dashboard low-stock widget actions column. Renders only the
+    // adjust-quantity plus-minus button (there's no edit/delete on this
+    // widget), gated on the row's available_actions.adjust_quantity.
+    // Row is polymorphic across consumables / accessories / components /
+    // asset_models / licenses; item.type carries the per-row URL segment,
+    // pluralized to match the sibling web routes.
+    window.lowStockActionsFormatter = function (value, row) {
+        if (!row || !row.item || !value || value.adjust_quantity !== true) {
+            return '';
+        }
+        var typeToDest = {
+            consumable: 'consumables',
+            accessory: 'accessories',
+            component: 'components',
+        };
+        var dest = typeToDest[row.item.type];
+        if (!dest) {
+            return '';
+        }
+        return '<nobr>' + window.renderAdjustQuantityButton({
+            dest: dest,
+            id: row.item.id,
+            name: row.item.name || '',
+            available: row.remaining,
+        }) + '</nobr>';
+    };
 
     var child_formatters = [
         ['kits', 'models'],
@@ -2088,8 +3409,8 @@
     function minAmtFormatter(row, value) {
 
         if ((row) && (row!=undefined)) {
-            
-            if (value.remaining <= value.min_amt) {
+
+            if (value.remaining < value.min_amt) {
                 return  '<span class="text-danger text-bold" data-tooltip="true" title="{{ trans('admin/licenses/general.below_threshold_short') }}"><x-icon type="warning" class="text-yellow" /> ' + value.min_amt + '</span>';
             }
             return value.min_amt
@@ -2221,21 +3542,72 @@
         }
     }
 
+    // Renders a single company tag. `isInherited` is decided by the caller —
+    // it's true only when (a) we're on the companies show page (viewing context
+    // is set), (b) the row didn't get included via direct membership, and (c)
+    // THIS specific tag is the parent or a child of the viewing company. Other
+    // unrelated memberships on the same row render unmarked.
+    function renderCompanyTag(c, isInherited) {
+        var color = (c.tag_color)
+            ? '<i class="fa-solid fa-square" style="color: ' + c.tag_color + ';" aria-hidden="true"></i> '
+            : '';
+        if (isInherited) {
+            return '<a href="{{ config('app.url') }}/companies/' + c.id + '"'
+                + ' class="label label-light"'
+                + ' data-tooltip="true"'
+                + ' title="{{ trans('admin/companies/table.inherited_help') }}">'
+                + '<i class="fa-solid fa-link" aria-hidden="true"></i> '
+                + color + c.name
+                + ' <span class="sr-only">({{ trans('admin/companies/table.inherited') }})</span>'
+                + '</a>';
+        }
+        return '<a href="{{ config('app.url') }}/companies/' + c.id + '" class="label label-light">'
+            + color + c.name
+            + '</a>';
+    }
+
+    // A tag is "inherited" when (1) we're on a company show page, (2) the row
+    // didn't include the viewing company itself (i.e. the user/asset isn't a
+    // direct member), AND (3) this specific tag IS in the viewing company's
+    // hierarchy set (parent or one of the children). Tags unrelated to the
+    // hierarchy never get marked, even on otherwise-inherited rows.
+    function isCompanyTagInherited(tagId, rowCompanyIds) {
+        if (typeof window.viewingCompanyId === 'undefined' || window.viewingCompanyId === null) {
+            return false;
+        }
+        if (typeof window.viewingCompanyHierarchyIds === 'undefined' || !window.viewingCompanyHierarchyIds) {
+            return false;
+        }
+
+        var viewing = parseInt(window.viewingCompanyId, 10);
+        var tag = parseInt(tagId, 10);
+
+        // Row is direct (some company on the row matches viewing) — nothing
+        // on this row counts as inherited.
+        var rowIsDirect = rowCompanyIds.some(function (id) { return parseInt(id, 10) === viewing; });
+        if (rowIsDirect) {
+            return false;
+        }
+
+        // Only tags that are part of the hierarchy set get the badge.
+        return window.viewingCompanyHierarchyIds.some(function (id) { return parseInt(id, 10) === tag; })
+            && tag !== viewing;
+    }
+
     function companiesLinkObjFormatter(value, row) {
         if (!value) {
             return '';
         }
-        var icon = (value.tag_color) ? '<i class="fa-solid fa-square" style="color: ' + value.tag_color + ';" aria-hidden="true"></i> ' : '';
-        return '<a href="{{ config('app.url') }}/companies/' + value.id + '" class="label label-light">' + icon + value.name + '</a>';
+        return renderCompanyTag(value, isCompanyTagInherited(value.id, [value.id]));
     }
 
     function companiesArrayLinkFormatter(value, row) {
         if (!value || !value.length) {
             return '';
         }
+        var rowCompanyIds = value.map(function (c) { return c.id; });
         return value.map(function (c) {
-            var icon = (c.tag_color) ? '<i class="fa-solid fa-square" style="color: ' + c.tag_color + ';" aria-hidden="true"></i> ' : '';
-            return '<a href="{{ config('app.url') }}/companies/' + c.id + '" class="label label-light">' + icon + c.name + '</a></span>';
+            return renderCompanyTag(c, isCompanyTagInherited(c.id, rowCompanyIds));
         }).join(' ');
     }
 
@@ -2484,6 +3856,10 @@
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
+    function linkNumberToUserAssignedMaintenancesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'maintenances');
+    }
+
     function labelPerPageFormatter(value, row, index, field) {
         if (row) {
             if (!row.hasOwnProperty('sheet_info')) { return 1; }
@@ -2630,7 +4006,12 @@
         $('.search-input').keyup(searchboxHighlighter);
 
         //  This is necessary to make the bootstrap tooltips work inside of the
-        // wenzhixin/bootstrap-table formatters
+        // wenzhixin/bootstrap-table formatters. The measurement handlers
+        // (post-body + shown.bs.tab) are registered at script parse time
+        // below, outside this ready wrapper, so they're active before
+        // snipeit.js's URL-hash-driven .tab('show') fires. This tooltip
+        // hook can stay in the ready wrapper because it doesn't depend on
+        // handler-timing.
         $(document).on('post-body.bs.table', '.snipe-table', function () {
             $('[data-tooltip="true"]').tooltip({
                 container: 'body'
@@ -2638,6 +4019,327 @@
         });
     }
 
+    // -----------------------------------------------------------------
+    // Sticky-column offsets and top-scrollbar mirror.
+    //
+    // Both function definitions AND both delegated handlers below are
+    // deliberately at script parse time (outside the $(function () { })
+    // wrapper). Reason: snipeit.js's URL-hash-to-tab logic
+    // (assets/js/snipeit.js) calls .tab('show') from its own
+    // document.ready, which fires 'shown.bs.tab' synchronously. If our
+    // handler is registered inside a later document.ready callback, we
+    // miss that first firing and the top-scrollbar's inner width stays at
+    // whatever bootstrap-table measured while the tab was still
+    // display:none (usually 0). Same issue for post-body.bs.table if
+    // bootstrap-table's own init fires it before our ready runs. Parsing
+    // these attachments at top level means they're subscribed before any
+    // document.ready callback runs anywhere.
+    // -----------------------------------------------------------------
+
+    // Tables that carry a snipe-table--sticky-right-N or -left-N class
+    // pin those columns via position:sticky. Each pinned column needs a
+    // right/left offset equal to the cumulative outerWidth of the
+    // pinned columns outside it, otherwise they all stack at the edge.
+    // The offsets are per-column and can change on column-toggle and
+    // window resize, so recompute after every render + resize.
+    function updateStickyColumnOffsets(root) {
+        var $targets = root ? $(root).filter('.snipe-table') : $('.snipe-table');
+        $targets.each(function () {
+            var el = this;
+            var $t = $(this);
+            var cls = el.className;
+            var $ths = $t.find('> thead > tr').first().children('th');
+            var count = $ths.length;
+
+            var mR = /\bsnipe-table--sticky-right-(\d+)\b/.exec(cls);
+            if (mR) {
+                var nR = Math.min(parseInt(mR[1], 10), count);
+                var offR = 0;
+                for (var i = 1; i <= nR; i++) {
+                    el.style.setProperty('--sticky-right-offset-' + i, offR + 'px');
+                    offR += $ths.eq(count - i).outerWidth() || 0;
+                }
+            }
+
+            var mL = /\bsnipe-table--sticky-left-(\d+)\b/.exec(cls);
+            if (mL) {
+                var nL = Math.min(parseInt(mL[1], 10), count);
+                var offL = 0;
+                for (var j = 1; j <= nL; j++) {
+                    el.style.setProperty('--sticky-left-offset-' + j, offL + 'px');
+                    offL += $ths.eq(j - 1).outerWidth() || 0;
+                }
+            }
+        });
+    }
+
+    // Second horizontal scrollbar mirrored above the table so users don't
+    // have to scroll down first to find a way to scroll right on wide
+    // tables. Bootstrap-table doesn't ship this; we mirror the native
+    // scrollbar of .fixed-table-body via a slim spacer div whose width
+    // tracks the underlying table's scrollWidth. Only rendered when the
+    // table actually overflows horizontally, so tables that fit in their
+    // container get no extra chrome.
+    function updateTopScrollbar(root) {
+        var $targets = root ? $(root).filter('.snipe-table') : $('.snipe-table');
+        // Track which outer .bootstrap-table wrappers have already been
+        // processed this pass. Bootstrap-table's fixed-columns extension
+        // (and some other add-ons) clone the table into extra inner
+        // wrappers inside a single .bootstrap-table container. Iterating
+        // .snipe-table naively then produced one top scrollbar per clone
+        // stacked above the same table, and none of them tracked the
+        // primary .fixed-table-body's actual scroll width — visible on
+        // /hardware and /locations as two mis-sized top scrollbars.
+        var processedWrappers = [];
+        $targets.each(function () {
+            var tbl = this;
+            var $body = $(tbl).closest('.fixed-table-body');
+            if (! $body.length) return;
+            var $btWrapper = $body.closest('.bootstrap-table');
+            if (! $btWrapper.length) return;
+
+            var wrapperEl = $btWrapper[0];
+            if (processedWrappers.indexOf(wrapperEl) !== -1) return;
+            processedWrappers.push(wrapperEl);
+
+            // Always mirror the PRIMARY .fixed-table-body (the first one
+            // inside the outer .bootstrap-table wrapper). Extension clones
+            // have their own .fixed-table-body but tracking any of them
+            // would produce a scrollbar that only spans the pinned
+            // columns' width, not the full table.
+            var $primaryContainer = $btWrapper.children('.fixed-table-container').first();
+            if (! $primaryContainer.length) return;
+            var $primaryBody = $primaryContainer.find('.fixed-table-body').first();
+            if (! $primaryBody.length) return;
+            var primaryBody = $primaryBody[0];
+            var $primaryTable = $primaryBody.find('table.snipe-table').first();
+            if (! $primaryTable.length) return;
+            var primaryTable = $primaryTable[0];
+
+            // Clean up any scrollbar left inside .fixed-table-container
+            // from an older layout. Current placement is as a direct
+            // child of .bootstrap-table (see the sticky-context comment
+            // below); orphan strays here would be invisible when the
+            // page scrolls (sticky broken by the container's
+            // overflow: hidden) and would double-render with the new
+            // one on wide tables.
+            $primaryContainer.children('.snipe-top-scrollbar').remove();
+
+            // Fixed-height tables (data-height, e.g. dashboard widgets)
+            // already show their bottom scrollbar within the box they
+            // live in, so the top scrollbar adds noise without benefit.
+            if ($(tbl).is('[data-height]')) {
+                $btWrapper.children('.snipe-top-scrollbar').remove();
+                return;
+            }
+
+            var overflows = primaryTable.scrollWidth > primaryBody.clientWidth;
+            // Look up an existing scrollbar as a direct child of the
+            // .bootstrap-table wrapper (NOT nested inside
+            // .fixed-table-container). Nesting inside the container
+            // used to make sense visually - the scrollbar sat right
+            // above .fixed-table-body - but .fixed-table-container has
+            // overflow: hidden as a fixed-column overlay clip, which
+            // makes it the sticky scroll context. Sticky inside an
+            // overflow:hidden ancestor won't engage against the page
+            // scroll, so scrolling the page just carries the scrollbar
+            // off-screen with the container. Living as a direct child
+            // of .bootstrap-table (overflow: visible) lets sticky bind
+            // to the outer page scroll and stay pinned at viewport top
+            // when the user scrolls past the natural table position
+            // (#19484 follow-up: bleed-through above sticky-clone thead).
+            var $topScroll = $btWrapper.children('.snipe-top-scrollbar');
+
+            // Sort re-renders can measure momentarily-wrong widths while
+            // bootstrap-table is settling the sticky-header clone and
+            // column widths — .remove()-ing the scrollbar during that
+            // window and then relying on a later post-body event to
+            // recreate it was fragile (#19484: horizontal scrollbar
+            // silently vanishes after a sort). Hide the element instead
+            // when the table currently fits, so the same node survives
+            // and can be re-shown as soon as an overflowing state is
+            // observed again on the next event tick or scroll.
+            if (! overflows) {
+                $topScroll.hide();
+                return;
+            }
+
+            if (! $topScroll.length) {
+                $topScroll = $('<div class="snipe-top-scrollbar" aria-hidden="true"><div class="snipe-top-scrollbar-inner"></div></div>');
+                $primaryContainer.before($topScroll);
+            } else {
+                $topScroll.show();
+            }
+
+            // Rebind scroll sync every time. The top scrollbar element
+            // persists across bootstrap-table renders, but .fixed-table-body
+            // is replaced on every post-body, so any handler we attached to
+            // the previous body is gone. Namespaced .off() clears whatever
+            // we may have attached before; .on() reattaches.
+            var top = $topScroll[0];
+            var syncing = false;
+            $topScroll.off('scroll.snipeScrollSync').on('scroll.snipeScrollSync', function () {
+                if (syncing) return;
+                syncing = true;
+                primaryBody.scrollLeft = top.scrollLeft;
+                syncing = false;
+            });
+            $primaryBody.off('scroll.snipeScrollSync').on('scroll.snipeScrollSync', function () {
+                if (syncing) return;
+                syncing = true;
+                top.scrollLeft = primaryBody.scrollLeft;
+                syncing = false;
+            });
+
+            $topScroll.children('.snipe-top-scrollbar-inner').css('width', primaryTable.scrollWidth + 'px');
+
+            // Re-evaluate pinning immediately so a table that was
+            // scrolled past before this render (e.g. the user sorted
+            // while scrolled down) gets the fixed positioning
+            // recomputed against the new column widths.
+            pinTopScrollbarIfScrolled($topScroll, $primaryContainer);
+        });
+    }
+
+    // Toggle the top scrollbar between natural flow and position:
+    // fixed at viewport top when the user has scrolled past the
+    // .fixed-table-container's start. Would ideally be position:
+    // sticky (declarative, no JS scroll handler) but sticky did not
+    // engage reliably against page scroll from inside the
+    // .bootstrap-table's ancestor chain. #19484 follow-up: the
+    // scrollbar was invisible when the sticky-clone thead activated,
+    // and the offset gap opened by stickyHeaderOffsetY was bleeding
+    // through tbody rows behind it.
+    function pinTopScrollbarIfScrolled($topScroll, $primaryContainer) {
+        if (! $topScroll.length || ! $primaryContainer.length) return;
+        if ($topScroll.css('display') === 'none') return;
+
+        var containerRect = $primaryContainer[0].getBoundingClientRect();
+        var scrollbarHeight = $topScroll.outerHeight();
+        // Pin as soon as the top of .fixed-table-container would go
+        // above the space we'd reserve for the pinned scrollbar (so
+        // the pin engages just before the natural scrollbar would
+        // scroll off-screen). Unpin when the container top comes
+        // back into view.
+        var shouldPin = containerRect.top < 0;
+        // Also unpin when the entire container has scrolled off the
+        // bottom of the viewport - no point pinning a scrollbar for
+        // a table that's not on screen.
+        if (containerRect.bottom < scrollbarHeight) {
+            shouldPin = false;
+        }
+
+        if (shouldPin) {
+            $topScroll.addClass('is-pinned').css({
+                position: 'fixed',
+                top: 0,
+                left: Math.round(containerRect.left) + 'px',
+                width: Math.round(containerRect.width) + 'px'
+            });
+        } else if ($topScroll.hasClass('is-pinned')) {
+            $topScroll.removeClass('is-pinned').css({
+                position: '',
+                top: '',
+                left: '',
+                width: ''
+            });
+        }
+    }
+
+    // Global scroll listener that repositions every visible top
+    // scrollbar mirror. Single listener over all tables rather than
+    // one per mirror so the handler count stays constant and cheap
+    // even on pages with many tables. rAF-throttled to keep the
+    // scroll path smooth.
+    var pinRafPending = false;
+    function schedulePinRecompute() {
+        if (pinRafPending) return;
+        pinRafPending = true;
+        var raf = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 16); };
+        raf(function () {
+            pinRafPending = false;
+            $('.snipe-top-scrollbar').each(function () {
+                var $ts = $(this);
+                var $btWrap = $ts.parent('.bootstrap-table');
+                if (! $btWrap.length) return;
+                var $pc = $btWrap.children('.fixed-table-container').first();
+                pinTopScrollbarIfScrolled($ts, $pc);
+            });
+        });
+    }
+    $(window).on('scroll.snipeTopScrollbarPin resize.snipeTopScrollbarPin', schedulePinRecompute);
+
+    // Helper: run the given callback after enough layout has settled that
+    // clientWidth / scrollWidth reads on newly-visible tables are stable.
+    //
+    // Uses two nested requestAnimationFrame calls (fires two frames later)
+    // plus a setTimeout fallback for the same tick, so we're robust
+    // against both:
+    //   - browsers where RAF fires before the paint that finalizes layout
+    //     of a just-un-hidden pane, and
+    //   - the resetView path in snipeit.js that runs on the same tick as
+    //     shown.bs.tab and adjusts column widths after us.
+    function deferAfterLayout(fn) {
+        var raf = window.requestAnimationFrame || function (cb) { return window.setTimeout(cb, 0); };
+        raf(function () {
+            raf(function () {
+                fn();
+            });
+        });
+        window.setTimeout(fn, 120);
+    }
+
+    // Re-measure after every bootstrap-table render. Delegated on document
+    // so it catches tables that init after this handler was attached.
+    //
+    // Includes a second re-check ~250ms later specifically for the top
+    // scrollbar. Sort re-renders (and stickyHeader clone width sync)
+    // can leave scrollWidth reading briefly equal to clientWidth on the
+    // first deferAfterLayout tick, which would hide the mirror even
+    // though the table actually overflows once layout settles. The
+    // delayed re-check catches that transient state without needing
+    // a full-blown ResizeObserver (#19484).
+    $(document).on('post-body.bs.table', '.snipe-table', function () {
+        var tbl = this;
+        deferAfterLayout(function () {
+            updateStickyColumnOffsets(tbl);
+            updateTopScrollbar(tbl);
+        });
+        window.setTimeout(function () {
+            updateTopScrollbar(tbl);
+        }, 250);
+    });
+
+    // Re-measure when a tab becomes visible. Bootstrap 3 renders inactive
+    // .tab-pane elements with display:none, so any bootstrap-table that was
+    // rendered inside a hidden tab measured its container width as 0 at
+    // post-body time. shown.bs.tab fires on the tab trigger after the pane
+    // has been made visible; a zero-arg call re-measures all snipe-tables
+    // on the page.
+    //
+    // Also listen for reset-view.bs.table, which bootstrap-table fires
+    // when snipeit.js calls `.bootstrapTable('resetView')` from its own
+    // shown.bs.tab handler (that path recomputes column widths after us
+    // and can leave scrollWidth stale if we measured on the same tick).
+    $(document).on('shown.bs.tab', function () {
+        deferAfterLayout(function () {
+            updateStickyColumnOffsets();
+            updateTopScrollbar();
+        });
+    });
+
+    $(document).on('reset-view.bs.table', '.snipe-table', function () {
+        var tbl = this;
+        deferAfterLayout(function () {
+            updateStickyColumnOffsets(tbl);
+            updateTopScrollbar(tbl);
+        });
+    });
+
+    $(window).on('resize', function () {
+        updateStickyColumnOffsets();
+        updateTopScrollbar();
+    });
 
 </script>
     

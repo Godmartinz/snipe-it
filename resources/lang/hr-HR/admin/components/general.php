@@ -13,4 +13,7 @@ return [
     'total' => 'ukupno',
     'update' => 'Ažuriraj komponentu',
     'checkin_limit' => 'Količina prijavljena mora biti jednaka ili manja od :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

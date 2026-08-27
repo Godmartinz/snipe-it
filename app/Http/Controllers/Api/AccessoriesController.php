@@ -6,9 +6,11 @@ use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccessoryCheckoutRequest;
+use App\Http\Requests\AdjustQuantityRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAccessoryRequest;
 use App\Http\Traits\CheckInOutTrait;
+use App\Http\Traits\HandlesAdjustQuantity;
 use App\Http\Transformers\AccessoriesTransformer;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
@@ -18,6 +20,7 @@ use App\Models\Company;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 class AccessoriesController extends Controller
 {
     use CheckInOutTrait;
+    use HandlesAdjustQuantity;
 
     /**
      * Display a listing of the resource.
@@ -51,12 +55,15 @@ class AccessoriesController extends Controller
                 'model_number',
                 'eol',
                 'notes',
+                'purchase_cost',
+                'purchase_date',
                 'created_at',
+                'updated_at',
                 'min_amt',
                 'company_id',
                 'notes',
                 'checkouts_count',
-                'order_number',
+                'image',
                 'qty',
                 // These are *relationships* so we wouldn't normally include them in this array,
                 // since they would normally create a `column not found` error,
@@ -69,8 +76,9 @@ class AccessoriesController extends Controller
                 'manufacturer',
             ];
 
+        // See ComponentsController for the orderItems.order.supplier eager-load rationale.
         $accessories = Accessory::select('accessories.*')
-            ->with('category', 'company', 'manufacturer', 'checkouts', 'location', 'supplier', 'adminuser')
+            ->with('category', 'company', 'manufacturer', 'checkouts', 'location', 'defaultSupplier', 'adminuser', 'orderItems.order.supplier')
             ->withCount('checkouts as checkouts_count');
 
         // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
@@ -79,11 +87,22 @@ class AccessoriesController extends Controller
         }
 
         if ($request->filled('company_id')) {
-            $accessories->where('accessories.company_id', '=', $request->input('company_id'));
+            // expand_company_hierarchy=1 opts the company show-page tabs into the
+            // parent/child rollup so a child shows items inherited from its parent.
+            if ($request->boolean('expand_company_hierarchy')) {
+                $accessories->whereIn('accessories.company_id', Company::reachableCompanyIds($request->input('company_id')));
+            } else {
+                $accessories->where('accessories.company_id', '=', $request->input('company_id'));
+            }
         }
 
         if ($request->filled('order_number')) {
-            $accessories->where('accessories.order_number', '=', $request->input('order_number'));
+            // Reroute through the HasOrders orders() HasManyThrough since
+            // the parent accessories.order_number column no longer exists.
+            $orderNumber = $request->input('order_number');
+            $accessories->whereHas('orders', function ($query) use ($orderNumber) {
+                $query->where('orders.order_number', '=', $orderNumber);
+            });
         }
 
         if ($request->filled('category_id')) {
@@ -94,8 +113,12 @@ class AccessoriesController extends Controller
             $accessories->where('accessories.manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
+        if ($request->input('requestable') == 'true') {
+            $accessories->where('accessories.requestable', '=', '1');
+        }
+
         if ($request->filled('supplier_id')) {
-            $accessories->where('accessories.supplier_id', '=', $request->input('supplier_id'));
+            $accessories->where('accessories.default_supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('location_id')) {
@@ -107,7 +130,8 @@ class AccessoriesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : app('api_offset_value');
+        $total = $accessories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -133,12 +157,32 @@ class AccessoriesController extends Controller
             case 'created_by':
                 $accessories = $accessories->OrderByCreatedByName($order);
                 break;
+            case 'purchase_cost':
+                // purchase_cost lives on order_items now; sort by the
+                // last acquisition's price rather than the removed
+                // parent column.
+                $accessories = $accessories->OrderByLastPurchaseCost($order);
+                break;
+            case 'purchase_date':
+                $accessories = $accessories->OrderByLastPurchaseDate($order);
+                break;
+            case 'total_cost':
+                // total_cost is the sum of qty*price across every
+                // OrderItem, mirroring the info-panel's total_cost
+                // display so the column header sort matches.
+                $accessories = $accessories->OrderByTotalOrderCost($order);
+                break;
+            case 'percent_remaining':
+                $accessories = $accessories->OrderPercentRemaining($order);
+                break;
+            case 'remaining':
+                $accessories = $accessories->OrderRemaining($order);
+                break;
             default:
                 $accessories = $accessories->orderBy($column_sort, $order);
                 break;
         }
 
-        $total = $accessories->count();
         $accessories = $accessories->skip($offset)->take($limit)->get();
 
         return (new AccessoriesTransformer)->transformAccessories($accessories, $total);
@@ -159,9 +203,17 @@ class AccessoriesController extends Controller
         $accessory = new Accessory;
         $accessory->fill($request->all());
         $accessory->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        // Seed the parent's "typical supplier" template from the initial
+        // acquisition supplier on create; editable afterwards. See the
+        // UI store method for the parent-as-template rationale.
+        if (! $request->filled('default_supplier_id') && $request->filled('supplier_id')) {
+            $accessory->default_supplier_id = $request->input('supplier_id');
+        }
         $accessory = $request->handleImages($accessory);
 
         if ($accessory->save()) {
+            $this->enrichInitialOrderFromRequest($request, $accessory);
+
             return response()->json(Helper::formatStandardApiResponse('success', $accessory, trans('admin/accessories/message.create.success')));
         }
 
@@ -255,15 +307,70 @@ class AccessoriesController extends Controller
     {
         $this->authorize('update', Accessory::class);
         $accessory = Accessory::findOrFail($id);
-        $accessory->fill($request->all());
+
+        // Payload shape is preserved for API back-compat: `qty`,
+        // `order_number`, and `supplier_id` all remain accepted keys.
+        // supplier_id flows through fill() like any other field. `qty` gets
+        // pulled off the fill and routed through adjustQuantity() below so
+        // any change writes a QuantityAdjust action_log entry rather than
+        // silently overwriting. `order_number` no longer lives on the
+        // parent — resolveOrderForAdjustment turns it into an Order +
+        // OrderItem pair and passes the Order's id to the trait.
+        $qtyBefore = (int) $accessory->qty;
+        $qtyRequested = $request->has('qty') ? (int) $request->input('qty') : $qtyBefore;
+        $qtyDelta = $qtyRequested - $qtyBefore;
+
+        // supplier_id, purchase_date, purchase_cost, and order_number
+        // are create-only on the parent. Post-create acquisitions live
+        // as Orders + OrderItems (each with its own supplier / date /
+        // price / order number), so update-mode drops all four. API
+        // consumers relying on the old "set these via PATCH" behavior
+        // need to use the adjust-quantity endpoint instead.
+        $accessory->fill($request->except([
+            'qty',
+            'order_number',
+            'purchase_cost',
+            'purchase_date',
+            'supplier_id',
+        ]));
         $accessory->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $accessory = $request->handleImages($accessory);
 
-        if ($accessory->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $accessory, trans('admin/accessories/message.update.success')));
+        if (! $accessory->save()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $accessory->getErrors()));
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $accessory->getErrors()));
+        if ($qtyDelta !== 0) {
+            $orderId = $this->resolveOrderForAdjustment($request, $accessory, $qtyDelta);
+            try {
+                $accessory->adjustQuantity(
+                    $qtyDelta,
+                    $request->input('note') ?: "API qty change: {$qtyBefore} → {$qtyRequested}",
+                    $orderId,
+                );
+            } catch (DomainException) {
+                return response()->json(
+                    Helper::formatStandardApiResponse('error', null, trans('general.adjust_quantity_below_zero')),
+                    422,
+                );
+            }
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('success', $accessory, trans('admin/accessories/message.update.success')));
+    }
+
+    /**
+     * Dedicated adjust-quantity endpoint. Signed delta semantics: positive
+     * amount replenishes, negative decrements. Every call becomes a
+     * QuantityAdjust action_log entry. Note is required (unlike the
+     * general update path which synthesizes one). An optional file
+     * attachment lands on the same log row via UploadFileRequest::handleFile.
+     * See Api\AccessoriesController::update for the "qty inside PATCH"
+     * alternative preserved for API back-compat.
+     */
+    public function adjustQuantity(AdjustQuantityRequest $request, Accessory $accessory): JsonResponse
+    {
+        return $this->adjustQuantityAsJson($request, $accessory);
     }
 
     /**
@@ -313,9 +420,25 @@ class AccessoriesController extends Controller
 
         $accessory->checkout_qty = $request->input('checkout_qty', 1);
         $payload = null;
+        $overAllocated = false;
 
-        // Keep checkout rows and checkout log/event atomic to avoid ghost assignments.
-        DB::transaction(function () use ($accessory, $request, $target, &$payload): void {
+        // Concurrency guard. AccessoryCheckoutRequest validated
+        // number_remaining_after_checkout >= 0 with an unlocked read of
+        // numRemaining(), so two simultaneous checkout requests could both
+        // pass validation, both attach rows, and land the register at -1.
+        // Re-fetch the parent row under lockForUpdate INSIDE the
+        // transaction, re-check availability against the locked snapshot,
+        // and only then write. Mirrors the License checkout locking
+        // pattern.
+        DB::transaction(function () use ($accessory, $request, $target, &$payload, &$overAllocated): void {
+            $locked = Accessory::whereKey($accessory->id)->lockForUpdate()->first();
+
+            if (! $locked || $locked->numRemaining() < $accessory->checkout_qty) {
+                $overAllocated = true;
+
+                return;
+            }
+
             for ($i = 0; $i < $accessory->checkout_qty; $i++) {
 
                 $accessory_checkout = new AccessoryCheckout([
@@ -349,6 +472,10 @@ class AccessoriesController extends Controller
                 $accessory->checkout_qty,
             ));
         });
+
+        if ($overAllocated) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/accessories/message.checkout.unavailable')));
+        }
 
         return response()->json(Helper::formatStandardApiResponse('success', $payload, trans('admin/accessories/message.checkout.success')));
 
@@ -431,5 +558,36 @@ class AccessoriesController extends Controller
         $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * List accessories that are requestable AND reachable by the
+     * current caller (per FMCS + location scoping). Hydrates the
+     * accessories tab on /account/requestable. Deliberately
+     * open to any authenticated user - the web page it feeds is open
+     * too, and the Requestable() scope layered on top of
+     * the CompanyableTrait global scope ensures the caller only sees
+     * rows they can act on.
+     */
+    public function requestable(Request $request): array
+    {
+        $query = Accessory::with('category', 'location', 'company', 'manufacturer', 'requests')
+            ->withCount('checkouts as checkouts_count')
+            ->Requestable();
+
+        if ($request->filled('search')) {
+            $query->TextSearch($request->input('search'));
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), ['name', 'created_at'], true) ? $request->input('sort') : 'name';
+
+        $rows = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+        return (new AccessoriesTransformer)->transformAccessories($rows, $total);
     }
 }

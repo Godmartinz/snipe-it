@@ -20,7 +20,7 @@ return [
         'error' => 'Hubo un problema al eliminar el proveedor, por favor inténtelo de nuevo.',
         'success' => 'Proveedor eliminado correctamente.',
         'not_found' => 'Proveedor no encontrado.',
-        'bulk_success' => 'Proveedores eliminados exitosamente.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -119,10 +121,9 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
         $targetAccessory = Accessory::factory()->create([
             'name' => 'Target Accessory',
             'company_id' => $targetCompany->id,
-            'order_number' => 'ORDER-A',
             'category_id' => $targetCategory->id,
             'manufacturer_id' => $targetManufacturer->id,
-            'supplier_id' => $targetSupplier->id,
+            'default_supplier_id' => $targetSupplier->id,
             'location_id' => $targetLocation->id,
             'notes' => 'NOTE-A',
         ]);
@@ -130,17 +131,18 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
         $otherAccessory = Accessory::factory()->create([
             'name' => 'Other Accessory',
             'company_id' => $otherCompany->id,
-            'order_number' => 'ORDER-B',
             'category_id' => $otherCategory->id,
             'manufacturer_id' => $otherManufacturer->id,
-            'supplier_id' => $otherSupplier->id,
+            'default_supplier_id' => $otherSupplier->id,
             'location_id' => $otherLocation->id,
             'notes' => 'NOTE-B',
         ]);
 
+        // order_number was dropped from the filters list when the parent
+        // column was renamed to legacy_order_number and current order
+        // numbers moved to the QuantityAdjust action_log per event.
         $filters = [
             'company_id' => $targetCompany->id,
-            'order_number' => 'ORDER-A',
             'category_id' => $targetCategory->id,
             'manufacturer_id' => $targetManufacturer->id,
             'supplier_id' => $targetSupplier->id,
@@ -155,5 +157,99 @@ class IndexAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
                 ->assertResponseContainsInRows($targetAccessory)
                 ->assertResponseDoesNotContainInRows($otherAccessory);
         }
+    }
+
+    public function test_can_sort_accessories_by_raw_remaining_count()
+    {
+        // Requested in issue #18505 alongside the percent_remaining sort:
+        // sort by absolute stock left (qty - active checkouts). The scope
+        // references the withCount-added `checkouts_count` alias, so a
+        // regression in the API's eager-load order would surface here as
+        // a SQL error or a null-count sort.
+        $user = User::factory()->viewAccessories()->create();
+
+        $lots = Accessory::factory()->create(['name' => 'Lots left', 'qty' => 10]);
+        $some = Accessory::factory()->create(['name' => 'Some left', 'qty' => 10]);
+        $none = Accessory::factory()->create(['name' => 'None left', 'qty' => 10]);
+
+        AccessoryCheckout::factory()->count(1)->create(['accessory_id' => $lots->id]);   // remaining = 9
+        AccessoryCheckout::factory()->count(5)->create(['accessory_id' => $some->id]);   // remaining = 5
+        AccessoryCheckout::factory()->count(10)->create(['accessory_id' => $none->id]);  // remaining = 0
+
+        $descRows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', ['sort' => 'remaining', 'order' => 'desc']))
+            ->assertOk()
+            ->json('rows');
+
+        $descNames = array_column($descRows, 'name');
+        $descRelevant = array_values(array_intersect($descNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['Lots left', 'Some left', 'None left'], $descRelevant);
+
+        $ascRows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', ['sort' => 'remaining', 'order' => 'asc']))
+            ->assertOk()
+            ->json('rows');
+
+        $ascNames = array_column($ascRows, 'name');
+        $ascRelevant = array_values(array_intersect($ascNames, ['Lots left', 'Some left', 'None left']));
+        $this->assertSame(['None left', 'Some left', 'Lots left'], $ascRelevant);
+    }
+
+    public function test_index_response_includes_distinct_order_numbers_per_accessory()
+    {
+        // The Accessory observer writes one Order + OrderItem per create()
+        // with a null order_number. Set explicit order numbers on those
+        // seed rows so the transformer's `orders` array has non-null
+        // values to surface. Multiple orders on one accessory must land
+        // in the output as a distinct list (feeds ordersSummaryFormatter).
+        $user = User::factory()->viewAccessories()->create();
+
+        $accessory = Accessory::factory()->create(['name' => 'Accessory With Orders']);
+        $accessory->orderItems()->first()->order->update(['order_number' => 'ORD-1001']);
+
+        $secondOrder = Order::create(['order_number' => 'ORD-1002']);
+        OrderItem::create([
+            'order_id' => $secondOrder->id,
+            'item_type' => Accessory::class,
+            'item_id' => $accessory->id,
+            'qty' => 5,
+            'price' => 10,
+        ]);
+
+        $rows = $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index'))
+            ->assertOk()
+            ->json('rows');
+
+        $row = collect($rows)->firstWhere('id', $accessory->id);
+
+        $this->assertNotNull($row);
+        $this->assertIsArray($row['orders']);
+        $this->assertEqualsCanonicalizing(['ORD-1001', 'ORD-1002'], $row['orders']);
+    }
+
+    public function test_advanced_search_filter_on_order_number_returns_only_matching_accessories()
+    {
+        // Column is wired to searchableRelations['orders' => ['order_number']],
+        // so a `filter[orders]=X` query threads through the Searchable
+        // trait to a whereHas('orders') LIKE match on orders.order_number.
+        // Prefix operators (is:, not:, is:null, is:not_null) are honored
+        // by the same code path; this test pins the default LIKE path so
+        // the relation is provably wired.
+        $user = User::factory()->superuser()->create();
+
+        $targetAccessory = Accessory::factory()->create(['name' => 'Target']);
+        $otherAccessory = Accessory::factory()->create(['name' => 'Other']);
+
+        $targetAccessory->orderItems()->first()->order->update(['order_number' => 'ADV-SEARCH-777']);
+        $otherAccessory->orderItems()->first()->order->update(['order_number' => 'UNRELATED-999']);
+
+        $this->actingAsForApi($user)
+            ->getJson(route('api.accessories.index', [
+                'filter' => json_encode(['orders' => 'ADV-SEARCH-777']),
+            ]))
+            ->assertOk()
+            ->assertResponseContainsInRows($targetAccessory)
+            ->assertResponseDoesNotContainInRows($otherAccessory);
     }
 }

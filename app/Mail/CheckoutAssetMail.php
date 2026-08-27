@@ -46,7 +46,7 @@ class CheckoutAssetMail extends BaseMailable
         }
 
         if ($this->item->expected_checkin) {
-            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
+            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'datetime',
                 false);
         }
     }

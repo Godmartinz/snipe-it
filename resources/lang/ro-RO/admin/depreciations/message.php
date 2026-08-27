@@ -19,6 +19,8 @@ return [
         'confirm' => 'Esti sigur ca vrei sa stergi clasa de deprecieri?',
         'error' => 'S-a intampinat o problema la stergerea clasei de deprecieri. Va rugam incercati iar.',
         'success' => 'Clasa de deprecieri a fost creata cu succes.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

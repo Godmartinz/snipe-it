@@ -17,6 +17,8 @@ return [
         'confirm' => 'Yakin ingin menghapus departemen ini?',
         'error' => 'Terjadi masalah saat menghapus departemen. Silahkan coba lagi',
         'success' => 'Departemen berhasil dihapus.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

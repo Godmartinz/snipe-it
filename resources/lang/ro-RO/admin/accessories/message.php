@@ -20,6 +20,8 @@ return [
         'confirm' => 'Sigur doriți să ștergeți acest accesoriu?',
         'error' => 'A apărut o problemă la ştergerea accesoriului. Vă rugăm să încercaţi din nou.',
         'success' => 'Accesoriul a fost şters cu succes.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -47,7 +47,7 @@ class ImportLocationsTest extends ImportDataTestCase implements TestsPermissions
         $this->importFileResponse(['import' => $import->id, 'send-welcome' => 0])
             ->assertOk()
             ->assertExactJson([
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 1, 'updated' => 0, 'skipped' => 0, 'errored' => 0]],
                 'status' => 'success',
                 'messages' => ['redirect_url' => route('locations.index')],
             ]);
@@ -87,7 +87,7 @@ class ImportLocationsTest extends ImportDataTestCase implements TestsPermissions
             ->assertInternalServerError()
             ->assertExactJson([
                 'status' => 'import-errors',
-                'payload' => null,
+                'payload' => ['tally' => ['created' => 0, 'updated' => 0, 'skipped' => 0, 'errored' => 1]],
                 'messages' => [
                     '' => [
                         'Location ""' => [
@@ -129,6 +129,78 @@ class ImportLocationsTest extends ImportDataTestCase implements TestsPermissions
             Arr::except($location->attributesToArray(), array_merge($updatedAttributes, $location->getDates())),
             Arr::except($updatedLocation->attributesToArray(), array_merge($updatedAttributes, $location->getDates())),
         );
+    }
+
+    #[Test]
+    public function update_mode_clears_field_when_csv_column_is_present_but_empty(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $location = Location::factory()->create([
+            'address' => '123 Pre-existing Street',
+            'city' => 'PreExistingCity',
+        ])->refresh();
+
+        $this->assertNotEmpty($location->address);
+        $this->assertNotEmpty($location->city);
+
+        // Construct directly (not via ::new()) so address + city land in the
+        // row array. ::new() runs replace() which only overwrites keys the
+        // default definition() already emits; the Location builder default
+        // only has name + phone, so 'address' and 'city' would be dropped
+        // and the CSV would not contain those columns at all.
+        $importFileBuilder = new ImportFileBuilder([[
+            'name' => $location->name,
+            'address' => '',
+            'city' => '',
+        ]]);
+        $import = Import::factory()->locations()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $location->refresh();
+        $this->assertNull($location->address);
+        $this->assertNull($location->city);
+    }
+
+    #[Test]
+    public function update_mode_preserves_fields_when_csv_column_is_absent(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        $location = Location::factory()->create([
+            'address' => 'Do Not Lose This',
+            'city' => 'PreservedCity',
+        ])->refresh();
+
+        $originalAddress = $location->address;
+        $originalCity = $location->city;
+
+        // Import a CSV that only has the identity field (name) plus one
+        // updated column. All other Location fields are absent from the CSV,
+        // so their DB values must be preserved on update.
+        $partialFile = new ImportFileBuilder([[
+            'name' => $location->name,
+            'zip' => '99999',
+        ]]);
+        $partialImport = Import::factory()->locations()->create([
+            'file_path' => $partialFile->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse([
+            'import' => $partialImport->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $location->refresh();
+        $this->assertEquals('99999', $location->zip);
+        $this->assertEquals($originalAddress, $location->address);
+        $this->assertEquals($originalCity, $location->city);
     }
 
     #[Test]

@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Sutikimo užklausa panaikinta',
     'acceptance_request' => 'Sutikimo užklausa',
     'custom_export' => [
+        'asset_company' => 'Turto įmonė',
+        'asset_serial' => 'Turto serijinis numeris',
+        'assigned_asset_tag' => 'Išduotas inventorinis numeris',
         'user_address' => 'Naudotojo adresas',
         'user_company' => 'Naudotojo įmonė',
         'user_city' => 'Naudotojo miestas',

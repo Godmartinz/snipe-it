@@ -12,7 +12,7 @@ class UserCompanyMembershipTest extends TestCase
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $user = User::factory()->create(['company_id' => $companyA->id]);
+        $user = User::factory()->forCompany($companyA->id)->create();
         $user->companies()->sync([$companyA->id]);
 
         $actor = User::factory()->superuser()->create();
@@ -38,7 +38,7 @@ class UserCompanyMembershipTest extends TestCase
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $users = User::factory()->count(3)->create(['company_id' => null]);
+        $users = User::factory()->count(3)->withoutCompany()->create();
 
         $actor = User::factory()->superuser()->create();
 
@@ -63,7 +63,7 @@ class UserCompanyMembershipTest extends TestCase
     {
         $company = Company::factory()->create();
 
-        $users = User::factory()->count(2)->create(['company_id' => $company->id]);
+        $users = User::factory()->count(2)->forCompany($company->id)->create();
         foreach ($users as $user) {
             $user->companies()->sync([$company->id]);
         }

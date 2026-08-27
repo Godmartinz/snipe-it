@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Http\Requests\ImageUploadRequest;
+use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Component;
+use App\Models\Consumable;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -89,17 +94,22 @@ class LocationsController extends Controller
         $location->fax = request('fax');
         $location->tag_color = $request->input('tag_color');
         $location->notes = $request->input('notes');
-        $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-
-        // Only scope the location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-            // check if parent is set and has a different company
-            if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                return redirect()->back()->withInput()->withInput()->with('error', 'different company than parent');
-            }
         } else {
             $location->company_id = $request->input('company_id');
+        }
+
+        // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
+        if (Setting::getSettings()->full_multiple_companies_support) {
+            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            if ($parent && $parent->company_id != $location->company_id) {
+                return redirect()->back()->withInput()->with('error', trans('general.error_location_parent_company', [
+                    'parent' => $parent->name,
+                    'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+                    'location_company' => $location->company?->name ?? trans('general.unassigned'),
+                ]));
+            }
         }
 
         if ($request->has('use_cloned_image')) {
@@ -171,19 +181,32 @@ class LocationsController extends Controller
         $location->tag_color = $request->input('tag_color');
         $location->notes = $request->input('notes');
 
-        // Only scope the location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
             // check if there are related objects with different company
-            if (Helper::test_locations_fmcs(false, $location->id, $location->company_id)) {
-                return redirect()->back()->withInput()->withInput()->with('error', 'error scoped locations');
-            }
-            // check if parent is set and has a different company
-            if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                return redirect()->back()->withInput()->withInput()->with('error', 'different company than parent');
+            if ($mismatched = Helper::test_locations_fmcs(false, $location->id, $location->company_id)) {
+                $first = $mismatched[0];
+
+                return redirect()->back()->withInput()->with('error', trans('general.error_location_scoped_items', [
+                    'item_type' => trans('general.'.strtolower($first[0])),
+                    'item_name' => $first[2],
+                    'item_company' => $first[5] ?? trans('general.unassigned'),
+                ]));
             }
         } else {
             $location->company_id = $request->input('company_id');
+        }
+
+        // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
+        if (Setting::getSettings()->full_multiple_companies_support) {
+            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            if ($parent && $parent->company_id != $location->company_id) {
+                return redirect()->back()->withInput()->with('error', trans('general.error_location_parent_company', [
+                    'parent' => $parent->name,
+                    'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+                    'location_company' => $location->company?->name ?? trans('general.unassigned'),
+                ]));
+            }
         }
 
         $location = $request->handleImages($location);
@@ -225,13 +248,11 @@ class LocationsController extends Controller
 
         if ($location->isDeletable()) {
 
-            if ($location->image) {
-                try {
-                    Storage::disk('public')->delete('locations/'.$location->image);
-                } catch (\Exception $e) {
-                    Log::error($e);
-                }
-            }
+            // Note: the image file is deliberately preserved across this
+            // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+            // removes it later when the row is force-deleted. Keeping
+            // the file here means a restored soft-deleted row still has
+            // its image.
             $location->delete();
 
             return redirect()->to(route('locations.index'))->with('success', trans('admin/locations/message.delete.success'));
@@ -275,17 +296,7 @@ class LocationsController extends Controller
         $this->authorize('view', Location::class);
 
         if ($location = Location::where('id', $id)->first()) {
-            return view('locations/print')
-                ->with('assigned', false)
-                ->with('assets', $location->assets)
-                ->with('assignedAssets', $location->assignedAssets)
-                ->with('accessories', $location->accessories)
-                ->with('assignedAccessories', $location->assignedAccessories)
-                ->with('users', $location->users()->with('companies')->get())
-                ->with('location', $location)
-                ->with('consumables', $location->consumables)
-                ->with('components', $location->components)
-                ->with('children', $location->children);
+            return view('locations/print', $this->printPayload($location, assigned: false));
         }
 
         return redirect()->route('locations.index')->with('error', trans('admin/locations/message.does_not_exist'));
@@ -294,21 +305,48 @@ class LocationsController extends Controller
     public function print_all_assigned($id): View|RedirectResponse
     {
         $this->authorize('view', Location::class);
+
         if ($location = Location::where('id', $id)->first()) {
-            return view('locations/print')
-                ->with('assigned', true)
-                ->with('assets', $location->assets)
-                ->with('assignedAssets', $location->assignedAssets)
-                ->with('accessories', $location->accessories)
-                ->with('assignedAccessories', $location->assignedAccessories)
-                ->with('users', $location->users()->with('companies')->get())
-                ->with('location', $location)
-                ->with('consumables', $location->consumables)
-                ->with('components', $location->components)
-                ->with('children', $location->children);
+            return view('locations/print', $this->printPayload($location, assigned: true));
         }
 
         return redirect()->route('locations.index')->with('error', trans('admin/locations/message.does_not_exist'));
+    }
+
+    /**
+     * Build the per-model related collections the print sheet renders.
+     * The route only gates on `view` for Location, but the view rendered
+     * the assigned users / assets / accessories / consumables /
+     * components inline without matching per-model permission checks -
+     * so a caller with locations.view but not users.view could read
+     * assigned users' identity through the printassigned URL, even
+     * though /users/{id} would 403 for them.
+     *
+     * Substitute an empty Collection for each relation the caller can't
+     * view. The existing `@if ($users->count() > 0)` guards in
+     * locations/print.blade.php then naturally skip the entire block,
+     * matching the per-model @can guards used by the standard
+     * locations/view.blade.php page. Instance-context gate checks pass
+     * the model class so FMCS scoping still applies.
+     */
+    private function printPayload(Location $location, bool $assigned): array
+    {
+        $empty = new Collection;
+
+        return [
+            'assigned' => $assigned,
+            'location' => $location,
+            'assets' => Gate::allows('view', Asset::class) ? $location->assets : $empty,
+            'assignedAssets' => Gate::allows('view', Asset::class) ? $location->assignedAssets : $empty,
+            'accessories' => Gate::allows('view', Accessory::class) ? $location->accessories : $empty,
+            'assignedAccessories' => Gate::allows('view', Accessory::class) ? $location->assignedAccessories : $empty,
+            'users' => Gate::allows('view', User::class) ? $location->users()->with('companies')->get() : $empty,
+            'consumables' => Gate::allows('view', Consumable::class) ? $location->consumables : $empty,
+            'components' => Gate::allows('view', Component::class) ? $location->components : $empty,
+            // Child locations key off the same locations.view permission the
+            // outer authorize() already required, so no further gate here.
+            'children' => $location->children,
+        ];
     }
 
     /**
@@ -405,11 +443,16 @@ class LocationsController extends Controller
                 }
             }
 
+            if ($valid_count === 0) {
+                return redirect()->route('locations.index')
+                    ->with('error', trans('general.bulk.delete.nothing_deletable', ['object_type' => trans_choice('general.location_plural', 2)]));
+            }
+
             return view('locations/bulk-delete', compact('locations'))->with('valid_count', $valid_count);
         }
 
-        return redirect()->route('models.index')
-            ->with('error', 'You must select at least one model to edit.');
+        return redirect()->route('locations.index')
+            ->with('error', trans('general.bulk.delete.nothing_selected', ['object_type' => trans_choice('general.location_plural', 2)]));
     }
 
     /**

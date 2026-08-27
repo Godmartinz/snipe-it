@@ -3,6 +3,7 @@
 return [
     'actions' => 'Darbības',
     'add' => 'Pievieno jaunu',
+    'back' => 'Atpakaļ',
     'cancel' => 'Atcelt',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Dzēst',

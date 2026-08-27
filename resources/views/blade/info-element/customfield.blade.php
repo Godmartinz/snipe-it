@@ -41,6 +41,10 @@
                 <span class="js-copy-{{ $field->id }} hidden-print"
                       id="text-{{ $field->id }}-to-show"
                       style="font-size: 0;">{{ \App\Helpers\Helper::gracefulDecrypt($field, \App\Helpers\Helper::getFormattedDateObject($item->{$field->db_column_name()}, 'date', false)) }}</span>
+            @elseif (($field->format=='DATETIME') && ($item->{$field->db_column_name()}!=''))
+                <span class="js-copy-{{ $field->id }} hidden-print"
+                      id="text-{{ $field->id }}-to-show"
+                      style="font-size: 0;">{{ \App\Helpers\Helper::gracefulDecrypt($field, \App\Helpers\Helper::getFormattedDateObject($item->{$field->db_column_name()}, 'datetime', false)) }}</span>
             @elseif ($field->element == 'markdown-textarea')
                 <div class="js-copy-{{ $field->id }} hidden-print markdown-field-content"
                      id="text-{{ $field->id }}-to-show"
@@ -63,6 +67,8 @@
         <a href="{{ $item->{$field->db_column_name()} }}" target="_new">{{ $item->{$field->db_column_name()} }}</a>
     @elseif (($field->format=='DATE') && ($item->{$field->db_column_name()}!=''))
         {{ \App\Helpers\Helper::getFormattedDateObject($item->{$field->db_column_name()}, 'date', false) }}
+    @elseif (($field->format=='DATETIME') && ($item->{$field->db_column_name()}!=''))
+        {{ \App\Helpers\Helper::getFormattedDateObject($item->{$field->db_column_name()}, 'datetime', false) }}
     @elseif (($field->element == 'markdown-textarea') && ($item->{$field->db_column_name()} != ''))
         <div class="markdown-field-content">{!! Helper::renderMarkdown($item->{$field->db_column_name()}) !!}</div>
     @else

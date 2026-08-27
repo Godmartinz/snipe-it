@@ -6,6 +6,7 @@ use App\Events\CheckoutableCheckedIn;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\Company;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Statuslabel;
@@ -61,9 +62,9 @@ class AssetCheckinTest extends TestCase
 
         $content = $response->getContent();
 
-        $this->assertStringContainsString('id="set-requestable-wrapper"', $content);
+        $this->assertStringContainsString('id="requestable-wrapper"', $content);
         $this->assertMatchesRegularExpression(
-            '/id="set-requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
+            '/id="requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
             $content
         );
     }
@@ -82,7 +83,7 @@ class AssetCheckinTest extends TestCase
         $content = $response->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/id="set-requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
+            '/id="requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
             $content
         );
     }
@@ -102,7 +103,7 @@ class AssetCheckinTest extends TestCase
             ->assertOk();
 
         $this->assertDoesNotMatchRegularExpression(
-            '/id="set-requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
+            '/id="requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
             $responseWithDeployableOldInput->getContent()
         );
 
@@ -116,7 +117,7 @@ class AssetCheckinTest extends TestCase
             ->assertOk();
 
         $this->assertMatchesRegularExpression(
-            '/id="set-requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
+            '/id="requestable-wrapper"(?:(?!>).)*style="display:\s*none;"/s',
             $responseWithNonDeployableOldInput->getContent()
         );
     }
@@ -179,15 +180,114 @@ class AssetCheckinTest extends TestCase
         $this->assertHasTheseActionLogs($asset, ['create', 'checkin from']);
     }
 
+    /**
+     * Regression coverage for #19401. Pre-fix, submitting the checkin form
+     * with the location dropdown blank (which is how a browser submits an
+     * empty select) wiped the asset's current location to null instead of
+     * resetting it to rtd_location_id like the field's own helper text
+     * implied. The new form ships both pickers pre-populated with
+     * rtd_location_id, so a no-touch submit sends both values back and
+     * the asset lands at rtd. This test posts the same shape as the browser
+     * would after a no-touch submit.
+     */
+    public function test_checkin_with_prepopulated_location_lands_at_rtd_not_null()
+    {
+        $rtdLocation = Location::factory()->create();
+        $userLocation = Location::factory()->create();
+        $asset = Asset::factory()->assignedToUser()->create([
+            'location_id' => $userLocation->id,
+            'rtd_location_id' => $rtdLocation->id,
+        ]);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', [$asset]), [
+                'location_id' => $rtdLocation->id,
+                'rtd_location_id' => $rtdLocation->id,
+            ]);
+
+        $fresh = $asset->refresh();
+        $this->assertNotNull($fresh->location_id, 'Current location must not be wiped to null on checkin (#19401).');
+        $this->assertTrue($fresh->location()->is($rtdLocation), 'Current location should land at rtd_location on default checkin.');
+        $this->assertTrue($fresh->defaultLoc()->is($rtdLocation), 'Default location should be unchanged when picker submitted with same rtd value.');
+    }
+
+    /**
+     * The user can explicitly clear either location picker (via select2's
+     * X button), which posts an empty string for that field. Empty string
+     * for a submitted field is distinct from "field not present" — it means
+     * "clear this location."
+     */
+    public function test_checkin_clears_location_when_picker_submitted_empty()
+    {
+        $rtdLocation = Location::factory()->create();
+        $asset = Asset::factory()->assignedToUser()->create([
+            'location_id' => Location::factory()->create()->id,
+            'rtd_location_id' => $rtdLocation->id,
+        ]);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', [$asset]), [
+                'location_id' => '',
+                'rtd_location_id' => $rtdLocation->id,
+            ]);
+
+        $fresh = $asset->refresh();
+        $this->assertNull($fresh->location_id, 'Explicit empty submission of the picker should clear the location.');
+        $this->assertTrue($fresh->defaultLoc()->is($rtdLocation), 'Default location should be untouched.');
+    }
+
+    public function test_checkin_rejects_nonexistent_location_id()
+    {
+        $rtdLocation = Location::factory()->create();
+        $asset = Asset::factory()->assignedToUser()->create(['rtd_location_id' => $rtdLocation->id]);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', [$asset]), [
+                'location_id' => PHP_INT_MAX,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertNotNull($asset->fresh()->assigned_to);
+    }
+
+    public function test_checkin_rejects_location_from_another_company_under_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $foreignLocation = Location::factory()->create(['company_id' => $companyB->id]);
+        $rtdLocation = Location::factory()->create(['company_id' => $companyA->id]);
+        $asset = Asset::factory()->assignedToUser()->create([
+            'company_id' => $companyA->id,
+            'rtd_location_id' => $rtdLocation->id,
+        ]);
+        $actor = User::factory()->checkinAssets()->viewAssets()->forCompany($companyA->id)->create();
+
+        $this->actingAs($actor)
+            ->post(route('hardware.checkin.store', [$asset]), [
+                'location_id' => $foreignLocation->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertNotNull($asset->fresh()->assigned_to);
+    }
+
     public function test_default_location_can_be_updated_upon_checkin()
     {
         $location = Location::factory()->create();
         $asset = Asset::factory()->assignedToUser()->create();
 
+        // Post-#19401 the checkin form ships both `location_id` and
+        // `rtd_location_id` as independent pickers, so updating the default
+        // location just means submitting the desired value on that field.
+        // Replaces the older `update_default_location=0` flag semantic.
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->post(route('hardware.checkin.store', [$asset]), [
                 'location_id' => $location->id,
-                'update_default_location' => 0,
+                'rtd_location_id' => $location->id,
             ]);
 
         $this->assertTrue($asset->refresh()->defaultLoc()->is($location));
@@ -287,7 +387,7 @@ class AssetCheckinTest extends TestCase
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->post(route('hardware.checkin.store', [$asset]), [
                 'status_id' => $deployableStatus->id,
-                'set_requestable' => 1,
+                'requestable' => 1,
             ]);
 
         $this->assertTrue((bool) $asset->fresh()->requestable);
@@ -318,7 +418,7 @@ class AssetCheckinTest extends TestCase
         $this->actingAs(User::factory()->checkinAssets()->create())
             ->post(route('hardware.checkin.store', [$asset]), [
                 'status_id' => $undeployableStatus->id,
-                'set_requestable' => 1,
+                'requestable' => 1,
             ]);
 
         $this->assertFalse((bool) $asset->fresh()->requestable);

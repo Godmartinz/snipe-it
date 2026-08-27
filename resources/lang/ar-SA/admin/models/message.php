@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'لم يتم اختيار أي موديلات، لذلك لم يتم حذف أي شيء.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'تم حذف النموذج!|تم حذف :success_count نموذج!',
         'success_partial' => 'تم حذف:success_count: من الموديلات، ومع ذلك تعذر حذف fail_count: نظرًا لأنها لا تزال تحتوي على أصول مقترنة بها.',
     ],

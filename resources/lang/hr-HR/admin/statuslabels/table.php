@@ -13,6 +13,7 @@ return [
     'pending' => 'U tijeku',
     'status_type' => 'Vrsta statusa',
     'show_in_nav' => 'Pokaži na bočnom nav',
+    'status_label' => 'Status etiketa',
     'title' => 'Oznake statusa',
     'undeployable' => 'Undeployable',
     'update' => 'Ažuriranje oznake statusa',

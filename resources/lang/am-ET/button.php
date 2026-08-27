@@ -3,6 +3,7 @@
 return [
     'actions' => 'Actions',
     'add' => 'Add New',
+    'back' => 'ወደኋላ',
     'cancel' => 'ተወው',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Delete',
