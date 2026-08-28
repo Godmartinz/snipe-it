@@ -39,6 +39,7 @@ use Watson\Validating\ValidatingTrait;
  * @property ?int $company_id
  * @property Carbon|string|null $last_checkin
  * @property bool $requestable
+ * @property Carbon|null $warranty_expires
  */
 class Asset extends Depreciable
 {
@@ -281,16 +282,6 @@ class Asset extends Depreciable
 
         static::softDeleted(function (Asset $asset) {
             $asset->requests()->delete();
-        });
-
-        static::saving(function ($asset) {
-            if ($asset->isDirty(['purchase_date', 'warranty_months'])) {
-                $asset->warranty_expires =
-                    $asset->purchase_date && $asset->warranty_months
-                        ? Carbon::parse($asset->purchase_date)
-                        ->addMonths((int)$asset->warranty_months)
-                        : null;
-            }
         });
     }
 
@@ -1152,7 +1143,7 @@ class Asset extends Depreciable
      *
      * @return mixed
      */
-    public static function getExpiringWarrantyOrEol($query, $days = 30)
+    public static function getExpiringWarrantyOrEol($days = 30)
     {
         $now = now();
         $end = now()->addDays($days);
