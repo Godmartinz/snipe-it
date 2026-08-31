@@ -16,13 +16,27 @@ return new class extends Migration
             $table->date('warranty_expires')->nullable()->after('warranty_months');
             $table->index('warranty_expires');
         });
+        $driver = DB::getDriverName();
 
-        DB::table('assets')
-            ->whereNotNull('purchase_date')
-            ->whereNotNull('warranty_months')
-            ->update([
-                'warranty_expires' => DB::raw('DATE_ADD(purchase_date, INTERVAL warranty_months MONTH)'),
-            ]);
+        if ($driver === 'sqlite') {
+            DB::table('assets')
+                ->whereNotNull('purchase_date')
+                ->whereNotNull('warranty_months')
+                ->update([
+                    'warranty_expires' => DB::raw(
+                        "date(purchase_date, '+' || warranty_months || ' months')"
+                    ),
+                ]);
+        } else {
+            DB::table('assets')
+                ->whereNotNull('purchase_date')
+                ->whereNotNull('warranty_months')
+                ->update([
+                    'warranty_expires' => DB::raw(
+                        'DATE_ADD(purchase_date, INTERVAL warranty_months MONTH)'
+                    ),
+                ]);
+        }
     }
 
     /**
