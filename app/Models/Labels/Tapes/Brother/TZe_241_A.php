@@ -4,7 +4,7 @@ namespace App\Models\Labels\Tapes\Brother;
 
 use App\Helpers\Helper;
 
-class TZe_241 extends TZe_18mm
+class TZe_241_A extends TZe_18mm
 {
     private const LABEL_SIZE = 5.0;
 
