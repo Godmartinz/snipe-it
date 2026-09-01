@@ -127,11 +127,11 @@ class L6009_A extends L6009
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
             'field_label_font' => 'freesans',
-            'field_label_font_size' => $this->getLabelSize(),
-            'field_label_margin' => $this->getLabelMargin(),
+            'field_label_font_size' => 2.8,
+            'field_label_margin' => 1.55,
             'field_value_font' => 'freemono',
-            'field_value_font_size' => $this->getFieldSize(),
-            'field_value_margin' => $this->getFieldMargin(),
+            'field_value_font_size' => 2.8,
+            'field_value_margin' => .2,
         ];
     }
 

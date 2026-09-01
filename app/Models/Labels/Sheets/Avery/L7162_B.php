@@ -140,6 +140,7 @@ class L7162_B extends L7162
         return [
             'barcode_size' => 4,
             'barcode_margin' => $this->getBarcodeMargin(),
+            'tag_alignment' => 'R',
             'tag_font' => 'freemono',
             'tag_font_size' => $this->getTagSize(),
             'logo_max_width' => $this->getLogoMaxWidth(),

@@ -13,9 +13,18 @@ final class LabelGeometryRules
             "{$prefix}grid.column_spacing" => ['required', 'numeric', 'min:0'],
             "{$prefix}label.width" => ['required', 'numeric', 'gt:0'],
             "{$prefix}label.height" => ['required', 'numeric', 'gt:0'],
+            "{$prefix}label.border" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}label.padding_top" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}label.padding_right" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}label.padding_bottom" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}label.padding_left" => ['nullable', 'numeric', 'min:0'],
+
             "{$prefix}page.width" => ['required', 'numeric', 'gt:0'],
             "{$prefix}page.height" => ['required', 'numeric', 'gt:0'],
-            // margins / padding / border: 'numeric', 'min:0'
+            "{$prefix}page.margin_top" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}page.margin_right" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}page.margin_bottom" => ['nullable', 'numeric', 'min:0'],
+            "{$prefix}page.margin_left" => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

@@ -128,6 +128,7 @@ class L7163_A extends L7163
             'barcode_margin' => $this->getBarcodeMargin(),
             'barcode_2d_size' => $this->get2DBarcodeSize(),
             'tag_font_size' => $this->getTagSize(),
+            'tag_offset_x' => 6,
             'title_font_size' => $this->getTitleSize(),
             'title_margin' => $this->getTitleMargin(),
             'field_label_font_size' => $this->getLabelSize(),

@@ -114,6 +114,11 @@ class CustomLabelImportValidator
     {
         return [
             'printable_area' => ['required', 'array'],
+            
+            'dimensions' => ['required', 'array'],
+            'dimensions.width' => ['required', 'numeric', 'gt:0'],
+            'dimensions.height' => ['required', 'numeric', 'gt:0'],
+            'dimensions.label_gap' => ['nullable', 'numeric', 'min:0'],
 
             'content.barcode1D_v_align' => ['nullable', 'string', 'in:T,M,B'],
             'content.barcode1D_placement' => ['nullable', 'string', 'in:full_width,text_column,inline'],

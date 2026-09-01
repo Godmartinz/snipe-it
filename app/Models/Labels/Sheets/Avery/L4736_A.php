@@ -128,7 +128,7 @@ class L4736_A extends L4736
             'title_position' => 'top',
             'title_offset_x' => 7,
             'field_label_font_size' => 1.8,
-            'field_label_margin' => $this->getLabelMargin(),
+            'field_label_margin' => 1.5,
             'field_value_font_size' => 2.8,
             'field_value_margin' => $this->getFieldMargin(),
         ];
