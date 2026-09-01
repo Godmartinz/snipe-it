@@ -1285,11 +1285,32 @@ class Helper
             return strtoupper(trans('admin/custom_fields/general.encrypted'));
         }
 
-        if (isset($item)) {
-            return self::gracefulDecrypt($field, $item->{$field->db_column_name()});
+        $value = isset($item)
+            ? self::gracefulDecrypt($field, $item->{$field->db_column_name()})
+            : $field->defaultValue($model->id);
+
+        // DATE / DATETIME custom fields can hold non-YYYY-MM-DD strings
+        // in the DB (e.g. `3/28/2025` from a historic CSV import that
+        // shoved raw cell values into the column). The datepicker
+        // widgets expect `Y-m-d` / `Y-m-d H:i:s` and blank or mangle
+        // anything else. AssetsTransformer already normalizes on the
+        // view / API read path via getFormattedDateObject; do the
+        // same here so the edit form renders a value the picker can
+        // hydrate. Save cycle rewrites the column to YYYY-MM-DD via
+        // the picker's own output, so the DB heals per-edit. Any
+        // value Carbon cannot parse falls through unchanged so the
+        // user sees the raw string and can correct it.
+        if (in_array($field->format, ['DATE', 'DATETIME'], true) && ! empty($value)) {
+            try {
+                $value = $field->format === 'DATETIME'
+                    ? Carbon::parse($value)->format('Y-m-d H:i:s')
+                    : Carbon::parse($value)->format('Y-m-d');
+            } catch (\Exception $e) {
+                // Unparseable value stays as-is.
+            }
         }
 
-        return $field->defaultValue($model->id);
+        return $value;
     }
 
     public static function formatStandardApiResponse($status, $payload = null, $messages = null)
@@ -1621,7 +1642,6 @@ class Helper
     {
         if (config('app.lock_passwords') === true) {
             return true;
-            Log::debug('app locked!');
         }
 
         return false;
@@ -1678,8 +1698,6 @@ class Helper
                 return (1 / 72) * static::getUnitConversionFactor('in');
             default:
                 throw new \InvalidArgumentException('Unit: '.e($unit).' is not supported');
-
-                return false;
         }
     }
 
@@ -1825,6 +1843,7 @@ class Helper
                 'Components' => route('components.index'),
                 'Consumables' => route('consumables.index'),
                 'Maintenances' => route('maintenances.index'),
+                default => route('home'),
             };
 
             // #15214: preserve query-string filters when the user came
@@ -1850,6 +1869,7 @@ class Helper
                 'Accessories' => redirect()->route('accessories.show', $id ?? $item_id),
                 'Components' => redirect()->route('components.show', $id ?? $item_id),
                 'Consumables' => redirect()->route('consumables.show', $id ?? $item_id),
+                default => redirect()->route('home'),
             };
         }
 
@@ -1869,6 +1889,7 @@ class Helper
                 'asset' => $assetId
                     ? redirect()->route('hardware.show', $assetId)
                     : redirect()->route('hardware.index'),
+                default => redirect()->route('home'),
             };
         }
 
@@ -1877,6 +1898,7 @@ class Helper
             return match ($other_redirect) {
                 'audit' => redirect()->route('assets.audit.due'),
                 'model' => redirect()->route('models.show', $request->model_id),
+                default => redirect()->route('home'),
             };
 
         }

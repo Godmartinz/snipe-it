@@ -68,11 +68,28 @@ class MaintenanceFactory extends Factory
             // Set location_id to rtd_location_id on the generated asset so
             // seeded maintenance rows point at assets with a real location,
             // matching what snipeit:sync-asset-locations would have set.
-            'asset_id' => Asset::factory()->laptopZenbook()->afterMaking(function (Asset $asset) {
-                if ($asset->location_id === null) {
-                    $asset->location_id = $asset->rtd_location_id;
+            //
+            // Use item_id + item_type (the polymorphic FK) rather than the
+            // legacy asset_id so callers can override the target with their
+            // own asset instance and skip the default factory-created one.
+            // A supplied asset_id routes through the model's
+            // setAssetIdAttribute mutator at save time. The closure below
+            // detects that up front and skips the default asset spawn so
+            // we don't leak a spurious asset row for cross-cutting counts
+            // to trip over (assetsPastEol on the Needs Attention widget,
+            // source_id collisions in the calendar events API test, etc.).
+            'item_id' => function (array $attributes) {
+                if (array_key_exists('asset_id', $attributes)) {
+                    return null;
                 }
-            }),
+
+                return Asset::factory()->laptopZenbook()->afterMaking(function (Asset $asset) {
+                    if ($asset->location_id === null) {
+                        $asset->location_id = $asset->rtd_location_id;
+                    }
+                });
+            },
+            'item_type' => Asset::class,
             'supplier_id' => Supplier::factory(),
             'maintenance_type_id' => $maintenanceType->id,
             'asset_maintenance_type' => $maintenanceType->name,

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
@@ -21,6 +22,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -35,6 +37,7 @@ use Watson\Validating\ValidatingTrait;
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
     use CompanyableTrait;
+    use HasCalendarEvents;
     use HasFactory;
     use HasUploads;
 
@@ -664,6 +667,17 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             && ($this->deleted_at == '');
     }
 
+    public function calendarEventDefinitions(): array
+    {
+        return [
+            [
+                'field' => 'end_date',
+                'event_type' => 'user.end_date',
+                'all_day' => true,
+            ],
+        ];
+    }
+
     /**
      * The association-blocker half of isDeletable(): true only when the
      * user has no assigned assets / accessories / licenses / consumables
@@ -820,6 +834,60 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         $logAction->created_by = auth()->id();
         $logAction->log_meta = json_encode($companyChange);
         $logAction->logaction('update');
+    }
+
+    /**
+     * FMCS-safe wrapper around syncCompaniesWithLogging() for the user
+     * update path. Folds the target's memberships in companies the
+     * editor cannot see back into the submitted list before syncing,
+     * so a scoped editor's save can't silently detach the target from
+     * tenants outside the editing user's own membership.
+     *
+     * Superuser editors skip the merge because they can see every
+     * company, so their submission already represents full intent.
+     */
+    public function syncCompaniesPreservingInvisibleTo(User $editor, array $submittedCompanyIds): void
+    {
+        $submitted = array_map('intval', $submittedCompanyIds);
+
+        // FMCS is off, so every user can see every company
+        // and there is no invisible-to-editor set to preserve. Superuser
+        // editors also skip because their submission already
+        // represents full intent across all tenants.
+        $fmcsOn = (bool) Setting::getSettings()->full_multiple_companies_support;
+        if (! $fmcsOn || $editor->isSuperUser()) {
+            $this->syncCompaniesWithLogging($submitted);
+
+            return;
+        }
+
+        // Read editor + target memberships directly from the pivot so
+        // Company's global CompanyableScope does not filter Companies
+        // down to what the acting user (the editor) can see before we
+        // compute the invisible-to-editor set. Going through
+        // $editor->companies() / $this->companies() under a scoped
+        // non-superuser editor would return only the editor's own
+        // companies from the Companies side of the join, which turns
+        // the whereNotIn below into an empty result and drops every
+        // preserved company. See GH #19569.
+        $editorVisible = DB::table('company_user')
+            ->where('user_id', $editor->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $submittedVisible = array_values(array_intersect($submitted, $editorVisible));
+
+        $invisiblePreserved = DB::table('company_user')
+            ->where('user_id', $this->id)
+            ->whereNotIn('company_id', $editorVisible)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->syncCompaniesWithLogging(
+            array_values(array_unique(array_merge($submittedVisible, $invisiblePreserved))),
+        );
     }
 
     /**
@@ -1014,7 +1082,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * and from responsibleParty() (whoever is responsible for completion).
      * Used by the user detail view's Maintenances tab and badge count.
      */
-    public function assignedMaintenances()
+    public function assignedMaintenances(): MorphMany
     {
         return $this->morphMany(Maintenance::class, 'checked_out_to')->withTrashed();
     }

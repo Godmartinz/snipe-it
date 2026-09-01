@@ -167,13 +167,29 @@
                     input_div_class="col-md-9 col-md-offset-3"
                 />
 
-                {{-- purchase_cost and order_number are intentionally not
-                     bulk-editable here. Assets have no currency column, so
-                     bulk-writing purchase_cost on rows that trace back to an
-                     Order can silently diverge from order_items.price and
-                     misrepresent the currency of the original purchase. The
-                     single-asset edit form still exposes both, and the
-                     controller enforces this omission on the POST side too. --}}
+                {{-- Purchase cost + Order number bulk edits. Assets
+                     have no per-row currency column, so if the
+                     selection contains assets whose original orders
+                     were in different currencies, one numeric value
+                     written here reads as the system default currency
+                     for every row regardless. Behavior is preserved
+                     from the pre-orders-refactor era and callers are
+                     expected to narrow the selection to one currency
+                     before using these fields. --}}
+                <x-form.row
+                    :label="trans('general.order_number')"
+                    name="order_number"
+                    type="text"
+                    :maxlength="191"
+                    input_div_class="col-md-7 col-sm-12"
+                />
+
+                <x-form.row
+                    :label="trans('general.purchase_cost')"
+                    name="purchase_cost"
+                    type="text"
+                    input_div_class="col-md-4 col-sm-12"
+                />
 
                 <x-input.supplier-select
                     :label="trans('general.supplier')"

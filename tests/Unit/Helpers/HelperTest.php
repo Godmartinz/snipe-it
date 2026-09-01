@@ -433,4 +433,79 @@ class HelperTest extends TestCase
             Helper::customFieldFormValue($field, null, $model)
         );
     }
+
+    /**
+     * Regression coverage for historic CSV-imported values on DATE / DATETIME
+     * custom fields. AssetImporter shoves raw CSV strings straight into
+     * custom-field columns, so a column can legitimately hold `M/D/YYYY`
+     * or similar. The view path already normalizes on read via
+     * AssetsTransformer + getFormattedDateObject; this helper does the
+     * matching normalization for the edit form so the datepicker widget
+     * gets a value in its expected `Y-m-d` / `Y-m-d H:i:s` shape and
+     * doesn't blank or mangle it on hydrate.
+     */
+    public function test_custom_field_form_value_normalizes_us_formatted_date_to_ymd(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Warranty Start Date',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Warranty Start Date')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '3/28/2025';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2025-03-28', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_normalizes_us_formatted_datetime_to_ymd_his(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Last Serviced',
+            'format' => 'DATETIME',
+            'element' => 'datetime_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Last Serviced')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '3/28/2025 09:15:00';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2025-03-28 09:15:00', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_leaves_already_normalized_date_untouched(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Audited',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Audited')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '2026-08-20';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2026-08-20', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_leaves_unparseable_date_value_untouched(): void
+    {
+        // Free-text values that were stored in a DATE-format column
+        // (`2028 1st Qtr` and similar) can't be Carbon-parsed. The
+        // helper falls through with the raw string so the user sees
+        // and can correct it, instead of masking it with a fake
+        // "normalized" date.
+        \App\Models\CustomField::factory()->create([
+            'name' => 'End of Lease Date',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'End of Lease Date')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '2028 1st Qtr';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2028 1st Qtr', Helper::customFieldFormValue($field, $asset, $model));
+    }
 }

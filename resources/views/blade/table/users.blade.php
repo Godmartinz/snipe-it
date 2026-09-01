@@ -7,6 +7,8 @@
     'table_header' => trans('general.users'),
 ])
 
+@aware(['name'])
+
 <!-- start assets tab pane -->
 @can('view', \App\Models\User::class)
     <x-slot:table_header>

@@ -103,7 +103,7 @@
 
 @section('moar_scripts')
     @can('files', $snipe_component)
-        @include ('modals.upload-file', ['item_type' => 'components', 'item_id' => $snipe_component->id])
+        <x-modals.upload-file item-type="components" :item-id="$snipe_component->id" />
     @endcan
 
     @can('update', $snipe_component)

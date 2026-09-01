@@ -9,7 +9,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="manufacturer" sr_only_title>
 
             @if ($manufacturer_count == 0)
 
@@ -24,6 +24,8 @@
                     </form>
 
               @else
+                <x-slot:table_header>{{ trans('admin/manufacturers/table.asset_manufacturers') }}</x-slot:table_header>
+
                 <x-slot:bulkactions>
                     <x-table.bulk-manufacturers />
                 </x-slot:bulkactions>

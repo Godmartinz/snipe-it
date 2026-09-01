@@ -17,6 +17,7 @@ use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
 use Illuminate\Bus\BusServiceProvider;
 use Illuminate\Cache\CacheServiceProvider;
+use Illuminate\Concurrency\ConcurrencyServiceProvider;
 use Illuminate\Cookie\CookieServiceProvider;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -466,6 +467,7 @@ return [
         SnipeTranslationServiceProvider::class, // we REPLACE the default Laravel translator with our own
         ValidationServiceProvider::class,
         ViewServiceProvider::class,
+        ConcurrencyServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -623,5 +625,38 @@ return [
     */
 
     'report_time_limit' => env('REPORT_TIME_LIMIT', 12000),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Force TLS / Allow Insecure Hosts
+    |--------------------------------------------------------------------------
+    | force_tls: forces the URL generator to emit https:// links regardless
+    | of the incoming request scheme. Snipe-IT already forces https when
+    | APP_URL starts with https, this flag covers reverse-proxy setups where
+    | APP_URL is http but is actually TLS. allow_insecure_hosts skips
+    | the URL::forceRootUrl() lockdown that otherwise rejects requests whose
+    | Host header doesn't match APP_URL.
+    */
+
+    'force_tls' => env('APP_FORCE_TLS', false),
+
+    'allow_insecure_hosts' => env('APP_ALLOW_INSECURE_HOSTS', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | LDAP Execution Limits
+    |--------------------------------------------------------------------------
+    | Seconds and memory ceiling passed to ini_set() at the top of the
+    | LDAP sync command so a large directory sync doesn't get killed by
+    | PHP's shorter defaults. ldap_tls_cacert points at a custom CA
+    | bundle to trust when running LDAPS against a self-signed or
+    | private-CA-signed directory.
+    */
+
+    'ldap_time_limit' => env('LDAP_TIME_LIM', 600),
+
+    'ldap_memory_limit' => env('LDAP_MEM_LIM', '500M'),
+
+    'ldap_tls_cacert' => env('LDAPTLS_CACERT'),
 
 ];

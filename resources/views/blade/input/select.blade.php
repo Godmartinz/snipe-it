@@ -1,6 +1,6 @@
+{{-- options: either an array of key => value pairs, or omit and pass
+     the option markup via the default slot. --}}
 @props([
-    // <options> can either be provided as key => value pairs
-    // or passed in via the default $slot
     'options',
     'selected' => null,
     'includeEmpty' => false,

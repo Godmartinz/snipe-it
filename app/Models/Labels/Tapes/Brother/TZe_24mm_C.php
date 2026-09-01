@@ -139,7 +139,6 @@ class TZe_24mm_C extends TZe_24mm
             'text_render_mode' => 'block',
         ];
     }
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

@@ -113,8 +113,6 @@ class TZe_24mm_B extends TZe_24mm
         return true;
     }
 
-    public function preparePDF($pdf) {}
-
     protected function getContentEditorConfig(): array
     {
         return [

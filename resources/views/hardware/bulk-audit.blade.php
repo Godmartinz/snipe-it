@@ -60,7 +60,7 @@
                     <x-form.checkbox-row
                         name="update_location"
                         :label="trans('admin/hardware/form.asset_location')"
-                        :help_html="trans('help.audit_help')"
+                        help_html="{!! trans('help.audit_help') !!}"
                     />
                 @endif
 

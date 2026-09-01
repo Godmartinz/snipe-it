@@ -37,7 +37,12 @@ class AssetCheckoutTest extends TestCase
             ->post(route('api.assets.requests.store', $nonRequestable->id))
             ->assertStatusMessageIs('error');
 
-        $this->assertHasTheseActionLogs($requestable, ['create', 'requested', 'update']); // FIXME - is this right?!
+        // The counter increment on requests_counter used to fire a
+        // redundant `update` log alongside `requested`; the
+        // AssetObserver's same_requests_counter gate now suppresses
+        // it (matching how it already suppresses the sibling
+        // `update` log on checkout/checkin counter bumps).
+        $this->assertHasTheseActionLogs($requestable, ['create', 'requested']);
 
     }
 

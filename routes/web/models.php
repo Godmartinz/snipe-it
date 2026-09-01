@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssetModelsController;
 use App\Http\Controllers\BulkAssetModelsController;
+use App\Models\AssetModel;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
@@ -84,6 +85,30 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
             'destroy',
         ]
     )->name('models.bulkdelete.store');
+
+    // Bulk-fulfill queue for a model's pending requests. Each row
+    // picks a specific available asset OF this model to hand out.
+    // See AssetModelsController::bulkFulfillRequests for design
+    // notes on the pool + auto-pick behavior.
+    Route::get(
+        '{model}/fulfill-requests',
+        [AssetModelsController::class, 'bulkFulfillRequests']
+    )->where('model', '[0-9]+')
+        ->name('models.fulfill-requests.create')
+        ->breadcrumbs(fn (Trail $trail, AssetModel $model) => $trail
+            // Bulk-fulfill always starts from the /requests queue -
+            // root there so the trail reads as the natural flow the
+            // admin came through, not the item-type indexes.
+            ->parent('requests.index')
+            ->push($model->name, route('models.show', $model))
+            ->push(trans('general.checkout'), route('models.fulfill-requests.create', $model))
+        );
+
+    Route::post(
+        '{model}/fulfill-requests',
+        [AssetModelsController::class, 'bulkFulfillStoreRequests']
+    )->where('model', '[0-9]+')
+        ->name('models.fulfill-requests.store');
 
 });
 

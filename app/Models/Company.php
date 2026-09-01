@@ -10,6 +10,7 @@ use App\Models\Traits\Searchable;
 use App\Presenters\CompanyPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -383,12 +384,23 @@ final class Company extends SnipeModel
 
             $userCompanyIds = self::getCurrentUserCompanyIds();
 
-            // Empty pivot = unrestricted (legacy no-company users). The pivot
-            // is the sole source of truth for membership now that the
-            // company_user table migration has run; the old scalar
-            // users.company_id column is not consulted here.
+            // Empty-pivot actor: route through null_company_is_floater to match
+            // the query scope's behavior for pivotless callers. Previously this
+            // branch returned true unconditionally, which let empty-pivot users
+            // act on rows their list queries would have hidden — the actual
+            // GHSA-8hq6-r8cw-gqwh bypass. This mirrors
+            // scopeCompanyablesDirectly()'s empty-pivot branches for
+            // companyable-table queries:
+            //   - Floater on: unrestricted (matches `return $query`).
+            //   - Floater off: null-company items only (matches `whereNull($column)`).
+            // Company targets never reach here — the tables-without-company_id
+            // early exit above returns true regardless of actor state.
             if (empty($userCompanyIds)) {
-                return true;
+                if (Setting::getSettings()->null_company_is_floater) {
+                    return true;
+                }
+
+                return is_null($companyable->company_id ?? null);
             }
 
             $companyable_company_id = ($companyable instanceof Company)
@@ -488,7 +500,7 @@ final class Company extends SnipeModel
      * on the index page. Hierarchy is metadata about a row the user already sees,
      * not an access decision, so unscoping here is semantically correct too.
      */
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes();
     }
@@ -580,6 +592,21 @@ final class Company extends SnipeModel
     {
         $companyIds = self::getCurrentUserCompanyIds();
 
+        // Location scoping is opt-in even under FMCS: setting
+        // scope_locations_fmcs = 0 tells Snipe-IT that locations are meant
+        // to be shared across tenants. Without this short-circuit the
+        // global scope still filters locations by the caller's pivot
+        // memberships, which hides null-company locations from every
+        // non-superuser (strict mode) and breaks Location::find() lookups
+        // on the checkin / checkout / audit paths that were tightened in
+        // v8.7.0. CompanyableTrait::canCheckoutTo() and
+        // LocationsController::store already respect this setting; the
+        // global scope needs to as well.
+        if ($query->getModel()->getTable() === 'locations'
+            && ! Setting::getSettings()->scope_locations_fmcs) {
+            return $query;
+        }
+
         // If we are scoping the companies table itself, look for the company.id
         if ($query->getModel()->getTable() == 'companies') {
             if (empty($companyIds)) {
@@ -655,13 +682,40 @@ final class Company extends SnipeModel
                 return $query->whereNull($table.$column);
             }
 
-            // action_logs: a NULL company_id means the logged object (AssetModel, Company, etc.)
-            // has no company_id column of its own. Those are global objects, visible to all users,
-            // so their log entries should not be hidden by the company filter.
+            // action_logs: a NULL company_id means the logged object's table has no
+            // company_id column. For most of those (AssetModel, Category, Manufacturer,
+            // Statuslabel, Location, etc.) the row is admin-authored global config
+            // that is safe to show cross-company. But User is also a table without a
+            // scalar company_id column (users belong to companies via the company_user
+            // pivot), and User-item action_logs carry PII in their log_meta diff
+            // (email, phone, employee_num, notes, address, jobtitle, etc.) written by
+            // UserObserver on every profile edit. Treating those as globally visible
+            // leaks cross-company PII, per GHSA-mch3-g6rh-gj22.
+            //
+            // Split by item_type: non-User rows keep the existing "null is safe" rule;
+            // User-item rows only fall through when the viewer shares at least one
+            // company with the target user via the company_user pivot (same visibility
+            // rule the users list itself applies under FMCS).
             if ($query->getModel()->getTable() === 'action_logs') {
-                return $query->where(function ($q) use ($table, $column, $companyIds) {
+                $userClass = User::class;
+
+                return $query->where(function ($q) use ($table, $column, $companyIds, $userClass) {
                     $q->whereIn($table.$column, $companyIds)
-                        ->orWhereNull($table.$column);
+                        ->orWhere(function ($null) use ($table, $column, $companyIds, $userClass) {
+                            $null->whereNull($table.$column)
+                                ->where(function ($check) use ($companyIds, $userClass) {
+                                    // Non-User item (or null item_type): safe global config, existing behavior.
+                                    $check->where('action_logs.item_type', '!=', $userClass)
+                                        ->orWhereNull('action_logs.item_type')
+                                        // User-item: viewer must share a company with the target user via pivot.
+                                        ->orWhere(function ($userItem) use ($companyIds, $userClass) {
+                                            $userItem->where('action_logs.item_type', $userClass)
+                                                ->whereIn('action_logs.item_id', function ($sub) use ($companyIds) {
+                                                    $sub->select('user_id')->from('company_user')->whereIn('company_id', $companyIds);
+                                                });
+                                        });
+                                });
+                        });
                 });
             }
 

@@ -6,6 +6,7 @@ use App\Models\Component;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Channels\SlackWebhookChannel;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
@@ -18,28 +19,26 @@ use NotificationChannels\GoogleChat\Widgets\KeyValue;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsChannel;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
-#[AllowDynamicProperties]
-class CheckoutComponentNotification extends Notification
+class CheckoutComponentNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private $params;
+    public $qty;
 
     /**
      * Create a new notification instance.
      *
      * @param  $params
      */
-    public function __construct(Component $component, $checkedOutTo, User $checkedOutBy, $acceptance, $note)
+    public function __construct(
+        public Component $item,
+        public $target,
+        public User $admin,
+        public $acceptance,
+        public $note
+    )
     {
-        $this->item = $component;
-        $this->admin = $checkedOutBy;
-        $this->note = $note;
-        $this->target = $checkedOutTo;
-        $this->acceptance = $acceptance;
-        $this->qty = $component->checkout_qty;
-
-        $this->settings = Setting::getSettings();
+        $this->qty = $item->checkout_qty;
     }
 
     /**`
@@ -73,8 +72,8 @@ class CheckoutComponentNotification extends Notification
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->webhook_botname) ? $this->settings->webhook_botname : 'Snipe-Bot';
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $botname = (Setting::getSettings()->webhook_botname) ? Setting::getSettings()->webhook_botname : 'Snipe-Bot';
+        $channel = (Setting::getSettings()->webhook_channel) ? Setting::getSettings()->webhook_channel : '';
 
         $fields = [
             trans('general.to') => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
@@ -109,7 +108,7 @@ class CheckoutComponentNotification extends Notification
 
         if (! Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
             return MicrosoftTeamsMessage::create()
-                ->to($this->settings->webhook_endpoint)
+                ->to(Setting::getSettings()->webhook_endpoint)
                 ->type('success')
                 ->addStartGroupToSection('activityTitle')
                 ->title(trans('mail.Component_checkout_notification'))
@@ -140,7 +139,7 @@ class CheckoutComponentNotification extends Notification
         $note = $this->note;
 
         return GoogleChatMessage::create()
-            ->to($this->settings->webhook_endpoint)
+            ->to(Setting::getSettings()->webhook_endpoint)
             ->card(
                 Card::create()
                     ->header(

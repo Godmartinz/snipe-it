@@ -326,6 +326,32 @@ class ImportComponentsTest extends ImportDataTestCase implements TestsPermission
     }
 
     #[Test]
+    public function import_persists_the_requestable_flag_from_csv(): void
+    {
+        // Component gained the Requestable trait + a per-row column.
+        // Pins that a CSV Requestable=TRUE on create lands as `1` in
+        // the DB, matching the shape the accessory / consumable
+        // importers ship.
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        // Overriding via `new()` merges into the seeded definition
+        // (unlike PHP's `+` union operator which keeps the definition's
+        // empty-string default and silently drops the override).
+        $importFileBuilder = ImportFileBuilder::new(['requestable' => 'TRUE']);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->component()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $component = Component::query()
+            ->where('name', $row['itemName'])
+            ->sole();
+        $this->assertTrue((bool) $component->requestable);
+    }
+
+    #[Test]
     public function update_mode_logs_component_update_in_actionlog(): void
     {
         $this->actingAsForApi(User::factory()->superuser()->create());

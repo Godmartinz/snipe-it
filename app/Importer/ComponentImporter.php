@@ -58,6 +58,12 @@ class ComponentImporter extends ItemImporter
         $this->setItemFromCsvIfPresent($row, 'min_amt');
         $this->setItemFromCsvIfPresent($row, 'qty', 'quantity');
         $this->setItemFromCsvIfPresent($row, 'serial');
+        // Persist the requestable flag on both create + update, matching
+        // the accessory / consumable importers now that Component is a
+        // first-class Requestable. Component::setRequestableAttribute
+        // normalizes "0"/"1"/"true"/"false"/"" so any of the common CSV
+        // shapes lands correctly.
+        $this->setItemFromCsvIfPresent($row, 'requestable');
 
         // asset_tag is not in Component's fillable but is used by the
         // checkout-to-asset path in createComponentIfNotExists.
@@ -84,17 +90,6 @@ class ComponentImporter extends ItemImporter
         $this->item['created_by'] = $this->created_by;
 
         $this->createComponentIfNotExists($row);
-    }
-
-    /**
-     * Override the base sanitize to skip the reject-empty pass. See handle()
-     * above for the matching item-population.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function sanitizeItemForStoring($model, $updating = false)
-    {
-        return collect($this->item)->only($model->getFillable())->toArray();
     }
 
     /**

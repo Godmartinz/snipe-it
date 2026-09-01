@@ -49,7 +49,17 @@ class ProfileController extends Controller
      */
     public function requestedAssets(): array
     {
-        $checkoutRequests = CheckoutRequest::where('user_id', '=', auth()->id())->get();
+        // Only surface OPEN (pending) requests. `state` is the
+        // source of truth for lifecycle - canceled_at + fulfilled_at
+        // still populate alongside their state transitions (WHEN,
+        // paired with the WHAT in state) but consumers should
+        // always filter on state, not on the datetime columns. A
+        // whereNull('canceled_at') filter would miss fulfilled
+        // rows entirely, which have no canceled_at set but are
+        // just as done.
+        $checkoutRequests = CheckoutRequest::where('user_id', '=', auth()->id())
+            ->pending()
+            ->get();
 
         $results = [];
         $show_field = [];
@@ -68,6 +78,7 @@ class ProfileController extends Controller
             // Make sure the asset and request still exist
             if ($checkoutRequest && $checkoutRequest->itemRequested()) {
                 $assets = [
+                    'id' => (int) $checkoutRequest->id,
                     'image' => e($checkoutRequest->itemRequested()->present()->getImageUrl()),
                     'name' => e($checkoutRequest->itemRequested()->display_name),
                     'type' => e($checkoutRequest->itemType()),
@@ -75,6 +86,17 @@ class ProfileController extends Controller
                     'location' => ($checkoutRequest->location()) ? e($checkoutRequest->location()->name) : null,
                     'expected_checkin' => Helper::getFormattedDateObject($checkoutRequest->itemRequested()->expected_checkin, 'datetime'),
                     'request_date' => Helper::getFormattedDateObject($checkoutRequest->created_at, 'datetime'),
+                    // Self-cancel URL. POSTing to /account/request/{type}/{id}
+                    // as the request owner toggles the open request into
+                    // canceled state via isRequestedBy() -> cancelRequest()
+                    // in ViewAssetsController::getRequestItem. Emitted per
+                    // row so the JS formatter doesn't need to reconstruct
+                    // the URL from type + id (and stay in sync with the
+                    // route's itemType regex, which can drift).
+                    'cancel_url' => route('account/request-item', [
+                        'itemType' => $checkoutRequest->itemType(),
+                        'itemId' => $checkoutRequest->requestable_id,
+                    ]),
                 ];
 
                 foreach ($showable_fields as $showable_field_name) {

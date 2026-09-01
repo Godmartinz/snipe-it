@@ -138,7 +138,7 @@
                             :label="trans('admin/custom_fields/general.field_custom_format')"
                             name="custom_format"
                             required
-                            :help_html="trans('admin/custom_fields/general.field_custom_format_help')"
+                            help_html="{!! trans('admin/custom_fields/general.field_custom_format_help') !!}"
                         >
                             <x-slot:input>
                                 <input

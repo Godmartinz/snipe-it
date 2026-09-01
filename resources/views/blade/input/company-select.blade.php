@@ -5,8 +5,18 @@
      disables sub-companies (they can't themselves become parents), the
      second hides the company being edited (so it can't be selected as its
      own parent). Both are read as data-* attributes by the js-data-ajax
-     initializer in snipeit.js and forwarded to the
-     /api/v1/companies/selectlist endpoint. --}}
+     in snipeit.js and forwarded to the /api/v1/companies/selectlist endpoint.
+
+     The 'id' in the props here is the select2 id override ID. Defaults to $selectId.
+     Modal links pass a distinct id when the trigger page already renders
+     a company picker with the same name (which would collide on the id and confuse select2,
+     leading to a broken select2 on the page if another "new" button is clicked.)
+     The form's submitted field name stays $name either way.--}}
+
+{{-- Auto-hides the "New" button when rendered inside an AJAX modal.
+     See x-input.company-select for the pattern. --}}
+@aware(['submitToSelect2' => false])
+
 @props([
     'label',
     'name',
@@ -16,7 +26,13 @@
     'hideNewButton' => false,
     'onlyTopLevel' => false,
     'excludeId' => null,
+    'id' => null,
 ])
+
+@php
+    $selectId = $id ?? $name.'_select';
+    $hideNewButton = $hideNewButton || $submitToSelect2;
+@endphp
 
 <div
     @class([
@@ -24,7 +40,7 @@
         'has-error' => $errors->has($name),
     ])
 >
-    <label for="{{ $name }}" class="col-md-3 control-label">{{ $label }}</label>
+    <label for="{{ $selectId }}" class="col-md-3 control-label">{{ $label }}</label>
     <div class="col-md-7">
         <select
             class="js-data-ajax"
@@ -33,7 +49,7 @@
             @if ($onlyTopLevel) data-only-top-level="true" @endif
             @if ($excludeId) data-exclude-id="{{ $excludeId }}" @endif
             name="{{ $name }}{{ $multiple ? '[]' : '' }}"
-            id="{{ $name }}"
+            id="{{ $selectId }}"
             style="width: 100%"
             aria-label="{{ $label }}"
             @required($required)
@@ -53,7 +69,7 @@
     @unless($hideNewButton)
         <div class="col-md-1 col-sm-1 text-left">
             @can('create', Company::class)
-                <a href="{{ route('modal.show', 'company') }}" data-toggle="modal" data-target="#createModal" data-select="{{ $name }}" class="btn btn-sm btn-theme">{{ trans('button.new') }}</a>
+                <a href="{{ route('modal.show', 'company') }}" data-toggle="modal" data-target="#createModal" data-select="{{ $selectId }}" class="btn btn-sm btn-theme">{{ trans('button.new') }}</a>
             @endcan
         </div>
     @endunless

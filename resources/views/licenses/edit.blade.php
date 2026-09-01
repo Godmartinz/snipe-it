@@ -171,6 +171,12 @@
                     :item="$item"
                 />
 
+                <x-form.checkbox-row
+                    name="requestable"
+                    :label="trans('admin/hardware/general.requestable')"
+                    :item="$item"
+                />
+
                 <x-form.row
                     :label="trans('general.notes')"
                     :$item

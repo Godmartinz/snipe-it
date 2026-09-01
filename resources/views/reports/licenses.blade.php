@@ -67,7 +67,7 @@
                                     {{ $snipeSettings->default_currency }}{{ Helper::formatCurrencyOutput($license->purchase_cost) }}
                                 </td>
                                 <td>
-                                    {{ ($license->depreciation) ? e($license->depreciation->name).' ('.$license->depreciation->months.' '.trans('general.months').')' : ''  }}
+                                    {{ ($license->depreciation) ? e($license->depreciation->name).' ('.trans_choice('general.months_plural', $license->depreciation->months).')' : ''  }}
                                 </td>
                                 <td class="text-right">
                                     {{ $snipeSettings->default_currency }}{{ Helper::formatCurrencyOutput($license->getDepreciatedValue()) }}

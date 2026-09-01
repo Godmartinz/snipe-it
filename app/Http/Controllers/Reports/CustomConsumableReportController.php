@@ -181,7 +181,10 @@ class CustomConsumableReportController extends Controller
 
                     return [
                         $user->display_name ?? '',
-                        $user->company->name ?? '',
+                        $user->companies
+                            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                            ->pluck('name')
+                            ->join(' | '),
                         $user->pivot->created_at ?? '',
                         $creator ? ($creator->display_name ?? '') : '',
                     ];
@@ -290,7 +293,7 @@ class CustomConsumableReportController extends Controller
                 'orderItems.order.supplier',
             ]);
 
-        $request->whenFilled('include_assignments', fn () => $query->with('users.company'));
+        $request->whenFilled('include_assignments', fn() => $query->with('users.companies'));
 
         $query = $this->appendLocalConstraints($query, $request, [
             'by_model_number' => 'consumables.model_number',

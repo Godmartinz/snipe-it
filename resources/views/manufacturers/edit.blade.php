@@ -43,7 +43,7 @@
                     :$item
                     name="support_url"
                     type="url"
-                    :help_html="trans('admin/manufacturers/message.support_url_help')"
+                    help_html="{!! trans('admin/manufacturers/message.support_url_help') !!}"
                     input_icon="link"
                     input_group_addon="left"
                     placeholder="https://example.com"
@@ -54,7 +54,7 @@
                     :$item
                     name="warranty_lookup_url"
                     type="url"
-                    :help_html="trans('admin/manufacturers/message.support_url_help')"
+                    help_html="{!! trans('admin/manufacturers/message.support_url_help') !!}"
                     input_icon="link"
                     input_group_addon="left"
                     placeholder="https://example.com"

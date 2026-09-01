@@ -7,6 +7,7 @@ use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\CheckoutAcceptance;
+use App\Models\CheckoutRequest;
 use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -27,7 +28,7 @@ class ConsumableCheckoutController extends Controller
      *
      * @param  int  $id
      */
-    public function create($id): View|RedirectResponse
+    public function create(Request $request, $id): View|RedirectResponse
     {
 
         if ($consumable = Consumable::find($id)) {
@@ -43,8 +44,21 @@ class ConsumableCheckoutController extends Controller
                         ->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => 1, 'remaining' => $consumable->numRemaining()]));
                 }
 
-                // Return the checkout view
-                return view('consumables/checkout', compact('consumable'));
+                // Optional ?request_id hint. Present when the admin
+                // reached this screen from a /requests row. Drives
+                // the side-panel context box (who asked + waiting
+                // list). CheckoutRequest::contextForCheckout handles
+                // the URL-twiddle guards; a miss returns nulls /
+                // empty so the panel renders nothing.
+                $context = CheckoutRequest::contextForCheckout(
+                    $request->integer('request_id') ?: null,
+                    Consumable::class,
+                    $consumable->id,
+                );
+
+                return view('consumables/checkout', compact('consumable'))
+                    ->with('checkoutRequest', $context['checkoutRequest'])
+                    ->with('otherPendingRequests', $context['otherPendingRequests']);
             }
 
             // Invalid category
@@ -90,7 +104,7 @@ class ConsumableCheckoutController extends Controller
         }
 
         $admin_user = auth()->user();
-        $assigned_to = e($request->input('assigned_to'));
+        $assigned_to = e($request->input('assigned_user'));
 
         // Check if the user exists
         if (is_null($user = User::find($assigned_to))) {
@@ -107,7 +121,7 @@ class ConsumableCheckoutController extends Controller
         }
 
         // Update the consumable data
-        $consumable->assigned_to = e($request->input('assigned_to'));
+        $consumable->assigned_to = e($request->input('assigned_user'));
         $consumable->checkout_qty = $quantity;
 
         // Concurrency guard. The unlocked numRemaining() check above is
@@ -132,7 +146,7 @@ class ConsumableCheckoutController extends Controller
                 $consumable->users()->attach($consumable->id, [
                     'consumable_id' => $consumable->id,
                     'created_by' => $admin_user->id,
-                    'assigned_to' => e($request->input('assigned_to')),
+                    'assigned_to' => e($request->input('assigned_user')),
                     'note' => $request->input('note'),
                 ]);
             }
@@ -192,5 +206,173 @@ class ConsumableCheckoutController extends Controller
         // Redirect to the new consumable page
         return Helper::getRedirectOption($request, $consumable->id, 'Consumables')
             ->with('success', trans('admin/consumables/message.checkout.success'));
+    }
+
+    /**
+     * Bulk-fulfill screen. Mirrors AccessoryCheckoutController::
+     * bulkFulfillCreate - see there for the design rationale.
+     */
+    public function bulkFulfillCreate(Consumable $consumable)
+    {
+        $this->authorize('checkout', $consumable);
+
+        if ($consumable->numRemaining() <= 0) {
+            return redirect()->route('consumables.show', $consumable)
+                ->with('error', trans('admin/consumables/message.checkout.unavailable', [
+                    'requested' => 1,
+                    'remaining' => $consumable->numRemaining(),
+                ]));
+        }
+
+        $pendingRequests = CheckoutRequest::pending()
+            ->where('requestable_type', Consumable::class)
+            ->where('requestable_id', $consumable->id)
+            ->with('user')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (CheckoutRequest $r) => $r->user !== null)
+            ->values();
+
+        if ($pendingRequests->isEmpty()) {
+            return redirect()->route('consumables.show', $consumable)
+                ->with('info', trans('admin/hardware/message.requests.no_active'));
+        }
+
+        return view('checkouts/fulfill-multiple', [
+            'item' => $consumable,
+            'pendingRequests' => $pendingRequests,
+            'formRoute' => route('consumables.fulfill-requests.store', $consumable),
+            'remaining' => (int) $consumable->numRemaining(),
+        ]);
+    }
+
+    /**
+     * Iterate + fulfill. See AccessoryCheckoutController::
+     * bulkFulfillStore for the shared per-row/partial-success
+     * pattern.
+     */
+    public function bulkFulfillStore(Request $request, Consumable $consumable): RedirectResponse
+    {
+        $this->authorize('checkout', $consumable);
+
+        // Checkboxes post as enabled_requests[<request_id>]="1",
+        // keyed by request id (unchecked boxes don't post at all).
+        $enabledIds = collect(array_keys((array) $request->input('enabled_requests', [])))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($enabledIds->isEmpty()) {
+            return redirect()->route('consumables.fulfill-requests.create', $consumable)
+                ->with('error', trans('admin/hardware/message.requests.no_selection'));
+        }
+
+        $qtyInputs = (array) $request->input('qty', []);
+        $userInputs = (array) $request->input('user_id', []);
+        $noteInputs = (array) $request->input('notes', []);
+
+        $requests = CheckoutRequest::pending()
+            ->where('requestable_type', Consumable::class)
+            ->where('requestable_id', $consumable->id)
+            ->whereIn('id', $enabledIds)
+            ->with('user')
+            ->get()
+            ->keyBy('id');
+
+        $adminUser = auth()->user();
+        $fulfilled = 0;
+        $errors = [];
+
+        foreach ($enabledIds as $requestId) {
+            /** @var CheckoutRequest|null $checkoutRequest */
+            $checkoutRequest = $requests->get($requestId);
+            if (! $checkoutRequest) {
+                $errors[] = trans('admin/hardware/message.requests.row_stale', ['id' => $requestId]);
+
+                continue;
+            }
+
+            $targetUserId = (int) ($userInputs[$requestId] ?? $checkoutRequest->user_id);
+            $qty = (int) ($qtyInputs[$requestId] ?? $checkoutRequest->quantity);
+            $note = $noteInputs[$requestId] ?? $checkoutRequest->notes;
+
+            if ($qty < 1) {
+                $errors[] = trans('admin/hardware/message.requests.row_qty_invalid', ['id' => $requestId]);
+
+                continue;
+            }
+
+            $targetUser = User::find($targetUserId);
+            if (! $targetUser) {
+                $errors[] = trans('admin/hardware/message.requests.row_user_missing', ['id' => $requestId]);
+
+                continue;
+            }
+
+            if (! $consumable->canCheckoutTo($targetUser)) {
+                $errors[] = trans('admin/hardware/message.requests.row_company_mismatch', [
+                    'id' => $requestId,
+                    'user' => $targetUser->display_name,
+                ]);
+
+                continue;
+            }
+
+            $overAllocated = false;
+
+            DB::transaction(function () use ($consumable, $targetUser, $qty, $note, $adminUser, &$overAllocated): void {
+                $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
+
+                if (! $locked || $locked->numRemaining() < $qty) {
+                    $overAllocated = true;
+
+                    return;
+                }
+
+                for ($i = 0; $i < $qty; $i++) {
+                    $consumable->users()->attach($consumable->id, [
+                        'consumable_id' => $consumable->id,
+                        'created_by' => $adminUser->id,
+                        'assigned_to' => $targetUser->id,
+                        'note' => $note,
+                    ]);
+                }
+            });
+
+            if ($overAllocated) {
+                $errors[] = trans('admin/hardware/message.requests.row_over_allocated', [
+                    'id' => $requestId,
+                ]);
+
+                continue;
+            }
+
+            try {
+                event(new CheckoutableCheckedOut(
+                    $consumable,
+                    $targetUser,
+                    $adminUser,
+                    $note,
+                    [],
+                    $qty,
+                    false,
+                ));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Bulk-fulfill event dispatch failed for request '.$requestId.': '.$e->getMessage());
+            }
+
+            $fulfilled++;
+        }
+
+        $summary = trans('admin/hardware/message.requests.bulk_summary', [
+            'fulfilled' => $fulfilled,
+            'total' => $enabledIds->count(),
+        ]);
+
+        return redirect()->route('requests.index')
+            ->with($fulfilled > 0 ? 'success' : 'warning', $summary)
+            ->with('multi_error_messages', $errors);
     }
 }

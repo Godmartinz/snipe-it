@@ -39,7 +39,9 @@ class DepreciationReportPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
-                'title' => trans('admin/hardware/form.name'),
+                // Match the import wizard's Name label so
+                // downloads use importer's auto-mapper.
+                'title' => trans('general.item_name_var', ['item' => trans('general.asset')]),
                 'visible' => false,
             ], [
                 'field' => 'asset_tag',

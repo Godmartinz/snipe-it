@@ -34,6 +34,39 @@ class RestoreAssetModelTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_create_permission_alone_cannot_restore_asset_model(): void
+    {
+        // Regression: getRestore() used to authorize `create`, so a caller
+        // holding models.create but not models.delete could reverse an
+        // admin's soft-delete. Every sibling restore path in the project
+        // (users, locations, manufacturers, assets, bulk assets, and this
+        // model's API sibling Api\AssetModelsController::restore) authorizes
+        // `delete` instead. Pinning the correct behavior here.
+        $model = AssetModel::factory()->create();
+        $model->delete();
+
+        $this->actingAs(User::factory()->createAssetModels()->create())
+            ->post(route('models.restore.store', $model->id))
+            ->assertForbidden();
+
+        $this->assertNotNull($model->fresh()->deleted_at, 'Restore should not have run.');
+    }
+
+    public function test_delete_permission_can_restore_asset_model(): void
+    {
+        // The paired positive case: models.delete IS the right permission
+        // for restore, matching every sibling restore action.
+        $model = AssetModel::factory()->create();
+        $model->delete();
+
+        $this->actingAs(User::factory()->deleteAssetModels()->create())
+            ->post(route('models.restore.store', $model->id))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertNull($model->fresh()->deleted_at);
+    }
+
     public function test_soft_deleted_asset_model_can_be_restored_via_web(): void
     {
         $model = AssetModel::factory()->create();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Companies\DestroyCompanyAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasAccessories;
 use App\Exceptions\ItemStillHasAssets;
 use App\Exceptions\ItemStillHasChildCompanies;
@@ -46,8 +47,8 @@ class BulkCompaniesController extends Controller
                 $errors[] = trans('general.bulk_delete_associations.assoc_users_no_count', ['item_name' => $company->name, 'item' => trans('general.company')]);
             } catch (ItemStillHasChildCompanies $e) {
                 $errors[] = trans('general.bulk_delete_associations.assoc_child_companies_no_count', ['item_name' => $company->name, 'item' => trans('general.company')]);
-            } catch (\Exception $e) {
-                report($e);
+            } catch (\Throwable $e) {
+                Handler::reportOrRethrow($e);
                 $errors[] = trans('general.something_went_wrong');
             }
         }

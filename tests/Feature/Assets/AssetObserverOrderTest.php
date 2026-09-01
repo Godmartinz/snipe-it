@@ -99,4 +99,124 @@ class AssetObserverOrderTest extends TestCase
         // their own Order rows even though supplier + company match.
         $this->assertSame($ordersBefore + 2, Order::count());
     }
+
+    public function test_asset_purchase_cost_change_syncs_to_linked_order_item(): void
+    {
+        // #19564 sync: editing purchase_cost on a saved asset (single
+        // edit, bulk edit, importer update, or API) must write through
+        // to the linked OrderItem's price so order-side reads don't
+        // diverge from the current asset row.
+        $supplier = Supplier::factory()->create();
+
+        $asset = Asset::factory()->create([
+            'supplier_id' => $supplier->id,
+            'order_number' => 'PO-EDIT-COST',
+            'purchase_cost' => 100.00,
+        ]);
+
+        $asset->purchase_cost = 175.50;
+        $asset->save();
+
+        $line = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->firstOrFail();
+
+        $this->assertEquals(175.50, (float) $line->price);
+    }
+
+    public function test_asset_order_number_change_repoints_line_and_cleans_up_orphan(): void
+    {
+        // Rename an asset's order_number. The asset's OrderItem must
+        // detach from the old Order, attach to a firstOrNew'd Order
+        // matching the new (order_number, supplier_id, company_id)
+        // tuple, and the old Order must be deleted when it's left
+        // with no other OrderItems.
+        $supplier = Supplier::factory()->create();
+
+        $asset = Asset::factory()->create([
+            'supplier_id' => $supplier->id,
+            'order_number' => 'PO-OLD',
+        ]);
+
+        $oldOrderId = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->value('order_id');
+
+        $this->assertNotNull(Order::find($oldOrderId));
+
+        $asset->order_number = 'PO-NEW';
+        $asset->save();
+
+        $line = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->firstOrFail();
+
+        $newOrder = Order::find($line->order_id);
+
+        $this->assertSame('PO-NEW', $newOrder->order_number);
+        $this->assertNotSame($oldOrderId, $line->order_id);
+        $this->assertNull(Order::find($oldOrderId), 'The old Order should be deleted after the only OrderItem moves away.');
+    }
+
+    public function test_asset_order_number_change_preserves_old_order_when_it_has_siblings(): void
+    {
+        // Two assets share PO-SHARED. Rename asset A to PO-NEW. Old
+        // Order (PO-SHARED) must survive because asset B still points
+        // at it.
+        $supplier = Supplier::factory()->create();
+
+        $assetA = Asset::factory()->create([
+            'supplier_id' => $supplier->id,
+            'order_number' => 'PO-SHARED',
+        ]);
+        $assetB = Asset::factory()->create([
+            'supplier_id' => $supplier->id,
+            'company_id' => $assetA->company_id,
+            'order_number' => 'PO-SHARED',
+        ]);
+
+        $sharedOrderId = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $assetA->id)
+            ->value('order_id');
+
+        $this->assertSame(
+            $sharedOrderId,
+            OrderItem::where('item_type', Asset::class)->where('item_id', $assetB->id)->value('order_id'),
+            'Precondition: both assets share the same Order.',
+        );
+
+        $assetA->order_number = 'PO-NEW';
+        $assetA->save();
+
+        $this->assertNotNull(Order::find($sharedOrderId), 'The old Order must survive because asset B still references it.');
+    }
+
+    public function test_unrelated_save_does_not_touch_the_linked_order_item(): void
+    {
+        // Sanity: touching a field other than purchase_cost /
+        // order_number leaves the OrderItem's price and order_id
+        // completely untouched.
+        $supplier = Supplier::factory()->create();
+
+        $asset = Asset::factory()->create([
+            'supplier_id' => $supplier->id,
+            'order_number' => 'PO-NOTES',
+            'purchase_cost' => 42.00,
+        ]);
+
+        $originalLine = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->firstOrFail();
+
+        $asset->notes = 'edited notes';
+        $asset->save();
+
+        $freshLine = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->firstOrFail();
+
+        $this->assertSame($originalLine->id, $freshLine->id);
+        $this->assertSame($originalLine->order_id, $freshLine->order_id);
+        $this->assertEquals((float) $originalLine->price, (float) $freshLine->price);
+    }
 }

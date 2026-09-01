@@ -54,6 +54,25 @@ Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
     )->where('licenseId', '[0-9]+')
         ->name('licenses.bulkcheckout');
 
+    // Bulk-fulfill queue for this license. Distinct from
+    // bulkcheckout above (which assigns free seats to every user
+    // in the org). See sibling accessories.fulfill-requests.* for
+    // the shared per-row shape and controller semantics.
+    Route::get('{license}/fulfill-requests',
+        [Licenses\LicenseCheckoutController::class, 'bulkFulfillCreate']
+    )->where('license', '[0-9]+')
+        ->name('licenses.fulfill-requests.create')
+        ->breadcrumbs(fn (Trail $trail, License $license) => $trail
+            ->parent('requests.index')
+            ->push($license->name, route('licenses.show', $license))
+            ->push(trans('general.checkout'), route('licenses.fulfill-requests.create', $license))
+        );
+
+    Route::post('{license}/fulfill-requests',
+        [Licenses\LicenseCheckoutController::class, 'bulkFulfillStore']
+    )->where('license', '[0-9]+')
+        ->name('licenses.fulfill-requests.store');
+
     Route::get(
         'export',
         [

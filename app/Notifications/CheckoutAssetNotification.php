@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Channels\SlackWebhookChannel;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
@@ -20,26 +21,26 @@ use NotificationChannels\GoogleChat\Widgets\KeyValue;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsChannel;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
-#[AllowDynamicProperties]
-class CheckoutAssetNotification extends Notification
+class CheckoutAssetNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public $last_checkout = '';
+
+    public $expected_checkin = '';
 
     /**
      * Create a new notification instance.
      *
      * @param  $params
      */
-    public function __construct(Asset $asset, $checkedOutTo, User $checkedOutBy, $acceptance, $note)
-    {
-        $this->settings = Setting::getSettings();
-        $this->item = $asset;
-        $this->admin = $checkedOutBy;
-        $this->note = $note;
-        $this->target = $checkedOutTo;
-        $this->last_checkout = '';
-        $this->expected_checkin = '';
-
+    public function __construct(
+        public Asset $item,
+        public $target,
+        public User $admin,
+        public $acceptance, // ???? what is this? (doesn't seem used)
+        public $note
+    ) {
         if ($this->item->last_checkout) {
             $this->last_checkout = Helper::getFormattedDateObject($this->item->last_checkout, 'date',
                 false);
@@ -101,7 +102,7 @@ class CheckoutAssetNotification extends Notification
             $fields[trans('general.company')] = $item->company->name;
         }
 
-        if (($this->expected_checkin) && ($this->expected_checkin !== '')) {
+        if ($this->expected_checkin) {
             $fields[trans('general.expected_checkin')] = $this->expected_checkin;
         }
 

@@ -687,6 +687,31 @@ class CustomConsumableReportTest extends TestCase
             ]);
     }
 
+    public function test_include_assignments_lists_every_user_company_alphabetized_and_pipe_joined()
+    {
+        // GH #19568: the user column read the legacy $user->company scalar
+        // mirror and only rendered ONE company under FMCS. It should render
+        // the full company_user pivot set, alphabetized, pipe-joined.
+        [$companyC, $companyA, $companyB] = Company::factory()->count(3)->sequence(
+            ['name' => 'Zeta Co'],
+            ['name' => 'alpha co'],
+            ['name' => 'Beta Co'],
+        )->create()->all();
+
+        $user = User::factory()->create(['first_name' => 'Casey', 'last_name' => 'Multi']);
+        $user->companies()->sync([$companyA->id, $companyB->id, $companyC->id]);
+
+        Consumable::factory()->checkedOutToUser($user)->create(['name' => 'Consumable A']);
+
+        $this->sendRequest([
+            'consumable_name' => '1',
+            'include_assignments' => '1',
+        ])
+            ->assertOk()
+            ->assertCsvHeader()
+            ->assertSeeTextInStreamedResponse('alpha co | Beta Co | Zeta Co');
+    }
+
     public function test_custom_consumable_report_adheres_to_company_scoping_for_non_super_users()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create()->all();

@@ -18,7 +18,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -407,120 +406,6 @@ class LocationsController extends Controller
         }
 
         return redirect()->back()->with('error', trans('general.could_not_restore', ['item_type' => trans('general.location'), 'error' => $location->getErrors()->first()]));
-
-    }
-
-    /**
-     * Returns a view that allows the user to bulk delete locations
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since [v6.3.1]
-     */
-    public function postBulkDelete(Request $request): View|RedirectResponse
-    {
-        $this->authorize('update', Location::class);
-
-        $locations_raw_array = $request->input('ids');
-
-        // Make sure some IDs have been selected
-        if ((is_array($locations_raw_array)) && (count($locations_raw_array) > 0)) {
-            $locations = Location::whereIn('id', $locations_raw_array)
-                ->withCount('assignedAssets as assigned_assets_count')
-                ->withCount('assets as assets_count')
-                ->withCount('assignedAccessories as assigned_accessories_count')
-                ->withCount('accessories as accessories_count')
-                ->withCount('rtd_assets as rtd_assets_count')
-                ->withCount('children as children_count')
-                ->withCount('consumables as consumables_count')
-                ->withCount('components as components_count')
-                ->withCount('users as users_count')->get();
-
-            $valid_count = 0;
-            foreach ($locations as $location) {
-                if ($location->isDeletable()) {
-                    $valid_count++;
-                }
-            }
-
-            if ($valid_count === 0) {
-                return redirect()->route('locations.index')
-                    ->with('error', trans('general.bulk.delete.nothing_deletable', ['object_type' => trans_choice('general.location_plural', 2)]));
-            }
-
-            return view('locations/bulk-delete', compact('locations'))->with('valid_count', $valid_count);
-        }
-
-        return redirect()->route('locations.index')
-            ->with('error', trans('general.bulk.delete.nothing_selected', ['object_type' => trans_choice('general.location_plural', 2)]));
-    }
-
-    /**
-     * Checks that locations can be deleted and deletes them if they can
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since [v6.3.1]
-     */
-    public function postBulkDeleteStore(Request $request): RedirectResponse
-    {
-        $this->authorize('delete', Location::class);
-
-        $locations_raw_array = $request->input('ids');
-
-        if ((is_array($locations_raw_array)) && (count($locations_raw_array) > 0)) {
-            $locations = Location::whereIn('id', $locations_raw_array)
-                ->withCount('assignedAssets as assigned_assets_count')
-                ->withCount('assets as assets_count')
-                ->withCount('assignedAccessories as assigned_accessories_count')
-                ->withCount('accessories as accessories_count')
-                ->withCount('rtd_assets as rtd_assets_count')
-                ->withCount('children as children_count')
-                ->withCount('users as users_count')
-                ->withCount('consumables as consumables_count')
-                ->withCount('components as components_count')->get();
-
-            $success_count = 0;
-            $error_count = 0;
-
-            foreach ($locations as $location) {
-
-                // Can we delete this location?
-                if ($location->isDeletable()) {
-                    $location->delete();
-                    $success_count++;
-                } else {
-                    $error_count++;
-                }
-            }
-
-            Log::debug('Success count: '.$success_count);
-            Log::debug('Error count: '.$error_count);
-            // Complete success
-            if ($success_count == count($locations_raw_array)) {
-                return redirect()
-                    ->route('locations.index')
-                    ->with('success', trans_choice('general.bulk.delete.success', $success_count,
-                        ['object_type' => trans_choice('general.location_plural', $success_count), 'count' => $success_count]
-                    ));
-            }
-
-            // Partial success
-            if ($error_count > 0) {
-                return redirect()
-                    ->route('locations.index')
-                    ->with('warning', trans('general.bulk.delete.partial',
-                        ['success' => $success_count, 'error' => $error_count, 'object_type' => trans('general.locations')]
-                    ));
-            }
-        }
-
-        // Nothing was selected - return to the index
-        return redirect()
-            ->route('locations.index')
-            ->with('error', trans('general.bulk.nothing_selected',
-                ['object_type' => trans('general.locations')]
-            ));
 
     }
 }

@@ -4,7 +4,9 @@
 {{ trans('mail.the_following_item') }}
 
 @if (($snipeSettings->show_images_in_email =='1') && $item->getImageUrl())
-<center><img src="{{ $item->getImageUrl() }}" alt="Asset" style="max-width: 570px;"></center>
+    {{-- @formatter:off --}}
+    <img src="{{ $item->getImageUrl() }}" alt="Asset" style="display:block; height:auto; max-width:100%; max-height:400px; margin:0 auto;">
+    {{-- @formatter:on --}}
 @endif
 
 @component('mail::table')

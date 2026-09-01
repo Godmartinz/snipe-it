@@ -242,10 +242,10 @@
 
 @section('moar_scripts')
     @can('files', $maintenance)
-        @include ('modals.upload-file', ['item_type' => 'maintenances', 'item_id' => $maintenance->id])
+        <x-modals.upload-file item-type="maintenances" :item-id="$maintenance->id" />
     @endcan
     @can('journal', $maintenance)
-        @include ('modals.add-note', ['type' => 'maintenance', 'id' => $maintenance->id])
+        <x-modals.add-note type="maintenance" :id="$maintenance->id" />
     @endcan
 
     <div class="modal fade" id="completeMaintenanceModal" tabindex="-1" role="dialog" aria-labelledby="completeMaintenanceModalLabel" aria-hidden="true">

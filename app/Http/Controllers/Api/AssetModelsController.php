@@ -379,4 +379,36 @@ class AssetModelsController extends Controller
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * List asset models that are requestable AND reachable by the
+     * current caller (per FMCS + location scoping). Hydrates the
+     * models tab on /account/requestable so the shell page can drop
+     * its server-rendered @foreach and match the pattern the other
+     * requestable tabs (accessory / consumable / component / license)
+     * already use. Row shape carries assigned_to_self plus
+     * available_actions.request/cancel so the JS actions formatter
+     * can pick the right button per row without a second query.
+     */
+    public function requestable(Request $request): array
+    {
+        $query = AssetModel::with('category', 'manufacturer', 'requests')
+            ->withCount('availableAssets as remaining')
+            ->Requestable();
+
+        if ($request->filled('search')) {
+            $query->TextSearch($request->input('search'));
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), ['name', 'created_at'], true) ? $request->input('sort') : 'name';
+
+        $rows = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+        return (new AssetModelsTransformer)->transformAssetModels($rows, $total);
+    }
 }

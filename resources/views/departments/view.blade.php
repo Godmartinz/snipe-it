@@ -59,7 +59,7 @@
 
 @section('moar_scripts')
     @can('files', $department)
-        @include ('modals.upload-file', ['item_type' => 'departments', 'item_id' => $department->id])
+        <x-modals.upload-file item-type="departments" :item-id="$department->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['exportFile' => 'department-' . $department->name . '-export', 'search' => false])

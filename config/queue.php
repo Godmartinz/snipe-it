@@ -30,6 +30,10 @@ return [
 
     'connections' => [
 
+        'background' => [
+            'driver' => 'background',
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

@@ -39,8 +39,8 @@ class StatuslabelsTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'update' => Gate::allows('update', Statuslabel::class) ? true : false,
-            'delete' => (Gate::allows('delete', Statuslabel::class) && ($statuslabel->isDeletable())) ? true : false,
+            'update' => Gate::allows('update', $statuslabel) ? true : false,
+            'delete' => (Gate::allows('delete', $statuslabel) && ($statuslabel->isDeletable())) ? true : false,
             'bulk_selectable' => [
                 'delete' => $statuslabel->isDeletable(),
             ],

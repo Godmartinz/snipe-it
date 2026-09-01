@@ -79,7 +79,7 @@
                     <x-input.user-select
                         :label="trans('general.user')"
                         name="assigned_user"
-                        :selected="old('assigned_user')"
+                        :selected="old('assigned_user', $checkoutRequest?->user_id)"
                         :companyId="$asset->company_id"
                         :style="(session('checkout_to_type') ?: 'user') == 'user' ? null : 'display: none;'"
                     />
@@ -102,6 +102,7 @@
                         type="datetimepicker"
                         :item="$item"
                         :default_now="false"
+                        :default="old('expected_checkin', ($checkoutRequest?->end_date ? $checkoutRequest->end_date->toDateString() : ($item->expected_checkin ?? null)))"
                         input_div_class="col-md-4"
                     />
 
@@ -191,6 +192,8 @@
         </x-page-column>
 
         <x-page-column class="col-md-5">
+            <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$asset" />
+
             <livewire:checkout-target-panel type="assets" />
         </x-page-column>
 

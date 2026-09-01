@@ -43,6 +43,7 @@ class ComponentsImportFileBuilder extends FileBuilder
             'purchaseDate' => 'Purchase Date',
             'quantity' => 'Quantity',
             'serialNumber' => 'Serial number',
+            'requestable' => 'Requestable',
         ];
     }
 
@@ -65,6 +66,7 @@ class ComponentsImportFileBuilder extends FileBuilder
             'purchaseDate' => $faker->date,
             'quantity' => rand(1, 100_000),
             'serialNumber' => 'SN:COM:'.Str::random(),
+            'requestable' => '',
         ];
     }
 }

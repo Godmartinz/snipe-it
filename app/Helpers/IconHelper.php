@@ -102,6 +102,8 @@ class IconHelper
             case 'request':
             case 'requested':
                 return 'fa-solid fa-bell-concierge';
+            case 'fulfill_multiple':
+                return 'fa-solid fa-arrows-down-to-people';
             case 'reports':
                 return 'fas fa-chart-bar';
             case 'heart':

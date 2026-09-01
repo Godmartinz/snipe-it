@@ -101,6 +101,16 @@ Route::middleware(['web', 'auth', 'authorize:superuser'])->prefix('oauth')->grou
 
 Route::group(['middleware' => 'auth'], function () {
     /*
+    * Calendar (unified view across every HasCalendarEvents source).
+    * Companion API endpoint lives at /api/v1/calendar/events.
+    */
+    Route::get('calendar', [App\Http\Controllers\CalendarEventsController::class, 'index'])
+        ->name('calendar.index')
+        ->breadcrumbs(fn (Tabuna\Breadcrumbs\Trail $trail) => $trail->parent('home')
+            ->push(trans('general.calendar'), route('calendar.index'))
+        );
+
+    /*
     * Companies
     */
     Route::resource('companies', CompaniesController::class, [
@@ -535,10 +545,16 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
             ->push(trans('general.requested_assets_menu'), route('account.requested')));
 
     Route::get(
-        'requestable-assets', [ViewAssetsController::class, 'getRequestableIndex'])
-        ->name('requestable-assets')
+        'requestable', [ViewAssetsController::class, 'getRequestableIndex'])
+        ->name('account.requestable')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
-            ->push(trans('general.requestable_items'), route('requestable-assets')));
+            ->push(trans('general.requestable_items'), route('account.requestable')));
+
+    // Legacy /account/requestable-assets URL. Now covers every
+    // requestable item type (accessories, consumables, components,
+    // licenses, models), not just assets - route + name moved to
+    // /account/requestable. 301 keeps external bookmarks working.
+    Route::redirect('requestable-assets', '/account/requestable', 301);
 
     Route::post('request-asset/{asset}', [ViewAssetsController::class, 'store'])
         ->name('account.request-asset');
@@ -546,9 +562,23 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     Route::post('request-asset/{asset}/cancel', [ViewAssetsController::class, 'destroy'])
         ->name('account.request-asset.cancel');
 
-    Route::post('request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}', [ViewAssetsController::class, 'getRequestItem'])
+    // Accepts POST (from the /account/requestable request-item form)
+    // AND DELETE (from the shared dataConfirmModal on /requests
+    // where the admin cancel-request button pipes through the same
+    // handler as every other delete confirmation flow). Same
+    // controller for both - the request itself is idempotent so the
+    // verb choice is a wiring convenience.
+    //
+    // Optional requestingUser segment carries the target user id
+    // when an admin is canceling on behalf of someone else.
+    // Omitted / equal to auth id → self-cancel. Distinct id →
+    // admin-cancel, re-authorized server-side against the caller's
+    // admin role. The old cancel_by_admin flag was dropped from the
+    // URL since the same information falls out of that comparison
+    // (see getRequestItem for the inference).
+    Route::match(['post', 'delete'], 'request/{itemType}/{itemId}/{requestingUser?}', [ViewAssetsController::class, 'getRequestItem'])
         ->name('account/request-item')
-        ->where('itemType', 'asset|asset_model|accessory');
+        ->where('itemType', 'asset|asset_model|accessory|consumable|component|license');
 
     Route::get(
         'display-sig/{filename}',
@@ -597,6 +627,26 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
 
 Route::group(['middleware' => ['auth']], function () {
     Route::post('notes', [NotesController::class, 'store'])->name('notes.store');
+});
+
+// Admin queue of open checkout requests across every requestable
+// item type (assets, accessories, consumables, components, licenses,
+// models). Lived under /hardware/requested back when only assets
+// could be requested; moved here now that the queue is polymorphic.
+// The legacy /hardware/requested URL still 301s here for existing
+// bookmarks (see routes/web/hardware.php). Controller method still
+// lives on AssetsController for now; move to a dedicated
+// RequestsController when the surrounding request-workflow refactor
+// lands.
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('requests', [\App\Http\Controllers\Assets\AssetsController::class, 'getRequestedIndex'])
+        ->name('requests.index')
+        ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
+            ->push(trans('general.pending_requests'), route('requests.index'))
+        );
+
+    Route::post('requests/bulk-cancel', [\App\Http\Controllers\Assets\AssetsController::class, 'bulkCancelRequests'])
+        ->name('requests.bulk-cancel');
 });
 
 Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
@@ -699,10 +749,13 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             Route::get('/{reportTemplate}', [ReportTemplatesController::class, 'show'])
                 ->name('report-templates.show')
                 ->breadcrumbs(function (Trail $trail, ReportTemplate $reportTemplate) {
+                    // 'asset' folds into the default since it maps to the
+                    // same breadcrumb parent. Component / consumable have
+                    // their own custom-report parents.
                     $parent = match ($reportTemplate->type) {
-                        'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
                         'consumable' => 'reports.custom.consumable',
+                        default => 'reports/custom',
                     };
 
                     return $trail->parent($parent)
@@ -712,10 +765,13 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             Route::get('/{reportTemplate}/edit', [ReportTemplatesController::class, 'edit'])
                 ->name('report-templates.edit')
                 ->breadcrumbs(function (Trail $trail, ReportTemplate $reportTemplate) {
+                    // 'asset' folds into the default since it maps to the
+                    // same breadcrumb parent. Component / consumable have
+                    // their own custom-report parents.
                     $parent = match ($reportTemplate->type) {
-                        'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
                         'consumable' => 'reports.custom.consumable',
+                        default => 'reports/custom',
                     };
 
                     return $trail->parent($parent)

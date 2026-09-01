@@ -22,7 +22,7 @@ class ConsumableSeeder extends Seeder
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);
         }
-        $supplierIds = Supplier::all()->pluck('id');
+        $supplierIds = Supplier::pluck('id');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
@@ -47,6 +47,27 @@ class ConsumableSeeder extends Seeder
                     'default_supplier_id' => $acq['supplier']->id,
                     'created_by' => $admin->id,
                 ]);
+        }
+
+        // Extra low-stock consumables so the dashboard's low-stock
+        // widget and the top-nav alert bell have realistic rows to
+        // display in a fresh demo. Qty stays >= the max seeded
+        // checkouts_count below (4) so the alert bell's `remaining =
+        // qty - checkouts_count` calc doesn't go negative on any of
+        // these rows. min_amt sits above qty so they still register
+        // as low-stock (remaining < min_amt) even after checkouts.
+        foreach ([
+            ['name' => 'Envelopes (#10)', 'qty' => 5, 'min_amt' => 10],
+            ['name' => 'AA Batteries', 'qty' => 4, 'min_amt' => 15],
+            ['name' => 'Ethernet Patch Cables (Cat 6, 3ft)', 'qty' => 5, 'min_amt' => 12],
+        ] as $lowStock) {
+            $acq = $randomAcquisition();
+            Consumable::factory()
+                ->withInitialAcquisition($acq['supplier'], $acq['cost'], $acq['date'])
+                ->create(array_merge($lowStock, [
+                    'default_supplier_id' => $acq['supplier']->id,
+                    'created_by' => $admin->id,
+                ]));
         }
 
         // Check out a couple of each consumable to random users so the

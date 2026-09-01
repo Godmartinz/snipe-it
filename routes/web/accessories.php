@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Accessories;
 use App\Http\Controllers\BulkAccessoriesController;
+use App\Models\Accessory;
 use Illuminate\Support\Facades\Route;
+use Tabuna\Breadcrumbs\Trail;
 
 /*
 * Accessories
@@ -45,6 +47,26 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
     Route::post('{accessory}/adjust-quantity',
         [Accessories\AccessoriesController::class, 'adjustQuantity']
     )->name('accessories.adjust-quantity');
+
+    // Bulk-fulfill: process the accessory's pending-request queue
+    // in one pass. Reached from the "Fulfill Multiple" button on
+    // the /requests admin queue when ≥2 pending requests exist for
+    // the same accessory. See AccessoryCheckoutController for the
+    // per-row iteration semantics.
+    Route::get('{accessory}/fulfill-requests',
+        [Accessories\AccessoryCheckoutController::class, 'bulkFulfillCreate']
+    )->name('accessories.fulfill-requests.create')
+        ->breadcrumbs(fn (Trail $trail, Accessory $accessory) => $trail
+            // Bulk-fulfill always starts from the /requests queue -
+            // root there so the trail reads as the natural flow.
+            ->parent('requests.index')
+            ->push($accessory->name, route('accessories.show', $accessory))
+            ->push(trans('general.checkout'), route('accessories.fulfill-requests.create', $accessory))
+        );
+
+    Route::post('{accessory}/fulfill-requests',
+        [Accessories\AccessoryCheckoutController::class, 'bulkFulfillStore']
+    )->name('accessories.fulfill-requests.store');
 
 });
 

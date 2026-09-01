@@ -49,6 +49,40 @@ class LocationsForSelectListTest extends TestCase
             );
     }
 
+    public function test_multiple_locations_are_excluded_when_exclude_ids_is_a_comma_separated_list(): void
+    {
+        // Used by the bulk-edit form's parent picker so a location can't
+        // be picked as its own new parent (or the parent of a sibling
+        // in the same batch, which would collapse the hierarchy).
+        [$locationA, $locationB, $locationC] = Location::factory()->count(3)->create();
+
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->getJson(route('api.locations.selectlist', ['excludeIds' => $locationA->id.','.$locationB->id]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertNotContains($locationA->id, $ids);
+        $this->assertNotContains($locationB->id, $ids);
+        $this->assertContains($locationC->id, $ids);
+    }
+
+    public function test_exclude_ids_also_accepts_a_native_array(): void
+    {
+        // Belt-and-braces: js-data-ajax forwards data-exclude-ids as a
+        // comma-separated string, but a caller building the URL by hand
+        // (Postman, cURL, etc.) could pass excludeIds[] as an array.
+        [$locationA, $locationB, $locationC] = Location::factory()->count(3)->create();
+
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->getJson(route('api.locations.selectlist', ['excludeIds' => [$locationA->id, $locationB->id]]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertNotContains($locationA->id, $ids);
+        $this->assertNotContains($locationB->id, $ids);
+        $this->assertContains($locationC->id, $ids);
+    }
+
     public function test_locations_are_returned_when_user_is_updating_their_profile_and_has_permission_to_update_location()
     {
         $this->actingAsForApi(User::factory()->canEditOwnLocation()->create())

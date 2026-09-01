@@ -25,7 +25,7 @@ class LicenseCheckoutRequest extends FormRequest
     {
         return [
             'note' => 'string|nullable',
-            'asset_id' => 'required_without:assigned_to',
+            'assigned_asset' => 'required_without:assigned_user',
         ];
     }
 }

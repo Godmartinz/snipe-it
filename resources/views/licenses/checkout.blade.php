@@ -45,12 +45,12 @@
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'false'])
                     <x-input.user-select
                         :label="trans('general.user')"
-                        name="assigned_to"
-                        :selected="old('assigned_to')"
+                        name="assigned_user"
+                        :selected="old('assigned_user', $checkoutRequest?->user_id)"
                         :companyId="$license->company_id"
                         :style="(session('checkout_to_type') ?: 'user') == 'user' ? null : 'display: none;'"
                     />
-                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id', 'company_id' => $license->company_id, 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
+                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'assigned_asset', 'company_id' => $license->company_id, 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
 
                     <x-form.row
                         :label="trans('general.checkout_note')"
@@ -131,6 +131,8 @@
         </x-page-column>
 
         <x-page-column class="col-md-5">
+            <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$license" />
+
             <livewire:checkout-target-panel type="licenses" />
         </x-page-column>
 

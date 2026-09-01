@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\StatusLabels\DestroyStatuslabelAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasAssets;
 use App\Models\Statuslabel;
 use Illuminate\Http\Request;
@@ -28,8 +29,8 @@ class BulkStatuslabelsController extends Controller
                 $success_count++;
             } catch (ItemStillHasAssets $e) {
                 $errors[] = trans('general.bulk_delete_associations.assoc_assets_no_count', ['item_name' => $statuslabel->name, 'item' => trans('admin/statuslabels/table.status_label')]);
-            } catch (\Exception $e) {
-                report($e);
+            } catch (\Throwable $e) {
+                Handler::reportOrRethrow($e);
                 $errors[] = trans('general.something_went_wrong');
             }
         }

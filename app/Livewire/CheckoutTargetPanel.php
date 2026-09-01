@@ -85,8 +85,12 @@ class CheckoutTargetPanel extends Component
     {
         return view('livewire.checkout-target-panel', [
             'items' => $this->items(),
-            'noun' => $this->itemNoun(),
-            'targetNoun' => $this->targetNoun(),
+            // $this->type is validated against self::TYPES in mount(),
+            // and $this->targetType is either null or one of TARGET_TYPES
+            // per targetSelected(), so both concatenations always land on
+            // a defined translation key.
+            'noun' => trans('general.'.$this->type),
+            'targetNoun' => trans('general.'.($this->targetType ?? 'user')),
         ]);
     }
 
@@ -142,27 +146,6 @@ class CheckoutTargetPanel extends Component
             'asset' => Asset::find($this->targetId),
             'location' => Location::find($this->targetId),
             default => null,
-        };
-    }
-
-    private function itemNoun(): string
-    {
-        return match ($this->type) {
-            'assets' => trans('general.assets'),
-            'licenses' => trans('general.licenses'),
-            'accessories' => trans('general.accessories'),
-            'consumables' => trans('general.consumables'),
-            'components' => trans('general.components'),
-        };
-    }
-
-    private function targetNoun(): string
-    {
-        return match ($this->targetType) {
-            'user' => trans('general.user'),
-            'asset' => trans('general.asset'),
-            'location' => trans('general.location'),
-            default => trans('general.user'),
         };
     }
 }

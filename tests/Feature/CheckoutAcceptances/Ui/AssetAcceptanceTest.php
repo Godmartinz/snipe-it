@@ -137,6 +137,7 @@ class AssetAcceptanceTest extends TestCase
     public function test_user_can_decline_asset()
     {
         Event::fake([CheckoutAccepted::class]);
+        $this->settings->disableAlertEmail(); //otherwise it tries to send an email without having enough information
 
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
 

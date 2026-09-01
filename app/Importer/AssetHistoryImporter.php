@@ -4,6 +4,7 @@ namespace App\Importer;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
@@ -25,11 +26,15 @@ class AssetHistoryImporter extends Importer
     // match the historical CSV template's bare "Name" column. Merge these
     // in every time setFieldMappings runs (which ItemImportRequest does
     // even for callers that don't pass column-mappings, wiping constructor-
-    // level overrides).
+    // level overrides). target_type is optional. When the CSV omits it
+    // the row defaults to a user checkout, matching the earlier
+    // behavior of the importer for backwards compat with older exports.
     private array $historyFieldMapExtras = [
         'checkout_date' => 'checkout date',
         'checkin_date' => 'checkin date',
         'full_name' => 'name',
+        'target_type' => 'target type',
+        'notes' => 'notes',
     ];
 
     public function setFieldMappings($fields)
@@ -130,40 +135,90 @@ class AssetHistoryImporter extends Importer
             $checkin_date = Carbon::parse(now())->format('Y-m-d H:i:s');
         }
 
-        $user = $this->resolveTargetUser($name);
+        $target_type_raw = strtolower(trim((string) $this->findCsvMatch($row, 'target_type')));
 
-        if (! $user) {
-            $this->log('User "'.$name.'" does not exist so no checkin log was created for asset '.$asset_tag);
+        // Optional column. Blank or absent falls back to user so
+        // earlier-style CSVs behave unchanged. An explicit value that
+        // isn't one of the two accepted forms surfaces as a per-row
+        // error. Reject early with the actual bad value in the message.
+        $lookupLocation = false;
+        if ($target_type_raw !== '' && $target_type_raw !== 'user') {
+            if ($target_type_raw === 'location') {
+                $lookupLocation = true;
+            } else {
+                $this->log('Unrecognized target_type "' . $target_type_raw . '" for asset ' . $asset_tag);
+                $this->recordSkipped();
+                $this->addRowError(
+                    trans('general.asset') . ' ' . $asset_tag,
+                    trans('general.import-history'),
+                    'target_type',
+                    trans('admin/hardware/message.import.history.invalid_target_type_message', [
+                        'value' => $target_type_raw,
+                    ]),
+                );
+
+                return;
+            }
+        }
+
+        $target = $lookupLocation
+            ? $this->resolveTargetLocation($name)
+            : $this->resolveTargetUser($name);
+
+        if (!$target) {
+            $missingLabel = $lookupLocation ? 'Location' : 'User';
+            $this->log($missingLabel . ' "' . $name . '" does not exist so no checkin log was created for asset ' . $asset_tag);
             $this->recordSkipped();
             $this->addRowError(
                 trans('general.asset').' '.$asset_tag,
                 trans('general.import-history'),
                 'name',
-                trans('admin/hardware/message.import.history.user_not_matched_message', ['name' => $name]),
+                trans('admin/hardware/message.import.history.target_not_matched_message', [
+                    'name' => $name,
+                    'target_type' => strtolower($missingLabel),
+                ]),
             );
 
             return;
         }
 
+        // Optional per-row note from the CSV.
+        $csvNote = trim((string) $this->findCsvMatch($row, 'notes'));
+        $checkoutNote = $csvNote !== ''
+            ? $csvNote
+            : 'Checkout imported by ' . (auth()->user()?->display_name ?? 'CSV importer') . ' from history importer';
+
         Actionlog::firstOrCreate([
             'item_id' => $asset->id,
             'item_type' => Asset::class,
             'created_by' => $this->created_by,
-            'note' => 'Checkout imported by '.(auth()->user()?->display_name ?? 'CSV importer').' from history importer',
-            'target_id' => $user->id,
-            'target_type' => User::class,
+            'note' => $checkoutNote,
+            'target_id' => $target->id,
+            'target_type' => get_class($target),
             'created_at' => $checkout_date,
             'action_type' => 'checkout',
         ]);
 
         // If the CSV explicitly told us about a checkin column and this row's
         // checkin is empty or in the future, the asset is still assigned to
-        // the target user. Otherwise leave the current assignment alone -
+        // the target. Otherwise leave the current assignment alone -
         // the asset is (by the source-of-truth CSV) already checked in.
         if ($checkinHeaderPresent) {
             if (empty($checkin_date) || strtotime($checkin_date) > strtotime(Carbon::now())) {
-                $asset->assigned_to = $user->id;
-                $asset->assigned_type = User::class;
+                $asset->assigned_to = $target->id;
+                $asset->assigned_type = get_class($target);
+
+                // Mirror Asset::checkOut()'s Location branch: when the
+                // asset is currently checked out TO a location, its own
+                // location_id must point at that location too so it
+                // shows up in the right place on the hardware list and
+                // location-specific reports. Without this a location
+                // checkout would flip assigned_to but leave location_id
+                // pinned to whatever it was before, producing an
+                // inconsistent state Snipe-IT itself never emits.
+                if ($target instanceof Location) {
+                    $asset->location_id = $target->id;
+                }
             }
         }
 
@@ -180,7 +235,8 @@ class AssetHistoryImporter extends Importer
         }
 
         if ($asset->save()) {
-            $this->log('Asset history imported for '.$asset_tag.' -> '.$user->username.' at '.$checkout_date);
+            $identity = $target instanceof User ? $target->username : $target->name;
+            $this->log('Asset history imported for ' . $asset_tag . ' -> ' . $identity . ' at ' . $checkout_date);
             $this->recordCreated();
         } else {
             $this->recordErrored();
@@ -221,6 +277,23 @@ class AssetHistoryImporter extends Importer
             $tableLabel,
             [$field => [$message]],
         );
+    }
+
+    /**
+     * Resolve a location by name for the location-target branch. Same
+     * "first match wins" contract as resolveTargetUser: no tie-breaker
+     * across parents, which matches how Location::name is uniqued in
+     * the schema (unique on name+parent_id, not globally unique). MySQL
+     * collates case-insensitively by default so no explicit lower-case
+     * fallback here.
+     */
+    private function resolveTargetLocation(?string $name): ?Location
+    {
+        if (empty($name)) {
+            return null;
+        }
+
+        return Location::where('name', '=', $name)->first();
     }
 
     private function resolveTargetUser(?string $name): ?User

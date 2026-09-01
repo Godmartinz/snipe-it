@@ -5,23 +5,22 @@ namespace App\Notifications;
 use App\Helpers\Helper;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class ExpectedCheckinNotification extends Notification
+class ExpectedCheckinNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-
-    private $params;
-
+    
     /**
      * Create a new notification instance.
      */
-    public function __construct($params)
+    public function __construct(
+        public $params
+    )
     {
-        $this->params = $params;
     }
 
     /**

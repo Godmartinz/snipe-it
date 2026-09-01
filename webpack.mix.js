@@ -89,6 +89,21 @@ mix
       "./public/js/dist/all.js"
   ).sourceMaps(true, 'source-map', 'source-map').version();
 
+/**
+ * Standalone chunk for calendar pages. FullCalendar v6 is
+ * ES-module-first and ~200KB; keeping it out of the always-loaded
+ * all.js bundle so pages that don't render a calendar don't pay the
+ * cost. Exposes window.snipeitCalendar.init(elementId, config) so
+ * per-entity calendar blades (maintenances, upcoming audits, expected
+ * checkins, user end-dates, etc.) share the same init path and only
+ * differ in which JSON events endpoint they hit.
+ */
+mix
+  .js(
+    './resources/assets/js/snipeit-calendar.js',
+    './public/js/dist/snipeit-calendar.js'
+  ).sourceMaps(true, 'source-map', 'source-map').version();
+
 
 
 /**

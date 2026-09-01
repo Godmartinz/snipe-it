@@ -9,7 +9,9 @@
     <div class="row">
         <div class="col-md-12">
             @if (isset($table_header))
-            <h3 class="box-title{{ (!isset($bulkactions)) ? ' pull-left' : '' }}">
+            <h3
+                @if ($name) id="{{ $name }}-title" @endif
+                class="box-title{{ (!isset($bulkactions)) ? ' pull-left' : '' }}">
                 {{ $table_header }}
             </h3>
         @endif

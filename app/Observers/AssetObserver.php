@@ -22,6 +22,7 @@ class AssetObserver
         $attributesOriginal = $asset->getRawOriginal();
         $same_checkout_counter = false;
         $same_checkin_counter = false;
+        $same_requests_counter = false;
         $restoring_or_deleting = false;
 
         // This is a gross hack to prevent the double logging when restoring an asset
@@ -37,12 +38,21 @@ class AssetObserver
             $same_checkin_counter = (($attributes['checkin_counter'] == $attributesOriginal['checkin_counter']));
         }
 
+        // requests_counter is a denorm bump fired by CreateCheckoutRequestAction /
+        // CancelCheckoutRequestAction. The `requested` and `request canceled`
+        // actionlogs those actions write already cover the user-visible history;
+        // this gate keeps the counter save from adding a redundant `update` row
+        // for the same event.
+        if (array_key_exists('requests_counter', $attributes) && array_key_exists('requests_counter', $attributesOriginal)) {
+            $same_requests_counter = (($attributes['requests_counter'] == $attributesOriginal['requests_counter']));
+        }
+
         // If the asset isn't being checked out, log the update.
         // (Checkout/checkin/audit actions already create their own log entries; the audit
         // path uses unsetEventDispatcher() so it never reaches this observer.)
         if (array_key_exists('assigned_to', $attributes) && array_key_exists('assigned_to', $attributesOriginal)
             && ($attributes['assigned_to'] == $attributesOriginal['assigned_to'])
-            && ($same_checkout_counter) && ($same_checkin_counter)
+            && ($same_checkout_counter) && ($same_checkin_counter) && ($same_requests_counter)
             && ($attributes['last_checkout'] == $attributesOriginal['last_checkout']) && (! $restoring_or_deleting)) {
             $changed = [];
 
@@ -164,6 +174,89 @@ class AssetObserver
             ]);
             $orderItem->created_by = $asset->created_by ?? auth()->id();
             $orderItem->save();
+        }
+    }
+
+    /**
+     * Keep the asset's linked OrderItem (and its parent Order) in
+     * step with edits to `purchase_cost` / `order_number` so downstream
+     * order-side reads (lastOrderDefaults, order-based reports) don't
+     * diverge from the current asset row. Only fires when those
+     * specific fields actually change, so unrelated saves stay cheap.
+     *
+     * Scope note: this handles the two fields the bulk edit form
+     * writes on the order-details side. Broader drift on
+     * `supplier_id`, `purchase_date`, `company_id`, and the missing
+     * per-asset `currency` column are captured in the orders-sync
+     * follow-up. See GH #19564.
+     */
+    public function updated(Asset $asset): void
+    {
+        if (! $asset->wasChanged(['purchase_cost', 'order_number'])) {
+            return;
+        }
+
+        $orderItem = OrderItem::where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->first();
+
+        if (! $orderItem) {
+            // Legacy assets that predate the orders refactor may not
+            // have an OrderItem row. Skip silently — the create-path
+            // is the only place that mints one.
+            return;
+        }
+
+        if ($asset->wasChanged('purchase_cost')) {
+            $orderItem->price = $asset->purchase_cost;
+            $orderItem->save();
+        }
+
+        if ($asset->wasChanged('order_number')) {
+            $newNumber = trim((string) ($asset->order_number ?? '')) ?: null;
+            $oldOrderId = $orderItem->order_id;
+
+            // Rebuild the (order_number, supplier_id, company_id)
+            // dedupe key from the create-path. A blank order_number
+            // becomes a distinct Order each time, matching create.
+            if ($newNumber !== null) {
+                $targetOrder = Order::firstOrNew(
+                    [
+                        'order_number' => $newNumber,
+                        'supplier_id' => $asset->supplier_id,
+                        'company_id' => $asset->company_id,
+                    ],
+                    [
+                        'purchase_date' => $asset->purchase_date,
+                    ],
+                );
+                if (! $targetOrder->exists) {
+                    $targetOrder->created_by = auth()->id() ?? $asset->created_by;
+                    $targetOrder->save();
+                }
+            } else {
+                $targetOrder = new Order([
+                    'order_number' => null,
+                    'supplier_id' => $asset->supplier_id,
+                    'company_id' => $asset->company_id,
+                    'purchase_date' => $asset->purchase_date,
+                ]);
+                $targetOrder->created_by = auth()->id() ?? $asset->created_by;
+                $targetOrder->save();
+            }
+
+            $orderItem->order_id = $targetOrder->id;
+            $orderItem->save();
+
+            // Clean up the previous Order if nothing else points at
+            // it. Avoids leaving orphan rows behind when a rename
+            // happens to be the only OrderItem on the old Order.
+            if ($oldOrderId && $oldOrderId !== $targetOrder->id) {
+                $oldOrder = Order::find($oldOrderId);
+                if ($oldOrder && $oldOrder->orderItems()->count() === 0) {
+                    $oldOrder->delete();
+                }
+            }
         }
     }
 

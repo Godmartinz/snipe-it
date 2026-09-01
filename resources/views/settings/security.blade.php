@@ -156,7 +156,7 @@
                                     <x-form.row
                                         name="login_remote_user_header_name"
                                         :label="trans('admin/settings/general.login_remote_user_header_name_text')"
-                                        :help_html="trans('admin/settings/general.login_remote_user_header_name_help')"
+                                        help_html="{!! trans('admin/settings/general.login_remote_user_header_name_help') !!}"
                                         help_icon="warning"
                                     >
                                         <x-slot:input>

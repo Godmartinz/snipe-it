@@ -46,13 +46,13 @@ class LicenseSeatsTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', License::class),
-            'checkin' => Gate::allows('checkin', License::class),
+            'checkout' => Gate::allows('checkout', $seat->license),
+            'checkin' => Gate::allows('checkin', $seat->license),
             'clone' => Gate::allows('create', License::class),
-            'update' => Gate::allows('update', License::class),
-            'delete' => Gate::allows('delete', License::class),
+            'update' => Gate::allows('update', $seat->license),
+            'delete' => Gate::allows('delete', $seat->license),
             'bulk_selectable' => [
-                'checkin' => Gate::allows('checkin', License::class) && ($seat->assigned_to || $seat->asset_id),
+                'checkin' => Gate::allows('checkin', $seat->license) && ($seat->assigned_to || $seat->asset_id),
             ],
         ];
 

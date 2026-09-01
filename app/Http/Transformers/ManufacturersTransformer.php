@@ -49,7 +49,7 @@ class ManufacturersTransformer
             ];
 
             $permissions_array['available_actions'] = [
-                'update' => (($manufacturer->deleted_at == '') && (Gate::allows('update', Manufacturer::class))),
+                'update' => (($manufacturer->deleted_at == '') && (Gate::allows('update', $manufacturer))),
                 'restore' => (($manufacturer->deleted_at != '') && (Gate::allows('create', Manufacturer::class))),
                 'delete' => $manufacturer->isDeletable(),
                 'bulk_selectable' => [

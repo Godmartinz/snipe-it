@@ -10,10 +10,12 @@ use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Traits\CheckInOutTrait;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\CheckoutRequest;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AssetCheckoutController extends Controller
@@ -32,7 +34,7 @@ class AssetCheckoutController extends Controller
      *
      * @return View
      */
-    public function create(Asset $asset): View|RedirectResponse
+    public function create(Request $request, Asset $asset): View|RedirectResponse
     {
 
         $this->authorize('checkout', $asset);
@@ -56,10 +58,24 @@ class AssetCheckoutController extends Controller
         }
 
         if ($asset->availableForCheckout()) {
+            // Optional ?request_id hint. Present when the admin
+            // reached this screen from a /requests row. Drives the
+            // side-panel context box (who asked + waiting list).
+            // CheckoutRequest::contextForCheckout handles the URL-
+            // twiddle guards; a miss returns nulls / empty so the
+            // panel renders nothing.
+            $context = CheckoutRequest::contextForCheckout(
+                $request->integer('request_id') ?: null,
+                Asset::class,
+                $asset->id,
+            );
+
             return view('hardware/checkout', compact('asset'))
                 ->with('statusLabel_list', Helper::deployableStatusLabelList())
                 ->with('table_name', 'Assets')
-                ->with('item', $asset);
+                ->with('item', $asset)
+                ->with('checkoutRequest', $context['checkoutRequest'])
+                ->with('otherPendingRequests', $context['otherPendingRequests']);
         }
 
         return redirect()->route('hardware.index')

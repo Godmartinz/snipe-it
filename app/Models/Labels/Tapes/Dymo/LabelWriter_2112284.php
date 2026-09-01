@@ -21,6 +21,7 @@ class LabelWriter_2112284 extends LabelWriter
     private const FIELD_SIZE = 2.40;
 
     private const FIELD_MARGIN = 0.10;
+
     private const RIGHT_SAFE_OFFSET = 4.0;
 
     public function getUnit()
@@ -106,9 +107,6 @@ class LabelWriter_2112284 extends LabelWriter
             'text_render_mode' => 'block',
         ];
     }
-    public function preparePDF($pdf)
-    {
-    }
 
     public function write($pdf, $record)
     {
@@ -183,9 +181,9 @@ class LabelWriter_2112284 extends LabelWriter
 
         foreach ($fields as $field) {
             $rawLabel = $field['label'] ?? null;
-            $value = (string)($field['value'] ?? '');
+            $value = (string) ($field['value'] ?? '');
 
-            if (!is_string($rawLabel) || trim($rawLabel) === '') {
+            if (! is_string($rawLabel) || trim($rawLabel) === '') {
                 static::writeText(
                     $pdf, $value,
                     $currentX, $currentY,
@@ -198,7 +196,7 @@ class LabelWriter_2112284 extends LabelWriter
                 continue;
             }
 
-            $labelText = rtrim($rawLabel, ':') . ':';
+            $labelText = rtrim($rawLabel, ':').':';
 
             static::writeText(
                 $pdf, $labelText,

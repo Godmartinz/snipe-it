@@ -46,7 +46,8 @@ class AssetAuditPresenter extends Presenter
                 'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
-                'title' => trans('admin/hardware/form.name'),
+                // Match the import wizard's Name target label
+                'title' => trans('general.item_name_var', ['item' => trans('general.asset')]),
                 'visible' => true,
                 'formatter' => 'hardwareLinkFormatter',
             ], [

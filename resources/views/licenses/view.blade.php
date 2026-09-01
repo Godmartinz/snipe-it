@@ -161,30 +161,30 @@
     </x-container>
 
 @can('checkin', \App\Models\License::class)
-    @include ('modals.confirm-action',
-          [
-              'modal_name' => 'checkinFromAllModal',
-              'route' => route('licenses.bulkcheckin', $license->id),
-              'title' => trans('general.modal_confirm_generic'),
-              'body' => trans_choice('admin/licenses/general.bulk.checkin_all.modal', 2, ['checkedout_seats_count' => $checkedout_seats_count])
-          ])
+    <x-modals.confirm-action
+        modal-name="checkinFromAllModal"
+        :route="route('licenses.bulkcheckin', $license->id)"
+        :title="trans('general.modal_confirm_generic')"
+    >
+        {{ trans_choice('admin/licenses/general.bulk.checkin_all.modal', 2, ['checkedout_seats_count' => $checkedout_seats_count]) }}
+    </x-modals.confirm-action>
 @endcan
 
 @can('checkout', \App\Models\License::class)
-    @include ('modals.confirm-action',
-          [
-              'modal_name' => 'checkoutFromAllModal',
-              'route' => route('licenses.bulkcheckout', $license->id),
-              'title' => trans('general.modal_confirm_generic'),
-              'body' => trans_choice('admin/licenses/general.bulk.checkout_all.modal', 2, ['available_seats_count' => $available_seats_count])
-          ])
+    <x-modals.confirm-action
+        modal-name="checkoutFromAllModal"
+        :route="route('licenses.bulkcheckout', $license->id)"
+        :title="trans('general.modal_confirm_generic')"
+    >
+        {{ trans_choice('admin/licenses/general.bulk.checkout_all.modal', 2, ['available_seats_count' => $available_seats_count]) }}
+    </x-modals.confirm-action>
 @endcan
 
 @endsection
 
 @section('moar_scripts')
     @can('files', $license)
-        @include ('modals.upload-file', ['item_type' => 'licenses', 'item_id' => $license->id])
+        <x-modals.upload-file item-type="licenses" :item-id="$license->id" />
     @endcan
 
     @include ('partials.bootstrap-table')

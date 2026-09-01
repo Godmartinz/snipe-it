@@ -176,16 +176,31 @@
             </x-info-element>
         @endif
 
+        {{-- Bulk-fulfill entry point. Requestable::bulkFulfillmentLink()
+             gates on: (a) type is one of the five bulk-eligible ones,
+             (b) caller can checkout the type, (c) >=2 open requests,
+             (d) stock available. Returns null when any gate fails so
+             the info-panel row is skipped without a Blade-side check. --}}
+        @if (method_exists($infoPanelObj, 'bulkFulfillmentLink') && $bulkFulfillmentLink = $infoPanelObj->bulkFulfillmentLink())
+            <x-info-element icon_type="fulfill_multiple" title="{{ trans('admin/hardware/general.fulfill_multiple') }}">
+                <a href="{{ $bulkFulfillmentLink['url'] }}">
+                    {{ trans_choice('admin/hardware/general.open_requests_count', $bulkFulfillmentLink['count'], ['count' => $bulkFulfillmentLink['count']]) }}
+                </a>
+            </x-info-element>
+        @endif
+
         @php
-            // Prefer the most recent OrderItem's price + currency so the
-            // Unit Cost row reflects the last acquisition, not the
-            // initial-create parent value. Falls back to parent
-            // purchase_cost + location.currency for legacy rows that
-            // never got an OrderItem written.
+            // Assets own purchase_cost as a canonical column on the parent
+            // row and Accessories / Consumables / Components moved that
+            // concept off the parent onto per-transaction OrderItem lines,
+            // so read the parent's own value first and let the
+            // Order-derived fallback fill in for the post-Orders inventory
+            // types where the parent no longer carries a purchase_cost
+            // column. See GH #19572.
             $lastOrderInfoPanel = method_exists($infoPanelObj, 'lastOrderDefaults')
                 ? $infoPanelObj->lastOrderDefaults()
                 : null;
-            $unitCost = $lastOrderInfoPanel['unit_cost'] ?? $infoPanelObj->purchase_cost ?? null;
+            $unitCost = $infoPanelObj->purchase_cost ?? $lastOrderInfoPanel['unit_cost'] ?? null;
             $unitCostCurrency = $lastOrderInfoPanel['currency']
                 ?? ($infoPanelObj->location->currency ?? null)
                 ?: $snipeSettings->default_currency;
@@ -377,7 +392,7 @@
         @if ($infoPanelObj->depreciation && $infoPanelObj->purchase_date)
             <x-info-element icon_type="depreciation" title="{{ trans('general.depreciation') }}">
                 {!!  $infoPanelObj->depreciation->present()->nameUrl !!}
-                ({{ $infoPanelObj->depreciation->months.' '.trans('general.months')}})
+                ({{ trans_choice('general.months_plural', $infoPanelObj->depreciation->months) }})
             </x-info-element>
 
             <x-info-element icon_type="depreciation-calendar" class="{{ $infoPanelObj->depreciationProgressPercent() > 90 ? 'text-danger' : '' }}" title="{{ trans('admin/hardware/form.fully_depreciated') }}">
@@ -548,12 +563,19 @@
 
 
         @php
-            // Prefer the most recent OrderItem's parent Order.purchase_date
-            // so the info-panel reflects the LAST acquisition, not the
-            // initial-create parent value. Falls back to parent
-            // purchase_date for legacy rows without an OrderItem.
-            $displayPurchaseDate = ($lastOrderInfoPanel['purchase_date'] ?? null)
-                ?: $infoPanelObj->purchase_date;
+            // Same canonical-parent-first rule as unit cost above. Assets
+            // keep purchase_date on the parent as the source of truth and
+            // the AssetObserver doesn't sync it back to Order because
+            // multiple assets can share one Order row (dedupe by
+            // order_number + supplier + company), so on that Order row
+            // purchase_date is a write-once snapshot from the first
+            // sibling asset's create. Reading the parent's canonical
+            // column keeps the info-panel in step with the edit form.
+            // Post-Orders inventory types (Accessory / Consumable /
+            // Component) have no parent purchase_date column, so their
+            // Order-derived fallback still wins. See GH #19572.
+            $displayPurchaseDate = $infoPanelObj->purchase_date
+                ?: ($lastOrderInfoPanel['purchase_date'] ?? null);
         @endphp
         @if ($displayPurchaseDate)
             <x-info-element>

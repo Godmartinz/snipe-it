@@ -16,6 +16,7 @@
 
             <x-box header="{{ $snipe_component->name }} ({{ $snipe_component->numRemaining() }} {{ trans('admin/components/general.remaining') }})">
 
+
             @if ($snipe_component->company)
                 <x-form.static :label="trans('general.company')">{!! $snipe_component->company->present()->formattedNameLink !!}</x-form.static>
             @endif
@@ -24,7 +25,22 @@
                 <x-form.static :label="trans('general.category')">{!! $snipe_component->category->present()->formattedNameLink !!}</x-form.static>
             @endif
 
-            @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id', 'company_id' => $snipe_component->company_id, 'required' => 'true', 'value' => old('asset_id')])
+            @include ('partials.forms.edit.asset-select', [
+                'translated_name' => trans('general.select_asset'),
+                'fieldname' => 'asset_id',
+                'company_id' => $snipe_component->company_id,
+                'required' => 'true',
+                'value' => old('asset_id'),
+                // Present when the admin reached this screen from a
+                // /requests row; pre-scopes the picker to the
+                // requester's assigned assets. See
+                // ComponentCheckoutController::create for the wiring.
+                // Empty result is intentional when the requester has
+                // nothing assigned - the request-context callout
+                // above the form tells the admin why the picker is
+                // empty (no valid install target).
+                'assigned_to' => $requestingUserId ?? null,
+            ])
 
             <x-input.quantity
                 name="assigned_qty"
@@ -90,6 +106,8 @@
     </x-page-column>
 
     <x-page-column class="col-md-5">
+        <x-checkout-request-context :request="$checkoutRequest" :requestable="$snipe_component" />
+
         <livewire:checkout-target-panel type="components" defaultTargetType="asset" />
     </x-page-column>
 

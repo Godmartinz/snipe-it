@@ -45,17 +45,38 @@
 
                         <div class="col-md-7">
 
-                                @if ($field->format == "DATE")
+                                @if ($field->format == "DATE" || $field->element == "date_picker")
 
                                     <div class="input-group col-md-4" style="padding-left: 0px;">
                                         {{-- wire:model + the input-event dispatch on change is the
                                              usual Livewire workaround so the picker's value change
                                              flows back to the component. See
-                                             https://laracasts.com/discuss/channels/livewire/livewire-and-bootstrap-datepicker?page=1&replyId=623122 --}}
+                                             https://laracasts.com/discuss/channels/livewire/livewire-and-bootstrap-datepicker?page=1&replyId=623122
+                                             format=DATE and element=date_picker both render a
+                                             datepicker here; the difference (native DATE column
+                                             vs plain TEXT column that allows encryption) is
+                                             handled at the model level, not on the default-value
+                                             widget. --}}
                                         <x-input.datepicker
                                             id="default-value{{ $field->id }}"
                                             name="default_values[{{ $field->id }}]"
                                             wire:model="selectedValues.{{ $field->db_column }}"
+                                            onchange="this.dispatchEvent(new InputEvent('input'))"
+                                        />
+                                    </div>
+
+                                @elseif ($field->format == "DATETIME" || $field->element == "datetime_picker")
+
+                                    {{-- Same rationale as the datepicker branch above, applied
+                                         to the datetimepicker widget. default_now=false so an
+                                         empty "no default" stays empty rather than pre-filling
+                                         with today's datetime. --}}
+                                    <div class="input-group col-md-6" style="padding-left: 0px;">
+                                        <x-input.datetimepicker
+                                            id="default-value{{ $field->id }}"
+                                            name="default_values[{{ $field->id }}]"
+                                            wire:model="selectedValues.{{ $field->db_column }}"
+                                            :default_now="false"
                                             onchange="this.dispatchEvent(new InputEvent('input'))"
                                         />
                                     </div>
@@ -72,7 +93,7 @@
                                     />
 
 
-                                @elseif($field->element == "textarea")
+                                @elseif($field->element == "textarea" || $field->element == "markdown-textarea")
 
 
                                         <textarea

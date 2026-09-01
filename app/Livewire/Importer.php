@@ -14,6 +14,7 @@ use App\Models\Import;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Setting;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -102,6 +103,12 @@ class Importer extends Component
     public $statusText;
 
     public $update;
+
+    // When true, blank CSV cells during an update pass are ignored (the DB
+    // value stays put). Default false matches the legacy behavior: a
+    // present-but-empty cell clears the corresponding DB column. Only the
+    // update flow reads it. New-row inserts ignore it entirely.
+    public $preserve_blanks = false;
 
     public $send_welcome;
 
@@ -617,6 +624,16 @@ class Importer extends Component
             'email' => trans('general.email'),
             'checkout_date' => trans('admin/hardware/table.checkout_date'),
             'checkin_date' => trans('admin/hardware/form.checkin_date'),
+            // Optional. Values "user" or "location" (case-insensitive)
+            // disambiguate what Name should resolve to. Absent or empty
+            // falls back to user for CSVs authored before the location
+            // branch existed.
+            'target_type' => trans('general.importer.checkout_type'),
+            // Optional per-row note that lands on the checkout
+            // actionlog. Legacy systems often carried a per-checkout
+            // narrative ("student damaged screen", "shipped to remote
+            // site"), and the column lets that history migrate through.
+            'notes' => trans('general.notes'),
         ];
 
         /**
@@ -639,6 +656,11 @@ class Importer extends Component
                 'name',
                 'supplier name',
                 'location name',
+                trans('general.name'),
+                trans('general.asset_name'),
+                trans('general.item_name'),
+                trans('general.model_name'),
+                trans('admin/hardware/form.name'),
             ],
             'item_no' => [
                 'item number',
@@ -1319,6 +1341,27 @@ class Importer extends Component
         }
 
         return false;
+    }
+
+    /**
+     * True when the current user's FMCS memberships restrict what they
+     * can import into. Superusers, and empty-pivot floater actors skip this.
+     */
+    #[Computed]
+    public function showFmcsRestrictionNotice(): bool
+    {
+        if (auth()->user()->isSuperUser()) {
+            return false;
+        }
+
+        $settings = Setting::getSettings();
+        if (! $settings->full_multiple_companies_support) {
+            return false;
+        }
+
+        $userCompanyIds = auth()->user()->companies()->pluck('companies.id')->all();
+
+        return ! (empty($userCompanyIds) && $settings->null_company_is_floater);
     }
 
     #[Computed]

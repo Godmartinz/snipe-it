@@ -73,7 +73,12 @@
                     @if ($acceptance->checkoutable->getEula())
                             <div class="col-md-12" style="padding-top: 5px; padding-bottom: 15px;">
                                 <div style="background-color: rgba(211,211,211,0.25); padding: 10px; border: var(--box-header-bottom-border-color) 1px solid;">
-                                    {!!  str_replace('<p>', '<p dir="auto">', Helper::parseEscapedMarkedown($acceptance->checkoutable->getEula())) !!}
+                                    {{-- getEula() already returns rendered + sanitized HTML
+                                         (SnipeModel::sanitizeEulaForRender runs parseEscapedMarkedown
+                                         and strips img tags). A second parseEscapedMarkedown pass
+                                         here would strip the block-level tags and re-parse the
+                                         plain text, losing lists / headings / bold. --}}
+                                    {!! str_replace('<p>', '<p dir="auto">', $acceptance->checkoutable->getEula()) !!}
                                 </div>
                             </div>
                         @endif

@@ -1,19 +1,37 @@
 <?php
 
+use App\Http\Controllers\BulkLocationsController;
 use App\Http\Controllers\LocationsController;
 use Illuminate\Support\Facades\Route;
+use Tabuna\Breadcrumbs\Trail;
 
 Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
 
     Route::post(
         'bulkdelete',
-        [LocationsController::class, 'postBulkDelete']
-    )->name('locations.bulkdelete.show');
+        [BulkLocationsController::class, 'edit']
+    )->name('locations.bulkdelete.show')
+        ->breadcrumbs(function (Trail $trail) {
+            $label = match (request()->input('bulk_actions')) {
+                'edit' => trans('general.bulk_edit'),
+                'delete' => trans('general.delete'),
+                default => trans('general.bulk_actions'),
+            };
+
+            return $trail->parent('locations.index')->push($label, route('locations.index'));
+        });
 
     Route::post(
         'bulkedit',
-        [LocationsController::class, 'postBulkDeleteStore']
+        [BulkLocationsController::class, 'destroy']
     )->name('locations.bulkdelete.store');
+
+    Route::post(
+        'bulkeditsave',
+        [BulkLocationsController::class, 'update']
+    )->name('locations.bulkedit.store')
+        ->breadcrumbs(fn(Trail $trail) => $trail->parent('locations.index')
+            ->push(trans('general.bulk_edit'), route('locations.index')));
 
     Route::post(
         '{location}/restore',

@@ -20,7 +20,7 @@ class ConsumableImporter extends ItemImporter
         // pattern: absent CSV columns stay out of $this->item so update mode
         // preserves the DB value, and present-but-empty cells land as null
         // so update mode clears the DB value. The base sanitize's reject-empty
-        // pass is suppressed via the sanitizeItemForStoring override below.
+        // pass is disabled by $rejectEmptyOnUpdate on ItemImporter.
         $this->item = [];
 
         // Shared lookup fields. Present-and-empty clears the FK; absent
@@ -90,17 +90,6 @@ class ConsumableImporter extends ItemImporter
         $this->item['created_by'] = $this->created_by;
 
         $this->createConsumableIfNotExists($row);
-    }
-
-    /**
-     * Override the base sanitize to skip the reject-empty pass. See handle()
-     * above for the matching item-population.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function sanitizeItemForStoring($model, $updating = false)
-    {
-        return collect($this->item)->only($model->getFillable())->toArray();
     }
 
     /**

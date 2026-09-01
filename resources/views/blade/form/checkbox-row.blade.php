@@ -1,3 +1,31 @@
+{{-- help_html: opt-in raw-HTML help. Rendered UNESCAPED, only pass
+     developer-authored strings (translation strings with anchors, <code>,
+     <br>, etc.). Never pass anything that could contain user input without
+     escaping it first. See x-form.row for the same prop with the same
+     semantics.
+
+     section_label: optional left-column section header for single-checkbox
+     rows that need to sit under a labeled section (e.g. "SAML Integration"
+     or "AD"), where the inner-label ("Enable SAML") is separate from the
+     section framing. Rendered as a plain <div>, not a <label>, so screen
+     readers get one accessible name from the inner form-control label,
+     not two competing ones. Ignored in multi mode, which uses $label for
+     the left column.
+
+     checked: explicit checked-state override. When passed (non-null), it
+     wins over the old-input / $item fallback below. Needed for contexts
+     (like Livewire) where the source of truth is neither the session's old
+     input nor a bound Eloquent model but a live component property.
+
+     input_div_class default: skip the col-md-offset-3 when there's a
+     left-hand column of any kind (multi with $label, or single with
+     $section_label). Keeping the grid classes centralized here means a
+     future Bootstrap / AdminLTE upgrade only has to touch this file, not
+     every callsite. Note: Blade evaluates @props defaults twice (once via
+     extractPropNames before caller attrs are bound, once when applying
+     defaults after). The `?? null` guards against "undefined variable" on
+     the first pass, isset() is inherently safe against undefined vars,
+     is_array() is not. --}}
 @props([
     'name' => null,
     'item' => null,
@@ -8,28 +36,11 @@
     'required' => null,
     'disabled' => false,
     'help_text' => null,
+    'help_html' => null,
     'help_icon' => null,
     'info_tooltip_text' => null,
-    // Optional left-column section header for single-checkbox rows that need
-    // to sit under a labeled section (e.g. "SAML Integration" or "AD"), where
-    // the inner-label ("Enable SAML") is separate from the section framing.
-    // Rendered as a plain <div>, not a <label>, so screen readers get one
-    // accessible name from the inner form-control label — not two competing
-    // ones. Ignored in multi mode, which uses $label for the left column.
     'section_label' => null,
-    // Explicit checked-state override. When passed (non-null), it wins over
-    // the old-input / $item fallback below. Needed for contexts (like
-    // Livewire) where the source of truth is neither the session's old input
-    // nor a bound Eloquent model but a live component property.
     'checked' => null,
-    // Default input column: skip the col-md-offset-3 when there's a left-hand
-    // column of any kind (multi with $label, or single with $section_label).
-    // Keeping the grid classes centralized here means a future Bootstrap /
-    // AdminLTE upgrade only has to touch this file, not every callsite.
-    // Note: Blade evaluates @props defaults twice (once via extractPropNames
-    // before caller attrs are bound, once when applying defaults after). The
-    // `?? null` guards against "undefined variable" on the first pass; isset()
-    // is inherently safe against undefined vars, is_array() is not.
     'input_div_class' => ((is_array($options ?? null) && isset($label)) || isset($section_label)) ? 'col-md-8' : 'col-md-8 col-md-offset-3',
 ])
 
@@ -41,7 +52,7 @@
     // Old-input aware check-state. On a fresh render, session()->hasOldInput()
     // is false, so we fall back to the model (or supplied :selected). On a
     // validation-failure redisplay, hasOldInput() is true and we trust the
-    // (possibly missing) old value — an unchecked box comes back correctly
+    // (possibly missing) old value: an unchecked box comes back correctly
     // unchecked instead of falling through to the stale $item->{$name}.
     $is_redisplay = session()->hasOldInput();
 
@@ -162,6 +173,22 @@
     @if ($help_text)
         <div class="col-md-8 col-md-offset-3">
             <x-form.help :name="$name" :icon="$help_icon">{!! $help_text !!}</x-form.help>
+        </div>
+    @elseif ($help_html)
+        {{-- Raw HTML help. Caller has opted in via help_html rather than
+             help_text. Callers passing a trans() string with HTML MUST use
+             the static-attribute form  help_html="{!! trans('...') !!}",
+             the dynamic-binding form  :help_html="trans('...')"  runs the
+             value through BladeCompiler::sanitizeComponentAttribute() and
+             turns <a> tags into &lt;a&gt; entities. See x-form.row for the
+             same wiring. --}}
+        <div class="col-md-8 col-md-offset-3">
+            <p class="help-block" id="{{ $name }}-help">
+                @if ($help_icon)
+                    <x-icon :type="$help_icon" />
+                @endif
+                {!! $help_html !!}
+            </p>
         </div>
     @endif
 

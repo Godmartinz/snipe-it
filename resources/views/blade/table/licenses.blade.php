@@ -11,6 +11,8 @@
     'table_header' => trans('general.licenses'),
 ])
 
+@aware(['name'])
+
 <!-- start licenses tab pane -->
 @can('view', \App\Models\License::class)
 
@@ -28,7 +30,7 @@
         :$show_advanced_search
         buttons="licenseButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($export_name ?? $name) }}-licenses-{{ date('Y-m-d') }}"
+        export_filename="export-{{ $export_name ? str_slug($export_name).'-' : '' }}licenses-{{ date('Y-m-d') }}"
     />
 
 

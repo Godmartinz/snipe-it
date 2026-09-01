@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\CheckoutAcceptance;
+use App\Models\CheckoutRequest;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -222,8 +223,26 @@ class Purge extends Command
         // trashed Asset would also delete accessory-owned maintenances
         // that happen to share the same numeric id.
         $childTables = [
-            Asset::class => ['maintenances' => ['item_id', 'item_type', Asset::class]],
-            License::class => ['license_seats' => 'license_id'],
+            Asset::class => [
+                'maintenances' => ['item_id', 'item_type', Asset::class],
+                'checkout_requests' => ['requestable_id', 'requestable_type', Asset::class],
+            ],
+            License::class => [
+                'license_seats' => 'license_id',
+                'checkout_requests' => ['requestable_id', 'requestable_type', License::class],
+            ],
+            // Every model carrying the Requestable trait needs its
+            // pending / historical CheckoutRequest rows nuked when
+            // the parent is purged, or those rows linger as orphans
+            // in the admin queue and the requester's own /account/
+            // requested page. Cascade uses the polymorphic
+            // requestable_id + requestable_type pair; the trait's
+            // forceDeleted hook covers the direct forceDelete() path
+            // that bypasses this command.
+            Accessory::class => ['checkout_requests' => ['requestable_id', 'requestable_type', Accessory::class]],
+            Consumable::class => ['checkout_requests' => ['requestable_id', 'requestable_type', Consumable::class]],
+            Component::class => ['checkout_requests' => ['requestable_id', 'requestable_type', Component::class]],
+            AssetModel::class => ['checkout_requests' => ['requestable_id', 'requestable_type', AssetModel::class]],
         ];
         $childCounts = [];
         if (array_key_exists($modelClass, $childTables)) {

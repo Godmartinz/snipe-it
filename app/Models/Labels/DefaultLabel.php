@@ -254,8 +254,6 @@ class DefaultLabel extends RectangleSheet
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
 

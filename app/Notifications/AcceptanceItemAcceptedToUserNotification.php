@@ -2,18 +2,40 @@
 
 namespace App\Notifications;
 
-use AllowDynamicProperties;
-use App\Helpers\Helper;
 use App\Models\Setting;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class AcceptanceItemAcceptedToUserNotification extends Notification
+class AcceptanceItemAcceptedToUserNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public $item_tag;
+
+    public $item_name;
+
+    public $item_model;
+
+    public $item_serial;
+
+    public $item_status;
+
+    public $accepted_date;
+
+    public $assigned_to;
+
+    public $note;
+
+    public $company_name;
+
+    public $file;
+
+    public $qty;
+
+    public $custom_fields;
 
     /**
      * Create a new notification instance.
@@ -27,11 +49,13 @@ class AcceptanceItemAcceptedToUserNotification extends Notification
         $this->item_model = $params['item_model'];
         $this->item_serial = $params['item_serial'];
         $this->item_status = $params['item_status'];
-        $this->accepted_date = Helper::getFormattedDateObject($params['accepted_date'], 'datetime', false);
+        // The controller already runs the accepted_date through
+        // Helper::getFormattedDateObject, so it arrives pre-formatted
+        // in the caller's locale. Don't invoke it here.
+        $this->accepted_date = $params['accepted_date'];
         $this->assigned_to = $params['assigned_to'];
         $this->note = $params['note'] ?? null;
         $this->company_name = $params['company_name'];
-        $this->settings = Setting::getSettings();
         $this->file = $params['file'] ?? null;
         $this->qty = $params['qty'] ?? null;
         $this->custom_fields = $params['custom_fields'] ?? [];
@@ -74,10 +98,10 @@ class AcceptanceItemAcceptedToUserNotification extends Notification
                 'company_name' => $this->company_name,
                 'qty' => $this->qty,
                 'custom_fields' => $this->custom_fields,
-                'intro_text' => trans_choice('mail.acceptance_asset_accepted_to_user', $this->qty, ['qty' => $this->qty, 'site_name' => $this->settings->site_name]),
+                'intro_text' => trans_choice('mail.acceptance_asset_accepted_to_user', $this->qty, ['qty' => $this->qty, 'site_name' => Setting::getSettings()->site_name]),
             ])
             ->attach($pdf_path)
-            ->subject('✅ '.trans_choice('mail.acceptance_asset_accepted_to_user', $this->qty, ['qty' => $this->qty, 'site_name' => $this->settings->site_name]))
+            ->subject('✅ ' . trans_choice('mail.acceptance_asset_accepted_to_user', $this->qty, ['qty' => $this->qty, 'site_name' => Setting::getSettings()->site_name]))
             ->withSymfonyMessage(function (Email $message) {
                 $message->getHeaders()->addTextHeader(
                     'X-System-Sender', 'Snipe-IT'

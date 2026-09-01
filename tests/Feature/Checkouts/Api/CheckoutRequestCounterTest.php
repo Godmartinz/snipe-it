@@ -55,7 +55,7 @@ class CheckoutRequestCounterTest extends TestCase
         $this->assertEquals(1, $asset->fresh()->requests_counter);
         $this->assertEquals(
             1,
-            $asset->requests()->whereNull('canceled_at')->where('user_id', $user->id)->count(),
+            $asset->openRequests()->where('user_id', $user->id)->count(),
             'Second request should not have created a second active CheckoutRequest row.'
         );
     }

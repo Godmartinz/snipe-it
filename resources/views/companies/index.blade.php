@@ -9,7 +9,9 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-            <x-box>
+            <x-box name="company" sr_only_title>
+
+                <x-slot:table_header>{{ trans('general.companies') }}</x-slot:table_header>
 
                 <x-slot:bulkactions>
                     <x-table.bulk-companies />

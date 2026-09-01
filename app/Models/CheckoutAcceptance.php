@@ -272,19 +272,29 @@ class CheckoutAcceptance extends Model
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
 
-        // Break the EULA into markdown blocks separated by blank lines (rather than splitting on every
-        // newline), and check each block for RTL or CJK characters. Splitting on blank lines keeps
-        // multi-line markdown constructs - e.g. nested lists - together in a single block, so Parsedown
-        // can render them correctly. Blank lines are Parsedown's own block boundaries, so rendering
-        // block-by-block matches the whole-document rendering used for the acceptance email; splitting
-        // on every newline previously flattened nested lists into a single flat list (#18176).
-        $eula_blocks = preg_split('/\R(?:[ \t]*\R)+/', $data['eula']);
-
-        foreach ($eula_blocks as $eula_block) {
-            Helper::hasRtl($eula_block) ? $pdf->setRTL(true) : $pdf->setRTL(false);
-            Helper::isCjk($eula_block) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
-            $pdf->writeHTML(Helper::parseEscapedMarkedown($eula_block), true, 0, true, 0, '');
-        }
+        // $data['eula'] arrives here as pre-rendered, sanitized HTML
+        // (SnipeModel::getEula routes through sanitizeEulaForRender which
+        // runs parseEscapedMarkedown + strips img tags before returning).
+        // The old block-split + parseEscapedMarkedown-per-block path only
+        // made sense when the input was raw markdown with blank-line block
+        // boundaries. Running parseEscapedMarkedown on already-rendered
+        // HTML double-parses: Parsedown sees the block-level tags as text,
+        // strips them, and re-parses the remaining plaintext, which is why
+        // #19544 reports the PDF EULA rendering as flat text with lists /
+        // headings / bold lost. Regression from a434253a94 which added the
+        // sanitize-at-getEula step in v8.7.0 but did not update this PDF
+        // path.
+        //
+        // The whole EULA gets one RTL/CJK detection pass (looking at the
+        // rendered HTML is fine for the heuristic - the RTL/CJK codepoints
+        // aren't affected by the HTML tags around them). Mixed-script EULAs
+        // pick the whole-document dominant script rather than the per-block
+        // one, which is a small edge-case regression on installs that had
+        // an all-Arabic EULA with a Latin heading, but WAY less broken than
+        // the current double-parse behavior.
+        Helper::hasRtl($data['eula']) ? $pdf->setRTL(true) : $pdf->setRTL(false);
+        Helper::isCjk($data['eula']) ? $pdf->SetFont('cid0cs', '', 9) : $pdf->SetFont('dejavusans', '', 8, '', true);
+        $pdf->writeHTML($data['eula'], true, 0, true, 0, '');
         $pdf->Ln();
         $pdf->Ln();
         $pdf->setRTL(false);

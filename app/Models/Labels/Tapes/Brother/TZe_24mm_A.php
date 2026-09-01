@@ -124,7 +124,6 @@ class TZe_24mm_A extends TZe_24mm
             'text_render_mode' => $this->getTextRenderMode(),
         ];
     }
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

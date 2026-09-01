@@ -27,7 +27,7 @@ class ManufacturerImporter extends ItemImporter
         // columns stay out of $this->item so update mode preserves the DB
         // value, and present-but-empty cells land as null so update mode
         // clears the DB value. The base sanitize's reject-empty pass is
-        // suppressed via the sanitizeItemForStoring override below.
+        // disabled by $rejectEmptyOnUpdate on ItemImporter.
         $this->item = [];
 
         foreach ([
@@ -44,17 +44,6 @@ class ManufacturerImporter extends ItemImporter
         }
 
         $this->createManufacturerIfNotExists($row);
-    }
-
-    /**
-     * Override the base sanitize to skip the reject-empty pass. See handle()
-     * above for the matching item-population.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function sanitizeItemForStoring($model, $updating = false)
-    {
-        return collect($this->item)->only($model->getFillable())->toArray();
     }
 
     /**

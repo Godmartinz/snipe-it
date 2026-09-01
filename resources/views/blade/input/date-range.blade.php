@@ -1,11 +1,11 @@
+{{-- max_date: 'today' caps both pickers at today, or pass a moment-parseable
+     string. Null (default) leaves both pickers uncapped. --}}
 @props([
     'name_start',
     'name_end',
     'value_start' => '',
     'value_end' => '',
     'placeholder' => trans('general.select_date'),
-    // 'today' caps both pickers at today, or pass a moment-parseable string.
-    // Null (default) leaves both pickers uncapped.
     'max_date' => null,
     'format' => 'YYYY-MM-DD',
     'id' => null,

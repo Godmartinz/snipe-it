@@ -10,7 +10,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="maintenance">
+        <x-box name="maintenance" sr_only_title>
 
             <x-slot:bulkactions>
                 <x-table.bulk-maintenances

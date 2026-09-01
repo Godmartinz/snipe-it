@@ -510,7 +510,9 @@ class RestoreFromBackup extends Command
             ' --batch '.
             ' --binary-mode '.
             ' -u '.escapeshellarg($connectionConfig['username']).' '.
-            ' -P '.escapeshellarg($connectionConfig['port']).' '.
+            (empty($connectionConfig['unix_socket'])
+                ? ' -P '.escapeshellarg($connectionConfig['port'])
+                : ' -S '.escapeshellarg($connectionConfig['unix_socket'])). ' '.
             escapeshellarg($connectionConfig['database']), // yanked -p since we pass via ENV
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,

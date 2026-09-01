@@ -42,6 +42,7 @@
                                     <th scope="col" data-field="custom_fields.{{ $field->db_column }}">{{ $field->name }}</th>
                                 @endif
                             @endforeach
+                            <th scope="col" data-field="cancel_url" data-formatter="userRequestCancelFormatter" class="hidden-print">{{ trans('table.actions') }}</th>
                         </tr>
                         </thead>
                     </table>

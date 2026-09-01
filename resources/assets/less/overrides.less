@@ -375,6 +375,39 @@ body {
   overflow: hidden;
 }
 
+// Bs-table ships several 1px #dee2e6 hairlines on the fixed-height
+// container (border-bottom on the plain no-footer variant, top+bottom
+// on has-card-view, left+right on .fixed-table-border). #dee2e6 is a
+// pale gray that blends into white on light mode but reads as a stark
+// bright edge on dark mode against --box-bg. Rather than kill the
+// borders (they're the visual seam between the table body and the
+// box wrapper) we re-color them to the same theme-aware token the
+// box's own edges use so the seam reads consistently on both themes.
+// !important is needed because bs-table's shipped stylesheet is
+// pushed via @stack('css') and can load AFTER overrides.less depending
+// on Mix bundling order; same selector + same specificity means load
+// order determines the winner without it.
+.bootstrap-table .fixed-table-container.fixed-height,
+.bootstrap-table .fixed-table-container.fixed-height:not(.has-footer),
+.bootstrap-table .fixed-table-container.fixed-height.has-card-view {
+  border-color: var(--box-bg) !important;
+}
+
+.bootstrap-table .fixed-table-container.fixed-height .fixed-table-border {
+  border-color: var(--box-bg) !important;
+}
+
+// Bs-table's loading overlay is `position: absolute; bottom: 0;
+// width: 100%; background: #fff`. Hidden via opacity:0 / visibility:
+// hidden by default, but the hardcoded white bg reads through on dark
+// mode as a stark bright strip along the container's bottom edge in
+// some browsers' compositing paths (especially when a transition is
+// in-flight or the element sits behind a translucent layer). Rebind
+// the bg to the box color so any bleed-through matches the surround.
+.bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading {
+  background: var(--box-bg) !important;
+}
+
 @media print {
 
   @page {
@@ -3481,3 +3514,334 @@ dl.table-display {
     margin-left: 0;
   }
 }
+
+// ============================================================================
+// FullCalendar v6 dark-mode overrides.
+//
+// FullCalendar's stock CSS reads from a fixed palette of light neutrals for
+// header cells, gridlines, and hour-axis text. In light mode that reads fine
+// against the AdminLTE box background; in dark mode the light-neutral rules
+// produce a wash of near-white cells and pale grid strokes that lack
+// contrast against the dark box. Rebind them to the same tokens the rest of
+// the app already uses.
+// ============================================================================
+
+[data-theme="dark"] {
+  .fc {
+    --fc-border-color: var(--box-header-top-border-color);
+    --fc-page-bg-color: var(--box-bg);
+    --fc-neutral-bg-color: ~"hsl(from var(--box-bg) h s calc(l + 5))";
+    --fc-neutral-text-color: var(--color-fg);
+    --fc-list-event-hover-bg-color: ~"hsl(from var(--box-bg) h s calc(l + 8))";
+    --fc-today-bg-color: ~"hsl(from var(--main-theme-color) h s calc(l - 25) / 0.25)";
+
+    .fc-col-header-cell,
+    .fc-list-day-cushion {
+      background-color: ~"hsl(from var(--box-bg) h s calc(l + 5))";
+      color: var(--color-fg);
+    }
+
+    .fc-col-header-cell-cushion,
+    .fc-daygrid-day-number,
+    .fc-timegrid-axis-cushion,
+    .fc-timegrid-slot-label-cushion,
+    .fc-list-day-text,
+    .fc-list-day-side-text,
+    .fc-list-event-title,
+    .fc-list-event-time {
+      color: var(--color-fg);
+    }
+
+    .fc-scrollgrid,
+    .fc-scrollgrid td,
+    .fc-scrollgrid th,
+    .fc-timegrid-slot,
+    .fc-daygrid-day {
+      border-color: var(--box-header-top-border-color);
+    }
+  }
+}
+
+// ============================================================================
+// Dashboard equal-height rows.
+//
+// AdminLTE 2 / Bootstrap 3 don't stretch sibling .box heights within a row,
+// so a col-md-8 + col-md-4 pair looks lopsided any time the wider box has
+// more content than the narrower one. This wrapper turns the row into a
+// flex container and forces every child .box to fill its column's height.
+// Applied only on rows opted-in via `dashboard-row-eq` so the rule doesn't
+// leak into other admin pages that happen to use .row + .box.
+// ============================================================================
+
+// Row-wrapper margin lives outside the media query so successive rows stay
+// gutter-separated at every breakpoint, mobile included.
+.dashboard-row-eq {
+  margin-bottom: 20px;
+}
+
+// Equal-height flex layout ONLY on md and up. Below md, Bootstrap 3 collapses
+// .col-md-* to full-width stacked blocks; forcing flex there causes every
+// widget in the row to stretch to the tallest sibling in the flow, which
+// leaves the small widgets with huge whitespace gaps on a phone. Falling
+// back to BS3's stock block layout below md keeps mobile clean.
+@media (min-width: 992px) {
+  .dashboard-row-eq {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .dashboard-row-eq > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+    float: none; // BS3 gives cols float:left, which suppresses flex behavior
+  }
+
+  .dashboard-row-eq > [class*="col-"] > .box {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+  }
+
+  // Ensure the box-body absorbs slack inside a stretched box, so header stays
+  // pinned to the top and any footer/link stays at the bottom instead of the
+  // body content leaving whitespace beneath itself.
+  .dashboard-row-eq > [class*="col-"] > .box > .box-body {
+    flex: 1 1 auto;
+  }
+
+  // AdminLTE flips a .collapsed-box class on the .box when the header
+  // +/- toggle collapses the body. Without this override, the box would
+  // stay stretched to the col's full height and the collapse would have
+  // no visible effect. Let the collapsed box shrink to its own content
+  // (just the header) so the toggle behaves like it does on non-flex
+  // dashboards. Neighboring boxes stay stretched to their previous
+  // heights.
+  .dashboard-row-eq > [class*="col-"] > .box.collapsed-box {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+}
+
+// ============================================================================
+// FullCalendar built-in toolbar buttons (today / prev / next / month /
+// week / day / list) use the shipped `.fc-button-primary` gray palette
+// out of the box, which looks unrelated to the rest of the app. Rebind
+// them to Snipe-IT's --main-theme-color palette so the whole calendar
+// header reads as part of the same UI. `.fc-button-active` for the
+// currently-selected view gets a darker fill so it stays distinct.
+// ============================================================================
+
+.fc {
+  .fc-button-primary {
+    background-color: var(--main-theme-color) !important;
+    background-image: none !important;
+    border-color: ~"hsl(from var(--main-theme-color) h s calc(l - 15))" !important;
+    color: var(--nav-primary-text-color) !important;
+  }
+
+  .fc-button-primary:hover,
+  .fc-button-primary:focus {
+    background-color: ~"hsl(from var(--main-theme-color) h s calc(l - 8))" !important;
+    border-color: ~"hsl(from var(--main-theme-color) h s calc(l - 20))" !important;
+    color: var(--nav-primary-text-color) !important;
+  }
+
+  .fc-button-primary:not(:disabled).fc-button-active,
+  .fc-button-primary:not(:disabled):active {
+    background-color: ~"hsl(from var(--main-theme-color) h s calc(l - 18))" !important;
+    border-color: ~"hsl(from var(--main-theme-color) h s calc(l - 25))" !important;
+    color: var(--nav-primary-text-color) !important;
+    box-shadow: inset 0 0 0 2px ~"hsl(from var(--main-theme-color) h s calc(l - 30))" !important;
+  }
+
+  .fc-button-primary:disabled {
+    background-color: ~"hsl(from var(--main-theme-color) h s calc(l + 10) / 0.5)" !important;
+    border-color: ~"hsl(from var(--main-theme-color) h s calc(l - 5) / 0.5)" !important;
+    color: var(--nav-primary-text-color) !important;
+    opacity: 0.6;
+  }
+}
+
+// ============================================================================
+// Dashboard row-height cap (large screens only).
+//
+// Rows opted in via `dashboard-row-compact` get a max-height on each
+// box's body so a long list (Needs Attention) or a long low-stock
+// scroll doesn't drag the whole row taller than the rest of the
+// dashboard reads comfortably. Gated on min-width: 1200px because on
+// smaller screens the boxes stack (single column) and clipping
+// content there would hide useful rows behind a scrollbar the user
+// didn't ask for.
+// ============================================================================
+
+@media (min-width: 1200px) {
+  .dashboard-row-compact > [class*="col-"] > .box > .box-body {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  // .dashboard-chart-body opts a box-body out of the compact scroll
+  // cap. Charts (Chart.js pie in particular) render a single canvas
+  // per box; capping + scrolling makes the pie clip inside a
+  // scrollable viewport instead of filling the box like a chart
+  // should. Keep the flex-stretch to match sibling row heights, but
+  // let the chart's own responsive resize fill the vertical space
+  // instead of forcing a scrollbar.
+  .dashboard-row-compact > [class*="col-"] > .box > .box-body.dashboard-chart-body {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+// ============================================================================
+// Needs-attention widget: two-column row layout so badge counts of
+// wildly different widths ("1" vs "1,247") share a right-aligned column
+// and the labels below each other line up on a shared left spine. The
+// stock Bootstrap 3 .badge inside .list-group-item floats right, which
+// looks fine per-row in isolation but produces jagged label indents
+// once the counts span more than one digit.
+// ============================================================================
+
+.dashboard-attention-list > .list-group-item > a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-attention-list .dashboard-attention-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dashboard-attention-list .dashboard-attention-count {
+  flex: 0 0 auto;
+  min-width: 3.5em;
+  text-align: center;
+  // Overrides Bootstrap 3's .list-group-item .badge float-right so
+  // the flex layout above actually controls positioning; otherwise
+  // the badge escapes the flex row and stacks weirdly.
+  float: none;
+  margin-left: 0;
+}
+
+// ============================================================================
+// bs-table's stock "no matching records found" cell reads as a dim
+// afterthought at default font size / weight. On dashboard widgets
+// where empty is often a happy state ("nothing below threshold"),
+// the unstyled row makes the panel look broken. Give empty-state
+// text a centered, padded, muted-but-legible presence via a wrapper
+// span that formatNoMatches emits when a data-empty-message is set.
+// ============================================================================
+
+.snipe-table-empty-state {
+  display: block;
+  padding: 24px 12px;
+  color: var(--text-legend-help, #888);
+  font-style: italic;
+  text-align: center;
+}
+
+// ============================================================================
+// FullCalendar list-view day-group headers render as <a> elements
+// regardless of the navLinks setting (v6 emits anchors and only
+// wires the click handler when navLinks is on). Browser default
+// styling paints them with underline + link color, so they look
+// clickable when they aren't. Neutralize the anchor look so the day
+// headers read as headings, not links.
+// ============================================================================
+
+.fc .fc-list-day-cushion a,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  color: inherit;
+  text-decoration: none;
+  cursor: default;
+  pointer-events: none;
+}
+
+// ============================================================================
+// FullCalendar filter buttons render as a native DOM row above the
+// calendar element (see buildFilterButtons in snipeit-calendar.js).
+// Kept out of FullCalendar's headerToolbar so the calendar's own
+// prev/next/today/title/views row isn't pushed off-center by an
+// inline row of filter chips.
+// ============================================================================
+
+.snipeit-calendar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--box-header-top-border-color, #ddd);
+}
+
+.snipeit-calendar-filter-button {
+  // Reserve horizontal space for the checkmark glyph up-front via a
+  // transparent placeholder so the button doesn't grow when its
+  // .active class is added. Without this the ::before content on
+  // `.active` shifts every other button in the row when a filter is
+  // toggled and makes the whole row jump.
+  padding: 4px 10px;
+  font-size: 13px;
+
+  &::before {
+    content: "\2713\00a0";
+    font-weight: bold;
+    visibility: hidden;
+  }
+}
+
+// ============================================================================
+// Calendar filter-button active-state styling (both themes).
+//
+// buildFilterButtons flips `.active` on selected filters. Bootstrap 3's
+// stock `.btn-default.active` only nudges the background a few shades
+// darker, which reads as "hovered" not "selected" and Snipe reported she
+// couldn't tell which filters were on. Force the active state to the
+// app's primary theme color with an inset border ring and a leading
+// checkmark glyph so a viewer can spot which filters are active without
+// squinting. Kept a11y-friendly with a real ::before content marker
+// rather than color alone (aria-pressed is toggled in JS on top of it).
+// ============================================================================
+
+.snipeit-calendar-filter-button.active,
+.snipeit-calendar-filter-button.active:hover,
+.snipeit-calendar-filter-button.active:focus,
+.snipeit-calendar-filter-button.active:active {
+  background-color: var(--main-theme-color) !important;
+  background-image: none !important;
+  border-color: ~"hsl(from var(--main-theme-color) h s calc(l - 15))" !important;
+  color: var(--nav-primary-text-color) !important;
+  box-shadow: inset 0 0 0 2px ~"hsl(from var(--main-theme-color) h s calc(l - 25))" !important;
+}
+
+.snipeit-calendar-filter-button.active::before {
+  visibility: visible;
+}
+
+.snipeit-calendar-filter-button.active:focus {
+  box-shadow: inset 0 0 0 2px ~"hsl(from var(--main-theme-color) h s calc(l - 25))",
+              0 0 0 3px ~"hsl(from var(--main-theme-color) h s calc(l + 20) / 0.5)" !important;
+}
+
+// Social login buttons on layouts/basic (login page).
+.btn-social.btn-google,
+.btn-social.btn-google:link,
+.btn-social.btn-google:visited {
+  background-color: var(--main-theme-color) !important;
+  color: var(--nav-primary-text-color) !important;
+  border-color: var(--main-theme-color) !important;
+}
+
+.btn-social.btn-google:hover,
+.btn-social.btn-google:focus,
+.btn-social.btn-google:active {
+  background-color: var(--main-theme-hover) !important;
+  color: var(--nav-primary-text-color) !important;
+  border-color: var(--main-theme-hover) !important;
+}
+

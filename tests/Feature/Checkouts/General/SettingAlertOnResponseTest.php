@@ -198,7 +198,7 @@ class SettingAlertOnResponseTest extends TestCase
         $this->actingAs($this->actor)
             ->post("/licenses/{$license->id}/checkout/", [
                 'checkout_to_type' => 'user',
-                'assigned_to' => $this->assignedUser->id,
+                'assigned_user' => $this->assignedUser->id,
             ]);
     }
 
@@ -207,7 +207,7 @@ class SettingAlertOnResponseTest extends TestCase
         $this->actingAs($this->actor)
             ->post(route('consumables.checkout.store', $consumable), [
                 'checkout_to_type' => 'user',
-                'assigned_to' => $this->assignedUser->id,
+                'assigned_user' => $this->assignedUser->id,
                 'checkout_qty' => 1,
             ]);
     }

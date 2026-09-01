@@ -25,6 +25,7 @@ class ModalController extends Controller
         // These values should correspond to a file in resources/views/modals/
         $allowed_types = [
             'category',
+            'company',
             'kit-model',
             'kit-license',
             'kit-consumable',
@@ -41,7 +42,7 @@ class ModalController extends Controller
         ];
 
         if (in_array($type, $allowed_types)) {
-            $view = view("modals.{$type}");
+            $view = view("blade.modals.{$type}");
 
             if ($type == 'statuslabel') {
                 $view->with('statuslabel_types', Helper::statusTypeList());

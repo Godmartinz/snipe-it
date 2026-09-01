@@ -23,8 +23,6 @@ trait CheckInOutTrait
             default:
                 return User::findOrFail(request('assigned_user'));
         }
-
-        return null;
     }
 
     /**

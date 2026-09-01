@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Manufacturers\DestroyManufacturerAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasChildren;
 use App\Http\Requests\ImageUploadRequest;
 use App\Models\Actionlog;
@@ -179,8 +180,8 @@ class ManufacturersController extends Controller
             DestroyManufacturerAction::run($manufacturer);
         } catch (ItemStillHasChildren $e) {
             return redirect()->route('manufacturers.index')->with('error', trans('general.bulk_delete_associations.general_assoc_warning', ['item' => trans('general.manufacturer')]));
-        } catch (\Exception $e) {
-            report($e);
+        } catch (\Throwable $e) {
+            Handler::reportOrRethrow($e);
 
             return redirect()->route('manufacturers.index')->with('error', trans('general.something_went_wrong'));
         }

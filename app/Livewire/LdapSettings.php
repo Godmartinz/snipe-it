@@ -1447,22 +1447,78 @@ class LdapSettings extends Component
             return;
         }
 
+        // Every string-typed prop that participates in the LDAP
+        // handshake or a downstream test surface, grouped by wizard
+        // step. Shared between the trim-on-assignment and the
+        // clearTestResult() blocks below because both need the same
+        // "user typed into a field the test depends on" signal.
+        $connectionStringProps = [
+            // Step 1: Connection
+            'ldap_server',
+            'ldap_client_tls_key',
+            'ldap_client_tls_cert',
+            // Step 2: Authenticate + Scope
+            'ldap_uname',
+            'ldap_pword',
+            'ldap_basedn',
+            'ldap_filter',
+            'ldap_auth_filter_query',
+            // Step 3: Attribute Mapping
+            'ldap_username_field',
+            'ldap_fname_field',
+            'ldap_lname_field',
+            'ldap_display_name',
+            'ldap_email',
+            'ldap_emp_num',
+            'ldap_phone_field',
+            'ldap_mobile',
+            'ldap_jobtitle',
+            'ldap_manager',
+            'ldap_dept',
+            'ldap_address',
+            'ldap_city',
+            'ldap_state',
+            'ldap_zip',
+            'ldap_country',
+            'ldap_location',
+            'ldap_active_flag',
+            // Step 4: Sync + Defaults
+            'custom_forgot_pass_url',
+            // Not persisted; step-4 Look Up preview input
+            'test_sample_username',
+        ];
+
         // Trim string values on assignment so pasted-with-whitespace
         // inputs get normalized both in the visible field and in the
         // saved config. Without this a leading space on ldap_server
         // silently fails starts_with:ldap://, and a trailing newline in
         // a bind username produces a mysterious LDAP-side rejection at
-        // auth time. Textareas (TLS key/cert) tolerate the trim because
-        // PEM parsers accept both terminating-newline and no-terminating-
-        // newline forms.
-        if (in_array($property, ['ldap_server', 'ad_domain', 'ldap_client_tls_key', 'ldap_client_tls_cert', 'ldap_uname', 'ldap_pword', 'ldap_basedn', 'ldap_filter', 'ldap_auth_filter_query', 'ldap_username_field', 'ldap_fname_field', 'ldap_lname_field', 'ldap_display_name', 'ldap_email', 'ldap_emp_num', 'ldap_phone_field', 'ldap_mobile', 'ldap_jobtitle', 'ldap_manager', 'ldap_dept', 'ldap_address', 'ldap_city', 'ldap_state', 'ldap_zip', 'ldap_country', 'ldap_location', 'ldap_active_flag', 'custom_forgot_pass_url', 'test_sample_username'], true) && is_string($this->{$property})) {
+        // auth time. Textareas (TLS key / cert) tolerate the trim
+        // because PEM parsers accept both terminating-newline and
+        // no-terminating-newline forms. ad_domain gets trimmed too but
+        // does NOT invalidate the test below; it's not part of the
+        // ldap_bind() handshake, only post-connection scoping.
+        if (in_array($property, [...$connectionStringProps, 'ad_domain'], true)) {
             $this->{$property} = trim($this->{$property});
         }
 
         // Any edit to a connection-shape field invalidates the prior
         // network test result (a stale "connected" indicator sitting
         // under a since-edited server URL would be actively misleading).
-        if (in_array($property, ['ldap_server', 'ldap_tls', 'ldap_server_cert_ignore', 'ldap_client_tls_key', 'ldap_client_tls_cert', 'ldap_uname', 'ldap_pword', 'ldap_basedn', 'ldap_filter', 'ldap_auth_filter_query', 'ldap_username_field', 'ldap_fname_field', 'ldap_lname_field', 'ldap_display_name', 'ldap_email', 'ldap_emp_num', 'ldap_phone_field', 'ldap_mobile', 'ldap_jobtitle', 'ldap_manager', 'ldap_dept', 'ldap_address', 'ldap_city', 'ldap_state', 'ldap_zip', 'ldap_country', 'ldap_location', 'ldap_active_flag', 'ldap_invert_active_flag', 'ldap_enabled', 'ldap_pw_sync', 'ldap_default_group', 'custom_forgot_pass_url', 'test_sample_username'], true)) {
+        // Every connection-participating string prop plus the non-string
+        // toggles / IDs that also affect the handshake or downstream
+        // test surface.
+        $testInvalidatingProps = [
+            ...$connectionStringProps,
+            'ldap_tls',
+            'ldap_server_cert_ignore',
+            'ldap_invert_active_flag',
+            'ldap_enabled',
+            'ldap_pw_sync',
+            'ldap_default_group',
+        ];
+
+        if (in_array($property, $testInvalidatingProps, true)) {
             $this->clearTestResult();
             // Also clear the step-4 preview table since it references the
             // old values.
@@ -1473,11 +1529,31 @@ class LdapSettings extends Component
         // Clear this field's inline validation error so re-editing the
         // field un-greys the Save button (which keys off canAdvance,
         // which checks the error bag).
-        if (in_array($property, ['ldap_server', 'ldap_client_tls_key', 'ldap_client_tls_cert', 'ad_domain', 'ldap_uname', 'ldap_pword', 'ldap_basedn', 'ldap_filter', 'ldap_auth_filter_query', 'ldap_username_field', 'ldap_fname_field', 'custom_forgot_pass_url', 'test_sample_username'], true)) {
+        if (in_array($property, [
+            'ldap_server',
+            'ldap_client_tls_key',
+            'ldap_client_tls_cert',
+            'ad_domain',
+            'ldap_uname',
+            'ldap_pword',
+            'ldap_basedn',
+            'ldap_filter',
+            'ldap_auth_filter_query',
+            'ldap_username_field',
+            'ldap_fname_field',
+            'custom_forgot_pass_url',
+            'test_sample_username'
+        ], true)) {
             $this->resetValidation($property);
         }
 
-        if (! in_array($property, ['currentStep', 'highestStepReached', 'dirty', 'testStatus', 'testMessage'], true)) {
+        if (!in_array($property, [
+            'currentStep',
+            'highestStepReached',
+            'dirty',
+            'testStatus',
+            'testMessage'
+        ], true)) {
             $this->dirty = true;
         }
     }

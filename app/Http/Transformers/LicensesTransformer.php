@@ -52,6 +52,7 @@ class LicensesTransformer
             'license_email' => ($license->license_email) ? e($license->license_email) : null,
             'reassignable' => ($license->reassignable == 1) ? true : false,
             'maintained' => ($license->maintained == 1) ? true : false,
+            'requestable' => (bool) $license->requestable,
             'supplier' => ($license->supplier) ? [
                 'id' => (int) $license->supplier->id,
                 'name' => e($license->supplier->name),
@@ -72,13 +73,27 @@ class LicensesTransformer
             'disabled' => $license->isInactive(),
         ];
 
+        // See AccessoriesTransformer for the assigned_to_self /
+        // available_actions.request/cancel rationale (reads from the
+        // eager-loaded `requests` relation so no N+1). Only populates
+        // when the relation has been eager loaded - the standard
+        // index endpoint doesn't preload requests, so gate on
+        // relationLoaded to avoid a per-row query.
+        $userHasOpenRequest = auth()->check() && $license->relationLoaded('requests') && $license->requests->contains(
+            fn (\App\Models\CheckoutRequest $request) => $request->user_id === auth()->id() && $request->canceled_at === null
+        );
+        $permissions_array = [];
+        $permissions_array['assigned_to_self'] = $userHasOpenRequest;
+
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', License::class),
-            'checkin' => Gate::allows('checkin', License::class),
+            'checkout' => Gate::allows('checkout', $license),
+            'checkin' => Gate::allows('checkin', $license),
             'clone' => Gate::allows('create', License::class),
-            'update' => Gate::allows('update', License::class),
+            'update' => Gate::allows('update', $license),
             'delete' => $license->isDeletable(),
             'user_can_checkout' => (bool) (($license->free_seats_count - $unreassignable) > 0),
+            'request' => (bool) $license->requestable && ! $userHasOpenRequest,
+            'cancel' => (bool) $license->requestable && $userHasOpenRequest,
             'bulk_selectable' => [
                 'delete' => $license->isDeletable(),
                 'delete_with_checkin' => Gate::allows('delete', $license) && Gate::allows('checkin', $license) && ($license->deleted_at == ''),

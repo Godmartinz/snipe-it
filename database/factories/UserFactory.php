@@ -27,6 +27,14 @@ class UserFactory extends Factory
      */
     public function definition()
     {
+        // ~10% of seeded users get an employment end_date roughly
+        // centered on today, so the calendar's user.end_date lane has
+        // enough content to look populated on a demo install. Tests
+        // pinning specific dates via state overrides still win.
+        $endDate = $this->faker->boolean(10)
+            ? $this->faker->dateTimeBetween('-30 days', '+9 months', date_default_timezone_get())->format('Y-m-d')
+            : null;
+
         return [
             'activated' => 1,
             'address' => $this->faker->address(),
@@ -36,6 +44,7 @@ class UserFactory extends Factory
             'display_name' => null,
             'email' => $this->faker->safeEmail(),
             'employee_num' => $this->faker->numberBetween(3500, 35050),
+            'end_date' => $endDate,
             'first_name' => $this->faker->firstName(),
             'jobtitle' => $this->faker->jobTitle(),
             'last_name' => $this->faker->lastName(),
@@ -281,6 +290,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.view.encrypted_custom_fields' => '1']);
     }
 
+    public function createAssetModels()
+    {
+        return $this->appendPermission(['models.create' => '1']);
+    }
+
     public function deleteAssetModels()
     {
         return $this->appendPermission(['models.delete' => '1']);
@@ -484,6 +498,11 @@ class UserFactory extends Factory
     public function deleteLocations()
     {
         return $this->appendPermission(['locations.delete' => '1']);
+    }
+
+    public function editLocations()
+    {
+        return $this->appendPermission(['locations.edit' => '1']);
     }
 
     public function canEditOwnLocation()

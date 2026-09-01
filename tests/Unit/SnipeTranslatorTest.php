@@ -91,4 +91,21 @@ class SnipeTranslatorTest extends TestCase
             trans('backup::notifications.exception_message', ['message' => 'MESSAGE'], 'pt_BR')
         );
     }
+
+    public function test_trans_choice_plural_on_informal_locale()
+    {
+        // Regression coverage for GH #18260: Laravel's MessageSelector doesn't
+        // know the `-if` informal-variant codes, so it used to fall through to
+        // `default: return 0` and always pick the singular form. SnipeTranslator
+        // strips the `-if` suffix before the plural-rule lookup so the base
+        // language's rule kicks in.
+        $this->assertEquals(
+            '1 Monat',
+            trans_choice('general.months_plural', 1, [], 'de-if')
+        );
+        $this->assertEquals(
+            '24 Monate',
+            trans_choice('general.months_plural', 24, [], 'de-if')
+        );
+    }
 }

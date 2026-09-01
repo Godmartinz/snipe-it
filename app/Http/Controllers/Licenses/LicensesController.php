@@ -112,6 +112,10 @@ class LicensesController extends Controller
         $license->termination_date = $request->input('termination_date');
         $license->created_by = auth()->id();
         $license->min_amt = $request->input('min_amt');
+        // Unchecked checkboxes are omitted from the POST body; coerce
+        // absence to false so the flag really flips off. The setter
+        // normalizes the truthy branch.
+        $license->requestable = $request->input('requestable', false);
 
         if ($request->input('redirect_option') === 'back') {
             session()->put(['redirect_option' => 'index']);
@@ -198,6 +202,9 @@ class LicensesController extends Controller
         $license->supplier_id = $request->input('supplier_id');
         $license->category_id = $request->input('category_id');
         $license->min_amt = $request->input('min_amt');
+        // Unchecked checkbox is omitted from the POST body; coerce
+        // absence to false so unchecking really turns the flag off.
+        $license->requestable = $request->input('requestable', false);
 
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 

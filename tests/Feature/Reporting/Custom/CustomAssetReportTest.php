@@ -105,6 +105,32 @@ class CustomAssetReportTest extends TestCase
             ->assertSeeTextInStreamedResponse('Asset B');
     }
 
+    public function test_user_company_column_lists_every_assignee_company_alphabetized_and_pipe_joined()
+    {
+        // GH #19568: the user_company column read the legacy scalar
+        // company mirror on the assignee and only rendered ONE company
+        // under FMCS. Report the full company_user pivot set,
+        // alphabetized, pipe-joined.
+        [$companyC, $companyA, $companyB] = Company::factory()->count(3)->sequence(
+            ['name' => 'Zeta Co'],
+            ['name' => 'alpha co'],
+            ['name' => 'Beta Co'],
+        )->create()->all();
+
+        $assignee = User::factory()->create(['first_name' => 'Casey', 'last_name' => 'Multi']);
+        $assignee->companies()->sync([$companyA->id, $companyB->id, $companyC->id]);
+
+        Asset::factory()->assignedToUser($assignee)->create(['name' => 'Assigned Asset']);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post('reports/custom', [
+                'asset_name' => '1',
+                'user_company' => '1',
+            ])
+            ->assertOk()
+            ->assertSeeTextInStreamedResponse('alpha co | Beta Co | Zeta Co');
+    }
+
     public function test_can_limit_assets_by_last_check_in()
     {
         Asset::factory()->create(['name' => 'Asset A', 'last_checkin' => '2023-08-01']);

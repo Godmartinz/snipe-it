@@ -221,12 +221,22 @@ class AssetPaginationTest extends TestCase
 
     public function test_page_urls_do_not_include_limit_when_not_in_original_request()
     {
-        Asset::factory()->count(600)->create();
+        // Since this test relies on app.max_results,
+        // let's lower it temporarily to avoid having
+        // to create a bunch of models.
+        $newMaxResults = 1;
+
+        config(['app.max_results' => $newMaxResults]);
+
+        Asset::factory()->count($newMaxResults + 1)->create();
 
         $response = $this->actingAsForApi($this->user)
             ->getJson(route('api.assets.index', ['page' => 1]))
             ->assertOk();
 
+        // Guards the thin margin above: without a second page there is no URL to
+        // inspect and the assertion below would pass vacuously.
+        $this->assertNotNull($response->json('next_page_url'));
         $this->assertStringNotContainsString('limit=', $response->json('next_page_url'));
     }
 

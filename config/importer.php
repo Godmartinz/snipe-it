@@ -26,4 +26,18 @@ return [
 
     'slice_size' => env('IMPORT_SLICE_SIZE', 500),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Importer execution knobs
+    |--------------------------------------------------------------------------
+    | Seconds and memory ceiling passed to ini_set() at the top of the
+    | import processing path so a large CSV doesn't get killed by PHP's
+    | shorter defaults. Applied both to the console ObjectImportCommand
+    | and the API ItemImportRequest slice handler.
+    */
+
+    'time_limit' => env('IMPORT_TIME_LIMIT', 600),
+
+    'memory_limit' => env('IMPORT_MEMORY_LIMIT', '500M'),
+
 ];

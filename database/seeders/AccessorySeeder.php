@@ -27,13 +27,13 @@ class AccessorySeeder extends Seeder
             $this->call(LocationSeeder::class);
         }
 
-        $locationIds = Location::all()->pluck('id');
+        $locationIds = Location::pluck('id');
 
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);
         }
 
-        $supplierIds = Supplier::all()->pluck('id');
+        $supplierIds = Supplier::pluck('id');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
@@ -65,6 +65,27 @@ class AccessorySeeder extends Seeder
                     'default_supplier_id' => $acq['supplier']->id,
                     'created_by' => $admin->id,
                 ]);
+        }
+
+        // Extra low-stock accessories so the dashboard's low-stock
+        // widget and the top-nav alert bell have realistic rows to
+        // display in a fresh demo. Qty stays >= the max seeded
+        // checkouts_count below (4) so the alert bell's `remaining =
+        // qty - checkouts_count` calc doesn't go negative on any of
+        // these rows. min_amt sits above qty so they still register
+        // as low-stock (remaining < min_amt) even after checkouts.
+        foreach ([
+            ['name' => 'USB-C Hubs', 'qty' => 5, 'min_amt' => 10],
+            ['name' => 'Wireless Headsets', 'qty' => 4, 'min_amt' => 12],
+        ] as $lowStock) {
+            $acq = $randomAcquisition();
+            Accessory::factory()
+                ->withInitialAcquisition($acq['supplier'], $acq['cost'], $acq['date'])
+                ->create(array_merge($lowStock, [
+                    'location_id' => $locationIds->random(),
+                    'default_supplier_id' => $acq['supplier']->id,
+                    'created_by' => $admin->id,
+                ]));
         }
 
         // Check out a handful of each accessory to random users so the

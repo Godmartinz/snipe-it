@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\Helper;
 use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\CategoryPresenter;
@@ -296,14 +295,19 @@ class Category extends SnipeModel
      */
     public function getEula()
     {
-
+        // Route through SnipeModel::sanitizeEulaForRender (protected on
+        // the parent) so this override matches SnipeModel::getEula's
+        // rendered-output shape: parseEscapedMarkedown + <img> tag strip.
+        // Without the strip, callsites that render this method's output
+        // (users/print.blade.php, etc.) would emit <img> tags the parent
+        // path deliberately blocks per the mail-context LFR/SSRF hardening.
         if ($this->eula_text) {
-            return Helper::parseEscapedMarkedown($this->eula_text);
+            return $this->sanitizeEulaForRender($this->eula_text);
         } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula == '1')) {
-            return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
-        } else {
-            return null;
+            return $this->sanitizeEulaForRender(Setting::getSettings()->default_eula_text);
         }
+
+        return null;
     }
 
     /**

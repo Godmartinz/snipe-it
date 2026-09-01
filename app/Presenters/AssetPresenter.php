@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Class AssetPresenter
+ *
+ * @property \App\Models\Asset $model Concrete-typed override of the base
+ *                                    Presenter's $model so PHPStan can resolve Asset-specific
+ *                                    properties (supplier, model relation, tag_color, etc)
+ *                                    without falling back to SnipeModel and flagging every
+ *                                    access as property.notFound.
  */
 class AssetPresenter extends Presenter
 {
@@ -49,7 +55,10 @@ class AssetPresenter extends Presenter
                 'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
-                'title' => trans('general.name'),
+                // Match the import wizard's Name target label so the
+                // asset datatable export round-trips through the
+                // importer's auto-mapper on every locale.
+                'title' => trans('general.item_name_var', ['item' => trans('general.asset')]),
                 'visible' => true,
                 'formatter' => 'hardwareLinkFormatter',
             ], [
@@ -538,10 +547,10 @@ class AssetPresenter extends Presenter
     public function formattedTagLink()
     {
         if (auth()->user()->can('view', ['\App\Models\Asset', $this])) {
-            return '<a href="' . route('hardware.show', e($this->id)) . '" class="' . (($this->deleted_at != '') ? 'deleted' : '') . '">' . e($this->asset_tag) . '</a>';
+            return '<a href="'.route('hardware.show', e($this->id)).'" class="'.(($this->deleted_at != '') ? 'deleted' : '').'">'.e($this->asset_tag).'</a>';
         }
 
-        return '<span class="' . (($this->deleted_at != '') ? 'deleted' : '') . '">' . e($this->asset_tag) . '</span>';
+        return '<span class="'.(($this->deleted_at != '') ? 'deleted' : '').'">'.e($this->asset_tag).'</span>';
     }
 
     public function modelUrl()
@@ -769,5 +778,155 @@ class AssetPresenter extends Presenter
     public function glyph()
     {
         return '<x-icon type="assets" />';
+    }
+
+    public function calendarUrl(): ?string
+    {
+        return route('hardware.show', $this->model->id);
+    }
+
+    public function calendarColor(): ?string
+    {
+        // Trailing `?->tag_color` (right before the ??) is stylistically
+        // redundant per PHPStan since if the left-hand relation is
+        // null the ?-> short-circuits already and the ?? catches the
+        // null. Drop the trailing nullsafe on the last hop only;
+        // keep it on intermediate relation hops that really can be
+        // null at runtime (model->category, supplier).
+        return $this->model->tag_color
+            ?? $this->model->model?->category?->tag_color
+            ?? $this->model->supplier?->tag_color;
+    }
+
+    /**
+     * Column layout for the assets tab on /account/requestable. Feeds
+     * <x-table> via api.assets.requestable. Row shape comes from
+     * AssetsTransformer with available_actions.request/cancel
+     * populated so the assetRequestActionsFormatter JS helper can
+     * render the request/cancel button-swap. Custom fields flagged
+     * show_in_requestable_list=1 append as extra columns so admin-
+     * defined per-asset attributes surface here without a code
+     * change.
+     */
+    public static function dataTableLayoutRequestable(): string
+    {
+        $layout = [
+            [
+                'field' => 'image',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.image'),
+                'formatter' => 'imageFormatter',
+            ], [
+                'field' => 'asset_tag',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.asset_tag'),
+            ], [
+                'field' => 'model',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.asset_model'),
+            ], [
+                'field' => 'model_number',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/models/table.modelnumber'),
+            ], [
+                'field' => 'name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                // Use the same trans key the import wizard uses for the
+                // Name target label so the assets datatable download
+                // round-trips through the importer's auto-mapper on
+                // every locale. See ReportsController::postCustom for
+                // the sibling change and the rationale.
+                'title' => trans('general.item_name_var', ['item' => trans('general.asset')]),
+            ], [
+                'field' => 'serial',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.serial'),
+            ], [
+                // Full object (not .name) so the formatter can read
+                // tag_color for the color-square icon prefix.
+                // Not searchable because Asset::$searchableRelations
+                // doesn't include category (Asset's category lives
+                // through the model relation, not a direct join),
+                // so a `search=` query wouldn't hit it.
+                'field' => 'category',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.category'),
+                'formatter' => 'categoriesLinkObjFormatter',
+            ], [
+                'field' => 'company.name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.company'),
+            ], [
+                'field' => 'location',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.location'),
+            ], [
+                'field' => 'status',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.status'),
+            ], [
+                'field' => 'expected_checkin',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.expected_checkin'),
+                'formatter' => 'dateDisplayFormatter',
+            ],
+        ];
+
+        // Custom fields flagged for the requestable list. Same
+        // fieldset-must-be-attached-to-a-model guard as the standard
+        // asset layout uses (see dataTableLayout above) so the JS
+        // side doesn't ask for row properties that never travel over
+        // the REST API.
+        $fields = CustomField::whereHas('fieldset', function ($query) {
+            $query->whereHas('models');
+        })->where('field_encrypted', 0)
+            ->where('show_in_requestable_list', 1)
+            ->get();
+
+        foreach ($fields as $field) {
+            $layout[] = [
+                'field' => 'custom_fields.'.$field->db_column,
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => e($field->name),
+            ];
+        }
+
+        $layout[] = [
+            'field' => 'actions',
+            'scope' => 'col',
+            'searchable' => false,
+            'sortable' => false,
+            'switchable' => false,
+            'title' => trans('table.actions'),
+            'formatter' => 'assetRequestActionsFormatter',
+            'printIgnore' => true,
+            'class' => 'hidden-print',
+        ];
+
+        return json_encode($layout);
     }
 }

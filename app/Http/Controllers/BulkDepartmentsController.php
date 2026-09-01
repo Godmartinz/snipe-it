@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Departments\DestroyDepartmentAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasUsers;
 use App\Models\Department;
 use Illuminate\Http\Request;
@@ -28,8 +29,8 @@ class BulkDepartmentsController extends Controller
                 $success_count++;
             } catch (ItemStillHasUsers $e) {
                 $errors[] = trans('general.bulk_delete_associations.assoc_users_no_count', ['item_name' => $department->name, 'item' => trans('general.department')]);
-            } catch (\Exception $e) {
-                report($e);
+            } catch (\Throwable $e) {
+                Handler::reportOrRethrow($e);
                 $errors[] = trans('general.something_went_wrong');
             }
         }

@@ -28,9 +28,9 @@ class CancelCheckoutRequestAction
         // decrement is gated on the actual affected row count.
         // Previously this method unconditionally decremented by 1
         // regardless of whether the caller had an active request,
-        // driving the shared requests_counter negative on no-op calls
-        // and letting a duplicate-request cancel decrement by less
-        // than the number of rows it actually canceled.
+        // driving the shared requests_counter negative on no-op calls.
+        // The pending-state filter inside cancelRequest() plus this
+        // affected-count gate together keep the counter honest.
         $affected = DB::transaction(function () use ($asset) {
             $affected = $asset->cancelRequest();
             if ($affected > 0) {

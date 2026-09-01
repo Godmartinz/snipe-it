@@ -329,8 +329,10 @@
                                         <x-demo-lock>{{ trans('general.feature_disabled') }}</x-demo-lock>
                                         <p class="help-block">
                                             {{ trans('admin/settings/general.dashboard_message_help') }}
-                                            <x-icon type="markdown" /> {!! trans('general.github_markdown') !!}
                                         </p>
+                                        <x-form.help name="dashboard_message" icon="markdown">
+                                            {{ trans('general.markdown') }}
+                                        </x-form.help>
                                     </x-slot:input>
                                 </x-form.row>
                             </fieldset>

@@ -13,6 +13,8 @@ namespace Tests\Support\Importing;
  *  email?: string,
  *  checkoutDate?: string,
  *  checkinDate?: string,
+ *  targetType?: string,
+ *  notes?: string,
  * }
  *
  * @extends FileBuilder<Row>
@@ -27,6 +29,8 @@ class AssetHistoryImportFileBuilder extends FileBuilder
             'email' => 'Email',
             'checkoutDate' => 'Checkout Date',
             'checkinDate' => 'Checkin Date',
+            'targetType' => 'Target Type',
+            'notes' => 'Notes',
         ];
     }
 
@@ -38,6 +42,8 @@ class AssetHistoryImportFileBuilder extends FileBuilder
             'email' => fake()->safeEmail,
             'checkoutDate' => fake()->date,
             'checkinDate' => '',
+            'targetType' => '',
+            'notes' => '',
         ];
     }
 }

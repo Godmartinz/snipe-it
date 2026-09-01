@@ -15,8 +15,9 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="models">
+        <x-box name="models" sr_only_title>
 
+            <x-slot:table_header>{{ trans('general.asset_models') }}</x-slot:table_header>
 
             <x-slot:bulkactions>
                 <x-table.bulk-models />

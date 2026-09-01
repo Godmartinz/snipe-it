@@ -10,7 +10,6 @@ use App\Models\Consumable;
 use App\Models\Department;
 use App\Models\License;
 use App\Models\LicenseSeat;
-use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -21,14 +20,20 @@ class CompanyScopingTest extends TestCase
 {
     /**
      * Every companyable model that stores its own company_id on a real
-     * column (as opposed to Users, which uses the company_user pivot).
-     * These all go through the same branch of Company::scopeCompanyablesDirectly
-     * and should share identical strict / floater behavior. Adding a model
-     * to this list runs the whole DataProvider matrix against it.
+     * column AND is unconditionally tenant-scoped under FMCS. Adding a
+     * model to this list runs the whole DataProvider matrix against it.
      *
-     * Users are covered by test_user_scoping_matrix. Company, Actionlog,
-     * and ConsumableAssignment are companyable but not first-class list
-     * targets so they're out of scope for the provider matrix.
+     * Users are covered by test_user_scoping_matrix (pivot semantics).
+     * Company, Actionlog, and ConsumableAssignment are companyable but
+     * not first-class list targets so they're out of scope for the
+     * provider matrix.
+     *
+     * Location is DELIBERATELY excluded: location scoping under FMCS is
+     * opt-in via the scope_locations_fmcs setting (off by default), so
+     * Location does not share the same strict/floater matrix as the
+     * always-scoped models. Location's own coverage lives in
+     * tests/Feature/Fmcs/LocationScopingSettingTest.php and
+     * tests/Feature/Locations/Api/LocationsFmcsScopingTest.php.
      */
     public static function models(): array
     {
@@ -39,7 +44,6 @@ class CompanyScopingTest extends TestCase
             'Consumables' => [Consumable::class],
             'Departments' => [Department::class],
             'Licenses' => [License::class],
-            'Locations' => [Location::class],
         ];
     }
 

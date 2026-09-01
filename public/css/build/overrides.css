@@ -373,6 +373,17 @@ body {
 .bootstrap-table .fixed-table-container {
   overflow: hidden;
 }
+.bootstrap-table .fixed-table-container.fixed-height,
+.bootstrap-table .fixed-table-container.fixed-height:not(.has-footer),
+.bootstrap-table .fixed-table-container.fixed-height.has-card-view {
+  border-color: var(--box-bg) !important;
+}
+.bootstrap-table .fixed-table-container.fixed-height .fixed-table-border {
+  border-color: var(--box-bg) !important;
+}
+.bootstrap-table .fixed-table-container .fixed-table-body .fixed-table-loading {
+  background: var(--box-bg) !important;
+}
 @media print {
   @page {
     size: A4;
@@ -3160,6 +3171,178 @@ dl.table-display {
 }
 .info-panel-actions > .pull-right ~ .pull-right {
   margin-left: 0;
+}
+[data-theme="dark"] .fc {
+  --fc-border-color: var(--box-header-top-border-color);
+  --fc-page-bg-color: var(--box-bg);
+  --fc-neutral-bg-color: hsl(from var(--box-bg) h s calc(l + 5));
+  --fc-neutral-text-color: var(--color-fg);
+  --fc-list-event-hover-bg-color: hsl(from var(--box-bg) h s calc(l + 8));
+  --fc-today-bg-color: hsl(from var(--main-theme-color) h s calc(l - 25) / 0.25);
+}
+[data-theme="dark"] .fc .fc-col-header-cell,
+[data-theme="dark"] .fc .fc-list-day-cushion {
+  background-color: hsl(from var(--box-bg) h s calc(l + 5));
+  color: var(--color-fg);
+}
+[data-theme="dark"] .fc .fc-col-header-cell-cushion,
+[data-theme="dark"] .fc .fc-daygrid-day-number,
+[data-theme="dark"] .fc .fc-timegrid-axis-cushion,
+[data-theme="dark"] .fc .fc-timegrid-slot-label-cushion,
+[data-theme="dark"] .fc .fc-list-day-text,
+[data-theme="dark"] .fc .fc-list-day-side-text,
+[data-theme="dark"] .fc .fc-list-event-title,
+[data-theme="dark"] .fc .fc-list-event-time {
+  color: var(--color-fg);
+}
+[data-theme="dark"] .fc .fc-scrollgrid,
+[data-theme="dark"] .fc .fc-scrollgrid td,
+[data-theme="dark"] .fc .fc-scrollgrid th,
+[data-theme="dark"] .fc .fc-timegrid-slot,
+[data-theme="dark"] .fc .fc-daygrid-day {
+  border-color: var(--box-header-top-border-color);
+}
+.dashboard-row-eq {
+  margin-bottom: 20px;
+}
+@media (min-width: 992px) {
+  .dashboard-row-eq {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+  .dashboard-row-eq > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+    float: none;
+  }
+  .dashboard-row-eq > [class*="col-"] > .box {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 100%;
+  }
+  .dashboard-row-eq > [class*="col-"] > .box > .box-body {
+    flex: 1 1 auto;
+  }
+  .dashboard-row-eq > [class*="col-"] > .box.collapsed-box {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+}
+.fc .fc-button-primary {
+  background-color: var(--main-theme-color) !important;
+  background-image: none !important;
+  border-color: hsl(from var(--main-theme-color) h s calc(l - 15)) !important;
+  color: var(--nav-primary-text-color) !important;
+}
+.fc .fc-button-primary:hover,
+.fc .fc-button-primary:focus {
+  background-color: hsl(from var(--main-theme-color) h s calc(l - 8)) !important;
+  border-color: hsl(from var(--main-theme-color) h s calc(l - 20)) !important;
+  color: var(--nav-primary-text-color) !important;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: hsl(from var(--main-theme-color) h s calc(l - 18)) !important;
+  border-color: hsl(from var(--main-theme-color) h s calc(l - 25)) !important;
+  color: var(--nav-primary-text-color) !important;
+  box-shadow: inset 0 0 0 2px hsl(from var(--main-theme-color) h s calc(l - 30)) !important;
+}
+.fc .fc-button-primary:disabled {
+  background-color: hsl(from var(--main-theme-color) h s calc(l + 10) / 0.5) !important;
+  border-color: hsl(from var(--main-theme-color) h s calc(l - 5) / 0.5) !important;
+  color: var(--nav-primary-text-color) !important;
+  opacity: 0.6;
+}
+@media (min-width: 1200px) {
+  .dashboard-row-compact > [class*="col-"] > .box > .box-body {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .dashboard-row-compact > [class*="col-"] > .box > .box-body.dashboard-chart-body {
+    max-height: none;
+    overflow: visible;
+  }
+}
+.dashboard-attention-list > .list-group-item > a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dashboard-attention-list .dashboard-attention-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.dashboard-attention-list .dashboard-attention-count {
+  flex: 0 0 auto;
+  min-width: 3.5em;
+  text-align: center;
+  float: none;
+  margin-left: 0;
+}
+.snipe-table-empty-state {
+  display: block;
+  padding: 24px 12px;
+  color: var(--text-legend-help, #888);
+  font-style: italic;
+  text-align: center;
+}
+.fc .fc-list-day-cushion a,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+  color: inherit;
+  text-decoration: none;
+  cursor: default;
+  pointer-events: none;
+}
+.snipeit-calendar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--box-header-top-border-color, #ddd);
+}
+.snipeit-calendar-filter-button {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.snipeit-calendar-filter-button::before {
+  content: "\2713\00a0";
+  font-weight: bold;
+  visibility: hidden;
+}
+.snipeit-calendar-filter-button.active,
+.snipeit-calendar-filter-button.active:hover,
+.snipeit-calendar-filter-button.active:focus,
+.snipeit-calendar-filter-button.active:active {
+  background-color: var(--main-theme-color) !important;
+  background-image: none !important;
+  border-color: hsl(from var(--main-theme-color) h s calc(l - 15)) !important;
+  color: var(--nav-primary-text-color) !important;
+  box-shadow: inset 0 0 0 2px hsl(from var(--main-theme-color) h s calc(l - 25)) !important;
+}
+.snipeit-calendar-filter-button.active::before {
+  visibility: visible;
+}
+.snipeit-calendar-filter-button.active:focus {
+  box-shadow: inset 0 0 0 2px hsl(from var(--main-theme-color) h s calc(l - 25)), 0 0 0 3px hsl(from var(--main-theme-color) h s calc(l + 20) / 0.5) !important;
+}
+.btn-social.btn-google,
+.btn-social.btn-google:link,
+.btn-social.btn-google:visited {
+  background-color: var(--main-theme-color) !important;
+  color: var(--nav-primary-text-color) !important;
+  border-color: var(--main-theme-color) !important;
+}
+.btn-social.btn-google:hover,
+.btn-social.btn-google:focus,
+.btn-social.btn-google:active {
+  background-color: var(--main-theme-hover) !important;
+  color: var(--nav-primary-text-color) !important;
+  border-color: var(--main-theme-hover) !important;
 }
 
 

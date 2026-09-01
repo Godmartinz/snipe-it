@@ -12,7 +12,9 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="groups" sr_only_title>
+
+            <x-slot:table_header>{{ trans('general.groups') }}</x-slot:table_header>
 
             <x-table
                     name="groups"

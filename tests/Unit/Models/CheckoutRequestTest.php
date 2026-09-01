@@ -72,4 +72,25 @@ class CheckoutRequestTest extends TestCase
 
         $this->assertDatabaseMissing('checkout_requests', ['id' => $checkoutRequest->id]);
     }
+
+    public function test_name_property_access_does_not_trigger_relation_resolution()
+    {
+        // Regression: CalendarEventsTransformer::titleFor() falls through
+        // to `$source->display_name ?? $source->name ?? ...` when the
+        // source has no Presentable presenter. CheckoutRequest defines a
+        // plain name() method that returns the requestable's display
+        // string. Without an accessor, Eloquent's __get('name') routes
+        // through getRelationValue('name') → getRelationshipFromMethod()
+        // which calls name(), gets a string back instead of a Relation,
+        // and throws `LogicException: name must return a relationship
+        // instance`, taking down the calendar API for any install that
+        // has a reservation-shape CheckoutRequest.
+        $checkoutRequest = CheckoutRequest::factory()->forAsset()->create();
+
+        $this->assertSame(
+            $checkoutRequest->name(),
+            $checkoutRequest->name,
+            'Property access `->name` must return the accessor value, not throw when Eloquent misinterprets name() as a relation.'
+        );
+    }
 }

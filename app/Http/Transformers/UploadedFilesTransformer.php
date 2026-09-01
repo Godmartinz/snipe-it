@@ -27,7 +27,7 @@ class UploadedFilesTransformer
         $snipeModel = $file->item_type;
         $item = null;
 
-        if (is_string($snipeModel) && class_exists($snipeModel)) {
+        if (class_exists($snipeModel)) {
             $itemQuery = $snipeModel::query();
 
             if (in_array(SoftDeletes::class, class_uses_recursive($snipeModel), true)) {

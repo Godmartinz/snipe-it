@@ -8,10 +8,10 @@ use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasOrders;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\ConsumablePresenter;
 use App\Presenters\Presentable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -33,6 +33,7 @@ class Consumable extends SnipeModel
     use HasOrders;
     use HasUploads;
     use Loggable, Presentable;
+    use Requestable;
     use SoftDeletes;
 
     protected $table = 'consumables';
@@ -59,6 +60,7 @@ class Consumable extends SnipeModel
         'purchase_date' => 'date_format:Y-m-d|nullable',
         'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
         'default_purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
+        'requestable' => 'nullable|boolean',
     ];
 
     /**
@@ -132,19 +134,9 @@ class Consumable extends SnipeModel
     ];
 
     /**
-     * Sets the attribute of whether or not the consumable is requestable
-     *
-     * This isn't really implemented yet, as you can't currently request a consumable
-     * however it will be implemented in the future, and we needed to include
-     * this method here so all of our polymorphic methods don't break.
-     *
-     * @todo Update this comment once it's been implemented
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v3.0]
-     *
-     * @return Relation
+     * Normalize the requestable form input so an empty string from an
+     * unchecked checkbox lands as false rather than a truthy "0" cast
+     * (matches Accessory::setRequestableAttribute).
      */
     public function setRequestableAttribute($value)
     {
@@ -152,6 +144,18 @@ class Consumable extends SnipeModel
             $value = null;
         }
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable consumables. FMCS + location
+     * scoping falls out of the CompanyableTrait global scope, so the
+     * usual "user only sees rows in their reachable companies" rule
+     * applies without any additional wrapping here (matches the
+     * Accessory scope's shape and rationale).
+     */
+    public function scopeRequestable($query)
+    {
+        return $query->where('consumables.requestable', '1');
     }
 
     public function isDeletable()

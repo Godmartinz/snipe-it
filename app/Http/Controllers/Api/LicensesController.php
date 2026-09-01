@@ -498,4 +498,31 @@ class LicensesController extends Controller
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * List licenses that are requestable AND reachable by the current
+     * caller (per FMCS + location scoping). Hydrates the licenses tab
+     * on /account/requestable. See the sibling
+     * AccessoriesController::requestable for design rationale.
+     */
+    public function requestable(Request $request): array
+    {
+        $query = License::with('category', 'company', 'manufacturer', 'requests')
+            ->Requestable();
+
+        if ($request->filled('search')) {
+            $query->TextSearch($request->input('search'));
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), ['name', 'created_at'], true) ? $request->input('sort') : 'name';
+
+        $rows = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+        return (new LicensesTransformer)->transformLicenses($rows, $total);
+    }
 }

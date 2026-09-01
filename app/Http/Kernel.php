@@ -29,6 +29,7 @@ use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -59,6 +60,7 @@ class Kernel extends HttpKernel
         SecurityHeaders::class,
         PreventBackHistory::class,
         HandleCors::class,
+        InvokeDeferredCallbacks::class,
 
     ];
 

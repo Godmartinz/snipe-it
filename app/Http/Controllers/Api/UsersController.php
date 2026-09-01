@@ -739,11 +739,14 @@ class UsersController extends Controller
                 $user->groups()->sync($request->input('groups'));
             }
 
-            // company_ids (new format) = full replacement sync.
+            // company_ids (new format) = full replacement sync, with
+            // the target's invisible-to-editor memberships preserved
+            // so a scoped editor's save can't detach the target from
+            // tenants outside the editor's own membership.
             // Legacy company_id = add without removing other associations.
             if ($request->has('company_ids')) {
-                $companyIds = array_filter(array_map('intval', (array) $request->input('company_ids')));
-                $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+                $companyIds = array_values(array_filter(array_map('intval', (array) $request->input('company_ids'))));
+                $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
             } elseif ($request->filled('company_id')) {
                 $filtered = Company::getIdsForCurrentUser([(int) $request->input('company_id')]);
                 if (! empty($filtered)) {
@@ -939,6 +942,7 @@ class UsersController extends Controller
         $this->authorize('view', License::class);
 
         if ($user = User::where('id', $id)->withTrashed()->first()) {
+            $this->authorize('view', $user);
             $licenses = $user->licenses();
 
             $total = $licenses->count();

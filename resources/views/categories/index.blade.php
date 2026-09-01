@@ -10,7 +10,9 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="category" sr_only_title>
+
+            <x-slot:table_header>{{ trans('general.categories') }}</x-slot:table_header>
 
             <x-slot:bulkactions>
                 <x-table.bulk-categories />

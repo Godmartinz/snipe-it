@@ -94,6 +94,26 @@ then
     done
 fi
 
+# Fix Apache request header limits
+# (defaults live in /etc/apache2/conf.d/limits.conf; override here)
+if [ -v "APACHE_LIMIT_REQUEST_FIELD_SIZE" ]
+then
+    echo "Changing LimitRequestFieldSize to ${APACHE_LIMIT_REQUEST_FIELD_SIZE}"
+    sed -i "s/^LimitRequestFieldSize.*/LimitRequestFieldSize ${APACHE_LIMIT_REQUEST_FIELD_SIZE}/" /etc/apache2/conf.d/limits.conf
+fi
+
+if [ -v "APACHE_LIMIT_REQUEST_LINE" ]
+then
+    echo "Changing LimitRequestLine to ${APACHE_LIMIT_REQUEST_LINE}"
+    sed -i "s/^LimitRequestLine.*/LimitRequestLine ${APACHE_LIMIT_REQUEST_LINE}/" /etc/apache2/conf.d/limits.conf
+fi
+
+if [ -v "APACHE_LIMIT_REQUEST_FIELDS" ]
+then
+    echo "Changing LimitRequestFields to ${APACHE_LIMIT_REQUEST_FIELDS}"
+    sed -i "s/^LimitRequestFields.*/LimitRequestFields ${APACHE_LIMIT_REQUEST_FIELDS}/" /etc/apache2/conf.d/limits.conf
+fi
+
 # If the Oauth DB files are not present copy the vendor files over to the db migrations
 if [ ! -f "/var/www/html/database/migrations/*create_oauth*" ]
 then

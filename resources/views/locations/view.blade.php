@@ -44,12 +44,20 @@
                   @endcan
 
 
-                  <x-tabs.asset-tab count="{{ $location->assets()->AssetsForShow()->count() }}"/>
+
 
                   @can('view', \App\Models\Asset::class)
 
-                      <x-tabs.nav-item
+                          <x-tabs.nav-item
                               name="assets"
+                              icon_type="assets"
+                              label="{{ trans('admin/locations/message.assigned_assets') }}"
+                              count="{{ $location->assignedAssets()->AssetsForShow()->count() }}"
+                              tooltip="{{ trans('admin/locations/message.assigned_assets') }}"
+                          />
+
+                          <x-tabs.nav-item
+                              name="asset-location"
                               icon="fa-solid fa-house-laptop fa-fw"
                               label="{{ trans('general.assets') }}"
                               count="{{ $location->assets()->AssetsForShow()->count() }}"
@@ -57,22 +65,14 @@
                       />
 
                       <x-tabs.nav-item
-                              name="rtd_assets"
+                          name="rtd-assets"
                               icon="fa-solid fa-house-flag fa-fw"
                               label="{{ trans('admin/hardware/form.default_location') }}"
                               count="{{ $location->rtd_assets()->AssetsForShow()->count() }}"
                               tooltip="{{ trans('admin/hardware/form.default_location') }}"
                       />
 
-                      <x-tabs.nav-item
-                              name="assets_assigned"
-                              icon="fas fa-barcode fa-fw"
-                              label="{{ trans('admin/locations/message.assigned_assets') }}"
-                              count="{{ $location->assignedAssets()->AssetsForShow()->count() }}"
-                              tooltip="{{ trans('admin/locations/message.assigned_assets') }}"
-                      />
-
-                  @endcan
+                      @endcan
 
                   @can('view', \App\Models\Accessory::class)
 
@@ -134,19 +134,19 @@
 
                   <!-- start assets tab pane -->
                   @can('view', \App\Models\Asset::class)
-                      <x-tabs.pane name="assets">
-                          <x-table.assets :table_header="trans('admin/locations/message.current_location')" :route="route('api.assets.index', ['location_id' => $location->id])"/>
-                      </x-tabs.pane>
-                      <!-- end assets tab pane -->
-
                       <!-- start assigned assets tab pane -->
-                      <x-tabs.pane name="assets_assigned">
+                      <x-tabs.pane name="assets">
                           <x-table.assets :table_header="trans('admin/locations/message.assigned_assets')" :route="route('api.assets.index', ['assigned_to' => $location->id, 'assigned_type' => 'App\Models\Location'])"/>
                       </x-tabs.pane>
                       <!-- end assigned assets tab pane -->
 
+                      <x-tabs.pane name="asset-location">
+                          <x-table.assets :table_header="trans('admin/locations/message.current_location')" :route="route('api.assets.index', ['location_id' => $location->id])"/>
+                      </x-tabs.pane>
+                      <!-- end assets tab pane -->
+
                       <!-- start rtd assets tab pane -->
-                      <x-tabs.pane name="rtd_assets">
+                      <x-tabs.pane name="rtd-assets">
                           <x-table.assets :table_header="trans('admin/hardware/form.default_location')" :route="route('api.assets.index', ['rtd_location_id' => $location->id]) "/>
                       </x-tabs.pane>
                   @endcan
@@ -244,7 +244,7 @@
 
 @section('moar_scripts')
     @can('files', $location)
-        @include ('modals.upload-file', ['item_type' => 'locations', 'item_id' => $location->id])
+        <x-modals.upload-file item-type="locations" :item-id="$location->id" />
     @endcan
 
     @include ('partials.bootstrap-table')

@@ -57,6 +57,7 @@ class LicensesImportFileBuilder extends FileBuilder
             'seats' => 'seats',
             'serialNumber' => 'Serial number',
             'supplierName' => 'supplier',
+            'requestable' => 'Requestable',
         ];
     }
 
@@ -87,6 +88,7 @@ class LicensesImportFileBuilder extends FileBuilder
             'seats' => rand(1, 10),
             'serialNumber' => 'SN:LIC:'.Str::random(),
             'supplierName' => $faker->company,
+            'requestable' => '',
         ];
     }
 }

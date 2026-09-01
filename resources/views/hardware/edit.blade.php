@@ -383,6 +383,10 @@
                     // this, the pickers would just be plain text inputs
                     // until page reload.
                     window.snipeitInitDatetimepickers('#custom_fields_content');
+                    // Same for the MAC-address input mask on any format=MAC
+                    // custom fields in the fresh partial. See
+                    // resources/assets/js/snipeit.js for the mask logic.
+                    window.snipeitInitMacAddressMask('#custom_fields_content');
                     //now re-populate the custom fields based on the previously saved values
                     $('#custom_fields_content').find('input,select,textarea').each(function (index,elem) {
                         if(transformed_oldvals[elem.name]) {

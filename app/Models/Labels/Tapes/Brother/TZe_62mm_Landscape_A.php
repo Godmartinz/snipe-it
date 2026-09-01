@@ -135,13 +135,6 @@ class TZe_62mm_Landscape_A extends TZe_62mm_Landscape
         return self::FIELD_MARGIN;
     }
 
-//    public function getRotation()
-//    {
-//        return 90;
-//    }
-
-
-
     protected function getContentEditorConfig(): array
     {
         return [
@@ -176,7 +169,6 @@ class TZe_62mm_Landscape_A extends TZe_62mm_Landscape
             'text_render_mode' => 'block',
         ];
     }
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

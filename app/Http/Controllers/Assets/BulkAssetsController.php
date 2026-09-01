@@ -266,7 +266,7 @@ class BulkAssetsController extends Controller
         // is Referer-derived and would need its own sanitize step.
         $bulk_back_url = Helper::sameOriginUrl($request->session()->pull('bulk_back_url')) ?? route('hardware.index');
 
-        $custom_field_columns = CustomField::all()->pluck('db_column')->toArray();
+        $custom_field_columns = CustomField::pluck('db_column')->toArray();
 
         // find custom field input attributes that start with 'null_'
         $null_custom_fields_inputs = array_filter($request->all(), function ($key) {
@@ -292,14 +292,12 @@ class BulkAssetsController extends Controller
          * make sense (for example, changing the status ID to something incompatible with
          * its checkout status.
          */
-        // purchase_cost and order_number are intentionally not bulk-editable.
-        // Assets carry no currency column, so bulk-writing purchase_cost on
-        // rows that trace back to an Order can silently diverge from
-        // order_items.price and misrepresent the currency of the original
-        // purchase. Removing them from both the "should we build an update
-        // array" trigger AND from the conditionallyAddItem chain below
-        // prevents both UI-form and hand-crafted-POST callers from setting
-        // them via bulk edit. Single-asset edit still allows both.
+        // purchase_cost and order_number bulk edits are allowed but
+        // carry a caveat: assets have no per-row currency column, so
+        // if the selection contains assets whose original orders were
+        // in different currencies, the value written here reads as
+        // the system default for every row. Callers are expected to
+        // narrow the selection to a single currency first. See #19564.
         if (($request->filled('name'))
             || ($request->filled('purchase_date'))
             || ($request->filled('expected_checkin'))
@@ -313,6 +311,8 @@ class BulkAssetsController extends Controller
             || ($request->filled('notes'))
             || ($request->filled('next_audit_date'))
             || ($request->filled('asset_eol_date'))
+            || ($request->filled('order_number'))
+            || ($request->filled('purchase_cost'))
             || ($request->filled('null_name'))
             || ($request->filled('null_purchase_date'))
             || ($request->filled('null_expected_checkin_date'))
@@ -406,6 +406,10 @@ class BulkAssetsController extends Controller
 
                 if ($request->filled('purchase_cost')) {
                     $this->update_array['purchase_cost'] = $request->input('purchase_cost');
+                }
+
+                if ($request->filled('order_number')) {
+                    $this->update_array['order_number'] = $request->input('order_number');
                 }
 
                 if ($request->filled('company_id')) {

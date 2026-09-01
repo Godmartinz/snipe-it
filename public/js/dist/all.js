@@ -74829,6 +74829,56 @@ $(function () {
     $modal.modal('show');
   });
 
+  // Request-item modal (on /account/requestable-assets). Trigger
+  // buttons carry data-request-url + data-item-name + data-current-qty
+  // so the modal can post to the correct endpoint and reset its
+  // qty/date fields between opens. Cancel case (the item is already
+  // requested by this user) POSTs synchronously via a small inline
+  // form on the row instead of routing through this modal, so a
+  // requested row never opens it.
+  $el.on('click', '.request-item', function () {
+    var $btn = $(this);
+    var $modal = $('#requestItemModal');
+    var $form = $('#requestItemForm');
+    $form.attr('action', $btn.data('request-url'));
+    $modal.find('.request-item-name').text($btn.data('item-name') || '');
+    var currentQty = parseInt($btn.data('current-qty'), 10);
+    $modal.find('#requestItemQuantity').val(!isNaN(currentQty) && currentQty > 0 ? currentQty : 1);
+
+    // Hide the qty row for types where qty is meaningless.
+    // Assets are 1:1 (you request THE asset, not N of it).
+    // Licenses are one-seat-per-request by convention (nobody
+    // realistically asks for 3 seats of Photoshop for
+    // themselves). The input stays in the DOM with value=1 so
+    // the POST shape stays uniform across every requestable
+    // type; only the row is display:none.
+    var itemType = ($btn.data('item-type') || '').toString().toLowerCase();
+    var hidesQty = itemType === 'asset' || itemType === 'license';
+    $modal.find('#requestItemQuantityRow').toggle(!hidesQty);
+    if (hidesQty) {
+      $modal.find('#requestItemQuantity').val(1);
+    }
+
+    // Reset dates + notes every open so state left in the modal
+    // by an earlier click can't leak into the next request.
+    $modal.find('#requestItemStartDate').val('');
+    $modal.find('#requestItemEndDate').val('');
+    $modal.find('#requestItemNotes').val('');
+
+    // Snapshot the tab the requester is on so the controller can
+    // restore it on the post-submit redirect. Walks up to the
+    // enclosing .tab-pane and reads its id; the assets tab uses
+    // an API-backed row-formatter that emits the same
+    // data-active-tab attr on its request button (see
+    // assetRequestActionsFormatter) so this handler works there
+    // too without needing the DOM parent.
+    var explicitTab = $btn.data('active-tab');
+    var $tabPane = $btn.closest('.tab-pane');
+    var activeTab = explicitTab || ($tabPane.length ? $tabPane.attr('id') : '');
+    $modal.find('#requestItemActiveTab').val(activeTab || '');
+    $modal.modal('show');
+  });
+
   // confirm delete modal
   $el.on('click', '.delete-asset', function (evnt) {
     var $context = $(this);
@@ -74899,6 +74949,17 @@ $(function () {
             statusType: link.data("asset-status-type"),
             companyId: link.data("company-ids") || link.data("company-id"),
             excludeId: link.data("exclude-id"),
+            excludeIds: link.data("exclude-ids"),
+            // Pre-scope the hardware picker to a user's
+            // assigned assets. Currently used by the
+            // components-checkout screen when reached via
+            // a /requests row (see the requesting_user
+            // wiring in ComponentsController + the checkout
+            // blade). The API endpoint gracefully falls
+            // back to the unfiltered list when the target
+            // user has no assigned assets, so an empty
+            // pre-filter doesn't lock the admin out.
+            assignedTo: link.data("assigned-to"),
             // When true, the companies selectlist marks child companies
             // (those with a parent of their own) as disabled — used by
             // the parent-company picker so users can't choose options
@@ -75414,8 +75475,41 @@ $(document).ready(function () {
       }
     });
   }
+
+  // MAC-address input mask. Custom fields with format=MAC render as
+  // plain text inputs; without a mask the user only discovers the
+  // required colon-separated shape (see \App\Rules\MacEncrypted)
+  // after a failed submit. The mask strips every non-hex character
+  // on input, uppercases A-F, and re-inserts a colon after every
+  // second character, so common paste shapes (hyphen-separated from
+  // Windows ipconfig, Cisco-dotted aabb.ccdd.eeff, bare hex,
+  // space-separated) all normalize to the canonical AA:BB:CC:DD:EE:FF
+  // form the backend expects.
+  //
+  // Exposed on window (matching snipeitInitDatetimepickers above) so
+  // the asset edit form's AJAX custom-fields-reload handler can
+  // re-init the mask on inputs that only exist after the model
+  // changes and a fresh custom_fields_form.blade.php partial is
+  // swapped into place. Pass a jQuery selector or DOM node to narrow
+  // the scope; omit to init every .mac-address-input on the page.
+  //
+  // The .mac-address-input class is applied in resources/views/models/
+  // custom_fields_form.blade.php on both text-input branches
+  // (format-icon wrapper AND bare input) when $field->format === 'MAC'.
+  window.snipeitInitMacAddressMask = function (scope) {
+    var $targets = scope ? $(scope).find('.mac-address-input') : $('.mac-address-input');
+    $targets.off('input.snipeitMacMask').on('input.snipeitMacMask', function () {
+      var _hex$match;
+      // Trim leading/trailing whitespace first so a paste like
+      // "  AA:BB:CC:DD:EE:FF\n" from a spreadsheet cell doesn't
+      // eat one of the trailing hex chars into the substring cap.
+      var hex = this.value.trim().toUpperCase().replace(/[^0-9A-F]/g, '').substring(0, 12);
+      this.value = ((_hex$match = hex.match(/.{1,2}/g)) === null || _hex$match === void 0 ? void 0 : _hex$match.join(':')) || '';
+    });
+  };
   window.snipeitInitDatetimepickers();
   initDateRangeLinking();
+  window.snipeitInitMacAddressMask();
 });
 
 /**
@@ -76203,11 +76297,19 @@ $(function () {
       // Initialize the ajaxy select2 with images.
       // This is a copy/paste of the code from snipeit.js, would be great to only have this in one place.
 
-      $('.js-data-ajax').each(function (i, item) {
+      // Scoped to #createModal so re-initialization only touches newly-loaded
+      // modal selects, not every js-data-ajax on the host page. Unscoped
+      // .each() clobbers the trigger page's existing select2 state (e.g. the
+      // Location picker whose "New" button opened this modal).
+      $('#createModal .js-data-ajax').each(function (i, item) {
         var link = $(item);
         var endpoint = link.data("endpoint");
         var select = link.data("select");
         link.select2({
+          // Explicit width because the modal is mid-animation when
+          // this runs, so measuring the parent's computed width
+          // returns 0 and the widget renders zero-pixels wide.
+          width: '100%',
           ajax: {
             // the baseUrl includes a trailing slash
             url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
@@ -76244,11 +76346,6 @@ $(function () {
         });
       });
     });
-  });
-  $(document).on('click', '#createModal .toggle-password', function () {
-    $(this).toggleClass('fa-eye fa-eye-slash');
-    var input = $($(this).attr('data-toggle'));
-    input.attr('type', input.attr('type') === 'password' ? 'text' : 'password');
   });
   $('#createModal').on('click', '#modal-save', function () {
     $.ajax({

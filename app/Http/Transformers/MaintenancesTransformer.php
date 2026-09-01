@@ -3,7 +3,6 @@
 namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
-use App\Models\Asset;
 use App\Models\Maintenance;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -125,9 +124,9 @@ class MaintenancesTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'update' => (Gate::allows('update', Asset::class) && ((($assetmaintenance->asset) && $assetmaintenance->asset->deleted_at == ''))) ? true : false,
-            'delete' => Gate::allows('delete', Asset::class),
-            'complete' => Gate::allows('update', Asset::class) && ! $assetmaintenance->completed_at,
+            'update' => (Gate::allows('update', $assetmaintenance->asset) && ((($assetmaintenance->asset) && $assetmaintenance->asset->deleted_at == ''))) ? true : false,
+            'delete' => Gate::allows('delete', $assetmaintenance->asset),
+            'complete' => Gate::allows('update', $assetmaintenance->asset) && ! $assetmaintenance->completed_at,
         ];
 
         $array += $permissions_array;

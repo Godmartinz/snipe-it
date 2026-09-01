@@ -10,7 +10,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="components" sr_only_title>
             <x-table.components :route="route('api.components.index')" />
         </x-box>
     </x-container>

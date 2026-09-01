@@ -74,6 +74,7 @@ class ConsumablesTransformer
             'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,
             'qty' => (int) $consumable->qty,
             'notes' => ($consumable->notes) ? Helper::parseEscapedMarkedownInline($consumable->notes) : null,
+            'requestable' => (bool) $consumable->requestable,
             'created_by' => ($consumable->adminuser) ? [
                 'id' => (int) $consumable->adminuser->id,
                 'name' => e($consumable->adminuser->display_name),
@@ -82,19 +83,31 @@ class ConsumablesTransformer
             'updated_at' => Helper::getFormattedDateObject($consumable->updated_at, 'datetime'),
         ];
 
+        $permissions_array = [];
         $permissions_array['user_can_checkout'] = false;
 
         if ($consumable->numRemaining() > 0) {
             $permissions_array['user_can_checkout'] = true;
         }
 
+        // See AccessoriesTransformer for the assigned_to_self /
+        // available_actions.request/cancel rationale. relationLoaded
+        // gate keeps the standard-index path from firing an N+1 (only
+        // the requestable() endpoint preloads `requests`).
+        $userHasOpenRequest = auth()->check() && $consumable->relationLoaded('requests') && $consumable->requests->contains(
+            fn (\App\Models\CheckoutRequest $request) => $request->user_id === auth()->id() && $request->canceled_at === null
+        );
+        $permissions_array['assigned_to_self'] = $userHasOpenRequest;
+
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Consumable::class),
-            'checkin' => Gate::allows('checkin', Consumable::class),
-            'update' => Gate::allows('update', Consumable::class),
-            'adjust_quantity' => Gate::allows('update', Consumable::class),
-            'delete' => Gate::allows('delete', Consumable::class),
+            'checkout' => Gate::allows('checkout', $consumable),
+            'checkin' => Gate::allows('checkin', $consumable),
+            'update' => Gate::allows('update', $consumable),
+            'adjust_quantity' => Gate::allows('update', $consumable),
+            'delete' => Gate::allows('delete', $consumable),
             'clone' => (Gate::allows('create', Consumable::class) && ($consumable->deleted_at == '')),
+            'request' => (bool) $consumable->requestable && ! $userHasOpenRequest,
+            'cancel' => (bool) $consumable->requestable && $userHasOpenRequest,
         ];
         $array += $permissions_array;
 

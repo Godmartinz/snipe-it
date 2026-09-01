@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutRequest;
 use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\Concerns\ReportsMemory;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
@@ -34,8 +36,8 @@ class AssetSeeder extends Seeder
         $this->ensureSuppliersSeeded();
 
         $this->adminuser = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
-        $this->locationIds = Location::all()->pluck('id');
-        $this->supplierIds = Supplier::all()->pluck('id');
+        $this->locationIds = Location::pluck('id');
+        $this->supplierIds = Supplier::pluck('id');
 
         $this->reportMemory('AssetSeeder start');
 
@@ -81,6 +83,47 @@ class AssetSeeder extends Seeder
         }
 
         DB::table('checkout_requests')->truncate();
+
+        // Seed a handful of demo-friendly "needs attention" rows so the
+        // dashboard widget has realistic content on a fresh install:
+        //
+        //   - Overdue checkins: pick a few assigned assets and backdate
+        //     their expected_checkin so overdueCheckins is populated on
+        //     the dashboard.
+        //   - Pending checkout requests: seed against requestable
+        //     assets so pendingRequestsCount is populated too.
+        //
+        // Kept small (5 of each) so the widget looks lived-in but not
+        // overwhelming on the demo.
+        $assignedAssetIds = Asset::whereNotNull('assigned_to')
+            ->inRandomOrder()
+            ->limit(5)
+            ->pluck('id');
+        foreach ($assignedAssetIds as $id) {
+            Asset::whereKey($id)->update([
+                'expected_checkin' => Carbon::now()->subDays(rand(3, 30)),
+            ]);
+        }
+
+        $requestableAssets = Asset::where('requestable', 1)
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+        $requesterIds = User::where('activated', 1)
+            ->where('show_in_list', '!=', '0')
+            ->inRandomOrder()
+            ->limit(5)
+            ->pluck('id');
+        if ($requesterIds->isNotEmpty()) {
+            foreach ($requestableAssets as $asset) {
+                CheckoutRequest::create([
+                    'requestable_id' => $asset->id,
+                    'requestable_type' => Asset::class,
+                    'user_id' => $requesterIds->random(),
+                    'quantity' => 1,
+                ]);
+            }
+        }
 
         $this->reportMemory('AssetSeeder end (all factory batches complete)');
     }

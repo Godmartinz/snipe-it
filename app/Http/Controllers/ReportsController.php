@@ -344,13 +344,28 @@ class ReportsController extends Controller
                             $item_name = '';
                         }
 
+                        // Mask license serial when the current user
+                        // does not hold viewKeys. A license's serial is
+                        // the product key, and the licenses / index /
+                        // export sinks already treat it that way. Without
+                        // this the Activity report CSV leaks every key
+                        // for licenses in the caller's scope.
+                        $itemSerial = null;
+                        if ($actionlog->item && $actionlog->item->serial) {
+                            if ($actionlog->item instanceof License && ! Gate::allows('viewKeys', $actionlog->item)) {
+                                $itemSerial = License::PRODUCT_KEY_MASK;
+                            } else {
+                                $itemSerial = $actionlog->item->serial;
+                            }
+                        }
+
                         $row = [
                             $actionlog->created_at,
                             ($actionlog->adminuser) ? $actionlog->adminuser->display_name : '',
                             $actionlog->present()->actionType(),
                             e($actionlog->itemType()),
                             ($actionlog->itemType() == 'user') ? $actionlog->filename : $item_name,
-                            ($actionlog->item) ? $actionlog->item->serial : null,
+                            $itemSerial,
                             (($actionlog->item) && ($actionlog->item->model)) ? htmlspecialchars($actionlog->item->model->name, ENT_NOQUOTES) : null,
                             (($actionlog->item) && ($actionlog->item->model)) ? $actionlog->item->model->model_number : null,
                             $target_name,
@@ -432,9 +447,17 @@ class ReportsController extends Controller
 
             License::orderBy('created_at', 'DESC')->chunk(500, function ($licenses) use ($handle, $formatter) {
                 foreach ($licenses as $license) {
+                    // Mirror LicensesTransformer / /licenses/export. A
+                    // license's serial is the product key, so require the
+                    // viewKeys gate (licenses.keys / create / edit)
+                    // before disclosing it. Otherwise this legacy
+                    // export lets any reports.view holder read every
+                    // key in their scope.
+                    $serial = Gate::allows('viewKeys', $license) ? $license->serial : License::PRODUCT_KEY_MASK;
+
                     $row = [
                         $license->name,
-                        $license->serial,
+                        $serial,
                         $license->seats,
                         $license->remaincount(),
                         $license->expiration_date,
@@ -501,7 +524,7 @@ class ReportsController extends Controller
      */
     public function postCustom(CustomAssetReportRequest $request): StreamedResponse
     {
-        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('max_execution_time', config('app.report_time_limit')); // 12000 seconds = 200 minutes
         $this->authorize('reports.view');
 
         $this->disableDebugbar();
@@ -532,7 +555,15 @@ class ReportsController extends Controller
             }
 
             if ($request->filled('asset_name')) {
-                $header[] = trans('admin/hardware/form.name');
+                // Use the same trans key the import wizard uses for the
+                // Name target label so a custom-report CSV round-trips
+                // through the importer's auto-mapper. Prior key
+                // (admin/hardware/form.name) resolves to "Nombre del
+                // activo" in Spanish while the importer's Name label
+                // resolves to "Activo Nombre" via item_name_var, so the
+                // exact-label auto-map silently misses in every non-
+                // English locale where item_name_var reorders the words.
+                $header[] = trans('general.item_name_var', ['item' => trans('general.asset')]);
             }
 
             if ($request->filled('asset_tag')) {
@@ -737,9 +768,16 @@ class ReportsController extends Controller
                 // do we scope here or??
             }
 
-            $assets = Asset::select('assets.*')->with(
-                'location', 'status', 'company', 'defaultLoc', 'assignedTo',
-                'model.category', 'model.manufacturer', 'model.fieldset.fields', 'supplier');
+            $assets = Asset::select('assets.*')->with([
+                'location', 'status', 'company', 'defaultLoc',
+                'model.category', 'model.manufacturer', 'model.fieldset.fields', 'supplier',
+                // assignedTo is a morphTo. The user_company column below
+                // reads $assignee->companies when the assignee is a User,
+                // and only User has a companies pivot. morphWith constrains
+                // the .companies load to User targets so Assets / Locations
+                // resolving through assignedTo don't blow up. See #19568.
+                'assignedTo' => fn ($morph) => $morph->morphWith([\App\Models\User::class => ['companies']]),
+            ]);
 
             if ($request->filled('by_location_id')) {
                 $assets->whereIn('assets.location_id', $request->input('by_location_id'));
@@ -1018,7 +1056,15 @@ class ReportsController extends Controller
 
                     if ($request->filled('user_company')) {
                         if ($asset->checkedOutToUser()) {
-                            $row[] = ($asset->assignedto?->company) ? $asset->assignedto?->company?->display_name : '';
+                            // Under FMCS a user can belong to multiple companies via
+                            // the company_user pivot. Legacy $user->company reads the
+                            // scalar users.company_id mirror, which only holds ONE.
+                            // Report the full pivot set, alphabetized, pipe-joined.
+                            // See GH #19568.
+                            $row[] = $asset->assignedto?->companies
+                                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                                ->pluck('name')
+                                ->join(' | ') ?? '';
                         } else {
                             $row[] = ''; // Empty string if unassigned
                         }

@@ -136,6 +136,12 @@
 
             <x-input.image-upload :item="$item" :imagePath="app('components_upload_path')" />
 
+            <x-form.checkbox-row
+                name="requestable"
+                :label="trans('admin/hardware/general.requestable')"
+                :item="$item"
+            />
+
             <x-slot:customfooter>
                 <x-redirect_submit_options
                     index_route="components.index"

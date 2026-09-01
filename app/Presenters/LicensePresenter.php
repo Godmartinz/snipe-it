@@ -4,6 +4,8 @@ namespace App\Presenters;
 
 /**
  * Class LicensePresenter
+ *
+ * @property \App\Models\License $model
  */
 class LicensePresenter extends Presenter
 {
@@ -234,6 +236,16 @@ class LicensePresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.notes'),
                 'formatter' => 'notesFormatter',
+            ],
+            [
+                'field' => 'requestable',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'visible' => false,
+                'title' => trans('admin/hardware/general.requestable'),
+                'formatter' => 'trueFalseFormatter',
             ],
         ];
 
@@ -496,5 +508,67 @@ class LicensePresenter extends Presenter
     public function viewUrl()
     {
         return route('licenses.show', $this->id);
+    }
+
+    public function calendarUrl(): ?string
+    {
+        return route('licenses.show', $this->model->id);
+    }
+
+    public function calendarColor(): ?string
+    {
+        return $this->model->category?->tag_color
+            ?? $this->model->manufacturer?->tag_color
+            ?? $this->model->supplier?->tag_color;
+    }
+
+    /**
+     * Column layout for the licenses tab on /account/requestable.
+     * Licenses don't carry an image column; category + free-seats
+     * remaining stand in for the location + numRemaining pair the
+     * other tabs use. Paired with api.licenses.requestable +
+     * LicensesTransformer.
+     */
+    public static function dataTableLayoutRequestable(): string
+    {
+        return json_encode([
+            [
+                'field' => 'name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.name'),
+                'formatter' => 'licenseRequestableNameFormatter',
+            ], [
+                'field' => 'category',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.category'),
+                'formatter' => 'categoriesLinkObjFormatter',
+            ], [
+                'field' => 'company.name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.company'),
+            ], [
+                'field' => 'remaining',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('admin/licenses/form.remaining_seats'),
+            ], [
+                'field' => 'actions',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'licenseRequestableActionsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+        ]);
     }
 }

@@ -146,8 +146,6 @@ class L4736_A extends L4736
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

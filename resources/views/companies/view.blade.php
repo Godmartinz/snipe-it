@@ -126,7 +126,7 @@
 
 @section('moar_scripts')
     @can('files', $company)
-        @include ('modals.upload-file', ['item_type' => 'companies', 'item_id' => $company->id])
+        <x-modals.upload-file item-type="companies" :item-id="$company->id" />
     @endcan
     <script>
         // Bootstrap-table formatters read these to decorate company tags on

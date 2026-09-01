@@ -62,12 +62,11 @@ class AppServiceProvider extends ServiceProvider
          *
          * We'll force the https scheme if the APP_URL starts with https://, or if APP_FORCE_TLS is set to true.
          */
-        if ((strpos(env('APP_URL'), 'https://') === 0) || (env('APP_FORCE_TLS'))) {
+        if ((str_starts_with(config('app.url'), 'https://')) || config('app.force_tls')) {
             $url->forceScheme('https');
         }
 
-        // TODO - isn't it somehow 'gauche' to check the environment directly; shouldn't we be using config() somehow?
-        if (! env('APP_ALLOW_INSECURE_HOSTS')) {  // unless you set APP_ALLOW_INSECURE_HOSTS, you should PROHIBIT forging domain parts of URL via Host: headers
+        if (! config('app.allow_insecure_hosts')) {  // unless you set APP_ALLOW_INSECURE_HOSTS, you should PROHIBIT forging domain parts of URL via Host: headers
             $url_parts = parse_url(config('app.url'));
             if ($url_parts && array_key_exists('scheme', $url_parts) && array_key_exists('host', $url_parts)) { // check for the *required* parts of a bare-minimum URL
                 URL::forceRootUrl(config('app.url'));

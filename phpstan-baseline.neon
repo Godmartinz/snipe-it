@@ -1,8 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method App\\Actions\\CheckoutRequests\\CreateCheckoutRequestAction\:\:run\(\) should return string but returns true\.$#'
-			identifier: return.type
+			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
+			identifier: property.notFound
 			count: 1
 			path: app/Actions/CheckoutRequests/CreateCheckoutRequestAction.php
 
@@ -117,7 +117,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 21
+			count: 17
 			path: app/Console/Commands/BulkDelete.php
 
 		-
@@ -193,6 +193,24 @@ parameters:
 			path: app/Console/Commands/BulkDelete.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$avatar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/CheckOrphanUploads.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/CheckOrphanUploads.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/CheckOrphanUploads.php
+
+		-
 			message: '#^Using nullsafe property access "\?\-\>asset_tag" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 3
@@ -205,26 +223,14 @@ parameters:
 			path: app/Console/Commands/CheckinAndDeleteItems.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\CheckoutRequest\:\:\$requestable\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Console/Commands/CleanOldCheckoutRequests.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CheckoutRequest\:\:\$user\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Console/Commands/CleanOldCheckoutRequests.php
-
-		-
-			message: '#^Relation ''requestedItem'' is not found in App\\Models\\CheckoutRequest model\.$#'
-			identifier: larastan.relationExistence
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:trashed\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: app/Console/Commands/CleanOldCheckoutRequests.php
 
 		-
-			message: '#^Relation ''user'' is not found in App\\Models\\CheckoutRequest model\.$#'
-			identifier: larastan.relationExistence
+			message: '#^PHPDoc tag @var has invalid value \(\\Illuminate\\Database\\Eloquent\\Model&object\{trashed\(\)\: bool\} \$requestable\)\: Unexpected token "\(", expected ''\:'' at offset 59 on line 1$#'
+			identifier: phpDoc.parseError
 			count: 1
 			path: app/Console/Commands/CleanOldCheckoutRequests.php
 
@@ -331,12 +337,6 @@ parameters:
 			path: app/Console/Commands/LdapSync.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: app/Console/Commands/LdapSync.php
-
-		-
 			message: '#^Property App\\Models\\User\:\:\$activated \(bool\) does not accept int\.$#'
 			identifier: assign.propertyType
 			count: 2
@@ -385,12 +385,6 @@ parameters:
 			path: app/Console/Commands/LdapTroubleshooter.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 3
-			path: app/Console/Commands/LdapTroubleshooter.php
-
-		-
 			message: '#^Variable \$conn might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -415,12 +409,6 @@ parameters:
 			path: app/Console/Commands/MergeUsersByUsername.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Console/Commands/MoveUploadsToNewDisk.php
-
-		-
 			message: '#^Method Illuminate\\Filesystem\\FilesystemAdapter\:\:url\(\) invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -437,12 +425,6 @@ parameters:
 			identifier: return.missing
 			count: 1
 			path: app/Console/Commands/NormalizeUserNames.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: app/Console/Commands/ObjectImportCommand.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$display_name\.$#'
@@ -577,12 +559,6 @@ parameters:
 			path: app/Console/Commands/SyncAssetLocations.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Console/Commands/SystemBackup.php
-
-		-
 			message: '#^Method App\\Console\\Commands\\ToggleCustomfieldEncryption\:\:handle\(\) should return int but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
@@ -593,18 +569,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/Console/Commands/ToggleCustomfieldEncryption.php
-
-		-
-			message: '#^Call to function is_array\(\) with \*NEVER\* will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Console/Commands/ValidateAssets.php
-
-		-
-			message: '#^Instanceof between Illuminate\\Support\\MessageBag and Illuminate\\Support\\MessageBag will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/Console/Commands/ValidateAssets.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>model_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -622,6 +586,12 @@ parameters:
 			message: '#^Binary operation "\+" between string and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 6
+			path: app/Console/Commands/Version.php
+
+		-
+			message: '#^Variable \$app_version might not be defined\.$#'
+			identifier: variable.undefined
+			count: 3
 			path: app/Console/Commands/Version.php
 
 		-
@@ -664,12 +634,6 @@ parameters:
 			message: '#^Call to an undefined method Exception\:\:getStatusCode\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Exceptions/Handler.php
-
-		-
-			message: '#^Call to function method_exists\(\) with Illuminate\\Database\\Eloquent\\ModelNotFoundException and ''getIds'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
 			path: app/Exceptions/Handler.php
 
 		-
@@ -775,12 +739,6 @@ parameters:
 			path: app/Helpers/Helper.php
 
 		-
-			message: '#^Match expression does not handle remaining value\: mixed$#'
-			identifier: match.unhandled
-			count: 4
-			path: app/Helpers/Helper.php
-
-		-
 			message: '#^Method App\\Helpers\\Helper\:\:ParseFloat\(\) should return string but returns float\.$#'
 			identifier: return.type
 			count: 1
@@ -850,12 +808,6 @@ parameters:
 			message: '#^Strict comparison using \!\=\= between int and false will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
-			path: app/Helpers/Helper.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 2
 			path: app/Helpers/Helper.php
 
 		-
@@ -931,12 +883,6 @@ parameters:
 			path: app/Http/Controllers/Accessories/AccessoryCheckinController.php
 
 		-
-			message: '#^Match expression does not handle remaining values\: string\|null$#'
-			identifier: match.unhandled
-			count: 1
-			path: app/Http/Controllers/Accessories/AccessoryCheckinController.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$request$#'
 			identifier: parameter.notFound
 			count: 1
@@ -951,7 +897,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\AccessoryCheckout\:\:\$created_by\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: app/Http/Controllers/Accessories/AccessoryCheckoutController.php
 
 		-
@@ -979,12 +925,6 @@ parameters:
 			path: app/Http/Controllers/Accessories/AccessoryCheckoutController.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/Accessories/AccessoryCheckoutController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1001,18 +941,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/Account/AcceptanceController.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: app/Http/Controllers/ActionlogController.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/ActionlogController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Accessory\:\:\$checkout_qty\.$#'
@@ -1107,18 +1035,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @return has invalid value \(\| array\)\: Unexpected token "\|", expected type at offset 192 on line 9$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: app/Http/Controllers/Api/AccessoriesController.php
-
-		-
-			message: '#^Relation ''lastCheckout'' is not found in App\\Models\\Accessory model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Api/AccessoriesController.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: app/Http/Controllers/Api/AccessoriesController.php
 
@@ -1267,12 +1183,6 @@ parameters:
 			path: app/Http/Controllers/Api/AssetsController.php
 
 		-
-			message: '#^Relation ''accessories'' is not found in App\\Models\\AccessoryCheckout model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Api/AssetsController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Category\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1288,12 +1198,6 @@ parameters:
 			message: '#^Call to an undefined method App\\Models\\SnipeModel\:\:getErrors\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Http/Controllers/Api/CategoriesController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
 			path: app/Http/Controllers/Api/CategoriesController.php
 
 		-
@@ -1348,12 +1252,6 @@ parameters:
 			message: '#^Call to an undefined method App\\Models\\SnipeModel\:\:getErrors\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Http/Controllers/Api/CompaniesController.php
-
-		-
-			message: '#^Relation ''parent'' is not found in App\\Models\\Company model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
 			path: app/Http/Controllers/Api/CompaniesController.php
 
 		-
@@ -1699,12 +1597,6 @@ parameters:
 			path: app/Http/Controllers/Api/LocationsController.php
 
 		-
-			message: '#^Relation ''accessories'' is not found in App\\Models\\AccessoryCheckout model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Api/LocationsController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 4
@@ -1765,12 +1657,6 @@ parameters:
 			path: app/Http/Controllers/Api/MaintenancesController.php
 
 		-
-			message: '#^Relation ''asset'' is not found in App\\Models\\Maintenance model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Api/MaintenancesController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1792,12 +1678,6 @@ parameters:
 			message: '#^Call to an undefined method App\\Models\\SnipeModel\:\:getErrors\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Http/Controllers/Api/ManufacturersController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
 			path: app/Http/Controllers/Api/ManufacturersController.php
 
 		-
@@ -1903,12 +1783,6 @@ parameters:
 			path: app/Http/Controllers/Api/ProfileController.php
 
 		-
-			message: '#^Relation ''asset'' is not found in App\\Models\\Maintenance model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Api/ReportsController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Pagination\\LengthAwarePaginator\<int, App\\Models\\Statuslabel\>\:\:\$use_text\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1972,12 +1846,6 @@ parameters:
 			message: '#^Call to an undefined method App\\Models\\SnipeModel\:\:getErrors\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Http/Controllers/Api/SuppliersController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
 			path: app/Http/Controllers/Api/SuppliersController.php
 
 		-
@@ -2055,12 +1923,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$id$#'
 			identifier: parameter.notFound
-			count: 1
-			path: app/Http/Controllers/Api/UsersController.php
-
-		-
-			message: '#^Relation ''assignedMaintenances'' is not found in App\\Models\\User model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: app/Http/Controllers/Api/UsersController.php
 
@@ -2191,12 +2053,6 @@ parameters:
 			path: app/Http/Controllers/Assets/AssetCheckinController.php
 
 		-
-			message: '#^Match expression does not handle remaining values\: string\|null$#'
-			identifier: match.unhandled
-			count: 1
-			path: app/Http/Controllers/Assets/AssetCheckinController.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$assetId$#'
 			identifier: parameter.notFound
 			count: 1
@@ -2233,12 +2089,6 @@ parameters:
 			path: app/Http/Controllers/Assets/AssetCheckoutController.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/Assets/AssetCheckoutController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -2246,12 +2096,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Asset\:\:\$created_by\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Assets/AssetsController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CheckoutRequest\:\:\$requestable\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Assets/AssetsController.php
@@ -2353,12 +2197,6 @@ parameters:
 			path: app/Http/Controllers/Assets/AssetsController.php
 
 		-
-			message: '#^Relation ''user'' is not found in App\\Models\\CheckoutRequest model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/Assets/AssetsController.php
-
-		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
 			count: 4
@@ -2371,21 +2209,9 @@ parameters:
 			path: app/Http/Controllers/Assets/AssetsController.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/Assets/AssetsController.php
-
-		-
 			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Database\\Eloquent\\Relations\\Relation\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
-			path: app/Http/Controllers/Assets/AssetsController.php
-
-		-
-			message: '#^Variable \$asset in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.variable
-			count: 1
 			path: app/Http/Controllers/Assets/AssetsController.php
 
 		-
@@ -2413,12 +2239,6 @@ parameters:
 			path: app/Http/Controllers/Assets/BulkAssetsController.php
 
 		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: app/Http/Controllers/Assets/BulkAssetsController.php
-
-		-
 			message: '#^Right side of \|\| is always false\.$#'
 			identifier: booleanOr.rightAlwaysFalse
 			count: 1
@@ -2427,12 +2247,6 @@ parameters:
 		-
 			message: '#^Strict comparison using \=\=\= between bool and 1 will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Http/Controllers/Assets/BulkAssetsController.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: app/Http/Controllers/Assets/BulkAssetsController.php
 
@@ -2587,46 +2401,10 @@ parameters:
 			path: app/Http/Controllers/Auth/SamlController.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkCategoriesController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkCompaniesController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkDepartmentsController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkDepreciationsController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/BulkMaintenancesController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkManufacturersController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkStatuslabelsController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Supplier\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Supplier\>\:\:\$accessories_count\.$#'
@@ -2653,12 +2431,6 @@ parameters:
 			path: app/Http/Controllers/BulkSuppliersController.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/BulkSuppliersController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Category\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -2668,12 +2440,6 @@ parameters:
 			message: '#^Call to an undefined method App\\Models\\SnipeModel\:\:getErrors\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: app/Http/Controllers/CategoriesController.php
-
-		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
 			path: app/Http/Controllers/CategoriesController.php
 
 		-
@@ -2745,7 +2511,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
-			count: 1
+			count: 2
 			path: app/Http/Controllers/Components/ComponentCheckoutController.php
 
 		-
@@ -2823,7 +2589,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
-			count: 1
+			count: 2
 			path: app/Http/Controllers/Consumables/ConsumableCheckoutController.php
 
 		-
@@ -2989,12 +2755,6 @@ parameters:
 			path: app/Http/Controllers/Kits/CheckoutKitController.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Http/Controllers/Kits/CheckoutKitController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PredefinedKit\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3064,30 +2824,6 @@ parameters:
 			message: '#^Method App\\Http\\Controllers\\Kits\\PredefinedKitsController\:\:editModel\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
 			identifier: return.type
 			count: 1
-			path: app/Http/Controllers/Kits/PredefinedKitsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Kits\\PredefinedKitsController\:\:updateAccessory\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 3
-			path: app/Http/Controllers/Kits/PredefinedKitsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Kits\\PredefinedKitsController\:\:updateConsumable\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 3
-			path: app/Http/Controllers/Kits/PredefinedKitsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Kits\\PredefinedKitsController\:\:updateLicense\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 3
-			path: app/Http/Controllers/Kits/PredefinedKitsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Kits\\PredefinedKitsController\:\:updateModel\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 3
 			path: app/Http/Controllers/Kits/PredefinedKitsController.php
 
 		-
@@ -3337,12 +3073,6 @@ parameters:
 			path: app/Http/Controllers/ManufacturersController.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/ManufacturersController.php
-
-		-
 			message: '#^PHPDoc tag @param for parameter \$request with type Illuminate\\Http\\Request is not subtype of native type App\\Http\\Requests\\ImageUploadRequest\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -3397,12 +3127,6 @@ parameters:
 			path: app/Http/Controllers/Reports/CustomComponentReportController.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Http/Controllers/Reports/CustomComponentReportController.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:onlyTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3418,12 +3142,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Models\\Asset\:\:\$assigned\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Http/Controllers/ReportsController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\License\:\:\$depreciation\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Http/Controllers/ReportsController.php
 
 		-
@@ -3477,7 +3195,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: app/Http/Controllers/ReportsController.php
 
 		-
@@ -3501,12 +3219,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:checkouts\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/ReportsController.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: app/Http/Controllers/ReportsController.php
 
@@ -3535,27 +3247,9 @@ parameters:
 			path: app/Http/Controllers/ReportsController.php
 
 		-
-			message: '#^Relation ''asset'' is not found in App\\Models\\Maintenance model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/ReportsController.php
-
-		-
-			message: '#^Relation ''depreciation'' is not found in App\\Models\\License model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Http/Controllers/ReportsController.php
-
-		-
 			message: '#^Unknown parameter \$firstTimeSending in call to App\\Mail\\CheckoutComponentMail constructor\.$#'
 			identifier: argument.unknown
 			count: 1
-			path: app/Http/Controllers/ReportsController.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
 			path: app/Http/Controllers/ReportsController.php
 
 		-
@@ -3721,12 +3415,6 @@ parameters:
 			path: app/Http/Controllers/SuppliersController.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/SuppliersController.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$supplierId$#'
 			identifier: parameter.notFound
 			count: 4
@@ -3811,12 +3499,6 @@ parameters:
 			path: app/Http/Controllers/Users/ImpersonateController.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: app/Http/Controllers/Users/LDAPImportController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AccessoryCheckout\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3889,14 +3571,14 @@ parameters:
 			path: app/Http/Controllers/Users/UsersController.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$assetId$#'
-			identifier: parameter.notFound
+			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
+			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/ViewAssetsController.php
 
 		-
-			message: '#^Relation ''requests'' is not found in App\\Models\\AssetModel model\.$#'
-			identifier: larastan.relationExistence
+			message: '#^PHPDoc tag @param references unknown parameter\: \$assetId$#'
+			identifier: parameter.notFound
 			count: 1
 			path: app/Http/Controllers/ViewAssetsController.php
 
@@ -3943,12 +3625,6 @@ parameters:
 			path: app/Http/Middleware/PreventRequestsDuringMaintenance.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Http/Middleware/SecurityHeaders.php
-
-		-
 			message: '#^PHPDoc type array of property App\\Http\\Middleware\\TrimStrings\:\:\$except is not covariant with PHPDoc type array\<int, string\> of overridden property Illuminate\\Foundation\\Http\\Middleware\\TrimStrings\:\:\$except\.$#'
 			identifier: property.phpDocType
 			count: 1
@@ -3973,12 +3649,6 @@ parameters:
 			path: app/Http/Requests/ItemImportRequest.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: app/Http/Requests/ItemImportRequest.php
-
-		-
 			message: '#^Call to static method flash\(\) on an unknown class Input\.$#'
 			identifier: class.notFound
 			count: 1
@@ -3987,12 +3657,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$orderItem\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Transformers/ActionlogsTransformer.php
-
-		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/Http/Transformers/ActionlogsTransformer.php
 
@@ -4123,13 +3787,19 @@ parameters:
 			path: app/Http/Transformers/CompaniesTransformer.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Company\:\:\$parent\.$#'
+			message: '#^Access to an undefined property App\\Models\\Company\:\:\$users_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Transformers/CompaniesTransformer.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Company\:\:\$users_count\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Transformers/CompaniesTransformer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Transformers/CompaniesTransformer.php
@@ -4183,7 +3853,13 @@ parameters:
 			path: app/Http/Transformers/LicenseSeatsTransformer.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\License\:\:\$depreciation\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Transformers/LicensesTransformer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Transformers/LicensesTransformer.php
@@ -4333,22 +4009,10 @@ parameters:
 			path: app/Http/Transformers/SuppliersTransformer.php
 
 		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Http/Transformers/UploadedFilesTransformer.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 1
 			path: app/Http/Transformers/UploadedFilesTransformer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$assigned_maintenances_count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Transformers/UsersTransformer.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\User\:\:\$manages_locations_count\.$#'
@@ -4393,12 +4057,6 @@ parameters:
 			path: app/Importer/AccessoryImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/AccessoryImporter.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -4435,12 +4093,6 @@ parameters:
 			path: app/Importer/AssetImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 353 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/AssetImporter.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between int and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
@@ -4465,12 +4117,6 @@ parameters:
 			path: app/Importer/AssetModelImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/AssetModelImporter.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Category\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4483,12 +4129,6 @@ parameters:
 			path: app/Importer/CategoryImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/CategoryImporter.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Component\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4497,12 +4137,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Importer/ComponentImporter.php
-
-		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: app/Importer/ComponentImporter.php
 
@@ -4521,12 +4155,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Importer/ConsumableImporter.php
-
-		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: app/Importer/ConsumableImporter.php
 
@@ -4687,12 +4315,6 @@ parameters:
 			path: app/Importer/ItemImporter.php
 
 		-
-			message: '#^Method App\\Importer\\ItemImporter\:\:createOrFetchCompany\(\) should return int but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Importer/ItemImporter.php
-
-		-
 			message: '#^Method App\\Importer\\ItemImporter\:\:createOrFetchLocation\(\) should return App\\Models\\Location\|null but returns int\.$#'
 			identifier: return.type
 			count: 2
@@ -4801,12 +4423,6 @@ parameters:
 			path: app/Importer/LicenseImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 355 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/LicenseImporter.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -4831,12 +4447,6 @@ parameters:
 			path: app/Importer/LocationImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/LocationImporter.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4845,12 +4455,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Manufacturer\:\:\$errors\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Importer/ManufacturerImporter.php
-
-		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: app/Importer/ManufacturerImporter.php
 
@@ -4867,21 +4471,9 @@ parameters:
 			path: app/Importer/SupplierImporter.php
 
 		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/Importer/SupplierImporter.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 4
-			path: app/Importer/UserImporter.php
-
-		-
-			message: '#^PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD\.UnusedFormalParameter\)\)\: Unexpected token "\.UnusedFormalParameter\)", expected ''\)'' at offset 166 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
 			path: app/Importer/UserImporter.php
 
 		-
@@ -4905,7 +4497,7 @@ parameters:
 		-
 			message: '#^Access to property \$checkedOutTo on an unknown class App\\Listeners\\Event\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: app/Listeners/CheckoutableListener.php
 
 		-
@@ -4948,12 +4540,6 @@ parameters:
 			message: '#^Call to method listen\(\) on an unknown class App\\Listeners\\Illuminate\\Events\\Dispatcher\.$#'
 			identifier: class.notFound
 			count: 2
-			path: app/Listeners/CheckoutableListener.php
-
-		-
-			message: '#^Match expression does not handle remaining value\: true$#'
-			identifier: match.unhandled
-			count: 1
 			path: app/Listeners/CheckoutableListener.php
 
 		-
@@ -5089,12 +4675,6 @@ parameters:
 			path: app/Livewire/CheckoutTargetPanel.php
 
 		-
-			message: '#^Match expression does not handle remaining value\: string$#'
-			identifier: match.unhandled
-			count: 1
-			path: app/Livewire/CheckoutTargetPanel.php
-
-		-
 			message: '#^Access to an undefined property App\\Livewire\\CustomFieldEditor\:\:\$allowedElementKeys\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5159,12 +4739,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Importer.php
-
-		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Livewire/LdapSettings.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
@@ -5725,6 +5299,12 @@ parameters:
 			path: app/Models/Accessory.php
 
 		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Accessory\) and ''numRemaining'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Accessory.php
+
+		-
 			message: '#^Cannot access property \$id on class\-string\|object\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -5750,6 +5330,12 @@ parameters:
 
 		-
 			message: '#^Method App\\Models\\Accessory\:\:getLatestSignedAcceptance\(\) should return App\\Models\\Actionlog\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Accessory.php
+
+		-
+			message: '#^Method App\\Models\\Accessory\:\:lastCheckout\(\) should return Illuminate\\Database\\Eloquent\\Relations\\HasMany but returns Illuminate\\Database\\Eloquent\\Relations\\Relation\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Models/Accessory.php
@@ -5811,6 +5397,12 @@ parameters:
 		-
 			message: '#^Property App\\Models\\Accessory\:\:\$searchableRelations \(array\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/Models/Accessory.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between class\-string\<static\(App\\Models\\Accessory\)\> and ''App\\\\Models\\\\AssetModel'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Accessory.php
 
@@ -6103,6 +5695,12 @@ parameters:
 			path: app/Models/Asset.php
 
 		-
+			message: '#^Offset class\-string\<static\(App\\Models\\Asset\)\> on array\{App\\Models\\Accessory\: ''accessories\.fulfill…'', App\\Models\\Consumable\: ''consumables\.fulfill…'', App\\Models\\Component\: ''components\.fulfill…'', App\\Models\\License\: ''licenses\.fulfill…'', App\\Models\\AssetModel\: ''models\.fulfill…''\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/Asset.php
+
+		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$acceptedBy$#'
 			identifier: parameter.notFound
 			count: 1
@@ -6112,6 +5710,12 @@ parameters:
 			message: '#^PHPDoc tag @param references unknown parameter\: \$order$#'
 			identifier: parameter.notFound
 			count: 2
+			path: app/Models/Asset.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$query$#'
+			identifier: parameter.notFound
+			count: 1
 			path: app/Models/Asset.php
 
 		-
@@ -6128,6 +5732,12 @@ parameters:
 
 		-
 			message: '#^PHPDoc tag @return with type Illuminate\\Database\\Query\\Builder is incompatible with native type Illuminate\\Database\\Eloquent\\Builder\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: app/Models/Asset.php
+
+		-
+			message: '#^PHPDoc tag @return with type Illuminate\\Database\\Query\\Builder is incompatible with native type array\.$#'
 			identifier: return.phpDocType
 			count: 1
 			path: app/Models/Asset.php
@@ -6271,8 +5881,20 @@ parameters:
 			path: app/Models/Asset.php
 
 		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/Models/Asset.php
+
+		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/Models/Asset.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: app/Models/Asset.php
 
@@ -6469,6 +6091,12 @@ parameters:
 			path: app/Models/AssetModel.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>require_acceptance" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/AssetModel.php
+
+		-
 			message: '#^Method App\\Models\\Builders\\MaintenanceQueryBuilder\:\:active\(\) should return static\(App\\Models\\Builders\\MaintenanceQueryBuilder\) but returns App\\Models\\Builders\\MaintenanceQueryBuilder\.$#'
 			identifier: return.type
 			count: 1
@@ -6617,6 +6245,18 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Models/CheckoutAcceptance.php
+
+		-
+			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Models/CheckoutRequest.php
+
+		-
+			message: '#^Unsafe access to private property App\\Models\\CheckoutRequest\:\:\$customFieldFilterMapCache through static\:\:\.$#'
+			identifier: staticClassAccess.privateProperty
+			count: 4
+			path: app/Models/CheckoutRequest.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$category\.$#'
@@ -6949,6 +6589,12 @@ parameters:
 			path: app/Models/Component.php
 
 		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Component\) and ''numRemaining'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Component.php
+
+		-
 			message: '#^Cannot access property \$id on class\-string\|object\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -6999,6 +6645,12 @@ parameters:
 		-
 			message: '#^Property App\\Models\\Component\:\:\$searchableRelations \(array\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/Models/Component.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between class\-string\<static\(App\\Models\\Component\)\> and ''App\\\\Models\\\\AssetModel'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Component.php
 
@@ -7171,6 +6823,12 @@ parameters:
 			path: app/Models/Consumable.php
 
 		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Consumable\) and ''numRemaining'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Consumable.php
+
+		-
 			message: '#^Cannot access property \$id on class\-string\|object\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -7185,12 +6843,6 @@ parameters:
 		-
 			message: '#^Method App\\Models\\Consumable\:\:getLatestSignedAcceptance\(\) should return App\\Models\\Actionlog\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Models/Consumable.php
-
-		-
-			message: '#^Method App\\Models\\Consumable\:\:setRequestableAttribute\(\) should return Illuminate\\Database\\Eloquent\\Relations\\Relation but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: app/Models/Consumable.php
 
@@ -7233,6 +6885,12 @@ parameters:
 		-
 			message: '#^Property App\\Models\\Consumable\:\:\$searchableRelations \(array\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/Models/Consumable.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between class\-string\<static\(App\\Models\\Consumable\)\> and ''App\\\\Models\\\\AssetModel'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Consumable.php
 
@@ -7549,7 +7207,7 @@ parameters:
 			path: app/Models/Labels/FieldOption.php
 
 		-
-			message: '#^Dead catch \- Exception is never thrown in the try block\.$#'
+			message: '#^Dead catch \- Throwable is never thrown in the try block\.$#'
 			identifier: catch.neverThrown
 			count: 1
 			path: app/Models/Labels/FieldOption.php
@@ -7663,144 +7321,6 @@ parameters:
 			path: app/Models/Labels/Sheet.php
 
 		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\L4736_A\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/L4736_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\L4736_A\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/L4736_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\L6009_A\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/L6009_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\L6009_A\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/L6009_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\L7163_A\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/L7163_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\_3490_A\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/_3490_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\_5267_A\:\:FIELD_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/_5267_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\_5267_A\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/_5267_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\_5520_A\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/_5520_A.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Sheets\\Avery\\_5520_B\:\:TAG_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Sheets/Avery/_5520_B.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_241\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_241.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:FIELD_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:FIELD_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:LABEL_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:TITLE_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_C\:\:TITLE_SIZE is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_C.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_D\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_D.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Brother\\TZe_24mm_E\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Brother/TZe_24mm_E.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Dymo\\LabelWriter_11354\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Dymo/LabelWriter_11354.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Dymo\\LabelWriter_1933081\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Dymo/LabelWriter_1933081.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Dymo\\LabelWriter_2112283\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Dymo/LabelWriter_2112283.php
-
-		-
-			message: '#^Constant App\\Models\\Labels\\Tapes\\Dymo\\LabelWriter_2112284\:\:LABEL_MARGIN is unused\.$#'
-			identifier: classConstant.unused
-			count: 1
-			path: app/Models/Labels/Tapes/Dymo/LabelWriter_2112284.php
-
-		-
 			message: '#^Property App\\Models\\Labels\\Tapes\\Generic\\Continuous_53mm\:\:\$tapeHeight is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -7828,12 +7348,6 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/Models/Ldap.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
 			path: app/Models/Ldap.php
 
 		-
@@ -7921,6 +7435,12 @@ parameters:
 			path: app/Models/License.php
 
 		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\License\) and ''numRemaining'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/License.php
+
+		-
 			message: '#^Method App\\Models\\License\:\:adjustSeatCount\(\) should return Illuminate\\Database\\Eloquent\\Relations\\Relation but returns false\.$#'
 			identifier: return.type
 			count: 1
@@ -7977,6 +7497,12 @@ parameters:
 		-
 			message: '#^Property App\\Models\\License\:\:\$searchableRelations \(array\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
+			count: 1
+			path: app/Models/License.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between class\-string\<static\(App\\Models\\License\)\> and ''App\\\\Models\\\\AssetModel'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/License.php
 
@@ -8647,12 +8173,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$assignedMaintenances\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\User\:\:\$company_id\.$#'
 			identifier: property.notFound
 			count: 2
@@ -8704,6 +8224,12 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
 			identifier: property.notFound
 			count: 2
+			path: app/Models/User.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
 			path: app/Models/User.php
 
 		-
@@ -8875,80 +8401,8 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$accepted_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$company_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$custom_fields\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$file\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$item_model\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$item_name\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$item_serial\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$item_status\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$item_tag\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$qty\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedNotification\:\:\$settings\.$#'
-			identifier: property.notFound
+			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
+			identifier: parameter.notFound
 			count: 2
 			path: app/Notifications/AcceptanceItemAcceptedNotification.php
 
@@ -8956,175 +8410,7 @@ parameters:
 			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
 			identifier: parameter.notFound
 			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$accepted_date\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$company_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$custom_fields\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$file\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$item_model\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$item_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$item_serial\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$item_status\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$item_tag\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$qty\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemAcceptedToUserNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
-			identifier: parameter.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemAcceptedToUserNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$company_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$declined_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$item_model\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$item_name\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$item_serial\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$item_status\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$item_tag\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$qty\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AcceptanceItemDeclinedNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/AcceptanceItemDeclinedNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\AuditNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/AuditNotification.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>display_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -9139,42 +8425,6 @@ parameters:
 			path: app/Notifications/AuditNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAccessoryNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAccessoryNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAccessoryNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAccessoryNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAccessoryNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 3
@@ -9185,48 +8435,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Notifications/CheckinAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$expected_checkin\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinAssetNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/CheckinAssetNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckinAssetNotification.php
 
 		-
 			message: '#^Ternary operator condition is always true\.$#'
@@ -9253,38 +8461,8 @@ parameters:
 			path: app/Notifications/CheckinAssetNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinComponentNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckinComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinComponentNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinComponentNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinComponentNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckinComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinComponentNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinComponentNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
 			count: 1
 			path: app/Notifications/CheckinComponentNotification.php
 
@@ -9307,44 +8485,20 @@ parameters:
 			path: app/Notifications/CheckinComponentNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckinLicenseSeatNotification.php
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\User\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/CheckinComponentNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$item\.$#'
+			message: '#^Access to an undefined property App\\Models\\License\:\:\$location\.$#'
 			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckinLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckinLicenseSeatNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
 			count: 1
 			path: app/Notifications/CheckinLicenseSeatNotification.php
 
 		-
-			message: '#^Property App\\Notifications\\CheckinLicenseSeatNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
 			count: 1
 			path: app/Notifications/CheckinLicenseSeatNotification.php
 
@@ -9356,6 +8510,12 @@ parameters:
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>display_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/CheckinLicenseSeatNotification.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\User\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Notifications/CheckinLicenseSeatNotification.php
@@ -9367,54 +8527,6 @@ parameters:
 			path: app/Notifications/CheckoutAccessoryNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$acceptance\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$checkout_qty\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 11
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAccessoryNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckoutAccessoryNotification.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 1
@@ -9427,57 +8539,9 @@ parameters:
 			path: app/Notifications/CheckoutAccessoryNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$expected_checkin\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$last_checkout\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
 			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$settings\.$#'
 			identifier: property.notFound
-			count: 6
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutAssetNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckoutAssetNotification.php
-
-		-
-			message: '#^Constructor of class App\\Notifications\\CheckoutAssetNotification has an unused parameter \$acceptance\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
+			count: 5
 			path: app/Notifications/CheckoutAssetNotification.php
 
 		-
@@ -9495,60 +8559,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Component\:\:\$checkout_qty\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$acceptance\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$qty\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutComponentNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckoutComponentNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\CheckoutComponentNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
 			count: 1
 			path: app/Notifications/CheckoutComponentNotification.php
 
@@ -9571,60 +8581,6 @@ parameters:
 			path: app/Notifications/CheckoutConsumableNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$acceptance\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$qty\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutConsumableNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\CheckoutConsumableNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/CheckoutConsumableNotification.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 1
@@ -9643,48 +8599,6 @@ parameters:
 			path: app/Notifications/CheckoutLicenseSeatNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$admin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\CheckoutLicenseSeatNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/CheckoutLicenseSeatNotification.php
-
-		-
 			message: '#^Ternary operator condition is always true\.$#'
 			identifier: ternary.alwaysTrue
 			count: 1
@@ -9697,92 +8611,26 @@ parameters:
 			path: app/Notifications/CheckoutLicenseSeatNotification.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\CurrentInventory\:\:\$user\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/CurrentInventory.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/CurrentInventory.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
 			identifier: parameter.notFound
 			count: 1
 			path: app/Notifications/CurrentInventory.php
 
 		-
-			message: '#^Access to an undefined property App\\Notifications\\ExpectedCheckinAdminNotification\:\:\$assets\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/ExpectedCheckinAdminNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/ExpectedCheckinAdminNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\ExpectedCheckinAdminNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/ExpectedCheckinAdminNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/ExpectedCheckinNotification.php
-
-		-
 			message: '#^Access to an undefined property App\\Notifications\\ExpiringAssetsNotification\:\:\$assets\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Notifications/ExpiringAssetsNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\ExpiringAssetsNotification\:\:\$threshold\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/ExpiringAssetsNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
 			count: 1
 			path: app/Notifications/ExpiringAssetsNotification.php
 
 		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$asset$#'
 			identifier: parameter.notFound
-			count: 1
-			path: app/Notifications/ExpiringAssetsNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\ExpiringAssetsNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
 			count: 1
 			path: app/Notifications/ExpiringAssetsNotification.php
 
 		-
 			message: '#^Access to an undefined property App\\Notifications\\ExpiringLicenseNotification\:\:\$licenses\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Notifications/ExpiringLicenseNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\ExpiringLicenseNotification\:\:\$threshold\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/ExpiringLicenseNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
 			count: 1
 			path: app/Notifications/ExpiringLicenseNotification.php
 
@@ -9799,220 +8647,16 @@ parameters:
 			path: app/Notifications/ExpiringLicenseNotification.php
 
 		-
-			message: '#^Property App\\Notifications\\ExpiringLicenseNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/ExpiringLicenseNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/FirstAdminNotification.php
-
-		-
-			message: '#^Access to an undefined property \$this\(App\\Notifications\\InventoryAlert\)\:\:\$threshold\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/InventoryAlert.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\InventoryAlert\:\:\$items\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/InventoryAlert.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\InventoryAlert\:\:\$threshold\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/InventoryAlert.php
-
-		-
-			message: '#^Property App\\Notifications\\InventoryAlert\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/InventoryAlert.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/MailTest.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$expected_checkin\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$item_quantity\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$last_checkout\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$requested_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetCancelation\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
 			identifier: parameter.notFound
 			count: 2
 			path: app/Notifications/RequestAssetCancelation.php
 
 		-
-			message: '#^Property App\\Notifications\\RequestAssetCancelation\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/RequestAssetCancelation.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$expected_checkin\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$item_quantity\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$item_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$last_checkout\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$note\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$requested_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$settings\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\RequestAssetNotification\:\:\$target\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
 			message: '#^PHPDoc tag @param references unknown parameter\: \$notifiable$#'
 			identifier: parameter.notFound
 			count: 1
 			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Property App\\Notifications\\RequestAssetNotification\:\:\$params is unused\.$#'
-			identifier: property.unused
-			count: 1
-			path: app/Notifications/RequestAssetNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\SendUpcomingAuditNotification\:\:\$assets\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/SendUpcomingAuditNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Notifications\\SendUpcomingAuditNotification\:\:\$threshold\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/SendUpcomingAuditNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/SendUpcomingAuditNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$expire_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/WelcomeNotification.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$token\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/WelcomeNotification.php
-
-		-
-			message: '#^Attribute class App\\Notifications\\AllowDynamicProperties does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: app/Notifications/WelcomeNotification.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Actionlog\:\:\$created_by\.$#'
@@ -10041,7 +8685,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Asset\:\:\$created_by\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 3
 			path: app/Observers/AssetObserver.php
 
 		-
@@ -10357,39 +9001,9 @@ parameters:
 			path: app/Presenters/AssetPresenter.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$asset_tag\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Presenters/AssetPresenter.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$assigned\.$#'
+			message: '#^Access to an undefined property App\\Models\\Asset\:\:\$assigned\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Presenters/AssetPresenter.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Presenters/AssetPresenter.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$model\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Presenters/AssetPresenter.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Presenters/AssetPresenter.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 4
 			path: app/Presenters/AssetPresenter.php
 
 		-
@@ -10449,6 +9063,12 @@ parameters:
 		-
 			message: '#^Method App\\Presenters\\AssetPresenter\:\:eol_date\(\) should return string\|false but return statement is missing\.$#'
 			identifier: return.missing
+			count: 1
+			path: app/Presenters/AssetPresenter.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tag_color" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Presenters/AssetPresenter.php
 
@@ -10693,6 +9313,12 @@ parameters:
 			path: app/Presenters/LicensePresenter.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>tag_color" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Presenters/LicensePresenter.php
+
+		-
 			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$license\.$#'
 			identifier: property.notFound
 			count: 1
@@ -10867,7 +9493,7 @@ parameters:
 			path: app/Presenters/SupplierPresenter.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\SnipeModel\:\:\$gravatar\.$#'
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$company\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Presenters/UserPresenter.php
@@ -10921,10 +9547,10 @@ parameters:
 			path: app/Presenters/UserPresenter.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 3
-			path: app/Providers/AppServiceProvider.php
+			message: '#^Using nullsafe property access "\?\-\>tag_color" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Presenters/UserPresenter.php
 
 		-
 			message: '#^PHPDoc type array of property App\\Providers\\AuthServiceProvider\:\:\$policies is not covariant with PHPDoc type array\<class\-string, class\-string\> of overridden property Illuminate\\Foundation\\Support\\Providers\\AuthServiceProvider\:\:\$policies\.$#'
@@ -10939,7 +9565,7 @@ parameters:
 			path: app/Providers/AuthServiceProvider.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Company\:\:\$parent\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Providers/BreadcrumbsServiceProvider.php
@@ -11491,12 +10117,6 @@ parameters:
 			path: database/migrations/2015_11_26_195528_import_ldap_settings.php
 
 		-
-			message: '#^Called ''first'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: database/migrations/2016_11_01_030818_fix_forgotten_filename_in_action_logs.php
-
-		-
 			message: '#^Method MakeAssetAssignedToPolymorphic\:\:down\(\) has invalid return type voidatom\.$#'
 			identifier: class.notFound
 			count: 1
@@ -11575,12 +10195,6 @@ parameters:
 			path: database/migrations/2024_09_17_204302_change_user_id_to_created_by.php
 
 		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 2
-			path: database/seeders/AccessorySeeder.php
-
-		-
 			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Console\\Command\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -11605,12 +10219,6 @@ parameters:
 			path: database/seeders/AssetSeeder.php
 
 		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 2
-			path: database/seeders/AssetSeeder.php
-
-		-
 			message: '#^Property Database\\Seeders\\AssetSeeder\:\:\$admin is unused\.$#'
 			identifier: property.unused
 			count: 1
@@ -11629,20 +10237,8 @@ parameters:
 			path: database/seeders/ComponentSeeder.php
 
 		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 3
-			path: database/seeders/ComponentSeeder.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\Relation\:\:attach\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: database/seeders/ConsumableSeeder.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
 			count: 1
 			path: database/seeders/ConsumableSeeder.php
 
@@ -11651,12 +10247,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: database/seeders/DatabaseSeeder.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: database/seeders/DepartmentSeeder.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Import\:\:\$created_by\.$#'
@@ -11669,12 +10259,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 2
 			path: database/seeders/ImportSeeder.php
-
-		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 1
-			path: database/seeders/LicenseSeeder.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\User\:\:\$enable_sound\.$#'
@@ -11707,12 +10291,6 @@ parameters:
 			path: database/seeders/SettingsSeeder.php
 
 		-
-			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
-			identifier: larastan.noUnnecessaryCollectionCall
-			count: 2
-			path: database/seeders/UserSeeder.php
-
-		-
 			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Console\\Command\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -11728,10 +10306,4 @@ parameters:
 			message: '#^Class App\\Mail\\CheckoutComponentMail constructor invoked with 0 parameters, 5 required\.$#'
 			identifier: arguments.count
 			count: 1
-			path: routes/web.php
-
-		-
-			message: '#^Match expression does not handle remaining value\: string$#'
-			identifier: match.unhandled
-			count: 2
 			path: routes/web.php

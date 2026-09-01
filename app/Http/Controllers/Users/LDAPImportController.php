@@ -34,11 +34,6 @@ class LDAPImportController extends Controller
         if (! auth()->user()?->isSuperUser()) {
             abort(403);
         }
-        try {
-            // $this->ldap->connect(); I don't think this actually exists in LdapAd.php, and we don't really 'persist' LDAP connections anyways...right?
-        } catch (\Exception $e) {
-            return redirect()->route('users.index')->with('error', $e->getMessage());
-        }
 
         return view('users/ldap');
     }

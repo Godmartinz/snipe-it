@@ -24,9 +24,16 @@
 @endif
 @endcomponent
 
-@if (($req_accept == 1) && ($eula!=''))
+{{-- Accept-required copy is gated on $accept_url so the "please
+     read and click" line and the accept button below only render
+     when there's an actual acceptance record for the recipient to
+     click through to. Otherwise (e.g. a component checked out to
+     an asset whose assigned user could not be resolved) the email
+     used to render an empty [text]() markdown link that read as
+     broken. See GH #19570. --}}
+@if (($req_accept == 1) && ($accept_url) && ($eula!=''))
     {{ trans('mail.read_the_terms_and_click') }}
-@elseif (($req_accept == 1) && ($eula==''))
+@elseif (($req_accept == 1) && ($accept_url) && ($eula==''))
     {{ trans('mail.click_on_the_link_asset') }}
 @elseif (($req_accept == 0) && ($eula!=''))
     {{ trans('mail.read_the_terms') }}
@@ -38,7 +45,7 @@
 @endcomponent
 @endif
 
-@if ($req_accept == 1)
+@if (($req_accept == 1) && ($accept_url))
 **[✔ {{ trans('mail.i_have_read') }}]({{ $accept_url }})**
 @endif
 

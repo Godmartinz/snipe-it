@@ -3,7 +3,7 @@
 {{-- Page title --}}
 @section('title')
 
-    {{ trans('general.depreciation') }}: {{ $depreciation->name }} ({{ $depreciation->months }} {{ trans('general.months') }})
+    {{ trans('general.depreciation') }}: {{ $depreciation->name }} ({{ trans_choice('general.months_plural', $depreciation->months) }})
 
     @parent
 @stop

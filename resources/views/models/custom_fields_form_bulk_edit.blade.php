@@ -55,8 +55,6 @@
                 @endif
                 @if(!$field->is_unique)
                     <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}">{{ old($field->db_column_name(), (isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}</textarea>
-                        <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}"
-                                  name="{{ $field->db_column_name() }}">{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}</textarea>
                 @endif
               @elseif ($field->element=='checkbox')
                     <!-- Checkboxes -->
@@ -160,10 +158,11 @@
                                 <input type="text"
                                        value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}"
                                        id="{{ $field->db_column_name() }}"
-                                       class="form-control"
+                                       class="form-control{{ strtoupper($field->format) === 'MAC' ? ' mac-address-input' : '' }}"
                                        name="{{ $field->db_column_name() }}"
-                                       placeholder="Enter {{ strtolower($field->format) }} text">
-                        @endif 
+                                       @if (strtoupper($field->format) === 'MAC') inputmode="text" autocomplete="off" @endif
+                                       placeholder="{{ strtoupper($field->format) === 'MAC' ? 'AA:BB:CC:DD:EE:FF' : 'Enter '.strtolower($field->format).' text' }}">
+                        @endif
                             @else
                                 <input type="text" value="{{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}" class="form-control disabled" disabled>
                     @endif

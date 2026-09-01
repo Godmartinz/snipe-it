@@ -2,12 +2,14 @@
 
 namespace App\Importer;
 
+use App\Exceptions\ImportRowRejected;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\CompanyableScope;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
@@ -16,9 +18,28 @@ class ItemImporter extends Importer
 {
     protected $item;
 
+    protected Setting $settings;
+
+    // Every concrete subclass currently disables the reject-empty pass on
+    // update so that a present-but-empty CSV cell clears the corresponding
+    // DB column. Absent columns still preserve the DB value because the
+    // subclasses' handle() methods only populate $this->item for cells that
+    // are actually in the row. Flip to true on a subclass, or via
+    // setRejectEmptyOnUpdate() at runtime, to fall back to "keep DB value
+    // on empty CSV cell" behavior.
+    protected bool $rejectEmptyOnUpdate = false;
+
+    public function setRejectEmptyOnUpdate(bool $reject): self
+    {
+        $this->rejectEmptyOnUpdate = $reject;
+
+        return $this;
+    }
+
     public function __construct($filename)
     {
         parent::__construct($filename);
+        $this->settings = Setting::getSettings();
     }
 
     protected function handle($row)
@@ -225,7 +246,7 @@ class ItemImporter extends Importer
         $item = $item->only($model->getFillable());
 
         // Then iterate through the item and, if we are updating, remove any blank values.
-        if ($updating) {
+        if ($updating && $this->rejectEmptyOnUpdate) {
             $item = $item->reject(function ($value) {
                 return empty($value);
             });
@@ -533,28 +554,46 @@ class ItemImporter extends Importer
     /**
      * Fetch an existing company, or create new if it doesn't exist
      *
+     * @param  $asset_company_name  string
+     * @return int|null id of company created/found, or null when FMCS rejects the importing user's access to it
+     *
      * @author Daniel Melzter
      *
      * @since 3.0
-     *
-     * @param  $asset_company_name  string
-     * @return int id of company created/found
      */
     public function createOrFetchCompany($asset_company_name)
     {
         // Bypass CompanyableScope so the lookup can see companies the
-        // importer's user isn't FMCS-allowed to see — otherwise the
-        // SELECT misses an existing row, the code falls through to the
-        // INSERT path, and the unique index on companies.name rejects
-        // it (which is what the customer's stack trace shows).
+        // importer's user isn't FMCS-allowed to see. Without this, a
+        // scoped user hits the create path against a name that already
+        // exists in another tenant, and Watson ValidatingTrait rejects
+        // the save because company.name has to be globally unique.
         $company = Company::withoutGlobalScope(CompanyableScope::class)
             ->where('name', $asset_company_name)
             ->first();
+
+        $importing_user = auth()->user() ?? ($this->created_by ? User::find($this->created_by) : null);
+        $fmcs = (bool) $this->settings->full_multiple_companies_support;
+
         if ($company) {
+            if ($fmcs && $importing_user !== null && ! $importing_user->isSuperUser()) {
+                $userCompanyIds = $importing_user->companies()->pluck('companies.id')->all();
+                // Empty pivot under floater mode is a trusted global-access actor.
+                $isFloater = empty($userCompanyIds) && (bool) $this->settings->null_company_is_floater;
+
+                if (! $isFloater && ! in_array($company->id, $userCompanyIds, true)) {
+                    throw new ImportRowRejected(
+                        'company',
+                        'User is not a member of company "'.$asset_company_name.'". Row rejected.',
+                    );
+                }
+            }
+
             $this->log('A matching Company '.$asset_company_name.' already exists');
 
             return $company->id;
         }
+
         $company = new Company;
         $company->created_by = $this->created_by;
         $company->name = $asset_company_name;
@@ -703,19 +742,42 @@ class ItemImporter extends Importer
         }
 
         // Bypass CompanyableScope so the lookup can see locations the
-        // importer's user isn't FMCS-allowed to see — same shape as the
-        // Company fix in createOrFetchCompany(). Without this, a hidden
-        // existing location forces the INSERT path and trips the unique
-        // index on locations.name.
+        // importer's user isn't FMCS-allowed to see. Falling through
+        // to the create path when a matching row already exists would
+        // just produce a second row with the same name.
         $location = Location::withoutGlobalScope(CompanyableScope::class)
             ->where('name', $asset_location)
             ->first();
 
+        $importing_user = auth()->user() ?? ($this->created_by ? User::find($this->created_by) : null);
+        $fmcs = (bool) $this->settings->full_multiple_companies_support;
+        $locationsFmcs = (bool) $this->settings->scope_locations_fmcs;
+
         if ($location) {
+            // Only enforced when scope_locations_fmcs is on. Otherwise
+            // locations are global and every user can see all of them.
+            if ($fmcs
+                && $locationsFmcs
+                && $importing_user !== null
+                && ! $importing_user->isSuperUser()
+                && $location->company_id
+            ) {
+                $userCompanyIds = $importing_user->companies()->pluck('companies.id')->all();
+                $isFloater = empty($userCompanyIds) && (bool) $this->settings->null_company_is_floater;
+
+                if (! $isFloater && ! in_array($location->company_id, $userCompanyIds, true)) {
+                    throw new ImportRowRejected(
+                        'location',
+                        'User does not have access to location "'.$asset_location.'". Row rejected.',
+                    );
+                }
+            }
+
             $this->log('Location '.$asset_location.' already exists');
 
             return $location->id;
         }
+
         // No matching locations in the collection, create a new one.
         $location = new Location;
         $location->name = $asset_location;

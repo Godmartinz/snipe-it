@@ -90,7 +90,7 @@
 
 @section('moar_scripts')
     @can('files', $model)
-        @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
+        <x-modals.upload-file item-type="models" :item-id="$model->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['exportFile' => 'models-' . $model->name . '-export', 'search' => false])

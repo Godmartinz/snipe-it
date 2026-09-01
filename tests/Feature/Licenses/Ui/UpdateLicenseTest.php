@@ -211,6 +211,7 @@ class UpdateLicenseTest extends TestCase
         $license = License::factory()->create([
             'name' => 'Same Name',
             'seats' => 5,
+            'expiration_date' => null,
             'license_email' => null,
             'notes' => null,
             'order_number' => null,

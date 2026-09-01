@@ -95,17 +95,34 @@ trait AdjustsQuantity
     public function adjustQuantity(int $delta, string $note, ?int $orderItemId = null, ?string $filename = null): void
     {
         $column = $this->getAdjustableQuantityColumn();
-        $current = (int) ($this->{$column} ?? 0);
-        $inUse = max(0, (int) $this->currentlyInUseCount());
-        $floor = $inUse;
 
-        if ($current + $delta < $floor) {
-            throw new DomainException(
-                "Adjustment would take on-hand quantity ({$current}) below the {$inUse} unit(s) currently in use (delta={$delta})"
-            );
-        }
+        DB::transaction(function () use ($delta, $column, $note, $orderItemId, $filename) {
+            // TOCTOU-safe path: SELECT ... FOR UPDATE on this row so
+            // concurrent adjusters serialize. Read + floor-check +
+            // decrement all live under the same lock, otherwise two
+            // requests each read the same pre-decrement quantity, each
+            // pass the floor check independently, and each apply their
+            // delta - aggregate effect drives on-hand below in-use even
+            // though each request looked valid on its own. The pattern
+            // matches the pessimistic lock LicenseCheckoutController
+            // already uses on seat checkout for the same reason.
+            $locked = static::query()->lockForUpdate()->find($this->id);
+            if ($locked === null) {
+                // Row went away between the caller loading it and the
+                // trait entering the transaction. Rare (would require
+                // a concurrent forceDelete) but bail cleanly rather
+                // than hit a null-deref two lines below.
+                throw new DomainException("Row {$this->id} not found during adjustQuantity lock");
+            }
+            $current = (int) ($locked->{$column} ?? 0);
+            $inUse = max(0, (int) $locked->currentlyInUseCount());
 
-        DB::transaction(function () use ($delta, $column, $current, $note, $orderItemId, $filename) {
+            if ($current + $delta < $inUse) {
+                throw new DomainException(
+                    "Adjustment would take on-hand quantity ({$current}) below the {$inUse} unit(s) currently in use (delta={$delta})"
+                );
+            }
+
             // Use the query builder directly (not $this->increment) so
             // the model's `updated` event doesn't fire. Firing it would
             // write a second "update" action_log entry (with log_meta of
@@ -116,11 +133,11 @@ trait AdjustsQuantity
             // submissions (delta = 0) skip the round-trip.
             if ($delta > 0) {
                 $this->newQuery()->where('id', $this->id)->increment($column, $delta);
-                $this->{$column} = (int) $this->{$column} + $delta;
+                $this->{$column} = $current + $delta;
                 $this->syncOriginalAttribute($column);
             } elseif ($delta < 0) {
                 $this->newQuery()->where('id', $this->id)->decrement($column, abs($delta));
-                $this->{$column} = (int) $this->{$column} + $delta;
+                $this->{$column} = $current + $delta;
                 $this->syncOriginalAttribute($column);
             }
 
@@ -132,12 +149,12 @@ trait AdjustsQuantity
             $log->order_item_id = $orderItemId;
             $log->quantity = $delta;
             // Feed the history-tab's "changed" column so QuantityAdjust
-            // entries render "qty: 5 → 8" the same way an update-type
-            // log renders a name change. Only populated on non-zero
-            // deltas — audit-only (delta = 0) submissions carry their
-            // reason in `note` and leaving log_meta null keeps the
-            // "changed" column empty for them (no field actually
-            // changed, so nothing to diff).
+            // entries render qty diffs the same way an update-type log
+            // renders a name change. Only populated on non-zero deltas
+            // - audit-only (delta = 0) submissions carry their reason
+            // in `note` and leaving log_meta null keeps the "changed"
+            // column empty for them (no field actually changed, so
+            // nothing to diff).
             if ($delta !== 0) {
                 $log->log_meta = json_encode([
                     $column => ['old' => $current, 'new' => $current + $delta],

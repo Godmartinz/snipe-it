@@ -20,7 +20,7 @@ class LicenseCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->create())
             ->post(route('licenses.checkout.save', $license->id), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
             ])
             ->assertForbidden();
     }
@@ -36,7 +36,7 @@ class LicenseCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutLicenses()->create())
             ->post(route('licenses.checkout.save', $license->id), [
-                'assigned_to' => $target->id,
+                'assigned_user' => $target->id,
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
@@ -56,7 +56,7 @@ class LicenseCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutLicenses()->create())
             ->post(route('licenses.checkout.save', $license->id), [
-                'asset_id' => $asset->id,
+                'assigned_asset' => $asset->id,
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
@@ -76,7 +76,7 @@ class LicenseCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutLicenses()->create())
             ->post(route('licenses.checkout.save', ['licenseId' => $license->id, 'seatId' => $seats[1]->id]), [
-                'assigned_to' => $target->id,
+                'assigned_user' => $target->id,
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
@@ -94,7 +94,7 @@ class LicenseCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutLicenses()->create())
             ->post(route('licenses.checkout.save', $license->id), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
             ])
             ->assertRedirect()
             ->assertSessionHas('error');
@@ -111,11 +111,11 @@ class LicenseCheckoutTest extends TestCase
         $user2 = User::factory()->create();
 
         $this->actingAs($actor)
-            ->post(route('licenses.checkout.save', $license->id), ['assigned_to' => $user1->id])
+            ->post(route('licenses.checkout.save', $license->id), ['assigned_user' => $user1->id])
             ->assertSessionHas('success');
 
         $this->actingAs($actor)
-            ->post(route('licenses.checkout.save', $license->id), ['assigned_to' => $user2->id])
+            ->post(route('licenses.checkout.save', $license->id), ['assigned_user' => $user2->id])
             ->assertSessionHas('success');
 
         $assignedTo = $license->licenseseats()->pluck('assigned_to');
@@ -138,13 +138,13 @@ class LicenseCheckoutTest extends TestCase
 
         foreach ([User::factory()->create(), User::factory()->create()] as $user) {
             $this->actingAs($actor)
-                ->post(route('licenses.checkout.save', $license->id), ['assigned_to' => $user->id])
+                ->post(route('licenses.checkout.save', $license->id), ['assigned_user' => $user->id])
                 ->assertSessionHas('success');
         }
 
         $this->actingAs($actor)
             ->post(route('licenses.checkout.save', $license->id), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
             ])
             ->assertRedirect()
             ->assertSessionHas('error');

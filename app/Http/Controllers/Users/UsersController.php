@@ -350,7 +350,7 @@ class UsersController extends Controller
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
-            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+            $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
 
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -844,7 +844,12 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        if (($user = User::find($id)) && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
+        $user = User::find($id);
+        if ($user) {
+            $this->authorize('view', $user);
+        }
+
+        if ($user && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
             $credentials = ['email' => trim($user->email)];
 
             try {

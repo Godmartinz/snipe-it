@@ -542,4 +542,32 @@ class ComponentsController extends Controller
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * List components that are requestable AND reachable by the
+     * current caller (per FMCS + location scoping). Hydrates the
+     * components tab on /account/requestable. See the sibling
+     * AccessoriesController::requestable for design rationale.
+     */
+    public function requestable(Request $request): array
+    {
+        $query = Component::with('category', 'location', 'company', 'manufacturer', 'requests')
+            ->withCount('assets as components_assets_count')
+            ->Requestable();
+
+        if ($request->filled('search')) {
+            $query->TextSearch($request->input('search'));
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), ['name', 'created_at'], true) ? $request->input('sort') : 'name';
+
+        $rows = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+        return (new ComponentsTransformer)->transformComponents($rows, $total);
+    }
 }

@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Helpers\Helper;
 use App\Models\Builders\MaintenanceQueryBuilder;
 use App\Models\Traits\CompanyableChildTrait;
+use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\MaintenancesPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
@@ -28,11 +30,12 @@ use Watson\Validating\ValidatingTrait;
  * @property-read \App\Models\User|null $adminuser
  * @property-read \App\Models\User|null $responsibleParty
  * @property-read \App\Models\User|null $completedByUser
- * @property-read \Illuminate\Database\Eloquent\Model|null $item
+ * @property-read \Illuminate\Database\Eloquent\Model|null $item Polymorphic parent (usually Asset). See item() below.
  */
 class Maintenance extends SnipeModel implements ICompanyableChild
 {
     use CompanyableChildTrait;
+    use HasCalendarEvents;
     use HasFactory;
     use HasUploads;
     use Loggable, Presentable;
@@ -261,7 +264,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
      * still returns the right rows today. Once accessories actually
      * carry maintenances, callers should switch to ->item.
      */
-    public function asset()
+    public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class, 'item_id')
             ->withTrashed();

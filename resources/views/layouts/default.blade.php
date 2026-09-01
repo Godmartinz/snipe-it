@@ -306,7 +306,7 @@
                                         @can('self.profile')
                                         <li {!! (request()->is('account/accept') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('account.accept') }}">
-                                                <x-icon type="checkmark" class="fa-fw" />
+                                                <x-icon type="signature" class="fa-fw"/>
                                                 {{ trans('general.accept_assets_menu') }}
                                             </a>
                                         </li>
@@ -511,10 +511,6 @@
                                                 {{ trans('general.bulk_checkout') }}
                                             </a>
                                         </li>
-                                        <li{!! (request()->is('hardware/requested') ? ' class="active" aria-current="page"' : '') !!}>
-                                            <a href="{{ route('assets.requested') }}">
-                                                {{ trans('general.requested') }}</a>
-                                        </li>
                                     @endcan
 
                                     @can('create', \App\Models\Asset::class)
@@ -568,7 +564,14 @@
                                 </li>
                             @endif
 
-                            
+                            @can('view', \App\Models\Asset::class)
+                                <li{!! (request()->routeIs('calendar.index') ? ' class="active" aria-current="page"' : '') !!}>
+                                    <a href="{{ route('calendar.index') }}">
+                                        <x-icon type="calendar" class="fa-fw"/>
+                                        <span>{{ trans('general.calendar') }}</span>
+                                    </a>
+                            </li>
+                        @endcan
                         @can('view', \App\Models\License::class)
                             <li{!! (request()->is('licenses*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('licenses.index') }}">
@@ -826,10 +829,18 @@
                                 </ul>
                             </li>
                         @endcan
+                            @can('canCheckoutAtLeastOneItemType')
+                                <li{!! (request()->is('requests.index') ? ' class="active" aria-current="page"' : '') !!}>
+                                    <a href="{{ route('requests.index') }}">
+                                        <i class="fa-solid fa-boxes-packing"></i>
+                                        <span>{{ trans('general.pending_requests') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
 
                         @can('viewRequestable', \App\Models\Asset::class)
-                            <li{!! (request()->is('account/requestable-assets') ? ' class="active" aria-current="page"' : '') !!}>
-                                <a href="{{ route('requestable-assets') }}">
+                            <li{!! (request()->is('account/requestable') ? ' class="active" aria-current="page"' : '') !!}>
+                                <a href="{{ route('account.requestable') }}">
                                     <x-icon type="requestable" class="fa-fw" />
                                     <span>{{ trans('general.requestable_items') }}</span>
                                 </a>

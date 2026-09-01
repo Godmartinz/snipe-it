@@ -34,8 +34,8 @@
 
             <x-input.user-select
                 :label="trans('general.select_user')"
-                name="assigned_to"
-                :selected="old('assigned_to')"
+                name="assigned_user"
+                :selected="old('assigned_user', $checkoutRequest?->user_id)"
                 :companyId="$consumable->company_id"
                 required
             />
@@ -116,6 +116,8 @@
     </x-page-column>
 
     <x-page-column class="col-md-5">
+        <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$consumable" />
+
         <livewire:checkout-target-panel type="consumables" />
     </x-page-column>
 

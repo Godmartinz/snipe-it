@@ -10,6 +10,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -158,6 +159,39 @@ class ActionlogsTransformer
 
             }
             $clean_meta = $this->changedInfo($clean_meta);
+
+            // A license serial is the product key. When the current
+            // user does not hold licenses.keys / create / edit, the
+            // resource / index / export sinks all mask the raw key.
+            // The old / new pair in log_meta['serial'] on a license
+            // edit would otherwise leak both the previous and new
+            // key through the History tab and the activity report.
+            if ($actionlog->item instanceof License
+                && ! Gate::allows('viewKeys', $actionlog->item)
+                && isset($clean_meta['serial'])
+                && is_array($clean_meta['serial'])
+            ) {
+                if (isset($clean_meta['serial']['old'])) {
+                    $clean_meta['serial']['old'] = License::PRODUCT_KEY_MASK;
+                }
+                if (isset($clean_meta['serial']['new'])) {
+                    $clean_meta['serial']['new'] = License::PRODUCT_KEY_MASK;
+                }
+            }
+        }
+
+        // A license serial is the product key. When the current user
+        // does not hold licenses.keys / create / edit, mask it here the
+        // same way LicensesTransformer masks product_key. Without this
+        // the /api/v1/licenses/{id}/history and /api/v1/reports/activity
+        // sinks leak the raw key through actionlog rows.
+        $itemSerial = null;
+        if ($actionlog->item && $actionlog->item->serial) {
+            if ($actionlog->item instanceof License && ! Gate::allows('viewKeys', $actionlog->item)) {
+                $itemSerial = License::PRODUCT_KEY_MASK;
+            } else {
+                $itemSerial = e($actionlog->item->serial);
+            }
         }
 
         $array = [
@@ -177,7 +211,7 @@ class ActionlogsTransformer
                 'id' => (int) $actionlog->item->id,
                 'name' => e($actionlog->item->display_name) ?? null,
                 'type' => e($actionlog->itemType()),
-                'serial' => e($actionlog->item->serial) ? e($actionlog->item->serial) : null,
+                'serial' => $itemSerial,
             ] : null,
             'location' => ($actionlog->location) ? [
                 'id' => (int) $actionlog->location->id,
@@ -217,7 +251,7 @@ class ActionlogsTransformer
                 : null,
             'note' => ($actionlog->note) ? Helper::parseEscapedMarkedownInline($actionlog->note) : null,
             'signature_file' => (($actionlog->accept_signature) && Storage::exists('private_uploads/signatures/'.$actionlog->accept_signature)) ? route('log.signature.view', ['filename' => $actionlog->accept_signature]) : null,
-            'log_meta' => ((isset($clean_meta)) && (is_array($clean_meta))) ? $clean_meta : null,
+            'log_meta' => $clean_meta ?? null,
             'remote_ip' => e($actionlog->remote_ip) ?? null,
             'user_agent' => e($actionlog->user_agent) ?? null,
             'action_source' => ($actionlog->action_source) ?? null,

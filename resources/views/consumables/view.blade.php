@@ -103,7 +103,7 @@
 
 @section('moar_scripts')
     @can('files', $consumable)
-        @include ('modals.upload-file', ['item_type' => 'consumables', 'item_id' => $consumable->id])
+        <x-modals.upload-file item-type="consumables" :item-id="$consumable->id" />
     @endcan
 
     @can('update', $consumable)

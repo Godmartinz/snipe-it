@@ -40,11 +40,14 @@ Route::group(
                 ->push('Quickscan Checkin', route('hardware/quickscancheckin'))
             );
 
-        Route::get('requested', [AssetsController::class, 'getRequestedIndex'])
-            ->name('assets.requested')
-            ->breadcrumbs(fn (Trail $trail) => $trail->parent('hardware.index')
-                ->push(trans('admin/hardware/general.requested'), route('assets.requested'))
-            );
+        // Legacy /hardware/requested URL. Route + name have moved to
+        // /requests since the queue covers every requestable item
+        // type now (not just hardware). Kept here as a 301 so external
+        // bookmarks + integrations that point at the old URL land in
+        // the right place. Delete once we're confident nothing in the
+        // wild still references it.
+        Route::redirect('requested', '/requests', 301);
+        Route::redirect('requested/bulk-cancel', '/requests/bulk-cancel', 301);
 
         Route::get('audit/due', [AssetsController::class, 'dueForAudit'])
             ->name('assets.audit.due')

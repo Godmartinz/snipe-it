@@ -30,7 +30,7 @@ class ConsumableCheckoutTest extends TestCase
     {
         $this->actingAs(User::factory()->checkoutConsumables()->create())
             ->post(route('consumables.checkout.store', Consumable::factory()->create()), [
-                // missing assigned_to
+                // missing assigned_user
             ])
             ->assertSessionHas('error');
     }
@@ -39,7 +39,7 @@ class ConsumableCheckoutTest extends TestCase
     {
         $this->actingAs(User::factory()->checkoutConsumables()->create())
             ->post(route('consumables.checkout.store', Consumable::factory()->withoutItemsRemaining()->create()), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
             ])
             ->assertSessionHas('error');
     }
@@ -51,7 +51,7 @@ class ConsumableCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutConsumables()->create())
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
             ]);
 
         $this->assertTrue($user->consumables->contains($consumable));
@@ -67,7 +67,7 @@ class ConsumableCheckoutTest extends TestCase
 
         $this->actingAs(User::factory()->checkoutConsumables()->create())
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
             ]);
 
         Mail::assertSent(CheckoutConsumableMail::class, function ($mail) use ($user) {
@@ -83,7 +83,7 @@ class ConsumableCheckoutTest extends TestCase
 
         $this->actingAs($actor)
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
                 'note' => 'oh hi there',
             ]);
 
@@ -109,7 +109,7 @@ class ConsumableCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.index'))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
                 'redirect_option' => 'index',
                 'assigned_qty' => 1,
             ])
@@ -124,7 +124,7 @@ class ConsumableCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.index'))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
                 'redirect_option' => 'item',
                 'assigned_qty' => 1,
             ])
@@ -140,7 +140,7 @@ class ConsumableCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('components.index'))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
                 'redirect_option' => 'target',
                 'assigned_qty' => 1,
             ])
@@ -158,7 +158,7 @@ class ConsumableCheckoutTest extends TestCase
         $this->actingAs($admin)
             ->from(route('components.index'))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
                 'redirect_option' => 'target',
                 'checkout_qty' => 2,
             ]);
@@ -182,7 +182,7 @@ class ConsumableCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.checkout.show', $consumable))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 2,
                 'sign_in_place' => 1,
@@ -212,7 +212,7 @@ class ConsumableCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.checkout.show', $consumable))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 2,
                 'sign_in_place' => 1,
@@ -241,7 +241,7 @@ class ConsumableCheckoutTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 1,
                 'sign_in_place' => 1,

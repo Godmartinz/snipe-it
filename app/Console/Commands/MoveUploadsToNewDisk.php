@@ -89,7 +89,7 @@ class MoveUploadsToNewDisk extends Command
             $type_count++;
             $filename = basename($logo);
             Storage::disk('public')->put('uploads/'.$filename, file_get_contents($logo));
-            $this->info($type_count.'. LOGO: '.$filename.' was copied to '.env('PUBLIC_AWS_URL').'/uploads/'.$filename);
+            $this->info($type_count.'. LOGO: '.$filename.' was copied to '.config('filesystems.disks.public_aws.url').'/uploads/'.$filename);
         }
 
         $private_uploads['assets'] = glob('storage/private_uploads/assets'.'/*.*');
