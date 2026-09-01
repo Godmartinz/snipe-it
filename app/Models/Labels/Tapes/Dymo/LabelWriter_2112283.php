@@ -141,7 +141,6 @@ class LabelWriter_2112283 extends LabelWriter
             'text_render_mode' => 'block',
         ];
     }
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

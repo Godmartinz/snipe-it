@@ -164,9 +164,6 @@ class _5520_A extends _5520
             'title_offset_x' => 0.590551,
         ];
     }
-
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

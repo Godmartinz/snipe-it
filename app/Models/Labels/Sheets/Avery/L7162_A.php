@@ -152,9 +152,6 @@ class L7162_A extends L7162
             'title' => $this->getSupportTitle(),
         ];
     }
-
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

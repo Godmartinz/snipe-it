@@ -171,8 +171,6 @@ class _3490_A extends _3490
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

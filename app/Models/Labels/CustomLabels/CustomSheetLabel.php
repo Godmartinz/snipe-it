@@ -11,6 +11,7 @@ use App\Models\Labels\CustomLabels\Concerns\HasCustomLabelSupports;
 use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
 use App\Models\Labels\CustomLabels\Concerns\SeedsCustomLabelFromTemplate;
 use App\Models\Labels\RectangleSheet;
+use TCPDF;
 
 abstract class CustomSheetLabel extends RectangleSheet
 {
@@ -174,7 +175,7 @@ abstract class CustomSheetLabel extends RectangleSheet
         return $this->textRenderMode;
     }
 
-    public function preparePDF($pdf)
+    public function preparePDF(TCPDF $pdf): void
     {
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false, 0);

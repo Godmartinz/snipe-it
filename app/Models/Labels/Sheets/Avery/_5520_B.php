@@ -151,8 +151,6 @@ class _5520_B extends _5520
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

@@ -11,6 +11,7 @@ use App\Models\Labels\CustomLabels\Concerns\RenderCustomLabelContent;
 use App\Models\Labels\CustomLabels\Concerns\SeedsCustomLabelFromTemplate;
 use App\Models\Labels\Label;
 use App\Helpers\Helper;
+use TCPDF;
 
 abstract class CustomTapeLabel extends Label
 {
@@ -137,7 +138,7 @@ abstract class CustomTapeLabel extends Label
     }
 
 
-    public function preparePDF($pdf)
+    public function preparePDF(TCPDF $pdf): void
     {
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false, 0);

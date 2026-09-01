@@ -147,8 +147,6 @@ class L6009_A extends L6009
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

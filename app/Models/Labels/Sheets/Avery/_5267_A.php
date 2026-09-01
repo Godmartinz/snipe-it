@@ -161,8 +161,6 @@ class _5267_A extends _5267
         ];
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();
