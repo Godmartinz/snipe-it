@@ -427,7 +427,7 @@ class LabelsController extends Controller
         return view('settings.label-edit', [
             'config' => $label->toEditorConfig(),
             'sections' => $label->getEditorSections(),
-            'selectedLabel' => null,
+            'selectedLabel' => 'New Label',
             'selectedType' => $validated['type'],
             'importedConfig' => null,
             'customLabel' => null,
@@ -610,7 +610,9 @@ class LabelsController extends Controller
                 : 'sheet';
         }
 
-        $config['name'] = data_get($config, 'name', 'Copy of ' . class_basename($selectedLabel));
+        if (!$importedConfig) {
+            $config['name'] = 'Copy of ' . class_basename($selectedLabel);
+        }
 
         return view('settings.label-edit', [
             'config' => $config,
