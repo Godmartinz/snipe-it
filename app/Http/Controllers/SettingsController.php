@@ -598,12 +598,10 @@ class SettingsController extends Controller
         $is_gd_installed = extension_loaded('gd');
         $setting = Setting::getSettings();
 
-        $setting->label2_template_name = $setting->label2_template;
-
         if (str_starts_with($setting->label2_template, 'custom:')) {
             $customLabelId = (int)str_replace('custom:', '', $setting->label2_template);
 
-            $setting->label2_template_name = CustomUserLabel::find($customLabelId)?->name
+            $setting->label2_template_name = CustomUserLabel::find($customLabelId)->name
                 ?? $setting->label2_template;
         }
 
