@@ -165,8 +165,14 @@ class LabelsController extends Controller
             'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
             'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
         ];
-
-        if (!$isTape) {
+        if ($isTape) {
+            $rules += [
+                'dimensions' => ['required', 'array'],
+                'dimensions.width' => ['required', 'numeric', 'gt:0'],
+                'dimensions.height' => ['required', 'numeric', 'gt:0'],
+                'dimensions.label_gap' => ['nullable', 'numeric', 'min:0'],
+            ];
+        } else {
             $rules += [
                 'page' => ['required', 'array'],
                 'grid' => ['required', 'array'],
@@ -222,6 +228,7 @@ class LabelsController extends Controller
 
         if ($isTape) {
             $submittedConfig = [
+                'dimensions' => $castNumeric($validated['dimensions']),
                 'content' => $content,
                 'supports' => $supports,
             ];
@@ -403,6 +410,8 @@ class LabelsController extends Controller
         ]);
         //A new label will seed the DefaultLabel values
         if ($validated['type'] === 'sheet') {
+
+            $selectedLabel = 'DefaultLabel';
             $page = RectangleSheet::supportedPageSize($validated['page_size']);
             $label = (new PreviewSheetLabel())->seedFromTemplate(new DefaultLabel());
             $config = $label->toEditorConfig();
@@ -416,6 +425,7 @@ class LabelsController extends Controller
 
             $label->applyEditorConfig($config);
         } else {
+            $selectedLabel = 'StandardTape';
 
             $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
@@ -423,11 +433,13 @@ class LabelsController extends Controller
                 labelGap: (float)$validated['label_gap'] ?? 0,
             );
         }
+        $config = $label->toEditorConfig();
+        $config['name'] = 'New Label';
 
         return view('settings.label-edit', [
-            'config' => $label->toEditorConfig(),
+            'config' => $config,
             'sections' => $label->getEditorSections(),
-            'selectedLabel' => 'New Label',
+            'selectedLabel' => $selectedLabel,
             'selectedType' => $validated['type'],
             'importedConfig' => null,
             'customLabel' => null,
@@ -587,14 +599,16 @@ class LabelsController extends Controller
         }
 
         try {
-            if ($selectedLabel === 'StandardTape') {
-                $template = new PreviewTapeLabel;
-            } else {
-                $template = $selectedLabel
-                    ? Label::find($selectedLabel)
-                    : new DefaultLabel;
-            }
+            $template = match (true) {
+                $selectedLabel === 'StandardTape' => new PreviewTapeLabel,
+                $selectedLabel !== null => Label::find($selectedLabel),
+                default => new DefaultLabel,
+            };
         } catch (\Throwable $e) {
+            $template = null;
+        }
+
+        if (!$template) {
             $template = new DefaultLabel;
             $selectedLabel = 'DefaultLabel';
         }
