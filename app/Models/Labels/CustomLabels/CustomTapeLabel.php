@@ -176,6 +176,11 @@ abstract class CustomTapeLabel extends Label
     {
         return [
             'unit' => 'mm',
+            'dimensions' => [
+                'width' => $this->getWidth(),
+                'height' => $this->getHeight(),
+                'label_gap' => $this->getLabelGap(),
+            ],
             'printable_area' => $this->getPrintableAreaEditorConfig(),
             'content' => $this->getContentEditorConfig(),
             'supports' => $this->getSupportsEditorConfig(),

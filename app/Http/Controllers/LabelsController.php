@@ -297,7 +297,12 @@ class LabelsController extends Controller
             $rules += LabelGeometryRules::sheet();
         }
         if ($type === 'tape') {
-            $rules['dimensions'] = ['required', 'array'];
+            $rules += [
+                'dimensions' => ['required', 'array'],
+                'dimensions.width' => ['required', 'numeric', 'gt:0'],
+                'dimensions.height' => ['required', 'numeric', 'gt:0'],
+                'dimensions.label_gap' => ['nullable', 'numeric', 'min:0'],
+            ];
         }
 
         $validated = $request->validate($rules);
