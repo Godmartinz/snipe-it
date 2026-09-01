@@ -691,9 +691,7 @@ class SettingsController extends Controller
         if ($setting->save()) {
             $selectedTemplate = $setting->label2_template;
 
-            CustomUserLabel::query()->update([
-                'is_default' => false,
-            ]);
+            CustomUserLabel::where('is_default', true)->update(['is_default' => false]);
 
             if (str_starts_with($selectedTemplate, 'custom:')) {
                 $customLabelId = (int)str_replace('custom:', '', $selectedTemplate);

@@ -94,6 +94,10 @@ return [
     'page_size' => 'Page Size',
     'labels_per_sheet' => 'Labels Per Sheet',
     'label_count_help' => 'Adjust the row and column count if this doesn’t match the number of labels on your sheet',
+    'base_label_missing' => 'Base label can not be found',
+    'label_deleted_successfully' => 'Label deleted successfully',
+    'created_successfully' => ' :item created successfully',
+    'updated_successfully' => ':item updated successfully',
 
 
 ];

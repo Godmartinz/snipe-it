@@ -54,7 +54,7 @@
                     this._form = document.querySelector('.label-customizer-shell form');
 
                     if (!this._form) {
-                        console.log('custom_label_preview: form not found');
+                        console.warn('custom_label_preview: form not found');
                         return;
                     }
 
@@ -75,7 +75,7 @@
                     const template = payload.template;
 
                     if (!template) {
-                        console.log('custom_label_preview: missing template');
+                        console.warn('custom_label_preview: missing template');
                         return;
                     }
 

@@ -351,8 +351,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.labels.update');
     Route::delete('settings/labels/{label}', [LabelsController::class, 'destroy'])
         ->name('settings.labels.destroy');
-    Route::post('/settings/labels/import', [LabelsController::class, 'import'])
-        ->name('settings.labels.import');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')

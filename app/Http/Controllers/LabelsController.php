@@ -213,7 +213,7 @@ class LabelsController extends Controller
             return redirect()->back()
                 ->with(
                     'error',
-                    trans('admin/labels/labels.base_label_missing')
+                    trans('admin/labels/general.base_label_missing')
                 );
         }
 
@@ -269,7 +269,7 @@ class LabelsController extends Controller
 
         return redirect()
             ->route('settings.labels.index')
-            ->with('success', $label->name . ' updated successfully.');
+            ->with('success', trans('admin/labels/general.updated_successfully', ['item' => $label->name]));
     }
 
     public function store(Request $request)
@@ -332,7 +332,7 @@ class LabelsController extends Controller
 
         if (!$baseLabel) {
             return redirect()->back()
-                ->with('error', trans('admin/labels/labels.base_label_missing'));
+                ->with('error', trans('admin/labels/general.base_label_missing'));
         }
 
         if ($type === 'tape') {
@@ -390,7 +390,7 @@ class LabelsController extends Controller
         ]);
 
         return redirect()->route('settings.labels.index')
-            ->with('success', $customLabel->name . ' created successfully.');
+            ->with('success', trans('admin/labels/general.created_successfully', ['item' => $customLabel->name]));
     }
 
     public function create(Request $request, CustomLabelImportValidator $validator)
@@ -460,7 +460,7 @@ class LabelsController extends Controller
 
         return redirect()
             ->route('settings.labels.index')
-            ->with('success', $labelName . ' ' . trans('admin/labels/labels.label_deleted_successfully'));
+            ->with('success', $labelName . ' ' . trans('admin/labels/general.label_deleted_successfully'));
     }
 
     public function customLabelPreview(Request $request, string $labelName)
