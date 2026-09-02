@@ -23,6 +23,7 @@ class LabelPreviewAsset
         $asset->asset_tag = '100001';
         $asset->serial = 'SN9876543210';
         $asset->asset_eol_date = Carbon::parse('2025-01-01');
+        $asset->warranty_months = 24;
         $asset->order_number = '12345';
         $asset->purchase_date = Carbon::parse('2023-01-01');
         $asset->status_id = 1;
@@ -58,6 +59,9 @@ class LabelPreviewAsset
         $manufacturer = new Manufacturer();
         $manufacturer->id = 999999;
         $manufacturer->name = trans('admin/labels/table.example_manufacturer');
+        $manufacturer->support_email = 'support@test.com';
+        $manufacturer->support_phone = '1-555-555-5555';
+        $manufacturer->support_url = 'https://example.com';
 
         $model->setRelation('manufacturer', $manufacturer);
 
