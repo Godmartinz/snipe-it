@@ -77,16 +77,22 @@ class LabelsController extends Controller
      */
     public function show(string $labelName): JsonResponse|array
     {
-        $customLabel = CustomUserLabel::find($labelName);
+        if (str_starts_with($labelName, 'custom:')) {
+            $customLabelId = (int)str_replace('custom:', '', $labelName);
 
-        if ($customLabel) {
-            $this->authorize('view', $customLabel);
+            $customLabel = CustomUserLabel::find($customLabelId);
 
-            return (new LabelsTransformer)->transformLabels(
-                collect([[
-                    'source' => 'custom',
-                    'label' => $customLabel,
-                ]]), 1);
+            if ($customLabel) {
+                $this->authorize('view', $customLabel);
+
+                return (new LabelsTransformer)->transformLabels(
+                    collect([[
+                        'source' => 'custom',
+                        'label' => $customLabel,
+                    ]]),
+                    1
+                );
+            }
         }
 
         $labelName = str_replace('/', '\\', $labelName);
