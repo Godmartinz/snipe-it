@@ -73,10 +73,11 @@ class ImportLabel extends Component
             return;
         }
 
-        session()->flash('imported_label_config', $config);
+        session()->put('imported_label_config', $config);
 
         $this->redirectRoute('settings.labels.create', [
             'label' => $config['template'] ?? null,
+            'import' => 1,
         ]);
     }
 

@@ -394,6 +394,8 @@ class LabelsController extends Controller
             'is_default' => false,
         ]);
 
+        session()->forget('imported_label_config');
+
         return redirect()->route('settings.labels.index')
             ->with('success', trans('admin/labels/general.created_successfully', ['item' => $customLabel->name]));
     }
@@ -597,11 +599,7 @@ class LabelsController extends Controller
             $selectedLabel = str_replace('/', '\\', $selectedLabel);
         }
 
-        $importedConfig = session('imported_label_config');
-
-        if ($importedConfig) {
-            $selectedLabel = data_get($importedConfig, 'template', $selectedLabel);
-        }
+        $importedConfig = $request->boolean('import') ? session('imported_label_config') : null;
 
         try {
             $template = match (true) {
@@ -619,7 +617,13 @@ class LabelsController extends Controller
         }
 
         $label = $this->previewLabelForTemplate($template);
-        $config = $importedConfig ?: $label->toEditorConfig();
+
+        if ($importedConfig) {
+            $label->applyEditorConfig($importedConfig);
+            $config = $importedConfig;
+        } else {
+            $config = $label->toEditorConfig();
+        }
 
         $type = data_get($config, 'type');
 
