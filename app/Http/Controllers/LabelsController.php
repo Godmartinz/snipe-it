@@ -437,7 +437,7 @@ class LabelsController extends Controller
             $label = new PreviewTapeLabel(
                 width: (float)$validated['label_width'],
                 height: (float)$validated['label_height'],
-                labelGap: (float)$validated['label_gap'] ?? 0,
+                labelGap: (float)($validated['label_gap'] ?? 0),
             );
         }
         $config = $label->toEditorConfig();
