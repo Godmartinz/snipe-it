@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 return new class extends Migration
 {
@@ -16,27 +17,23 @@ return new class extends Migration
             $table->date('warranty_expires')->nullable()->after('warranty_months');
             $table->index('warranty_expires');
         });
-        $driver = DB::getDriverName();
 
-        if ($driver === 'sqlite') {
-            DB::table('assets')
-                ->whereNotNull('purchase_date')
-                ->whereNotNull('warranty_months')
-                ->update([
-                    'warranty_expires' => DB::raw(
-                        "date(purchase_date, '+' || warranty_months || ' months')"
-                    ),
-                ]);
-        } else {
-            DB::table('assets')
-                ->whereNotNull('purchase_date')
-                ->whereNotNull('warranty_months')
-                ->update([
-                    'warranty_expires' => DB::raw(
-                        'DATE_ADD(purchase_date, INTERVAL warranty_months MONTH)'
-                    ),
-                ]);
-        }
+        DB::table('assets')
+            ->whereNotNull('purchase_date')
+            ->whereNotNull('warranty_months')
+            ->select('id', 'purchase_date', 'warranty_months')
+            ->orderBy('id')
+            ->chunkById(1000, function ($rows) {
+                foreach ($rows as $row) {
+                    DB::table('assets')
+                        ->where('id', $row->id)
+                        ->update([
+                            'warranty_expires' => Carbon::parse($row->purchase_date)
+                                ->addMonths((int)$row->warranty_months)
+                                ->toDateString(),
+                        ]);
+                }
+            });
     }
 
     /**

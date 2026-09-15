@@ -665,7 +665,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
         ->name('reports/expiring-items')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
-            ->push(trans('general.Expiring_Items_Report'), route('reports/expiring-items')));
+            ->push(trans('general.expiring_items_report'), route('reports/expiring-items')));
     // Is this still used??
     Route::get(
         'export/depreciation', [ReportsController::class, 'exportDeprecationReport'])

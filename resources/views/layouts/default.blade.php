@@ -808,7 +808,7 @@
                                     </li>
                                     <li {!! (request()->is('reports/expiring-items') ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('reports/expiring-items') }}">
-                                            {{ trans('general.Expiring_Items_Report') }}
+                                            {{ trans('general.expiring_items_report') }}
                                         </a>
                                     </li>
                                     <li {!! (request()->is('reports/licenses') ? ' class="active" aria-current="page"' : '') !!}>

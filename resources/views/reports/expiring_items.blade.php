@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ trans('general.Expiring_Items_Report') }}
+    {{ trans('general.expiring_items_report') }}
     @parent
 @stop
 
