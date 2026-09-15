@@ -5,6 +5,7 @@
     'fixed_number' => 3,
     'table_header' => trans('general.assets'),
     'status_type' => null,
+    'presenter' => null,
 ])
 
 @aware(['name'])
@@ -22,7 +23,7 @@
     </x-slot:bulkactions>
 
     <x-table
-        :presenter="\App\Presenters\AssetPresenter::dataTableLayout($status_type !== 'Deleted' ? ['deleted_at'] : [])"
+            :presenter="$presenter ?? \App\Presenters\AssetPresenter::dataTableLayout( $status_type !== 'Deleted' ? ['deleted_at'] : [])"
         :$fixed_right_number
         :$fixed_number
         show_column_search="true"
