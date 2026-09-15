@@ -416,10 +416,24 @@
                                 <x-form.checkbox-row
                                     name="update"
                                     :label="trans('general.update_existing_values')"
-                                    :help_text="trans('admin/hardware/message.import.update_mode_help')"
+                                    :help_text="trans('general.update_mode_help')"
                                     :checked="(bool) $update"
                                     wire:model.live="update"
                                 />
+
+                                {{-- Only useful when Update Existing Values
+                                     is on. Default to clear-blanks behavior
+                                     unless the importing user explicitly opts in to
+                                     preserving DB values on blank CSV cells. --}}
+                                @if ($update)
+                                    <x-form.checkbox-row
+                                        name="preserve_blanks"
+                                        :label="trans('general.preserve_blank_cells_on_update')"
+                                        :help_text="trans('general.preserve_blank_cells_on_update_help')"
+                                        :checked="(bool) $preserve_blanks"
+                                        wire:model.live="preserve_blanks"
+                                    />
+                                @endif
                             @endif
 
                             @if ($typeOfImport === 'asset' && $snipeSettings->auto_increment_assets == 1 && $update)
@@ -1096,6 +1110,7 @@
                         var isLastSlice = (sliceIndex === totalSlices - 1);
                         var payload = {
                             'import-update': !!$wire.$get('update'),
+                            'import-preserve-blanks': !!$wire.$get('preserve_blanks'),
                             'send-welcome': !!$wire.$get('send_welcome'),
                             'import-type': $wire.$get('typeOfImport'),
                             // run-backup only makes sense before the first

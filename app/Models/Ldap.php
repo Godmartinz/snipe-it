@@ -73,8 +73,8 @@ class Ldap extends Model
         self::ignoreCertificates((bool) $ldap_server_cert_ignore);
 
         // If the user specifies where CA Certs are, make sure to use them
-        if (env('LDAPTLS_CACERT')) {
-            putenv('LDAPTLS_CACERT='.env('LDAPTLS_CACERT'));
+        if (config('app.ldap_tls_cacert')) {
+            putenv('LDAPTLS_CACERT='.config('app.ldap_tls_cacert'));
         }
         // You _were_ allowed to do this *after* the ldap_connect() in some versions of PHP, but it's not how they want
         // you to anymore, and it seems to not work at all in later PHP versions.

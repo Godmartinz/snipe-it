@@ -633,7 +633,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('requests', [\App\Http\Controllers\Assets\AssetsController::class, 'getRequestedIndex'])
         ->name('requests.index')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
-            ->push(trans('general.requested'), route('requests.index'))
+            ->push(trans('general.pending_requests'), route('requests.index'))
         );
 
     Route::post('requests/bulk-cancel', [\App\Http\Controllers\Assets\AssetsController::class, 'bulkCancelRequests'])
@@ -746,10 +746,13 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             Route::get('/{reportTemplate}', [ReportTemplatesController::class, 'show'])
                 ->name('report-templates.show')
                 ->breadcrumbs(function (Trail $trail, ReportTemplate $reportTemplate) {
+                    // 'asset' folds into the default since it maps to the
+                    // same breadcrumb parent. Component / consumable have
+                    // their own custom-report parents.
                     $parent = match ($reportTemplate->type) {
-                        'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
                         'consumable' => 'reports.custom.consumable',
+                        default => 'reports/custom',
                     };
 
                     return $trail->parent($parent)
@@ -759,10 +762,13 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
             Route::get('/{reportTemplate}/edit', [ReportTemplatesController::class, 'edit'])
                 ->name('report-templates.edit')
                 ->breadcrumbs(function (Trail $trail, ReportTemplate $reportTemplate) {
+                    // 'asset' folds into the default since it maps to the
+                    // same breadcrumb parent. Component / consumable have
+                    // their own custom-report parents.
                     $parent = match ($reportTemplate->type) {
-                        'asset' => 'reports/custom',
                         'component' => 'reports.custom.component',
                         'consumable' => 'reports.custom.consumable',
+                        default => 'reports/custom',
                     };
 
                     return $trail->parent($parent)

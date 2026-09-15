@@ -235,6 +235,21 @@ class UserFactory extends Factory
         return $this->appendPermission(['locations.view' => '1']);
     }
 
+    public function viewLocations()
+    {
+        return $this->appendPermission(['locations.view' => '1']);
+    }
+
+    public function createLocations()
+    {
+        return $this->appendPermission(['locations.create' => '1']);
+    }
+
+    public function cloneLocations()
+    {
+        return $this->viewLocations()->createLocations();
+    }
+
     public function viewAccessoryHistory()
     {
         return $this->appendPermission(['accessories.view' => '1']);
@@ -258,6 +273,19 @@ class UserFactory extends Factory
     public function createAssets()
     {
         return $this->appendPermission(['assets.create' => '1']);
+    }
+
+    /**
+     * Grants the permission set the `clone` policy composes for assets
+     * (view + create). Tests exercising the clone happy-path go through
+     * here so any future change to what `AssetPolicy::clone` requires
+     * gets picked up in one place rather than every test file. Negative
+     * tests still call `createAssets()` / `viewAssets()` directly to
+     * exercise a specific subset.
+     */
+    public function cloneAssets()
+    {
+        return $this->viewAssets()->createAssets();
     }
 
     public function editAssets()
@@ -295,6 +323,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['models.create' => '1']);
     }
 
+    public function cloneAssetModels()
+    {
+        return $this->viewAssetModels()->createAssetModels();
+    }
+
     public function deleteAssetModels()
     {
         return $this->appendPermission(['models.delete' => '1']);
@@ -318,6 +351,11 @@ class UserFactory extends Factory
     public function createAccessories()
     {
         return $this->appendPermission(['accessories.create' => '1']);
+    }
+
+    public function cloneAccessories()
+    {
+        return $this->viewAccessories()->createAccessories();
     }
 
     public function editAccessories()
@@ -348,6 +386,11 @@ class UserFactory extends Factory
     public function createConsumables()
     {
         return $this->appendPermission(['consumables.create' => '1']);
+    }
+
+    public function cloneConsumables()
+    {
+        return $this->viewConsumables()->createConsumables();
     }
 
     public function editConsumables()
@@ -390,6 +433,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['licenses.create' => '1']);
     }
 
+    public function cloneLicenses()
+    {
+        return $this->viewLicenses()->createLicenses();
+    }
+
     public function editLicenses()
     {
         return $this->appendPermission(['licenses.edit' => '1']);
@@ -423,6 +471,11 @@ class UserFactory extends Factory
     public function createComponents()
     {
         return $this->appendPermission(['components.create' => '1']);
+    }
+
+    public function cloneComponents()
+    {
+        return $this->viewComponents()->createComponents();
     }
 
     public function editComponents()
@@ -475,6 +528,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['users.create' => '1']);
     }
 
+    public function cloneUsers()
+    {
+        return $this->viewUsers()->createUsers();
+    }
+
     public function editUsers()
     {
         return $this->appendPermission(['users.edit' => '1']);
@@ -498,6 +556,11 @@ class UserFactory extends Factory
     public function deleteLocations()
     {
         return $this->appendPermission(['locations.delete' => '1']);
+    }
+
+    public function editLocations()
+    {
+        return $this->appendPermission(['locations.edit' => '1']);
     }
 
     public function canEditOwnLocation()

@@ -45,8 +45,8 @@ class AssetImporter extends ItemImporter
         // $this->item exclusively via setItemFromCsvIfPresent so absent
         // columns never enter the update payload (preserving DB values)
         // and present-but-empty columns land as null (clearing DB values).
-        // See sanitizeItemForStoring override below for the matching
-        // pass-through sanitize.
+        // The base sanitize's reject-empty pass is disabled by
+        // $rejectEmptyOnUpdate on ItemImporter.
         $this->item = [];
 
         // Shared lookup fields. Present-and-empty clears the FK; absent
@@ -179,19 +179,6 @@ class AssetImporter extends ItemImporter
         }
 
         $this->createAssetIfNotExists($row);
-    }
-
-    /**
-     * Override the base sanitize to skip the reject-empty pass. AssetImporter
-     * populates $this->item exclusively from CSV columns that were present in
-     * the row, so an empty value here is an explicit intent to clear the DB
-     * field on update. See handle() above for the matching item-population.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function sanitizeItemForStoring($model, $updating = false)
-    {
-        return collect($this->item)->only($model->getFillable())->toArray();
     }
 
     /**

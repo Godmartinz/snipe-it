@@ -11,7 +11,9 @@
     <x-container columns="2">
 
         <x-page-column class="col-md-9">
-            <x-box>
+            <x-box name="statuslabel" sr_only_title>
+
+                <x-slot:table_header>{{ trans('admin/statuslabels/table.title') }}</x-slot:table_header>
 
                 <x-slot:bulkactions>
                     <x-table.bulk-statuslabels />

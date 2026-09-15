@@ -79,6 +79,7 @@ class CalendarEventsApiTest extends TestCase implements TestsFullMultipleCompani
             ]))
             ->assertOk()
             ->json('events'))
+            ->filter(fn ($row) => $row['extendedProps']['source_type'] === Maintenance::class)
             ->pluck('extendedProps.source_id')
             ->all();
 
@@ -102,6 +103,7 @@ class CalendarEventsApiTest extends TestCase implements TestsFullMultipleCompani
             ->getJson(route('api.calendar.events', ['event_type' => ['maintenance.start']]))
             ->assertOk()
             ->json('events'))
+            ->filter(fn ($row) => $row['extendedProps']['source_type'] === Maintenance::class)
             ->pluck('extendedProps.source_id')
             ->all();
         $this->assertContains($maintenance->id, $ids);
@@ -111,6 +113,7 @@ class CalendarEventsApiTest extends TestCase implements TestsFullMultipleCompani
             ->getJson(route('api.calendar.events', ['event_type' => ['some.other.type']]))
             ->assertOk()
             ->json('events'))
+            ->filter(fn ($row) => $row['extendedProps']['source_type'] === Maintenance::class)
             ->pluck('extendedProps.source_id')
             ->all();
         $this->assertNotContains($maintenance->id, $ids);
@@ -150,6 +153,7 @@ class CalendarEventsApiTest extends TestCase implements TestsFullMultipleCompani
             ->getJson(route('api.calendar.events'))
             ->assertOk()
             ->json('events'))
+            ->filter(fn ($row) => $row['extendedProps']['source_type'] === Maintenance::class)
             ->pluck('extendedProps.source_id')
             ->all();
 

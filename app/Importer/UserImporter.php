@@ -142,17 +142,6 @@ class UserImporter extends ItemImporter
     }
 
     /**
-     * Override the base sanitize to skip the reject-empty pass. See handle()
-     * above for the matching item-population.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    protected function sanitizeItemForStoring($model, $updating = false)
-    {
-        return collect($this->item)->only($model->getFillable())->toArray();
-    }
-
-    /**
      * Parse a pipe-separated company column value into an array of company IDs,
      * creating companies that do not yet exist. Returns an empty array when the
      * raw value is blank (so callers can treat that as "don't change").

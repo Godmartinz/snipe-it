@@ -1,3 +1,8 @@
+{{-- input_div_class default depends on whether the row has a left-hand
+     label. With a label, the row already spends col-md-3 on the left,
+     without one the options need to be offset. Concentrating the grid
+     class here means a future Bootstrap / AdminLTE upgrade only has to
+     touch this file, not every place it's invoked. --}}
 @props([
     'name' => null,
     'item' => null,
@@ -9,11 +14,6 @@
     'help_text' => null,
     'help_icon' => null,
     'info_tooltip_text' => null,
-    // Default input column depends on whether the row has a left-hand label.
-    // With a label, the row already spends col-md-3 on the left; without one
-    // the options need to be offset. Concentrating the grid class here means
-    // a future Bootstrap / AdminLTE upgrade only has to touch this file, not
-    // every place it's invoked.
     'input_div_class' => isset($label) ? 'col-md-8' : 'col-md-8 col-md-offset-3',
 ])
 

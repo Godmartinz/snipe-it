@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Kits;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageUploadRequest;
+use App\Models\Accessory;
+use App\Models\AssetModel;
+use App\Models\Consumable;
+use App\Models\License;
 use App\Models\PredefinedKit;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
@@ -193,7 +197,7 @@ class PredefinedKitsController extends Controller
      * @author [D. Minaev] [<dmitriy.minaev.v@gmail.com>]
      *
      * @param  int  $modelId
-     * @return View
+     * @return RedirectResponse
      */
     public function updateModel(Request $request, $kit_id, $model_id)
     {
@@ -208,6 +212,16 @@ class PredefinedKitsController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withInput()->withErrors($validator);
         }
+
+        // Verify the user can view the
+        // model id they are about to write into the pivot. Without this,
+        // kits.edit alone would let them re-point the pivot at a model
+        // they cannot read directly, including one in another company.
+        $targetModel = AssetModel::find($request->input('model_id'));
+        if (! $targetModel) {
+            return redirect()->back()->withInput()->with('error', trans('admin/models/message.does_not_exist'));
+        }
+        $this->authorize('view', $targetModel);
 
         $pivot = $kit->models()->wherePivot('id', $request->input('pivot_id'))->first()->pivot;
 
@@ -274,7 +288,7 @@ class PredefinedKitsController extends Controller
      *
      * @param  int  $kit_id
      * @param  int  $license_id
-     * @return View
+     * @return RedirectResponse
      */
     public function updateLicense(Request $request, $kit_id, $license_id)
     {
@@ -289,6 +303,14 @@ class PredefinedKitsController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withInput()->withErrors($validator);
         }
+
+        // Verify the caller can view the license id they are about to
+        // write into the pivot. Mirrors the API sibling from FD-56594.
+        $targetLicense = License::find($request->input('license_id'));
+        if (! $targetLicense) {
+            return redirect()->back()->withInput()->with('error', trans('admin/licenses/message.does_not_exist'));
+        }
+        $this->authorize('view', $targetLicense);
 
         $pivot = $kit->licenses()->wherePivot('id', $request->input('pivot_id'))->first()->pivot;
 
@@ -356,7 +378,7 @@ class PredefinedKitsController extends Controller
      *
      * @param  int  $kit_id
      * @param  int  $accessory_id
-     * @return View
+     * @return RedirectResponse
      */
     public function updateAccessory(Request $request, $kit_id, $accessory_id)
     {
@@ -371,6 +393,14 @@ class PredefinedKitsController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withInput()->withErrors($validator);
         }
+
+        // Verify the caller can view the accessory id they are about
+        // to write into the pivot. Mirrors the API sibling from FD-56594.
+        $targetAccessory = Accessory::find($request->input('accessory_id'));
+        if (! $targetAccessory) {
+            return redirect()->back()->withInput()->with('error', trans('admin/accessories/message.does_not_exist'));
+        }
+        $this->authorize('view', $targetAccessory);
 
         $pivot = $kit->accessories()->wherePivot('id', $request->input('pivot_id'))->first()->pivot;
 
@@ -437,7 +467,7 @@ class PredefinedKitsController extends Controller
      *
      * @param  int  $kit_id
      * @param  int  $consumableId
-     * @return View
+     * @return RedirectResponse
      */
     public function updateConsumable(Request $request, $kit_id, $consumable_id)
     {
@@ -452,6 +482,14 @@ class PredefinedKitsController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withInput()->withErrors($validator);
         }
+
+        // Verify the caller can view the consumable id they are about
+        // to write into the pivot. Mirrors the API sibling from FD-56594.
+        $targetConsumable = Consumable::find($request->input('consumable_id'));
+        if (! $targetConsumable) {
+            return redirect()->back()->withInput()->with('error', trans('admin/consumables/message.does_not_exist'));
+        }
+        $this->authorize('view', $targetConsumable);
 
         $pivot = $kit->consumables()->wherePivot('id', $request->input('pivot_id'))->first()->pivot;
 

@@ -77,12 +77,20 @@ $(function () {
         // Initialize the ajaxy select2 with images.
         // This is a copy/paste of the code from snipeit.js, would be great to only have this in one place.
 
-        $('.js-data-ajax').each( function (i,item) {
+        // Scoped to #createModal so re-initialization only touches newly-loaded
+        // modal selects, not every js-data-ajax on the host page. Unscoped
+        // .each() clobbers the trigger page's existing select2 state (e.g. the
+        // Location picker whose "New" button opened this modal).
+        $('#createModal .js-data-ajax').each( function (i,item) {
             var link = $(item);
             var endpoint = link.data("endpoint");
             var select = link.data("select");
 
             link.select2({
+                // Explicit width because the modal is mid-animation when
+                // this runs, so measuring the parent's computed width
+                // returns 0 and the widget renders zero-pixels wide.
+                width: '100%',
                 ajax: {
 
                     // the baseUrl includes a trailing slash
@@ -125,15 +133,7 @@ $(function () {
 
   });
 
- 
-
-  $(document).on('click', '#createModal .toggle-password', function () {
-    $(this).toggleClass('fa-eye fa-eye-slash');
-    var input = $($(this).attr('data-toggle'));
-    input.attr('type', input.attr('type') === 'password' ? 'text' : 'password');
-  });
-
-  $('#createModal').on('click','#modal-save', function () {
+    $('#createModal').on('click','#modal-save', function () {
     $.ajax({
         type: 'POST',
         url: $('.modal-body form').attr('action'),

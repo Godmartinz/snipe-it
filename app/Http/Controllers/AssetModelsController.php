@@ -127,8 +127,6 @@ class AssetModelsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v1.0]
-     *
-     * @param  int  $modelId
      */
     public function edit(AssetModel $model): View|RedirectResponse
     {
@@ -147,7 +145,6 @@ class AssetModelsController extends Controller
      * @since [v1.0]
      *
      * @param  ImageUploadRequest  $request
-     * @param  int  $modelId
      *
      * @throws AuthorizationException
      */
@@ -201,8 +198,6 @@ class AssetModelsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v1.0]
-     *
-     * @param  int  $modelId
      */
     public function destroy(AssetModel $model): RedirectResponse
     {
@@ -272,8 +267,6 @@ class AssetModelsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v1.0]
-     *
-     * @param  int  $modelId
      */
     public function show(AssetModel $model): View|RedirectResponse
     {
@@ -288,12 +281,10 @@ class AssetModelsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v1.0]
-     *
-     * @param  int  $modelId
      */
     public function getClone(AssetModel $model): View|RedirectResponse
     {
-        $this->authorize('create', AssetModel::class);
+        $this->authorize('clone', $model);
 
         $cloned_model = clone $model;
         // Preserve the source model's id BEFORE we blank the working copy — the
@@ -435,8 +426,6 @@ class AssetModelsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v1.0]
-     *
-     * @param  int  $modelId
      */
     public function postBulkDelete(Request $request): RedirectResponse
     {

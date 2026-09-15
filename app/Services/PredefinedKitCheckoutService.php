@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Models\Accessory;
 use App\Models\Asset;
+use App\Models\Consumable;
+use App\Models\LicenseSeat;
 use App\Models\PredefinedKit;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -216,10 +219,10 @@ class PredefinedKitCheckoutService
                 foreach ($assets_to_add as $asset) {
                     $asset->location_id = $user->location_id;
 
-                    // Concurrency guard, same shape as Api\AssetsController::checkout.
+                    // Concurrency guard, same as Api\AssetsController::checkout.
                     // Kit checkout can race with any other checkout of the same asset.
-                    // Re-fetch under lockForUpdate and re-check availability before
-                    // invoking checkOut; a claimed asset gets skipped rather than
+                    // Re-fetch under lockForUpdate and re-check availability
+                    // before invoking checkOut. A claimed asset gets skipped rather than
                     // producing a duplicate history row and counter bump.
                     $locked = Asset::whereKey($asset->id)->lockForUpdate()->first();
                     if (! $locked || ! $locked->availableForCheckout()) {
@@ -235,33 +238,81 @@ class PredefinedKitCheckoutService
                 }
                 // licenses
                 foreach ($license_seats_to_add as $licenseSeat) {
-                    $licenseSeat->created_by = $admin->id;
-                    $licenseSeat->assigned_to = $user->id;
-                    if ($licenseSeat->save()) {
-                        event(new CheckoutableCheckedOut($licenseSeat, $user, $admin, $note));
+                    // Concurrency guard, same shape as the asset branch
+                    // above. getLicenseSeatsToAdd() reads freeSeats before
+                    // the transaction, so two concurrent kit checkouts
+                    // can pick the same "free" seat and both save
+                    // assigned_to on it, producing duplicate
+                    // CheckoutableCheckedOut history rows and audit-log
+                    // entries even though only one assignment persists on
+                    // the seat row. Re-fetch each seat under lockForUpdate
+                    // and re-check that assigned_to is still null before
+                    // claiming it. A seat that was claimed by a racing
+                    // request gets skipped with an operator-visible error
+                    // so the audit log matches the persisted state.
+                    $locked = LicenseSeat::whereKey($licenseSeat->id)->lockForUpdate()->first();
+                    if (!$locked || $locked->assigned_to !== null) {
+                        $errors[] = trans('admin/kits/general.none_licenses', [
+                            'license' => $licenseSeat->license?->name ?? '?',
+                            'qty' => 1,
+                        ]);
+
+                        continue;
+                    }
+                    $locked->created_by = $admin->id;
+                    $locked->assigned_to = $user->id;
+                    if ($locked->save()) {
+                        event(new CheckoutableCheckedOut($locked, $user, $admin, $note));
                     } else {
                         $errors[] = 'Something went wrong saving a license seat';
                     }
                 }
                 // consumables
                 foreach ($consumables_to_add as $consumable) {
-                    $consumable->assigned_to = $user->id;
-                    $consumable->users()->attach($consumable->id, [
-                        'consumable_id' => $consumable->id,
+                    // Same class of race as the license branch above but
+                    // count-bounded rather than identity-bounded: two
+                    // concurrent kit checkouts each read numRemaining()
+                    // before the transaction and both proceed to attach,
+                    // producing an oversubscribed pivot. Lock the
+                    // consumable row and re-count remaining under the
+                    // lock. Skip with an operator-visible error if the
+                    // capacity was already consumed by a racing request.
+                    $requestedQuantity = $consumable->pivot->quantity;
+                    $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
+                    if (!$locked || $locked->numRemaining() < $requestedQuantity) {
+                        $errors[] = trans('admin/kits/general.none_consumables', [
+                            'consumable' => $consumable->name,
+                            'qty' => $requestedQuantity,
+                        ]);
+
+                        continue;
+                    }
+                    $locked->users()->attach($locked->id, [
+                        'consumable_id' => $locked->id,
                         'user_id' => $admin->id,
                         'assigned_to' => $user->id,
                     ]);
-                    event(new CheckoutableCheckedOut($consumable, $user, $admin, $note));
+                    event(new CheckoutableCheckedOut($locked, $user, $admin, $note));
                 }
                 // accessories
                 foreach ($accessories_to_add as $accessory) {
-                    $accessory->assigned_to = $user->id;
-                    $accessory->users()->attach($accessory->id, [
-                        'accessory_id' => $accessory->id,
+                    // Same shape as the consumable branch above.
+                    $requestedQuantity = $accessory->pivot->quantity;
+                    $locked = Accessory::whereKey($accessory->id)->lockForUpdate()->first();
+                    if (!$locked || $locked->numRemaining() < $requestedQuantity) {
+                        $errors[] = trans('admin/kits/general.none_accessory', [
+                            'accessory' => $accessory->name,
+                            'qty' => $requestedQuantity,
+                        ]);
+
+                        continue;
+                    }
+                    $locked->users()->attach($locked->id, [
+                        'accessory_id' => $locked->id,
                         'user_id' => $admin->id,
                         'assigned_to' => $user->id,
                     ]);
-                    event(new CheckoutableCheckedOut($accessory, $user, $admin, $note));
+                    event(new CheckoutableCheckedOut($locked, $user, $admin, $note));
                 }
 
                 return $errors;

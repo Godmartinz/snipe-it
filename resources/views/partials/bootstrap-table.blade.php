@@ -15,6 +15,17 @@
             color: #fff !important;
             text-decoration: none !important;
         }
+
+        /* When the bulk-actions dropdown has a specific action picked,
+           rows that don't support that action get this class so the
+           operator can tell at a glance that the checkbox is inert
+           for that specific action. Style is checkbox-only (dimmed +
+           not-allowed cursor); the rest of the row stays fully
+           legible so the operator can still read the row's data. */
+        tr.bulk-action-incompatible input[type="checkbox"] {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
     </style>
 @endpush
 
@@ -2021,10 +2032,13 @@
     });
 
     // Dynamic bulk actions: when a table's bulk-actions dropdown was rendered with
-    // data-dynamic-actions, its options are populated here from the intersection of
-    // each selected row's available_actions.bulk_selectable. An action shows only
-    // when every currently-selected row supports it. Tables that rendered a static
-    // option list have no data-dynamic-actions attribute and are unaffected.
+    // data-dynamic-actions, its options are populated here from the UNION of every
+    // selected row's available_actions.bulk_selectable. An action shows if AT LEAST
+    // ONE currently-selected row supports it. Rows that don't support the picked
+    // action are auto-unchecked when the operator selects the action from the
+    // dropdown, so the effective selection lines up with what "Go" will actually
+    // submit. Tables that rendered a static option list have no data-dynamic-actions
+    // attribute and are unaffected.
     function refreshDynamicBulkActions(table) {
         var $table = $(table);
         var formId = $table.data('bulk-form-id');
@@ -2045,19 +2059,11 @@
         var currentValue = $select.val();
         var placeholder = $select.attr('data-placeholder') || '';
 
-        var eligible = null;
+        var eligible = {};
         for (var i = 0; i < selections.length; i++) {
             var supported = (selections[i].available_actions && selections[i].available_actions.bulk_selectable) || {};
-            var rowActions = {};
             for (var k in supported) {
-                if (supported[k] === true) rowActions[k] = true;
-            }
-            if (eligible === null) {
-                eligible = rowActions;
-            } else {
-                var next = {};
-                for (var kk in eligible) if (rowActions[kk]) next[kk] = true;
-                eligible = next;
+                if (supported[k] === true) eligible[k] = true;
             }
         }
 
@@ -2069,7 +2075,8 @@
         if (selections.length === 0) {
             $select.append($('<option/>', { value: '', text: placeholder }));
             $button.attr('disabled', 'disabled');
-        } else if (!eligible || Object.keys(eligible).length === 0) {
+        }
+        else if (Object.keys(eligible).length === 0) {
             $select.append($('<option/>', { value: '', text: '{{ trans('general.bulk_actions_none_available') }}' }));
             $button.attr('disabled', 'disabled');
         } else {
@@ -2092,7 +2099,164 @@
         }
 
         $select.select2({ minimumResultsForSearch: Infinity });
+
+        // Auto-uncheck rows that don't support the picked action. Bound
+        // here rather than via document delegation because select2's
+        // destroy-then-init cycle inside this function was intermittently
+        // swallowing delegated change events. Rebinding on every
+        // refresh keeps this deterministic. .off('.autoUncheck')
+        // isolates just this namespace so we don't clobber select2's
+        // own handlers.
+        $select.off('change.autoUncheck select2:select.autoUncheck').on('change.autoUncheck select2:select.autoUncheck', function () {
+            var action = $(this).val();
+            if (action) {
+                autoUncheckIncompatibleRowsFor($table, $(this));
+            }
+            else {
+                clearActionDependentRowStyling($table);
+            }
+        });
+
+        // Re-apply the action-dependent visual state now, in case the
+        // refresh was triggered while an action was still selected in
+        // the dropdown (e.g. operator checked a new row while "delete"
+        // was picked). Keeps styling consistent with the just-adjusted
+        // selection.
+        applyActionDependentRowStyling($table, $select.val() || null);
     }
+
+    function autoUncheckIncompatibleRowsFor($table, $select) {
+        var action = $select.val();
+        if (!action) return;
+
+        // Use uncheck(index) instead of uncheckBy(field, values). bs-table's
+        // uncheckBy at bootstrap-table.js line 10791 filters on ':enabled',
+        // which means once applyActionDependentRowStyling disables the
+        // checkbox on an incompatible row (or a prior refresh cycle did),
+        // uncheckBy silently skips it. uncheck(index) uses _toggleCheck
+        // which sets checked=false via prop() directly, without the
+        // :enabled filter, so incompatible rows still uncheck even if
+        // their checkbox is already disabled.
+        var idsToUncheck = {};
+        var selections = $table.bootstrapTable('getSelections');
+        for (var i = 0; i < selections.length; i++) {
+            var supported = (selections[i].available_actions && selections[i].available_actions.bulk_selectable) || {};
+            if (supported[action] !== true) {
+                idsToUncheck[selections[i].id] = true;
+            }
+        }
+
+        var data = $table.bootstrapTable('getData');
+        for (var j = 0; j < data.length; j++) {
+            if (idsToUncheck[data[j].id]) {
+                $table.bootstrapTable('uncheck', j);
+            }
+        }
+
+        applyActionDependentRowStyling($table, action);
+    }
+
+    // Toggle a visual disabled state on rows that don't support the
+    // currently-picked action. Composes on top of checkboxEnabledFormatter
+    // (which handles the "no actions at all" case at render time). This
+    // layer reacts live to dropdown changes and check events so operators
+    // can tell at a glance which rows will land in the batch.
+    function applyActionDependentRowStyling($table, action) {
+        var data = $table.bootstrapTable('getData');
+
+        $table.find('tbody > tr').each(function () {
+            var $tr = $(this);
+            var index = $tr.data('index');
+            var rowData = (typeof index !== 'undefined') ? data[index] : null;
+            if (!rowData || !rowData.available_actions || !rowData.available_actions.bulk_selectable) return;
+
+            var supported = rowData.available_actions.bulk_selectable;
+            var isIncompatible = !!(action && supported[action] !== true);
+
+            $tr.toggleClass('bulk-action-incompatible', isIncompatible);
+
+            // Only toggle the disabled attribute we set — leave whatever
+            // checkboxEnabledFormatter already decided at render time
+            // alone by only ADDING disabled when we mark incompatible
+            // and REMOVING it only when the row would otherwise be
+            // renderable (checkboxEnabledFormatter marks .disabled on
+            // the CELL wrapper, so we test that before re-enabling).
+            var $checkbox = $tr.find('input[type="checkbox"][name="btSelectItem"]');
+            if (!$checkbox.length) return;
+            if (isIncompatible) {
+                $checkbox.prop('disabled', true);
+            }
+            else {
+                var $cell = $checkbox.closest('.bs-checkbox');
+                var cellSaysDisabled = $cell.length && $cell.hasClass('disabled');
+                if (!cellSaysDisabled) {
+                    $checkbox.prop('disabled', false);
+                }
+            }
+        });
+    }
+
+    // Clear the class + attribute back to base state when there's no
+    // action picked (dropdown cleared or reset).
+    function clearActionDependentRowStyling($table) {
+        applyActionDependentRowStyling($table, null);
+    }
+
+    // Re-run the auto-uncheck against whatever action is currently in the
+    // dropdown for this table's bulk-actions form. Called after any row-
+    // check event so a re-check (or check-all) of an incompatible row
+    // doesn't sneak past the guard that fired on dropdown pick.
+    function reapplyAutoUncheckForTable(table) {
+        var $table = $(table);
+        var formId = $table.data('bulk-form-id');
+        if (!formId) return;
+
+        var $select = $(formId).find('select[data-dynamic-actions]');
+        if ($select.length === 0) return;
+        if (!$select.val()) return;
+
+        autoUncheckIncompatibleRowsFor($table, $select);
+    }
+
+    // bs-table wipes DOM classes when it re-renders rows (pagination,
+    // sort, filter, search). Re-apply the action-dependent styling
+    // after every body render so the visual state survives those
+    // interactions.
+    $('.snipe-table').on('post-body.bs.table', function () {
+        var $table = $(this);
+        var formId = $table.data('bulk-form-id');
+        if (!formId) return;
+
+        var $select = $(formId).find('select[data-dynamic-actions]');
+        if ($select.length === 0) return;
+
+        applyActionDependentRowStyling($table, $select.val() || null);
+    });
+
+    // Safety-net delegated listener for the dropdown change event. The
+    // direct binding inside refreshDynamicBulkActions should be doing
+    // the work, but if select2's destroy/init cycle ever clobbers it,
+    // this catches the event through DOM delegation. Both routes call
+    // the same function so double-firing is idempotent.
+    $(document).on('change', 'select[data-dynamic-actions]', function () {
+        var $select = $(this);
+        var formEl = $select.closest('form')[0];
+        if (!formEl) return;
+
+        var $table = $('.snipe-table').filter(function () {
+            var formId = $(this).data('bulk-form-id');
+            return formId && $(formId)[0] === formEl;
+        });
+        if ($table.length === 0) return;
+
+        var action = $select.val();
+        if (action) {
+            autoUncheckIncompatibleRowsFor($table, $select);
+        }
+        else {
+            clearActionDependentRowStyling($table);
+        }
+    });
 
     // These methods dynamically add/remove hidden input values in the bulk actions form
     $('.snipe-table').on('check.bs.table .btSelectItem', function (row, $element) {
@@ -2108,6 +2272,7 @@
         }));
         updateSelectedCount(this);
         refreshDynamicBulkActions(this);
+        reapplyAutoUncheckForTable(this);
     });
 
     $('.snipe-table').on('check-all.bs.table', function (event, rowsAfter) {
@@ -2132,6 +2297,7 @@
         }
         updateSelectedCount(this);
         refreshDynamicBulkActions(this);
+        reapplyAutoUncheckForTable(this);
     });
 
 
@@ -2834,7 +3000,7 @@
         else if (permissions.checkin && row.requestable) {
             actions += ' <a href="{{ config('app.url') }}/hardware/' + row.requestable.id +
                 '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">' +
-                '{{ trans('general.checkin') }}</a>';
+                '<x-icon type="checkin" class="fa-fw" /><span class="sr-only">{{ trans('general.checkin') }}</span></a>';
         }
 
         // Replenish button opens the shared adjust-quantity modal
@@ -3833,7 +3999,7 @@
     }
 
     function linkNumberToUserAssetsFormatter(value, row) {
-        return linkToUserSectionBasedOnCount(value, row.id, 'asset');
+        return linkToUserSectionBasedOnCount(value, row.id, 'assets');
     }
 
     function linkNumberToUserLicensesFormatter(value, row) {

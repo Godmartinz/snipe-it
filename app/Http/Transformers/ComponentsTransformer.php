@@ -96,11 +96,11 @@ class ComponentsTransformer
         $permissions_array['assigned_to_self'] = $userHasOpenRequest;
 
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Component::class),
-            'checkin' => Gate::allows('checkin', Component::class),
-            'update' => Gate::allows('update', Component::class),
-            'adjust_quantity' => Gate::allows('update', Component::class),
-            'clone' => Gate::allows('create', Component::class),
+            'checkout' => Gate::allows('checkout', $component),
+            'checkin' => Gate::allows('checkin', $component),
+            'update' => Gate::allows('update', $component),
+            'adjust_quantity' => Gate::allows('update', $component),
+            'clone' => Gate::allows('clone', $component),
             'delete' => $component->isDeletable(),
             'request' => (bool) $component->requestable && ! $userHasOpenRequest,
             'cancel' => (bool) $component->requestable && $userHasOpenRequest,

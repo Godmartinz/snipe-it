@@ -22,7 +22,7 @@ class ConsumableSeeder extends Seeder
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);
         }
-        $supplierIds = Supplier::all()->pluck('id');
+        $supplierIds = Supplier::pluck('id');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

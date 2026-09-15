@@ -178,7 +178,7 @@ class UsersController extends Controller
             }
 
             if (auth()->user()->isSuperUser() && auth()->user()->can('editableOnDemo')) {
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
 
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -334,10 +334,11 @@ class UsersController extends Controller
                 ));
             }
 
-            // Only save groups if the user is a superuser
-            if (auth()->user()->isSuperUser()) {
-                $user->groups()->sync($request->input('groups'));
-            }
+            // Group sync lives in the post-save block below so
+            // UserObserver::updating() has already written its
+            // Actionlog row for this edit session, and
+            // syncGroupsWithLogging() can merge the group diff into
+            // that same row instead of producing two log entries.
         }
 
         // Update the location of any assets checked out to this user
@@ -351,6 +352,12 @@ class UsersController extends Controller
 
         if ($user->save()) {
             $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
+
+            if (auth()->user()->isSuperUser()
+                && auth()->user()->can('canEditAuthFields', $user)
+                && auth()->user()->can('editableOnDemo')) {
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
+            }
 
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -485,16 +492,13 @@ class UsersController extends Controller
      */
     public function getClone(Request $request, User $user)
     {
-        $this->authorize('create', $user);
-
         // We need to reverse the UI specific logic for our
         // permissions here before we update the user.
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
         $user_to_clone = User::with('userloc', 'companies')->withTrashed()->find($user->id);
-        // Make sure they can view this particular user
-        $this->authorize('view', $user_to_clone);
+        $this->authorize('clone', $user_to_clone);
 
         if ($user_to_clone) {
 
@@ -844,7 +848,12 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        if (($user = User::find($id)) && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
+        $user = User::find($id);
+        if ($user) {
+            $this->authorize('view', $user);
+        }
+
+        if ($user && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
             $credentials = ['email' => trim($user->email)];
 
             try {

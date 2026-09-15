@@ -22,11 +22,20 @@ class CloneConsumableTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_clone_page_renders(): void
+    public function test_create_permission_alone_is_not_enough_to_clone_consumable(): void
     {
         $consumable = Consumable::factory()->create();
 
         $this->actingAs(User::factory()->createConsumables()->create())
+            ->get(route('consumables.clone.create', $consumable))
+            ->assertForbidden();
+    }
+
+    public function test_clone_page_renders(): void
+    {
+        $consumable = Consumable::factory()->create();
+
+        $this->actingAs(User::factory()->cloneConsumables()->create())
             ->get(route('consumables.clone.create', $consumable))
             ->assertOk();
     }
@@ -42,7 +51,7 @@ class CloneConsumableTest extends TestCase
             'order_number' => 'PO-CONS-CLONE-1',
         ]);
 
-        $response = $this->actingAs(User::factory()->createConsumables()->create())
+        $response = $this->actingAs(User::factory()->cloneConsumables()->create())
             ->get(route('consumables.clone.create', $source))
             ->assertOk();
 

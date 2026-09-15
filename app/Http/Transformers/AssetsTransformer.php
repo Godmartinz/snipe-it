@@ -3,7 +3,6 @@
 namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
-use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\Asset;
 use App\Models\Component;
@@ -172,20 +171,20 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
-            'checkout' => ($asset->deleted_at == '' && Gate::allows('checkout', Asset::class)) ? true : false,
-            'checkin' => ($asset->deleted_at == '' && Gate::allows('checkin', Asset::class)) ? true : false,
-            'clone' => Gate::allows('create', Asset::class) ? true : false,
+            'checkout' => ($asset->deleted_at == '' && Gate::allows('checkout', $asset)) ? true : false,
+            'checkin' => ($asset->deleted_at == '' && Gate::allows('checkin', $asset)) ? true : false,
+            'clone' => Gate::allows('clone', $asset) ? true : false,
             'restore' => ($asset->deleted_at != '' && Gate::allows('create', Asset::class)) ? true : false,
-            'update' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)) ? true : false,
-            'audit' => Gate::allows('audit', Asset::class) ? true : false,
-            'delete' => ($asset->deleted_at == '' && $asset->assigned_to == '' && Gate::allows('delete', Asset::class) && ($asset->deleted_at == '')) ? true : false,
+            'update' => ($asset->deleted_at == '' && Gate::allows('update', $asset)) ? true : false,
+            'audit' => Gate::allows('audit', $asset) ? true : false,
+            'delete' => ($asset->deleted_at == '' && $asset->assigned_to == '' && Gate::allows('delete', $asset) && ($asset->deleted_at == '')) ? true : false,
             'bulk_selectable' => [
-                'edit' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)),
-                'maintenance' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)),
-                'checkout' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('checkout', Asset::class)),
-                'checkin' => ($asset->deleted_at == '' && $asset->assigned_to && Gate::allows('checkin', Asset::class)),
-                'audit' => ($asset->deleted_at == '' && Gate::allows('audit', Asset::class)),
-                'delete' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('delete', Asset::class)),
+                'edit' => ($asset->deleted_at == '' && Gate::allows('update', $asset)),
+                'maintenance' => ($asset->deleted_at == '' && Gate::allows('update', $asset)),
+                'checkout' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('checkout', $asset)),
+                'checkin' => ($asset->deleted_at == '' && $asset->assigned_to && Gate::allows('checkin', $asset)),
+                'audit' => ($asset->deleted_at == '' && Gate::allows('audit', $asset)),
+                'delete' => ($asset->deleted_at == '' && ! $asset->assigned_to && Gate::allows('delete', $asset)),
                 'labels' => $asset->deleted_at == '',
                 'restore' => ($asset->deleted_at != '' && Gate::allows('create', Asset::class)),
             ],
@@ -406,7 +405,7 @@ class AssetsTransformer
 
             $permissions_array['available_actions'] = [
                 'checkout' => false,
-                'checkin' => Gate::allows('checkin', Accessory::class),
+                'checkin' => Gate::allows('checkin', $accessory_checkout->accessory),
             ];
 
             $array += $permissions_array;
@@ -451,9 +450,9 @@ class AssetsTransformer
 
         $permissions_array['available_actions'] = [
             'checkout' => false,
-            'checkin' => Gate::allows('checkin', License::class),
+            'checkin' => Gate::allows('checkin', $licenseseat->license),
             'bulk_selectable' => [
-                'checkin' => Gate::allows('checkin', License::class),
+                'checkin' => Gate::allows('checkin', $licenseseat->license),
             ],
         ];
 
@@ -503,8 +502,8 @@ class AssetsTransformer
                     'name' => e($component_checkout->adminuser->display_name),
                 ] : null,
                 'available_actions' => [
-                    'checkin' => (($component->deleted_at == '') && Gate::allows('checkin', Component::class)),
-                    'view' => (($component->deleted_at == '') && Gate::allows('view', Component::class)),
+                    'checkin' => (($component->deleted_at == '') && Gate::allows('checkin', $component)),
+                    'view' => (($component->deleted_at == '') && Gate::allows('view', $component)),
                 ],
             ];
         }

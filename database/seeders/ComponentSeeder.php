@@ -26,18 +26,18 @@ class ComponentSeeder extends Seeder
             $this->call(CompanySeeder::class);
         }
 
-        $companyIds = Company::all()->pluck('id');
+        $companyIds = Company::pluck('id');
 
         if (! Location::count()) {
             $this->call(LocationSeeder::class);
         }
 
-        $locationIds = Location::all()->pluck('id');
+        $locationIds = Location::pluck('id');
 
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);
         }
-        $supplierIds = Supplier::all()->pluck('id');
+        $supplierIds = Supplier::pluck('id');
 
         // See AccessorySeeder for the withInitialAcquisition rationale.
         $randomAcquisition = function () use ($supplierIds) {

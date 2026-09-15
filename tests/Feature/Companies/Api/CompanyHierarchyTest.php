@@ -611,4 +611,133 @@ class CompanyHierarchyTest extends TestCase
         $this->assertContains($assetInChild->id, $foundIds, 'Child asset should be visible via hierarchy');
         $this->assertContains($floaterAsset->id, $foundIds, 'Floater asset should be visible via null_company_is_floater');
     }
+
+    public function test_scoped_actor_cannot_reparent_own_company_under_a_foreign_top_level_company(): void
+    {
+        // Under FMCS, Company::getCurrentUserCompanyIds() walks parent+
+        // children. Re-parenting Company A under Company B would silently
+        // expose every Company A resource to every Company B member. The
+        // structural parent_must_be_top_level + must_have_no_children
+        // rules accept the write because they only look at the parent's
+        // shape, not the caller's scope on it. The parent_within_scope
+        // rule closes that gap.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $actor = $companyA->users()->save(User::factory()->editCompanies()->make());
+
+        $response = $this->actingAsForApi($actor)
+            ->patchJson(route('api.companies.update', ['company' => $companyA->id]), [
+                'name' => $companyA->name,
+                'parent_id' => $companyB->id,
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('error')
+            ->assertJsonStructure(['messages' => ['parent_id']]);
+
+        $this->assertNull(
+            $companyA->fresh()->parent_id,
+            'Company A must not be re-parented under a company outside the actor\'s scope.',
+        );
+
+        $message = implode(' ', (array) $response->json('messages.parent_id'));
+        $this->assertStringContainsString('outside your assigned scope', $message);
+    }
+
+    public function test_scoped_actor_cannot_create_child_of_foreign_company(): void
+    {
+        // Sibling of the update case for the create path. Same scope
+        // gap, same rule.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $actor = $companyA->users()->save(User::factory()->createCompanies()->make());
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.companies.store'), [
+                'name' => 'Attempted-Child-Of-B',
+                'parent_id' => $companyB->id,
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('error')
+            ->assertJsonStructure(['messages' => ['parent_id']]);
+
+        $this->assertDatabaseMissing('companies', ['name' => 'Attempted-Child-Of-B']);
+    }
+
+    public function test_scoped_actor_can_reparent_within_their_own_scope(): void
+    {
+        // Happy path: user in Company A can re-parent one of their own
+        // companies (an orphan they also belong to) under another of
+        // their companies. Guards against a fix that would reject every
+        // reparent from a non-superuser.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $actor = User::factory()->editCompanies()->create();
+        $actor->companies()->sync([$companyA->id, $companyB->id]);
+
+        $orphan = $companyA;
+        $newParent = $companyB;
+
+        $this->actingAsForApi($actor)
+            ->patchJson(route('api.companies.update', ['company' => $orphan->id]), [
+                'name' => $orphan->name,
+                'parent_id' => $newParent->id,
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($newParent->id, $orphan->fresh()->parent_id);
+    }
+
+    public function test_superuser_can_reparent_across_any_companies_under_fmcs(): void
+    {
+        // Regression guard for the fix. Superusers bypass FMCS scope
+        // entirely, so they must still be able to re-parent any company
+        // under any other, matching pre-fix behavior.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->patchJson(route('api.companies.update', ['company' => $companyA->id]), [
+                'name' => $companyA->name,
+                'parent_id' => $companyB->id,
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($companyB->id, $companyA->fresh()->parent_id);
+    }
+
+    public function test_scoped_actor_can_clear_parent_id_on_their_own_company(): void
+    {
+        // Sending parent_id = null (or 0, per the model mutator) never
+        // exposes new scope so it must pass regardless of what the
+        // parent used to be. Guards against a fix that would insist on
+        // scope on the CURRENT parent instead of the NEW one.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $companyA = Company::factory()->create();
+        $companyB = Company::factory()->create();
+
+        $child = Company::factory()->create(['parent_id' => $companyB->id]);
+
+        $actor = $companyA->users()->save(User::factory()->editCompanies()->make());
+        $actor->companies()->attach($child->id);
+
+        $this->actingAsForApi($actor)
+            ->patchJson(route('api.companies.update', ['company' => $child->id]), [
+                'name' => $child->name,
+                'parent_id' => null,
+            ])
+            ->assertStatus(200)
+            ->assertStatusMessageIs('success');
+
+        $this->assertNull($child->fresh()->parent_id);
+    }
 }

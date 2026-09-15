@@ -256,7 +256,7 @@ class ConsumablesController extends Controller
 
     public function clone(Consumable $consumable): View
     {
-        $this->authorize('create', $consumable);
+        $this->authorize('clone', $consumable);
         $consumable_to_close = $consumable;
         $consumable = clone $consumable_to_close;
         $consumable->id = null;

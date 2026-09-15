@@ -104,10 +104,10 @@ class AssetModelsTransformer
             // render the name as an <a> link or as plain text. Keeps
             // the permission check server-side so the JS doesn't need
             // a compile-time @can inside its Blade-hosted formatter.
-            'view' => Gate::allows('view', AssetModel::class),
-            'update' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
+            'view' => Gate::allows('view', $assetmodel),
+            'update' => (Gate::allows('update', $assetmodel) && ($assetmodel->deleted_at == '')),
             'delete' => $assetmodel->isDeletable(),
-            'clone' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at == '')),
+            'clone' => (Gate::allows('clone', $assetmodel) && ($assetmodel->deleted_at == '')),
             'restore' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at != '')),
             // Request / cancel: if the requestable flag is off the row
             // never surfaces on /account/requestable anyway (scoped
@@ -116,8 +116,8 @@ class AssetModelsTransformer
             'request' => (bool) $assetmodel->requestable && ! $userHasOpenRequest,
             'cancel' => (bool) $assetmodel->requestable && $userHasOpenRequest,
             'bulk_selectable' => [
-                'edit' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
-                'delete' => (Gate::allows('delete', AssetModel::class) && $assetmodel->isDeletable()),
+                'edit' => (Gate::allows('update', $assetmodel) && ($assetmodel->deleted_at == '')),
+                'delete' => (Gate::allows('delete', $assetmodel) && $assetmodel->isDeletable()),
             ],
         ];
 
@@ -155,7 +155,7 @@ class AssetModelsTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'delete' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
+            'delete' => (Gate::allows('update', $assetmodel) && ($assetmodel->deleted_at == '')),
         ];
 
         $array += $permissions_array;

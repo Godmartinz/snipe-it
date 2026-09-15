@@ -113,8 +113,8 @@ class LicenseCheckoutController extends Controller
         }
 
         if (Setting::getSettings()->full_multiple_companies_support == '1') {
-            if ($request->filled('asset_id')) {
-                $fmcsTarget = Asset::find($request->input('asset_id'));
+            if ($request->filled('assigned_asset')) {
+                $fmcsTarget = Asset::find($request->input('assigned_asset'));
                 if ($fmcsTarget && ! $license->canCheckoutTo($fmcsTarget)) {
                     return redirect()->route('licenses.index')->with('error', trans('general.error_checkout_company_mismatch', [
                         'item' => trans('general.license').' "'.$license->name.'"',
@@ -122,8 +122,8 @@ class LicenseCheckoutController extends Controller
                         'target' => trans('general.asset').' "'.$fmcsTarget->display_name.'"',
                     ]));
                 }
-            } elseif ($request->filled('assigned_to')) {
-                $fmcsTarget = User::find($request->input('assigned_to'));
+            } elseif ($request->filled('assigned_user')) {
+                $fmcsTarget = User::find($request->input('assigned_user'));
                 if ($fmcsTarget && ! $license->canCheckoutTo($fmcsTarget)) {
                     return redirect()->route('licenses.index')->with('error', trans('general.error_checkout_company_mismatch', [
                         'item' => trans('general.license').' "'.$license->name.'"',
@@ -142,24 +142,20 @@ class LicenseCheckoutController extends Controller
             $licenseSeat->created_by = auth()->id();
             $licenseSeat->notes = $request->input('notes');
 
-            if ($request->filled('asset_id')) {
+            if ($request->filled('assigned_asset')) {
                 $checkoutTarget = $this->checkoutToAsset($licenseSeat);
-            } elseif ($request->filled('assigned_to')) {
+            } elseif ($request->filled('assigned_user')) {
                 $checkoutTarget = $this->checkoutToUser($licenseSeat);
             }
         });
 
-        if ($request->filled('asset_id')) {
-            session()->put(['checkout_to_type' => 'asset']);
-            $request->request->add(['assigned_asset' => $checkoutTarget->id]);
+        if ($request->filled('assigned_asset')) {
             session()->put([
                 'redirect_option' => $request->input('redirect_option'),
                 'checkout_to_type' => 'asset',
                 'sign_in_place' => $request->boolean('sign_in_place'),
             ]);
-        } elseif ($request->filled('assigned_to')) {
-            session()->put(['checkout_to_type' => 'user']);
-            $request->request->add(['assigned_user' => $checkoutTarget->id]);
+        } elseif ($request->filled('assigned_user')) {
             session()->put([
                 'redirect_option' => $request->input('redirect_option'),
                 'checkout_to_type' => 'user',
@@ -224,10 +220,10 @@ class LicenseCheckoutController extends Controller
 
     protected function checkoutToAsset($licenseSeat)
     {
-        if (is_null($target = Asset::find(request('asset_id')))) {
+        if (is_null($target = Asset::find(request('assigned_asset')))) {
             return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.asset_does_not_exist'));
         }
-        $licenseSeat->asset_id = request('asset_id');
+        $licenseSeat->asset_id = request('assigned_asset');
 
         // Override asset's assigned user if available
         if ($target->checkedOutToUser()) {
@@ -245,10 +241,10 @@ class LicenseCheckoutController extends Controller
     protected function checkoutToUser($licenseSeat)
     {
         // Fetch the target and set the license user
-        if (is_null($target = User::find(request('assigned_to')))) {
+        if (is_null($target = User::find(request('assigned_user')))) {
             return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.user_does_not_exist'));
         }
-        $licenseSeat->assigned_to = request('assigned_to');
+        $licenseSeat->assigned_to = request('assigned_user');
 
         if ($licenseSeat->save()) {
             event(new CheckoutableCheckedOut($licenseSeat, $target, auth()->user(), request('notes'), [], 1, request()->boolean('sign_in_place')));

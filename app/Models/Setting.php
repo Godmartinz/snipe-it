@@ -258,7 +258,7 @@ class Setting extends Model
         }
 
         // Superuser-planted CSS renders inside <style> on every layout for
-        // every other superuser, so the sanitize step has to hold up as a
+        // every user, so the sanitize step has to hold up as a
         // CSS filter, not just an HTML filter. Two abuse primitives to
         // shut down:
         //
@@ -273,17 +273,36 @@ class Setting extends Model
         //   absolute or protocol-relative URL. Same-origin relative paths
         //   under /uploads/ etc. are fine for legit branding assets.
         //
-        // strip_tags belt-and-braces guards against injection reaching a
+        // strip_tags guards against injection reaching a
         // context that treats < as an HTML boundary. The old encode-then-
         // selectively-decode chain silently undid its own work on > and "
         // and did not touch either @import or url(), so it's gone.
         $custom_css = strip_tags($custom_css);
-        $custom_css = preg_replace('/@import\s+[^;]*;?/i', '', $custom_css);
+
+        // \b (word boundary) instead of \s+ so `@import"url"` and
+        // `@import/*c*/"url"` — both valid CSS tokenizations that a
+        // \s+ pattern would leave in place — still get stripped. `\b`
+        // sits between the `t` of `@import` and any non-word character
+        // that follows (string quote, `/`, whitespace, etc.), so any
+        // legal CSS token immediately after the at-keyword triggers
+        // the match. `@importfoo` won't match (no word boundary
+        // between two word chars), and `@importfoo` isn't a valid CSS
+        // at-rule anyway.
+        $custom_css = preg_replace('/@import\b[^;]*;?/i', '', $custom_css);
         $custom_css = preg_replace_callback(
             '/\burl\s*\(\s*([^)]*)\)/i',
             function (array $match): string {
                 $value = trim($match[1], " \t\n\r\"'");
-                if ($value === '' || preg_match('#^(https?:)?//|^data:|^javascript:|^vbscript:#i', $value)) {
+
+                // Reject any url() value containing a backslash. CSS lets
+                // you write `\2F\2F attacker.example` or `\/\/ attacker.example`
+                // and the browser resolves those escape sequences to
+                // `//attacker.example` at render time. Testing the raw
+                // literal against the scheme regex below would miss the
+                // bypass.
+                if ($value === ''
+                    || str_contains($value, '\\')
+                    || preg_match('#^(https?:)?//|^data:|^javascript:|^vbscript:#i', $value)) {
                     return '';
                 }
 

@@ -15,6 +15,7 @@ use App\Presenters\Presentable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
@@ -496,6 +497,12 @@ class License extends Depreciable
     public function manufacturer()
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id')->withTrashed();
+    }
+
+    
+    public function depreciation(): BelongsTo
+    {
+        return $this->belongsTo(Depreciation::class, 'depreciation_id');
     }
 
     /**

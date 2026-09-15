@@ -13,7 +13,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="checkoutRequests">
+        <x-box name="checkoutRequests" sr_only_title>
             <x-slot:table_header>
                 {{ trans('admin/hardware/general.requested') }}
             </x-slot:table_header>

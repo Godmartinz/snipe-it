@@ -15,7 +15,7 @@
 @endphp
 
 @if ($imagePath && $existing_image)
-    {{-- Delete-existing / reuse-cloned toggle. No label column — the checkbox
+    {{-- Delete-existing / reuse-cloned toggle. No label column. The checkbox
          label is inside the input area, so we render a bare offset form-group. --}}
     <div class="form-group {{ $errors->has('image_delete') ? 'has-error' : '' }}">
         <div class="col-md-9 col-md-offset-3">

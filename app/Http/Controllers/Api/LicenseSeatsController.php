@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class LicenseSeatsController extends Controller
@@ -216,6 +217,19 @@ class LicenseSeatsController extends Controller
 
                 // Are the assignment fields cleared? If yes, this is a checkin operation.
                 $is_checkin = ($assignmentTouched && $licenseSeat->assigned_to === null && $licenseSeat->asset_id === null);
+
+                // The method-level authorize() above requires licenses.checkout
+                // because most calls to this endpoint reassign a seat. When the
+                // update instead clears the assignment (a checkin), require the
+                // dedicated licenses.checkin permission too. Gate on the
+                // specific license so FMCS company scoping runs too (a caller
+                // in a different company shouldn't be able to free a seat on
+                // this one even with the permission bit).
+                if ($is_checkin && ! Gate::allows('checkin', $license)) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('general.unauthorized')), 403);
+
+                    return;
+                }
 
                 // The logging functions expect only one "target"; assets take precedence over users.
                 $target = null;

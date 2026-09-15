@@ -17,7 +17,7 @@ class DepartmentSeeder extends Seeder
             $this->call(LocationSeeder::class);
         }
 
-        $locationIds = Location::all()->pluck('id');
+        $locationIds = Location::pluck('id');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

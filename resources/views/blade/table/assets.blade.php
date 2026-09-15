@@ -6,6 +6,7 @@
     'table_header' => trans('general.assets'),
     'status_type' => null,
     'presenter' => null,
+    'export_name' => null,
 ])
 
 @aware(['name'])
@@ -23,14 +24,14 @@
     </x-slot:bulkactions>
 
     <x-table
-            :presenter="$presenter ?? \App\Presenters\AssetPresenter::dataTableLayout( $status_type !== 'Deleted' ? ['deleted_at'] : [])"
+        :presenter="$presenter ?? \App\Presenters\AssetPresenter::dataTableLayout( $status_type !== 'Deleted' ? ['deleted_at'] : [])"
         :$fixed_right_number
         :$fixed_number
         show_column_search="true"
         show_advanced_search="true"
         buttons="assetButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-assets-{{ date('Y-m-d') }}"
+        export_filename="export-{{ $export_name ? str_slug($export_name).'-' : '' }}assets-{{ date('Y-m-d') }}"
     />
 
 @endcan

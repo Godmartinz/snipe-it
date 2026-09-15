@@ -27,13 +27,13 @@ class AccessorySeeder extends Seeder
             $this->call(LocationSeeder::class);
         }
 
-        $locationIds = Location::all()->pluck('id');
+        $locationIds = Location::pluck('id');
 
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);
         }
 
-        $supplierIds = Supplier::all()->pluck('id');
+        $supplierIds = Supplier::pluck('id');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

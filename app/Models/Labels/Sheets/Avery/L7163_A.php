@@ -16,8 +16,6 @@ class L7163_A extends L7163
 
     private const LABEL_SIZE = 3.35;
 
-    private const LABEL_MARGIN = -0.30;
-
     private const FIELD_SIZE = 4.80;
 
     private const FIELD_MARGIN = 0.20;
@@ -76,8 +74,6 @@ class L7163_A extends L7163
     {
         return true;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

@@ -12,18 +12,6 @@ class TZe_24mm_C extends TZe_24mm
 
     private const LOGO_MARGIN = 2.20;
 
-    private const TITLE_SIZE = 2.80;
-
-    private const TITLE_MARGIN = 0.50;
-
-    private const LABEL_SIZE = 2.00;
-
-    private const LABEL_MARGIN = -0.35;
-
-    private const FIELD_SIZE = 3.20;
-
-    private const FIELD_MARGIN = 0.15;
-
     public function getUnit()
     {
         return 'mm';
@@ -63,8 +51,6 @@ class TZe_24mm_C extends TZe_24mm
     {
         return false;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

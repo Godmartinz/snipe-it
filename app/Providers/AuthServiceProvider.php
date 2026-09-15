@@ -46,6 +46,7 @@ use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use Carbon\CarbonInterval;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Console\ClientCommand;
 use Laravel\Passport\Console\InstallCommand;
@@ -89,6 +90,8 @@ class AuthServiceProvider extends ServiceProvider
      * Register any authentication / authorization services.
      *
      * @return void
+     *
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function boot()
     {
@@ -105,6 +108,20 @@ class AuthServiceProvider extends ServiceProvider
         Passport::personalAccessTokensExpireIn(CarbonInterval::years($expirationYears));
 
         Passport::cookie(config('passport.cookie_name'));
+
+        // Federated identity: a provider-agnostic OIDC bearer guard, layered
+        // alongside Passport via the `auth:oidc,api` multi-guard. Inert until
+        // config('oidc.enabled') is true, so this is purely additive.
+        // `$name` is unused: Laravel fixes the driver-closure signature as
+        // ($app, $name, $config), and the guard is named by config/auth.php.
+        Auth::extend('oidc', function ($app, $name, array $config) {
+            return new \App\Auth\OidcGuard(
+                Auth::createUserProvider($config['provider']),
+                $app['request'],
+                $app->make(\App\Services\Oidc\OidcTokenValidator::class),
+                $app->make(\App\Services\Oidc\OidcUserResolver::class),
+            );
+        });
 
         /**
          * BEFORE ANYTHING ELSE
@@ -271,27 +288,63 @@ class AuthServiceProvider extends ServiceProvider
                 || $user->can('view', Depreciation::class);
         });
 
-        // This  determines whether or not an API user should be able to get the selectlists.
+        // This  determines whether or not a user should be able to get the selectlists.
         // This can seem a little confusing, since view properties may not have been granted
-        // to the logged in API user, but creating assets, licenses, etc won't work
+        // to the logged in user, but creating assets, licenses, etc won't work
         // if the user can't view and interact with the select lists.
+        // Selectlists back form dropdowns across the app. A caller who
+        // can update, create, or check out any resource needs the
+        // dropdowns those forms depend on. A pure view-only caller
+        // does not: they browse tables via the index endpoints, not
+        // the selectlist endpoints. The pre-existing gate covered
+        // Asset / License / Component / Consumable / Accessory / User
+        // but silently 403'd anyone whose only permission was on one
+        // of the other admin resources (locations.edit ran into this on
+        // the parent + manager pickers). Extending the same
+        // update-or-create shape to every listable resource fixes
+        // that without granting view-only callers dropdowns they'd
+        // never have to use.
         Gate::define('view.selectlists', function ($user) {
-            return $user->can('update', Asset::class)
-                || $user->can('create', Asset::class)
-                || $user->can('checkout', Asset::class)
-                || $user->can('checkin', Asset::class)
-                || $user->can('audit', Asset::class)
-                || $user->can('update', License::class)
-                || $user->can('create', License::class)
-                || $user->can('update', Component::class)
-                || $user->can('create', Component::class)
-                || $user->can('update', Consumable::class)
-                || $user->can('create', Consumable::class)
-                || $user->can('update', Accessory::class)
-                || $user->can('create', Accessory::class)
-                || $user->can('update', User::class)
-                || $user->can('create', User::class)
-                || ($user->hasAccess('reports.view'));
+            $resources = [
+                Asset::class,
+                License::class,
+                Component::class,
+                Consumable::class,
+                Accessory::class,
+                User::class,
+                Location::class,
+                Category::class,
+                Manufacturer::class,
+                Supplier::class,
+                Company::class,
+                Department::class,
+                Statuslabel::class,
+                Depreciation::class,
+                AssetModel::class,
+            ];
+
+            foreach ($resources as $resource) {
+                if ($user->can('update', $resource) || $user->can('create', $resource)) {
+                    return true;
+                }
+            }
+
+            $checkoutables = [
+                Asset::class,
+                Accessory::class,
+                Consumable::class,
+                Component::class,
+                License::class,
+            ];
+
+            foreach ($checkoutables as $checkoutable) {
+                if ($user->can('checkout', $checkoutable) || $user->can('checkin', $checkoutable)) {
+                    return true;
+                }
+            }
+
+            return $user->can('audit', Asset::class)
+                || $user->hasAccess('reports.view');
         });
 
         // This determines whether the user can edit their profile based on the setting in Admin > General

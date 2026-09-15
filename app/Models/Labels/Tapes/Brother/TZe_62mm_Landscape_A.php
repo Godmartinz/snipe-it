@@ -70,8 +70,6 @@ class TZe_62mm_Landscape_A extends TZe_62mm_Landscape
 
     private const FIELD_MARGIN = 0.10;
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getPrintableArea();

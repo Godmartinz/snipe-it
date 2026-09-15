@@ -563,7 +563,7 @@ class UsersController extends Controller
             }
 
             if (($request->has('groups')) && (auth()->user()->isSuperUser())) {
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
 
             $user->syncCompaniesWithLogging($permittedCompanyIds);
@@ -736,7 +736,7 @@ class UsersController extends Controller
                 }
 
                 // Sync the groups since the user is a superuser and the groups pass validation
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
 
             // company_ids (new format) = full replacement sync, with
@@ -942,6 +942,7 @@ class UsersController extends Controller
         $this->authorize('view', License::class);
 
         if ($user = User::where('id', $id)->withTrashed()->first()) {
+            $this->authorize('view', $user);
             $licenses = $user->licenses();
 
             $total = $licenses->count();

@@ -10,6 +10,7 @@ use TCPDF;
 abstract class Z_Ultimate extends Label
 {
     private const LABEL_GAP = 3.00;
+
     private const MARGIN_SIDES = 1.50;
 
     private const MARGIN_ENDS = 1.50;
@@ -59,7 +60,7 @@ abstract class Z_Ultimate extends Label
         );
     }
 
-    public function preparePDF(TCPDF $pdf)
+    public function preparePDF(TCPDF $pdf): void
     {
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false, 0);

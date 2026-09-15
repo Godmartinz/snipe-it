@@ -20,6 +20,22 @@ class ItemImporter extends Importer
 
     protected Setting $settings;
 
+    // Every concrete subclass currently disables the reject-empty pass on
+    // update so that a present-but-empty CSV cell clears the corresponding
+    // DB column. Absent columns still preserve the DB value because the
+    // subclasses' handle() methods only populate $this->item for cells that
+    // are actually in the row. Flip to true on a subclass, or via
+    // setRejectEmptyOnUpdate() at runtime, to fall back to "keep DB value
+    // on empty CSV cell" behavior.
+    protected bool $rejectEmptyOnUpdate = false;
+
+    public function setRejectEmptyOnUpdate(bool $reject): self
+    {
+        $this->rejectEmptyOnUpdate = $reject;
+
+        return $this;
+    }
+
     public function __construct($filename)
     {
         parent::__construct($filename);
@@ -230,7 +246,7 @@ class ItemImporter extends Importer
         $item = $item->only($model->getFillable());
 
         // Then iterate through the item and, if we are updating, remove any blank values.
-        if ($updating) {
+        if ($updating && $this->rejectEmptyOnUpdate) {
             $item = $item->reject(function ($value) {
                 return empty($value);
             });

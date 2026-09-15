@@ -154,6 +154,10 @@ class TransferUserItemsBehaviorTest extends TestCase
             ->viewUsers()
             ->checkinAssets()
             ->checkoutAssets()
+            ->checkinAccessories()
+            ->checkoutAccessories()
+            ->checkinLicenses()
+            ->checkoutLicenses()
             ->create();
     }
 }

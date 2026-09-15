@@ -10,7 +10,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="accessory">
+        <x-box name="accessories" sr_only_title>
             <x-table.accessories name="accessories" :route="route('api.accessories.index')" fixed_right_number="3" />
         </x-box>
         <x-shiftclick/>

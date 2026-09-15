@@ -52,4 +52,53 @@ class BulkDeleteLocationsTest extends TestCase
             ->assertRedirect(route('locations.index'))
             ->assertSessionHas('error');
     }
+
+    public function test_confirmation_view_shows_blocking_dependency_counts_for_undeletable_rows()
+    {
+        // Populate several dependent-relations on the undeletable row
+        // so the confirm view can render the per-icon counts for each.
+        // Uses the icon-column layout mirroring users/confirm-bulk-delete:
+        // each dependency type gets its own column with a header icon
+        // and a per-row numeric count that is text-danger when >0.
+        $undeletable = Location::factory()->create();
+        Asset::factory()->count(2)->for($undeletable, 'location')->create();
+        Location::factory()->count(3)->create(['parent_id' => $undeletable->id]);
+        $deletable = Location::factory()->create();
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('locations.bulkdelete.show'), [
+                'ids' => [$undeletable->id, $deletable->id],
+            ])
+            ->assertStatus(200);
+
+        // Column icons in the table header. Icons match the tabs on the
+        // location view page so the two surfaces read consistently.
+        $response->assertSee('fa-barcode', false);
+        $response->assertSee('fa-city', false);
+
+        // Per-row counts on the undeletable row. 2 assets (assets_count
+        // column) + 3 children (children_count column) each render in
+        // their own cell as `text-danger">N</td>` when non-zero.
+        $response->assertSee('text-danger">2</td>', false);
+        $response->assertSee('text-danger">3</td>', false);
+    }
+
+    public function test_confirmation_view_shows_partial_selection_warning_when_some_rows_are_undeletable()
+    {
+        $undeletable = Location::factory()->create();
+        Asset::factory()->for($undeletable, 'location')->create();
+        $deletable = Location::factory()->create();
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('locations.bulkdelete.show'), [
+                'ids' => [$undeletable->id, $deletable->id],
+            ])
+            ->assertStatus(200);
+
+        // The partial-selection copy names both the selected count and
+        // the smaller deletable count so the operator sees the batch
+        // isn't going to fire against every row.
+        $response->assertSeeText('You selected 2');
+        $response->assertSeeText('1 will be deleted');
+    }
 }

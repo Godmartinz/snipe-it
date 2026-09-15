@@ -160,7 +160,7 @@
                             <x-slot:input>
                                 <input class="form-control" type="text" name="gravatar" id="gravatar" value="{{ old('gravatar', $user->gravatar) }}" />
                                 <p style="padding-top: 3px;">
-                                    <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" alt="{{ $user->display_name }} avatar image">
+                                    <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" referrerpolicy="no-referrer" alt="{{ $user->display_name }} avatar image">
                                     {!! trans('general.gravatar_url') !!}
                                 </p>
                             </x-slot:input>

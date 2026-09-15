@@ -266,7 +266,7 @@ class BulkAssetsController extends Controller
         // is Referer-derived and would need its own sanitize step.
         $bulk_back_url = Helper::sameOriginUrl($request->session()->pull('bulk_back_url')) ?? route('hardware.index');
 
-        $custom_field_columns = CustomField::all()->pluck('db_column')->toArray();
+        $custom_field_columns = CustomField::pluck('db_column')->toArray();
 
         // find custom field input attributes that start with 'null_'
         $null_custom_fields_inputs = array_filter($request->all(), function ($key) {

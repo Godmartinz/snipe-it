@@ -270,6 +270,7 @@
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         @if (auth()->user()->present()->gravatar())
                                             <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image"
+                                                 referrerpolicy="no-referrer"
                                                  alt="">
                                         @else
                                             <x-icon type="user" />
@@ -838,7 +839,7 @@
                                 <li{!! (request()->is('requests.index') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('requests.index') }}">
                                         <i class="fa-solid fa-boxes-packing"></i>
-                                        <span>{{ trans('general.requested') }}</span>
+                                        <span>{{ trans('general.pending_requests') }}</span>
                                     </a>
                                 </li>
                             @endcan

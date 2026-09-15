@@ -174,4 +174,87 @@ class EditMaintenanceTest extends TestCase
             'item_type' => \App\Models\Asset::class,
         ]);
     }
+
+    public function test_cannot_reparent_maintenance_via_item_id_to_asset_in_another_company()
+    {
+        // Both `asset_id` (legacy alias) and `item_id` are fillable on the
+        // Maintenance model. Gating only the legacy alias leaves the
+        // polymorphic FK as an alternative FMCS-bypass route to the same
+        // effect.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $user = $companyA->users()->save(User::factory()->editAssets()->make());
+        $assetA = Asset::factory()->create(['company_id' => $companyA->id]);
+        $assetB = Asset::factory()->create(['company_id' => $companyB->id]);
+        $maintenance = Maintenance::factory()->create(['asset_id' => $assetA->id]);
+
+        $this->actingAsForApi($user)
+            ->patchJson(route('api.maintenances.update', $maintenance), [
+                'name' => 'Cross-company reparent attempt via item_id',
+                'item_id' => $assetB->id,
+                'start_date' => '2024-01-01',
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertDatabaseHas('maintenances', [
+            'id' => $maintenance->id,
+            'item_id' => $assetA->id,
+            'item_type' => \App\Models\Asset::class,
+        ]);
+    }
+
+    public function test_can_reparent_maintenance_via_item_id_within_same_company()
+    {
+        // Happy path for the polymorphic FK: same-company re-parenting via
+        // item_id should still succeed. Guards against a fix that would
+        // reject item_id outright.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $company = Company::factory()->create();
+        $user = $company->users()->save(User::factory()->editAssets()->make());
+        $assetA = Asset::factory()->create(['company_id' => $company->id]);
+        $assetB = Asset::factory()->create(['company_id' => $company->id]);
+        $maintenance = Maintenance::factory()->create(['asset_id' => $assetA->id]);
+
+        $this->actingAsForApi($user)
+            ->patchJson(route('api.maintenances.update', $maintenance), [
+                'name' => 'Moved via item_id',
+                'item_id' => $assetB->id,
+                'start_date' => '2024-01-01',
+            ])
+            ->assertStatusMessageIs('success');
+
+        $this->assertDatabaseHas('maintenances', [
+            'id' => $maintenance->id,
+            'item_id' => $assetB->id,
+            'item_type' => \App\Models\Asset::class,
+        ]);
+    }
+
+    public function test_cannot_set_item_type_to_non_asset_class()
+    {
+        // Maintenances only support Asset-scoped attachments today, so any
+        // other item_type gets rejected rather than persisted.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $company = Company::factory()->create();
+        $user = $company->users()->save(User::factory()->editAssets()->make());
+        $asset = Asset::factory()->create(['company_id' => $company->id]);
+        $maintenance = Maintenance::factory()->create(['asset_id' => $asset->id]);
+
+        $this->actingAsForApi($user)
+            ->patchJson(route('api.maintenances.update', $maintenance), [
+                'item_id' => $user->id,
+                'item_type' => User::class,
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertDatabaseHas('maintenances', [
+            'id' => $maintenance->id,
+            'item_id' => $asset->id,
+            'item_type' => \App\Models\Asset::class,
+        ]);
+    }
 }

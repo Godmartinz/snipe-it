@@ -42,8 +42,8 @@ class PredefinedKitsTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'update' => Gate::allows('update', PredefinedKit::class),
-            'delete' => Gate::allows('delete', PredefinedKit::class),
+            'update' => Gate::allows('update', $kit),
+            'delete' => Gate::allows('delete', $kit),
             'checkout' => Gate::allows('checkout', Asset::class),
             // 'clone' => Gate::allows('create', PredefinedKit::class),
             // 'restore' => Gate::allows('create', PredefinedKit::class),

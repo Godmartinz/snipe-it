@@ -392,7 +392,7 @@
         @if ($infoPanelObj->depreciation && $infoPanelObj->purchase_date)
             <x-info-element icon_type="depreciation" title="{{ trans('general.depreciation') }}">
                 {!!  $infoPanelObj->depreciation->present()->nameUrl !!}
-                ({{ $infoPanelObj->depreciation->months.' '.trans('general.months')}})
+                ({{ trans_choice('general.months_plural', $infoPanelObj->depreciation->months) }})
             </x-info-element>
 
             <x-info-element icon_type="depreciation-calendar" class="{{ $infoPanelObj->depreciationProgressPercent() > 90 ? 'text-danger' : '' }}" title="{{ trans('admin/hardware/form.fully_depreciated') }}">

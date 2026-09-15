@@ -30,12 +30,14 @@ class UpdateLocationsTest extends TestCase
 
     public function test_edit_page_ships_manager_select_and_submit_controls()
     {
-        // Regression guard for the migration off @include('partials.forms
-        // .edit.user-select') to <x-input.user-select>. The manager
-        // picker must still emit the assigned_user_select select id (the
-        // "+ New user" quick-create modal targets it via data-select), and
-        // the bottom cancel/save controls come from <x-box.footer /> which
-        // <x-box> renders when its parent <x-form> exposes a route.
+        // Regression guard for the manager picker + submit controls on
+        // the location edit page. The select id is derived from the
+        // component's `name` prop, so a manager picker with
+        // name="manager_id" gets id="manager_id_select" and the
+        // "+ New user" quick-create modal targets that id via
+        // data-select. The bottom cancel/save controls come from
+        // <x-box.footer /> which <x-box> renders when its parent
+        // <x-form> exposes a route.
         $manager = User::factory()->create();
         $location = Location::factory()->create(['manager_id' => $manager->id]);
 
@@ -43,7 +45,7 @@ class UpdateLocationsTest extends TestCase
             ->get(route('locations.edit', $location))
             ->assertOk();
 
-        $response->assertSee('id="assigned_user_select"', false);
+        $response->assertSee('id="manager_id_select"', false);
         $response->assertSee('name="manager_id"', false);
         $response->assertSee('value="'.$manager->id.'"', false);
         $response->assertSee('id="submit_button"', false);

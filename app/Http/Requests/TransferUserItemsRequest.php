@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Accessory;
 use App\Models\Asset;
+use App\Models\License;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -13,10 +15,34 @@ class TransferUserItemsRequest extends Request
     {
         $sourceUser = $this->route('user');
 
-        return $sourceUser
-            && Gate::allows('view', $sourceUser)
-            && Gate::allows('checkin', Asset::class)
-            && Gate::allows('checkout', Asset::class);
+        if (! $sourceUser || ! Gate::allows('view', $sourceUser)) {
+            return false;
+        }
+
+        if (! Gate::allows('checkin', Asset::class) || ! Gate::allows('checkout', Asset::class)) {
+            return false;
+        }
+
+        // The store handler transfers accessory checkouts and license
+        // seats alongside assets. Each resource is governed by its own
+        // independent checkin / checkout permissions, so require them
+        // when the payload actually supplies items of that type. Without
+        // these guards, a role holding only assets.checkin / assets.checkout
+        // could move another user's accessories and license seats,
+        // bypassing the per-resource permission model.
+        if (! empty($this->input('accessory_checkout_ids'))
+            && (! Gate::allows('checkin', Accessory::class) || ! Gate::allows('checkout', Accessory::class))
+        ) {
+            return false;
+        }
+
+        if (! empty($this->input('license_seat_ids'))
+            && (! Gate::allows('checkin', License::class) || ! Gate::allows('checkout', License::class))
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     public function rules(): array

@@ -11,7 +11,10 @@
 {{-- Content --}}
 @section('content')
     <x-container>
-        <x-box name="kits">
+        <x-box name="kits" sr_only_title>
+
+            <x-slot:table_header>{{ trans('general.kits') }}</x-slot:table_header>
+
             <x-table
                 :presenter="\App\Presenters\PredefinedKitPresenter::dataTableLayout()"
                 :fixed_number="1"

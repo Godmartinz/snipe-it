@@ -104,6 +104,12 @@ class Importer extends Component
 
     public $update;
 
+    // When true, blank CSV cells during an update pass are ignored (the DB
+    // value stays put). Default false matches the legacy behavior: a
+    // present-but-empty cell clears the corresponding DB column. Only the
+    // update flow reads it. New-row inserts ignore it entirely.
+    public $preserve_blanks = false;
+
     public $send_welcome;
 
     public $run_backup;

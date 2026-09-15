@@ -30,4 +30,16 @@ class CloneUserTest extends TestCase
         $response->assertSee('value="'.$companyA->id.'"', false);
         $response->assertSee('value="'.$companyB->id.'"', false);
     }
+
+    public function test_create_permission_alone_is_not_enough_to_clone_user()
+    {
+        // Cloning renders the source user's data (email domain, groups,
+        // permissions bitmap) into the create form, so a user with only
+        // users.create (no users.view) must be blocked.
+        $source = User::factory()->create();
+
+        $this->actingAs(User::factory()->createUsers()->create())
+            ->get(route('users.clone.show', $source))
+            ->assertForbidden();
+    }
 }

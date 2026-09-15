@@ -51,8 +51,8 @@ class LdapSync extends Command
             exit();
         }
 
-        ini_set('max_execution_time', env('LDAP_TIME_LIM', 600)); // 600 seconds = 10 minutes
-        ini_set('memory_limit', env('LDAP_MEM_LIM', '500M'));
+        ini_set('max_execution_time', config('app.ldap_time_limit')); // 600 seconds = 10 minutes
+        ini_set('memory_limit', config('app.ldap_memory_limit'));
 
         // Single source of truth for internal-key => LDAP-attribute-name
         // lives on the Ldap model so parseAndMapLdapAttributes and this
@@ -404,6 +404,7 @@ class LdapSync extends Command
                     // Check if the relationship already exists
                     if (! $user->groups()->where('group_id', $ldap_default_group)->exists()) {
                         $user->groups()->attach($ldap_default_group);
+                        $user->logGroupAttached((int) $ldap_default_group);
                     }
                 }
 

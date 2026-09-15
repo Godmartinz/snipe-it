@@ -36,13 +36,13 @@ class UserSeeder extends Seeder
             $this->call(CompanySeeder::class);
         }
 
-        $companyIds = Company::all()->pluck('id');
+        $companyIds = Company::pluck('id');
 
         if (! Department::count()) {
             $this->call(DepartmentSeeder::class);
         }
 
-        $departmentIds = Department::all()->pluck('id');
+        $departmentIds = Department::pluck('id');
 
         // Named admins get multiple companies. They manage assets across several organisations.
         foreach (['firstAdmin', 'snipeAdmin', 'testAdmin'] as $state) {

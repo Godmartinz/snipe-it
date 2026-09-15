@@ -170,6 +170,11 @@ class ComponentsController extends Controller
             case 'remaining':
                 $components = $components->OrderRemaining($order);
                 break;
+            case 'order_number':
+                // components.order_number is `legacy_order_number` now
+                // so a raw orderBy on it is a SQL error.
+                $components = $components->OrderByOrderNumber($order);
+                break;
             case 'purchase_cost':
                 // See AccessoriesController for the rationale — these
                 // three sorts walk order_items rather than removed

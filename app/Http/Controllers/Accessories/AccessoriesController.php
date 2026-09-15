@@ -145,7 +145,7 @@ class AccessoriesController extends Controller
     public function getClone(Accessory $accessory): View|RedirectResponse
     {
 
-        $this->authorize('create', $accessory);
+        $this->authorize('clone', $accessory);
         $cloned = clone $accessory;
         $accessory_to_clone = $accessory;
         $cloned->id = null;

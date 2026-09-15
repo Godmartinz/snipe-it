@@ -29,7 +29,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="users" sr_only_title>
             <x-table.users :route="route('api.users.index',
                 [
                     'status' => is_scalar(request('status')) ? request('status') : null,

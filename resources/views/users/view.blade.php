@@ -676,12 +676,13 @@
     @endif
 
     @if (auth()->user()->isSuperUser() && $user->twoFactorResettable())
-        @include('modals.confirm-action', [
-            'modal_name' => 'confirmTwoFactorResetModal',
-            'route' => route('users.two_factor_reset', $user->id),
-            'title' => trans('admin/settings/general.two_factor_reset'),
-            'body' => trans('admin/settings/general.two_factor_reset_confirm', ['name' => $user->display_name]),
-        ])
+        <x-modals.confirm-action
+            modal-name="confirmTwoFactorResetModal"
+            :route="route('users.two_factor_reset', $user->id)"
+            :title="trans('admin/settings/general.two_factor_reset')"
+        >
+            {{ trans('admin/settings/general.two_factor_reset_confirm', ['name' => $user->display_name]) }}
+        </x-modals.confirm-action>
     @endif
 
 @endsection
@@ -689,7 +690,7 @@
 
 @section('moar_scripts')
     @can('files', $user)
-        @include ('modals.upload-file', ['item_type' => 'users', 'item_id' => $user->id])
+        <x-modals.upload-file item-type="users" :item-id="$user->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['simple_view' => true])

@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -836,6 +837,148 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
+     * Sync group pivot membership and log the change if the set of groups changed.
+     *
+     * Same as syncCompaniesWithLogging(): if UserObserver::updating()
+     * already wrote an Actionlog for this edit session (via
+     * $this->currentUpdateLogId), the group diff is merged into that
+     * existing row so a single edit produces one log entry, not two.
+     * Otherwise a standalone Actionlog is written.
+     */
+    public function syncGroupsWithLogging(array $groupIds): void
+    {
+        // Same defensive coercion as the company version: reduce any
+        // callable payload shape (API JSON, form input, bulk edit,
+        // future LDAP importer) to a flat, unique list of positive int
+        // ids before it hits ->sync(). Prevents "Array to string
+        // conversion" tripping on nested arrays and drops junk shapes
+        // (null, booleans, unparseable strings) silently.
+        $groupIds = array_values(array_unique(array_filter(
+            array_map('intval', array_filter($groupIds, 'is_scalar'))
+        )));
+
+        $oldSnapshot = $this->currentGroupSnapshot();
+        $this->groups()->sync($groupIds);
+        $newSnapshot = $this->currentGroupSnapshot();
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Log the attachment of a single group to this user. Called from
+     * paths that mutate the pivot without going through
+     * syncGroupsWithLogging() (SCIM SnipeMutableCollection::add(),
+     * LdapSync attaching the LDAP default group, future sync adapters
+     * that propagate group membership).
+     *
+     * The caller has already run ->attach() (or the equivalent). This
+     * method's job is to record the delta if it was a real add. When
+     * the group was already attached before the call, we no-op so
+     * repeat-attach patterns don't produce noise.
+     */
+    public function logGroupAttached(int $groupId): void
+    {
+        $newSnapshot = $this->currentGroupSnapshot();
+        if (! collect($newSnapshot)->contains('id', $groupId)) {
+            // The caller's ->attach() didn't produce a real add (e.g.
+            // duplicate insert silently ignored, race with another
+            // process, group id doesn't exist). Nothing to log.
+            return;
+        }
+
+        $oldSnapshot = array_values(array_filter(
+            $newSnapshot,
+            fn ($entry) => $entry['id'] !== $groupId,
+        ));
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Log the detachment of a single group. Companion to
+     * logGroupAttached(). Called from SCIM's
+     * SnipeMutableCollection::remove() and any other path that runs
+     * ->detach() on a single group without going through
+     * syncGroupsWithLogging().
+     */
+    public function logGroupDetached(int $groupId): void
+    {
+        $newSnapshot = $this->currentGroupSnapshot();
+        if (collect($newSnapshot)->contains('id', $groupId)) {
+            // Detach didn't remove the group (never was attached, or
+            // still present for some other reason). Nothing to log.
+            return;
+        }
+
+        // Look up the detached group's current name so the log records
+        // it verbatim, not the id alone. If the group row is somehow
+        // gone by the time we look (deleted in the same request),
+        // record the id with a placeholder rather than skipping the
+        // log entirely, so the pivot mutation is still visible.
+        $detached = Group::find($groupId);
+        $oldSnapshot = $newSnapshot;
+        $oldSnapshot[] = ['id' => $groupId, 'name' => $detached ? $detached->name : '#'.$groupId];
+        usort($oldSnapshot, fn ($a, $b) => $a['id'] <=> $b['id']);
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Current pivot state as an ordered list of {id, name} pairs.
+     * The name is snapshotted at log-write time so the history entry
+     * preserves what the group was called when the change happened,
+     * regardless of later renames or deletes.
+     *
+     * @return array<int, array{id: int, name: string}>
+     */
+    private function currentGroupSnapshot(): array
+    {
+        return $this->groups()
+            ->orderBy('permission_groups.id')
+            ->get(['permission_groups.id', 'permission_groups.name'])
+            ->map(fn ($group) => ['id' => (int) $group->id, 'name' => (string) $group->name])
+            ->all();
+    }
+
+    /**
+     * Write (or merge into) an Actionlog for a groups pivot change.
+     * Merges into $this->currentUpdateLogId when the observer already
+     * opened a log row for this edit session so field + group
+     * changes stay in one log entry. Otherwise writes a standalone
+     * 'update' Actionlog row.
+     *
+     * @param  array<int, array{id: int, name: string}>  $oldSnapshot
+     * @param  array<int, array{id: int, name: string}>  $newSnapshot
+     */
+    private function recordGroupsChange(array $oldSnapshot, array $newSnapshot): void
+    {
+        if ($oldSnapshot === $newSnapshot) {
+            return;
+        }
+
+        $groupChange = ['groups' => ['old' => $oldSnapshot, 'new' => $newSnapshot]];
+
+        if ($this->currentUpdateLogId && ($existing = Actionlog::find($this->currentUpdateLogId))) {
+            $meta = json_decode($existing->log_meta ?? '{}', true) ?: [];
+            $existing->log_meta = json_encode(array_merge($meta, $groupChange));
+            $existing->save();
+            $this->currentUpdateLogId = null;
+
+            return;
+        }
+
+        $logAction = new Actionlog;
+        $logAction->item_type = static::class;
+        $logAction->item_id = $this->id;
+        $logAction->target_type = static::class;
+        $logAction->target_id = $this->id;
+        $logAction->created_at = date('Y-m-d H:i:s');
+        $logAction->created_by = auth()->id();
+        $logAction->log_meta = json_encode($groupChange);
+        $logAction->logaction('update');
+    }
+
+    /**
      * FMCS-safe wrapper around syncCompaniesWithLogging() for the user
      * update path. Folds the target's memberships in companies the
      * editor cannot see back into the submitted list before syncing,
@@ -854,23 +997,34 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         // editors also skip because their submission already
         // represents full intent across all tenants.
         $fmcsOn = (bool) Setting::getSettings()->full_multiple_companies_support;
-        if (!$fmcsOn || $editor->isSuperUser()) {
+        if (! $fmcsOn || $editor->isSuperUser()) {
             $this->syncCompaniesWithLogging($submitted);
 
             return;
         }
 
-        $editorVisible = $editor->companies()
-            ->pluck('companies.id')
-            ->map(fn($id) => (int) $id)
+        // Read editor + target memberships directly from the pivot so
+        // Company's global CompanyableScope does not filter Companies
+        // down to what the acting user (the editor) can see before we
+        // compute the invisible-to-editor set. Going through
+        // $editor->companies() / $this->companies() under a scoped
+        // non-superuser editor would return only the editor's own
+        // companies from the Companies side of the join, which turns
+        // the whereNotIn below into an empty result and drops every
+        // preserved company. See GH #19569.
+        $editorVisible = DB::table('company_user')
+            ->where('user_id', $editor->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
             ->all();
 
         $submittedVisible = array_values(array_intersect($submitted, $editorVisible));
 
-        $invisiblePreserved = $this->companies()
-            ->whereNotIn('companies.id', $editorVisible)
-            ->pluck('companies.id')
-            ->map(fn($id) => (int) $id)
+        $invisiblePreserved = DB::table('company_user')
+            ->where('user_id', $this->id)
+            ->whereNotIn('company_id', $editorVisible)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
             ->all();
 
         $this->syncCompaniesWithLogging(
@@ -1070,7 +1224,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * and from responsibleParty() (whoever is responsible for completion).
      * Used by the user detail view's Maintenances tab and badge count.
      */
-    public function assignedMaintenances()
+    public function assignedMaintenances(): MorphMany
     {
         return $this->morphMany(Maintenance::class, 'checked_out_to')->withTrashed();
     }

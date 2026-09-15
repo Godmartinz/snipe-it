@@ -12,6 +12,7 @@ use App\Models\Traits\Searchable;
 use App\Presenters\MaintenancesPresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
@@ -263,7 +264,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
      * still returns the right rows today. Once accessories actually
      * carry maintenances, callers should switch to ->item.
      */
-    public function asset()
+    public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class, 'item_id')
             ->withTrashed();

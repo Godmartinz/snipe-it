@@ -103,12 +103,12 @@ class AccessoriesTransformer
         $permissions_array['assigned_to_self'] = $userHasOpenRequest;
 
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Accessory::class),
+            'checkout' => Gate::allows('checkout', $accessory),
             'checkin' => false,
-            'update' => Gate::allows('update', Accessory::class),
-            'adjust_quantity' => Gate::allows('update', Accessory::class),
-            'delete' => $accessory->checkouts_count === 0 && Gate::allows('delete', Accessory::class),
-            'clone' => Gate::allows('create', Accessory::class),
+            'update' => Gate::allows('update', $accessory),
+            'adjust_quantity' => Gate::allows('update', $accessory),
+            'delete' => $accessory->checkouts_count === 0 && Gate::allows('delete', $accessory),
+            'clone' => Gate::allows('clone', $accessory),
             // Request / cancel: if the requestable flag is off the row
             // never surfaces on /account/requestable anyway (scoped out
             // by Requestable()), but honor it here too for
@@ -145,7 +145,7 @@ class AccessoriesTransformer
                     'name' => e($checkout->adminuser->present()->fullName),
                 ] : null,
                 'created_at' => Helper::getFormattedDateObject($checkout->created_at, 'datetime'),
-                'available_actions' => Gate::allows('checkout', Accessory::class) ? ['checkin' => true] : ['checkin' => false],
+                'available_actions' => Gate::allows('checkout', $checkout->accessory) ? ['checkin' => true] : ['checkin' => false],
             ];
         }
 

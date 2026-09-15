@@ -160,4 +160,37 @@ class ComponentIndexTest extends TestCase
         $ascRelevant = array_values(array_intersect($ascNames, ['Lots left', 'Some left', 'None left']));
         $this->assertSame(['None left', 'Some left', 'Lots left'], $ascRelevant);
     }
+
+    public function test_can_sort_components_by_order_number()
+    {
+        $user = User::factory()->viewComponents()->create();
+
+        $componentA = Component::factory()->create(['name' => 'Component A', 'qty' => 1]);
+        $componentB = Component::factory()->create(['name' => 'Component B', 'qty' => 1]);
+        $componentC = Component::factory()->create(['name' => 'Component C', 'qty' => 1]);
+
+        $componentA->orderItems()->first()->order->update(['order_number' => 'PO-0002']);
+        $componentB->orderItems()->first()->order->update(['order_number' => 'PO-0003']);
+        $componentC->orderItems()->first()->order->update(['order_number' => 'PO-0001']);
+
+        $names = ['Component A', 'Component B', 'Component C'];
+
+        $ascendingResponse = $this->actingAsForApi($user)
+            ->getJson(route('api.components.index', ['sort' => 'order_number', 'order' => 'asc']))
+            ->assertOk()
+            ->json('rows');
+
+        // filter out any other components that may exist in response and only grab the ones we seeded above
+        $ascendingRelevant = array_values(array_intersect(array_column($ascendingResponse, 'name'), $names));
+        $this->assertSame(['Component C', 'Component A', 'Component B'], $ascendingRelevant);
+
+        $descendingRows = $this->actingAsForApi($user)
+            ->getJson(route('api.components.index', ['sort' => 'order_number', 'order' => 'desc']))
+            ->assertOk()
+            ->json('rows');
+
+        // filter out any other components that may exist in response and only grab the ones we seeded above
+        $descendingRelevant = array_values(array_intersect(array_column($descendingRows, 'name'), $names));
+        $this->assertSame(['Component B', 'Component A', 'Component C'], $descendingRelevant);
+    }
 }

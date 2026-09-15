@@ -2,6 +2,7 @@
     'box_style' => 'default',
     'header' => false,
     'top_submit' => false,
+    'sr_only_title' => false,
 ])
 @aware(['name', 'route'])
 
@@ -41,7 +42,9 @@
     <div class="box-body">
 
         @if (isset($table_header))
-            <h3 class="box-title{{ (!isset($bulkactions)) ? ' pull-left' : '' }}">
+            <h3
+                @if ($name) id="{{ $name }}-title" @endif
+                class="{{ $sr_only_title ? 'sr-only' : 'box-title'.((!isset($bulkactions)) ? ' pull-left' : '') }}">
                 {{ $table_header }}
             </h3>
         @endif

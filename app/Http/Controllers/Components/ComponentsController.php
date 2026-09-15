@@ -253,7 +253,7 @@ class ComponentsController extends Controller
 
     public function getClone(Component $component): View|RedirectResponse
     {
-        $this->authorize('create', Component::class);
+        $this->authorize('clone', $component);
 
         $cloned_component = clone $component;
         $cloned_component->id = null;

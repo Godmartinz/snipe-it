@@ -78,4 +78,30 @@ class AcceptanceReportCsvFormulaEscapeTest extends TestCase
         $this->assertStringContainsString('=SUM(A1:A9)', $body);
         $this->assertStringNotContainsString('`=SUM(A1:A9)', $body);
     }
+
+    public function test_embedded_newline_in_cell_does_not_break_out_into_a_new_record()
+    {
+        // Reported by doanmanhducz as a bypass of the prior fix. Naming an
+        // asset "ordinary label\n=1+1" passed the EscapeFormula check (cell
+        // begins with 'o', not a formula prefix) and the manual
+        // implode("\n", $rows) join then split the cell in half, dropping
+        // "=1+1" onto its own line as the first field of a new record.
+        $this->seedPendingAcceptanceWithAssetNamed("ordinary label\n=1+1");
+
+        $body = $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('reports/export/unaccepted_assets'))
+            ->assertOk()
+            ->getContent();
+
+        // Parse the response with fgetcsv (respects RFC 4180 quoting) and
+        // walk every record. No first cell may be an unescaped formula.
+        $handle = fopen('php://memory', 'r+');
+        fwrite($handle, $body);
+        rewind($handle);
+
+        while (($record = fgetcsv($handle)) !== false) {
+            $this->assertNotSame('=1+1', $record[0] ?? null, 'Formula leaked into a new record via embedded newline');
+        }
+        fclose($handle);
+    }
 }

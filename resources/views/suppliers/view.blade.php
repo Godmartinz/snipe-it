@@ -150,7 +150,7 @@
 
 @section('moar_scripts')
     @can('files', $supplier)
-        @include ('modals.upload-file', ['item_type' => 'suppliers', 'item_id' => $supplier->id])
+        <x-modals.upload-file item-type="suppliers" :item-id="$supplier->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['exportFile' => 'suppliers-' . $supplier->name . '-export', 'search' => false])

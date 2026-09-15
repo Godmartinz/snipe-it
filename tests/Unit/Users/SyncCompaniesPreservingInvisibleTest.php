@@ -121,6 +121,54 @@ class SyncCompaniesPreservingInvisibleTest extends TestCase
     }
 
     #[Test]
+    public function scoped_editor_acting_as_user_preserves_invisible_memberships_from_pivot_read(): void
+    {
+        // Regression for the second hit on GH #19569 (swift2512). The
+        // earlier tests passed because they didn't set the acting
+        // user, so Company's CompanyableScope short-circuited on the
+        // no-auth branch and both editor + target reads through
+        // Eloquent came back unscoped. In the controller path the
+        // editor IS the acting user, so the scope filters Company
+        // rows to the editor's own pivot before whereNotIn runs,
+        // and the "invisible-to-editor" preservation set collapses
+        // to empty. Reads must go through the pivot table directly.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB, $companyC, $companyD, $companyE] = Company::factory()->count(5)->create();
+
+        $editor = User::factory()->create();
+        $editor->companies()->sync([$companyA->id, $companyB->id]);
+
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyC->id, $companyD->id, $companyE->id]);
+
+        // Act AS the editor so the CompanyableScope on Company is
+        // active. The old implementation lost target's [C, D, E]
+        // memberships here.
+        $this->actingAs($editor);
+
+        // Submission mirrors swift's scenario: no changes, so the
+        // form re-submits whatever the editor was able to see for
+        // the target (Company A only, since scope filters everything
+        // else out on the edit form's pre-populate query).
+        $target->syncCompaniesPreservingInvisibleTo($editor, [$companyA->id]);
+
+        // Assert directly against the pivot so the still-acting-as
+        // editor doesn't pull the read back through
+        // CompanyableScope and mask what the pivot actually holds.
+        $pivotRows = \DB::table('company_user')
+            ->where('user_id', $target->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertEqualsCanonicalizing(
+            [$companyA->id, $companyC->id, $companyD->id, $companyE->id],
+            $pivotRows,
+        );
+    }
+
+    #[Test]
     public function empty_submission_still_preserves_invisible_memberships(): void
     {
         // Editor is in A, target in A + B. Editor unchecks A and

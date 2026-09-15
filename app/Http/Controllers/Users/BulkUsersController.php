@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -342,7 +343,7 @@ class BulkUsersController extends Controller
             }
 
             if ($canEditAuth && $request->filled('groups') && auth()->user()->isSuperUser()) {
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
         }
 
@@ -449,6 +450,10 @@ class BulkUsersController extends Controller
 
         LicenseSeat::whereIn('id', $licenses->pluck('id'))->update(['assigned_to' => null]);
         ConsumableAssignment::whereIn('id', $consumableUserRows->pluck('id'))->delete();
+
+        CheckoutAcceptance::pending()
+            ->whereIn('assigned_to_id', $user_raw_array)
+            ->delete();
 
         foreach ($users as $user) {
             $user->accessories()->sync([]);

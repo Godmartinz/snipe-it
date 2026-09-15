@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Asset;
 use Illuminate\Console\Command;
-use Illuminate\Support\MessageBag;
 
 class ValidateAssets extends Command
 {
@@ -69,18 +68,7 @@ class ValidateAssets extends Command
 
     private function formatValidationErrors(Asset $asset): string
     {
-        $errors = $asset->getErrors();
-        $messages = [];
-
-        if ($errors instanceof MessageBag) {
-            $messages = $errors->all();
-        } elseif (is_array($errors)) {
-            $messages = $errors;
-        } else {
-            $messages = [(string) $errors];
-        }
-
-        $prefixedMessages = collect($messages)
+        $prefixedMessages = collect($asset->getErrors()->all())
             ->map(fn ($message) => trim((string) $message))
             ->filter()
             ->map(fn (string $message) => str_starts_with($message, '✘') ? $message : '✘ '.$message)

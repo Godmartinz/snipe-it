@@ -35,7 +35,7 @@
         @required($required)
     />
     <span class="input-group-addon" style="padding: 0;">
-        {{-- Plain <button> without btn-link — btn-link inherits the
+        {{-- Plain <button> without btn-link. btn-link inherits the
              theme link color (blue), which stands out wrong in an input
              addon. Inline reset styles give the eye the addon's default
              text color (dark gray) while keeping button semantics for

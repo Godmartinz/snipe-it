@@ -49,27 +49,24 @@ class ActionlogController extends Controller
     {
         $filename = basename((string) $filename);
 
-        if ($actionlog = Actionlog::where('filename', $filename)->with('user')->with('target')->firstOrFail()) {
+        $actionlog = Actionlog::where('filename', $filename)->with('user')->with('target')->firstOrFail();
 
-            $this->authorize('view', $actionlog->target);
-            $this->authorize('view', $actionlog->user);
+        $this->authorize('view', $actionlog->target);
+        $this->authorize('view', $actionlog->user);
 
-            if (config('filesystems.default') == 's3_private') {
-                return redirect()->away(Storage::disk('s3_private')->temporaryUrl('private_uploads/eula-pdfs/'.$filename, now()->addMinutes(5)));
-            }
-
-            if (Storage::exists('private_uploads/eula-pdfs/'.$filename)) {
-
-                if (request()->input('inline') == 'true') {
-                    return response()->file(config('app.private_uploads').'/eula-pdfs/'.$filename);
-                }
-
-                return response()->download(config('app.private_uploads').'/eula-pdfs/'.$filename);
-            }
-
-            return redirect()->back()->with('error', trans('general.file_does_not_exist'));
+        if (config('filesystems.default') == 's3_private') {
+            return redirect()->away(Storage::disk('s3_private')->temporaryUrl('private_uploads/eula-pdfs/'.$filename, now()->addMinutes(5)));
         }
 
-        return redirect()->back()->with('error', trans('general.record_not_found'));
+        if (Storage::exists('private_uploads/eula-pdfs/'.$filename)) {
+
+            if (request()->input('inline') == 'true') {
+                return response()->file(config('app.private_uploads').'/eula-pdfs/'.$filename);
+            }
+
+            return response()->download(config('app.private_uploads').'/eula-pdfs/'.$filename);
+        }
+
+        return redirect()->back()->with('error', trans('general.file_does_not_exist'));
     }
 }

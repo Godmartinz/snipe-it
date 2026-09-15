@@ -104,7 +104,7 @@ class ConsumableCheckoutController extends Controller
         }
 
         $admin_user = auth()->user();
-        $assigned_to = e($request->input('assigned_to'));
+        $assigned_to = e($request->input('assigned_user'));
 
         // Check if the user exists
         if (is_null($user = User::find($assigned_to))) {
@@ -121,7 +121,7 @@ class ConsumableCheckoutController extends Controller
         }
 
         // Update the consumable data
-        $consumable->assigned_to = e($request->input('assigned_to'));
+        $consumable->assigned_to = e($request->input('assigned_user'));
         $consumable->checkout_qty = $quantity;
 
         // Concurrency guard. The unlocked numRemaining() check above is
@@ -146,7 +146,7 @@ class ConsumableCheckoutController extends Controller
                 $consumable->users()->attach($consumable->id, [
                     'consumable_id' => $consumable->id,
                     'created_by' => $admin_user->id,
-                    'assigned_to' => e($request->input('assigned_to')),
+                    'assigned_to' => e($request->input('assigned_user')),
                     'note' => $request->input('note'),
                 ]);
             }

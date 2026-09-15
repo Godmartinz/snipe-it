@@ -473,10 +473,10 @@
 
     @section('moar_scripts')
         @can('files', $asset)
-            @include ('modals.upload-file', ['item_type' => 'asset', 'item_id' => $asset->id])
+            <x-modals.upload-file item-type="asset" :item-id="$asset->id" />
         @endcan
         @can('update', $asset)
-        @include ('modals.add-note', ['type' => 'asset', 'id' => $asset->id])
+        <x-modals.add-note type="asset" :id="$asset->id" />
     @endcan
         @include ('partials.bootstrap-table')
         <x-modals.maintenance-complete />

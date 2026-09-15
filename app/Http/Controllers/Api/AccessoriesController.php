@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -503,13 +504,8 @@ class AccessoriesController extends Controller
         $accessory = Accessory::find($accessory_checkout->accessory_id);
         $this->authorize('checkin', $accessory);
 
-        $accessory->logCheckin(User::find($accessory_checkout->assigned_to), $request->input('note'));
-
-        // Was the accessory updated?
         if ($accessory_checkout->delete()) {
-            if (! is_null($accessory_checkout->assigned_to)) {
-                $user = User::find($accessory_checkout->assigned_to);
-            }
+            event(new CheckoutableCheckedIn($accessory, $accessory_checkout->assignedTo, auth()->user(), $request->input('note')));
 
             $payload = [
                 'accessory_id' => $accessory->id,

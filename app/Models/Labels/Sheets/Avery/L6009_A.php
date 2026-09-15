@@ -8,15 +8,11 @@ class L6009_A extends L6009
 {
     private const BARCODE_MARGIN = 1.80;
 
-    private const TAG_SIZE = 4.80;
-
     private const TITLE_SIZE = 3.00;
 
     private const TITLE_MARGIN = 1.80;
 
     private const LABEL_SIZE = 2.8;
-
-    private const LABEL_MARGIN = -0.45;
 
     private const FIELD_SIZE = 3.80;
 
@@ -76,8 +72,6 @@ class L6009_A extends L6009
     {
         return false;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

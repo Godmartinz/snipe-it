@@ -16,6 +16,8 @@ return [
     'create' => [
         'error' => 'Asset was not created, please try again. :(',
         'success' => 'Asset created successfully. :)',
+        'success_no_checkout' => 'Asset created successfully, but was not checked out because you do not have permission to check assets out.',
+        'checkout_skipped_no_permission' => 'The asset was created, but was not checked out to the requested target because you do not have permission to check assets out.',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
         'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
         'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
@@ -99,7 +101,6 @@ return [
             'errored' => 'Errored',
             'no_changes' => 'The import finished but nothing was created or updated. Every row was skipped, usually because the underlying records already existed. Check the counts below and adjust the CSV or import type if that is not what you expected.',
         ],
-        'update_mode_help' => 'When enabled, existing records matched by identity (serial, asset tag, username, etc.) are updated instead of skipped. Any column in your CSV with an empty value will clear the corresponding field on the existing record. Columns you leave out of your CSV entirely are not touched, so existing values are preserved. Required fields (like name and seats on a license) cannot be cleared. Leaving them empty will produce a validation error for that row.',
         'type_required' => 'Please select an import type before continuing.',
         'processing' => 'Processing your import. Please wait until this finishes before closing the page.',
         'backup_running' => 'Running backup before importing. This can take a while on larger files. Please wait.',

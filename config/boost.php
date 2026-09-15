@@ -45,10 +45,7 @@ return [
     */
 
     'guidelines' => [
-        'exclude' => [
-            'deployments',
-            'herd',
-        ],
+        'exclude' => [],
     ],
 
     /*

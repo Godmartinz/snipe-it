@@ -627,13 +627,11 @@ class LdapTroubleshooter extends Command
                         posix_kill($parent_pid, SIGUSR2);
                     }
                     exit();
-                    break; // yes I know we don't need it.
                 case -1:
                     // couldn't fork
                     $this->error('COULD NOT FORK - assuming failure');
 
                     return false;
-                    break; // I still know that we don't need it
                 default:
                     // we remain the 'parent', $pid is the PID of the forked process.
                     $siginfo = [];
@@ -645,7 +643,6 @@ class LdapTroubleshooter extends Command
 
                         return false;
                     }
-                    break; // Yeah I get it already, shush.
             }
         }
 

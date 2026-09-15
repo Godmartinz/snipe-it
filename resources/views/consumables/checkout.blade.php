@@ -34,8 +34,8 @@
 
             <x-input.user-select
                 :label="trans('general.select_user')"
-                name="assigned_to"
-                :selected="old('assigned_to', $checkoutRequest?->user_id)"
+                name="assigned_user"
+                :selected="old('assigned_user', $checkoutRequest?->user_id)"
                 :companyId="$consumable->company_id"
                 required
             />

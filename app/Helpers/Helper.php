@@ -1642,7 +1642,6 @@ class Helper
     {
         if (config('app.lock_passwords') === true) {
             return true;
-            Log::debug('app locked!');
         }
 
         return false;
@@ -1699,8 +1698,6 @@ class Helper
                 return (1 / 72) * static::getUnitConversionFactor('in');
             default:
                 throw new \InvalidArgumentException('Unit: '.e($unit).' is not supported');
-
-                return false;
         }
     }
 
@@ -1846,6 +1843,7 @@ class Helper
                 'Components' => route('components.index'),
                 'Consumables' => route('consumables.index'),
                 'Maintenances' => route('maintenances.index'),
+                default => route('home'),
             };
 
             // #15214: preserve query-string filters when the user came
@@ -1871,6 +1869,7 @@ class Helper
                 'Accessories' => redirect()->route('accessories.show', $id ?? $item_id),
                 'Components' => redirect()->route('components.show', $id ?? $item_id),
                 'Consumables' => redirect()->route('consumables.show', $id ?? $item_id),
+                default => redirect()->route('home'),
             };
         }
 
@@ -1890,6 +1889,7 @@ class Helper
                 'asset' => $assetId
                     ? redirect()->route('hardware.show', $assetId)
                     : redirect()->route('hardware.index'),
+                default => redirect()->route('home'),
             };
         }
 
@@ -1898,6 +1898,7 @@ class Helper
             return match ($other_redirect) {
                 'audit' => redirect()->route('assets.audit.due'),
                 'model' => redirect()->route('models.show', $request->model_id),
+                default => redirect()->route('home'),
             };
 
         }

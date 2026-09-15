@@ -112,7 +112,7 @@ class LocationPresenter extends Presenter
                 'title' => trans('admin/locations/message.assigned_assets'),
                 'titleTooltip' => trans('admin/locations/message.assigned_assets'),
                 'visible' => true,
-                'class' => 'css-house-laptop text-right text-padding-number-cell',
+                'class' => 'css-barcode text-right text-padding-number-cell',
                 'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'accessories_count',

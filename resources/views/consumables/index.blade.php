@@ -9,7 +9,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="consumables" sr_only_title>
             <x-table.consumables :route="route('api.consumables.index')" />
         </x-box>
     </x-container>

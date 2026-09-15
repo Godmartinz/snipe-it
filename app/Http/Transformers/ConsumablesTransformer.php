@@ -100,12 +100,12 @@ class ConsumablesTransformer
         $permissions_array['assigned_to_self'] = $userHasOpenRequest;
 
         $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Consumable::class),
-            'checkin' => Gate::allows('checkin', Consumable::class),
-            'update' => Gate::allows('update', Consumable::class),
-            'adjust_quantity' => Gate::allows('update', Consumable::class),
-            'delete' => Gate::allows('delete', Consumable::class),
-            'clone' => (Gate::allows('create', Consumable::class) && ($consumable->deleted_at == '')),
+            'checkout' => Gate::allows('checkout', $consumable),
+            'checkin' => Gate::allows('checkin', $consumable),
+            'update' => Gate::allows('update', $consumable),
+            'adjust_quantity' => Gate::allows('update', $consumable),
+            'delete' => Gate::allows('delete', $consumable),
+            'clone' => (Gate::allows('clone', $consumable) && ($consumable->deleted_at == '')),
             'request' => (bool) $consumable->requestable && ! $userHasOpenRequest,
             'cancel' => (bool) $consumable->requestable && $userHasOpenRequest,
         ];
