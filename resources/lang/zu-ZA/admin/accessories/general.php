@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Ayikho i-EULA eyimfihlo eyatholakala. Engeza eyodwa kuzilungiselelo.',
     'total' => 'Inani',
     'remaining' => 'Kukhona',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Buyekeza Ukufinyelela',
     'use_default_eula' => 'Sebenzisa okungu-<a href="#" data-toggle="modal" data-target="#eulaModal">kuzenzakalela okuzenzakalelayo ku-EULA</a> kunalokho.',
     'use_default_eula_disabled' => '<del>Sebenzisa i-EULA eyinhloko yokuzenzakalela esikhundleni.</del> Ayikho i-EULA eyimilayezo eyisisekelo esethiwe. Sicela ungeze eyodwa kuzilungiselelo.',

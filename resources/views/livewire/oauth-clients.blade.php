@@ -1,12 +1,12 @@
 <div>
     @if ($authorizationError)
-        <div class="alert alert-danger">
+        <x-alert type="danger">
             <p>
                 {{ trans('admin/users/message.insufficient_permissions') }}
                 <br>
                 {{ $authorizationError }}
             </p>
-        </div>
+        </x-alert>
     @endif
 
     @if ($this->showOauthClients())
@@ -192,7 +192,7 @@
                 <div class="modal-body">
                     <!-- Form Errors -->
                     @if($errors->has('name') || $errors->has('redirect'))
-                        <div class="alert alert-danger">
+                        <x-alert type="danger">
                             <p><strong>Whoops!</strong> Something went wrong!</p>
                             <br>
                             <ul>
@@ -203,7 +203,7 @@
                                     <li>{{ $errors->first('redirect') }}</li>
                                 @endif
                             </ul>
-                        </div>
+                        </x-alert>
                     @endif
 
                     <!-- Create Client Form -->
@@ -279,7 +279,7 @@
 
                 <div class="modal-body">
                     @if($errors->has('newName') || $errors->has('newRedirect'))
-                        <div class="alert alert-danger">
+                        <x-alert type="danger">
                             <p><strong>Whoops!</strong> Something went wrong!</p>
                             <br>
                             <ul>
@@ -293,7 +293,7 @@
                                     <li>{{ $authorizationError }}</li>
                                 @endif
                             </ul>
-                        </div>
+                        </x-alert>
                     @endif
 
                     <!-- Edit Client Form -->

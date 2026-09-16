@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Je hebt het item succesvol geaccepteerd.',
     'declined' => 'Je hebt dit item succesvol afgewezen.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Uw gebruikers zijn succesvol bijgewerkt, de gekozen manager kon echter niet toegepast worden omdat deze persoon ook in de lijst staat, gebruikers mogen niet hun eigen manager zijn. Probeer het nogmaals en selecteer de gebruikers zonder de manager.',
     'user_exists' => 'Gebruiker bestaat reeds!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Gebruiker bestaat niet of je hebt geen toestemming om deze te bekijken.',
     'user_login_required' => 'Het veld gebruikersnaam is verplicht.',
     'user_has_no_assets_assigned' => 'Geen assets toegewezen aan de gebruiker.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Het veld wachtwoord is verplicht.',
     'insufficient_permissions' => 'Onvoldoende rechten.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Deze gebruiker is verwijderd. Je zult deze gebruiker moeten herstellen om hem te bewerken of om nieuwe assets toe te wijzen.',
     'ldap_not_configured' => 'LDAP integratie is niet geconfigureerd voor deze installatie.',
     'password_resets_sent' => 'De geselecteerde gebruikers die zijn geactiveerd en die een geldig e-mailadres hebben, hebben een wachtwoord reset link ontvangen.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Een link om het wachtwoord te resetten is verstuurd naar :email!',
     'user_has_no_email' => 'Deze gebruiker heeft geen e-mailadres in zijn profiel.',
     'log_record_not_found' => 'Een overeenkomende logboekrecord voor deze gebruiker kon niet worden gevonden.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Gebruiker succesvol aangemaakt.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Het wachtwoord voor deze account wordt beheerd door LDAP/Active Directory. Neem contact op met uw IT-afdeling om uw wachtwoord te wijzigen. ',
         'multi_company_items_assigned' => 'Deze gebruiker heeft items toegewezen welke tot een andere organisatie behoren. Check deze alstublieft in of bewerk het bedrijf van de gebruiker.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

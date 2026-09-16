@@ -29,6 +29,7 @@ use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -59,6 +60,7 @@ class Kernel extends HttpKernel
         SecurityHeaders::class,
         PreventBackHistory::class,
         HandleCors::class,
+        InvokeDeferredCallbacks::class,
 
     ];
 
@@ -82,7 +84,12 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            'auth:api',
+            // oidc first: Passport's TokenGuard clears the Authorization header
+            // when it fails, so it must run AFTER the OIDC guard (which never
+            // clears it) -- otherwise an OIDC bearer would be wiped before the
+            // oidc guard sees it. A Passport token falls through cleanly.
+            'auth:oidc,api',
+            CheckUserIsActivated::class,
             EnforceApiTwoFactorEnrollment::class,
             EnforceApiUserAgent::class,
             CheckLocale::class,

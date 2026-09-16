@@ -19,6 +19,8 @@ return [
         'confirm' => 'هل أنت متأكد من رغبتك في حذف فئة الاستهلاك هذه؟',
         'error' => 'لقد حدثت مشكلة أثناء عملية حذف فئة الاستهلاك، الرجاء المحاولة مرة اخرى.',
         'success' => 'تم إنشاء فئة الاستهلاك بنجاح.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

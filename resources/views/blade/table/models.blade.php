@@ -7,6 +7,8 @@
     'table_header' => trans('general.asset_models'),
 ])
 
+@aware(['name'])
+
 <!-- start assets tab pane -->
 @can('view', \App\Models\AssetModel::class)
     <x-slot:table_header>

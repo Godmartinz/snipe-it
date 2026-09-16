@@ -19,6 +19,8 @@ return [
         'confirm' => 'Bist du sicher, dass du diese Abschreibungsklasse löschen willst?',
         'error' => 'Beim Löschen der Abschreibungsklasse ist ein Problem aufgetreten. Bitte versuche es erneut.',
         'success' => 'Die Abschreibungsklasse wurde erfolgreich gelöscht.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Presenters\MaintenanceTypePresenter;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,6 +16,8 @@ class MaintenanceType extends SnipeModel
     use SoftDeletes;
     use ValidatingTrait;
 
+    protected $presenter = MaintenanceTypePresenter::class;
+
     protected $table = 'maintenance_types';
 
     protected $rules = [
@@ -23,17 +26,23 @@ class MaintenanceType extends SnipeModel
 
     protected $injectUniqueIdentifier = true;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'tag_color'];
 
     public function isDeletable(): bool
     {
         return Gate::allows('delete', $this)
-            && ($this->deleted_at == '');
+            && ($this->deleted_at == '')
+            && $this->maintenances()->doesntExist();
     }
 
     public function maintenances()
     {
         return $this->hasMany(Maintenance::class, 'maintenance_type_id');
+    }
+
+    public function adminuser()
+    {
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     public function getDisplayNameAttribute(): string

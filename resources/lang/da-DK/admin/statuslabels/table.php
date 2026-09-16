@@ -13,6 +13,7 @@ return [
     'pending' => 'Verserende',
     'status_type' => 'Status Type',
     'show_in_nav' => 'Vis i side nav',
+    'status_label' => 'Statusetiket',
     'title' => 'Status labels',
     'undeployable' => 'Undeployable',
     'update' => 'Opdater status label',

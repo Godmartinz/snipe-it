@@ -285,8 +285,8 @@ class CustomComponentReportTest extends TestCase
         Component::factory()
             ->count(2)
             ->sequence(
-                ['supplier_id' => $supplierA->id, 'name' => 'Component for Supplier A'],
-                ['supplier_id' => $supplierB->id, 'name' => 'Component for Supplier B'],
+                ['default_supplier_id' => $supplierA->id, 'name' => 'Component for Supplier A'],
+                ['default_supplier_id' => $supplierB->id, 'name' => 'Component for Supplier B'],
             )
             ->create();
 
@@ -368,8 +368,30 @@ class CustomComponentReportTest extends TestCase
 
     public function test_limiting_by_order_number()
     {
-        Component::factory()->create(['name' => 'Component A', 'order_number' => 'ORD-001']);
-        Component::factory()->create(['name' => 'Component B', 'order_number' => 'ORD-002']);
+        // Under the new Orders / OrderItems model, order_number lives on
+        // the Order and each Component links via a polymorphic OrderItem.
+        // The report's `by_order_number` filter now walks that relation
+        // (whereHas('orders')) instead of the removed
+        // components.order_number column, and the export's `order`
+        // column plucks distinct order numbers from the eager-loaded
+        // relation.
+        $componentA = Component::factory()->create(['name' => 'Component A']);
+        $componentB = Component::factory()->create(['name' => 'Component B']);
+
+        $orderA = \App\Models\Order::create(['order_number' => 'ORD-001']);
+        $orderB = \App\Models\Order::create(['order_number' => 'ORD-002']);
+        \App\Models\OrderItem::create([
+            'order_id' => $orderA->id,
+            'item_type' => Component::class,
+            'item_id' => $componentA->id,
+            'qty' => 1,
+        ]);
+        \App\Models\OrderItem::create([
+            'order_id' => $orderB->id,
+            'item_type' => Component::class,
+            'item_id' => $componentB->id,
+            'qty' => 1,
+        ]);
 
         $this->sendRequest([
             'component_name' => '1',
@@ -379,13 +401,17 @@ class CustomComponentReportTest extends TestCase
             ->assertOk()
             ->assertCsvHeader()
             ->assertSeePairsInStreamedResponse(['Order Number' => 'ORD-001', 'Component Name' => 'Component A'])
-            ->assertDontSeeTextInStreamedResponse('ORD-002');
+            ->assertDontSeeTextInStreamedResponse('ORD-002')
+            ->assertDontSeeTextInStreamedResponse('Component B');
     }
 
     public function test_limiting_by_purchase_date_range()
     {
-        Component::factory()->create(['name' => 'Component A', 'purchase_date' => '2024-01-15']);
-        Component::factory()->create(['name' => 'Component B', 'purchase_date' => '2024-06-15']);
+        // purchase_date lives on the initial OrderItem's Order now;
+        // withInitialAcquisition seeds that Order's date so the report's
+        // Orders-EXISTS subquery matches Component A but not Component B.
+        Component::factory()->withInitialAcquisition(null, null, '2024-01-15')->create(['name' => 'Component A']);
+        Component::factory()->withInitialAcquisition(null, null, '2024-06-15')->create(['name' => 'Component B']);
 
         $this->sendRequest([
             'component_name' => '1',
@@ -432,8 +458,11 @@ class CustomComponentReportTest extends TestCase
 
     public function test_limiting_by_unit_cost_range()
     {
-        Component::factory()->create(['name' => 'Component A', 'purchase_cost' => 10.00]);
-        Component::factory()->create(['name' => 'Component B', 'purchase_cost' => 500.00]);
+        // unit_cost filters against the parent's default_purchase_cost
+        // template (see CustomComponentReportController::buildQuery for
+        // the rationale on why we don't walk OrderItems here).
+        Component::factory()->create(['name' => 'Component A', 'default_purchase_cost' => 10.00]);
+        Component::factory()->create(['name' => 'Component B', 'default_purchase_cost' => 500.00]);
 
         $this->sendRequest([
             'component_name' => '1',

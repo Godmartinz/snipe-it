@@ -21,6 +21,8 @@ Per favore aggiorna i tuoi Asset per togliere i riferimenti a questo stato e rip
         'confirm' => 'Sei sicuro di voler cancellare questo stato?',
         'error' => 'C\'è stato un problema cancellando lo stato. Per favore riprova.',
         'success' => 'L\'etichetta di stato è stata cancellata correttamente.',
+        'bulk_success' => 'Etichetta di stato eliminata con successo.|:count etichette di stato eliminate con successo.',
+        'partial_success' => 'Etichetta di Stato eliminata con successo. Leggi le informazioni aggiuntive qui sotto.|:count etichette di stato eliminate con successo. Leggi le informazioni aggiuntive qui sotto.',
     ],
 
     'help' => [

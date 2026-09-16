@@ -13,6 +13,7 @@ return [
     'no_default_eula' => '沒有找到預設EULA（最終使用者許可協議）。請在設定中增加一個。',
     'total' => '總計',
     'remaining' => '可用',
+    'requestable' => 'Users may request this accessory',
     'update' => '更新配件',
     'use_default_eula' => '用<a href="#" data-toggle="modal" data-target="#eulaModal">預設EULA（最終使用者許可協議）</a>進行替換',
     'use_default_eula_disabled' => '<del>使用預設EULA（最終使用者許可協議）</del>沒有設定預設EULA（最終使用者許可協議），請在設定中新增一個。',

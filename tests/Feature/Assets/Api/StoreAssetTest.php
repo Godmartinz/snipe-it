@@ -33,7 +33,7 @@ class StoreAssetTest extends TestCase
         $rtdLocation = Location::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
         $supplier = Supplier::factory()->create();
-        $user = User::factory()->createAssets()->create();
+        $user = User::factory()->createAssets()->checkoutAssets()->create();
         $userAssigned = User::factory()->create();
 
         $response = $this->actingAsForApi($user)
@@ -567,7 +567,7 @@ class StoreAssetTest extends TestCase
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
-        $user = User::factory()->createAssets()->create();
+        $user = User::factory()->createAssets()->checkoutAssets()->create();
         $userAssigned = User::factory()->create();
 
         $this->settings->enableAutoIncrement();
@@ -596,7 +596,7 @@ class StoreAssetTest extends TestCase
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $actorInCompanyA = User::factory()->createAssets()->forCompany($companyA)->create();
+        $actorInCompanyA = User::factory()->createAssets()->checkoutAssets()->forCompany($companyA)->create();
         $targetUserInCompanyB = User::factory()->forCompany($companyB)->create();
 
         $model = AssetModel::factory()->create();
@@ -690,7 +690,7 @@ class StoreAssetTest extends TestCase
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
         $location = Location::factory()->create();
-        $user = User::factory()->createAssets()->create();
+        $user = User::factory()->createAssets()->checkoutAssets()->create();
 
         $this->settings->enableAutoIncrement();
 
@@ -717,7 +717,7 @@ class StoreAssetTest extends TestCase
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
         $asset = Asset::factory()->create();
-        $user = User::factory()->createAssets()->create();
+        $user = User::factory()->createAssets()->checkoutAssets()->create();
 
         $this->settings->enableAutoIncrement();
 

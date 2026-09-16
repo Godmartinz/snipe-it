@@ -13,4 +13,7 @@ return [
     'total' => 'សរុប',
     'update' => 'ធ្វើបច្ចុប្បន្នភាព សមាសភាគ',
     'checkin_limit' => 'ចំនួនដែលបានប្រគល់មកវិញ ត្រូវតែស្មើនឹង ឬតិចជាង :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

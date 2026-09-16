@@ -45,15 +45,7 @@ class AccessoryObserver
      */
     public function created(Accessory $accessory)
     {
-        $logAction = new Actionlog;
-        $logAction->item_type = Accessory::class;
-        $logAction->item_id = $accessory->id;
-        $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->created_by = auth()->id();
-        if ($accessory->imported) {
-            $logAction->setActionSource('importer');
-        }
-        $logAction->logaction('create');
+        $accessory->writeInitialInventoryCreate();
     }
 
     /**

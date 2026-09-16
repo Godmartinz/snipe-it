@@ -14,7 +14,6 @@
                 data-id-field="name"
                 data-side-pagination="server"
                 data-sort-name="name"
-                data-fixed-columns="false"
                 data-sort-order="asc"
                 data-url="{{ route('api.labels.index') }}"
                 id="label2TemplateTable"

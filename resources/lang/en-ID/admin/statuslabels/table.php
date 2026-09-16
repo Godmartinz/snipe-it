@@ -13,6 +13,7 @@ return [
     'pending' => 'Tertunda',
     'status_type' => 'Tipe status',
     'show_in_nav' => 'Tunjukkan di sisi nav',
+    'status_label' => 'Status Label',
     'title' => 'Label status',
     'undeployable' => 'Tidak dapat disebarkan',
     'update' => 'Perbarui label status',

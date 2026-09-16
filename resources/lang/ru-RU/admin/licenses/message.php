@@ -37,9 +37,14 @@ return [
         'confirm' => 'Вы уверены, что хотите удалить эту лицензию?',
         'error' => 'При удалении лицензии возникла проблема. Попробуйте снова.',
         'success' => 'Лицензия удалена.',
-        'bulk_success' => 'The selected licenses were deleted successfully.',
-        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
-        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
+        'bulk_success' => 'Выбранные лицензии успешно удалены.',
+        'partial_success' => 'Лицензия успешно удалена. Смотрите дополнительную информацию ниже. | :count лицензий были удалены. Смотрите дополнительную информацию ниже.',
+        'bulk_checkout_warning' => ':license_name имеет места, которые в настоящее время выданы и не могут быть удалены. Пожалуйста, проверьте все места перед удалением.',
+    ],
+
+    'delete_with_checkin' => [
+        'bulk_success' => ':count licenses were deleted successfully after checking in :seats seats.',
+        'partial_success' => ':count licenses were deleted successfully after checking in :seats seats. See additional information below.',
     ],
 
     'checkout' => [
@@ -48,12 +53,12 @@ return [
         'not_enough_seats' => 'Недостаточно мест лицензии для выдачи',
         'mismatch' => 'Предоставленное место лицензии не соответствует лицензии',
         'unavailable' => 'Место недоступно для выдачи.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'license_is_inactive' => 'Лицензия истекает или прекращена.',
     ],
 
     'checkin' => [
         'error' => 'При возврате лицензии произошла проблема. Попробуйте снова.',
-        'not_reassignable' => 'Seat has been used',
+        'not_reassignable' => 'Место уже используется',
         'success' => 'Лицензия возвращена',
     ],
 

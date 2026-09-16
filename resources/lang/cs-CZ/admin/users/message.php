@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Tuto položku jste úspěšně přijali.',
     'declined' => 'Tuto položku jste úspěšně odmítli.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Uživatelé byli úspěšně aktualizováni, položka správce však nebyla uložena, protože správce, který jste si vybrali, byl také v seznamu uživatelů, který má být upraven, a uživatelé nemusí být jejich vlastní správce. Zvolte své uživatele znovu, kromě správce.',
     'user_exists' => 'Uživatel již existuje!',
     'cannot_delete' => 'Uživatel neexistuje nebo nemáte oprávnění k jeho odstranění.',
     'user_not_found' => 'Uživatel neexistuje nebo nemáte oprávnění k jeho zobrazení.',
     'user_login_required' => 'Přihlašovací pole je povinné',
     'user_has_no_assets_assigned' => 'Momentálně nejsou uživateli přiřazeny žádné položky.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Je vyžadováno heslo.',
     'insufficient_permissions' => 'Nedostatečná oprávnění.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Tento uživatel byl smazán. Budete muset uživatele obnovit, aby jste ho mohli upravil nebo přidělil nové majetky.',
     'ldap_not_configured' => 'Integrace LDAP nebyla pro tuto instalaci nakonfigurována.',
     'password_resets_sent' => 'Vybraným uživatelům, kteří jsou aktivováni a mají platné e-mailové adresy, byl zaslán odkaz pro obnovení hesla.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Odkaz pro obnovení hesla byl odeslán na :email!',
     'user_has_no_email' => 'Tento uživatel nemá e-mailovou adresu ve svém profilu.',
     'log_record_not_found' => 'Pro tohoto uživatele se nepodařilo nalézt odpovídající záznam z logu.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Uživatel byl úspěšně vytvořen.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Heslo pro tento účet je spravováno serverem LDAP / Active Directory. Obraťte se na oddělení IT a změňte heslo.',
         'multi_company_items_assigned' => 'Tento uživatel má přiřazené položky, které patří jiné společnosti. Zkontrolujte je nebo upravte jejich společnost.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

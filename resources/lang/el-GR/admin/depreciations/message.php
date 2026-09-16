@@ -19,6 +19,8 @@ return [
         'confirm' => 'Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτήν την κατηγορία απόσβεσης;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας την τάξη αποσβέσεων. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Η τάξη αποσβέσεων διαγράφηκε με επιτυχία.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

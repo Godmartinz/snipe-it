@@ -21,7 +21,7 @@ return [
         'confirm' => 'Bu kategoriyi silmek istediğinize emin misiniz?',
         'error' => 'Bu kategoriyi silerken bir hata ile karşılaşıldı. Lütfen tekrar deneyin.',
         'success' => 'Kategori başarıyla silindi.',
-        'bulk_success' => 'Kategoriler başarıyla silindi.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Kategori başarıyla silindi. Aşağıda ek bilgileri görebilirsiniz. | :count kategori başarıyla silindi. Aşağıda ek bilgileri görebilirsiniz.',
     ],
 

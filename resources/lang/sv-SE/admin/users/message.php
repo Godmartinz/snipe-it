@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Dina användare har uppdaterats, men ansvarigfältet sparades inte eftersom den ansvarige du valt även finns i användarlistan varvid en användare inte kan ange sig själv som ansvarig. Vänligen välj dina användare igen, med den ansvarige exkluderad ur valen.',
     'user_exists' => 'Användaren existerar redan!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Användaren finns inte eller så har du inte behörighet att se den.',
     'user_login_required' => 'Inloggningsfältet krävs',
     'user_has_no_assets_assigned' => 'Inga tillgångar har tilldelats denna användare.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Lösenordet krävs.',
     'insufficient_permissions' => 'Otillräckliga behörigheter.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Den här användaren har raderats. Du måste återställa den här användaren för att redigera eller tilldela nya tillgångar.',
     'ldap_not_configured' => 'LDAP-integrationen har inte konfigurerats för den här uppsättningen.',
     'password_resets_sent' => 'De valda användarna som är aktiverade och har en giltig e-postadress har skickats en länk för lösenordsåterställning.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'En återställningslänk för lösenord har skickats till :email!',
     'user_has_no_email' => 'Den här användaren har ingen e-postadress i sin profil.',
     'log_record_not_found' => 'Det gick inte att hitta en matchande logg för den här användaren.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Användare skapad.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Lösenordet för det här kontot hanteras av LDAP/Active Directory. Vänligen kontakta din IT-ansvarige för att ändra ditt lösenord. ',
         'multi_company_items_assigned' => 'Denna användare har objekt tilldelade som tillhör ett annat företag. Vänligen checka in dem eller redigera deras företag.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

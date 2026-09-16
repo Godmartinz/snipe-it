@@ -13,4 +13,7 @@ return [
     'total' => '总计',
     'update' => '更新组件',
     'checkin_limit' => '归还的数量必须等于或小于 :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

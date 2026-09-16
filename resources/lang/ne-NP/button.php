@@ -3,6 +3,7 @@
 return [
     'actions' => 'Actions',
     'add' => 'Add New',
+    'back' => 'फिर्ता',
     'cancel' => 'रद्द गर्नुहोस्',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Delete',

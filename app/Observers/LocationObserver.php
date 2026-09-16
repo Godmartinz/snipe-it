@@ -25,6 +25,11 @@ class LocationObserver
             }
         }
 
+        // See AssetModelObserver::updating for the deleted_at / updated_at
+        // filter rationale (restore fires updating via save() and would
+        // otherwise log a noisy "update" entry alongside the "restore" one).
+        unset($changed['deleted_at'], $changed['updated_at']);
+
         if (count($changed) > 0) {
             $logAction = new Actionlog;
             $logAction->item_type = Location::class;

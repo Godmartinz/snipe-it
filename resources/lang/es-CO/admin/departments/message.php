@@ -17,6 +17,8 @@ return [
         'confirm' => '¿Está seguro de que desea eliminar este departamento?',
         'error' => 'Hubo un problema al borrar el departamento. Por favor, inténtelo de nuevo.',
         'success' => 'El departamento fue eliminado correctamente.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

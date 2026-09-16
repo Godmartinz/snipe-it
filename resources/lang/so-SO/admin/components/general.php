@@ -13,4 +13,7 @@ return [
     'total' => 'Wadarta',
     'update' => 'Cusbooneysii Qaybta',
     'checkin_limit' => 'Qadarka la hubiyay waa in ay la mid tahay ama ka yar tahay :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

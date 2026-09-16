@@ -20,6 +20,8 @@ return [
         'confirm' => 'Kas olete kindel, et soovite selle oleku märgendi kustutada?',
         'error' => 'Staatuse märgi kustutamisel tekkis probleem. Palun proovi uuesti.',
         'success' => 'Staatuse märgis kustutati edukalt.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

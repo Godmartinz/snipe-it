@@ -3,6 +3,7 @@
 return [
     'actions' => 'Handlinger',
     'add' => 'Opprett ny',
+    'back' => 'Tilbake',
     'cancel' => 'Avbryt',
     'checkin_and_delete' => 'Sjekk inn alle / slett bruker',
     'delete' => 'Slett',

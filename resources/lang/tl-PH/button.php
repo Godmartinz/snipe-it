@@ -3,6 +3,7 @@
 return [
     'actions' => 'Mga kilos',
     'add' => 'Add New',
+    'back' => 'Back',
     'cancel' => 'Cancel',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Delete',

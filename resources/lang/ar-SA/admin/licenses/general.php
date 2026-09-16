@@ -48,6 +48,11 @@ return [
             'log_msg' => 'تم الخروج عن طريق سحب الترخيص بالجملة في واجهة المستخدم المرخص',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'هناك فقط :remaining_count مقاعد متبقية لهذا الترخيص مع حد أدنى من :min_amt. قد ترغب في النظر في شراء المزيد من المقاعد.',

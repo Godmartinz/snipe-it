@@ -13,6 +13,7 @@ return [
     'pending' => 'Pendiente',
     'status_type' => 'Tipo de estado',
     'show_in_nav' => 'Mostrar en la barra lateral',
+    'status_label' => 'Etiqueta de estado',
     'title' => 'Etiquetas de estado',
     'undeployable' => 'No utilizable',
     'update' => 'Actualizar la etiqueta de estado',

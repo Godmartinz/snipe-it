@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Neboli vybrané ziadne modely, preto nebolo nič odmazané.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model zmazaný!|:success_count_models modelov zmazaných!',
         'success_partial' => ':success_count model(y) odstránené, avšak :fail_count nebolo možné odstrániť pretože stále majú priradené majetky.',
     ],

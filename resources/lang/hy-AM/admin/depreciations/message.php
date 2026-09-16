@@ -19,6 +19,8 @@ return [
         'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս ամորտիզացիայի դասը։',
         'error' => 'Ամորտիզացիայի դասը ջնջելիս խնդիր առաջացավ։ Խնդրում ենք կրկին փորձել։',
         'success' => 'Ամորտիզացիայի դասը հաջողությամբ ջնջվել է։',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

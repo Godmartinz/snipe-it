@@ -20,7 +20,7 @@ return [
         'error' => 'Bandant panaikinti tiekėją įvyko klaida. Bandykite dar kartą.',
         'success' => 'Tiekėjas sėkmingai panaikintas.',
         'not_found' => 'Tiekėjas nerastas.',
-        'bulk_success' => 'Tiekėjai sėkmingai panaikinti.',
+        'bulk_success' => 'Tiekėjas sėkmingai ištrintas.|Tiekėjai (:count) sėkmingai ištrinti.',
         'partial_success' => '.',
     ],
 

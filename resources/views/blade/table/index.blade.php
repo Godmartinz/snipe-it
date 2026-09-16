@@ -10,14 +10,33 @@
     'fixed_right_number' => null,
     'sort_order' => 'asc',
     'sort_field' => 'name',
-    'nosticky' => false,
+    'aria_labelledby' => null,
 ])
 
 @aware(['name'])
 
+{{-- Automatically determine aria-labelledby from the enclosing box or tab-pane's
+     box-title h3 id. Both containers output id="{name}-title" when name is
+     set, so any table underneath can programmatically pair with it without
+     us having to remember to add it. --}}
+@php
+    $aria_labelledby ??= ($name && $name !== 'default') ? $name.'-title' : null;
+@endphp
+
+{{-- fixed_number / fixed_right_number pin the first / last N columns
+     via CSS position:sticky (snipe-table--sticky-*-N in overrides.less).
+     The bootstrap-table fixed-columns feature that used to handle this
+     was pulled from the bundle — its clone-and-overlay approach
+     misplaced tooltips when the container reflowed and drifted in
+     height with long-content rows. --}}
 <table
     role="table"
-    class="table table-striped snipe-table"
+    @if ($aria_labelledby) aria-labelledby="{{ $aria_labelledby }}" @endif
+    @class([
+        'table', 'table-striped', 'snipe-table',
+        'snipe-table--sticky-right-' . $fixed_right_number => (bool) $fixed_right_number,
+        'snipe-table--sticky-left-' . $fixed_number => (bool) $fixed_number,
+    ])
     data-cookie-id-table="{{ $name }}ListingTable"
     data-id-table="{{ $name }}ListingTable"
     data-sort-order="{{ $sort_order }}"
@@ -39,16 +58,6 @@
         data-columns="{{ $presenter }}"
     @endif
 
-    data-fixed-columns="{{ (($fixed_number) || ($fixed_right_number) || ($nosticky!='true')) ? 'true' : 'false' }}"
-
-    @if ($fixed_number)
-        data-fixed-number="{{ $fixed_number }}"
-    @endif
-
-    @if ($fixed_right_number)
-        data-fixed-right-number="{{ $fixed_right_number }}"
-    @endif
-
     @if ($buttons)
         data-buttons="{{ $buttons }}"
     @endif
@@ -63,3 +72,4 @@
         "ignoreColumn": ["actions","available_actions", "image","change","checkbox","checkincheckout","icon"]
     }'>
 </table>
+

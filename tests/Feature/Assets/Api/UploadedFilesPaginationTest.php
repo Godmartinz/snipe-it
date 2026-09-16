@@ -121,6 +121,34 @@ class UploadedFilesPaginationTest extends TestCase
         $this->assertCount(4, $response->json('rows'));
     }
 
+    public function test_search_filter_reflects_filtered_total_not_unfiltered_count()
+    {
+        // Regression: total (and the offset clamp that depends on it)
+        // used to be computed from the unfiltered query, so a search
+        // that narrowed 10 rows down to 2 still reported total=10.
+        foreach (range(1, 10) as $i) {
+            $this->createUploadLog(sprintf('PAG-TEST-%03d.jpg', $i));
+        }
+        $this->createUploadLog('needle-one.jpg');
+        $this->createUploadLog('needle-two.jpg');
+
+        $response = $this->actingAsForApi($this->user)
+            ->getJson(route('api.files.index', [
+                'object_type' => 'assets',
+                'id' => $this->asset->id,
+                'search' => 'needle',
+                'sort' => 'filename',
+                'order' => 'asc',
+            ]))
+            ->assertOk();
+
+        $this->assertEquals(2, $response->json('total'));
+        $this->assertEquals(
+            ['needle-one.jpg', 'needle-two.jpg'],
+            $response->json('rows.*.filename'),
+        );
+    }
+
     public function test_page_beyond_results_returns_empty_rows()
     {
         foreach (range(1, 5) as $i) {

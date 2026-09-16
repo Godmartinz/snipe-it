@@ -19,6 +19,8 @@ return [
         'confirm' => 'Etes-vous sûr de vouloir supprimer cette classe d\'amortissement?',
         'error' => 'Il y a eu un problème en supprimant cette classe d\'amortissement. Veuillez réessayer.',
         'success' => 'La classe d\'amortissement a été supprimée correctement.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

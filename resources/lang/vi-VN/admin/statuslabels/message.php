@@ -20,6 +20,8 @@ return [
         'confirm' => 'Bạn có chắc bạn muốn xóa nhãn tình trạng này?',
         'error' => 'Đã xảy ra sự cố khi xóa Nhãn trạng thái. Vui lòng thử lại.',
         'success' => 'Nhãn Trạng thái đã bị xóa thành công.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

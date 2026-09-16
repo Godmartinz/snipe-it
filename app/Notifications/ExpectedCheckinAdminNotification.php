@@ -3,23 +3,22 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class ExpectedCheckinAdminNotification extends Notification
+class ExpectedCheckinAdminNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private $params;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($params)
-    {
-        $this->assets = $params;
+    public function __construct(
+        public $assets
+    ) {
     }
 
     /**

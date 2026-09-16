@@ -13,6 +13,7 @@ return [
     'pending' => 'Kei te tatari',
     'status_type' => 'Momo Tūnga',
     'show_in_nav' => 'Whakaatuhia i te waka tawhito',
+    'status_label' => 'Status Label',
     'title' => 'Ngā Tapanga Tūnga',
     'undeployable' => 'Kaore e taea',
     'update' => 'Whakahoutia te Tapanga Tūnga',

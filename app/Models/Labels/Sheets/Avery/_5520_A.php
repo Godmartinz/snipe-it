@@ -6,8 +6,6 @@ class _5520_A extends _5520
 {
     private const BARCODE_MARGIN = 0.075;
 
-    private const TAG_SIZE = 0.125;
-
     private const TITLE_SIZE = 0.140;
 
     private const TITLE_MARGIN = 0.040;
@@ -74,8 +72,6 @@ class _5520_A extends _5520
     {
         return true;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

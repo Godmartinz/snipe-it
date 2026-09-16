@@ -20,6 +20,8 @@ return [
         'confirm' => 'Bạn có chắc muốn xoá phụ kiện này không?',
         'error' => 'Có lỗi xảy ra khi xoá phụ kiện. Vui lòng thử lại.',
         'success' => 'Phụ kiện đã được xoá thành công.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -24,9 +24,9 @@ return [
     'delete' => [
         'confirm' => 'Вы действительно хотите удалить производителя?',
         'error' => 'При удалении производителя возникла ошибка. Попробуйте снова.',
-        'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
-        'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
+        'success' => 'Производитель успешно удален.',
+        'bulk_success' => 'Производитель успешно удален.|:count производителей были успешно удалены.',
+        'partial_success' => 'Производитель успешно удален. См. дополнительную информацию ниже. | : :count производителей успешно удалены. См. дополнительную информацию ниже.',
     ],
 
 ];

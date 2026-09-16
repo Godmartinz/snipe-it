@@ -19,6 +19,8 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang klase ng depresasyong ito?',
         'error' => 'Mayroong isyu sa pag-delete ng kalse ng depresasyon. Mangayring subukang muli.',
         'success' => 'Ang klase ng depresayon ang matagumpay na nai-delete.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

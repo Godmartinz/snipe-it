@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Models\Setting;
 use Com\Tecnick\Barcode\Barcode;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class QrCodeController extends Controller
@@ -30,18 +31,18 @@ class QrCodeController extends Controller
         if ($settings->label2_2d_type === 'none') {
             return false;
         }
+        
+        $unavailable = fn() => abort(404, trans('general.generic_model_not_found', ['model' => trans('general.item')]));
 
         if (! array_key_exists($object_type, self::$map_show_route)) {
-            return $object_type.' is not a valid type.';
+            $unavailable();
         }
 
-        $object = self::$map_object_type[$object_type]::withTrashed()->find($id);
+        $object = parent::getMapObjectType()[$object_type]::withTrashed()->find($id);
 
-        if (! $object) {
-            return 'That item is invalid';
+        if (!$object || !Gate::allows('view', $object)) {
+            $unavailable();
         }
-
-        $this->authorize('view', $object);
 
         $size = Helper::barcodeDimensions($settings->label2_2d_type);
         $qr_file = public_path().'/uploads/barcodes/qr-'.str_slug($object_type).'-'.str_slug($id).'.png';

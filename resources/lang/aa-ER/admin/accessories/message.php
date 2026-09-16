@@ -20,6 +20,8 @@ return [
         'confirm' => 'crwdns1607:0crwdne1607:0',
         'error' => 'crwdns1608:0crwdne1608:0',
         'success' => 'crwdns1609:0crwdne1609:0',
+        'bulk_success' => 'crwdns15063:0crwdne15063:0',
+        'partial_success' => 'crwdns15065:0crwdne15065:0',
     ],
 
     'checkout' => [

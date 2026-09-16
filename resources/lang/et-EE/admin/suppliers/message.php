@@ -20,7 +20,7 @@ return [
         'error' => 'Tarnija kustutamisel tekkis probleem. Palun proovi uuesti.',
         'success' => 'Tarnija kustutamine õnnestus.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

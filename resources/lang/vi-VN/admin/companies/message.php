@@ -16,5 +16,7 @@ return [
         'confirm' => 'Bạn có chắc chắn muốn xóa công ty này?',
         'error' => 'Đã xảy ra sự cố khi xóa công ty. Vui lòng thử lại.',
         'success' => 'Công ty đã bị xóa thành công.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

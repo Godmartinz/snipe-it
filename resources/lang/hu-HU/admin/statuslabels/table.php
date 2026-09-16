@@ -13,6 +13,7 @@ return [
     'pending' => 'Függőben',
     'status_type' => 'Státusz típusa',
     'show_in_nav' => 'Mutassa az oldalsó navigációt',
+    'status_label' => 'Státusz címke',
     'title' => 'Státusz címkék',
     'undeployable' => 'Nem telepíthető',
     'update' => 'Státusz címke frissítése',

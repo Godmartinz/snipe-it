@@ -13,4 +13,7 @@ return [
     'total' => 'Samtals',
     'update' => 'Uppfæra íhlut',
     'checkin_limit' => 'Fjöldi sem er skilað þarf að vera jafn eða minni en :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

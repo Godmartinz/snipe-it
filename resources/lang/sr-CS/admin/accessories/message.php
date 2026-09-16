@@ -20,6 +20,8 @@ return [
         'confirm' => 'Da li ste sigurni da želite brisanje pribora?',
         'error' => 'Došlo je do problema s brisanjem dodatne opreme, pribora. Molim pokušajte ponovo.',
         'success' => 'Pribor je uspešno izbrisan.',
+        'bulk_success' => 'Dodatna oprema je uspešno izbrisana.|:count dodatne opreme je uspešno izbrisano.',
+        'partial_success' => ':count dodatne opreme je uspešno izbrisano, ali ostalo nije moglo biti izbrisano. Pogledajte ispod za više detalja.|:count dodatne opreme je uspešno izbrisano, ali ostalo nije moglo biti izbrisano. Pogledajte ispod za više detalja.',
     ],
 
     'checkout' => [

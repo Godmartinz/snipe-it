@@ -20,6 +20,8 @@ return [
         'confirm' => 'هل تريد بالتأكيد حذف تسمية الحالة هذه؟',
         'error' => 'حدثت مشكلة أثناء حذف تسمية الحالة. حاول مرة اخرى.',
         'success' => 'تم حذف تسمية الحالة بنجاح.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

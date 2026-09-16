@@ -15,6 +15,7 @@ return [
     'responsible_party' => 'Atsakinga pusė',
     'checked_out_to_at_creation' => 'Kam išduota',
     'completed_at' => 'Užbaigta',
+    'completed_at_help' => 'Kada šis aptarnavimas buvo faktiškai baigtas. Palikite tuščią, jei dar nebaigta. Datos nustatymas čia yra tas pats, kas spustelėti „Pažymėti kaip atliktą“, bet leidžia įvesti ankstesnę datą, o ne naudoti dabartinį laiką.',
     'completed_by' => 'Užbaigė',
     'mark_complete' => 'Žymėti kaip užbaigtą',
     'already_complete' => 'Jau užbaigta',

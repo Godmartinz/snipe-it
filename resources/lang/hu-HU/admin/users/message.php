@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Ön sikeresen elfogadta ezt az eszközt.',
     'declined' => 'Ön sikeresen elutasította ezt az eszközt.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'A felhasználók sikeresen frissültek, azonban a kezelői bejegyzést nem mentette el, mert a kiválasztott kezelő a szerkesztőben is szerepel a felhasználók listájában, és a felhasználók nem lehetnek saját kezelőik. Kérjük, ismét válassza ki a felhasználókat, kivéve a kezelőt.',
     'user_exists' => 'Felhasználó már létezik!',
     'cannot_delete' => 'A felhasználó nem létezik, vagy nincs engedélye a megtekintéséhez.',
     'user_not_found' => 'A felhasználó nem létezik, vagy nincs engedélye a megtekintéséhez.',
     'user_login_required' => 'A bejelentkezési mező kötelező',
     'user_has_no_assets_assigned' => 'A felhasználóhoz jelenleg nincs hozzárendelve eszköz.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'A jelszó szükséges.',
     'insufficient_permissions' => 'Nem megfelelő engedélyek.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Ezt a felhasználót törölték. Ezt a felhasználót vissza kell állítania, hogy szerkeszteni tudja őket, vagy hozzárendelhessen új eszközökhöz.',
     'ldap_not_configured' => 'Az LDAP integráció nem lett konfigurálva ehhez a telepítéshez.',
     'password_resets_sent' => 'A kiválasztott felhasználók számára, akik aktívak és van nekik érvényes email cím, elküldésre került egy jelszó visszaállítási link.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'A jelszó visszaállítási link elküldésre került a :email címre!',
     'user_has_no_email' => 'Ez a felhasználó nem rendelkezik e-mail címmel a profiljában.',
     'log_record_not_found' => 'Nem található illeszkedő naplóbejegyzés ehhez a felhasználóhoz.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'A felhasználó sikeresen létrejött.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'A fiókhoz tartozó jelszót az LDAP / Active Directory kezeli. Kérjük, lépjen kapcsolatba informatikai részlegével a jelszó megváltoztatásához.',
         'multi_company_items_assigned' => 'Ehhez a felhasználóhoz olyan tételek vannak hozzárendelve, amelyek egy másik céghez tartoznak. Kérjük, előbb végezze el azok visszavételét, vagy módosítsa az cégüket.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

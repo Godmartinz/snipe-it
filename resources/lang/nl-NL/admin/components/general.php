@@ -13,4 +13,7 @@ return [
     'total' => 'Totaal',
     'update' => 'Component bijwerken',
     'checkin_limit' => 'Het ingecheckte aantal moet gelijk zijn aan of kleiner zijn dan :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

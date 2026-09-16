@@ -19,6 +19,8 @@ return [
         'confirm' => 'இந்த தேய்மானத் தரத்தை நிச்சயமாக நீக்க விரும்புகிறீர்களா?',
         'error' => 'தேய்மானம் வகுப்பை நீக்குவதில் ஒரு சிக்கல் இருந்தது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
         'success' => 'தேய்மானம் வகுப்பு வெற்றிகரமாக நீக்கப்பட்டது.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

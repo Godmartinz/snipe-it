@@ -19,6 +19,8 @@ return [
         'confirm' => 'Kei te hiahia koe ki te muku i tenei akomanga uara?',
         'error' => 'I puta he take e whakakore ana i te akomanga whakahekenga. Tena ngana ano.',
         'success' => 'Kua mukua te akomanga ohaoha.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

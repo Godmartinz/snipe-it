@@ -55,6 +55,18 @@ class ExternalUrlTest extends TestCase
             'v4-mapped loopback' => ['http://[::ffff:127.0.0.1]/'],
             'v4-mapped rfc1918' => ['http://[::ffff:10.0.0.1]/'],
 
+            // IPv6 transition-prefix sneak-in (GHSA-5j6m-rr83-rpj7).
+            // NAT64, 6to4, and Teredo all embed an IPv4 target inside
+            // a globally-routable IPv6 wrapper. filter_var doesn't
+            // inspect the payload, so PublicIpCheck extracts and
+            // re-validates it.
+            'nat64 imds' => ['http://[64:ff9b::169.254.169.254]/latest/meta-data/'],
+            'nat64 imds hex' => ['http://[64:ff9b::a9fe:a9fe]/'],
+            'nat64 loopback' => ['http://[64:ff9b::127.0.0.1]/'],
+            '6to4 loopback' => ['http://[2002:7f00:1::]/'],
+            '6to4 imds' => ['http://[2002:a9fe:a9fe::]/'],
+            'teredo rfc1918' => ['http://[2001:0000:4136:e378:8000:63bf:f5ff:fffe]/'],
+
             // Malformed.
             'no scheme' => ['example.com'],
             'no host' => ['http:///'],

@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Helper;
-use App\Http\Requests\CustomFieldRequest;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 /**
  * This controller handles all actions related to Custom Asset Fields for
@@ -54,93 +50,6 @@ class CustomFieldsController extends Controller
     public function show(): RedirectResponse
     {
         return redirect()->route('fields.index');
-    }
-
-    /**
-     * Returns a view with a form to create a new custom field.
-     *
-     * @see CustomFieldsController::storeField()
-     *
-     * @author [Brady Wetherington] [<uberbrady@gmail.com>]
-     *
-     * @since [v1.8]
-     */
-    public function create(Request $request): View
-    {
-        $this->authorize('view', CustomField::class);
-        $this->authorize('create', CustomField::class);
-        $fieldsets = CustomFieldset::get();
-
-        return view('custom_fields.fields.edit', [
-            'predefinedFormats' => Helper::predefined_formats(),
-            'customFormat' => '',
-            'fieldsets' => $fieldsets,
-            'field' => new CustomField,
-        ]);
-    }
-
-    /**
-     * Validates and stores a new custom field.
-     *
-     * @see CustomFieldsController::createField()
-     *
-     * @author [Brady Wetherington] [<uberbrady@gmail.com>]
-     *
-     * @since [v1.8]
-     */
-    public function store(CustomFieldRequest $request): RedirectResponse
-    {
-        $this->authorize('view', CustomField::class);
-        $this->authorize('create', CustomField::class);
-
-        $show_in_email = $request->input('show_in_email', 0);
-        $display_in_user_view = $request->input('display_in_user_view', 0);
-
-        // Override the display settings if the field is encrypted
-        if ($request->input('field_encrypted') == '1') {
-            $show_in_email = '0';
-            $display_in_user_view = '0';
-        }
-
-        $field = new CustomField([
-            'name' => trim($request->input('name')),
-            'element' => $request->input('element'),
-            'help_text' => $request->input('help_text'),
-            'field_values' => $request->input('field_values'),
-            'field_encrypted' => $request->input('field_encrypted', 0),
-            'show_in_email' => $show_in_email,
-            'is_unique' => $request->input('is_unique', 0),
-            'display_in_user_view' => $display_in_user_view,
-            'auto_add_to_fieldsets' => $request->input('auto_add_to_fieldsets', 0),
-            'show_in_listview' => $request->input('show_in_listview', 0),
-            'show_in_requestable_list' => $request->input('show_in_requestable_list', 0),
-            'display_checkin' => $request->input('display_checkin', 0),
-            'display_checkout' => $request->input('display_checkout', 0),
-            'display_audit' => $request->input('display_audit', 0),
-            'created_by' => auth()->id(),
-        ]);
-
-        if ($request->filled('custom_format')) {
-            $field->format = $request->input('custom_format');
-        } else {
-            $field->format = $request->input('format');
-        }
-
-        if ($field->save()) {
-
-            // Sync fields with fieldsets
-            $fieldset_array = $request->input('associate_fieldsets');
-            if ($request->has('associate_fieldsets') && (is_array($fieldset_array))) {
-                $field->fieldset()->sync(array_keys($fieldset_array));
-            } else {
-                $field->fieldset()->sync([]);
-            }
-
-            return redirect()->route('fields.index')->with('success', trans('admin/custom_fields/message.field.create.success'));
-        }
-
-        return redirect()->back()->with('selected_fieldsets', $request->input('associate_fieldsets'))->withInput()
-            ->with('error', trans('admin/custom_fields/message.field.create.error'));
     }
 
     /**
@@ -191,98 +100,5 @@ class CustomFieldsController extends Controller
 
         return redirect()->route('fields.index')
             ->with('success', trans('admin/custom_fields/message.field.delete.success'));
-    }
-
-    /**
-     * Return a view to edit a custom field
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @param  int  $id
-     *
-     * @since [v4.0]
-     */
-    public function edit(Request $request, CustomField $field): View|RedirectResponse
-    {
-        $this->authorize('update', CustomField::class);
-        $fieldsets = CustomFieldset::get();
-        $customFormat = '';
-        if ((stripos($field->format, 'regex') === 0) && ($field->format !== CustomField::PREDEFINED_FORMATS['MAC'])) {
-            $customFormat = $field->format;
-        }
-
-        return view('custom_fields.fields.edit', [
-            'field' => $field,
-            'customFormat' => $customFormat,
-            'fieldsets' => $fieldsets,
-            'predefinedFormats' => Helper::predefined_formats(),
-        ]);
-
-    }
-
-    /**
-     * Store the updated field
-     *
-     * @todo Allow encrypting/decrypting if encryption status changes
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @param  int  $id
-     *
-     * @since [v4.0]
-     *
-     * @throws AuthorizationException
-     */
-    public function update(CustomFieldRequest $request, CustomField $field): RedirectResponse
-    {
-        $this->authorize('update', CustomField::class);
-        $show_in_email = $request->input('show_in_email', 0);
-        $display_in_user_view = $request->input('display_in_user_view', 0);
-
-        // Override the display settings if the field is encrypted
-        if ($request->input('field_encrypted') == '1') {
-            $show_in_email = '0';
-            $display_in_user_view = '0';
-        }
-
-        $field->name = trim($request->input('name'));
-        $field->element = $request->input('element');
-        $field->field_values = $request->input('field_values');
-        $field->created_by = auth()->id();
-        $field->help_text = $request->input('help_text');
-        $field->show_in_email = $show_in_email;
-        $field->is_unique = $request->input('is_unique', 0);
-        $field->display_in_user_view = $display_in_user_view;
-        $field->auto_add_to_fieldsets = $request->input('auto_add_to_fieldsets', 0);
-        $field->show_in_listview = $request->input('show_in_listview', 0);
-        $field->show_in_requestable_list = $request->input('show_in_requestable_list', 0);
-        $field->display_checkin = $request->input('display_checkin', 0);
-        $field->display_checkout = $request->input('display_checkout', 0);
-        $field->display_audit = $request->input('display_audit', 0);
-
-        if ($request->input('format') == 'CUSTOM REGEX') {
-            $field->format = $request->input('custom_format');
-        } else {
-            $field->format = $request->input('format');
-        }
-
-        if ($field->element == 'checkbox' || $field->element == 'radio') {
-            $field->format = 'ANY';
-        }
-
-        if ($field->save()) {
-
-            // Sync fields with fieldsets
-            $fieldset_array = $request->input('associate_fieldsets');
-            if ($request->has('associate_fieldsets') && (is_array($fieldset_array))) {
-                $field->fieldset()->sync(array_keys($fieldset_array));
-            } else {
-                $field->fieldset()->sync([]);
-            }
-
-            return redirect()->route('fields.index')->with('success', trans('admin/custom_fields/message.field.update.success'));
-        }
-
-        return redirect()->back()->withInput()->with('error', trans('admin/custom_fields/message.field.update.error'));
     }
 }

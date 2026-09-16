@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Анхдагч анхдагч EULA олдсонгүй. Тохиргоо дотроос нэгийг нэмэх.',
     'total' => 'Нийт',
     'remaining' => 'Ашигтай',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Дагалдах хэрэгслийг шинэчлэх',
     'use_default_eula' => 'Оронд нь <a href="#" data-toggle="modal" data-target="#eulaModal">програмын үндсэн EULA</a>-г ашиглаарай.',
     'use_default_eula_disabled' => '<del> оронд үндсэн анхдагч EULA ашигла.</del> Үндсэн анхдагч EULA тохируулагдаагүй байна. Тохиргоо дотроос нэгийг нэмж оруулна уу.',

@@ -16,5 +16,7 @@ return [
         'confirm' => 'คุณแน่ใจหรือไม่ว่าต้องการลบ บริษัท นี้',
         'error' => 'เกิดปัญหาในการลบ บริษัท กรุณาลองอีกครั้ง.',
         'success' => 'บริษัท ถูกลบเรียบร้อยแล้ว',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

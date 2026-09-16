@@ -16,5 +16,7 @@ return [
         'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս կազմակերպությունը ։',
         'error' => 'Կազմակերպությունը ջնջելիս խնդիր է առաջացել։ Խնդրում ենք փորձել կրկին։',
         'success' => 'Ընկերությունը հաջողությամբ ջնջվել է։',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

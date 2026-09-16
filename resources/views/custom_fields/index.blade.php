@@ -32,7 +32,7 @@
                 data-advanced-search="false"
                 id="customFieldsetTable"
                 data-buttons="customFieldsetButtons"
-                class="table table-striped snipe-table"
+                class="table table-striped snipe-table snipe-table--sticky-right-1"
                 data-export-options='{
                 "fileName": "export-fieldsets-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
@@ -117,7 +117,7 @@
                 id="customFieldsTable"
                 data-advanced-search="false"
                 data-buttons="customFieldButtons"
-                class="table table-striped snipe-table"
+                class="table table-striped snipe-table snipe-table--sticky-right-1"
                 data-export-options='{
                 "fileName": "export-fields-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

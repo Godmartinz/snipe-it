@@ -16,5 +16,7 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovu tvrtku?',
         'error' => 'Došlo je do problema s brisanjem tvrtke. Molim te pokušaj ponovno.',
         'success' => 'Tvrtka je uspješno izbrisana.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

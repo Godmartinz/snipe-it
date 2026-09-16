@@ -20,7 +20,7 @@ return [
         'error' => 'Bhí ceist ann a scriosadh an soláthraí. Arís, le d\'thoil.',
         'success' => 'Scriosadh an tsoláthraí go rathúil.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Jūs sėkmingai priėmėte šį daiktą.',
     'declined' => 'Jūs sėkmingai atsisakėte priimti šį daiktą.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Jūsų naudotojai buvo sėkmingai atnaujinti, tačiau tiesioginio vadovo informacija nebuvo išsaugota, nes jūsų nurodytas tiesioginis vadovas taip pat buvo redaguojamų naudotojų sąraše. Naudotojas negali būti savo paties tiesioginiu vadovu, todėl dar kartą pasirinkite naudotojus, neįtraukdami tiesioginio vadovo.',
     'user_exists' => 'Toks naudotojas jau yra!',
     'cannot_delete' => 'Tokio naudotojo nėra arba jūs neturite teisės jo panaikinti.',
     'user_not_found' => 'Tokio naudotojo nėra arba jūs neturite teisės jo peržiūrėti.',
     'user_login_required' => 'Prisijungimo laukas yra privalomas',
     'user_has_no_assets_assigned' => 'Naudotojui neišduotas joks turtas.',
+    'nothing_currently_assigned' => 'Šiuo metu nėra nieko priskirta.',
     'user_password_required' => 'Slaptažodis yra privalomas.',
     'insufficient_permissions' => 'Nepakanka teisių.',
+    'auth_fields_denied' => 'Jūs neturite teisės keisti šio naudotojo prisijungimo duomenų ar aktyvinimo laukų. Šie laukai nebuvo atnaujinti: :fields',
     'user_deleted_warning' => 'Šis naudotojas buvo panaikintas. Turėsite atkurti naudotoją, jeigu norėsite jį redaguoti ar priskirti jam naują turtą.',
     'ldap_not_configured' => 'LDAP integracija nebuvo sukonfigūruota šiam diegimui.',
     'password_resets_sent' => 'Pasirinktiems naudotojams, kurie yra aktyvuoti ir turi galiojančius el. pašto adresus, buvo išsiųsta slaptažodžio nustatymo iš naujo nuoroda.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Slaptažodžio nustatymo iš naujo nuoroda buvo išsiųsta į :email!',
     'user_has_no_email' => 'Šis naudotojas savo profilyje neturi el. pašto adreso.',
     'log_record_not_found' => 'Su šiuo naudotoju susijusių žurnalo įrašų nerasta.',
+
+    'impersonate' => [
+        'started' => 'Šiuo metu esate prisijungęs kaip :name.',
+        'stopped' => 'Grįžote į savo paskyrą.',
+        'cannot_impersonate_self' => 'Negalite prisijungti kaip jūs pats.',
+        'cannot_impersonate_superuser' => 'Jūs negalite prisijungti kaip kitas supernaudotojas.',
+        'target_not_active' => 'Šis naudotojas yra išjungtas arba ištrintas, todėl negalima prisijungti jo vardu.',
+        'impersonator_missing' => 'Pradinė paskyra, iš kurios buvo pradėta ši tapatybės prisiėmimo sesija, nebeegzistuoja. Prašome prisijungti iš naujo.',
+    ],
 
     'success' => [
         'create' => 'Naudotojas sėkmingai sukurtas.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Šios paskyros slaptažodį tvarko LDAP / Active Directory. Prašome susisiekti su savo IT skyriumi, kad pakeistumėte slaptažodį. ',
         'multi_company_items_assigned' => 'Šiam naudotojui yra priskirti daiktai, priklausantys kitai įmonei. Paimkite juos arba pakeiskite jų įmonę.',
         'no_pending_acceptances' => 'Šis naudotojas neturi jokių laukiančių patvirtinimų, apie kuriuos jam būtų galima priminti.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ma hubtaa inaad rabto inaad tirtirto qalabkan?',
         'error' => 'Waxaa jirtay xaalad tirtireysay mulxaqa. Fadlan isku day mar kale.',
         'success' => 'Mulxaqa lasoo raaciyay waa lagu guuleystay in la tir-tiro.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

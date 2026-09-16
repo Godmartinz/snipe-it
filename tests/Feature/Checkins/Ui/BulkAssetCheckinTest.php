@@ -159,7 +159,11 @@ class BulkAssetCheckinTest extends TestCase
 
     public function test_bulk_checkin_rejects_location_from_another_company_under_fmcs()
     {
-        $this->settings->enableMultipleFullCompanySupport();
+        // Location tenant-scoping under FMCS is opt-in via
+        // scope_locations_fmcs (off by default). This assertion depends
+        // on that scoping actively hiding the cross-company location,
+        // so enable it explicitly.
+        $this->settings->enableScopedLocationsWithFullMultipleCompanySupport();
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 

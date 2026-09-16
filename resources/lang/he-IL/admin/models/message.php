@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'לא נבחרו מודלים, לכן לא נמחק שום דבר.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'דגם נמחק!:|success_count דגמים נמחקו!',
         'success_partial' => ':success_count model(s) were deleted, however :fail_count were unable to be deleted because they still have assets associated with them.',
     ],

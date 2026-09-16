@@ -17,6 +17,8 @@ return [
         'confirm' => 'Is jy seker jy wil hierdie departement uitvee?',
         'error' => 'Daar is \'n probleem met die verwydering van die departement. Probeer asseblief weer.',
         'success' => 'Die departement is suksesvol geskrap.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -81,8 +81,6 @@ class L7162_B extends L7162
         return true;
     }
 
-    public function preparePDF($pdf) {}
-
     public function write($pdf, $record)
     {
         $pa = $this->getLabelPrintableArea();

@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Channels\SlackWebhookChannel;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
@@ -20,33 +21,33 @@ use NotificationChannels\GoogleChat\Widgets\KeyValue;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsChannel;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
-#[AllowDynamicProperties]
-class CheckoutAssetNotification extends Notification
+class CheckoutAssetNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public $last_checkout = '';
+
+    public $expected_checkin = '';
 
     /**
      * Create a new notification instance.
      *
      * @param  $params
      */
-    public function __construct(Asset $asset, $checkedOutTo, User $checkedOutBy, $acceptance, $note)
-    {
-        $this->settings = Setting::getSettings();
-        $this->item = $asset;
-        $this->admin = $checkedOutBy;
-        $this->note = $note;
-        $this->target = $checkedOutTo;
-        $this->last_checkout = '';
-        $this->expected_checkin = '';
-
+    public function __construct(
+        public Asset $item,
+        public $target,
+        public User $admin,
+        public $acceptance, // ???? what is this? (doesn't seem used)
+        public $note
+    ) {
         if ($this->item->last_checkout) {
             $this->last_checkout = Helper::getFormattedDateObject($this->item->last_checkout, 'date',
                 false);
         }
 
         if ($this->item->expected_checkin) {
-            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
+            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'datetime',
                 false);
         }
     }
@@ -81,12 +82,13 @@ class CheckoutAssetNotification extends Notification
 
     public function toSlack(): SlackMessage
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->webhook_botname) ?: 'Snipe-Bot';
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $botname = ($settings->webhook_botname) ?: 'Snipe-Bot';
+        $channel = ($settings->webhook_channel) ? $settings->webhook_channel : '';
 
         $fields = [
             trans('general.to_user') => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
@@ -101,7 +103,7 @@ class CheckoutAssetNotification extends Notification
             $fields[trans('general.company')] = $item->company->name;
         }
 
-        if (($this->expected_checkin) && ($this->expected_checkin !== '')) {
+        if ($this->expected_checkin) {
             $fields[trans('general.expected_checkin')] = $this->expected_checkin;
         }
 
@@ -118,20 +120,21 @@ class CheckoutAssetNotification extends Notification
 
     public function toMicrosoftTeams()
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
 
-        if (! Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
+        if (!Str::contains($settings->webhook_endpoint, 'workflows')) {
             return MicrosoftTeamsMessage::create()
-                ->to($this->settings->webhook_endpoint)
+                ->to($settings->webhook_endpoint)
                 ->type('success')
                 ->title(trans('mail.Asset_Checkout_Notification', ['tag' => '']))
                 ->addStartGroupToSection('activityText')
-                ->fact(trans('mail.assigned_to'), $target->display_name)
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityText')
-                ->fact(trans('general.administrator'), $admin->display_name)
+                ->fact(trans('general.administrator'), (string) ($admin?->display_name ?? ''))
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 
@@ -148,12 +151,13 @@ class CheckoutAssetNotification extends Notification
 
     public function toGoogleChat()
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $item = $this->item;
         $note = $this->note;
 
         return GoogleChatMessage::create()
-            ->to($this->settings->webhook_endpoint)
+            ->to($settings->webhook_endpoint)
             ->card(
                 Card::create()
                     ->header(

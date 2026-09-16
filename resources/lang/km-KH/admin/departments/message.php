@@ -17,6 +17,8 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបនាយកដ្ឋាននេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបនាយកដ្ឋាន។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'នាយកដ្ឋានត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

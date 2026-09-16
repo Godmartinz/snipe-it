@@ -25,7 +25,7 @@ return [
         'confirm' => 'Vai tiešām vēlaties dzēst šo ražotāju?',
         'error' => 'Radās problēma, izdzēšot ražotāju. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

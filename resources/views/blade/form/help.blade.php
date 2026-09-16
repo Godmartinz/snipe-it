@@ -1,5 +1,5 @@
 @props(['name', 'icon' => null])
-<p class="help-block" id="{{ $name }}-help">
+<p {{ $attributes->merge(['class' => 'help-block', 'id' => $name.'-help']) }}>
     @if ($icon)
         <x-icon :type="$icon" />
     @endif

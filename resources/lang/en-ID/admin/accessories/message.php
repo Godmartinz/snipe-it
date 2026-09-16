@@ -20,6 +20,8 @@ return [
         'confirm' => 'Anda yakin ingin menghapus aksesoris ini?',
         'error' => 'Ada masalah untuk mengahpus aksesoris ini. Silahkan coba lagi.',
         'success' => 'Aksessoris ini berhasil dihapus.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

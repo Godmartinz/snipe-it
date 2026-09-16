@@ -17,6 +17,8 @@ return [
         'confirm' => 'Tem certeza que deseja excluir este departamento?',
         'error' => 'Houve um problema de exclusão no departamento. Por favor, tente novamente.',
         'success' => 'O departamento foi excluído com sucesso.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

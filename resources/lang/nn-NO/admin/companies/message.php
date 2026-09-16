@@ -16,5 +16,7 @@ return [
         'confirm' => 'Er du sikker på at du vil slette denne bedriften?',
         'error' => 'Feil ved sletting av bedrift. Prøv igjen.',
         'success' => 'Bedriften ble slettet.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

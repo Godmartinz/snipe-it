@@ -3,6 +3,7 @@
 return [
     'actions' => 'Ενέργειες',
     'add' => 'Προσθήκη Νέου',
+    'back' => 'Προηγούμενο',
     'cancel' => 'Ακύρωση',
     'checkin_and_delete' => 'Checkin Όλων / Διαγραφή Χρήστη',
     'delete' => 'Διαγραφή',

@@ -9,18 +9,12 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="department">
+        <x-box name="department" sr_only_title>
+
+            <x-slot:table_header>{{ trans('general.departments') }}</x-slot:table_header>
 
             <x-slot:bulkactions>
-                <x-table.bulk-actions
-                        name='department'
-                        action_route="{{ route('departments.bulk.delete') }}"
-                        model_name="department"
-                >
-                    @can('delete', App\Models\Department::class)
-                        <option>{{ trans('general.delete') }}</option>
-                    @endcan
-                </x-table.bulk-actions>
+                <x-table.bulk-departments />
             </x-slot:bulkactions>
 
             <x-table

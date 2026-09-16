@@ -38,7 +38,7 @@ return [
 
     'forgot-password-confirm' => [
         'error' => 'Bandant pakeisti slaptažodį įvyko klaidą, bandykite dar kartą.',
-        'success' => 'Jūsų slaptaždis buvo sėkmingai pakeistas.',
+        'success' => 'Jūsų slaptažodis buvo sėkmingai pakeistas.',
     ],
 
 ];

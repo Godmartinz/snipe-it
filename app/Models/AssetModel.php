@@ -148,9 +148,41 @@ class AssetModel extends SnipeModel
         return $this->hasMany(Asset::class, 'model_id')->RTD();
     }
 
+    /**
+     * Bulk-fulfillment eligibility hook. Overrides the Requestable
+     * trait's default (which probes numRemaining) since AssetModel
+     * fulfills by handing out concrete assets of the model rather
+     * than a qty count. Returns true when at least one available
+     * (RTD) asset of this model exists.
+     */
+    protected function hasStockForBulkFulfillment(): bool
+    {
+        return $this->availableAssets()->exists();
+    }
+
     public function assignedAssets()
     {
         return $this->hasMany(Asset::class, 'model_id')->Deployed();
+    }
+
+    /**
+     * How many distinct Orders this asset model has appeared on across
+     * all of its Asset instances. Since each Asset is 1:1 with a
+     * transaction via AssetObserver::created, this is the count of
+     * distinct order_ids on order_items linked to any of this model's
+     * assets. Useful for the info-panel "how many times has this model
+     * been ordered" hint.
+     */
+    public function ordersCount(): int
+    {
+        // Purchases only (positive qty) — see HasOrders::ordersCount for
+        // the rationale on filtering out corrections/consumption events.
+        return (int) OrderItem::query()
+            ->where('item_type', Asset::class)
+            ->whereIn('item_id', $this->assets()->select('id'))
+            ->where('qty', '>', 0)
+            ->distinct()
+            ->count('order_id');
     }
 
     public function archivedAssets()
@@ -204,6 +236,11 @@ class AssetModel extends SnipeModel
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function requireAcceptance(): bool
+    {
+        return (bool) ($this->category?->require_acceptance ?? false);
     }
 
     /**
@@ -336,7 +373,7 @@ class AssetModel extends SnipeModel
      *
      * @version v3.5
      */
-    public function scopeRequestableModels($query)
+    public function scopeRequestable($query)
     {
         return $query->where('requestable', '1');
     }
@@ -407,5 +444,30 @@ class AssetModel extends SnipeModel
     public function scopeOrderByCreatedByName($query, $order)
     {
         return $query->leftJoin('users as admin_sort', 'models.created_by', '=', 'admin_sort.id')->select('models.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * `% remaining` is (available / total) * 100 — see percentRemaining().
+     * The caller (Api\AssetModelsController::index) already adds the
+     * `remaining` and `assets_count` withCount aliases before applying
+     * this scope, so we reference them directly in ORDER BY. Guarded
+     * against division by zero for models with no assets. Uses
+     * orderByRaw because Laravel's query builder has no arithmetic API
+     * for ORDER BY expressions.
+     *
+     * PostgreSQL note: this expression references SELECT-list aliases
+     * inside a compound ORDER BY expression, which PostgreSQL rejects
+     * per SQL standard. Snipe-IT officially supports MySQL/MariaDB and
+     * tests on SQLite (both allow this); moving to PostgreSQL would
+     * require inlining the subqueries or wrapping the query in an
+     * outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN assets_count = 0 THEN 0 ELSE (remaining * 100.0 / assets_count) END '.$direction);
     }
 }

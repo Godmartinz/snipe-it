@@ -23,4 +23,6 @@ return [
         'success' => 'Aptarnavimas pažymėtas kaip užbaigtas.',
         'error' => 'Bandant pažymėti šį aptarnavimą kaip užbaigtą įvyko klaida. Bandykite dar kartą.',
     ],
+    'bulk_delete' => 'Nebuvo ištrinti jokie aptarnavimo įrašai (praleistų – :skipped).|Ištrintas aptarnavimo įrašas (:count). (Praleistų – :skipped.)|Ištrinti aptarnavimo įrašai (:count). (Praleistų – :skipped.)',
+    'bulk_complete' => 'Nė vienas aptarnavimo įrašas nebuvo pažymėtas kaip baigtas (Praleisti arba jau baigti – :skipped.).|Pažymėtas :count aptarnavimo įrašas kaip baigtas. (Praleisti arba jau baigti – :skipped.)|Aptarnavimo įrašai, pažymėti kaip baigti – :count. (Praleisti arba jau baigti – :skipped.)',
 ];

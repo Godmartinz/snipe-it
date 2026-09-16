@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Class UserPresenter
+ *
+ * @property \App\Models\User $model
  */
 class UserPresenter extends Presenter
 {
@@ -614,5 +616,16 @@ class UserPresenter extends Presenter
         }
 
         return '<span class="'.(($this->deleted_at != '') ? 'deleted' : '').'">'.e($this->display_name).'</span>';
+    }
+
+    public function calendarUrl(): ?string
+    {
+        return route('users.show', $this->model->id);
+    }
+
+    public function calendarColor(): ?string
+    {
+        return $this->model->department?->tag_color
+            ?? $this->model->company?->color;
     }
 }

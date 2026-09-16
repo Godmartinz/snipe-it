@@ -20,7 +20,7 @@ return [
         'error' => 'A szállító törlését okozta. Kérlek próbáld újra.',
         'success' => 'A szállító sikeresen törölve lett.',
         'not_found' => 'A beszállító nem található.',
-        'bulk_success' => 'A beszállítók sikeresen törlésre kerültek.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

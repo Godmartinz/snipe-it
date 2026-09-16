@@ -72,6 +72,11 @@ class CleanOldCheckoutRequests extends Command
 
     private function shouldSoftDelete(CheckoutRequest $request)
     {
-        return $request->requestable->trashed() || $request->user->trashed();
+        /** @var \Illuminate\Database\Eloquent\Model&object{trashed(): bool} $requestable */
+        $requestable = $request->requestable;
+        /** @var \App\Models\User $user */
+        $user = $request->user;
+
+        return $requestable->trashed() || $user->trashed();
     }
 }

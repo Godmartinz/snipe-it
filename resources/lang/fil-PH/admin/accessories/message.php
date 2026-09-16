@@ -20,6 +20,8 @@ return [
         'confirm' => 'Sigurado kaba na gusto mong i-delete ang aksesoryang ito?',
         'error' => 'Mayroong isyu sa pagdelete ng aksesorya. Mangyaring subukang muli.',
         'success' => 'Ang aksesorya ay matagumpay na nai-delete.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

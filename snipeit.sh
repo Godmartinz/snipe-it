@@ -321,19 +321,31 @@ rename_default_vhost () {
 }
 
 
-if [[ -f /etc/debian_version || -f /etc/lsb-release ]]; then
-  distro="$(lsb_release -is)"
-  version="$(lsb_release -rs)"
-  codename="$(lsb_release -cs)"
-elif [ -f /etc/os-release ]; then
+# Prefer /etc/os-release because it is the modern cross-distro standard and
+# is always present on every distro this installer supports. Debian 13
+# stopped shipping lsb_release by default (issue #19469), so the old path
+# that shelled out to `lsb_release` produced empty distro/version/codename
+# on a fresh Debian 13 install and broke everything downstream.
+#
+# lsb_release stays as a fallback for very old systems that predate the
+# os-release standard.
+#
+# Order is important below. If /etc/os-release and /etc/centos-release both
+# exist, we are on CentOS 7 and os-release handles it. If only
+# /etc/centos-release exists, we are on CentOS 6 or earlier, which is not
+# parsable, so we assume version 6. /etc/os-release also properly detects
+# Fedora.
+if [ -f /etc/os-release ]; then
   # shellcheck disable=SC1091
   distro="$(source /etc/os-release && echo "$ID")"
   # shellcheck disable=SC1091
   version="$(source /etc/os-release && echo "$VERSION_ID")"
-  #Order is important here.  If /etc/os-release and /etc/centos-release exist, we're on centos 7.
-  #If only /etc/centos-release exist, we're on centos6(or earlier).  Centos-release is less parsable,
-  #so lets assume that it's version 6 (Plus, who would be doing a new install of anything on centos5 at this point..)
-  #/etc/os-release properly detects fedora
+  # shellcheck disable=SC1091
+  codename="$(source /etc/os-release && echo "$VERSION_CODENAME")"
+elif [[ -f /etc/debian_version || -f /etc/lsb-release ]]; then
+  distro="$(lsb_release -is)"
+  version="$(lsb_release -rs)"
+  codename="$(lsb_release -cs)"
 elif [ -f /etc/centos-release ]; then
   distro="centos"
   version="6"

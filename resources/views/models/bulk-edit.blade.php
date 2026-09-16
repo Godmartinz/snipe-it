@@ -18,10 +18,9 @@
                 <div class="box box-default">
                     <div class="box-body">
 
-                        <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
-                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        <x-callout type="warning" icon="warning" live="assertive">
                             {{ trans_choice('admin/models/message.bulkedit.warn', count($models), ['model_count' => count($models)]) }}
-                        </div>
+                        </x-callout>
 
 
                         <table class="table table-striped">

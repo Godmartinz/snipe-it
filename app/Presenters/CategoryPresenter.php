@@ -63,6 +63,8 @@ class CategoryPresenter extends Presenter
                 'sortable' => true,
                 'title' => trans('general.qty'),
                 'visible' => true,
+                'class' => 'text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'has_eula',
                 'scope' => 'col',

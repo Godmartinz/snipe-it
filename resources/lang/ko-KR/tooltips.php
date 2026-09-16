@@ -3,22 +3,22 @@
 return [
 
     'disabled_assoc' => [
-        'accessory' => 'This accessory cannot be deleted because it still has items, users, or locations associated with it',
-        'asset' => 'This asset cannot be deleted because it still has items associated with it',
-        'category' => 'This category cannot be deleted because it still has items associated with it',
-        'company' => 'This company cannot be deleted because it still has items or users associated with it',
-        'component' => 'This component cannot be deleted because it still has items associated with it',
-        'custom_field' => 'This custom field cannot be deleted because it is still associated with at least one fieldset',
-        'department' => 'This department cannot be deleted because it still has users associated with it',
-        'location' => 'This location cannot be deleted because it still has items or users associated with it',
-        'manufacturer' => 'This manufacturer cannot be deleted because it still has items associated with it',
-        'supplier' => 'This supplier cannot be deleted because it still has items associated with it',
-        'user' => 'This user cannot be deleted because it still has items associated with it',
-        'user_self' => 'You cannot delete yourself',
+        'accessory' => '이 액세서리는 연결된 항목, 사용자 또는 위치가 있어 삭제할 수 없습니다',
+        'asset' => '이 자산은 연결된 항목이 있어 삭제할 수 없습니다',
+        'category' => '이 카테고리는 연결된 항목이 있어 삭제할 수 없습니다',
+        'company' => '이 회사는 연결된 항목 또는 사용자가 있어 삭제할 수 없습니다',
+        'component' => '이 부품은 연결된 항목이 있어 삭제할 수 없습니다',
+        'custom_field' => '이 사용자 정의 필드는 최소 하나의 필드셋과 연결되어 있어 삭제할 수 없습니다',
+        'department' => '이 부서는 연결된 사용자가 있어 삭제할 수 없습니다',
+        'location' => '이 위치는 연결된 항목 또는 사용자가 있어 삭제할 수 없습니다',
+        'manufacturer' => '이 제조사는 연결된 항목이 있어 삭제할 수 없습니다',
+        'supplier' => '이 공급업체는 연결된 항목이 있어 삭제할 수 없습니다',
+        'user' => '이 사용자는 연결된 항목이 있어 삭제할 수 없습니다',
+        'user_self' => '자기 자신은 삭제할 수 없습니다',
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.',
+        'user' => '이 사용자의 모든 항목을 반입하고 선택적으로 삭제합니다. 다음 페이지에서 확인할 수 있습니다.',
     ],
 
 ];

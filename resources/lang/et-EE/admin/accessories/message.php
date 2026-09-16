@@ -20,6 +20,8 @@ return [
         'confirm' => 'Kas olete kindel, et soovite seda tarvikut kustutada?',
         'error' => 'Tarvikut ei õnnestunud kustutada. Palun proovi uuesti.',
         'success' => 'Lisaseade kustutati edukalt.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -16,5 +16,7 @@ return [
         'confirm' => 'Ar tikrai norite ištrinti šią įmonę?',
         'error' => 'Bandant panaikinti įmonę įvyko klaida. Bandykite dar kartą.',
         'success' => 'Įmonė sėkmingai panaikinta.',
+        'bulk_success' => 'Įmonė sėkmingai ištrinta.|Įmonės (:count) sėkmingai ištrintos.',
+        'partial_success' => 'Įmonė sėkmingai ištrinta. Daugiau informacijos rasite žemiau. | Įmonės (:count) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
     ],
 ];

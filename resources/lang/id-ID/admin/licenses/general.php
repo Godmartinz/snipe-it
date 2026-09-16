@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Dipinjamkan atau Diberikan melalui peminjaman atau pemberian lisensi massal di GUI lisensi',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Hanya ada :remaining_count slot lisensi tersisa untuk lisensi ini dengan jumlah minimum :min_amt. Anda mungkin perlu mempertimbangkan untuk membeli lebih banyak slot lisensi.',

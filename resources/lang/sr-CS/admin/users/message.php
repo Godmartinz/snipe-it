@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Uspešno ste prihvatili ovu stavku.',
     'declined' => 'Uspešno ste odbili ovu stavku.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Your users have been successfully updated, however your manager entry was not saved because the manager you selected was also in the user list to be edited, and users may not be their own manager. Please select your users again, excluding the manager.',
     'user_exists' => 'Korisnik već postoji!',
     'cannot_delete' => 'Korisnik ne postoji ili vi nemate ovlašćenja da ga obrišete.',
     'user_not_found' => 'Korisnik ne postoji ili vi nemate ovlašćenja da ga vidite.',
     'user_login_required' => 'Polje za prijavu je obavezno',
     'user_has_no_assets_assigned' => 'Trenutno nema imovine zadužene korisniku.',
+    'nothing_currently_assigned' => 'Trenutno ništa nije dodeljeno.',
     'user_password_required' => 'Lozinka je obavezna.',
     'insufficient_permissions' => 'Insufficient Permissions.',
+    'auth_fields_denied' => 'Nemate dozvolu da menjate kredencijale ili aktivaciona polja ovom korisniku. Zahtevana polja nisu izmenjena: :fileds',
     'user_deleted_warning' => 'Ovaj je korisnik izbrisan. Morate vratiti tog korisnika da biste ga uredili ili mu dodeliti novi resurs.',
     'ldap_not_configured' => 'LDAP integracija nije konfigurisana za ovu instalaciju.',
     'password_resets_sent' => 'Odabranim korisnicima koji su aktivirani i imaju važeće adrese e-pošte poslat je link za resetovanje lozinke.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Link za resetovanje lozinke je poslat na :email!',
     'user_has_no_email' => 'Ovaj korisnik nema adresu e-pošte u svom profilu.',
     'log_record_not_found' => 'Nije bilo moguće pronaći odgovarajući zapis u dnevniku za ovog korisnika.',
+
+    'impersonate' => [
+        'started' => 'Prijavljeni ste kao :name.',
+        'stopped' => 'Vratili ste se u svoj nalog.',
+        'cannot_impersonate_self' => 'Ne možete se prijaviti kao vi.',
+        'cannot_impersonate_superuser' => 'Ne možete se prijaviti kao drugi superkorisnik.',
+        'target_not_active' => 'Korisnik je deaktiviran ili izbrisan i ne možete se prijaviti kao on.',
+        'impersonator_missing' => 'Originalni nalog ove sesije predstavljanja više ne postoji. Molim vas prijavite se ponovo.',
+    ],
 
     'success' => [
         'create' => 'Korisnik je uspešno kreiran.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Lozinku za ovaj nalog kontroliše LDAP / Active Directory. Obratite se IT centru za promenu lozinke. ',
         'multi_company_items_assigned' => 'Ovaj korisnik poseduje zadužene stavke koje pripadaju drugoj kompaniji. Molim vas razdužite ih ili promenite njihovu kompaniju.',
         'no_pending_acceptances' => 'Ovaj korisnik nema prihvatanja na čekanju za koja bi ih podsetili.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

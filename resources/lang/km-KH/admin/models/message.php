@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'គ្មាន​ម៉ូដែល​ត្រូវ​បាន​ជ្រើសរើស ដូច្នេះ​មិន​មាន​អ្វី​ត្រូវ​បាន​លុប។',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'បានលុបម៉ូដែល!|:success_count model ត្រូវបានលុប!',
         'success_partial' => ':success_count model(s) ត្រូវបានលុប ទោះយ៉ាងណាក៏ដោយ :fail_count មិនអាចលុបបានទេ ដោយសារពួកគេនៅតែមានទ្រព្យសកម្មដែលពាក់ព័ន្ធជាមួយពួកគេ។',
     ],

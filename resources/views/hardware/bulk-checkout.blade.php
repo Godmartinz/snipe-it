@@ -18,24 +18,9 @@
     <x-container columns="2">
         <x-page-column class="col-md-7">
 
-            <x-form id="checkout_form" route="{{ url()->current() }}">
+            <x-form id="checkout_form" route="{{ url()->current() }}" data-disable-empty-on-submit data-autofocus-select2-search>
 
                 <x-box header="{{ trans('admin/hardware/form.tag') }}">
-
-                    @if ($removed_assets->isNotEmpty())
-                        <x-box box_style="solid box-warning" header="Warning">
-                            <p>{{ trans('general.assigned_assets_removed') }}</p>
-                            <ul>
-                                @foreach ($removed_assets as $removed_asset)
-                                    <li>
-                                        <a href="{{ route('hardware.show', $removed_asset->id) }}">
-                                            {{ $removed_asset->present()->fullName }}
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </x-box>
-                    @endif
 
                     @include ('partials.forms.edit.asset-select', [
                         'translated_name' => trans('general.assets'),
@@ -57,34 +42,25 @@
                                 name="status_id"
                                 :options="$statusLabel_list"
                                 :selected="old('status_id', $status_id ?? null)"
-                                required
                                 style="width: 100%;"
                                 aria-label="status_id"
                             />
                         </x-slot:input>
                     </x-form.row>
 
-                    <x-form.row
-                        :label="trans('admin/hardware/form.requestable')"
-                        name="set_not_requestable"
-                    >
-                        <x-slot:input>
-                            <x-input.select
-                                name="set_not_requestable"
-                                id="set_not_requestable"
-                                :options="[
-                                    '' => trans('general.do_not_change'),
-                                    '1' => trans('admin/hardware/general.not_requestable'),
-                                ]"
-                                :selected="old('set_not_requestable', '')"
-                                style="width: 100%;"
-                                aria-label="set_not_requestable"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    <x-form.checkbox-row
+                        name="requestable"
+                        :label="trans('admin/hardware/general.requestable')"
+                        data-user-preference-key="snipeit.checkout.requestable_default.{{ auth()->id() ?? 'guest' }}"
+                        data-had-old-input="{{ ((bool) old('requestable', false)) || session()->has('_old_input.requestable') ? '1' : '0' }}"
+                    />
 
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'true'])
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => session('checkout_to_type') == 'user' ? '' : ''])
+                    <x-input.user-select
+                        :label="trans('general.user')"
+                        name="assigned_user"
+                        :selected="old('assigned_user')"
+                    />
                     <!-- unselect keeps the asset being checked out from being pre-selected in this picker -->
                     @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'asset_selector_div_id' => 'assigned_asset', 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
                     @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => session('checkout_to_type') == 'location' ? '' : 'display: none;'])
@@ -92,31 +68,17 @@
                     <x-form.row
                         :label="trans('admin/hardware/form.checkout_date')"
                         name="checkout_at"
+                        type="datetimepicker"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="checkout_at"
-                                end_date="0d"
-                                :value="old('checkout_at')"
-                                :placeholder="trans('general.select_date')"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('admin/hardware/form.expected_checkin')"
                         name="expected_checkin"
+                        type="datetimepicker"
+                        :default_now="false"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="expected_checkin"
-                                :value="old('expected_checkin')"
-                                :placeholder="trans('general.select_date')"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('general.notes')"
@@ -128,10 +90,14 @@
                     </x-form.row>
 
                     <x-slot:customfooter>
-                        <div class="box-footer">
-                            <a class="btn btn-link" href="{{ URL::previous() }}">{{ trans('button.cancel') }}</a>
-                            <button type="submit" class="btn btn-primary pull-right"><x-icon type="checkmark"/> {{ trans('general.checkout') }}</button>
-                        </div>
+                        <x-redirect_submit_options
+                            index_route="hardware.index"
+                            :button_label="trans('general.checkout')"
+                            :options="[
+                                'bulk_checkout' => trans('admin/hardware/form.redirect_to_bulk_checkout'),
+                                'index' => trans('admin/hardware/form.redirect_to_all', ['type' => trans('general.assets')]),
+                            ]"
+                        />
                     </x-slot:customfooter>
 
                 </x-box>
@@ -140,36 +106,14 @@
 
         </x-page-column>
 
-        <livewire:checkout-target-panel type="assets" />
+        <x-page-column class="col-md-5">
+            <x-side-panel.removed-assets
+                :items="$removed_assets"
+                :message="trans('general.assigned_assets_removed')"
+            />
+            <livewire:checkout-target-panel type="assets" />
+        </x-page-column>
 
     </x-container>
 @stop
 
-@section('moar_scripts')
-    <script nonce="{{ csrf_token() }}">
-        $(function () {
-            // Add the disabled attribute to empty inputs on submit to handle the case where someone does not pick a status ID
-            // and the form is submitted with an empty status ID which will fail validation via the form request
-            $("form").submit(function() {
-                $(this).find(":input").filter(function(){ return !this.value; }).attr("disabled", "disabled");
-                return true; // ensure form still submits
-            });
-
-            setTimeout(function () {
-                const $searchField = $('.select2-search__field');
-                const $results = $('.select2-results');
-
-                // Focus the search input
-                $searchField.focus();
-
-                // Hide results initially
-                $results.hide();
-
-                // Show results when a user starts typing
-                $searchField.on('input', function () {
-                    $results.show();
-                });
-            }, 0);
-        });
-    </script>
-@stop

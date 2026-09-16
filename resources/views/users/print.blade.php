@@ -95,8 +95,8 @@
     @endphp
     <div id="start_of_user_section"> {{-- used for page breaks when printing --}}</div>
     <h3>
-        @if ($show_user->company)
-            <b>{{ trans('admin/companies/table.name') }}:</b> {{ $show_user->company->name }}
+        @if ($show_user->companies->isNotEmpty())
+            <b>{{ trans('admin/companies/table.name') }}:</b> {{ $show_user->companies->pluck('name')->join(', ') }}
         <br>
         @endif
         {{ trans('general.assigned_to', ['name' => $show_user->display_name]) }}
@@ -105,6 +105,7 @@
     </h3>
     <p></p>{{ trans('admin/users/general.all_assigned_list_generation')}} {{ Helper::getFormattedDateObject(now(), 'datetime', false) }}
 
+    @can('view', \App\Models\Asset::class)
     @if ($show_user->assets->count() > 0)
         @php
             $counter = 1;
@@ -175,6 +176,7 @@
             </tbody>
         </table>
     @endif
+    @endcan
 
     @can('view', \App\Models\License::class)
         @if ($show_user->directlicenses->count() > 0)
@@ -432,6 +434,7 @@
                     @endphp
                 @endforeach
                 @endcan
+                @can('view', \App\Models\Component::class)
                 @foreach ($asset->components as $component)
                     @if($component)
                         <tr>
@@ -446,6 +449,7 @@
                         $indirectAssignmentsCounter ++
                     @endphp
                 @endforeach
+                @endcan
                 @can('view', \App\Models\Accessory::class)
                 @foreach ($asset->assignedAccessories as $indirectAccessory)
                     @if($indirectAccessory)

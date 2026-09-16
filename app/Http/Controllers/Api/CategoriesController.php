@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Categories\DestroyCategoryAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasChildren;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -119,7 +120,8 @@ class CategoriesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $categories->count()) ? $categories->count() : app('api_offset_value');
+        $total = $categories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -139,7 +141,6 @@ class CategoriesController extends Controller
                 break;
         }
 
-        $total = $categories->count();
         $categories = $categories->skip($offset)->take($limit)->get();
 
         return (new CategoriesTransformer)->transformCategories($categories, $total);
@@ -240,8 +241,8 @@ class CategoriesController extends Controller
             return response()->json(
                 Helper::formatStandardApiResponse('error', null, trans('general.bulk_delete_associations.general_assoc_warning', ['asset_type' => $category->category_type]))
             );
-        } catch (\Exception $e) {
-            report($e);
+        } catch (\Throwable $e) {
+            Handler::reportOrRethrow($e);
 
             return response()->json(
                 Helper::formatStandardApiResponse('error', null, trans('general.something_went_wrong'))

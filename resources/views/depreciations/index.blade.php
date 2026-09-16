@@ -10,18 +10,12 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="depreciation">
+        <x-box name="depreciation" sr_only_title>
+
+            <x-slot:table_header>{{ trans('general.depreciations') }}</x-slot:table_header>
 
             <x-slot:bulkactions>
-                <x-table.bulk-actions
-                        name='depreciation'
-                        action_route="{{ route('depreciations.bulk.delete') }}"
-                        model_name="depreciation"
-                >
-                    @can('delete', App\Models\Depreciation::class)
-                        <option>{{ trans('general.delete') }}</option>
-                    @endcan
-                </x-table.bulk-actions>
+                <x-table.bulk-depreciations />
             </x-slot:bulkactions>
 
             <x-table

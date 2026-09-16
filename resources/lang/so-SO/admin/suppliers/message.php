@@ -20,7 +20,7 @@ return [
         'error' => 'Cillad ayaa ka taagan tir-tiraanka alaab gudbiyahan. Fadlan ku celi marakale.',
         'success' => 'Gaarsiiyaha si guul leh ayaa loo sameeyay.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

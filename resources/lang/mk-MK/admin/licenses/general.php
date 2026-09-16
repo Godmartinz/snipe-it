@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Задолжено преку интерфејсот за групно задолжување лиценци',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Има само :remaining_count места достапни за оваа лиценца со минимална количина од :min_amt. Можеби би сакале да размислите за набавка на нови количини.',

@@ -25,7 +25,7 @@ return [
         'confirm' => '您確定要刪除此製造商嗎？',
         'error' => '刪除製造商失敗，請重試。',
         'success' => '製造商已成功刪除。',
-        'bulk_success' => '製造商已成功刪除。',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => '製造商已成功刪除。請參閱下方的附加資訊。| :count 個製造商已成功刪除。請參閱下方的附加資訊。',
     ],
 

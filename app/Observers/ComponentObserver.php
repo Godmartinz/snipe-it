@@ -49,16 +49,7 @@ class ComponentObserver
      */
     public function created(Component $component)
     {
-        $logAction = new Actionlog;
-        $logAction->item_type = Component::class;
-        $logAction->item_id = $component->id;
-        $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->action_date = date('Y-m-d H:i:s');
-        $logAction->created_by = auth()->id();
-        if ($component->imported) {
-            $logAction->setActionSource('importer');
-        }
-        $logAction->logaction('create');
+        $component->writeInitialInventoryCreate();
     }
 
     /**

@@ -56,7 +56,12 @@ class ResetDemoSettings extends Command
         $settings->label2_2d_type = 'QRCODE';
         $settings->default_currency = 'USD';
         $settings->brand = 2;
-        $settings->ldap_enabled = 0;
+        // Enabled so the wizard's return-visitor branch unlocks all 5
+        // steps for demo visitors and they can jump straight to the
+        // step-3 Test Find User preview against the seeded Forumsys
+        // config. Safe on the demo because LoginController skips the
+        // LDAP auth branch when config('app.lock_passwords') is on.
+        $settings->ldap_enabled = '1';
         $settings->full_multiple_companies_support = 0;
         $settings->label2_1d_type = 'C128';
         $settings->email_domain = 'snipeitapp.com';

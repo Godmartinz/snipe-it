@@ -3,6 +3,7 @@
 return [
     'actions' => 'Үйлдлүүд',
     'add' => 'Шинийг нэмэх',
+    'back' => 'Буцах',
     'cancel' => 'Болих',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Устгах',

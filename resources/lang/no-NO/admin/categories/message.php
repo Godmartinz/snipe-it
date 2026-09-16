@@ -22,7 +22,7 @@ return [
         'error' => 'Det oppsto et problem ved sletting av kategorien. Vennligst prøv igjen.
 ',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

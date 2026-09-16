@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Nu au fost selectate câmpuri, deci nimic nu a fost actualizat.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Modelul a fost șters!<unk> :success_count modele șterse!',
         'success_partial' => 'Au fost șterse :success_count modele, cu toate acestea :fail_count nu au putut fi șterse deoarece au în continuare active asociate cu acestea.',
     ],

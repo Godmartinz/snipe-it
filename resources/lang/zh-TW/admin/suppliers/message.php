@@ -20,7 +20,7 @@ return [
         'error' => '刪除供應商失敗，請重試',
         'success' => '刪除供應商成功。',
         'not_found' => '找不到供應商。',
-        'bulk_success' => '供應商已成功刪除。',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

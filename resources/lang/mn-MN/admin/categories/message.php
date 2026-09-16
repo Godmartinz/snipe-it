@@ -21,7 +21,7 @@ return [
         'confirm' => 'Та энэ категорийг устгахдаа итгэлтэй байна уу?',
         'error' => 'Категорийг устгахад асуудал гарлаа. Дахин оролдоно уу.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

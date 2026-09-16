@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Δεν επιλέχθηκαν πεδία, επομένως τίποτα δεν διαγράφηκε.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Το μοντέλο διαγράφηκε! :success_count μοντέλα διαγράφηκε!',
         'success_partial' => ':success_count model(s) μοντέλα διαγράφηκαν, ωστόσο το :fail_count δεν μπόρεσε να διαγραφεί επειδή εξακολουθούν να έχουν στοιχεία που σχετίζονται με αυτά.',
     ],

@@ -17,9 +17,11 @@ return [
     'name' => '분류 명',
     'require_acceptance' => '이 분류의 자산 승인을 확인하는 사용자가 필요합니다.',
     'required_acceptance' => '이 사용자에게 이 항목의 승인을 확인하는 링크가 이메일로 전송됩니다.',
-    'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
+    'global_signature_required_notice' => '관리자 설정을 통해 사용자 서명이 현재 전역적으로 요구되므로, 이 카테고리 설정과 관계없이 항목이 사용자에게 반출되는 경우(위치 등이 아닌) 서명이 여전히 요구됩니다.',
     'required_eula' => '이 사용자에게 사용권 계약서의 사본을 이메일로 전송합니다.',
-    'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
+    'required_signature' => '이 사용자는 이 항목의 수령 확인을 위해 서명해야 합니다.',
     'no_default_eula' => '기본 사용권 계약서가 없습니다. 설정에서 추가하세요.',
     'update' => '분류 갱신',
     'use_default_eula' => '대체  <a href="#" data-toggle="modal" data-target="#eulaModal">기본 사용권 계약서</a>를 사용합니다.',
@@ -29,6 +31,6 @@ return [
     'import_checkin_email' => '입고 알림 전자 우편 송신',
     'import_eula_text' => '최종 사용자 사용권 계약서(EULA)',
     'import_category_type' => '분류 유형',
-    'import_alert_on_response' => 'Alert on Response',
+    'import_alert_on_response' => '응답 시 알림',
 
 ];

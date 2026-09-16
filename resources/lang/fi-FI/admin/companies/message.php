@@ -16,5 +16,7 @@ return [
         'confirm' => 'Haluatko varmasti poistaa tämän yrityksen?',
         'error' => 'Yrityksen poistamisessa tapahtui jotain. Yritä uudelleen.',
         'success' => 'Yritys poistettiin onnistuneesti.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

@@ -6,7 +6,7 @@
 ])
 @aware(['name', 'footer'])
 
-<form id="{{ $id }}" class="{{ $class }}" method="post" action="{{ $route }}" autocomplete="off" role="form" enctype="multipart/form-data">
+<form id="{{ $id }}" class="{{ $class }}" method="post" action="{{ $route }}" autocomplete="off" role="form" enctype="multipart/form-data" {{ $attributes }}>
 
     @csrf
 

@@ -16,5 +16,7 @@ return [
         'confirm' => '您確定要刪除此公司嗎？',
         'error' => '刪除公司時發生問題。請再試一次。',
         'success' => '刪除公司成功。',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

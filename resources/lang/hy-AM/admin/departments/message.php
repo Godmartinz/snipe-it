@@ -17,6 +17,8 @@ return [
         'confirm' => 'Վստա՞հ եք, որ ցանկանում եք ջնջել այս բաժինը։',
         'error' => 'Բաժինը ջնջելիս խնդիր առաջացավ։ Խնդրում ենք կրկին փորձել։',
         'success' => 'Բաժինը հաջողությամբ ջնջվել է։',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

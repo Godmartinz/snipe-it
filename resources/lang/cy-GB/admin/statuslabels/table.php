@@ -13,6 +13,7 @@ return [
     'pending' => 'Yn aros',
     'status_type' => 'Math Statws',
     'show_in_nav' => 'Dangos ar y dewislen ochor',
+    'status_label' => 'Status Label',
     'title' => 'Labeli Statws',
     'undeployable' => 'Dim ar gael',
     'update' => 'Diweddaru Label Statws',

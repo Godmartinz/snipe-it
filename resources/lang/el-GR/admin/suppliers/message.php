@@ -20,7 +20,7 @@ return [
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας τον προμηθευτή. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Ο προμηθευτής διαγράφηκε επιτυχώς.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

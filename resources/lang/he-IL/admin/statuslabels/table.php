@@ -13,6 +13,7 @@ return [
     'pending' => 'ממתין ל',
     'status_type' => 'סוג סטטוס',
     'show_in_nav' => 'הצג בצד Nav',
+    'status_label' => 'Status Label',
     'title' => 'תוויות סטטוס',
     'undeployable' => 'לא ניתן לפריסה',
     'update' => 'עדכון תווית סטטוס',

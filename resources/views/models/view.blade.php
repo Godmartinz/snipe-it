@@ -17,10 +17,9 @@
 
         @if ($model->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
-                    <x-icon type="warning" />
+                <x-callout type="warning" icon="warning" live="assertive">
                     {{ trans('admin/models/general.deleted') }}
-                </div>
+                </x-callout>
             </div>
         @endif
 
@@ -29,6 +28,7 @@
                 <x-slot:tabnav>
                     <x-tabs.asset-tab count="{{ $model->assets()->AssetsForShow()->count() }}" />
                     <x-tabs.files-tab :item="$model" count="{{ $model->uploads()->count() }}"/>
+                    <x-tabs.orders-tab count="{{ $model->ordersCount() }}"/>
                     <x-tabs.history-tab count="{{ $model->history()->count() }}" :model="$model"/>
                     <x-tabs.upload-tab :item="$model"/>
                 </x-slot:tabnav>
@@ -39,9 +39,27 @@
                         <x-table.assets :route="route('api.assets.index', ['model_id' => $model->id, 'status' => $model->deleted_at!='' ? 'Deleted' : ''])" />
                     </x-tabs.pane>
 
+                    <!-- start orders tab pane -->
+                    <x-tabs.pane name="orders">
+                        <x-table.orders :route="route('api.order-items.index', ['asset_model_id' => $model->id])"/>
+                    </x-tabs.pane>
+                    <!-- end orders tab pane -->
+
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$model" :route="route('api.models.history', $model)"/>
+                        {{-- AssetModel history is limited to model-level
+                             events (create / update / delete on the
+                             model itself). Models aren't checked out
+                             and don't get files uploaded to them, so
+                             hide the columns that only carry data for
+                             per-asset checkout / adjust-quantity flows.
+                             `item` is redundant since every row is
+                             this same model. --}}
+                        <x-table.history
+                            :model="$model"
+                            :route="route('api.models.history', $model)"
+                            :hide_fields="['order_number', 'target', 'item', 'serial', 'file', 'file_download', 'signature_file', 'quantity']"
+                        />
                     </x-tabs.pane>
                     <!-- end history tab pane -->
 
@@ -72,7 +90,7 @@
 
 @section('moar_scripts')
     @can('files', $model)
-        @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
+        <x-modals.upload-file item-type="models" :item-id="$model->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['exportFile' => 'models-' . $model->name . '-export', 'search' => false])

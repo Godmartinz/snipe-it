@@ -13,4 +13,7 @@ return [
     'total' => 'Ida\'ama Walii galaa',
     'update' => 'Meeshaa hundeeffame sirreessi',
     'checkin_limit' => 'Baay\'inni seene baay\'ina ramadame :assigned_qyt walqixa tahuu yookaan isaa gadi tahuu qaba',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

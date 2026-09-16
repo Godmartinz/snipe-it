@@ -8,7 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Component;
+use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Group;
 use App\Models\License;
@@ -106,26 +109,23 @@ class BulkUsersController extends Controller
                 return redirect()->back()->with('success', trans('admin/users/message.password_resets_sent'));
 
             } elseif ($request->input('bulk_actions') == 'print') {
-                $users = User::query()
-                    ->with([
-                        'assets.assetlog',
-                        'assets.assignedAssets.assetlog',
-                        'assets.assignedAssets.defaultLoc',
-                        'assets.assignedAssets.location',
-                        'assets.assignedAssets.model.category',
-                        'assets.defaultLoc',
-                        'assets.location',
-                        'assets.model.category',
-                        'accessories.assetlog',
-                        'accessories.category',
-                        'accessories.manufacturer',
-                        'consumables.assetlog',
-                        'consumables.category',
-                        'consumables.manufacturer',
-                        'licenses.category',
-                    ])
-                    ->withTrashed()
-                    ->findMany($request->input('ids'));
+                $actor = auth()->user();
+                $canViewAssets = $actor->can('view', Asset::class);
+                $canViewLicenses = $actor->can('view', License::class);
+                $canViewAccessories = $actor->can('view', Accessory::class);
+                $canViewConsumables = $actor->can('view', Consumable::class);
+                $canViewComponents = $actor->can('view', Component::class);
+
+                $users = collect($request->input('ids'))
+                    ->map(fn ($id) => User::withInventoryRelations(
+                        (int) $id,
+                        $canViewAssets,
+                        $canViewLicenses,
+                        $canViewAccessories,
+                        $canViewConsumables,
+                        $canViewComponents,
+                    )->first())
+                    ->filter();
 
                 $users->each(fn ($user) => $this->authorize('view', $user));
 
@@ -275,8 +275,25 @@ class BulkUsersController extends Controller
             $allowedIds = Company::getIdsForCurrentUser($bulkCompanyIds);
         }
 
-        // Floater-mode self-elevation guard (#19200). See User::canGrantFloaterStatus.
         $wouldClear = $clearCompanies || ($bulkCompanyIds && empty($allowedIds));
+
+        // Strict-FMCS #19192 gate — mirrors the branch in SaveUserRequest
+        // so bulk-editing a batch to clear all company memberships in
+        // strict mode is blocked for companied non-superusers. Fires
+        // before the older floater-mode gate so its more specific error
+        // wins when both apply. Skips uncompanied actors because they
+        // legitimately operate in the null pseudo-company namespace in
+        // strict mode; nulling pivots there is their normal workflow,
+        // not a self-escalation attempt.
+        $settings = Setting::getSettings();
+        $strictFmcs = $settings->full_multiple_companies_support && ! $settings->null_company_is_floater;
+        $actor = auth()->user();
+        if ($wouldClear && $strictFmcs && ! $actor->isSuperUser() && $actor->companies()->exists()) {
+            return redirect()->route('users.index')
+                ->with('error', trans('validation.fmcs_company', ['attribute' => trans('general.company')]));
+        }
+
+        // Floater-mode self-elevation guard (#19200). See User::canGrantFloaterStatus.
         if ($wouldClear && ! auth()->user()->canGrantFloaterStatus()) {
             return redirect()->route('users.index')
                 ->with('error', trans('admin/users/general.cannot_make_floater'));
@@ -326,7 +343,7 @@ class BulkUsersController extends Controller
             }
 
             if ($canEditAuth && $request->filled('groups') && auth()->user()->isSuperUser()) {
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
         }
 
@@ -416,6 +433,15 @@ class BulkUsersController extends Controller
             }
         }
 
+        // Company-scoped consumable set: the CompanyableTrait's global
+        // scope filters this to consumables the caller can actually
+        // see. Used to fence the ConsumableAssignment delete below to
+        // the caller's tenant, closing the FMCS bypass reported in
+        // GHSA-m647-5cjf-gf92 while leaving the existing permission
+        // model (editUsers alone can bulk-remove consumable pivots)
+        // intact for same-company operations.
+        $scopedConsumableIds = Consumable::whereIn('id', $consumableUserRows->pluck('consumable_id')->unique())->pluck('id');
+
         if ($request->input('delete_user') == '1' && $users->isNotEmpty() && auth()->user()->cannot('delete', User::class)) {
             return redirect()->route('users.index')->with('error', trans('general.insufficient_permissions'));
         }
@@ -432,7 +458,15 @@ class BulkUsersController extends Controller
         ]);
 
         LicenseSeat::whereIn('id', $licenses->pluck('id'))->update(['assigned_to' => null]);
-        ConsumableAssignment::whereIn('id', $consumableUserRows->pluck('id'))->delete();
+
+        $scopedConsumableRowIds = $consumableUserRows
+            ->whereIn('consumable_id', $scopedConsumableIds)
+            ->pluck('id');
+        ConsumableAssignment::whereIn('id', $scopedConsumableRowIds)->delete();
+
+        CheckoutAcceptance::pending()
+            ->whereIn('assigned_to_id', $user_raw_array)
+            ->delete();
 
         foreach ($users as $user) {
             $user->accessories()->sync([]);

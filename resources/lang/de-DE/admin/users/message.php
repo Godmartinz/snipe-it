@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Sie haben diesen Gegenstand erfolgreich angenommen.',
     'declined' => 'Sie haben diesen Gegenstand erfolgreich abgelehnt.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Benutzer erfolgreich geändert. Vorgesetzter sollte auch bearbeitet werden und konnte nicht angepasst werden, weil er sich nicht selbst als Vorgesetzter eingetragen haben kann. Bitte Benutzer ohne den Vorgesetzten nochmal bearbeiten.',
     'user_exists' => 'Benutzer existiert bereits!',
     'cannot_delete' => 'Benutzer existiert nicht oder Sie haben nicht die Berechtigung, den Benutzer zu löschen.',
     'user_not_found' => 'Benutzer existiert nicht oder Sie haben keine Berechtigung, ihn anzusehen.',
     'user_login_required' => 'Das Loginfeld ist erforderlich',
     'user_has_no_assets_assigned' => 'Derzeit sind keine Assets dem Benutzer zugewiesen.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Das Passswortfeld ist erforderlich.',
     'insufficient_permissions' => 'Unzureichende Berechtigungen.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Dieser Benutzer wurde gelöscht. Sie müssen ihn wiederherstellen, um ihn zu bearbeiten oder neue Assets zuzuweisen.',
     'ldap_not_configured' => 'LDAP Integration wurde für diese Installation nicht konfiguriert.',
     'password_resets_sent' => 'Den ausgewählten Benutzern, die aktiviert sind und eine gültige E-Mail-Adresse haben, wurde ein Link zum Zurücksetzen des Passworts gesendet.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Der Link zum Zurücksetzen des Passworts wurde an :email gesendet!',
     'user_has_no_email' => 'Dieser Benutzer hat keine E-Mail-Adresse in seinem Profil.',
     'log_record_not_found' => 'Ein passender Logeintrag für diesen Benutzer konnte nicht gefunden werden.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Benutzer wurde erfolgreich erstellt.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Das Passwort für diesen Account wird vom LDAP/Active Directory verwaltet. Bitte kontaktieren Sie Ihre IT-Abteilung, um Ihr Passwort zu ändern. ',
         'multi_company_items_assigned' => 'Diesem Benutzer sind Dinge zugewiesen, die zu einer anderen Firma gehören. Bitte checken Sie sie ein oder bearbeiten Sie Ihre Firma.',
         'no_pending_acceptances' => 'Dieser Benutzer hat keine ausstehenden Übernahmen, an die er erinnert werden könnte.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

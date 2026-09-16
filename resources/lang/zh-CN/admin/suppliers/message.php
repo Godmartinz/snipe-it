@@ -20,7 +20,7 @@ return [
         'error' => '删除供应商的过程中出现了一点儿问题，请重试。',
         'success' => '供应商成功被删除。',
         'not_found' => '找不到供应商。',
-        'bulk_success' => '供应商已成功删除。',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

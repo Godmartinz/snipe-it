@@ -21,7 +21,7 @@ return [
         'confirm' => '你确定要删除这个分类吗？',
         'error' => '删除分类出现异常，请重试。',
         'success' => '分类已经被成功删除。',
-        'bulk_success' => '分类已经被成功删除。',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => '分类已成功删除。请参阅下面的额外信息。 | :count 个类别已成功删除。请参阅下面的额外信息。',
     ],
 

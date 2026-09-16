@@ -3,6 +3,7 @@
 return [
     'actions' => 'akcije',
     'add' => 'Dodaj novi',
+    'back' => 'Nazad',
     'cancel' => 'Otkazati',
     'checkin_and_delete' => 'Dodijeli sve / Izbriši korisnika',
     'delete' => 'Izbrisati',

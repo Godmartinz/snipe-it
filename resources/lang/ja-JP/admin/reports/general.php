@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => '承認リクエストが削除されました',
     'acceptance_request' => 'リクエストを承認',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'ユーザーアドレス',
         'user_company' => 'User Company',
         'user_city' => 'ユーザー市区町村名',

@@ -137,12 +137,6 @@ The ERD is available [online here](https://drawsql.app/templates/snipe-it).
 
 Be sure to check out all of the [amazing people](CONTRIBUTORS.md) that have contributed to Snipe-IT over the years!
 
------
-
-### Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=grokability/snipe-it&type=Date)](https://www.star-history.com/#grokability/snipe-it&Date)
-
 ------
 ### Announcement List
 

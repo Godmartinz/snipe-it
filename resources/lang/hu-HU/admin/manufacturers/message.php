@@ -25,7 +25,7 @@ return [
         'confirm' => 'Biztosan törölni szeretnéd ezt a gyártót?',
         'error' => 'Probléma adódott a gyártó törlése közben. Próbálkozz újra.',
         'success' => 'A gyártó sikeresen törlésre került.',
-        'bulk_success' => 'A gyártók sikeresen törlésre kerültek.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'A gyártó sikeresen törlésre került. További információk alább. | :count gyártó sikeresen törlésre került. További információk alább.',
     ],
 

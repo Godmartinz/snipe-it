@@ -34,11 +34,10 @@ class ConsumableFactory extends Factory
             'item_no' => $this->faker->numberBetween(1000000, 50000000),
             'min_amt' => $this->faker->numberBetween($min = 1, $max = 2),
             'name' => $this->faker->words(3, true),
-            'order_number' => $this->faker->numberBetween(1000000, 50000000),
-            'purchase_cost' => $this->faker->randomFloat(2, 1, 50),
-            'purchase_date' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get())->format('Y-m-d'),
+            'default_purchase_cost' => $this->faker->randomFloat(2, 1, 50),
+            'legacy_purchase_date' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get())->format('Y-m-d'),
             'qty' => $this->faker->numberBetween(5, 10),
-            'supplier_id' => Supplier::factory(),
+            'default_supplier_id' => Supplier::factory(),
         ];
     }
 
@@ -134,6 +133,37 @@ class ConsumableFactory extends Factory
                 'created_by' => User::factory()->create()->id,
                 'assigned_to' => $user->id ?? User::factory()->create()->id,
             ]);
+        });
+    }
+
+    /**
+     * See ComponentFactory::withInitialAcquisition for docs.
+     */
+    public function withInitialAcquisition(
+        ?Supplier $supplier = null,
+        ?float $unitCost = null,
+        ?string $purchaseDate = null,
+    ) {
+        return $this->afterCreating(function (Consumable $consumable) use ($supplier, $unitCost, $purchaseDate) {
+            $line = $consumable->orderItems()->latest('id')->first();
+            if (! $line) {
+                return;
+            }
+            if ($unitCost !== null) {
+                $line->price = $unitCost;
+                $line->save();
+            }
+            $order = $line->order;
+            if (! $order) {
+                return;
+            }
+            if ($supplier !== null) {
+                $order->supplier_id = $supplier->id;
+            }
+            if ($purchaseDate !== null) {
+                $order->purchase_date = Carbon::parse($purchaseDate);
+            }
+            $order->save();
         });
     }
 }

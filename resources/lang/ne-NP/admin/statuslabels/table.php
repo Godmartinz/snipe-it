@@ -13,6 +13,7 @@ return [
     'pending' => 'प्रतीक्षामा',
     'status_type' => 'Status Type',
     'show_in_nav' => 'Show in side nav',
+    'status_label' => 'स्थिति लेबल',
     'title' => 'Status Labels',
     'undeployable' => 'Undeployable',
     'update' => 'Update Status Label',

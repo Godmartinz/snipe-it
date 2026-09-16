@@ -14,6 +14,7 @@ Více informací najdete v <a href="https://snipe-it.readme.io/docs/overview#sta
     'pending' => 'Probíhající',
     'status_type' => 'Typ stavu',
     'show_in_nav' => 'Zobrazit ve vedlejším navigačním panelu',
+    'status_label' => 'Označení stavu',
     'title' => 'Označení stavu',
     'undeployable' => 'Nemožné připravit',
     'update' => 'Upravit označení stavu',

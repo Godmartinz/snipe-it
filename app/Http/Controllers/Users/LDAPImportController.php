@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -28,12 +27,12 @@ class LDAPImportController extends Controller
      */
     public function create()
     {
-        // I guess this prolly oughtta... I dunno. Do something?
-        $this->authorize('update', User::class);
-        try {
-            // $this->ldap->connect(); I don't think this actually exists in LdapAd.php, and we don't really 'persist' LDAP connections anyways...right?
-        } catch (\Exception $e) {
-            return redirect()->route('users.index')->with('error', $e->getMessage());
+        // Superuser-only: a bulk LDAP sync surfaces users from across
+        // the entire directory (all companies, all OUs), so anyone with
+        // "users.edit" but no full-directory access shouldn't be able
+        // to run it or read the summary that lists them.
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
         }
 
         return view('users/ldap');
@@ -52,7 +51,10 @@ class LDAPImportController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('update', User::class);
+        // See create() for the superuser-only rationale.
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
+        }
         // Call Artisan LDAP import command.
 
         Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('location_id'), '--json_summary' => true]);

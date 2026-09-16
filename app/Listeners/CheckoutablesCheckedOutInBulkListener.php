@@ -9,7 +9,6 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -49,8 +48,15 @@ class CheckoutablesCheckedOutInBulkListener
         }
 
         if ($shouldSendEmailToAlertAddress && Setting::getSettings()->admin_cc_email) {
+            // admin_cc_email is validated as a comma-separated list
+            // (email_array validator on the settings request). CheckoutableListener
+            // already explodes on comma before handing to Mail::to; this listener
+            // used to pass the raw string, which Symfony Mailer would treat as
+            // one recipient and reject as invalid. See #19426.
+            $recipients = array_filter(array_map('trim', explode(',', Setting::getSettings()->admin_cc_email)));
+
             try {
-                Mail::to(Setting::getSettings()->admin_cc_email)->send(new BulkAssetCheckoutMail(
+                Mail::to($recipients)->send(new BulkAssetCheckoutMail(
                     $event->assets,
                     $event->target,
                     $event->admin,

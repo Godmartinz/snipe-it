@@ -20,6 +20,8 @@ return [
         'confirm' => 'An bhfuil tú cinnte gur mian leat an Lipéad Stádas seo a scriosadh?',
         'error' => 'Bhí ceist ann a scriosadh an Lipéad Stádas. Arís, le d\'thoil.',
         'success' => 'Scriosadh an Lipéad Stádas go rathúil.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

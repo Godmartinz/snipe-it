@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Luovutettu lisenssien massalainauskäyttöliittymän kautta',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Tälle lisenssille jää vain :remaining_count istuimet ja vähimmäismäärä :min_amt. Voit halutessasi harkita useampien paikkojen ostamista.',

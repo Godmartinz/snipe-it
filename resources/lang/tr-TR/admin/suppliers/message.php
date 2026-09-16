@@ -20,7 +20,7 @@ return [
         'error' => 'Tedarikçi silinirken bir hata oluştu. Lütfen tekrar deneyin.',
         'success' => 'Tedarikçi silindi.',
         'not_found' => 'Tedarikçi bulunamadı.',
-        'bulk_success' => 'Tedarikçiler başarıyla silindi.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

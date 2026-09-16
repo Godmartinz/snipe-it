@@ -19,6 +19,8 @@ return [
     'required_acceptance' => 'L\'utilisateur·trice recevra un courriel avec un lien d\'acceptation de cet article.',
     'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'L\'utilisateur·trice recevra par courriel une copie de la licence d\'utilisation',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
     'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
     'no_default_eula' => 'Il n\'y a pas de licence d\'utilisation par défaut. Veuillez en ajouter une dans Préférences.',
     'update' => 'Mettre à jour la catégorie',

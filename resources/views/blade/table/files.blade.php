@@ -12,7 +12,7 @@
 
 @if(isset($object))
     <table
-        data-columns="{{ \App\Presenters\UploadedFilesPresenter::dataTableLayout() }}"
+        data-columns="{{ \App\Presenters\UploadedFilesPresenter::dataTableLayout(Gate::allows('manageFiles', $object) ? [] : ['available_actions']) }}"
         data-cookie-id-table="{{ $object_type }}-FileUploadsTable"
         data-id-table="{{ $object_type }}-FileUploadsTable"
         id="{{ $object_type }}-FileUploadsTable"

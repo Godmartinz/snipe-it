@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Nenhum EULA padrão primário foi encontrado. Adicione um nas Configurações.',
     'total' => 'Total',
     'remaining' => 'Disponível',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Atualizar dispositivo',
     'use_default_eula' => 'Em vez disso, use o <a href="#" data-toggle="modal" data-target="#eulaModal">EULA padrão primário</a>.',
     'use_default_eula_disabled' => '<del>Em vez disso, use o EULA padrão primário.</del> Nenhum EULA padrão primário foi definido. Adicione um nas Configurações.',

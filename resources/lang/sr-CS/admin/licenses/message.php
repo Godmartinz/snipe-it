@@ -42,6 +42,11 @@ return [
         'bulk_checkout_warning' => ':license_name ima sedišta koja su trenutno zadužena i ne može biti izbrisana. Molim vas razdužite sva sedišta pre brisanja.',
     ],
 
+    'delete_with_checkin' => [
+        'bulk_success' => ':count licenses were deleted successfully after checking in :seats seats.',
+        'partial_success' => ':count licenses were deleted successfully after checking in :seats seats. See additional information below.',
+    ],
+
     'checkout' => [
         'error' => 'Došlo je do problema prilikom provere licence. Molim pokušajte ponovo.',
         'success' => 'Licenca je uspešno proverena',

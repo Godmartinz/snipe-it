@@ -44,9 +44,9 @@ class AccessoryCheckoutRequest extends ImageUploadRequest
 
         return array_merge(
             [
-                'assigned_user' => 'required_without_all:assigned_asset,assigned_location',
-                'assigned_asset' => 'required_without_all:assigned_user,assigned_location',
-                'assigned_location' => 'required_without_all:assigned_user,assigned_asset',
+                'assigned_user' => 'required_without_all:assigned_asset,assigned_location|nullable|exists_undeleted:users,id',
+                'assigned_asset' => 'required_without_all:assigned_user,assigned_location|nullable|exists_undeleted:assets,id',
+                'assigned_location' => 'required_without_all:assigned_user,assigned_asset|nullable|exists_undeleted:locations,id',
 
                 'number_remaining_after_checkout' => [
                     'min:0',

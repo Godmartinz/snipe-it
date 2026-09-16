@@ -37,6 +37,8 @@ class CustomFieldSeeder extends Seeder
         CustomField::factory()->count(1)->testCheckbox()->create();
         CustomField::factory()->count(1)->testRadio()->create();
         CustomField::factory()->count(1)->testMarkdownTextarea()->create();
+        CustomField::factory()->count(1)->testDate()->create();
+        CustomField::factory()->count(1)->testDatetime()->create();
         CustomField::factory()->count(1)->xss()->create();
 
         DB::table('custom_field_custom_fieldset')->insert([
@@ -120,6 +122,34 @@ class CustomFieldSeeder extends Seeder
 
             [
                 'custom_field_id' => '9',
+                'custom_fieldset_id' => '2',
+                'order' => 0,
+                'required' => 0,
+            ],
+
+            [
+                'custom_field_id' => '10',
+                'custom_fieldset_id' => '1',
+                'order' => 0,
+                'required' => 0,
+            ],
+
+            [
+                'custom_field_id' => '11',
+                'custom_fieldset_id' => '1',
+                'order' => 0,
+                'required' => 0,
+            ],
+
+            [
+                'custom_field_id' => '10',
+                'custom_fieldset_id' => '2',
+                'order' => 0,
+                'required' => 0,
+            ],
+
+            [
+                'custom_field_id' => '11',
                 'custom_fieldset_id' => '2',
                 'order' => 0,
                 'required' => 0,

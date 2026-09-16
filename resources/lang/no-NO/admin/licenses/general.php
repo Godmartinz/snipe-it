@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Sjekket ut via masselisensutsjekking i lisens GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Det er bare :remaining_count seter igjen for denne lisensen med et minimum av :min_amt. Du kan vurdere å kjøpe flere seter.',

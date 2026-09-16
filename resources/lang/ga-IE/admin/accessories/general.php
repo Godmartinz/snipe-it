@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Níor aimsíodh aon réamhshocraithe EULA. Cuir ceann amháin i Socruithe.',
     'total' => 'Iomlán',
     'remaining' => 'Bain úsáid as',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Nuashonraigh Cúlpháirtí',
     'use_default_eula' => 'Bain úsáid as an réamhshocraithe <a href="#" data-toggle="modal" data-target="#eulaModal"> réamhshocrú EULA</a> ina ionad.',
     'use_default_eula_disabled' => '<del>Cuir an príomh-réamhshocraithe EULA in ionad.</del> Níl aon réamhshocraithe EULA leagtha síos. Cuir ceann amháin i Socruithe le do thoil.',

@@ -139,4 +139,56 @@ class AssetsForSelectListTest extends TestCase
             ->assertResponseContainsInResults($assetA)
             ->assertResponseContainsInResults($assetB);
     }
+
+    /**
+     * #19394 regression: under FMCS + floater mode, a company-scoped user
+     * asking for assets narrowed by companyId should also see null-company
+     * (floater) assets in the results. This matches the documented rule
+     * that "items from any company can be checked out to targets with no
+     * company assignment" — server-side canCheckoutTo already permits the
+     * checkout, so the picker must not hide the target.
+     */
+    public function test_floater_assets_appear_in_selectlist_under_floater_mode_when_narrowed_by_company()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->enableFloaterMode();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $companyAsset = Asset::factory()->for($companyA)->create(['asset_tag' => 'FLOATER-CA']);
+        $otherCompanyAsset = Asset::factory()->for($companyB)->create(['asset_tag' => 'FLOATER-CB']);
+        $floaterAsset = Asset::factory()->create(['asset_tag' => 'FLOATER-NULL', 'company_id' => null]);
+
+        $actor = User::factory()->createAssets()->forCompany($companyA->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('assets.selectlist', ['companyId' => $companyA->id]))
+            ->assertResponseContainsInResults($companyAsset)
+            ->assertResponseContainsInResults($floaterAsset)
+            ->assertResponseDoesNotContainInResults($otherCompanyAsset);
+    }
+
+    /**
+     * #19394 negative counterpart: under FMCS + strict mode (floater OFF),
+     * the companyId narrowing stays exact — null-company assets must NOT
+     * leak into the picker for a company-scoped caller. Otherwise turning
+     * floater mode off would silently still show floaters, breaking the
+     * "null is treated as its own pseudo-company" strict-mode contract.
+     */
+    public function test_floater_assets_are_hidden_in_selectlist_under_strict_mode_when_narrowed_by_company()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->disableFloaterMode();
+
+        $companyA = Company::factory()->create();
+        $companyAsset = Asset::factory()->for($companyA)->create(['asset_tag' => 'STRICT-CA']);
+        $floaterAsset = Asset::factory()->create(['asset_tag' => 'STRICT-NULL', 'company_id' => null]);
+
+        $actor = User::factory()->createAssets()->forCompany($companyA->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('assets.selectlist', ['companyId' => $companyA->id]))
+            ->assertResponseContainsInResults($companyAsset)
+            ->assertResponseDoesNotContainInResults($floaterAsset);
+    }
 }

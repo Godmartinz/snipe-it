@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Tidak ada model yang dipilih, jadi tidak ada yang dihapus.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model dihapus!|:success_count model dihapus!',
         'success_partial' => ':success_count model telah dihapus, tetapi :fail_count tidak dapat dihapus karena masih memiliki aset yang terkait dengannya.',
     ],

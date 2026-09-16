@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Suppliers\DestroySupplierAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasAccessories;
 use App\Exceptions\ItemStillHasAssets;
 use App\Exceptions\ItemStillHasComponents;
@@ -114,7 +115,8 @@ class SuppliersController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $suppliers->count()) ? $suppliers->count() : app('api_offset_value');
+        $total = $suppliers->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -129,7 +131,6 @@ class SuppliersController extends Controller
                 break;
         }
 
-        $total = $suppliers->count();
         $suppliers = $suppliers->skip($offset)->take($limit)->get();
 
         return (new SuppliersTransformer)->transformSuppliers($suppliers, $total);
@@ -235,8 +236,8 @@ class SuppliersController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.bulk_delete_associations.assoc_components', [
                 'components_count' => (int) $supplier->components_count, 'item' => trans('general.supplier'),
             ])));
-        } catch (\Exception $e) {
-            report($e);
+        } catch (\Throwable $e) {
+            Handler::reportOrRethrow($e);
 
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.something_went_wrong')));
         }

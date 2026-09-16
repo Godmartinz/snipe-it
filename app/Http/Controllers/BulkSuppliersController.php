@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Suppliers\DestroySupplierAction;
+use App\Exceptions\Handler;
 use App\Exceptions\ItemStillHasAccessories;
 use App\Exceptions\ItemStillHasAssets;
 use App\Exceptions\ItemStillHasComponents;
@@ -43,8 +44,8 @@ class BulkSuppliersController extends Controller
                 $errors[] = trans('general.bulk_delete_associations.assoc_consumables', ['consumables_count' => (int) $supplier->consumables_count, 'item' => trans('general.supplier'), 'item_name' => $supplier->name]);
             } catch (ItemStillHasComponents $e) {
                 $errors[] = trans('general.bulk_delete_associations.assoc_components', ['components_count' => (int) $supplier->components_count, 'item' => trans('general.supplier'), 'item_name' => $supplier->name]);
-            } catch (\Exception $e) {
-                report($e);
+            } catch (\Throwable $e) {
+                Handler::reportOrRethrow($e);
                 $errors[] = trans('general.something_went_wrong');
             }
         }

@@ -13,6 +13,7 @@ return [
     'pending' => 'hangende',
     'status_type' => 'Status Tipe',
     'show_in_nav' => 'Wys in sy nav',
+    'status_label' => 'Status Label',
     'title' => 'Status etikette',
     'undeployable' => 'Undeployable',
     'update' => 'Dateer Status Label op',

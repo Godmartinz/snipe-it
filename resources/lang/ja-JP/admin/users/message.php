@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'あなたの利用者は正常に更新されました。しかしながら、あなたの管理者エントリーは保存されませんでした。あなたが選択した管理者が、編集対象の利用者一覧に選択されていたため更新されませんでした。および利用者は彼ら自身の管理者でない場合があります。再度、管理者を除いた上で、あなたの利用者を選択してください。',
     'user_exists' => '利用者が既に存在しています!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'ユーザーが存在しないか、表示する権限がありません。',
     'user_login_required' => 'ログインフィールドが必要です。',
     'user_has_no_assets_assigned' => 'ユーザーに割り当てられているアセットはありません。',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'パスワードが必要です。',
     'insufficient_permissions' => '権限が不足しています。',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => '利用者が削除されました。これらを編集するにはユーザーを復旧するか、新しい資産を割り当てなければなりません。',
     'ldap_not_configured' => 'LDAPの統合は、インストール時に設定されません。',
     'password_resets_sent' => '有効なメールアドレスを持っている選択されたユーザーにパスワードリセットのリンクが送信されました。',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'パスワードリセットのURLが:emailに送信されました。',
     'user_has_no_email' => 'このユーザーのプロフィールにはメールアドレスがありません。',
     'log_record_not_found' => 'このユーザーに一致するログレコードが見つかりませんでした。',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => '利用者が正常に作成されました。',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'このアカウントのパスワードは、LDAPかアクティブディレクトリで管理されています。パスワードを変更するには管理者にお問い合わせください。 ',
         'multi_company_items_assigned' => 'このユーザーには、別の会社に属するアイテムが割り当てられています。会社を確認するか、アイテムを編集してください。',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

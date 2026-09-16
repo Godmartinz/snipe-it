@@ -13,6 +13,7 @@ return [
     'pending' => 'In behandeling',
     'status_type' => 'Statustype',
     'show_in_nav' => 'Weergeven in navigatiebalk aan de zijkant',
+    'status_label' => 'Status label',
     'title' => 'Statuslabels',
     'undeployable' => 'Niet inzetbaar',
     'update' => 'Update Status Label',

@@ -32,12 +32,18 @@
 
             <x-form.static :label="trans('admin/components/general.remaining')">{{ $consumable->numRemaining() }}</x-form.static>
 
-            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required' => 'true', 'company_id' => $consumable->company_id])
+            <x-input.user-select
+                :label="trans('general.select_user')"
+                name="assigned_user"
+                :selected="old('assigned_user', $checkoutRequest?->user_id)"
+                :companyId="$consumable->company_id"
+                required
+            />
 
             @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $consumable->getEula() || ($snipeSettings->webhook_endpoint != ''))
                 <div class="form-group notification-callout">
                     <div class="col-md-8 col-md-offset-3">
-                        <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
+                        <x-callout type="info" role="status">
                             @if ($consumable->category->require_acceptance == '1')
                                 <i class="far fa-envelope fa-fw" aria-hidden="true"></i>
                                 {{ trans('admin/categories/general.required_acceptance') }}<br>
@@ -58,7 +64,7 @@
                                 <i class="fab fa-slack fa-fw" aria-hidden="true"></i>
                                 {{ trans('general.webhook_msg_note') }}
                             @endif
-                        </div>
+                        </x-callout>
                     </div>
 
                     @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1')
@@ -109,7 +115,11 @@
 
     </x-page-column>
 
-    <livewire:checkout-target-panel type="consumables" />
+    <x-page-column class="col-md-5">
+        <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$consumable" />
+
+        <livewire:checkout-target-panel type="consumables" />
+    </x-page-column>
 
 </x-container>
 

@@ -67,7 +67,7 @@ return [
         'february' => 'Vas',
         'march' => 'Kov',
         'april' => 'Bal',
-        'may' => 'Gegužė',
+        'may' => 'Geg',
         'june' => 'Bir',
         'july' => 'Lie',
         'august' => 'Rugp',

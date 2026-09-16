@@ -22,36 +22,27 @@
 
                 <x-box>
 
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'user_id', 'required' => 'true'])
+                    <x-input.user-select
+                        :label="trans('general.select_user')"
+                        name="user_id"
+                        :selected="old('user_id')"
+                        required
+                    />
 
                     <x-form.row
                         :label="trans('admin/hardware/form.checkout_date')"
                         name="checkout_at"
+                        type="datetimepicker"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="checkout_at"
-                                end_date="0d"
-                                :value="old('checkout_at')"
-                                :placeholder="trans('general.select_date')"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('admin/hardware/form.expected_checkin')"
                         name="expected_checkin"
+                        type="datetimepicker"
+                        :default_now="false"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="expected_checkin"
-                                :value="old('expected_checkin')"
-                                :placeholder="trans('general.select_date')"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('general.notes')"
@@ -75,7 +66,9 @@
 
         </x-page-column>
 
-        <livewire:checkout-target-panel type="assets" />
+        <x-page-column class="col-md-5">
+            <livewire:checkout-target-panel type="assets" />
+        </x-page-column>
 
     </x-container>
 @stop

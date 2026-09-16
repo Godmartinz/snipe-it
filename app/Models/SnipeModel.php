@@ -21,6 +21,9 @@ class SnipeModel extends Model
         $this->attributes['purchase_date'] = $value;
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function purchaseDateFormatted(): Attribute
     {
         return Attribute::make(
@@ -28,6 +31,9 @@ class SnipeModel extends Model
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function expiresDiffInDays(): Attribute
     {
         return Attribute::make(
@@ -35,6 +41,9 @@ class SnipeModel extends Model
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function expiresDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -42,6 +51,9 @@ class SnipeModel extends Model
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function expiresFormattedDate(): Attribute
     {
         return Attribute::make(
@@ -197,6 +209,9 @@ class SnipeModel extends Model
         $query->skip($offset)->take($limit);
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function displayName(): Attribute
     {
         return Attribute::make(
@@ -206,24 +221,68 @@ class SnipeModel extends Model
 
     public function getEula()
     {
+        // Resolve the raw eula text from the appropriate source, then hand
+        // it to sanitizeEulaForRender before returning. See that method for
+        // the security rationale behind the sanitize step.
+        $raw = null;
 
         // This is - for now - only for assets, where the asset model is the thing tied to the category
         if (($this->model) && ($this->model->category)) {
             if (($this->model->category->eula_text) && ($this->model->category->use_default_eula == 0)) {
-                return $this->model->category->eula_text;
+                $raw = $this->model->category->eula_text;
             } elseif ($this->model->category->use_default_eula == 1) {
-                return Setting::getSettings()->default_eula_text;
+                $raw = Setting::getSettings()->default_eula_text;
             } else {
                 return false;
             }
             // For everything else, just check the category for EULA info
         } elseif (($this->category) && ($this->category->eula_text)) {
-            return $this->category->eula_text;
+            $raw = $this->category->eula_text;
         } elseif ((Setting::getSettings()->default_eula_text) && (($this->category) && ($this->category->use_default_eula == '1'))) {
-            return Setting::getSettings()->default_eula_text;
+            $raw = Setting::getSettings()->default_eula_text;
         }
 
-        return null;
+        return $this->sanitizeEulaForRender($raw);
+    }
+
+    /**
+     * Sanitize raw eula_text before it lands in any renderer. This method
+     * is invoked by getEula and mirrors the shape Category::getEula uses on
+     * the web path (Helper::parseEscapedMarkedown = strip_tags + Parsedown
+     * safe mode) with one addition: an <img> strip on the Parsedown output.
+     *
+     * The extra <img> strip is what closes the LFR + SSRF primitive reported
+     * by W1nterFr3ak (Chris Byron Otieno) on 2026-08-02. Every checkout mail
+     * template embeds this via `{!! $eula !!}` into a Markdown mailable,
+     * whose HTML output is walked by laravel-mail-auto-embed, which fetches
+     * every <img src=""> server-side (file_get_contents for local paths,
+     * curl with TLS verification disabled for remote URLs) and attaches the
+     * bytes to the outgoing mail. Any low-privilege user with categories.edit
+     * could set eula_text to `![x](/var/www/html/.env)` or a raw <img> tag,
+     * check the asset out to themselves, and receive the file contents (or
+     * the response body of any URL, including cloud instance metadata) as
+     * a MIME attachment.
+     *
+     * strip_tags kills raw <img> HTML the user might have typed directly.
+     * Parsedown safe mode converts markdown to HTML. The second img-strip
+     * removes markdown-syntax images that Parsedown converted
+     * (e.g. `![x](url)` becoming `<img src=url>`). BlockImagesMarkdownExtension
+     * on the mail Markdown parser (see config/mail.php) is defense in depth
+     * for anything that slips past this pre-sanitize.
+     */
+    protected function sanitizeEulaForRender(?string $raw): ?string
+    {
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        $rendered = Helper::parseEscapedMarkedown($raw);
+
+        if ($rendered === null || $rendered === '') {
+            return null;
+        }
+
+        return preg_replace('/<img\b[^>]*>/i', '', $rendered);
     }
 
     public function getImageUrl($path = null)

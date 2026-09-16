@@ -3,6 +3,7 @@
 return [
     'actions' => 'Действия',
     'add' => 'Добавить',
+    'back' => 'Назад',
     'cancel' => 'Отмена',
     'checkin_and_delete' => 'Вернуть все и удалить пользователя',
     'delete' => 'Удалить',
@@ -22,7 +23,7 @@ return [
     'add_maintenance' => 'Добавить техническое обслуживание',
     'append' => 'Добавить',
     'new' => 'Создать',
-    'show_hide_info' => 'Show/Hide More Information',
+    'show_hide_info' => 'Показать/скрыть больше информации',
     'var' => [
         'clone' => 'Клонировать :item_type',
         'edit' => 'Редактировать :item_type',

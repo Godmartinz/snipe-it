@@ -13,6 +13,7 @@ return [
     'pending' => '待处理',
     'status_type' => '状态类型',
     'show_in_nav' => '在侧边导航栏中显示',
+    'status_label' => '状态标签',
     'title' => '状态标签',
     'undeployable' => '无法部署',
     'update' => '更新状态标签',

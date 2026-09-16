@@ -16,5 +16,7 @@ return [
         'confirm' => 'Sigurado kaba na i-delete mo ang kumpanyang ito?',
         'error' => 'Mayroong isyu sa pag-delete ng kumpanya. Mangayaring subukang muli.',
         'success' => 'Ang kompayang ito ay matagumpay na nailikha.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

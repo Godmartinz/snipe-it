@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\AssetModel;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -17,6 +18,20 @@ class CustomFieldSetDefaultValuesForModel extends Component
     public $model_id;
 
     public array $selectedValues = [];
+
+    /**
+     * Route-level middleware on the model create/edit pages requires
+     * AssetModel update permission, but snapshot replay to POST
+     * /livewire/update bypasses that gate. Without this check, a
+     * low-privilege user with a valid snapshot could enumerate custom-field
+     * default values for any asset model by swapping model_id.
+     */
+    public function boot(): void
+    {
+        if (! Gate::allows('update', AssetModel::class)) {
+            abort(403);
+        }
+    }
 
     public function mount($model_id = null)
     {

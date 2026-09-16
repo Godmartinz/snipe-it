@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Žiaden predvolený EULA dokument nebol nájdený. Pridajte nový v Nastaveniach.',
     'total' => 'Celkom',
     'remaining' => 'Dostupných',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Upraviť príslušenstvo',
     'use_default_eula' => 'Použiť <a href="#" data-toggle="modal" data-target="#eulaModal">predvolený dokument EULA</a> namiesto aktuálneho.',
     'use_default_eula_disabled' => '<del>Použiť namiesto aktuálneho predvolený dokument EULA.</del> Predvolený dokument EULA nie je nastavený. Prosím vyberte predvolený dokument v Nastaveniach.',

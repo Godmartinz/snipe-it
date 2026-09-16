@@ -46,7 +46,8 @@ class DepreciationsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $depreciations->count()) ? $depreciations->count() : app('api_offset_value');
+        $total = $depreciations->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -61,7 +62,6 @@ class DepreciationsController extends Controller
                 break;
         }
 
-        $total = $depreciations->count();
         $depreciations = $depreciations->skip($offset)->take($limit)->get();
 
         return (new DepreciationsTransformer)->transformDepreciations($depreciations, $total);

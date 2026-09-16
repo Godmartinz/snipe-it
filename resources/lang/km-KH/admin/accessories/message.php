@@ -20,6 +20,8 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបគ្រឿងបន្លាស់នេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបគ្រឿងបន្លាស់។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'គ្រឿងបន្លាស់ត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

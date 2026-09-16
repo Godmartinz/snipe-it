@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Tidak ada EULA standar utama yang ditemukan. Tambahkan di Pengaturan.',
     'total' => 'Total',
     'remaining' => 'Tersedia',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Perbarui Aksesori',
     'use_default_eula' => 'Gunakan <a href="#" data-toggle="modal" data-target="#eulaModal"> primary default </a>  sebagai gantinya.',
     'use_default_eula_disabled' => '<del>Gunakan primary default EULA sebagai gantinya.</del> Tidak ada primary default yang diatur. Silahkan tambahkan di Pengaturan.',

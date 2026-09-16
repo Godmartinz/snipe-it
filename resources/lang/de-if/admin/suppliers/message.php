@@ -20,7 +20,7 @@ return [
         'error' => 'Beim Löschen des Lieferanten ist ein Fehler aufgetreten. Bitte versuche es erneut.',
         'success' => 'Lieferant wurde erfolgreich gelöscht.',
         'not_found' => 'Lieferant nicht gefunden.',
-        'bulk_success' => 'Lieferanten wurden erfolgreich gelöscht.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

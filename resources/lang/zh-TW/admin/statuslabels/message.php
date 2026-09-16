@@ -20,6 +20,8 @@ return [
         'confirm' => '您確定要刪除此狀態標籤嗎？',
         'error' => '刪除狀態標籤失敗，請重試。',
         'success' => '刪除狀態標籤成功。',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

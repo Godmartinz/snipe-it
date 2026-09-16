@@ -20,6 +20,8 @@ return [
         'confirm' => 'Is jy seker jy wil hierdie Status Label uitvee?',
         'error' => 'Daar was \'n probleem met die verwydering van die statusetiket. Probeer asseblief weer.',
         'success' => 'Die statusetiket is suksesvol verwyder.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

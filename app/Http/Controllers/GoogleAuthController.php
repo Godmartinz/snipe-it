@@ -63,10 +63,10 @@ class GoogleAuthController extends Controller
             }
 
             Log::debug('Google user '.$socialUser->getEmail().' found in Snipe-IT');
-            $user->update([
-                'avatar' => $socialUser->avatar,
-                'last_login' => \Carbon::now(),
-            ]);
+            
+            $user->avatar = $socialUser->avatar;
+            $user->last_login = \Carbon::now();
+            $user->save();
 
             Auth::login($user, true);
 

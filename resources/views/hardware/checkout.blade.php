@@ -71,10 +71,18 @@
                         name="requestable"
                         :label="trans('admin/hardware/general.requestable')"
                         :item="$asset"
+                        data-user-preference-key="snipeit.checkout.requestable_default.{{ auth()->id() ?? 'guest' }}"
+                        data-had-old-input="{{ ((bool) old('requestable', false)) || session()->has('_old_input.requestable') ? '1' : '0' }}"
                     />
 
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'true'])
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'company_id' => $asset->company_id, 'style' => (session('checkout_to_type') ?: 'user') == 'user' ? '' : 'display: none;'])
+                    <x-input.user-select
+                        :label="trans('general.user')"
+                        name="assigned_user"
+                        :selected="old('assigned_user', $checkoutRequest?->user_id)"
+                        :companyId="$asset->company_id"
+                        :style="(session('checkout_to_type') ?: 'user') == 'user' ? null : 'display: none;'"
+                    />
                     <!-- unselect keeps the asset being checked out from being pre-selected in this picker -->
                     @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'assigned_asset', 'company_id' => $asset->company_id, 'unselect' => 'true', 'exclude_id' => $asset->id, 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
                     @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'company_id' => $asset->company_id, 'style' => session('checkout_to_type') == 'location' ? '' : 'display: none;'])
@@ -82,33 +90,21 @@
                     <x-form.row
                         :label="trans('admin/hardware/form.checkout_date')"
                         name="checkout_at"
+                        type="datetimepicker"
+                        :item="$item"
+                        :default="date('Y-m-d H:i:s')"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="checkout_at"
-                                end_date="0d"
-                                :value="old('expected_checkin', date('Y-m-d'))"
-                                :placeholder="trans('general.select_date')"
-                                required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('admin/hardware/form.expected_checkin')"
                         name="expected_checkin"
+                        type="datetimepicker"
+                        :item="$item"
+                        :default_now="false"
+                        :default="old('expected_checkin', ($checkoutRequest?->end_date ? $checkoutRequest->end_date->toDateString() : ($item->expected_checkin ?? null)))"
                         input_div_class="col-md-4"
-                    >
-                        <x-slot:input>
-                            <x-input.datepicker
-                                name="expected_checkin"
-                                :value="old('expected_checkin', $item->expected_checkin)"
-                                :placeholder="trans('general.select_date')"
-                                required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
-                            />
-                        </x-slot:input>
-                    </x-form.row>
+                    />
 
                     <x-form.row
                         :label="trans('general.notes')"
@@ -128,7 +124,7 @@
                     @if ($asset->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $asset->getEula() || ($snipeSettings->webhook_endpoint != ''))
                         <div class="form-group notification-callout" style="display:none;">
                             <div class="col-md-8 col-md-offset-3">
-                                <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
+                                <x-callout type="info" role="status">
 
                                     @if ($asset->requireAcceptance())
                                         <x-icon type="email" class="fa-fw"/>
@@ -158,7 +154,7 @@
                                         <i class="fab fa-slack fa-fw" aria-hidden="true"></i>
                                         {{ trans('general.webhook_msg_note') }}
                                     @endif
-                                </div>
+                                </x-callout>
                             </div>
 
                             <!-- Sign in place checkbox -->
@@ -195,55 +191,11 @@
 
         </x-page-column>
 
-        <livewire:checkout-target-panel type="assets" />
+        <x-page-column class="col-md-5">
+            <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$asset" />
+
+            <livewire:checkout-target-panel type="assets" />
+        </x-page-column>
 
     </x-container>
-@stop
-
-@section('moar_scripts')
-
-    <script nonce="{{ csrf_token() }}">
-        // Per-user localStorage preference for the requestable default on
-        // checkout. Namespaced by user id so a shared browser doesn't leak one
-        // user's habit into another user's default. Only takes over when the
-        // field wasn't repopulated from a validation-error redirect (old()
-        // beats the stored preference). On submit we save whatever the user
-        // actually chose, so the preference tracks their real habit.
-        const initializeCheckoutRequestablePreference = function () {
-            const storageKey = 'snipeit.checkout.requestable_default.' + @json(auth()->id() ?? 'guest');
-            const hadOldInput = @json((bool) old('requestable', false)) || @json(session()->has('_old_input.requestable'));
-            const checkbox = document.getElementById('requestable');
-            const form = checkbox ? checkbox.closest('form') : null;
-
-            if (!checkbox || !form) {
-                return;
-            }
-
-            if (!hadOldInput) {
-                let stored = null;
-                try {
-                    stored = window.localStorage.getItem(storageKey);
-                } catch (e) {
-                    // localStorage may be unavailable (private mode, disabled).
-                }
-                if (stored === '1' || stored === '0') {
-                    checkbox.checked = stored === '1';
-                }
-            }
-
-            form.addEventListener('submit', function () {
-                try {
-                    window.localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
-                } catch (e) {
-                    // Non-fatal: preference just won't persist this time.
-                }
-            });
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeCheckoutRequestablePreference);
-        } else {
-            initializeCheckoutRequestablePreference();
-        }
-    </script>
 @stop

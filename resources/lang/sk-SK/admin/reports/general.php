@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Požiadavka na akceptáciu odstránená',
     'acceptance_request' => 'Požiadavka na akceptáciu',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Adresa používateľa',
         'user_company' => 'User Company',
         'user_city' => 'Mesto používateľa',

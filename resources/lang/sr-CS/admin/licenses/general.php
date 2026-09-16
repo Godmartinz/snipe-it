@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Zaduženo grupnim razduživanjem u ekranu licenci',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Ostalo je samo :remaining_count slobodnih mesta za ovu licencu sa minimalnom količinom :min_amt. Možda bi ste želeli da razmotrite nabavku nove količine.',

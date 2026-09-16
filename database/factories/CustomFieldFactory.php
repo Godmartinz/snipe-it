@@ -155,6 +155,30 @@ class CustomFieldFactory extends Factory
         });
     }
 
+    public function testDate()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Sample Date',
+                'help_text' => 'This shows a datepicker',
+                'element' => 'date_picker',
+                'format' => 'DATE',
+            ];
+        });
+    }
+
+    public function testDatetime()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Sample Datetime',
+                'help_text' => 'This shows a datetimepicker',
+                'element' => 'datetime_picker',
+                'format' => 'DATETIME',
+            ];
+        });
+    }
+
     public function testMarkdownTextarea()
     {
         return $this->state(function () {

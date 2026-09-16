@@ -19,6 +19,8 @@ return [
     'required_acceptance' => '使用者會收到包含確認接收連結的郵件',
     'global_signature_required_notice' => '目前透過管理員設定全域要求使用者簽名，因此無論此類別的設定為何，只要項目借出給使用者（而非位置等），仍將需要簽名。',
     'required_eula' => '使用者將收到EULA（最終使用者許可協議）的郵件',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
     'required_signature' => '此使用者需要簽名以確認接受此項目。',
     'no_default_eula' => '沒有找到預設EULA（最終使用者許可協議）。請在設定中增加一個。',
     'update' => '更新類別',

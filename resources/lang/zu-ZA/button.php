@@ -3,6 +3,7 @@
 return [
     'actions' => 'Izenzo',
     'add' => 'Engeza okusha',
+    'back' => 'Emuva',
     'cancel' => 'Khansela',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Susa',

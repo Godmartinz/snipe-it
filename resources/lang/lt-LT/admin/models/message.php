@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Nebuvo pasirinktas joks modelis, todėl niekas nebuvo panaikinta.',
+        'nothing_deletable' => 'Nei vieno iš pasirinktų modelių negalima ištrinti, nes su jais vis dar yra susieto turto.',
         'success' => 'Modelis panaikintas! :success_count modeliai panaikinti!',
         'success_partial' => 'Panaikinti modeliai – :success_count, tačiau dar :fail_count nepavyko panaikinti, nes vis dar yra su jais susieto turto.',
     ],

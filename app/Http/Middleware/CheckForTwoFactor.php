@@ -10,9 +10,21 @@ use Illuminate\Support\Facades\Auth;
 class CheckForTwoFactor
 {
     /**
-     * Routes to ignore for Two Factor Auth
+     * Routes to ignore for Two Factor Auth.
+     *
+     * `storage-proxy` is on the list because the /storage-proxy/{path}
+     * route serves the "public" filesystem disk (branding logos, user
+     * avatars, model images) which pages like /two-factor-enroll
+     * reference via `<img src="…">`. Without the exemption, the
+     * browser's image fetches on those pre-2FA-complete pages get
+     * redirected here to /two-factor-enroll (broken images) AND
+     * clobber redirect()->setIntendedUrl() with the storage-proxy URL,
+     * so redirect()->intended() after MFA sends the user to the logo
+     * URL instead of the dashboard. Content on the public disk is
+     * public by design, so bypassing 2FA on this route is safe. See
+     * issue #19457.
      */
-    public const IGNORE_ROUTES = ['two-factor', 'two-factor-enroll', 'setup', 'logout'];
+    public const IGNORE_ROUTES = ['two-factor', 'two-factor-enroll', 'setup', 'logout', 'storage-proxy'];
 
     /**
      * Whether the *session* attached to this request has cleared 2FA — i.e.

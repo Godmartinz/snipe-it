@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ingabe uqinisekile ukuthi ufisa ukususa le ndawo yokufinyelela?',
         'error' => 'Kube nenkinga yokususa i-accessory. Ngicela uzame futhi.',
         'success' => 'Isesekeli sisusiwe ngempumelelo.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

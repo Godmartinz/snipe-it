@@ -6,6 +6,8 @@ return [
 ',
     'declined' => 'Դուք հաջողությամբ մերժել եք այս տարրը։
 ',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Ձեր օգտատերերը հաջողությամբ թարմացվել են, սակայն ղեկավարի գրառումը չի պահպանվել, քանի որ ընտրված ղեկավարը նույնպես գտնվում էր խմբագրվող օգտատերերի ցանկում, և օգտատերերը չեն կարող լինել իրենց սեփական ղեկավարը։ Խնդրում ենք կրկին ընտրել ձեր օգտատերերին՝ բացառելով ղեկավարին։
 ',
     'user_exists' => 'Օգտատերն արդեն գոյություն ունի։
@@ -16,9 +18,11 @@ return [
 ',
     'user_login_required' => 'Մուտքի դաշտը պարտադիր է։',
     'user_has_no_assets_assigned' => 'Օգտատիրոջը ներկայումս ոչ մի ակտիվ չի հանձնվել։',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Գաղտնաբառը պարտադիր է։
 ',
     'insufficient_permissions' => 'Ոչ բավարար լիազորություններ։',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Այս օգտատերը ջնջվել է։ Նրան խմբագրելու կամ նոր ակտիվներ հանձնելու համար հարկավոր է վերականգնել այս օգտատիրոջը։',
     'ldap_not_configured' => 'LDAP ինտեգրումը կազմաձևված չէ այս տեղադրման համար։
 ',
@@ -30,6 +34,15 @@ return [
 ',
     'log_record_not_found' => 'Այս օգտատերի պրոֆիլում էլ. փոստի հասցե նշված չէ։
 ',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Օգտատերը հաջողությամբ ստեղծվել է։
@@ -84,6 +97,7 @@ return [
         'password_ldap' => 'Այս հաշվի գաղտնաբառը կառավարվում է LDAP/Active Directory-ի կողմից։ Գաղտնաբառը փոխելու համար խնդրում ենք կապվել ձեր ՏՏ բաժնի հետ։',
         'multi_company_items_assigned' => 'Այս օգտատիրոջը հանձնված տարրեր կան, որոնք պատկանում են մեկ այլ ընկերության։ Խնդրում ենք վերադարձնել դրանք կամ խմբագրել դրանց ընկերությունը։',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

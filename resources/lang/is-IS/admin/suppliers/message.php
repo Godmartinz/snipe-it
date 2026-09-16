@@ -20,7 +20,7 @@ return [
         'error' => 'Það kom upp vandamál þegar reynt var að eyða birgjanum. Vinsamlegast reyndu aftur.',
         'success' => 'Supplier was deleted successfully.',
         'not_found' => 'Birgir fannst ekki.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Nem voltak eszközök kiválasztva, így semmi sem lett törölve.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Eszköz modell törölve! Összesen |:success_count eszköz törölve!',
         'success_partial' => ': success_count modell(ek) törlésre kerültek, azonban ennyit nem sikerült törölni: a fail_count , mert még hozzárendelt eszközökkel rendelkeznek.',
     ],

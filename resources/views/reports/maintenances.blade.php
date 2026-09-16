@@ -12,7 +12,6 @@
         <x-box>
 
             <x-table
-                nosticky="true"
                 name="maintenanceReport"
                 api_url="{{ route('api.maintenances.index', ['format' => 'flat']) }}"
                 :presenter="\App\Presenters\MaintenancesPresenter::reportLayout()"

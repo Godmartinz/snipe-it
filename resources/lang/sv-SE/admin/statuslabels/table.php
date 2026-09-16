@@ -13,6 +13,7 @@ return [
     'pending' => 'Pågående',
     'status_type' => 'Statustyp',
     'show_in_nav' => 'Visa i sidofältet',
+    'status_label' => 'Statusetikett',
     'title' => 'Statusetiketter',
     'undeployable' => 'Otillgänglig',
     'update' => 'Uppdatera statusetikett',

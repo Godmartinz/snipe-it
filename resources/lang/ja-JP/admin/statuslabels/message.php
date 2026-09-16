@@ -20,6 +20,8 @@ return [
         'confirm' => 'このステータスラベルを削除しますか？',
         'error' => 'ステータスラベルを削除する際に問題が発生しました。もう一度やり直して下さい。',
         'success' => 'ステータスラベルは削除されました。',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

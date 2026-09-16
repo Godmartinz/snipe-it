@@ -24,6 +24,11 @@ jobs:
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: none
+          # ParaTest spawns a worker per core as a separate PHP process
+          # and forwards ini flags only via --passthru-php, so bump the
+          # memory limit here when setting up PHP rather than
+          # on the test command.
+          ini-values: memory_limit=1G
 
       - uses: actions/checkout@v7
         with:
@@ -65,7 +70,7 @@ jobs:
           DB_CONNECTION: sqlite
           LOG_CHANNEL: single
           LOG_LEVEL: debug
-        run: php artisan test
+        run: php artisan test --parallel
 
       - name: Upload Laravel logs as artifacts
         if: always()

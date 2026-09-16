@@ -107,10 +107,10 @@
                 @endif
             </label>
             @if ($this->emailWillBeSendDueToEula)
-                <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
+                <x-callout type="info" role="status">
                     <i class="far fa-envelope" aria-hidden="true"></i>
                     <span>{{ $this->emailMessage }}</span>
-                </div>
+                </x-callout>
             @endif
         </div>
     </div>

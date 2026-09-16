@@ -21,7 +21,7 @@ return [
         'confirm' => 'Ar jūs tikrai norite panaikinti šią kategoriją?',
         'error' => 'Bandant panaikinti kategoriją įvyko klaida. Bandykite dar kartą.',
         'success' => 'Kategorija sėkmingai ištrinta.',
-        'bulk_success' => 'Kategorijos sėkmingai ištrintos.',
+        'bulk_success' => 'Kategorija sėkmingai ištrinta.|Kategorijos (:count) sėkmingai ištrintos.',
         'partial_success' => 'Kategorija sėkmingai ištrinta. Daugiau informacijos rasite žemiau. | Kategorijos (:count) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
     ],
 

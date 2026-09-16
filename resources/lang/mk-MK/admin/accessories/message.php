@@ -20,6 +20,8 @@ return [
         'confirm' => 'Дали сте сигурни дека сакате да го избришете овој додаток?',
         'error' => 'Имаше проблем со бришење на додатокот. Обидете се повторно.',
         'success' => 'Додатокот беше успешно избришан.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -126,11 +126,92 @@ class UpdateLicenseTest extends TestCase
         $this->assertEquals('New Name', $meta['name']['new']);
     }
 
+    public function test_edit_page_renders_date_fields_in_ymd_format(): void
+    {
+        // Regression for the "editing a license wipes its dates" bug that
+        // shipped in 8.7.0. `x-form.row type="datepicker"` was passing the
+        // raw model attribute as the input value, which for License's date
+        // fields (all cast to `date`) meant Carbon objects stringified as
+        // "Y-m-d H:i:s". The datepicker JS couldn't parse that, rendered
+        // blank, and submitting the form wiped the DB field.
+        //
+        // Guarantee here: all three date inputs on the edit page must
+        // render with value="Y-m-d" so the picker parses correctly and a
+        // no-op resubmit preserves the field.
+        $license = License::factory()->create([
+            'purchase_date' => '2026-01-15',
+            'expiration_date' => '2027-06-30',
+            'termination_date' => '2028-12-31',
+        ]);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('licenses.edit', $license->id))
+            ->assertOk();
+
+        foreach (['purchase_date' => '2026-01-15', 'expiration_date' => '2027-06-30', 'termination_date' => '2028-12-31'] as $name => $expected) {
+            $response->assertSee('name="'.$name.'"', false);
+            $response->assertSee('value="'.$expected.'"', false);
+            // The old bug shape: value contained the trailing time component
+            // because the raw Carbon was rendered directly.
+            $response->assertDontSee('value="'.$expected.' 00:00:00"', false);
+        }
+    }
+
+    public function test_update_with_unchanged_date_fields_preserves_them(): void
+    {
+        // End-to-end regression: simulate what happens when an operator
+        // opens the edit page and clicks Save without changing anything.
+        // In the 8.7.0 bug, the blank-rendered pickers submitted empty
+        // strings for the three date fields, and the update silently
+        // wiped them. This asserts they survive a form roundtrip.
+        $license = License::factory()->create([
+            'purchase_date' => '2026-01-15',
+            'expiration_date' => '2027-06-30',
+            'termination_date' => '2028-12-31',
+        ]);
+
+        $editResponse = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('licenses.edit', $license->id))
+            ->assertOk();
+
+        // Extract each date input value from the rendered edit page and
+        // resubmit them, mimicking a no-op save.
+        $html = $editResponse->getContent();
+        $extract = function (string $name) use ($html): ?string {
+            $q = preg_quote($name, '/');
+            if (preg_match('/name="'.$q.'"[^>]*value="([^"]*)"/s', $html, $m)) {
+                return $m[1];
+            }
+            if (preg_match('/value="([^"]*)"[^>]*name="'.$q.'"/s', $html, $m)) {
+                return $m[1];
+            }
+
+            return null;
+        };
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->put(route('licenses.update', $license->id), [
+                'name' => $license->name,
+                'seats' => $license->seats,
+                'category_id' => $license->category_id,
+                'purchase_date' => $extract('purchase_date'),
+                'expiration_date' => $extract('expiration_date'),
+                'termination_date' => $extract('termination_date'),
+            ])
+            ->assertStatus(302);
+
+        $license->refresh();
+        $this->assertEquals('2026-01-15', $license->purchase_date->format('Y-m-d'));
+        $this->assertEquals('2027-06-30', $license->expiration_date->format('Y-m-d'));
+        $this->assertEquals('2028-12-31', $license->termination_date->format('Y-m-d'));
+    }
+
     public function test_no_op_update_does_not_create_log_entry()
     {
         $license = License::factory()->create([
             'name' => 'Same Name',
             'seats' => 5,
+            'expiration_date' => null,
             'license_email' => null,
             'notes' => null,
             'order_number' => null,

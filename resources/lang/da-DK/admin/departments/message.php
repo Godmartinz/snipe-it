@@ -17,6 +17,8 @@ return [
         'confirm' => 'Er du sikker på du vil slette denne afdeling?',
         'error' => 'Der var et problem sletningen af afdelingen. Prøv venligst igen.',
         'success' => 'Afdelingen blev slettet.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

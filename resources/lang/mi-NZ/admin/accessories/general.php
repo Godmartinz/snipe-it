@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Karekau he taunga tuatahi taunoa EULA. Tāpirihia tetahi i te Tautuhinga.',
     'total' => 'Te tapeke',
     'remaining' => 'Waea',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Whakahōuhia te Uru',
     'use_default_eula' => 'Whakamahia te taunoa 123_57__321primary taunoa EULA</a> hei utu mo tenei.',
     'use_default_eula_disabled' => '<del>Me te taunoa tuatahi o te EULA instead.</del> Karekau he tautuhinga taunoa EULA. Tēnā tāpirihia tētahi i Ngā Tautuhinga.',

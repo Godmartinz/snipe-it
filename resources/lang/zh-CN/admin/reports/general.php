@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => '接受请求已删除',
     'acceptance_request' => '接受请求',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => '用户地址',
         'user_company' => 'User Company',
         'user_city' => '用户城市',

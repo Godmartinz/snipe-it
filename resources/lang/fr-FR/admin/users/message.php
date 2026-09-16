@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Vous avez accepté cet élément avec succès.',
     'declined' => 'Vous avez refusé cet élément avec succès.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Vos utilisateurs ont été mis à jour avec succès, mais votre entrée de gestionnaire n\'a pas été enregistrée, car le gestionnaire que vous avez sélectionné était également dans la liste d\'utilisateurs à éditer, et les utilisateurs peuvent ne pas être leur propre gestionnaire. Sélectionnez à nouveau vos utilisateurs, à l\'exclusion du gestionnaire.',
     'user_exists' => 'L\'utilisateur existe déjà !',
     'cannot_delete' => 'L\'utilisateur n\'existe pas ou vous n\'avez pas la permission de les supprimer.',
     'user_not_found' => 'L\'utilisateur n\'existe pas ou vous n\'avez pas la permission de les voir.',
     'user_login_required' => 'Le champ identifiant est obligatoire',
     'user_has_no_assets_assigned' => 'Aucun actif actuellement assigné à l\'utilisateur·trice.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Le mot de passe est obligatoire.',
     'insufficient_permissions' => 'Droits insuffisants.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Cet utilisateur a été supprimé. Vous devez le restaurer pour pouvoir l\'éditer ou lui assigner de nouveaux actifs.',
     'ldap_not_configured' => 'L\'intégration LDAP n\'a pas été configuré pour cette installation .',
     'password_resets_sent' => 'Les utilisateurs sélectionnés qui sont activés et ont une adresse e-mail valide ont reçu un lien de réinitialisation du mot de passe.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Un lien de réinitialisation du mot de passe a été envoyé à :email!',
     'user_has_no_email' => 'Cet utilisateur n\'a pas renseigné d\'adresse e-mail dans son profil.',
     'log_record_not_found' => 'Impossible de trouver un enregistrement de log correspondant à cet utilisateur.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'L’utilisateur a été créé avec succès.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Le mot de passe de ce compte est géré par LDAP / Active Directory. Veuillez contacter votre service informatique pour changer votre mot de passe.',
         'multi_company_items_assigned' => 'Cet utilisateur a des actifs assignés qui appartiennent à une autre société. Veuillez les vérifier ou modifier leur société.',
         'no_pending_acceptances' => 'Cet utilisateur n\'a pas d\'approbation en attente pour le rappeler.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

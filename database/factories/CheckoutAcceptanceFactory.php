@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\LicenseSeat;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -64,6 +65,14 @@ class CheckoutAcceptanceFactory extends Factory
         ]);
     }
 
+    public function forLicenseSeat()
+    {
+        return $this->state([
+            'checkoutable_type' => LicenseSeat::class,
+            'checkoutable_id' => LicenseSeat::factory(),
+        ]);
+    }
+
     public function pending()
     {
         return $this->state([
@@ -77,6 +86,14 @@ class CheckoutAcceptanceFactory extends Factory
         return $this->state([
             'accepted_at' => now()->subDay(),
             'declined_at' => null,
+        ]);
+    }
+
+    public function declined()
+    {
+        return $this->state([
+            'accepted_at' => null,
+            'declined_at' => now()->subDay(),
         ]);
     }
 
@@ -100,12 +117,22 @@ class CheckoutAcceptanceFactory extends Factory
 
     private function createdAssociatedActionLogEntry(CheckoutAcceptance $acceptance): void
     {
+        // Match the log entry's created_at to the acceptance's created_at
+        // explicitly. ReportsController::sentAssetAcceptanceReminder
+        // joins the two on WHERE created_at = ?, and TIMESTAMP columns
+        // store second precision — so if the acceptance's default
+        // timestamp and this insert's default timestamp straddle a second
+        // boundary (under full-suite load, often enough to matter), the
+        // join returns nothing and the reminder path bails with an error.
+        // Passing the acceptance's created_at through makes the pair
+        // deterministically identical.
         $acceptance->checkoutable->assetlog()->create([
             'action_type' => 'checkout',
             'target_id' => $acceptance->assigned_to_id,
             'target_type' => User::class,
             'item_id' => $acceptance->checkoutable_id,
             'item_type' => $acceptance->checkoutable_type,
+            'created_at' => $acceptance->created_at,
         ]);
     }
 }

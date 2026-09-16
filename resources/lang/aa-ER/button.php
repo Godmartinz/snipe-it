@@ -3,6 +3,7 @@
 return [
     'actions' => 'crwdns967:0crwdne967:0',
     'add' => 'crwdns1150:0crwdne1150:0',
+    'back' => 'crwdns15305:0crwdne15305:0',
     'cancel' => 'crwdns1151:0crwdne1151:0',
     'checkin_and_delete' => 'crwdns10510:0crwdne10510:0',
     'delete' => 'crwdns965:0crwdne965:0',

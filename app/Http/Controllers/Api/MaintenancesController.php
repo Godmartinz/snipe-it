@@ -52,7 +52,13 @@ class MaintenancesController extends Controller
         }
 
         if ($request->filled('asset_id')) {
-            $maintenances->where('asset_id', '=', $request->input('asset_id'));
+            // asset_id request param stays for API back-compat but
+            // filters against the polymorphic (item_id, item_type)
+            // pair now that maintenances can attach to accessories
+            // too. Callers filtering by asset_id are, by definition,
+            // scoping to items of type Asset.
+            $maintenances->where('item_id', '=', $request->input('asset_id'))
+                ->where('item_type', '=', Asset::class);
         }
 
         // Polymorphic filter — used by the user detail Maintenances tab to
@@ -115,7 +121,8 @@ class MaintenancesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $maintenances->count()) ? $maintenances->count() : app('api_offset_value');
+        $total = $maintenances->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $allowed_columns = [
@@ -124,6 +131,10 @@ class MaintenancesController extends Controller
             'asset_maintenance_time',
             'cost',
             'start_date',
+            'expected_completion_date',
+            // Legacy alias: API v1 callers passed sort=completion_date
+            // against the pre-rename column. Kept in the allow-list and
+            // mapped below so those callers keep sorting the same rows.
             'completion_date',
             'completed_at',
             'notes',
@@ -177,12 +188,16 @@ class MaintenancesController extends Controller
             case 'completed_at':
                 $maintenances = $maintenances->orderByCompletedAt($order);
                 break;
+            case 'completion_date':
+                // Legacy alias for the renamed expected_completion_date
+                // column; keep API v1 sort= callers working.
+                $maintenances = $maintenances->orderBy('expected_completion_date', $order);
+                break;
             default:
                 $maintenances = $maintenances->orderBy($sort, $order);
                 break;
         }
 
-        $total = $maintenances->count();
         $maintenances = $maintenances->skip($offset)->take($limit)->get();
 
         if (request()->input('format') == 'flat') {
@@ -292,22 +307,40 @@ class MaintenancesController extends Controller
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('admin/maintenances/general.maintenance'), 'id' => $id, 'action' => trans('general.edit')])));
             }
 
-            // If the request changes asset_id, verify the new asset is accessible
-            if ($request->filled('asset_id') && (int) $request->input('asset_id') !== $maintenance->asset_id) {
-                $newAsset = Asset::find($request->input('asset_id'));
+            // Re-parenting intent can arrive as the legacy `asset_id` alias
+            // or as the polymorphic pair (`item_id` + `item_type`). Both are
+            // fillable on the model, so gating only on `asset_id` (as the
+            // original CVE-2026-55516 fix did) still let `item_id` through
+            // to bypass the FMCS check. Normalize both shapes into a single
+            // "requested asset id" and reject any non-Asset item_type since
+            // only asset-scoped maintenances are supported.
+            $requestedAssetId = null;
+            if ($request->filled('asset_id')) {
+                $requestedAssetId = (int) $request->input('asset_id');
+            } elseif ($request->filled('item_id')) {
+                if ($request->filled('item_type') && $request->input('item_type') !== Asset::class) {
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('admin/maintenances/general.maintenance'), 'id' => $id, 'action' => trans('general.edit')])), 403);
+                }
+                $requestedAssetId = (int) $request->input('item_id');
+            }
+
+            $newAsset = null;
+            if ($requestedAssetId !== null && $requestedAssetId !== $maintenance->asset_id) {
+                $newAsset = Asset::find($requestedAssetId);
 
                 if (! $newAsset) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.item_not_found', ['item_type' => trans('general.asset'), 'id' => $request->input('asset_id')])));
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.item_not_found', ['item_type' => trans('general.asset'), 'id' => $requestedAssetId])));
                 }
 
                 if (! Company::isCurrentUserHasAccess($newAsset)) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('general.asset'), 'id' => $request->input('asset_id'), 'action' => trans('general.edit')])), 403);
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('general.asset'), 'id' => $requestedAssetId, 'action' => trans('general.edit')])), 403);
                 }
+            }
 
-                $maintenance->fill($request->except('asset_id'));
+            $maintenance->fill($request->except(['asset_id', 'item_id', 'item_type']));
+
+            if ($newAsset !== null) {
                 $maintenance->asset_id = $newAsset->id;
-            } else {
-                $maintenance->fill($request->except('asset_id'));
             }
 
             if ($maintenance->save()) {

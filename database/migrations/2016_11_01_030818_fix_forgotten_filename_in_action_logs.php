@@ -22,7 +22,7 @@ class FixForgottenFilenameInActionLogs extends Migration
                     ->where('note', $log->note)
                     ->where('filename', null)
                     ->withTrashed()
-                    ->get()->first();
+                    ->first();
 
                 if ($matching_action_log) {
                     $matching_action_log->filename = $log->filename;

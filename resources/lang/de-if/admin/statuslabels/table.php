@@ -13,6 +13,7 @@ return [
     'pending' => 'Ausstehend',
     'status_type' => 'Statustyp',
     'show_in_nav' => 'Im seitlichen Navigationsbereich zeigen',
+    'status_label' => 'Statusbezeichnung',
     'title' => 'Statusbezeichnungen',
     'undeployable' => 'Nicht einsetzbar',
     'update' => 'Statusbezeichnung aktualisieren',

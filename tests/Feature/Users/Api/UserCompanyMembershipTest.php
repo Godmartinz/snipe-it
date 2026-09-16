@@ -279,4 +279,114 @@ class UserCompanyMembershipTest extends TestCase
 
         $this->assertNull(User::where('username', 'testuser_invalid_companies')->first());
     }
+
+    public function test_store_denies_mixed_cross_tenant_company_ids_from_non_superuser()
+    {
+        // Regression for Christopher Finks / Issue 2. A non-superuser with
+        // users.create who is a member of Company A only cannot create a
+        // user whose company_ids[] includes any company outside the actor's
+        // permitted scope. This exercises the mixed case (some permitted,
+        // some not) where SaveUserRequest::withValidator() does not fire
+        // its "cannot make floater" gate because the filter still returns
+        // a non-empty set. Prior behavior filled and saved the user, then
+        // silently dropped the foreign company id at sync time - leaving
+        // a user record whose eventual pivot did not match the request.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $actor = User::factory()->createUsers()->forCompany($companyA->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.users.store'), [
+                'first_name' => 'Cross',
+                'last_name' => 'Tenant',
+                'username' => 'cross_tenant_mixed',
+                'password' => 'secret123456',
+                'password_confirmation' => 'secret123456',
+                'company_ids' => [$companyA->id, $companyB->id],
+            ])
+            ->assertStatus(403);
+
+        $this->assertNull(User::where('username', 'cross_tenant_mixed')->first(), 'User must not be persisted when any requested company is outside the actor scope.');
+    }
+
+    public function test_update_denies_mixed_cross_tenant_company_ids_from_non_superuser()
+    {
+        // Same regression as above but on the update path. Actor edits an
+        // existing user's company_ids to include a foreign company alongside
+        // their own permitted one - must be rejected before any pivot write.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $target = User::factory()->forCompany($companyA->id)->create();
+        $target->companies()->sync([$companyA->id]);
+        $actor = User::factory()->editUsers()->forCompany($companyA->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->patchJson(route('api.users.update', $target), [
+                'first_name' => $target->first_name,
+                'last_name' => $target->last_name,
+                'username' => $target->username,
+                'company_ids' => [$companyA->id, $companyB->id],
+            ])
+            ->assertStatus(403);
+
+        $target->refresh();
+        $this->assertFalse($target->companies->contains($companyB), 'Cross-tenant company must not be attached on update.');
+        $this->assertTrue($target->companies->contains($companyA), 'Existing legitimate company assignment must survive the rejection.');
+    }
+
+    public function test_store_scalar_cross_tenant_company_id_rejected_by_validation()
+    {
+        // Scalar company_id case with a single foreign company id is
+        // rejected earlier by SaveUserRequest::withValidator() (the
+        // "cannot make floater" gate fires because the permitted-id filter
+        // returns empty). Kept here as a coverage marker so this path does
+        // not regress and someone does not later remove the validator gate
+        // thinking the controller alone protects the endpoint.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $actor = User::factory()->createUsers()->forCompany($companyA->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.users.store'), [
+                'first_name' => 'Cross',
+                'last_name' => 'Tenant',
+                'username' => 'cross_tenant_scalar',
+                'password' => 'secret123456',
+                'password_confirmation' => 'secret123456',
+                'company_id' => $companyB->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->assertNull(User::where('username', 'cross_tenant_scalar')->first());
+    }
+
+    public function test_store_allows_non_superuser_to_assign_own_company()
+    {
+        // Sanity: the fix should not break the legitimate case of a
+        // non-superuser creating a user in their own company.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $company = Company::factory()->create();
+        $actor = User::factory()->createUsers()->forCompany($company->id)->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.users.store'), [
+                'first_name' => 'Same',
+                'last_name' => 'Tenant',
+                'username' => 'same_tenant_ok',
+                'password' => 'secret123456',
+                'password_confirmation' => 'secret123456',
+                'company_id' => $company->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $user = User::where('username', 'same_tenant_ok')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->companies->contains($company));
+    }
 }

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Ingen standard EULA funnet. Legg til en i Innstillinger.',
     'total' => 'Total',
     'remaining' => 'Tilgjengelig',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Oppdater tilbehør',
     'use_default_eula' => 'Bruk <a href="#" data-toggle="modal" data-target="#eulaModal">standard EULA</a> i stedet.',
     'use_default_eula_disabled' => '<del>Bruk standard EULA i stedet.</del> Ingen standard EULA er satt. Legg til en i Innstillinger.',

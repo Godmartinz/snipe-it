@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Entrega feita através da entrega em massa da licença',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Existem apenas :remaining_count lugares para esta licença com uma quantidade mínima de :min_amt. Você pode querer considerar a compra de mais lugares.',

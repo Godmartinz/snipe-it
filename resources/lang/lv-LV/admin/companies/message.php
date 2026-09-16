@@ -16,5 +16,7 @@ return [
         'confirm' => 'Vai tiešām vēlaties izdzēst šo uzņēmumu?',
         'error' => 'Radās problēma, izlaižot uzņēmumu. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Uzņēmums tika veiksmīgi dzēsts.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

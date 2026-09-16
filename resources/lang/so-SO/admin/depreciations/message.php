@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ma hubtaa inaad rabto inaad tirtirto heerkan qiimo-dhaca?',
         'error' => 'Laguma guuleysan tir-tiritaanka. Fadlan ku celi markale.',
         'success' => 'Qiimo dhimista heerka isticmaalka waa lagu guuleystay in la tir-tiro.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

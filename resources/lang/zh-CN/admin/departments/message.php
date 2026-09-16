@@ -17,6 +17,8 @@ return [
         'confirm' => '你确定要删除这个部门吗？',
         'error' => '删除部门出现了问题。请再试一次。',
         'success' => '已成功删除该部门。',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -19,15 +19,6 @@ class UpdateComponentRequest extends ImageUploadRequest
         }
     }
 
-    public function rules(): array
-    {
-        $min = $this->component->numCheckedOut();
-
-        return array_merge(parent::rules(), [
-            'qty' => "required|numeric|min:{$min}",
-        ]);
-    }
-
     public function response(array $errors)
     {
         return $this->redirector->back()->withInput()->withErrors($errors, $this->errorBag);

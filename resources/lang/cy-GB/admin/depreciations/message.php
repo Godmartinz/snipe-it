@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ydych chi\'n siwr eich bod eisiau dileu\'r dosbarth dibrisiant yma?',
         'error' => 'Nid oedd yn bosib dileu\'r dosbarth dibrisiant. Ceisiwch eto o. g. y. dd.',
         'success' => 'Dosbarth dibrisiant wedi\'i dileu yn llwyddiannus.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

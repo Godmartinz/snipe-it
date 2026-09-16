@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'បានលុបសំណើទទួលយក',
     'acceptance_request' => 'សំណើទទួលយក',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'អាសយដ្ឋានអ្នកប្រើប្រាស់',
         'user_company' => 'User Company',
         'user_city' => 'ទីក្រុងអ្នកប្រើប្រាស់',

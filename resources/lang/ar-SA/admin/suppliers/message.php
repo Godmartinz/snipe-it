@@ -20,7 +20,7 @@ return [
         'error' => 'حدثت مشكلة أثناء حذف المورد. حاول مرة اخرى.',
         'success' => 'تم حذف المورد بنجاح.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

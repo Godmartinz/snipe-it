@@ -13,6 +13,7 @@ return [
     'pending' => 'நிலுவையில்',
     'status_type' => 'நிலை வகை',
     'show_in_nav' => 'பக்க nav இல் காட்டு',
+    'status_label' => 'Status Label',
     'title' => 'நிலை லேபிள்கள்',
     'undeployable' => 'Undeployable',
     'update' => 'Status Label ஐப் புதுப்பிக்கவும்',

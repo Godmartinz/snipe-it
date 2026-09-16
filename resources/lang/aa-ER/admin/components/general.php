@@ -13,4 +13,7 @@ return [
     'total' => 'crwdns1553:0crwdne1553:0',
     'update' => 'crwdns1554:0crwdne1554:0',
     'checkin_limit' => 'crwdns11217:0crwdne11217:0',
+    'exclude_deleted' => 'crwdns14981:0crwdne14981:0',
+    'include_deleted' => 'crwdns14983:0crwdne14983:0',
+    'only_deleted' => 'crwdns14985:0crwdne14985:0',
 ];

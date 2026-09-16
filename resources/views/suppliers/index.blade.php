@@ -9,18 +9,12 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="supplier" sr_only_title>
+
+            <x-slot:table_header>{{ trans('admin/suppliers/table.suppliers') }}</x-slot:table_header>
 
             <x-slot:bulkactions>
-                <x-table.bulk-actions
-                        name='supplier'
-                        action_route="{{route('suppliers.bulk.delete')}}"
-                        model_name="supplier"
-                >
-                    @can('delete', App\Models\Supplier::class)
-                        <option>{{ trans('general.delete') }}</option>
-                    @endcan
-                </x-table.bulk-actions>
+                <x-table.bulk-suppliers />
             </x-slot:bulkactions>
 
 
@@ -35,6 +29,7 @@
             />
 
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

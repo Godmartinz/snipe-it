@@ -13,6 +13,7 @@ return [
     'pending' => 'Beklemede',
     'status_type' => 'Durum Türü',
     'show_in_nav' => 'Kenar çubuğunda göster',
+    'status_label' => 'Durum Etiketi',
     'title' => 'Durum Etiketleri',
     'undeployable' => 'Dağtılamaz',
     'update' => 'Durum Etiketi Güncelle',

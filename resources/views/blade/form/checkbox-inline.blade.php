@@ -10,7 +10,7 @@
 @php
     // Old-input aware check-state. On a fresh render, session()->hasOldInput()
     // is false, so we fall back to the model. On a validation-failure redisplay,
-    // hasOldInput() is true and we trust the (possibly missing) old value — an
+    // hasOldInput() is true and we trust the (possibly missing) old value: an
     // unchecked box comes back correctly unchecked instead of falling through
     // to the stale $item->{$name}.
     $is_redisplay = session()->hasOldInput();

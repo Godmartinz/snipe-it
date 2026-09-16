@@ -19,6 +19,8 @@ return [
     'required_acceptance' => 'Dieser Benutzer erhält eine E-Mail zur Bestätigung der Annahme des Gegenstands.',
     'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Dieser Benutzer erhält eine Kopie der EULA via Email',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
     'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
     'no_default_eula' => 'Keine Standard EULA gefunden. Füge eine in den Einstellungen hinzu.',
     'update' => 'Kategorie aktualisieren',

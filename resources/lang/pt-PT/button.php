@@ -3,6 +3,7 @@
 return [
     'actions' => 'Ações',
     'add' => 'Adicionar Novo',
+    'back' => 'Voltar',
     'cancel' => 'Cancelar',
     'checkin_and_delete' => 'Entrega todos / Apaga Utilizadores',
     'delete' => 'Remover',

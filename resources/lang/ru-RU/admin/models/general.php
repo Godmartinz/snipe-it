@@ -16,7 +16,7 @@ return [
     'no_custom_field' => 'Нет пользовательских полей',
     'add_default_values' => 'Добавить значения по умолчанию',
     'importer' => [
-        'require_serial' => 'Require Serial',
-        'serial_required' => 'Serial Required',
+        'require_serial' => 'Требуется серийный номер',
+        'serial_required' => 'Требуемый серийный номер',
     ],
 ];

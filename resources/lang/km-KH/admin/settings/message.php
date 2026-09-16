@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'ឯកសារបម្រុងទុកនោះមិនអាចត្រូវបានរកឃើញនៅលើម៉ាស៊ីនមេទេ។',
         'restore_warning' => 'បាទ ស្ដារវាឡើងវិញ។ ខ្ញុំទទួលស្គាល់ថាវានឹងសរសេរជាន់លើទិន្នន័យដែលមានស្រាប់ណាមួយនាពេលបច្ចុប្បន្ននៅក្នុងមូលដ្ឋានទិន្នន័យ។ វាក៏នឹងចេញពីអ្នកប្រើប្រាស់ដែលមានស្រាប់របស់អ្នកទាំងអស់ (រួមទាំងអ្នក)',
         'restore_confirm' => 'តើ​អ្នក​ប្រាកដ​ថា​អ្នក​ចង់​ស្ដារ​មូលដ្ឋាន​ទិន្នន័យ​របស់​អ្នក​ពី :filename?',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => 'ការបម្រុងទុកប្រព័ន្ធរបស់អ្នកត្រូវបានស្ដារឡើងវិញ។ សូមចូលម្តងទៀត។',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'កំហុសបានកើតឡើងខណៈពេលកំពុងសម្អាត។ ',

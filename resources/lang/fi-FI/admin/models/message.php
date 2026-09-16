@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Ei malleja valittuna, mitään ei poistettu.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Malli poistettu!|:success_count mallia poistettu!',
         'success_partial' => ':success_count malli(a) poistettiin, mutta :fail_count ei voitu poistaa, koska niillä on vielä niihin liittyviä laitteita.',
     ],

@@ -20,6 +20,8 @@ return [
         'confirm' => 'Kei te hiahia koe ki te muku i tenei Tapanga Tūnga?',
         'error' => 'He raru kei te whakakore i te Tapanga Tūnga. Tena ngana ano.',
         'success' => 'I mukua te Tapanga Whakaaetanga.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

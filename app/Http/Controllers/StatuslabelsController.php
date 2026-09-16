@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\Statuslabel;
+use App\Rules\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,6 +60,8 @@ class StatuslabelsController extends Controller
             return redirect()->back()->withInput()->withErrors(['statuslabel_types' => trans('validation.statuslabel_type')]);
         }
 
+        $request->validate(['color' => ['nullable', new CssColor]]);
+
         $statusType = Statuslabel::getStatuslabelTypesForDB($request->input('statuslabel_types'));
 
         // Save the Statuslabel data
@@ -108,6 +111,9 @@ class StatuslabelsController extends Controller
         if (! $request->filled('statuslabel_types')) {
             return redirect()->back()->withInput()->withErrors(['statuslabel_types' => trans('validation.statuslabel_type')]);
         }
+
+        // See color-validation comment in store() above.
+        $request->validate(['color' => ['nullable', new CssColor]]);
 
         // Update the Statuslabel data
         $statustype = Statuslabel::getStatuslabelTypesForDB($request->input('statuslabel_types'));

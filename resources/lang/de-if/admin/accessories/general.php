@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Keine Standard EULA gefunden. Füge eine in den Einstellungen hinzu.',
     'total' => 'Gesamt',
     'remaining' => 'Verfügbar',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Zubehör aktualisieren',
     'use_default_eula' => 'Die <a href="#" data-toggle="modal" data-target="#eulaModal">Standard EULA</a> stattdessen verwenden.',
     'use_default_eula_disabled' => '<del>Die Standard-EULA verwenden.</del> Es wurde keine Standard-EULA definiert. Bitte füge eine in den Einstellungen hinzu.',

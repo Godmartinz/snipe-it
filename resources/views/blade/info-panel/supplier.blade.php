@@ -3,7 +3,10 @@
 ])
 
 
-@if ($infoPanelObj->supplier)
+{{-- Suppress the supplier row when the item has been acquired from --}}
+{{-- multiple suppliers over its lifetime. Otherwise the panel would --}}
+{{-- render one supplier name as if authoritative. --}}
+@if ($infoPanelObj->supplier && (! method_exists($infoPanelObj, 'hasConsistentSupplier') || $infoPanelObj->hasConsistentSupplier()))
     <x-info-element icon_type="supplier" icon_color="{{ $infoPanelObj->supplier->tag_color }}" title="{{ trans('general.supplier') }}">
         {!!  $infoPanelObj->supplier->present()->nameUrl !!}
         <a class="pull-right js-copy-link" style="font-size: 16px; margin-right: 3px;" type="button" data-toggle="collapse" data-target="#supplierContact" aria-expanded="false" aria-controls="supplierContact">

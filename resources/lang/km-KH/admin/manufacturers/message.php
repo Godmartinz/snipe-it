@@ -25,7 +25,7 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបក្រុមហ៊ុនផលិតនេះទេ?',
         'error' => 'មានបញ្ហាក្នុងការលុបក្រុមហ៊ុនផលិត។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'Manufacturer deleted successfully.',
-        'bulk_success' => 'Manufacturers deleted successfully.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

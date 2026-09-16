@@ -16,5 +16,7 @@ return [
         'confirm' => 'Ydych chi\'n siwr eich bod eisiau dileu\'r cwmni yma?',
         'error' => 'Nid oedd yn bosib dileu\'r cwmni. Ceisiwch eto o. g. y. dd.',
         'success' => 'Cwmni wedi dileu\'n llwyddiannus.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

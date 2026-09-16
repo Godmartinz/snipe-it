@@ -2,26 +2,25 @@
 
 namespace App\Notifications;
 
-use AllowDynamicProperties;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class InventoryAlert extends Notification
+class InventoryAlert extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private $params;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($params, $threshold)
+    public function __construct(
+        public $items,
+        public $threshold = 0
+    )
     {
-        $this->items = $params;
-        $this->threshold = $threshold ?? 0;
     }
 
     /**

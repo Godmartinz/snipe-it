@@ -3,6 +3,7 @@
 return [
     'actions' => 'Műveletek',
     'add' => 'Új hozzáadása',
+    'back' => 'Vissza',
     'cancel' => 'Vissza',
     'checkin_and_delete' => 'Összes visszavétele és a felhasználó törlése',
     'delete' => 'Törlés',

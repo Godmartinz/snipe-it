@@ -44,7 +44,10 @@
 
                     <!-- start licenses tab pane -->
                     <x-tabs.pane name="licenses">
-                        <x-table.licenses :name="$supplier->name" :route="route('api.licenses.index', ['supplier_id' => $supplier->id])"/>
+                        <x-slot:bulkactions>
+                            <x-table.bulk-licenses />
+                        </x-slot:bulkactions>
+                        <x-table.licenses name="licenses" :export_name="$supplier->name" :route="route('api.licenses.index', ['supplier_id' => $supplier->id])"/>
                     </x-tabs.pane>
                     <!-- end licenses tab pane -->
 
@@ -147,7 +150,7 @@
 
 @section('moar_scripts')
     @can('files', $supplier)
-        @include ('modals.upload-file', ['item_type' => 'suppliers', 'item_id' => $supplier->id])
+        <x-modals.upload-file item-type="suppliers" :item-id="$supplier->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['exportFile' => 'suppliers-' . $supplier->name . '-export', 'search' => false])

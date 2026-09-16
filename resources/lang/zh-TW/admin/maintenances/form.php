@@ -15,6 +15,7 @@ return [
     'responsible_party' => '負責人',
     'checked_out_to_at_creation' => '借出至',
     'completed_at' => '完成時間',
+    'completed_at_help' => 'When this maintenance was actually finished. Leave blank if not yet complete. Setting a date here is equivalent to clicking Mark Complete but lets you enter a past date instead of using the current time.',
     'completed_by' => '完成人員',
     'mark_complete' => '標記為完成',
     'already_complete' => '已完成',

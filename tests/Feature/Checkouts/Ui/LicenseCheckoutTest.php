@@ -27,8 +27,8 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs($admin)
             ->post(route('licenses.checkout', $licenseSeat->license), [
                 'checkout_to_type' => 'asset',
-                'assigned_to' => null,
-                'asset_id' => $asset->id,
+                'assigned_user' => null,
+                'assigned_asset' => $asset->id,
                 'notes' => 'oh hi there',
             ]);
 
@@ -51,8 +51,8 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs($admin)
             ->post(route('licenses.checkout', $licenseSeat->license), [
                 'checkout_to_type' => 'user',
-                'assigned_to' => $admin->id,
-                'asset_id' => null,
+                'assigned_user' => $admin->id,
+                'assigned_asset' => null,
                 'notes' => 'oh hi there',
             ]);
 
@@ -74,7 +74,7 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $license))
             ->post(route('licenses.checkout', $license), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
                 'redirect_option' => 'index',
                 'assigned_qty' => 1,
             ])
@@ -89,7 +89,7 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $license))
             ->post(route('licenses.checkout', $license), [
-                'assigned_to' => User::factory()->create()->id,
+                'assigned_user' => User::factory()->create()->id,
                 'redirect_option' => 'item',
             ])
             ->assertStatus(302)
@@ -104,7 +104,7 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $license))
             ->post(route('licenses.checkout', $license), [
-                'assigned_to' => $user->id,
+                'assigned_user' => $user->id,
                 'redirect_option' => 'target',
             ])
             ->assertStatus(302)
@@ -119,7 +119,7 @@ class LicenseCheckoutTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $license))
             ->post(route('licenses.checkout', $license), [
-                'asset_id' => $asset->id,
+                'assigned_asset' => $asset->id,
                 'redirect_option' => 'target',
             ])
             ->assertStatus(302)
@@ -134,7 +134,7 @@ class LicenseCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $seat->license))
             ->post(route('licenses.checkout', $seat->license), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'sign_in_place' => 1,
             ]);
@@ -161,7 +161,7 @@ class LicenseCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('licenses.checkout', $seat->license))
             ->post(route('licenses.checkout', $seat->license), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'sign_in_place' => 1,
             ]);
@@ -189,7 +189,7 @@ class LicenseCheckoutTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->post(route('licenses.checkout', $seat->license), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'sign_in_place' => 1,
             ]);

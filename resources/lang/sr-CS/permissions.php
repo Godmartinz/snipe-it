@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => 'Imovina',
-        'note' => 'Dozvoljava pristup sekciji sa imovinom aplikacije.',
+        'note' => 'Dozvoljava pristup sekciji sa imovinom aplikacije. ',
     ],
 
     'assetsview' => [
         'name' => 'Pregled imovine',
+        'note' => 'Upamtite da korisnici sa ovom dozvolom takođe mogu da vide (ne da menjaju ili brišu) datoteke otpremljene u model imovine. Ovo je zato da bi se lakše delila uobičajena dokumenta poput korisničkih uputstava među imovinom bez potrebe da se otpremaju za svaku imovinu, i da se izbegne dodeljivanje korisniku dozvola za izmenu datoteka imovine.',
     ],
 
     'assetscreate' => [

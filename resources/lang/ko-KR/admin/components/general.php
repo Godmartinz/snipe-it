@@ -12,5 +12,8 @@ return [
     'remaining' => '잔여수량',
     'total' => '총계',
     'update' => '부품 갱신',
-    'checkin_limit' => 'Amount checked in must be equal to or less than :assigned_qty',
+    'checkin_limit' => '반입 수량은 :assigned_qty 이하여야 합니다',
+    'exclude_deleted' => '삭제된 부품 제외',
+    'include_deleted' => '삭제된 부품 포함',
+    'only_deleted' => '삭제된 부품만',
 ];

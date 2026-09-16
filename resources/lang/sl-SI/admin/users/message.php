@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'You have successfully accepted this item.',
     'declined' => 'You have successfully declined this item.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'Vaši uporabniki so bili uspešno posodobljeni, vendar vnos v upravitelju ni bil shranjen, ker je bil izbran upravitelj tudi na seznamu uporabnikov, ki ga je treba urediti, uporabniki pa morda niso njihovi lastniki. Prosimo, izberite svoje uporabnike, razen upravitelja.',
     'user_exists' => 'Uporabnik že obstaja!',
     'cannot_delete' => 'User does not exist or you do not have permission to delete them.',
     'user_not_found' => 'Uporabnik ne obstaja ali pa nimate dovoljenja za njegov ogled.',
     'user_login_required' => 'Polje za prijavo je obvezno',
     'user_has_no_assets_assigned' => 'Brez sredstev dodeljenih uporabniku.',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => 'Geslo je obvezno.',
     'insufficient_permissions' => 'Nezadostna dovoljenja.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Ta uporabnik je bil izbrisan. Tega uporabnika boste morali obnoviti, da ga uredite ali dodelite nova sredstva.',
     'ldap_not_configured' => 'Integracija LDAP za to namestitev ni bila konfigurirana.',
     'password_resets_sent' => 'Izbranim aktiviranim uporabnikom z veljavnim e-poštnim računom je bila poslana povezava za ponastavitev gesla.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Povezava za ponastavitev gesla je bila poslana na :email!',
     'user_has_no_email' => 'Ta uporabnik nima e-poštnega naslova v svojem profilu.',
     'log_record_not_found' => 'Ujemajočega se zapisa dnevnika za tega uporabnika ni bilo mogoče najti.',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => 'Uporabnik je bil uspešno ustvarjen.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'Geslo za ta račun upravlja LDAP / Active Directory. Za spremembo gesla se obrnite na oddelek IT. ',
         'multi_company_items_assigned' => 'Ta uporabnik ima dodeljene elemente, ki pripadajo drugemu podjetju. Prosimo, da jih shranite ali uredite njihovo podjetje.',
         'no_pending_acceptances' => 'This user has no pending acceptances to remind them about.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\RefreshTokenRepository;
 use Laravel\Passport\TokenRepository;
 
 class ProfileController extends Controller
@@ -48,7 +49,17 @@ class ProfileController extends Controller
      */
     public function requestedAssets(): array
     {
-        $checkoutRequests = CheckoutRequest::where('user_id', '=', auth()->id())->get();
+        // Only surface OPEN (pending) requests. `state` is the
+        // source of truth for lifecycle - canceled_at + fulfilled_at
+        // still populate alongside their state transitions (WHEN,
+        // paired with the WHAT in state) but consumers should
+        // always filter on state, not on the datetime columns. A
+        // whereNull('canceled_at') filter would miss fulfilled
+        // rows entirely, which have no canceled_at set but are
+        // just as done.
+        $checkoutRequests = CheckoutRequest::where('user_id', '=', auth()->id())
+            ->pending()
+            ->get();
 
         $results = [];
         $show_field = [];
@@ -67,6 +78,7 @@ class ProfileController extends Controller
             // Make sure the asset and request still exist
             if ($checkoutRequest && $checkoutRequest->itemRequested()) {
                 $assets = [
+                    'id' => (int) $checkoutRequest->id,
                     'image' => e($checkoutRequest->itemRequested()->present()->getImageUrl()),
                     'name' => e($checkoutRequest->itemRequested()->display_name),
                     'type' => e($checkoutRequest->itemType()),
@@ -74,6 +86,17 @@ class ProfileController extends Controller
                     'location' => ($checkoutRequest->location()) ? e($checkoutRequest->location()->name) : null,
                     'expected_checkin' => Helper::getFormattedDateObject($checkoutRequest->itemRequested()->expected_checkin, 'datetime'),
                     'request_date' => Helper::getFormattedDateObject($checkoutRequest->created_at, 'datetime'),
+                    // Self-cancel URL. POSTing to /account/request/{type}/{id}
+                    // as the request owner toggles the open request into
+                    // canceled state via isRequestedBy() -> cancelRequest()
+                    // in ViewAssetsController::getRequestItem. Emitted per
+                    // row so the JS formatter doesn't need to reconstruct
+                    // the URL from type + id (and stay in sync with the
+                    // route's itemType regex, which can drift).
+                    'cancel_url' => route('account/request-item', [
+                        'itemType' => $checkoutRequest->itemType(),
+                        'itemId' => $checkoutRequest->requestable_id,
+                    ]),
                 ];
 
                 foreach ($showable_fields as $showable_field_name) {
@@ -157,6 +180,39 @@ class ProfileController extends Controller
 
         return new Response('', Response::HTTP_NO_CONTENT);
 
+    }
+
+    /**
+     * Bearer-authenticated self-logout. Revokes the access token that
+     * authenticated THIS request and any refresh token that was issued
+     * alongside it, so a client cannot silently renew after logging
+     * out. Does not touch the user's other tokens (other devices,
+     * personal-access tokens, tokens under different OAuth clients) -
+     * scope is exactly the current session.
+     *
+     * Deliberately distinct from Passport's UI-shaped
+     * DELETE /oauth/tokens/{id} route, which is session-cookie
+     * authenticated for the Passport-Vue self-service page and can't
+     * answer a bearer-only client. Passport does not ship a
+     * bearer-self-revoke endpoint because RFC 7009 revocation uses
+     * client credentials rather than bearer auth, so this
+     * "log me out of this session" affordance is a Snipe-IT addition.
+     */
+    public function logout(RefreshTokenRepository $refreshTokens): Response
+    {
+        $token = auth()->user()?->token();
+
+        // auth:api on the route guarantees a bearer-authenticated user,
+        // but session-cookie / personal-access flows leave token() null.
+        // Return 401 for those instead of a 500 on a null property read.
+        if ($token === null) {
+            return new Response('', Response::HTTP_UNAUTHORIZED);
+        }
+
+        $this->tokenRepository->revokeAccessToken($token->id);
+        $refreshTokens->revokeRefreshTokensByAccessTokenId($token->id);
+
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 
     /**

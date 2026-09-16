@@ -42,6 +42,11 @@ return [
         'bulk_checkout_warning' => ':license_name 有目前正在借出的名額，無法刪除。請先將所有名額繳回後再進行刪除。',
     ],
 
+    'delete_with_checkin' => [
+        'bulk_success' => ':count licenses were deleted successfully after checking in :seats seats.',
+        'partial_success' => ':count licenses were deleted successfully after checking in :seats seats. See additional information below.',
+    ],
+
     'checkout' => [
         'error' => '借出授權時發生問題，請重試。',
         'success' => '借出授權成功。',

@@ -50,4 +50,16 @@ class CloneAssetModelTest extends TestCase
             ->assertSet('model_id', null)
             ->assertSet('fieldset_id', null);
     }
+
+    public function test_create_permission_alone_is_not_enough_to_clone_asset_model()
+    {
+        // Cloning renders the source asset model's data (model_number,
+        // notes, fieldset, image) into the create form, so a user with
+        // only models.create (no models.view) must be blocked.
+        $model = AssetModel::factory()->create();
+
+        $this->actingAs(User::factory()->createAssetModels()->create())
+            ->get(route('models.clone.create', $model))
+            ->assertForbidden();
+    }
 }

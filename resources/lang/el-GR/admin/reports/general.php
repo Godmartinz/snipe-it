@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Η αίτηση αποδοχής διαγράφηκε',
     'acceptance_request' => 'Αίτημα αποδοχής',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Διεύθυνση Χρήστη',
         'user_company' => 'User Company',
         'user_city' => 'Πόλη Χρήστη',

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Actionlog;
 use App\Models\AssetModel;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -12,6 +13,12 @@ class AssetModelSeeder extends Seeder
 {
     public function run()
     {
+        // Truncate reuses the same auto-increment IDs on the next
+        // seed, so action_logs from prior runs still point at those IDs
+        // and show up as stale "create" entries in the History tab.
+        // Scoped delete on the leading column of the composite index
+        // (item_type, item_id, action_type) — single indexed range op.
+        Actionlog::where('item_type', AssetModel::class)->delete();
         AssetModel::truncate();
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();

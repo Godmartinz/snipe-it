@@ -20,6 +20,8 @@ return [
         'confirm' => 'Er du sikker på, at du vil slette denne statuslabel?',
         'error' => 'Der opstod et problem ved at slette statusetiketten. Prøv igen.',
         'success' => 'Statusmærket blev slettet.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

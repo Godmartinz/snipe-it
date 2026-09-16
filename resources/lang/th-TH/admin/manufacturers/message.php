@@ -25,7 +25,7 @@ return [
         'confirm' => 'คุณแน่ใจที่จะลบผู้ผลิตนี้?',
         'error' => 'มีปัญหาระหว่างการลบผู้ผลิต กรุณาลองใหม่อีกครั้ง',
         'success' => 'ลบบริษัทผู้ผลิตแล้ว',
-        'bulk_success' => 'ลบบริษัทผู้ผลิตแล้ว',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Manufacturer deleted successfully. See additional information below. | :count manufacturers were deleted successfully. See additional information below.',
     ],
 

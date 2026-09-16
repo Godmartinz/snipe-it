@@ -3,12 +3,43 @@
 namespace Tests\Unit\Helpers;
 
 use App\Helpers\Helper;
+use App\Models\Location;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 class HelperTest extends TestCase
 {
+    /**
+     * Regression: `<x-form.row type="datetimepicker">` on transient checkout
+     * forms (hardware/checkout, bulk-checkout, kits/checkout, etc.) passes
+     * `$item = null` down to `Helper::checkIfRequired`. Without the null guard
+     * this hit `null::rules()` and threw "Class name must be a valid object or
+     * a string", 500ing the whole page. When there's no bound model to
+     * introspect, we treat the field as not required.
+     */
+    public function test_check_if_required_returns_false_when_class_is_null()
+    {
+        $this->assertFalse(Helper::checkIfRequired(null, 'name'));
+    }
+
+    public function test_check_if_required_detects_required_field_on_a_real_model()
+    {
+        // Location::$rules declares 'name' => 'required|max:255|unique_undeleted'
+        $this->assertTrue(Helper::checkIfRequired(new Location, 'name'));
+    }
+
+    public function test_check_if_required_returns_false_for_a_non_required_field()
+    {
+        // Location's 'address' is 'max:191|nullable' — no required rule.
+        $this->assertFalse(Helper::checkIfRequired(new Location, 'address'));
+    }
+
+    public function test_check_if_required_returns_false_for_unknown_field()
+    {
+        $this->assertFalse(Helper::checkIfRequired(new Location, 'no_such_field_on_location'));
+    }
+
     public function test_default_chart_colors_method_handles_high_values()
     {
         $this->assertIsString(Helper::defaultChartColors(1000));
@@ -176,5 +207,305 @@ class HelperTest extends TestCase
             $this->assertInstanceOf(RedirectResponse::class, $redirect);
             $this->assertEquals($data['route'], $redirect->getTargetUrl(), $scenario.'failed.');
         }
+    }
+
+    public function test_get_redirect_option_preserves_query_filters_when_returning_to_index()
+    {
+        // #15214: a user editing an asset from `hardware?status_type=Deployed`
+        // should land back on that filtered view, not the plain
+        // hardware.index that drops the side-nav filter context.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', route('hardware.index').'?status_type=Deployed');
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Assets');
+
+        $this->assertInstanceOf(RedirectResponse::class, $redirect);
+        $this->assertEquals(
+            route('hardware.index').'?status_type=Deployed',
+            $redirect->getTargetUrl(),
+        );
+    }
+
+    public function test_get_redirect_option_preserves_multiple_query_filters()
+    {
+        // Query string with more than one filter round-trips cleanly.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', route('hardware.index').'?status_type=RTD&category_id=3');
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Assets');
+
+        $this->assertEquals(
+            route('hardware.index').'?status_type=RTD&category_id=3',
+            $redirect->getTargetUrl(),
+        );
+    }
+
+    public function test_get_redirect_option_falls_back_to_plain_index_when_no_referrer_query()
+    {
+        // When there's no filter to preserve, behavior matches the
+        // pre-#15214 code path.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', route('hardware.index'));
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Assets');
+
+        $this->assertEquals(route('hardware.index'), $redirect->getTargetUrl());
+    }
+
+    public function test_get_redirect_option_ignores_referrer_pointing_at_a_different_path()
+    {
+        // If the referrer was the show page or the create form (not the
+        // index they'd be redirected to), don't smuggle it into the
+        // index redirect. Only same-path referrers are preserved.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', route('hardware.show', 42));
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Assets');
+
+        $this->assertEquals(route('hardware.index'), $redirect->getTargetUrl());
+    }
+
+    public function test_get_redirect_option_ignores_offsite_referrer_when_returning_to_index()
+    {
+        // Off-site protection was already in place for the 'back'
+        // option (via the parse_url host check). Verify it also applies
+        // on the 'index' path so an attacker-controlled url.intended
+        // (see SamlController RelayState) can't smuggle an external URL
+        // into an index redirect.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', 'https://evil.example.com/hardware?status_type=Deployed');
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Assets');
+
+        $this->assertEquals(route('hardware.index'), $redirect->getTargetUrl());
+    }
+
+    public function test_get_redirect_option_preserves_filters_for_other_entity_types_too()
+    {
+        // The #15214 fix lives in Helper::getRedirectOption so it covers
+        // every entity that routes through the redirect helper, not just
+        // Assets. Users/Licenses/etc. don't have side-nav filters today
+        // but might grow them, and generic ?category_id=... links are
+        // already common.
+        Session::put('redirect_option', 'index');
+        Session::put('url.intended', route('users.index').'?company_id=5');
+
+        $redirect = Helper::getRedirectOption((object) [], null, 'Users');
+
+        $this->assertEquals(route('users.index').'?company_id=5', $redirect->getTargetUrl());
+    }
+
+    public function test_same_origin_url_returns_null_for_empty_input()
+    {
+        $this->assertNull(Helper::sameOriginUrl(null));
+        $this->assertNull(Helper::sameOriginUrl(''));
+    }
+
+    public function test_same_origin_url_returns_relative_url_unchanged()
+    {
+        $this->assertSame('/maintenances?completed=true', Helper::sameOriginUrl('/maintenances?completed=true'));
+        $this->assertSame('home', Helper::sameOriginUrl('home'));
+    }
+
+    public function test_same_origin_url_accepts_url_pointing_at_app_host()
+    {
+        $url = config('app.url').'/hardware/42';
+        $this->assertSame($url, Helper::sameOriginUrl($url));
+    }
+
+    public function test_same_origin_url_rejects_offsite_host()
+    {
+        $this->assertNull(Helper::sameOriginUrl('https://evil.example.com/steal-session'));
+    }
+
+    public function test_same_origin_url_rejects_dangerous_schemes()
+    {
+        $this->assertNull(Helper::sameOriginUrl('javascript:alert(1)'));
+        $this->assertNull(Helper::sameOriginUrl('data:text/html,<script>alert(1)</script>'));
+        $this->assertNull(Helper::sameOriginUrl('file:///etc/passwd'));
+    }
+
+    public function test_same_origin_url_strips_crlf_to_prevent_header_injection()
+    {
+        // A CR/LF in a Location: header would let an attacker split the
+        // HTTP response and inject arbitrary headers/body. The helper
+        // must strip them before returning.
+        $this->assertSame('/foo', Helper::sameOriginUrl("/foo\r\n"));
+        $this->assertSame('/foo/bar', Helper::sameOriginUrl("/foo\r\n/bar"));
+    }
+
+    public function test_same_origin_url_rejects_scheme_relative_offsite_url()
+    {
+        // //evil.com/... is a scheme-relative URL that inherits the
+        // current scheme and points at evil.com. Must be rejected.
+        $this->assertNull(Helper::sameOriginUrl('//evil.example.com/steal-session'));
+    }
+
+    /**
+     * FD-56673 regression coverage: customFieldFormValue collapses the
+     * gate + decrypt + default fallback that every branch of
+     * custom_fields_form.blade.php used to hand-roll (and got wrong on
+     * seven of them). These unit tests pin the four possible states of
+     * the helper without needing to boot a full HTTP request.
+     */
+    public function test_custom_field_form_value_masks_encrypted_field_when_gate_denies(): void
+    {
+        \App\Models\CustomField::factory()->testEncrypted()->create();
+        $field = \App\Models\CustomField::where('name', 'Test Encrypted')->first();
+
+        // Set the column value via magic-setter rather than mass assignment
+        // because CustomField columns are added at runtime and are not in
+        // Asset's $fillable, so `new Asset([...])` would silently drop them.
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = \Illuminate\Support\Facades\Crypt::encrypt('very-secret-value');
+
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->actingAs(\App\Models\User::factory()->editAssets()->create());
+
+        $this->assertSame(
+            strtoupper(trans('admin/custom_fields/general.encrypted')),
+            Helper::customFieldFormValue($field, $asset, $model)
+        );
+    }
+
+    public function test_custom_field_form_value_returns_decrypted_value_when_gate_allows(): void
+    {
+        \App\Models\CustomField::factory()->testEncrypted()->create();
+        $field = \App\Models\CustomField::where('name', 'Test Encrypted')->first();
+
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = \Illuminate\Support\Facades\Crypt::encrypt('very-secret-value');
+
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->actingAs(\App\Models\User::factory()->superuser()->create());
+
+        $this->assertSame(
+            'very-secret-value',
+            Helper::customFieldFormValue($field, $asset, $model)
+        );
+    }
+
+    public function test_custom_field_form_value_returns_raw_value_for_non_encrypted_field(): void
+    {
+        // Non-encrypted fields short-circuit before the gate check, so the caller
+        // permission is irrelevant. Verified with an unauthenticated actor to make
+        // the "gate does not gate this" behavior explicit.
+        \App\Models\CustomField::factory()->ram()->create();
+        $field = \App\Models\CustomField::where('name', 'RAM')->first();
+
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '16';
+
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('16', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_returns_default_when_item_is_null(): void
+    {
+        // Create-form path: no bound $item yet, so the helper returns the
+        // model-scoped default value for the field.
+        \App\Models\CustomField::factory()->ram()->create();
+        $field = \App\Models\CustomField::where('name', 'RAM')->first();
+        $model = \App\Models\AssetModel::factory()->create();
+
+        $this->assertSame(
+            $field->defaultValue($model->id),
+            Helper::customFieldFormValue($field, null, $model)
+        );
+    }
+
+    public function test_custom_field_form_value_masks_default_when_encrypted_field_has_no_item_and_gate_denies(): void
+    {
+        // Create-form path AND encrypted field AND caller can't view keys.
+        // The gate check runs first regardless of whether $item is present,
+        // so the mask should win over the default-value fallback.
+        \App\Models\CustomField::factory()->testEncrypted()->create();
+        $field = \App\Models\CustomField::where('name', 'Test Encrypted')->first();
+        $model = \App\Models\AssetModel::factory()->create();
+
+        $this->actingAs(\App\Models\User::factory()->editAssets()->create());
+
+        $this->assertSame(
+            strtoupper(trans('admin/custom_fields/general.encrypted')),
+            Helper::customFieldFormValue($field, null, $model)
+        );
+    }
+
+    /**
+     * Regression coverage for historic CSV-imported values on DATE / DATETIME
+     * custom fields. AssetImporter shoves raw CSV strings straight into
+     * custom-field columns, so a column can legitimately hold `M/D/YYYY`
+     * or similar. The view path already normalizes on read via
+     * AssetsTransformer + getFormattedDateObject; this helper does the
+     * matching normalization for the edit form so the datepicker widget
+     * gets a value in its expected `Y-m-d` / `Y-m-d H:i:s` shape and
+     * doesn't blank or mangle it on hydrate.
+     */
+    public function test_custom_field_form_value_normalizes_us_formatted_date_to_ymd(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Warranty Start Date',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Warranty Start Date')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '3/28/2025';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2025-03-28', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_normalizes_us_formatted_datetime_to_ymd_his(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Last Serviced',
+            'format' => 'DATETIME',
+            'element' => 'datetime_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Last Serviced')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '3/28/2025 09:15:00';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2025-03-28 09:15:00', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_leaves_already_normalized_date_untouched(): void
+    {
+        \App\Models\CustomField::factory()->create([
+            'name' => 'Audited',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'Audited')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '2026-08-20';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2026-08-20', Helper::customFieldFormValue($field, $asset, $model));
+    }
+
+    public function test_custom_field_form_value_leaves_unparseable_date_value_untouched(): void
+    {
+        // Free-text values that were stored in a DATE-format column
+        // (`2028 1st Qtr` and similar) can't be Carbon-parsed. The
+        // helper falls through with the raw string so the user sees
+        // and can correct it, instead of masking it with a fake
+        // "normalized" date.
+        \App\Models\CustomField::factory()->create([
+            'name' => 'End of Lease Date',
+            'format' => 'DATE',
+            'element' => 'date_picker',
+        ]);
+        $field = \App\Models\CustomField::where('name', 'End of Lease Date')->first();
+        $asset = new \App\Models\Asset;
+        $asset->{$field->db_column} = '2028 1st Qtr';
+        $model = \App\Models\AssetModel::factory()->make();
+
+        $this->assertSame('2028 1st Qtr', Helper::customFieldFormValue($field, $asset, $model));
     }
 }

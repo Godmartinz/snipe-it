@@ -43,8 +43,14 @@
                     @endif
 
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'false'])
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_to', 'company_id' => $license->company_id, 'style' => (session('checkout_to_type') ?: 'user') == 'user' ? '' : 'display: none;'])
-                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'asset_id', 'company_id' => $license->company_id, 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
+                    <x-input.user-select
+                        :label="trans('general.user')"
+                        name="assigned_user"
+                        :selected="old('assigned_user', $checkoutRequest?->user_id)"
+                        :companyId="$license->company_id"
+                        :style="(session('checkout_to_type') ?: 'user') == 'user' ? null : 'display: none;'"
+                    />
+                    @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.select_asset'), 'fieldname' => 'assigned_asset', 'company_id' => $license->company_id, 'style' => session('checkout_to_type') == 'asset' ? '' : 'display: none;'])
 
                     <x-form.row
                         :label="trans('general.checkout_note')"
@@ -58,7 +64,7 @@
                     @if ($license->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $license->getEula() || ($snipeSettings->webhook_endpoint != ''))
                         <div class="form-group notification-callout">
                             <div class="col-md-8 col-md-offset-3">
-                                <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
+                                <x-callout type="info" role="status">
 
                                     @if ($license->requireAcceptance())
                                         <i class="far fa-envelope fa-fw" aria-hidden="true"></i>
@@ -88,7 +94,7 @@
                                         <i class="fab fa-slack fa-fw" aria-hidden="true"></i>
                                         {{ trans('general.webhook_msg_note') }}
                                     @endif
-                                </div>
+                                </x-callout>
                             </div>
 
                             <!-- Sign in place checkbox -->
@@ -124,7 +130,11 @@
 
         </x-page-column>
 
-        <livewire:checkout-target-panel type="licenses" />
+        <x-page-column class="col-md-5">
+            <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$license" />
+
+            <livewire:checkout-target-panel type="licenses" />
+        </x-page-column>
 
     </x-container>
 @stop

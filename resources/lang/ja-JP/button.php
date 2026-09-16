@@ -3,6 +3,7 @@
 return [
     'actions' => 'アクション',
     'add' => '新規追加',
+    'back' => '戻る',
     'cancel' => 'キャンセル',
     'checkin_and_delete' => 'すべてチェックイン/ユーザー削除',
     'delete' => '削除',

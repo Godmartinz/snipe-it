@@ -4,14 +4,18 @@ return [
 
     'accepted' => 'Hai accettato con successo questo articolo.',
     'declined' => 'Hai rifiutato con successo questo articolo.',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => 'I tuoi utenti sono stati aggiornati con successo, tuttavia la voce del gestore non è stata salvata perché il gestore selezionato è stato anche nell\'elenco utenti da modificare e gli utenti potrebbero non essere il proprio gestore. Seleziona nuovamente i tuoi utenti, esclusi il gestore.',
     'user_exists' => 'Utente già esistente!',
     'cannot_delete' => 'L\'utente non esiste oppure non hai l\'autorizzazione per eliminarlo.',
     'user_not_found' => 'L\'utente non esiste o non ha il permesso di visualizzarlo.',
     'user_login_required' => 'È necessario il campo login',
     'user_has_no_assets_assigned' => 'Nessun bene assegnato all\'utente.',
+    'nothing_currently_assigned' => 'Niente attualmente assegnato.',
     'user_password_required' => 'È richiesta la password.',
     'insufficient_permissions' => 'Permessi Insufficienti.',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => 'Questo utente è stato eliminato. Si dovrà ripristinare questo utente per modificare o assegnare nuovi beni.',
     'ldap_not_configured' => 'L\'integrazione con LDAP non è stata configurata per questa installazione.',
     'password_resets_sent' => 'È stato inviato un link agli utenti selezionati che sono attivati e hanno un indirizzo email valido, per reimpostare la password.',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => 'Un link per reimpostare la password è stato inviato a :email!',
     'user_has_no_email' => 'Questo utente non ha un indirizzo email nel suo profilo.',
     'log_record_not_found' => 'Non ho trovato nessun log per questo utente.',
+
+    'impersonate' => [
+        'started' => 'Hai fatto accesso come :name.',
+        'stopped' => 'Sei tornato sul tuo account.',
+        'cannot_impersonate_self' => 'Non puoi accedere come te stesso.',
+        'cannot_impersonate_superuser' => 'Non puoi accedere come altro superuser.',
+        'target_not_active' => 'Quell\'utente è disattivato o eliminato, e non può fare accesso.',
+        'impersonator_missing' => 'L\'utente originale per questa sessione d\'impersonazione non esiste più. Effettua di nuovo l\'accesso.',
+    ],
 
     'success' => [
         'create' => 'Utente creato con successo.',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => 'La password per questo account è gestita da LDAP / Active Directory. Per cambiare la tua password, contatta il tuo reparto IT.',
         'multi_company_items_assigned' => 'A questo utente sono assegnati oggetti appartenenti a un\'altra azienda. Si prega di farli restituire o modificarne l\'azienda.',
         'no_pending_acceptances' => 'Questo utente non ha accettazioni in sospeso da notificare.',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

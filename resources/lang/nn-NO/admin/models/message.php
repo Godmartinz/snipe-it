@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Ingen modeller ble valgt, så ingenting ble slettet.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Modellen ble slettet!g_:success_count modeller slettet!',
         'success_partial' => ':Success_count-modell(ene) ble slettet, men fail_count kunne ikke slettes fordi de fortsatt har eiendeler knyttet til dem.',
     ],

@@ -142,13 +142,19 @@ class HttpCrossCompanyLeakTest extends TestCase
 
     public function test_api_locations_index_hides_other_company_rows(): void
     {
+        // Location tenant-scoping under FMCS is opt-in via scope_locations_fmcs.
+        // With that setting off (the default, and the "locations are shared
+        // across tenants" configuration many installs use), the scope
+        // intentionally does not fire on the locations table. Enable it here
+        // so the cross-company leak assertion below has semantic meaning.
         $companyBLocation = Location::factory()->for($this->companyB)->create();
         $caller = $this->callerScopedToCompanyA(['locations']);
 
-        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->enableScopedLocationsWithFullMultipleCompanySupport();
         $this->assertCompanyBRowHidden(route('api.locations.index'), $companyBLocation, $caller);
 
         $this->settings->enableFloaterMode();
+        $this->settings->set(['scope_locations_fmcs' => 1]);
         $this->assertCompanyBRowHidden(route('api.locations.index'), $companyBLocation, $caller);
     }
 

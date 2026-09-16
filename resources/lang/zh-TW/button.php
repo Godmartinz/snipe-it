@@ -3,6 +3,7 @@
 return [
     'actions' => '操作',
     'add' => '新增',
+    'back' => '返回',
     'cancel' => '取消',
     'checkin_and_delete' => '全部繳回 / 刪除使用者',
     'delete' => '刪除',

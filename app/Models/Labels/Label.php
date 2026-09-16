@@ -123,10 +123,14 @@ abstract class Label
 
     /**
      * Make changes to the PDF properties here. OPTIONAL.
+     * No-op default so subclasses that don't need to customize PDF
+     * properties don't have to declare an empty stub. The subclasses
+     * that DO customize (Continuous_53mm_A, Continuous_Landscape_0_59in_A,
+     * Tape_53mm_A, Z_Ultimate) override this method with real behavior.
      *
      * @param  TCPDF  $pdf  The TCPDF instance
      */
-    abstract public function preparePDF(TCPDF $pdf);
+    public function preparePDF(TCPDF $pdf): void {}
 
     /**
      * Write single data record as content here.

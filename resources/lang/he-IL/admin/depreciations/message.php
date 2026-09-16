@@ -19,6 +19,8 @@ return [
         'confirm' => 'האם אתה בטוח שברצונך למחוק את שיעור הפחת הזה?',
         'error' => 'אירעה בעיה במחיקת שיעור הפחת. בבקשה נסה שוב.',
         'success' => 'מחלקת הפחת נמחקה בהצלחה.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -38,8 +38,8 @@ class DepreciationsTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'update' => Gate::allows('update', Depreciation::class),
-            'delete' => Gate::allows('delete', Depreciation::class) && $depreciation->isDeletable(),
+            'update' => Gate::allows('update', $depreciation),
+            'delete' => Gate::allows('delete', $depreciation) && $depreciation->isDeletable(),
             'bulk_selectable' => [
                 'delete' => $depreciation->isDeletable(),
             ],

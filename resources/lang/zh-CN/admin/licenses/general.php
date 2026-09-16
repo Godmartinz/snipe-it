@@ -48,6 +48,11 @@ return [
             'log_msg' => '在许可证GUI中通过“批量许可证签出”签出',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => '此许可证仅剩:remaining_count个席位，并且最小数量为:min_amt。你可能需要考虑购买更多席位。',

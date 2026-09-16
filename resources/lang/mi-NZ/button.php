@@ -3,6 +3,7 @@
 return [
     'actions' => 'Nga mahi',
     'add' => 'Tāpiri Hou',
+    'back' => 'Hoki',
     'cancel' => 'Whakakore',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Mukua',

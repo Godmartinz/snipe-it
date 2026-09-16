@@ -29,8 +29,11 @@ class CancelRequestTest extends TestCase
         );
     }
 
-    public function test_non_admin_cannot_use_cancel_by_admin_to_cancel_another_users_request(): void
+    public function test_non_admin_cannot_cancel_another_users_request_via_requestinguser_param(): void
     {
+        // Admin-cancel is inferred from a requestingUser param that
+        // differs from the auth id. Non-admin callers who hand-craft
+        // that URL get rejected server-side.
         $asset = Asset::factory()->create();
         $victim = User::factory()->create();
         CheckoutRequest::factory()->create(['requestable_id' => $asset->id, 'requestable_type' => Asset::class, 'user_id' => $victim->id]);
@@ -39,7 +42,6 @@ class CancelRequestTest extends TestCase
             ->post(route('account/request-item', [
                 'itemType' => 'asset',
                 'itemId' => $asset->id,
-                'cancel_by_admin' => '1',
                 'requestingUser' => $victim->id,
             ]))
             ->assertRedirect()
@@ -53,42 +55,35 @@ class CancelRequestTest extends TestCase
         );
     }
 
-    public function test_user_with_own_pending_request_cannot_cancel_another_users_request_via_requestinguser_param(): void
+    public function test_non_admin_with_own_pending_request_is_blocked_when_trying_admin_cancel_url(): void
     {
+        // Actor has their own open request AND passes a different
+        // requestingUser id (the victim's). Since actor isn't
+        // admin, the whole request is rejected - neither their own
+        // nor the victim's request is canceled. This is the
+        // security-friendlier behavior compared to the old shape
+        // (which silently self-canceled and ignored the URL noise).
         $asset = Asset::factory()->create();
         $actor = User::factory()->create();
         $victim = User::factory()->create();
 
-        CheckoutRequest::factory()->create(['requestable_id' => $asset->id, 'requestable_type' => Asset::class, 'user_id' => $actor->id]);
-        CheckoutRequest::factory()->create(['requestable_id' => $asset->id, 'requestable_type' => Asset::class, 'user_id' => $victim->id]);
+        $actorRequest = CheckoutRequest::factory()->create(['requestable_id' => $asset->id, 'requestable_type' => Asset::class, 'user_id' => $actor->id]);
+        $victimRequest = CheckoutRequest::factory()->create(['requestable_id' => $asset->id, 'requestable_type' => Asset::class, 'user_id' => $victim->id]);
 
         $this->actingAs($actor)
             ->post(route('account/request-item', [
                 'itemType' => 'asset',
                 'itemId' => $asset->id,
-                'cancel_by_admin' => '0',
                 'requestingUser' => $victim->id,
             ]))
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
-        // Actor's own request is cancelled
-        $this->assertNotNull(
-            CheckoutRequest::where('requestable_id', $asset->id)
-                ->where('user_id', $actor->id)
-                ->whereNotNull('canceled_at')
-                ->first()
-        );
-
-        // Victim's request is untouched
-        $this->assertNull(
-            CheckoutRequest::where('requestable_id', $asset->id)
-                ->where('user_id', $victim->id)
-                ->whereNotNull('canceled_at')
-                ->first()
-        );
+        $this->assertNull($actorRequest->fresh()->canceled_at);
+        $this->assertNull($victimRequest->fresh()->canceled_at);
     }
 
-    public function test_superuser_can_cancel_another_users_request_via_cancel_by_admin(): void
+    public function test_superuser_can_cancel_another_users_request(): void
     {
         $asset = Asset::factory()->create();
         $victim = User::factory()->create();
@@ -98,7 +93,6 @@ class CancelRequestTest extends TestCase
             ->post(route('account/request-item', [
                 'itemType' => 'asset',
                 'itemId' => $asset->id,
-                'cancel_by_admin' => '1',
                 'requestingUser' => $victim->id,
             ]))
             ->assertRedirect();
@@ -170,7 +164,7 @@ class CancelRequestTest extends TestCase
         Log::shouldHaveReceived('warning')->once();
     }
 
-    public function test_admin_can_cancel_another_users_request_via_cancel_by_admin(): void
+    public function test_admin_can_cancel_another_users_request(): void
     {
         $asset = Asset::factory()->create();
         $victim = User::factory()->create();
@@ -180,7 +174,6 @@ class CancelRequestTest extends TestCase
             ->post(route('account/request-item', [
                 'itemType' => 'asset',
                 'itemId' => $asset->id,
-                'cancel_by_admin' => '1',
                 'requestingUser' => $victim->id,
             ]))
             ->assertRedirect();

@@ -2,10 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Channels\SlackWebhookChannel;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
@@ -18,17 +20,20 @@ use NotificationChannels\GoogleChat\Widgets\KeyValue;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsChannel;
 use NotificationChannels\MicrosoftTeams\MicrosoftTeamsMessage;
 
-#[AllowDynamicProperties]
-class CheckoutLicenseSeatNotification extends Notification
+class CheckoutLicenseSeatNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private $params;
+    public License $item;
+
+    public User $admin;
+
+    public $note;
+
+    public $target;
 
     /**
      * Create a new notification instance.
-     *
-     * @param  $params
      */
     public function __construct(LicenseSeat $licenseSeat, $checkedOutTo, User $checkedOutBy, $acceptance, $note)
     {
@@ -37,8 +42,6 @@ class CheckoutLicenseSeatNotification extends Notification
         $this->note = $note;
         $this->target = $checkedOutTo;
         $this->acceptance = $acceptance;
-
-        $this->settings = Setting::getSettings();
     }
 
     /**
@@ -72,18 +75,19 @@ class CheckoutLicenseSeatNotification extends Notification
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->webhook_botname) ? $this->settings->webhook_botname : 'Snipe-Bot';
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $botname = (Setting::getSettings()->webhook_botname) ? Setting::getSettings()->webhook_botname : 'Snipe-Bot';
+        $channel = (Setting::getSettings()->webhook_channel) ? Setting::getSettings()->webhook_channel : '';
 
         $fields = [
             trans('general.to') => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
             trans('general.by') => '<'.$admin->present()->viewUrl().'|'.$admin->display_name.'>',
         ];
 
-        if ($item->location) {
-            $fields[trans('general.location')] = $item->location->name;
-        }
-
+        // License has no location relation (it's model-tier config,
+        // not a physical asset in a room), so no location field for
+        // the Slack payload. The `if ($item->location)` branch that
+        // used to sit here was dead code from a copy-paste of the
+        // Asset checkout notification.
         if ($item->company) {
             $fields[trans('general.company')] = $item->company->name;
         }
@@ -108,15 +112,15 @@ class CheckoutLicenseSeatNotification extends Notification
 
         if (! Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
             return MicrosoftTeamsMessage::create()
-                ->to($this->settings->webhook_endpoint)
+                ->to(Setting::getSettings()->webhook_endpoint)
                 ->type('success')
                 ->addStartGroupToSection('activityTitle')
                 ->title(trans('mail.License_Checkout_Notification'))
                 ->addStartGroupToSection('activityText')
                 ->fact(htmlspecialchars_decode($item->display_name), '', 'activityTitle')
-                ->fact(trans('mail.License_Checkout_Notification').' by ', $admin->display_name)
-                ->fact(trans('mail.assigned_to'), $target->display_name)
-                ->fact(trans('admin/consumables/general.remaining'), $item->availCount()->count())
+                ->fact(trans('mail.License_Checkout_Notification').' by ', (string) ($admin?->display_name ?? ''))
+                ->fact(trans('mail.assigned_to'), (string) ($target?->display_name ?? ''))
+                ->fact(trans('admin/consumables/general.remaining'), (string) $item->availCount()->count())
                 ->fact(trans('mail.notes'), $note ?: '');
         }
 
@@ -139,7 +143,7 @@ class CheckoutLicenseSeatNotification extends Notification
         $note = $this->note;
 
         return GoogleChatMessage::create()
-            ->to($this->settings->webhook_endpoint)
+            ->to(Setting::getSettings()->webhook_endpoint)
             ->card(
                 Card::create()
                     ->header(

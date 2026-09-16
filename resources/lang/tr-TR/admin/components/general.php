@@ -13,4 +13,9 @@ return [
     'total' => 'Toplam',
     'update' => 'Bileşeni düzenle',
     'checkin_limit' => 'Giren toplam tutar :assigned_qty miktarına eşit ya da daha az olmalıdır',
+    'exclude_deleted' => 'Silinen Bileşenleri Hariç Tut',
+    'include_deleted' => 'Silinen Bileşenleri Dahil Et',
+    'only_deleted' => 'Yalnızca Silinen Bileşenler
+
+',
 ];

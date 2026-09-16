@@ -117,7 +117,11 @@ class AccessoryPresenter extends Presenter
                 'field' => 'remaining',
                 'scope' => 'col',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
+                // Kept hidden by default so the primary "% Remaining"
+                // progress bar column stays the headline signal; users
+                // who want raw-count sorting can toggle this on via
+                // the bootstrap-table column picker (issue #18505).
                 'visible' => false,
                 'title' => trans('admin/accessories/general.remaining'),
                 'footerFormatter' => 'qtySumFormatter',
@@ -135,27 +139,44 @@ class AccessoryPresenter extends Presenter
                 'field' => 'percent_remaining',
                 'scope' => 'col',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
                 'switchable' => true,
                 'title' => '% '.trans('general.remaining'),
                 'visible' => true,
                 'formatter' => 'progressBarFormatter',
             ],
             [
+                // "Last" prefix reflects that purchase_date now lives
+                // on Orders — an accessory can have many, so displaying
+                // an unqualified "Purchase Date" on the index page is
+                // misleading. The API's purchase_date sort routes
+                // through OrderByLastPurchaseDate accordingly.
                 'field' => 'purchase_date',
                 'scope' => 'col',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
                 'visible' => false,
-                'title' => trans('general.purchase_date'),
+                'title' => trans('general.last_purchase_date'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'purchase_cost',
                 'scope' => 'col',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
-                'title' => trans('general.unit_cost'),
+                'title' => trans('general.last_unit_cost'),
                 'class' => 'text-right text-padding-number-cell',
+            ], [
+                // Field name matches the transformer key
+                // ('orders') and the HasOrders relation name so advanced
+                // search resolves straight through $searchableRelations.
+                'field' => 'orders',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'visible' => true,
+                'title' => trans('general.order_number'),
+                'formatter' => 'ordersSummaryFormatter',
             ], [
                 'field' => 'total_cost',
                 'scope' => 'col',
@@ -165,13 +186,6 @@ class AccessoryPresenter extends Presenter
                 'footerFormatter' => 'sumFormatterQuantity',
                 'class' => 'text-right text-padding-number-cell',
             ], [
-                'field' => 'order_number',
-                'scope' => 'col',
-                'searchable' => true,
-                'sortable' => true,
-                'visible' => false,
-                'title' => trans('general.order_number'),
-            ], [
                 'field' => 'notes',
                 'scope' => 'col',
                 'searchable' => true,
@@ -179,6 +193,15 @@ class AccessoryPresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.notes'),
                 'formatter' => 'notesFormatter',
+            ], [
+                'field' => 'requestable',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'visible' => false,
+                'title' => trans('admin/hardware/general.requestable'),
+                'formatter' => 'trueFalseFormatter',
             ], [
                 'field' => 'created_by',
                 'scope' => 'col',
@@ -410,5 +433,69 @@ class AccessoryPresenter extends Presenter
     public function name()
     {
         return $this->model->name;
+    }
+
+    /**
+     * Column layout for the accessories tab on /account/requestable.
+     * Feeds <x-table> via api.accessories.requestable. Row shape
+     * comes from AccessoriesTransformer with assigned_to_self +
+     * available_actions.request/cancel populated so the
+     * accessoryRequestable*Formatter JS helpers can render the
+     * request/cancel button-swap.
+     */
+    public static function dataTableLayoutRequestable(): string
+    {
+        return json_encode([
+            [
+                'field' => 'image',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.image'),
+                'formatter' => 'imageFormatter',
+            ], [
+                'field' => 'name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/accessories/general.accessory_name'),
+                'formatter' => 'accessoryRequestableNameFormatter',
+            ], [
+                'field' => 'category',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.category'),
+                'formatter' => 'categoriesLinkObjFormatter',
+            ], [
+                'field' => 'company.name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.company'),
+            ], [
+                'field' => 'location.name',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('admin/hardware/table.location'),
+            ], [
+                'field' => 'remaining',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('admin/accessories/general.remaining'),
+            ], [
+                'field' => 'actions',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'formatter' => 'accessoryRequestableActionsFormatter',
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+        ]);
     }
 }

@@ -18,14 +18,14 @@ return [
         'confirm' => '이 부품을 삭제하시겠습니까?',
         'error' => '부품 삭제시 문제가 발생했습니다. 다시 시도해 주세요.',
         'success' => '부품이 삭제되었습니다.',
-        'error_qty' => 'Some components of this type are still checked out. Please check them in and try again.',
+        'error_qty' => '이 유형의 일부 부품이 여전히 반출되어 있습니다. 반입 후 다시 시도하세요.',
     ],
 
     'checkout' => [
         'error' => '부품이 반출되지 않았습니다. 다시 시도해 주세요.',
         'success' => '부품이 반출 되었습니다.',
         'user_does_not_exist' => '잘못된 사용자 입니다. 다시 시도해 주세요.',
-        'unavailable' => 'Not enough components remaining: :remaining remaining, :requested requested ',
+        'unavailable' => '남은 부품 부족: :remaining 개 남음, :requested 개 요청됨',
     ],
 
     'checkin' => [

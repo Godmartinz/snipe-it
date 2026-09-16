@@ -13,6 +13,7 @@ return [
     'pending' => '保留中',
     'status_type' => 'ステータスタイプ',
     'show_in_nav' => 'サイドバーの表示',
+    'status_label' => 'ステータスラベル',
     'title' => 'ステータスラベル',
     'undeployable' => '配備不可',
     'update' => 'ステータスラベルを更新',

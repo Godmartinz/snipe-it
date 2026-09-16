@@ -45,6 +45,7 @@ return [
     'redirect_to_type' => 'Անցնել :type
 ',
     'redirect_to_checked_out_to' => 'Անցնել հանձնված՝',
+    'redirect_to_bulk_checkout' => 'Return to Bulk Checkout',
     'select_statustype' => 'Ընտրել կարգավճակ',
     'serial' => 'Սերիական համար',
     'serial_required' => ':number ակտիվը պահանջում է սերիական համար',
@@ -53,6 +54,7 @@ return [
     'tag' => 'Ակտիվի պիտակ',
     'update' => 'Թարմացնել ակտիվը',
     'warranty' => 'Երաշխիքային ժամկետ',
+    'warranty_months' => 'Warranty Months',
     'warranty_expires' => 'Ժամկետի ավարտ',
     'years' => 'տարիներ',
     'asset_location' => 'Թարմացնել ակտիվի տեղադիրքը',

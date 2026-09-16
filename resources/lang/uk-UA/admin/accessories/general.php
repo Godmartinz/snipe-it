@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Основна EULA не знайдена. Додайте одненьку в налаштуваннях.',
     'total' => 'Разом',
     'remaining' => 'Є',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Оновити аксесуар',
     'use_default_eula' => 'Використовувати <a href="#" data-toggle="modal" data-target="#eulaModal">основну EULA</a>.',
     'use_default_eula_disabled' => '<del>Натомість використовуйте основну ліцензійну угоду за умовчанням.</del> Основна ліцензійна угода за умовчанням не встановлена. Додайте її в налаштуваннях.',

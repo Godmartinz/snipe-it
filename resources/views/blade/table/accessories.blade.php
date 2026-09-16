@@ -5,6 +5,7 @@
     'fixed_right_number' => 2,
     'fixed_number' => 2,
     'table_header' => trans('general.accessories'),
+    'export_name' => null,
 ])
 
 @aware(['name'])
@@ -17,14 +18,7 @@
     </x-slot:table_header>
 
     <x-slot:bulkactions>
-        <x-table.bulk-actions
-            name='accessory'
-            action_route="{{ route('accessories.bulk.delete') }}"
-            model_name="accessory">
-            @can('delete', App\Models\Accessory::class)
-                <option>{{ trans('general.delete') }}</option>
-            @endcan
-        </x-table.bulk-actions>
+        <x-table.bulk-accessories />
     </x-slot:bulkactions>
 
     <x-table
@@ -35,7 +29,7 @@
         show_advanced_search="true"
         buttons="accessoryButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-accessories-{{ date('Y-m-d') }}"
+        export_filename="export-{{ $export_name ? str_slug($export_name).'-' : '' }}accessories-{{ date('Y-m-d') }}"
     />
 
 @endcan

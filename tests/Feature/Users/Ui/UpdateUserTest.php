@@ -156,6 +156,45 @@ class UpdateUserTest extends TestCase
         $this->assertEquals(1, $admin->refresh()->activated);
     }
 
+    /**
+     * Regression for the pre-gate-activated escalation:
+     * UsersController::update used to assign $user->activated from the
+     * request BEFORE the canEditAuthFields gate, with the intent that the
+     * gated branch would overwrite it for authorized callers. Unauthorized
+     * callers had the first assignment stick through to save(), letting
+     * anyone with `users.edit` deactivate any admin by POSTing a full edit
+     * payload.
+     *
+     * The pre-existing test_editing_users_cannot_edit_escalation_fields_for_admins
+     * passed by accident because its payload omitted first_name / last_name,
+     * so SaveUserRequest rejected the request on validation before the
+     * controller wrote to the model. This test sends a complete valid
+     * payload so the controller actually runs to save() and pins the
+     * unauthorized-cannot-touch-activated behavior directly.
+     */
+    public function test_editing_users_cannot_toggle_admin_activated_via_full_valid_payload()
+    {
+        $editing_user = User::factory()->editUsers()->create(['activated' => true]);
+        $admin = User::factory()->admin()->create([
+            'first_name' => 'Admin',
+            'last_name' => 'Target',
+            'username' => 'admin_target',
+            'email' => 'admin-target@example.test',
+            'activated' => true,
+        ]);
+
+        $this->actingAs($editing_user)
+            ->put(route('users.update', $admin), [
+                'first_name' => $admin->first_name,
+                'last_name' => $admin->last_name,
+                'username' => $admin->username,
+                'email' => $admin->email,
+                'activated' => 0,
+            ]);
+
+        $this->assertSame(1, (int) $admin->fresh()->activated, 'Non-admin actor must not be able to deactivate an admin.');
+    }
+
     public function test_editing_users_cannot_edit_escalation_fields_for_admins()
     {
         $editing_user = User::factory()->editUsers()->create(['activated' => true]);

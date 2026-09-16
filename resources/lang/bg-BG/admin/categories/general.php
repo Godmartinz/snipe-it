@@ -19,6 +19,8 @@ return [
     'required_acceptance' => 'Потребителят ще получи email с връзка за потвърждаване получаването на актива.',
     'global_signature_required_notice' => 'User signatures are currently required globally via the admin settings, so signatures will still be required regardless of this category setting if the item is checked out to a user (versus a location, etc).',
     'required_eula' => 'Потребителят ще получи копие на EULA.',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
     'required_signature' => 'This user will be required to sign to confirm acceptance of this item.',
     'no_default_eula' => 'Няма EULA по подразбиране. Добавете я в Настройки.',
     'update' => 'Обновяване на категория',

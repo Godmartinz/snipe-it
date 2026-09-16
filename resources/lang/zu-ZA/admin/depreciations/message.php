@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ingabe uqinisekile ukuthi ufisa ukususa lesi sigaba sokunciphisa?',
         'error' => 'Kube nenkinga yokususa isigaba sokunciphisa. Ngicela uzame futhi.',
         'success' => 'Isigaba sokunciphisa sisusiwe ngempumelelo.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -16,5 +16,7 @@ return [
         'confirm' => 'Та энэ компанийг устгахыг хүсч байгаадаа итгэлтэй байна уу?',
         'error' => 'Компаниыг устгахад асуудал гарлаа. Дахин оролдоно уу.',
         'success' => 'Компани амжилттай устгасан.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

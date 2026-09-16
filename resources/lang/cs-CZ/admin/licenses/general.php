@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Vydáno pomocí hromadného zpracování licencí',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Pro tuto licenci zbývá pouze :remaining_count míst s minimálním množstvím :min_amt. Můžete uvažovat o zakoupení více míst.',

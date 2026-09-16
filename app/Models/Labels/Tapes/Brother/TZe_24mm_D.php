@@ -14,8 +14,6 @@ class TZe_24mm_D extends TZe_24mm
 
     private const LABEL_SIZE = 2.50;
 
-    private const LABEL_MARGIN = -0.35;
-
     private const FIELD_SIZE = 2.50;
 
     private const FIELD_MARGIN = 0.35;
@@ -61,8 +59,6 @@ class TZe_24mm_D extends TZe_24mm
     {
         return true;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

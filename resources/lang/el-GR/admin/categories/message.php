@@ -21,7 +21,7 @@ return [
         'confirm' => 'Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτήν την κατηγορία;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας αυτή την κατηγορία. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

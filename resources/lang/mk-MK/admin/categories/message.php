@@ -21,7 +21,7 @@ return [
         'confirm' => 'Дали сте сигурни дека сакате да ја избришете оваа категорија?',
         'error' => 'Имаше проблем со бришење на категоријата. Обидете се повторно.',
         'success' => 'Category was deleted successfully.',
-        'bulk_success' => 'Categories were deleted successfully.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Category deleted successfully. See additional information below. | :count categories were deleted successfully. See additional information below.',
     ],
 

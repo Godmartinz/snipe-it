@@ -7,10 +7,17 @@ use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Client;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Token;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class OauthClients extends Component
 {
+    /**
+     * Locked so a client-side snapshot replay cannot flip the section from
+     * an admin context (oauth-clients) into a lower-privilege context
+     * (authorized-applications) to bypass the boot() authorization gate.
+     */
+    #[Locked]
     public string $section = 'all';
 
     public $name;
@@ -29,6 +36,25 @@ class OauthClients extends Component
     {
         if ($section !== null) {
             $this->section = $section;
+        }
+    }
+
+    /**
+     * Livewire boot() fires on the initial mount AND on every subsequent
+     * POST /livewire/update from the same component instance. Route-level
+     * middleware (superuser gate on /admin/oauth) protects the initial page
+     * render but NOT snapshot replays that arrive at /livewire/update
+     * carrying a valid signed snapshot of this component. Enforce the same
+     * authorization here so a low-privilege attacker who obtains a signed
+     * snapshot (e.g. from a shared admin page, a proxied response, a
+     * partially-leaked prior session) cannot invoke createClient /
+     * deleteAuthorizedApplication under their own session and mint /
+     * revoke admin-scoped tokens.
+     */
+    public function boot(): void
+    {
+        if ($this->showOauthClients() && ! auth()->user()?->isSuperUser()) {
+            abort(403);
         }
     }
 
@@ -97,6 +123,15 @@ class OauthClients extends Component
 
     public function createClient(): void
     {
+        // Defense in depth on top of boot(). createClient is only reachable
+        // from the admin OAuth-clients management surface, which is
+        // superuser-gated at the route level. Snapshot replay to
+        // POST /livewire/update can reach here regardless of route gating,
+        // so re-check the same authorization here explicitly.
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
+        }
+
         $this->validate([
             'name' => 'required|string|max:255',
             'redirect' => 'required|url|max:255',
@@ -127,10 +162,21 @@ class OauthClients extends Component
 
     public function deleteAuthorizedApplication(int $clientId): void
     {
-        $revokedTokenCount = DB::table('oauth_access_tokens')
+        // Only revoke tokens the caller actually owns. Superusers may revoke
+        // any authorized-application entry (matches their admin-surface
+        // reach). Anyone else is limited to their own access tokens for the
+        // named client. Prevents a snapshot replay from calling this method
+        // and revoking another user's active tokens (denial of service on
+        // legitimate integrations).
+        $query = DB::table('oauth_access_tokens')
             ->where('client_id', $clientId)
-            ->where('revoked', false)
-            ->update(['revoked' => true]);
+            ->where('revoked', false);
+
+        if (! auth()->user()?->isSuperUser()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $revokedTokenCount = $query->update(['revoked' => true]);
 
         if ($revokedTokenCount > 0) {
             session()->flash('success', trans('admin/settings/message.oauth.token_deleted'));
@@ -142,6 +188,14 @@ class OauthClients extends Component
 
     public function editClient(Client $editClientId): void
     {
+        // Only the client owner or a superuser may pre-fill the edit modal.
+        // Without this check, snapshot replay could load any client's name
+        // and redirect URI into the component's public props, exposing them
+        // via the next render() response.
+        if (! auth()->user()?->isSuperUser() && $editClientId->user_id != auth()->id()) {
+            abort(403);
+        }
+
         $this->editName = $editClientId->name;
         $this->editRedirect = $editClientId->redirect;
 

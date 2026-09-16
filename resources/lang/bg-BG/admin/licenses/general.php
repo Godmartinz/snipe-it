@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Изписан чрез групово лизенц изписване в GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Има само :remaining_count лиценз(а) останали от този лиценз с минимално количество от :min_amt. Може да желаете да поръчате допълнително.',

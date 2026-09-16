@@ -3,6 +3,7 @@
 return [
     'actions' => 'Thao tác',
     'add' => 'Thêm mới',
+    'back' => 'Quay lại',
     'cancel' => 'Hủy',
     'checkin_and_delete' => 'Thu hồi tất cả / Xóa người dùng',
     'delete' => 'Xóa',

@@ -13,9 +13,14 @@ return [
         'file_not_found' => 'Ese archivo de copia de seguridad no se pudo encontrar en el servidor.',
         'restore_warning' => 'Sí, restaurarlo. Reconozco que esto sobrescribirá cualquier dato existente actualmente en la base de datos. Esto también cerrará la sesión de todos sus usuarios existentes (incluido usted).',
         'restore_confirm' => '¿Está seguro que desea restaurar su base de datos desde :filename?',
+        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
     ],
     'restore' => [
         'success' => 'Se ha restaurado la copia de seguridad de su sistema. Por favor, vuelva a iniciar sesión.',
+        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
+        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
+        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
+        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
     ],
     'purge' => [
         'error' => 'Ha ocurrido un error mientras se realizaba el purgado. ',

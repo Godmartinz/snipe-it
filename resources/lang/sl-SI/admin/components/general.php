@@ -13,4 +13,7 @@ return [
     'total' => 'Skupaj',
     'update' => 'Posodobi komponento',
     'checkin_limit' => 'Prijavljeni znesek mora biti enak ali manjši od :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

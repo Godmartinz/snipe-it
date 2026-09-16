@@ -16,5 +16,7 @@ return [
         'confirm' => '¿Está seguro de que quiere eliminar esta compañía?',
         'error' => 'Hubo un problema eliminando la compañía. Por favor, inténtelo de nuevo.',
         'success' => 'La compañía fue eliminada correctamente.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

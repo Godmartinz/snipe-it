@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'ไม่พบข้อกำหนดการใช้งานหลักใดๆ ในการตั้งค่า',
     'total' => 'รวมทั้งหมด',
     'remaining' => 'พร้อมใช้',
+    'requestable' => 'Users may request this accessory',
     'update' => 'ปรับปรุงอุปกรณ์เสริม',
     'use_default_eula' => 'ใช้<a href="#" data-toggle="modal" data-target="#eulaModal">เป็นข้อกำหนดการใช้งานหลัก</a>แทน',
     'use_default_eula_disabled' => '<del>ใช้ข้อกำหนดการใช้งานหลักแทน</del> ค่าเริ่มต้นหลักจะตั้งข้อกำหนดการใช้งาน กรุณาเพิ่มในการตั้งค่า',

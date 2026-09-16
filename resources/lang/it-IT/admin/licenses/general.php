@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Assegnazione effettuato tramite GUI di assegnazione massiva di licenze',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Ci sono solo :remaining_count installazioni disponibili rimaste per questa licenza con una quantità minima di :min_amt. Si consiglia di acquistarne altre.',

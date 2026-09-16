@@ -3,6 +3,7 @@
 return [
     'actions' => 'Aðgerðir',
     'add' => 'Bæta við nýjum',
+    'back' => 'Til baka',
     'cancel' => 'Hætta við',
     'checkin_and_delete' => 'Skrá inn allt / Eyða notenda',
     'delete' => 'Eyða',

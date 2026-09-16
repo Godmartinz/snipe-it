@@ -10,11 +10,15 @@ use Tests\TestCase;
  * guard against DB collation folding. The MySQL/MariaDB default collation
  * utf8mb4_unicode_ci treats snipeitreport3 and snípeitreport3 as equal, so
  * `WHERE username = ?` can return the wrong row for an attacker-controlled
- * external identifier. The helper is the byte-exact re-check every federated
- * auth callsite (SAML, LDAP, REMOTE_USER, Google OAuth) runs before trusting
- * the resolved local user. These tests instantiate the User model without
- * touching the DB because the helper is a pure function on the resolved row
- * plus the expected string.
+ * external identifier. The helper re-checks the resolved user's username
+ * against the caller-provided identifier every federated auth callsite
+ * (SAML, LDAP, REMOTE_USER, Google OAuth) runs before trusting the row.
+ * Comparison is case-insensitive (both sides lowercased) because most IdPs
+ * treat usernames case-insensitively and locking admins out on case-only
+ * mismatches was a real support burden. Everything else (accents, whitespace,
+ * unicode lookalikes) is still rejected. These tests instantiate the User
+ * model without touching the DB because the helper is a pure function on the
+ * resolved row plus the expected string.
  *
  * Original vulnerability report: whale120 (@whale120_tw), DEVCORE Internship
  * Program.
@@ -50,18 +54,27 @@ class VerifyExactUsernameMatchTest extends TestCase
         $this->assertNull(User::verifyExactUsernameMatch($user, 'snípeitreport3'));
     }
 
-    public function test_case_variant_is_rejected()
+    /**
+     * Deliberate compromise: most IdPs treat usernames case-insensitively,
+     * and admins were locking themselves out when the case in their IdP
+     * didn't match the case in their Snipe-IT user row. The helper now
+     * lowercases both sides before comparing, so `Admin` and `ADMIN` from
+     * a SAML/LDAP assertion resolve to the local `admin` row. Accent-,
+     * whitespace-, and lookalike-character folding are still rejected
+     * because those aren't handled by strtolower.
+     */
+    public function test_case_variant_matches()
     {
         $user = new User(['username' => 'admin']);
 
-        $this->assertNull(User::verifyExactUsernameMatch($user, 'Admin'));
+        $this->assertSame($user, User::verifyExactUsernameMatch($user, 'Admin'));
     }
 
-    public function test_uppercase_variant_is_rejected()
+    public function test_uppercase_variant_matches()
     {
         $user = new User(['username' => 'admin']);
 
-        $this->assertNull(User::verifyExactUsernameMatch($user, 'ADMIN'));
+        $this->assertSame($user, User::verifyExactUsernameMatch($user, 'ADMIN'));
     }
 
     /**

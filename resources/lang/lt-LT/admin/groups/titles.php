@@ -7,7 +7,7 @@ return [
     'create' => 'Sukurti naują grupę',
     'update' => 'Redaguoti grupę',
     'group_name' => 'Grupės pavadinimas',
-    'group_admin' => 'Gruopės administratorius',
+    'group_admin' => 'Grupės administratorius',
     'allow' => 'Leisti',
     'deny' => 'Neleisti',
     'permission' => 'Teisė',

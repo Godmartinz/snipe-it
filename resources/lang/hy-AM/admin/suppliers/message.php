@@ -20,7 +20,7 @@ return [
         'error' => 'Մատակարարին ջնջելիս խնդիր առաջացավ։ Խնդրում ենք կրկին փորձել։',
         'success' => 'Մատակարարը հաջողությամբ ջնջվել է։',
         'not_found' => 'Մատակարարը չի գտնվել',
-        'bulk_success' => 'Մատակարարները հաջողությամբ ջնջվեցին։',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '․',
     ],
 

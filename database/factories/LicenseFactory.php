@@ -25,10 +25,20 @@ class LicenseFactory extends Factory
      */
     public function definition()
     {
+        // ~50% of seeded licenses get a future expiration date so the
+        // calendar's default visible window has enough license.expiration
+        // events to be interesting on demos. Must stay in the future so
+        // it never trips isInactive() / scopeActiveLicenses filtering in
+        // tests that use bare License::factory()->create(). Tests
+        // pinning specific dates via state overrides still win.
+        $expirationDate = $this->faker->boolean(50)
+            ? $this->faker->dateTimeBetween('+1 day', '+18 months', date_default_timezone_get())->format('Y-m-d')
+            : null;
+
         return [
             'category_id' => Category::factory(),
             'created_by' => User::factory()->superuser(),
-            'expiration_date' => null,
+            'expiration_date' => $expirationDate,
             'license_email' => $this->faker->safeEmail(),
             'name' => $this->faker->name(),
             'notes' => 'Created by DB seeder',

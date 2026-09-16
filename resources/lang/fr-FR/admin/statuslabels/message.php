@@ -20,6 +20,8 @@ return [
         'confirm' => 'Etes-vous sûr de vouloir supprimer cette étiquette de statut?',
         'error' => 'Un problème est survenu durant la suppression de cette étiquette de statut. Merci d\'essayer à nouveau.',
         'success' => 'L\'étiquette de statut a bien été supprimée.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

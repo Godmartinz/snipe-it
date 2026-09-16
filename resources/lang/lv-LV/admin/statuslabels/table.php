@@ -13,6 +13,7 @@ return [
     'pending' => 'Gaida',
     'status_type' => 'Statusa veids',
     'show_in_nav' => 'Rādīt pusē',
+    'status_label' => 'Status Label',
     'title' => 'Statusa etiķetes',
     'undeployable' => 'Nodarbināms',
     'update' => 'Atjaunināt statusa marķējumu',

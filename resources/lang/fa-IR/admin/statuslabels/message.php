@@ -20,6 +20,8 @@ return [
         'confirm' => 'آیا مطمئنید که میخواهید این برچسب وضعیت را حذف کنید؟',
         'error' => 'یک مسئله حذف برچسب وضعیت وجود داشت. لطفا دوباره تلاش کنید.',
         'success' => 'برچسب وضعیت با موفقیت حذف شد.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

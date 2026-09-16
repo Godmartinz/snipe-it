@@ -57,9 +57,13 @@
                     @elseif ($category->category_type=='license')
                         @can('view', \App\Models\License::class)
                             <x-tabs.pane name="licenses">
+                                <x-slot:bulkactions>
+                                    <x-table.bulk-licenses />
+                                </x-slot:bulkactions>
                                 <x-table.licenses
                                     show_footer="true"
                                     name="licenses"
+                                    :export_name="$category->name"
                                     :route="route('api.licenses.index', ['category_id' => $category->id])"/>
                             </x-tabs.pane>
                         @endcan

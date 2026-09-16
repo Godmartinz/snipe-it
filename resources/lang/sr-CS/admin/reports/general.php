@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Zahtev za prihvatanje je izbrisan',
     'acceptance_request' => 'Zahtev za prihvatanje',
     'custom_export' => [
+        'asset_company' => 'Kompanija imovine',
+        'asset_serial' => 'Serijski broj imovine',
+        'assigned_asset_tag' => 'Oznaka zadužene imovine',
         'user_address' => 'Adresa korisnika',
         'user_company' => 'Kompanija korisnika',
         'user_city' => 'Grad korisnika',

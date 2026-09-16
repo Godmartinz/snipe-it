@@ -11,6 +11,20 @@ use Livewire\Component;
  */
 class AdminPersonalAccessTokens extends Component
 {
+    /**
+     * Route-level middleware on /admin/oauth requires superuser, but
+     * snapshot replay to POST /livewire/update bypasses that gate. Without
+     * this check, a low-privilege user with a valid snapshot could enumerate
+     * every user's personal access tokens (name, expiration, associated
+     * client) through the render payload.
+     */
+    public function boot(): void
+    {
+        if (! auth()->user()?->isSuperUser()) {
+            abort(403);
+        }
+    }
+
     public function render()
     {
         $tokens = DB::table('oauth_access_tokens')

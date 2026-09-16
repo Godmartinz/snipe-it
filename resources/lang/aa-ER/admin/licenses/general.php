@@ -48,6 +48,11 @@ return [
             'log_msg' => 'crwdns11577:0crwdne11577:0',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'crwdns15531:0crwdne15531:0',
+            'log_msg' => 'crwdns15533:0crwdne15533:0',
+        ],
     ],
 
     'below_threshold' => 'crwdns12124:0crwdne12124:0',

@@ -20,6 +20,8 @@ return [
         'confirm' => 'آیا مطمئن هستید می خواهید این وسیله حذف شود?',
         'error' => 'اشکال در حذف دسته بندی.لطفا دوباره امتحان کنید.',
         'success' => 'دسته بندی با موفقیت حذف شد.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

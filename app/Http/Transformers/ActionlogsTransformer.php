@@ -10,6 +10,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -55,7 +56,13 @@ class ActionlogsTransformer
 
         $icon = $actionlog->present()->icon();
 
-        if (($actionlog->filename != '') && ($actionlog->action_type != 'upload deleted')) {
+        // File-type icon only wins for events that are inherently ABOUT
+        // a file (`uploaded`). Other events that happen to carry a
+        // receipt attachment (QuantityAdjust with an invoice PDF,
+        // checkouts with a signed acceptance form, etc.) keep their
+        // semantic icon so the history tab telegraphs what happened, not
+        // that a file was attached.
+        if ($actionlog->action_type === ActionType::Uploaded->value && $actionlog->filename != '') {
             $icon = Helper::filetype_icon($actionlog->filename);
         }
 
@@ -152,6 +159,39 @@ class ActionlogsTransformer
 
             }
             $clean_meta = $this->changedInfo($clean_meta);
+
+            // A license serial is the product key. When the current
+            // user does not hold licenses.keys / create / edit, the
+            // resource / index / export sinks all mask the raw key.
+            // The old / new pair in log_meta['serial'] on a license
+            // edit would otherwise leak both the previous and new
+            // key through the History tab and the activity report.
+            if ($actionlog->item instanceof License
+                && ! Gate::allows('viewKeys', $actionlog->item)
+                && isset($clean_meta['serial'])
+                && is_array($clean_meta['serial'])
+            ) {
+                if (isset($clean_meta['serial']['old'])) {
+                    $clean_meta['serial']['old'] = License::PRODUCT_KEY_MASK;
+                }
+                if (isset($clean_meta['serial']['new'])) {
+                    $clean_meta['serial']['new'] = License::PRODUCT_KEY_MASK;
+                }
+            }
+        }
+
+        // A license serial is the product key. When the current user
+        // does not hold licenses.keys / create / edit, mask it here the
+        // same way LicensesTransformer masks product_key. Without this
+        // the /api/v1/licenses/{id}/history and /api/v1/reports/activity
+        // sinks leak the raw key through actionlog rows.
+        $itemSerial = null;
+        if ($actionlog->item && $actionlog->item->serial) {
+            if ($actionlog->item instanceof License && ! Gate::allows('viewKeys', $actionlog->item)) {
+                $itemSerial = License::PRODUCT_KEY_MASK;
+            } else {
+                $itemSerial = e($actionlog->item->serial);
+            }
         }
 
         $array = [
@@ -171,7 +211,7 @@ class ActionlogsTransformer
                 'id' => (int) $actionlog->item->id,
                 'name' => e($actionlog->item->display_name) ?? null,
                 'type' => e($actionlog->itemType()),
-                'serial' => e($actionlog->item->serial) ? e($actionlog->item->serial) : null,
+                'serial' => $itemSerial,
             ] : null,
             'location' => ($actionlog->location) ? [
                 'id' => (int) $actionlog->location->id,
@@ -201,9 +241,17 @@ class ActionlogsTransformer
                 'type' => e($actionlog->targetType()),
             ] : null,
             'quantity' => $this->getQuantity($actionlog),
+            // action_logs.order_number was replaced by action_logs.order_item_id
+            // pointing at the specific OrderItem line. The parent Order
+            // is one hop away. Null for log rows with no OrderItem
+            // attached (checkouts, edits, anything that isn't a
+            // QuantityAdjust with an order supplied).
+            'order_number' => $actionlog->orderItem?->order?->order_number
+                ? e($actionlog->orderItem->order->order_number)
+                : null,
             'note' => ($actionlog->note) ? Helper::parseEscapedMarkedownInline($actionlog->note) : null,
             'signature_file' => (($actionlog->accept_signature) && Storage::exists('private_uploads/signatures/'.$actionlog->accept_signature)) ? route('log.signature.view', ['filename' => $actionlog->accept_signature]) : null,
-            'log_meta' => ((isset($clean_meta)) && (is_array($clean_meta))) ? $clean_meta : null,
+            'log_meta' => $clean_meta ?? null,
             'remote_ip' => e($actionlog->remote_ip) ?? null,
             'user_agent' => e($actionlog->user_agent) ?? null,
             'action_source' => ($actionlog->action_source) ?? null,
@@ -350,6 +398,33 @@ class ActionlogsTransformer
             $clean_meta[trans('general.companies')] = $clean_meta['companies'];
             unset($clean_meta['companies']);
         }
+        if (array_key_exists('groups', $clean_meta)) {
+            // groups meta is a list of {id, name} snapshots taken at
+            // write time. The name is the load-bearing bit: it
+            // preserves what the group was called at the moment the
+            // change happened, so a later rename or delete doesn't
+            // rewrite history. clean_field() ran e(json_encode()) on
+            // the arrays, so we have to htmlspecialchars_decode the
+            // JSON string before json_decode can read the escaped
+            // quotes back. The companies handler above sidesteps this
+            // because its ids are plain integers with no quoted
+            // strings inside the JSON.
+            $renderGroupSnapshot = function ($rawValue): string {
+                $entries = json_decode(htmlspecialchars_decode((string) $rawValue, ENT_QUOTES), true);
+                if (empty($entries) || ! is_array($entries)) {
+                    return trans('general.unassigned');
+                }
+
+                return collect($entries)
+                    ->map(fn ($entry) => is_array($entry) && isset($entry['name']) ? e($entry['name']) : trans('general.deleted'))
+                    ->join(', ');
+            };
+
+            $clean_meta['groups']['old'] = $renderGroupSnapshot($clean_meta['groups']['old']);
+            $clean_meta['groups']['new'] = $renderGroupSnapshot($clean_meta['groups']['new']);
+            $clean_meta[trans('general.groups')] = $clean_meta['groups'];
+            unset($clean_meta['groups']);
+        }
         if (array_key_exists('supplier_id', $clean_meta)) {
 
             $oldSupplier = $supplier->find($clean_meta['supplier_id']['old']);
@@ -399,6 +474,8 @@ class ActionlogsTransformer
             ActionType::CheckinFrom->value,
             ActionType::AddSeats->value,
             ActionType::DeleteSeats->value,
+            ActionType::QuantityAdjust->value,
+            ActionType::Create->value,
         ])) {
             return null;
         }

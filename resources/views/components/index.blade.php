@@ -10,10 +10,13 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box>
+        <x-box name="components" sr_only_title>
             <x-table.components :route="route('api.components.index')" />
         </x-box>
     </x-container>
+@can('update', \App\Models\Component::class)
+    <x-modals.adjust-quantity />
+@endcan
 @stop
 
 @section('moar_scripts')

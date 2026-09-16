@@ -19,6 +19,8 @@ return [
         'confirm' => 'Ar tikrai norite panaikinti šią nusidėvėjimo klasę?',
         'error' => 'Bandant panaikinti nusidėvėjimo klasę įvyko klaida. Bandykite dar kartą.',
         'success' => 'Nusidėvėjimo klasė sėkmingai panaikinta.',
+        'bulk_success' => 'Nusidėvėjimo klasė sėkmingai ištrinta.|Nusidėvėjimo klasės (:count) buvo sėkmingai ištrintos.',
+        'partial_success' => 'Nusidėvėjimo klasė sėkmingai ištrinta. Daugiau informacijos rasite žemiau.| Nusidėvėjimo klasės (:count) buvo sėkmingai ištrintos. Daugiau informacijos rasite žemiau.',
     ],
 
 ];

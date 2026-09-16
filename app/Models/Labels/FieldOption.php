@@ -31,7 +31,7 @@ class FieldOption
         if (in_array($dataPath[0], ['assignedTo', 'displayName'])) {
             $assigned = $asset->relationLoaded('assignedTo') ? $asset->assigned : $asset->assignedTo;
 
-            if (!$assigned) {
+            if (! $assigned) {
                 return null;
             }
             if ($dataPath[0] === 'displayName') {
@@ -40,6 +40,7 @@ class FieldOption
             if ($assigned instanceof User) {
                 return $assigned->full_name;
             }
+
             return $assigned->name ?? $assigned->display_name ?? null;
         }
 
@@ -47,12 +48,19 @@ class FieldOption
         if ($dataPath[0] === 'purchase_date') {
             return $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : null;
         }
+        if ($dataPath[0] === 'warranty_months') {
+
+            return ($asset->warranty_months > 0) ? e($asset->warranty_months.' '.trans('admin/hardware/form.months')) : null;
+        }
+        if ($dataPath[0] === 'warranty_expires') {
+            return ($asset->warranty_months > 0) ? $asset->warranty_expires->toDateString() : null;
+        }
 
         return $dataPath->reduce(
             function ($myValue, $path) {
                 try {
                     return $myValue ? $myValue->{$path} : ${$myValue};
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     return $myValue;
                 }
             }, $asset

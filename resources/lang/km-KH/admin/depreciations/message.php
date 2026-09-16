@@ -19,6 +19,8 @@ return [
         'confirm' => 'តើអ្នកប្រាកដថាចង់លុបថ្នាក់រំលោះនេះទេ?',
         'error' => 'មាន​បញ្ហា​ក្នុង​ការ​លុប​ថ្នាក់​រំលោះ។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'ថ្នាក់រំលោះត្រូវបានលុបដោយជោគជ័យ។',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -17,6 +17,8 @@ return [
         'confirm' => 'คุณแน่ใจหรือไม่ว่าต้องการลบแผนกนี้',
         'error' => 'เกิดปัญหาในการลบแผนก กรุณาลองอีกครั้ง.',
         'success' => 'แผนกนี้ถูกลบเรียบร้อยแล้ว',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

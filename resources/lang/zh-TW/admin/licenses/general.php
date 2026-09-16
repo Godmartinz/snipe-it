@@ -49,6 +49,11 @@ return [
             'log_msg' => '透過圖形化介面的執照大量借出功能借出執照.',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => '此授權的最低數量要求為 :min_amt，目前只剩 :remaining_count 個名額。您可能需要考慮購買更多名額。',

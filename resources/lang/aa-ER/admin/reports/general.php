@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'crwdns6705:0crwdne6705:0',
     'acceptance_request' => 'crwdns6707:0crwdne6707:0',
     'custom_export' => [
+        'asset_company' => 'crwdns14977:0crwdne14977:0',
+        'asset_serial' => 'crwdns14979:0crwdne14979:0',
+        'assigned_asset_tag' => 'crwdns14987:0crwdne14987:0',
         'user_address' => 'crwdns11870:0crwdne11870:0',
         'user_company' => 'crwdns14536:0crwdne14536:0',
         'user_city' => 'crwdns11872:0crwdne11872:0',

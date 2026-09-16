@@ -2,9 +2,10 @@
     'route' => route('api.assets.index'),
     'name' => 'default',
     'fixed_right_number' => 2,
-    'fixed_number' => 1,
+    'fixed_number' => 3,
     'table_header' => trans('general.assets'),
     'status_type' => null,
+    'export_name' => null,
 ])
 
 @aware(['name'])
@@ -18,7 +19,7 @@
     </x-slot:table_header>
 
     <x-slot:bulkactions>
-        <x-table.bulk-assets :status_type="$status_type"/>
+        <x-table.bulk-assets />
     </x-slot:bulkactions>
 
     <x-table
@@ -29,7 +30,7 @@
         show_advanced_search="true"
         buttons="assetButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-assets-{{ date('Y-m-d') }}"
+        export_filename="export-{{ $export_name ? str_slug($export_name).'-' : '' }}assets-{{ date('Y-m-d') }}"
     />
 
 @endcan

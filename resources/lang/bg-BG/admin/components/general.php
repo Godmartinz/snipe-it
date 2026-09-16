@@ -13,4 +13,7 @@ return [
     'total' => 'Общо',
     'update' => 'Обновяване на компонент',
     'checkin_limit' => 'Вписаното количество трябва да е равно или по-малко от :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

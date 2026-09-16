@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Asignada vía asignación masiva en página de licencias',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Solo quedan :remaining_count licencias y su cantidad mínima es de :min_amt. Puede que desee considerar la compra de más licencias.',

@@ -3,6 +3,7 @@
 return [
     'actions' => 'Tegevused',
     'add' => 'Lisa uus',
+    'back' => 'Tagasi',
     'cancel' => 'Loobu',
     'checkin_and_delete' => 'Checkin All / Delete User',
     'delete' => 'Kustuta',

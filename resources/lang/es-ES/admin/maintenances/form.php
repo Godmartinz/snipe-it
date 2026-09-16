@@ -15,6 +15,7 @@ return [
     'responsible_party' => 'Parte responsable',
     'checked_out_to_at_creation' => 'Asignado a',
     'completed_at' => 'Completado en',
+    'completed_at_help' => 'When this maintenance was actually finished. Leave blank if not yet complete. Setting a date here is equivalent to clicking Mark Complete but lets you enter a past date instead of using the current time.',
     'completed_by' => 'Completado por',
     'mark_complete' => 'Marcar como Completada',
     'already_complete' => 'Ya completado',

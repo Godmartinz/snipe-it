@@ -4,14 +4,18 @@ return [
 
     'accepted' => '您已成功接受此項目。',
     'declined' => '您已成功拒絕此項目。',
+    'accept_signature_write_failed' => 'Your acceptance signature could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
+    'accept_pdf_write_failed' => 'The acceptance PDF could not be saved to storage. Acceptance was not recorded. Please contact your administrator.',
     'bulk_manager_warn' => '您的使用者已成功更新，但主管條目未保存，因為您選擇的主管也在要編輯的使用者列表中，使用者不能是自己的主管。 請再次選擇您的使用者並排除主管。',
     'user_exists' => '使用者已存在！',
     'cannot_delete' => '使用者不存在或您沒有刪除的權限。',
     'user_not_found' => '使用者不存在或您沒有檢視的權限。',
     'user_login_required' => '登入欄位是必需的',
     'user_has_no_assets_assigned' => '目前沒有資產分配給此使用者。',
+    'nothing_currently_assigned' => 'Nothing currently assigned.',
     'user_password_required' => '密碼欄位是必需的',
     'insufficient_permissions' => '權限不足',
+    'auth_fields_denied' => 'You do not have permission to modify credential or activation fields on this user. Requested fields not updated: :fields',
     'user_deleted_warning' => '此使用者已被刪除。您必須先還原此使用者才能進行編輯或分配新的資產。',
     'ldap_not_configured' => 'LDAP 整合尚未設定',
     'password_resets_sent' => '已向選定的已啟動且擁有有效電子郵件地址的使用者傳送了密碼重設連結。',
@@ -19,6 +23,15 @@ return [
     'password_reset_sent' => '密碼重置連結已傳送至 :email',
     'user_has_no_email' => '該使用者的個人資料尚未填寫電子郵件。',
     'log_record_not_found' => '找不到此使用者對應的日誌記錄。',
+
+    'impersonate' => [
+        'started' => 'You are now logged in as :name.',
+        'stopped' => 'You are back to your own account.',
+        'cannot_impersonate_self' => 'You cannot log in as yourself.',
+        'cannot_impersonate_superuser' => 'You cannot log in as another superuser.',
+        'target_not_active' => 'That user is deactivated or deleted and cannot be logged in as.',
+        'impersonator_missing' => 'The original account for this impersonation session no longer exists. Please log in again.',
+    ],
 
     'success' => [
         'create' => '新增使用者成功。',
@@ -57,6 +70,7 @@ return [
         'password_ldap' => '此帳戶的密碼由 LDAP/AD 管理。若要更改您的密碼，請聯繫您的 IT 部門。 ',
         'multi_company_items_assigned' => '此使用者已分配屬於不同公司的項目。請先繳回或編輯其所屬公司。',
         'no_pending_acceptances' => '此使用者沒有任何待接受的項目需要提醒。',
+        'company_not_permitted' => 'One or more requested company assignments are outside your permitted company scope.',
     ],
 
     'deletefile' => [

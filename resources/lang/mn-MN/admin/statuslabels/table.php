@@ -13,6 +13,7 @@ return [
     'pending' => 'Хүлээгдэж байна',
     'status_type' => 'Статус төрөл',
     'show_in_nav' => 'Далд nav-д харуулах',
+    'status_label' => 'Status Label',
     'title' => 'Статусын шошго',
     'undeployable' => 'Undeployable',
     'update' => 'Статус шошго шинэчлэх',

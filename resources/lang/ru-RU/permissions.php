@@ -16,53 +16,54 @@ return [
     */
 
     'superuser' => [
-        'name' => 'Super User',
-        'note' => 'Determines whether the user has full access to all aspects of the admin. This setting overrides ALL more specific and restrictive permissions throughout the system. ',
+        'name' => 'Суперпользователь',
+        'note' => 'Определяет, имеет ли пользователь полный доступ ко всем разделам администратора. Этот параметр переопределяет ВСЕ более конкретные и ограниченные разрешения в системе. ',
     ],
     'admin' => [
-        'name' => 'Admin Access',
-        'note' => 'Determines whether the user has access to most aspects of the system EXCEPT the System Admin Settings. These users will be able to manage users, locations, categories, etc, but ARE constrained by Full Multiple Company Support if it is enabled.',
+        'name' => 'Доступ администратора',
+        'note' => 'Определяет, есть ли у пользователя доступ к большинству функций системы, ЗА ИСКЛЮЧЕНИЕМ настроек системного администратора. Такие пользователи могут управлять пользователями, местоположениями, категориями и т. д., но при включенной функции полной поддержки нескольких компаний их возможности будут ограничены.',
     ],
 
     'import' => [
-        'name' => 'CSV Import',
-        'note' => 'This will allow users to import even if access to users, assets, etc is denied elsewhere.',
+        'name' => 'Импорт CSV',
+        'note' => 'Это позволит пользователям импортировать данные, даже если доступ к пользователям, активам и т. д. в других местах ограничен.',
     ],
 
     'reports' => [
-        'name' => 'Reports Access',
-        'note' => 'Determines whether the user has access to the Reports section of the application.',
+        'name' => 'Доступ к отчетам',
+        'note' => 'Определяет, имеет ли пользователь доступ к разделу Отчеты приложения.',
     ],
 
     'assets' => [
         'name' => 'Активы',
-        'note' => 'Grants access to the Assets section of the application.',
+        'note' => 'Предоставляет доступ к секции активов приложения. ',
     ],
 
     'assetsview' => [
-        'name' => 'View Assets',
+        'name' => 'Показать актив',
+        'note' => 'Note that users with this permission will also be able to see (not modify or delete) files uploaded to the asset model as well. This is to make it easier to share common documents like user manuals across assets without having to upload them to every asset, and to avoid having to grant the user permission to modify asset files.',
     ],
 
     'assetscreate' => [
-        'name' => 'Create New Assets',
+        'name' => 'Создать новые активы',
     ],
 
     'assetsedit' => [
-        'name' => 'Edit Assets',
+        'name' => 'Редактировать активы',
     ],
 
     'assetsdelete' => [
-        'name' => 'Delete Assets',
+        'name' => 'Удалить активы',
     ],
 
     'assetscheckin' => [
-        'name' => 'Check In',
-        'note' => 'Check assets back into inventory that are currently checked out.',
+        'name' => 'Принять',
+        'note' => 'Верните на склад активы, которые в данный момент выданы.',
     ],
 
     'assetscheckout' => [
-        'name' => 'Check Out',
-        'note' => 'Assign assets in inventory by checking them out.',
+        'name' => 'Выдать',
+        'note' => 'Назначить активы в инвентаризацию, проверяя их.',
     ],
 
     'assetsaudit' => [

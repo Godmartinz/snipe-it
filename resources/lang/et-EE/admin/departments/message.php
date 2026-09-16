@@ -17,6 +17,8 @@ return [
         'confirm' => 'Kas olete kindel, et soovite selle osakonna kustutada?',
         'error' => 'Osakonna kustutamisel tekkis küsimus. Palun proovi uuesti.',
         'success' => 'Osakond kustutati edukalt.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Aksepteringsforespørsel slettet',
     'acceptance_request' => 'Akseptanseforespørsel',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Brukerens adresse',
         'user_company' => 'User Company',
         'user_city' => 'Bruker by',

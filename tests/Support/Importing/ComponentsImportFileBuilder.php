@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
  *  companyName?: string,
  *  itemName?: string,
  *  location?: string,
+ *  notes?: string,
  *  orderNumber?: string,
  *  purchaseCost?: int,
  *  purchaseDate?: string,
@@ -36,11 +37,13 @@ class ComponentsImportFileBuilder extends FileBuilder
             'companyName' => 'Company',
             'itemName' => 'item Name',
             'location' => 'Location',
+            'notes' => 'Notes',
             'orderNumber' => 'Order Number',
             'purchaseCost' => 'Purchase Cost',
             'purchaseDate' => 'Purchase Date',
             'quantity' => 'Quantity',
             'serialNumber' => 'Serial number',
+            'requestable' => 'Requestable',
         ];
     }
 
@@ -57,11 +60,13 @@ class ComponentsImportFileBuilder extends FileBuilder
             'companyName' => Str::random()." {$faker->companySuffix}",
             'itemName' => Str::random(),
             'location' => "{$faker->city}, {$faker->country}",
+            'notes' => $faker->sentence(),
             'orderNumber' => "ON:COM:{$faker->uuid}",
             'purchaseCost' => rand(1, 100_000),
             'purchaseDate' => $faker->date,
             'quantity' => rand(1, 100_000),
             'serialNumber' => 'SN:COM:'.Str::random(),
+            'requestable' => '',
         ];
     }
 }

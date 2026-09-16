@@ -20,6 +20,8 @@ return [
         'confirm' => 'Are you sure you wish to delete this accessory?',
         'error' => 'There was an issue deleting the accessory. Please try again.',
         'success' => 'The accessory was deleted successfully.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'Inga tillgångar valdes, så ingenting togs bort.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Modell borttagen! |:success_count modeller borttagna!',
         'success_partial' => ':success_count modell(erna) raderades, men :fail_count kunde inte raderas eftersom de fortfarande har tillgångar kopplade till sig.',
     ],

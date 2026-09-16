@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Заявката за приемане е изтрита',
     'acceptance_request' => 'Заявка за приемане',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Адрес на потребителя',
         'user_company' => 'Фирма',
         'user_city' => 'Град на потребителя',

@@ -13,4 +13,7 @@ return [
     'total' => 'Ang Kabuuan',
     'update' => 'I-update ang Komponent',
     'checkin_limit' => 'Ang bilang ng nai-check in ay dapat pareho o mas mababa sa :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

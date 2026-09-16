@@ -17,6 +17,7 @@ use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
 use Illuminate\Bus\BusServiceProvider;
 use Illuminate\Cache\CacheServiceProvider;
+use Illuminate\Concurrency\ConcurrencyServiceProvider;
 use Illuminate\Cookie\CookieServiceProvider;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -359,6 +360,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allow test buttons to target private / loopback IPs
+    |--------------------------------------------------------------------------
+    |
+    | Various admin screens (LDAP wizard, Google OAuth, webhook config, etc.)
+    | expose "Test" buttons that fire a real network request to a user-
+    | supplied host. Without a guard these are SSRF / port-scanning vectors:
+    | a superadmin (compromised account, insider, or SaaS tenant) could
+    | probe internal-only services, cloud metadata endpoints (169.254.169.254),
+    | loopback, etc. and read the distinguishing error responses to
+    | enumerate them.
+    |
+    | Default: false. The test helpers resolve the hostname and reject any
+    | URL that lands on a private / loopback / link-local / reserved range.
+    |
+    | Set to true ONLY when the Snipe-IT installation is legitimately
+    | pointed at services on the same private network (self-hosted on-prem
+    | alongside internal AD/Slack/webhooks is the typical case). Never
+    | enable on hosted / multi-tenant deployments.
+    |
+    */
+
+    'test_allow_private_ips' => env('TEST_ALLOW_PRIVATE_IPS', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Superuser Impersonation
     |--------------------------------------------------------------------------
     |
@@ -441,6 +467,7 @@ return [
         SnipeTranslationServiceProvider::class, // we REPLACE the default Laravel translator with our own
         ValidationServiceProvider::class,
         ViewServiceProvider::class,
+        ConcurrencyServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -587,5 +614,49 @@ return [
   */
 
     'max_unpaginated_records' => env('MAX_UNPAGINATED', '5000'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Report Execution Time Limit
+    |--------------------------------------------------------------------------
+    | Seconds passed to ini_set('max_execution_time') at the top of the
+    | streaming custom-report controllers so long chunked exports don't
+    | get killed by PHP's shorter default. Default 12000 (200 minutes).
+    */
+
+    'report_time_limit' => env('REPORT_TIME_LIMIT', 12000),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Force TLS / Allow Insecure Hosts
+    |--------------------------------------------------------------------------
+    | force_tls: forces the URL generator to emit https:// links regardless
+    | of the incoming request scheme. Snipe-IT already forces https when
+    | APP_URL starts with https, this flag covers reverse-proxy setups where
+    | APP_URL is http but is actually TLS. allow_insecure_hosts skips
+    | the URL::forceRootUrl() lockdown that otherwise rejects requests whose
+    | Host header doesn't match APP_URL.
+    */
+
+    'force_tls' => env('APP_FORCE_TLS', false),
+
+    'allow_insecure_hosts' => env('APP_ALLOW_INSECURE_HOSTS', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | LDAP Execution Limits
+    |--------------------------------------------------------------------------
+    | Seconds and memory ceiling passed to ini_set() at the top of the
+    | LDAP sync command so a large directory sync doesn't get killed by
+    | PHP's shorter defaults. ldap_tls_cacert points at a custom CA
+    | bundle to trust when running LDAPS against a self-signed or
+    | private-CA-signed directory.
+    */
+
+    'ldap_time_limit' => env('LDAP_TIME_LIM', 600),
+
+    'ldap_memory_limit' => env('LDAP_MEM_LIM', '500M'),
+
+    'ldap_tls_cacert' => env('LDAPTLS_CACERT'),
 
 ];

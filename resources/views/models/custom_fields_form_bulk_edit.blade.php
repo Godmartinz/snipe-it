@@ -55,8 +55,6 @@
                 @endif
                 @if(!$field->is_unique)
                     <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}">{{ old($field->db_column_name(), (isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}</textarea>
-                        <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}"
-                                  name="{{ $field->db_column_name() }}">{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}</textarea>
                 @endif
               @elseif ($field->element=='checkbox')
                     <!-- Checkboxes -->
@@ -99,6 +97,25 @@
                         data-target-name="{{ $field->db_column_name() }}">
                     {{ trans('/admin/hardware/general.clear') }}
                 </button>
+
+            @elseif ($field->element=='date_picker')
+                <div class="input-group col-md-5" style="padding-left: 0px;">
+                    <x-input.datepicker
+                        id="{{ $field->db_column_name() }}"
+                        name="{{ $field->db_column_name() }}"
+                        :value="old($field->db_column_name(), isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')"
+                    />
+                </div>
+
+            @elseif ($field->element=='datetime_picker')
+                <div class="input-group col-md-6" style="padding-left: 0px;">
+                    <x-input.datetimepicker
+                        id="{{ $field->db_column_name() }}"
+                        name="{{ $field->db_column_name() }}"
+                        :value="old($field->db_column_name(), isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')"
+                        :default_now="false"
+                    />
+                </div>
             @endif
 
             @else
@@ -107,15 +124,28 @@
             @if ($field->format=='DATE')
 
             <div class="input-group col-md-5" style="padding-left: 0px;">
-                <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
-                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}"
-                           name="{{ $field->db_column_name() }}"
-                           id="{{ $field->db_column_name() }}" readonly
-                           value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}"
-                           style="background-color:inherit">
-                    <span class="input-group-addon"><x-icon type="calendar" /></span>
-                </div>
+                <x-input.datepicker
+                    id="{{ $field->db_column_name() }}"
+                    name="{{ $field->db_column_name() }}"
+                    :value="old($field->db_column_name(), isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')"
+                />
             </div>
+
+
+                @elseif ($field->format=='DATETIME')
+
+                    {{-- Outer wrapper with inline padding-left: 0 to match
+                         the DATE case above; conflicting duplicate CSS
+                         rules for .input-group[class*="col-"] otherwise
+                         re-apply the 15px grid padding. --}}
+                  <div class="input-group col-md-6" style="padding-left: 0px;">
+                        <x-input.datetimepicker
+                            id="{{ $field->db_column_name() }}"
+                            name="{{ $field->db_column_name() }}"
+                            :value="old($field->db_column_name(), isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')"
+                            :default_now="false"
+                        />
+                    </div>
 
 
                 @else
@@ -128,10 +158,11 @@
                                 <input type="text"
                                        value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : '')) }}"
                                        id="{{ $field->db_column_name() }}"
-                                       class="form-control"
+                                       class="form-control{{ strtoupper($field->format) === 'MAC' ? ' mac-address-input' : '' }}"
                                        name="{{ $field->db_column_name() }}"
-                                       placeholder="Enter {{ strtolower($field->format) }} text">
-                        @endif 
+                                       @if (strtoupper($field->format) === 'MAC') inputmode="text" autocomplete="off" @endif
+                                       placeholder="{{ strtoupper($field->format) === 'MAC' ? 'AA:BB:CC:DD:EE:FF' : 'Enter '.strtolower($field->format).' text' }}">
+                        @endif
                             @else
                                 <input type="text" value="{{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}" class="form-control disabled" disabled>
                     @endif

@@ -13,6 +13,7 @@ return [
     'pending' => 'Pending',
     'status_type' => 'Vrsta statusa',
     'show_in_nav' => 'Show in side nav',
+    'status_label' => 'Oznaka statusa',
     'title' => 'Oznake statusa',
     'undeployable' => 'Undeployable',
     'update' => 'Ažuriranje oznake statusa',

@@ -13,15 +13,13 @@
         @if ($acceptanceQuantity = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->sum('qty'))
           <div class="row">
             <div class="col-md-12">
-              <div class="alert alert alert-warning fade in">
-                <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
-
+              <x-alert type="warning" icon="warning">
                 <strong>
                   <a href="{{ route('account.accept') }}" style="color: white;">
                     {{ trans_choice('general.unaccepted_profile_warning', $acceptanceQuantity, ['count' => $acceptanceQuantity]) }}
                   </a>
-                  </strong>
-              </div>
+                </strong>
+              </x-alert>
             </div>
           </div>
         @endif
@@ -137,7 +135,7 @@
                     <div class="col-md-3 col-xs-12 col-sm-push-9 info-stack">
 
                             <div class="col-md-12 text-center">
-                              <img src="{{ $user->present()->gravatar() }}"  class=" img-thumbnail hidden-print" style="margin-bottom: 20px;" alt="{{ $user->display_name }}" alt="User avatar">
+                              <img src="{{ $user->present()->gravatar() }}" class="img-thumbnail hidden-print" style="margin-bottom: 20px;" referrerpolicy="no-referrer" alt="{{ $user->display_name }}">
                             </div>
 
                               @if (!request()->filled('user_id') || auth()->user()->id == $user->id)
@@ -713,7 +711,7 @@
                     <td>{{ $accessory->name }}</td>
                     @can('self.view_purchase_cost')
                       <td>
-                        {!! Helper::formatCurrencyOutput($accessory->purchase_cost) !!}
+                        {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
                       </td>
                     @endcan
 
@@ -760,7 +758,7 @@
                     <td>{{ $consumable->name }}</td>
                     @can('self.view_purchase_cost')
                       <td>
-                        {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}
+                        {!! Helper::formatCurrencyOutput($consumable->lastOrderDefaults()['unit_cost'] ?? null) !!}
                       </td>
                     @endcan
                     <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>

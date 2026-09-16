@@ -20,6 +20,8 @@ return [
         'confirm' => 'Ali ste prepričani, da želite izbrisati ta dodatek?',
         'error' => 'Prišlo je do napake pri brisanju dodatka. Prosim poskusite ponovno.',
         'success' => 'Dodatek je bil uspešno izbrisan.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

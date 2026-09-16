@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => '沒有型號被選擇，因此沒有更新任何內容。',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => '已刪除型號！|已刪除 :success_count 個型號！',
         'success_partial' => ':success_count 個型號被刪除, 但是 :fail_count 無法被刪除, 因為它們仍有與之關聯的資產。',
     ],

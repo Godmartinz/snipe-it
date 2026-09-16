@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'week_start_select' => 'Select Day of Week',
-    'week_start' => 'Day the Week Starts On',
+    'week_start_select' => 'Выберите день недели',
+    'week_start' => 'День начала недели',
     'today' => 'Сегодня',
     'clear' => 'Очистить',
     'days' => [

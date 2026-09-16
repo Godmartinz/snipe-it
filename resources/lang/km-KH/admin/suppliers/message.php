@@ -20,7 +20,7 @@ return [
         'error' => 'មានបញ្ហាក្នុងការលុបអ្នកផ្គត់ផ្គង់។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'អ្នកផ្គត់ផ្គង់ត្រូវបានលុបដោយជោគជ័យ។',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

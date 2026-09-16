@@ -13,6 +13,7 @@ return [
     'pending' => 'Ruošiama',
     'status_type' => 'Būsenos tipas',
     'show_in_nav' => 'Rodyti šoniniame meniu',
+    'status_label' => 'Būsenos žyma',
     'title' => 'Būsenos žymos',
     'undeployable' => 'Negalima išduoti',
     'update' => 'Atnaujinti būsenos žymą',

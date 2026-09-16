@@ -3,6 +3,7 @@
 return [
     'actions' => 'Akcie',
     'add' => 'Pridať nové',
+    'back' => 'Späť',
     'cancel' => 'Zrušiť',
     'checkin_and_delete' => 'Prijať všetko / Zmazať používateľa',
     'delete' => 'Vymazať',

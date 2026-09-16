@@ -28,8 +28,6 @@
                         name="company_id"
                         :selected="old('company_id', $item->company_id)"
                     />
-                @else
-                    <input id="hidden_company_id" type="hidden" name="company_id" value="{{ Auth::user()->company_id }}">
                 @endif
 
                 <x-form.row
@@ -57,7 +55,11 @@
                     :maxlength="34"
                 />
 
-                @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id'])
+                <x-input.user-select
+                    :label="trans('admin/users/table.manager')"
+                    name="manager_id"
+                    :selected="old('manager_id', $item->manager_id)"
+                />
 
                 <x-input.location-select
                     :label="trans('general.location')"

@@ -16,8 +16,6 @@ class LabelWriter_2112283 extends LabelWriter
 
     private const LABEL_SIZE = 2.80;
 
-    private const LABEL_MARGIN = -0.35;
-
     private const FIELD_SIZE = 2.80;
 
     private const FIELD_MARGIN = 0.15;
@@ -66,8 +64,6 @@ class LabelWriter_2112283 extends LabelWriter
     {
         return true;
     }
-
-    public function preparePDF($pdf) {}
 
     public function write($pdf, $record)
     {

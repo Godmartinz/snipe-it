@@ -19,8 +19,10 @@ return [
     'warranty' => 'Гарантия',
     'not_warranty' => 'Гарантии нет/истекла',
     'complete' => [
-        'confirm' => 'Are you sure you want to mark this maintenance as complete? This cannot be undone.',
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'confirm' => 'Вы уверены, что хотите завершить это обслуживание? Отменить его будет нельзя.',
+        'success' => 'Обслуживание отмечено как завершенное.',
+        'error' => 'Возникла проблема с пометкой этого обслуживания как завершенного. Пожалуйста, попробуйте снова.',
     ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

@@ -16,5 +16,7 @@ return [
         'confirm' => 'Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτήν την εταιρεία;',
         'error' => 'Υπήρξε ένα ζήτημα διαγράφοντας την εταιρεία. Παρακαλώ δοκιμάστε ξανά.',
         'success' => 'Η εταιρεία έχει διαγραφεί με επιτυχία.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

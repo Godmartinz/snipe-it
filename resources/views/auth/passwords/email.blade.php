@@ -36,10 +36,9 @@
                         <div class="login-box-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div class="alert alert-info">
-                                        <x-icon type="info-circle" />
+                                    <x-alert type="info" icon="info-circle">
                                         {!! trans('auth/general.username_help_top') !!}
-                                    </div>
+                                    </x-alert>
                                 </div>
 
 

@@ -64,7 +64,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'sendPasswordReset',
         ]
-    )->name('users.password');
+    )->where('userId', '[0-9]+')
+        ->name('users.password');
 
     Route::get(
         '{userId}/print',
@@ -72,7 +73,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'printInventory',
         ]
-    )->name('users.print');
+    )->where('userId', '[0-9]+')
+        ->name('users.print');
 
     Route::post(
         '{userId}/email',
@@ -80,7 +82,8 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\UsersController::class,
             'emailAssetList',
         ]
-    )->name('users.email');
+    )->where('userId', '[0-9]+')
+        ->name('users.email');
 
     Route::post(
         '{user}/acceptance-reminder',
@@ -160,6 +163,19 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             'update',
         ]
     )->name('users/bulkeditsave');
+
+    Route::get(
+        '{user}/transfer',
+        [Users\UserItemTransferController::class, 'show'],
+    )->name('users.transfer.show')
+        ->breadcrumbs(fn (Trail $trail, $user) => $trail
+            ->parent('users.show', $user)
+            ->push(trans('admin/users/general.transfer.title'), route('users.transfer.show', $user)));
+
+    Route::post(
+        '{user}/transfer',
+        [Users\UserItemTransferController::class, 'store'],
+    )->name('users.transfer.store');
 
 });
 

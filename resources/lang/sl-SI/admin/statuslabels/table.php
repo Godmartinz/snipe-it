@@ -13,6 +13,7 @@ return [
     'pending' => 'Na čakanju',
     'status_type' => 'Vrsta statusa',
     'show_in_nav' => 'Prikaži v stranski vrstici',
+    'status_label' => 'Oznaka stanja',
     'title' => 'Oznake statusa',
     'undeployable' => 'Nerazporejeno',
     'update' => 'Posodobi statusno oznako',

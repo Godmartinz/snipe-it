@@ -19,6 +19,8 @@ return [
         'confirm' => 'Oletko varma että haluat poistaa tämän poistoluokan?',
         'error' => 'Poistoluokan poistamisessa tapahtui virhe. Yritä uudelleen.',
         'success' => 'Poistoluokka poistettiin onnistuneesti.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

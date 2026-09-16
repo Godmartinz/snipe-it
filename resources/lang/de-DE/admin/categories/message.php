@@ -21,7 +21,7 @@ return [
         'confirm' => 'Sind Sie sicher, dass Sie diese Kategorie löschen wollen?',
         'error' => 'Beim Löschen der Kategorie ist ein Problem aufgetreten. Bitte versuchen Sie es erneut.',
         'success' => 'Kategorie wurde erfolgreich gelöscht.',
-        'bulk_success' => 'Kategorien wurden erfolgreich gelöscht.',
+        'bulk_success' => 'Category deleted successfully.|:count categories were deleted successfully.',
         'partial_success' => 'Kategorie wurde erfolgreich gelöscht. Siehe weitere Informationen unten. | :count Kategorien wurden erfolgreich gelöscht. Siehe weitere Informationen unten.',
     ],
 

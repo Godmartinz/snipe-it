@@ -3,6 +3,7 @@
 return [
     'actions' => 'Toiminnot',
     'add' => 'Lisää uusi',
+    'back' => 'Edellinen',
     'cancel' => 'Peruuta',
     'checkin_and_delete' => 'Palauta Kaikki / Poista Käyttäjä',
     'delete' => 'Poista',

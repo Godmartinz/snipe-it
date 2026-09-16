@@ -23,4 +23,6 @@ return [
         'success' => 'Manutenzione segnata come completata.',
         'error' => 'Si è verificato un problema segnando questa manutenzione come completata. Riprova.',
     ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

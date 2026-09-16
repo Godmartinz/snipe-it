@@ -3,6 +3,7 @@
 return [
     'actions' => 'Tindakan',
     'add' => 'Tambah Baru',
+    'back' => 'Kembali',
     'cancel' => 'Batalkan',
     'checkin_and_delete' => 'Tandai Semua Masuk / Hapus Pengguna',
     'delete' => 'Hapus',

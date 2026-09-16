@@ -4,16 +4,29 @@ namespace App\Notifications;
 
 use App\Helpers\Helper;
 use App\Models\Setting;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class RequestAssetCancelation extends Notification
+class RequestAssetCancelation extends Notification implements ShouldQueue
 {
-    private $params;
+    use Queueable;
+
+    public $target;
+    public $item;
+    public $note;
+    public $last_checkout;
+    public $item_quantity;
+    public $expected_checkin;
+    public $requested_date;
+
+    public $start_date;
+
+    public $end_date;
 
     /**
      * Create a new notification instance.
@@ -28,7 +41,6 @@ class RequestAssetCancelation extends Notification
         $this->expected_checkin = '';
         $this->requested_date = Helper::getFormattedDateObject($params['requested_date'], 'datetime',
             false);
-        $this->settings = Setting::getSettings();
 
         if (array_key_exists('note', $params)) {
             $this->note = $params['note'];
@@ -43,6 +55,18 @@ class RequestAssetCancelation extends Notification
             $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
                 false);
         }
+
+        // Reservation window (if the canceled request carried one).
+        // Callers that read the dates off the CheckoutRequest row
+        // before triggering the cancel can pass them through so the
+        // notification tells the admin exactly which reservation was
+        // scrapped.
+        $this->start_date = ! empty($params['start_date'])
+            ? Helper::getFormattedDateObject($params['start_date'], 'date', false)
+            : '';
+        $this->end_date = ! empty($params['end_date'])
+            ? Helper::getFormattedDateObject($params['end_date'], 'date', false)
+            : '';
     }
 
     /**
@@ -71,8 +95,8 @@ class RequestAssetCancelation extends Notification
         $item = $this->item;
         $note = $this->note;
         $qty = $this->item_quantity;
-        $botname = ($this->settings->webhook_botname) ? $this->settings->webhook_botname : 'Snipe-Bot';
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $botname = (Setting::getSettings()->webhook_botname) ? Setting::getSettings()->webhook_botname : 'Snipe-Bot';
+        $channel = (Setting::getSettings()->webhook_channel) ? Setting::getSettings()->webhook_channel : '';
 
         $fields = [
             'QTY' => $qty,
@@ -81,6 +105,12 @@ class RequestAssetCancelation extends Notification
 
         if (($this->expected_checkin) && ($this->expected_checkin != '')) {
             $fields['Expected Checkin'] = $this->expected_checkin;
+        }
+        if ($this->start_date) {
+            $fields['Start Date'] = $this->start_date;
+        }
+        if ($this->end_date) {
+            $fields['End Date'] = $this->end_date;
         }
 
         return (new SlackMessage)
@@ -119,6 +149,8 @@ class RequestAssetCancelation extends Notification
                 'qty' => $this->item_quantity,
                 'last_checkout' => $this->last_checkout,
                 'expected_checkin' => $this->expected_checkin,
+                'start_date' => $this->start_date,
+                'end_date' => $this->end_date,
                 'intro_text' => trans('mail.a_user_canceled'),
             ])
             ->subject('⚠️ '.trans('general.request_canceled'))

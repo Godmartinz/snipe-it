@@ -413,6 +413,7 @@ class AssetsController extends Controller
                 break;
             case 'location':
                 $assets->OrderLocation($order);
+                break;
             case 'rtd_location':
                 $assets->OrderRtdLocation($order);
                 break;
@@ -461,10 +462,10 @@ class AssetsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
+        $total = $assets->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $assets->count();
         $assets = $assets->skip($offset)->take($limit)->get();
 
         /**
@@ -498,17 +499,17 @@ class AssetsController extends Controller
             $assets = $assets->withTrashed();
         }
 
-        if (($assets = $assets->get()) && ($assets->count()) > 0) {
+        if (($assets = $assets->get()) && ($total = $assets->count()) > 0) {
 
             // If there is exactly one result and the deleted parameter is not passed, we should pull the first (and only)
             // asset from the returned collection, since transformAsset() expects an Asset object, NOT a collection
-            if (($assets->count() == 1) && ($request->input('deleted') != 'true')) {
+            if (($total == 1) && ($request->input('deleted') != 'true')) {
                 return (new AssetsTransformer)->transformAsset($assets->first());
 
                 // If there is more than one result OR if the endpoint is requesting deleted items (even if there is only one
                 // match, return the normal collection transformed.
             } else {
-                return (new AssetsTransformer)->transformAssets($assets, $assets->count());
+                return (new AssetsTransformer)->transformAssets($assets, $total);
             }
         }
 
@@ -548,10 +549,10 @@ class AssetsController extends Controller
             $assets = $assets->withTrashed();
         }
 
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
+        $total = $assets->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $assets->count();
         $assets = $assets->skip($offset)->take($limit)->get();
 
         if (($assets) && ($assets->count()) > 0) {
@@ -633,12 +634,39 @@ class AssetsController extends Controller
             && ! auth()->user()->isSuperUser()) {
             $companyIds = array_values(array_filter(array_map('intval', explode(',', $request->input('companyId')))));
             if (! empty($companyIds)) {
-                $assets->whereIn('assets.company_id', $companyIds);
+                if (Setting::getSettings()->null_company_is_floater) {
+                    // Floater mode: include null-company (floater) assets too,
+                    // matching the "items from any company can be checked out
+                    // to targets with no company assignment" policy. Without
+                    // this the whereIn below hid all floaters from the
+                    // checkout dropdown while server-side canCheckoutTo still
+                    // permitted the checkout (#19394).
+                    $assets->where(function ($q) use ($companyIds) {
+                        $q->whereIn('assets.company_id', $companyIds)
+                            ->orWhereNull('assets.company_id');
+                    });
+                } else {
+                    $assets->whereIn('assets.company_id', $companyIds);
+                }
             }
         }
 
         if ($request->filled('excludeId')) {
             $assets->where('assets.id', '!=', (int) $request->input('excludeId'));
+        }
+
+        // Pre-scope the picker to a specific user's assigned assets.
+        // Used by the components-checkout screen when reached via a
+        // /requests row: an admin fulfilling a component request wants
+        // to install the part into one of the requester's existing
+        // assets, not hunt across the whole fleet. Empty result is the
+        // honest answer here - if the requester has nothing assigned,
+        // there's no valid install target and the admin should see
+        // that instead of a fallback to the full fleet.
+        if ($request->filled('assignedTo')) {
+            $assignedUserId = (int) $request->input('assignedTo');
+            $assets->where('assets.assigned_to', $assignedUserId)
+                ->where('assets.assigned_type', User::class);
         }
 
         if ($request->filled('statusType') && $request->input('statusType') === 'RTD') {
@@ -750,6 +778,20 @@ class AssetsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')));
         }
 
+        // The create payload may include assigned_user / assigned_asset /
+        // assigned_location and normally triggers a real checkOut() alongside
+        // the create. A role with only assets.create (and an explicit deny on
+        // assets.checkout) would otherwise land a checkout event on the
+        // newly-fabricated asset, bypassing the checkout permission entirely.
+        // Rather than reject the whole request, drop the checkout side of the
+        // operation and keep the create. The response message flags the skipped checkout so they
+        // can detect the partial success.
+        $checkoutSkippedForPermission = $requestedCheckout && ! Gate::allows('checkout', $asset);
+        if ($checkoutSkippedForPermission) {
+            $requestedCheckout = false;
+            $target = null;
+        }
+
         if ($requestedCheckout) {
             $companyMismatchResponse = $this->checkoutCompanyMismatchResponse($asset, $target);
             if ($companyMismatchResponse) {
@@ -776,7 +818,11 @@ class AssetsController extends Controller
                 $asset->image = $asset->getImageUrl();
             }
 
-            return response()->json(Helper::formatStandardApiResponse('success', $asset, trans('admin/hardware/message.create.success')));
+            $message = $checkoutSkippedForPermission
+                ? trans('admin/hardware/message.create.success_no_checkout')
+                : trans('admin/hardware/message.create.success');
+
+            return response()->json(Helper::formatStandardApiResponse('success', $asset, $message));
 
             // below is what we want the _eventual_ return to look like - in a more standardized format.
             // return response()->json(Helper::formatStandardApiResponse('success', (new AssetsTransformer)->transformAsset($asset), trans('admin/hardware/message.create.success')));
@@ -1025,12 +1071,62 @@ class AssetsController extends Controller
             ];
         }
 
+        // The PATCH/PUT update path accepts assigned_user / assigned_asset /
+        // assigned_location for backwards compatibility with older callers,
+        // but that meant a role with only assets.edit (and an explicit deny
+        // on assets.checkout) could still trigger $asset->checkOut() and
+        // record a checkout event, bypassing the permission entirely.
+        // Enforce the same authorization the dedicated checkout endpoint
+        // requires whenever the update payload asks for a checkout.
+        if ($requestedCheckout && ! Gate::allows('checkout', $asset)) {
+            return [
+                'success' => false,
+                'asset' => null,
+                'message' => null,
+                'errors' => null,
+                'encrypted_field_warning' => false,
+                'error_response_key' => 'general.unauthorized',
+            ];
+        }
+
+        // Same as the dedicated checkout endpoint: an asset is only eligible
+        // for checkout when it is not currently assigned to anyone and its
+        // status is deployable / not archived. Rejecting here blocks
+        //   (a) reassigning an already-checked-out asset without an
+        //       intervening checkin (which the pre-fix code allowed and
+        //       recorded as two consecutive checkout events), and
+        //   (b) checking out an asset in a Pending / non-deployable status.
+        // availableForCheckout() covers both. See App\Models\Asset::availableForCheckout.
+        if ($requestedCheckout && ! $asset->availableForCheckout()) {
+            return [
+                'success' => false,
+                'asset' => null,
+                'message' => null,
+                'errors' => null,
+                'encrypted_field_warning' => false,
+                'error_response_key' => 'admin/hardware/message.checkout.not_available',
+            ];
+        }
+
         $updated = DB::transaction(function () use ($asset, $request, $target, $requestedCheckout): bool {
             if (! $asset->save()) {
                 return false;
             }
 
             if ($requestedCheckout) {
+                // Concurrency guard, same shape as Api\AssetsController::checkout.
+                // availableForCheckout() at line 1067 ran outside the transaction;
+                // without a row lock, two racing PATCH requests that both include
+                // assigned_user / assigned_asset / assigned_location could each
+                // pass that check and both proceed through checkOut(), producing
+                // duplicate checkout-history rows and a doubled checkout_counter.
+                // Re-fetch the row under lockForUpdate and re-check availability
+                // against the locked snapshot before invoking checkOut.
+                $locked = Asset::whereKey($asset->id)->lockForUpdate()->first();
+                if (! $locked || ! $locked->availableForCheckout()) {
+                    return false;
+                }
+
                 // Preserve the asset name if the name wasn't in the payload.
                 $asset_name = $request->has('name') ? $request->input('name') : $asset->name;
 
@@ -1252,6 +1348,14 @@ class AssetsController extends Controller
             $error_payload['target_type'] = 'user';
         }
 
+        // withoutGlobalScopes above bypasses the SoftDeletes scope so we
+        // can distinguish "target not found" from "target in another company"
+        // for FMCS error messaging. Trashed targets must not be treated as
+        // valid checkout destinations though, so exclude them here.
+        if (isset($target) && ! empty($target->deleted_at)) {
+            $target = null;
+        }
+
         if ($request->filled('status_id')) {
             $asset->status_id = $request->input('status_id');
         }
@@ -1284,8 +1388,23 @@ class AssetsController extends Controller
         //            $asset->location_id = $target->rtd_location_id;
         //        }
 
-        // Keep checkout mutation + checkout logging/event side effects atomic.
+        // Concurrency guard. availableForCheckout() above ran on an
+        // unlocked read, so two simultaneous checkout requests can both
+        // observe the asset as available and both proceed through
+        // checkOut(), producing duplicate checkout-history rows and
+        // double-incrementing checkout_counter on a single-assignment
+        // asset. Re-fetch the row under lockForUpdate INSIDE the
+        // transaction and re-check availability against the locked
+        // snapshot. Any concurrent checkout blocks on the row lock until
+        // this transaction commits, then sees the asset as no longer
+        // available. Mirrors the pattern in ConsumablesController::store
+        // (GHSA-x4g2-87xc-m5jm).
         $wasCheckedOut = DB::transaction(function () use ($asset, $target, $checkout_at, $expected_checkin, $note, $asset_name): bool {
+            $locked = Asset::whereKey($asset->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->availableForCheckout()) {
+                return false;
+            }
+
             return $asset->checkOut($target, auth()->user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id);
         });
 
@@ -1401,18 +1520,56 @@ class AssetsController extends Controller
     public function checkinByTag(Request $request, $tag = null): JsonResponse
     {
         $this->authorize('checkin', Asset::class);
-        if ($tag == null && null !== ($request->input('asset_tag'))) {
-            $tag = $request->input('asset_tag');
-        }
-        $asset = Asset::where('asset_tag', $tag)->first();
+
+        $asset = $this->resolveCheckinAssetFromBody($request, $tag);
 
         if ($asset) {
             return $this->checkin($request, $asset->id);
         }
 
+        $displayKey = $tag
+            ?? $request->input('checkin_key')
+            ?? $request->input('asset_tag');
+
         return response()->json(Helper::formatStandardApiResponse('error', [
-            'asset' => e($tag),
-        ], 'Asset with tag '.e($tag).' not found'));
+            'asset' => e($displayKey),
+        ], 'Asset with tag '.e($displayKey).' not found'));
+    }
+
+    /**
+     * Body-based asset lookup for the quickscan-checkin path. Mirrors the
+     * audit-side resolveAuditAssetFromBody: prefer checkin_key +
+     * checkin_by_field (serial gated on unique_serial), fall back to the
+     * legacy `asset_tag` field, otherwise return null. The URL-bound tag
+     * path still wins when the caller uses the /bytag/{tag}/checkin route.
+     */
+    private function resolveCheckinAssetFromBody(Request $request, ?string $tag): ?Asset
+    {
+        if ($tag !== null) {
+            return Asset::where('asset_tag', $tag)->first();
+        }
+
+        $settings = Setting::getSettings();
+        $checkin_by_field = $request->input('checkin_by_field', 'asset_tag');
+        $checkin_key = $request->input('checkin_key', null);
+
+        if ($settings->unique_serial == '1' && $checkin_by_field === 'serial' && $checkin_key) {
+            return Asset::where('serial', '=', trim($checkin_key))->first();
+        }
+
+        if ($checkin_by_field === 'asset_tag' && $checkin_key) {
+            return Asset::where('asset_tag', '=', trim($checkin_key))->first();
+        }
+
+        // Legacy body-based lookup: kept so callers that still send
+        // `asset_tag` (e.g. the pre-serial quickscan-checkin blade, third-
+        // party integrations built against the older API shape) continue
+        // to work without change.
+        if ($request->filled('asset_tag')) {
+            return Asset::where('asset_tag', '=', $request->input('asset_tag'))->first();
+        }
+
+        return null;
     }
 
     /**
@@ -1441,6 +1598,14 @@ class AssetsController extends Controller
                 trans('admin/hardware/message.does_not_exist')
             ), 200);
         }
+
+        // Per-instance authorize so the policy layer independently
+        // enforces FMCS scoping on the resolved asset, regardless of
+        // whether it came from route-model binding or body lookup.
+        // Without this, FMCS enforcement depends solely on
+        // CompanyableScope firing on the underlying Asset::where /
+        // route-binding lookup.
+        $this->authorize('audit', $resolvedAsset);
 
         $result = $this->applyAssetAudit($resolvedAsset, $request);
 
@@ -1795,13 +1960,13 @@ class AssetsController extends Controller
                 break;
         }
 
-        $assets->requestableAssets();
+        $assets->requestable();
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
+        $total = $assets->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $assets->count();
         $assets = $assets->skip($offset)->take($limit)->get();
 
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
@@ -1832,10 +1997,10 @@ class AssetsController extends Controller
             ->with('adminuser')
             ->with('accessories');
 
-        $offset = ($request->input('offset') > $accessory_checkouts->count()) ? $accessory_checkouts->count() : app('api_offset_value');
+        $total = $accessory_checkouts->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $accessory_checkouts->count();
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
 
         return (new AssetsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
@@ -1870,8 +2035,8 @@ class AssetsController extends Controller
                 break;
         }
 
-        $offset = ($request->input('offset') > $component_checkouts->count()) ? $component_checkouts->count() : app('api_offset_value');
         $total = $component_checkouts->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $component_checkouts = $component_checkouts->skip($offset)->take($limit)->get();
 

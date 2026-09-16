@@ -19,8 +19,8 @@ return [
         'confirm' => 'Вы уверены, что хотите удалить данного поставщика?',
         'error' => 'При удалении поставщика произошла ошибка. Попробуйте еще раз.',
         'success' => 'Поставщик успешно удален.',
-        'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'not_found' => 'Поставщик не найден.',
+        'bulk_success' => 'Поставщик успешно удален.|:count поставщиков были успешно удалены.',
         'partial_success' => '.',
     ],
 

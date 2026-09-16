@@ -2,6 +2,8 @@
 
 namespace App\Models\Labels\Tapes\Generic;
 
+use TCPDF;
+
 class Continuous_53mm_A extends Continuous_53mm
 {
     public function getUnit()
@@ -39,7 +41,7 @@ class Continuous_53mm_A extends Continuous_53mm
         return true;
     }
 
-    public function preparePDF($pdf)
+    public function preparePDF(TCPDF $pdf): void
     {
         $pdf->SetAutoPageBreak(false);
     }

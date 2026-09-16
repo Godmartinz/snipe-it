@@ -19,6 +19,8 @@ return [
         'confirm' => 'Opravdu chcete smazat tuto skupinu amrotizace?',
         'error' => 'Vyskytl se problém při mazání skupiny amrotizace. Zkuste to znovu.',
         'success' => 'Skupina amrotizace byla úspěšně smazána.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -2,6 +2,8 @@
 
 namespace App\Models\Labels\Tapes\Generic;
 
+use TCPDF;
+
 class Continuous_Landscape_0_59in_A extends Continuous_Landscape_0_59in
 {
     public function getUnit()
@@ -39,7 +41,7 @@ class Continuous_Landscape_0_59in_A extends Continuous_Landscape_0_59in
         return false;
     }
 
-    public function preparePDF($pdf)
+    public function preparePDF(TCPDF $pdf): void
     {
         $pdf->SetAutoPageBreak(false);
     }

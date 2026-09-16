@@ -77,7 +77,7 @@
                 <div class="modal-body">
                     <!-- Form Errors -->
                     @if($errors->has('name'))
-                        <div class="alert alert-danger">
+                        <x-alert type="danger">
                             <p><strong>{{ trans('general.whoops') }}</strong> {{ trans('general.something_went_wrong') }}</p>
                             <br>
                             <ul>
@@ -89,7 +89,7 @@
                                     @enderror
                                 </li>
                             </ul>
-                        </div>
+                        </x-alert>
                     @endif
 
                     <!-- Create Token Form -->

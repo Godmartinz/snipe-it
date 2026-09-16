@@ -17,6 +17,8 @@ return [
         'confirm' => 'Êtes-vous sûr de vouloir supprimer ce département?',
         'error' => 'Il y avait un problème de suppression du département. Veuillez réessayer.',
         'success' => 'Le département a été supprimé avec succès.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -3,12 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Symfony\Component\Mime\Email;
 
-#[AllowDynamicProperties]
-class SendUpcomingAuditNotification extends Notification
+class SendUpcomingAuditNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -17,10 +17,11 @@ class SendUpcomingAuditNotification extends Notification
      *
      * @return void
      */
-    public function __construct($params, $threshold)
+    public function __construct(
+        public $assets,
+        public $threshold
+    )
     {
-        $this->assets = $params;
-        $this->threshold = $threshold;
     }
 
     /**

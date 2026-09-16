@@ -20,6 +20,8 @@ return [
         'confirm' => 'Tem certeza de que deseja excluir este acessório?',
         'error' => 'Ocorreu um problema ao remover o acessório. Por favor, tente novamente.',
         'success' => 'O acessório foi excluído com sucesso.',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

@@ -19,6 +19,8 @@ return [
         'confirm' => 'آیا شما مطمئن هستید که می خواهید این دسته ی استهلاک را حذف کنید؟',
         'error' => 'در حذف کردن دسته ی استهلاک مشکلی وجود داشت. لطفا دوباره تلاش کنید.',
         'success' => 'دسته ی استهلاک با موفقیت حذف شد.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

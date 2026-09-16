@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Transformers\PredefinedKitsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
+use App\Models\AssetModel;
 use App\Models\Consumable;
 use App\Models\License;
 use App\Models\PredefinedKit;
@@ -35,7 +36,8 @@ class PredefinedKitsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $kits->count()) ? $kits->count() : app('api_offset_value');
+        $total = $kits->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
@@ -59,7 +61,6 @@ class PredefinedKitsController extends Controller
                 break;
         }
 
-        $total = $kits->count();
         $kits = $kits->skip($offset)->take($limit)->get();
 
         return (new PredefinedKitsTransformer)->transformPredefinedKits($kits, $total);
@@ -208,6 +209,13 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+
+        // Mirror storeLicense: verify the caller can view the license they
+        // are attaching. Without this, kits.edit alone would let them attach
+        // (and leak the name of) a license they cannot read directly.
+        $license = License::findOrFail($license_id);
+        $this->authorize('view', $license);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -263,6 +271,13 @@ class PredefinedKitsController extends Controller
             $quantity = 1;
         }
 
+        // Verify the caller can view the model they are attaching. Without
+        // this, kits.edit alone would let them attach (and leak the name
+        // of) a model they cannot read directly. Mirrors storeLicense /
+        // storeConsumable / storeAccessory.
+        $model = AssetModel::findOrFail($model_id);
+        $this->authorize('view', $model);
+
         $relation = $kit->models();
         if ($relation->find($model_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['model' => trans('admin/kits/general.model_already_attached')]));
@@ -281,6 +296,10 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+
+        $model = AssetModel::findOrFail($model_id);
+        $this->authorize('view', $model);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -357,6 +376,10 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+
+        $consumable = Consumable::findOrFail($consumable_id);
+        $this->authorize('view', $consumable);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -433,6 +456,10 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+
+        $accessory = Accessory::findOrFail($accessory_id);
+        $this->authorize('view', $accessory);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;

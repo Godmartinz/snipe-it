@@ -16,5 +16,7 @@ return [
         'confirm' => 'この所属を削除してもよろしいですか？',
         'error' => '所属を削除する時に問題が発生しました。もう一度試して下さい。',
         'success' => '所属の削除に成功しました。',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

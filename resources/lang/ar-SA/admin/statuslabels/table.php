@@ -13,6 +13,7 @@ return [
     'pending' => 'قيد الانتظار',
     'status_type' => 'نوع الحالة',
     'show_in_nav' => 'أظهِر في الشريط الجانبي',
+    'status_label' => 'Status Label',
     'title' => 'تسميات الحالة',
     'undeployable' => 'غير قابل للتوزيع',
     'update' => 'تحديث تسمية الحالة',

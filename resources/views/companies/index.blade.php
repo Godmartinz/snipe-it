@@ -9,18 +9,12 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-            <x-box>
+            <x-box name="company" sr_only_title>
+
+                <x-slot:table_header>{{ trans('general.companies') }}</x-slot:table_header>
 
                 <x-slot:bulkactions>
-                    <x-table.bulk-actions
-                            name='company'
-                            action_route="{{ route('companies.bulk.delete') }}"
-                            model_name="company"
-                    >
-                        @can('delete', App\Models\Company::class)
-                            <option>{{ trans('general.delete') }}</option>
-                        @endcan
-                    </x-table.bulk-actions>
+                    <x-table.bulk-companies />
                 </x-slot:bulkactions>
 
                 <x-table

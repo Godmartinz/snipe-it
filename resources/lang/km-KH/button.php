@@ -3,6 +3,7 @@
 return [
     'actions' => 'សកម្មភាព',
     'add' => 'បន្ថែម​ថ្មី',
+    'back' => 'ត្រឡប់មកវិញ',
     'cancel' => 'បោះបង់',
     'checkin_and_delete' => 'Checkin ទាំងអស់ / លុបអ្នកប្រើប្រាស់',
     'delete' => 'លុប',

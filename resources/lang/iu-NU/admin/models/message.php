@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'No models were selected, so nothing was deleted.',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ':success_count model(s) were deleted, however :fail_count were unable to be deleted because they still have assets associated with them.',
     ],

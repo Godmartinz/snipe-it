@@ -13,6 +13,7 @@ return [
     'pending' => 'Kulindile',
     'status_type' => 'Uhlobo lomumo',
     'show_in_nav' => 'Bonisa eceleni kwe-nav',
+    'status_label' => 'Status Label',
     'title' => 'Amalebula wesimo',
     'undeployable' => 'Awuvumelekile',
     'update' => 'Buyekeza i-Label yesimo',

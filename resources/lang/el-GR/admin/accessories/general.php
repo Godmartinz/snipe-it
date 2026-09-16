@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Δεν βρέθηκαν προεπιλεγμένα πρωτεύοντος EULA. Προσθέστε ένα στις ρυθμίσεις.',
     'total' => 'Σύνολο',
     'remaining' => 'Όφελος',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Ενημέρωση αξεσουάρ',
     'use_default_eula' => 'Χρησιμοποιήστε την προεπιλεγμένη <a href="#" data-toggle="modal" data-target="#eulaModal">primary EULA</a>.',
     'use_default_eula_disabled' => '<del>Χρησιμοποιήστε την κύρια προεπιλεγμένη EULA instead.</del> καμία κύρια προεπιλεγμένη άδεια χρήσης τελικού χρήστη δεν έχει οριστεί. Παρακαλείσθε να προσθέσετε μία στις ρυθμίσεις.',

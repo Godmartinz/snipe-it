@@ -19,6 +19,8 @@ return [
     'required_acceptance' => 'crwdns1244:0crwdne1244:0',
     'global_signature_required_notice' => 'crwdns14708:0crwdne14708:0',
     'required_eula' => 'crwdns1245:0crwdne1245:0',
+    'required_acceptance_component' => 'crwdns15573:0crwdne15573:0',
+    'required_eula_component' => 'crwdns15575:0crwdne15575:0',
     'required_signature' => 'crwdns14815:0crwdne14815:0',
     'no_default_eula' => 'crwdns1246:0crwdne1246:0',
     'update' => 'crwdns639:0crwdne639:0',

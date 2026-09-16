@@ -5,6 +5,7 @@ namespace Tests\Feature\Assets\Api;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Location;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -217,5 +218,45 @@ class AssetIndexTest extends TestCase
                 'rows',
             ])
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 3)->etc());
+    }
+
+    /**
+     * Regression for a missing `break` in the API asset sort switch that
+     * silently fell through from `case 'location'` into `case 'rtd_location'`,
+     * applying both OrderLocation and OrderRtdLocation to the query so the
+     * caller got a sort keyed on rtd_location first and location second when
+     * they asked for location only. Verify sort=location alone controls the
+     * result ordering.
+     */
+    public function test_sort_by_location_does_not_fall_through_to_rtd_location(): void
+    {
+        $zebraLocation = Location::factory()->create(['name' => 'Zebra Warehouse']);
+        $aardvarkLocation = Location::factory()->create(['name' => 'Aardvark Warehouse']);
+
+        // Cross the pairing between location and rtd_location so a fallthrough
+        // that applied OrderRtdLocation would put the assets in a different
+        // order than a clean OrderLocation.
+        $assetLocatedAtAardvark = Asset::factory()->create([
+            'location_id' => $aardvarkLocation->id,
+            'rtd_location_id' => $zebraLocation->id,
+        ]);
+        $assetLocatedAtZebra = Asset::factory()->create([
+            'location_id' => $zebraLocation->id,
+            'rtd_location_id' => $aardvarkLocation->id,
+        ]);
+
+        $response = $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index', [
+                'sort' => 'location',
+                'order' => 'asc',
+                'limit' => 20,
+            ]))
+            ->assertOk()
+            ->json('rows');
+
+        $this->assertSame(
+            [$assetLocatedAtAardvark->id, $assetLocatedAtZebra->id],
+            [$response[0]['id'], $response[1]['id']],
+        );
     }
 }

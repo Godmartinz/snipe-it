@@ -16,5 +16,7 @@ return [
         'confirm' => 'Сигурни ли сте, че желаете да изтриете тази компания?',
         'error' => 'Възникна проблем при изтриването на компанията. Моля опитайте отново.',
         'success' => 'Компанията бе изтрита успешно.',
+        'bulk_success' => 'Company deleted successfully.|:count companies were deleted successfully.',
+        'partial_success' => 'Company deleted successfully. See additional information below. | :count companies were deleted successfully. See additional information below.',
     ],
 ];

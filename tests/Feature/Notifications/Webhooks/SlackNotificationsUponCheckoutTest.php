@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
+use Illuminate\Notifications\Messages\SlackMessage;
+use NotificationChannels\GoogleChat\GoogleChatMessage;
+
 
 #[Group('notifications')]
 class SlackNotificationsUponCheckoutTest extends TestCase
@@ -240,5 +243,99 @@ class SlackNotificationsUponCheckoutTest extends TestCase
             User::factory()->superuser()->create(),
             '',
         ));
+    }
+
+    #[DataProvider('checkoutNotificationCases')]
+    public function test_checkout_slack_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableSlackWebhook();
+
+        $notification = $createNotification();
+
+        $this->assertInstanceOf(
+            SlackMessage::class,
+            $notification->toSlack()
+        );
+    }
+
+    #[DataProvider('checkoutNotificationCases')]
+    public function test_checkout_google_chat_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableGoogleChatWebhook();
+        $notification = $createNotification();
+
+        $this->assertInstanceOf(
+            GoogleChatMessage::class,
+            $notification->toGoogleChat()
+        );
+    }
+
+    #[DataProvider('checkoutNotificationCases')]
+    public function test_checkout_microsoft_teams_workflow_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableMicrosoftTeamsWebhook();
+        $notification = $createNotification();
+
+        $message = $notification->toMicrosoftTeams();
+
+        $this->assertIsArray($message);
+        $this->assertCount(2, $message);
+        $this->assertIsString($message[0]);
+        $this->assertIsArray($message[1]);
+    }
+
+    public static function checkoutNotificationCases(): array
+    {
+        return [
+            'Accessory' => [
+                fn() => new CheckoutAccessoryNotification(
+                    Accessory::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    'Test note',
+                ),
+            ],
+
+            'Asset' => [
+                fn() => new CheckoutAssetNotification(
+                    Asset::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    'Test note',
+                ),
+            ],
+
+            'Component' => [
+                fn() => new CheckoutComponentNotification(
+                    Component::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    'Test note',
+                ),
+            ],
+
+            'Consumable' => [
+                fn() => new CheckoutConsumableNotification(
+                    Consumable::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    'Test note',
+                ),
+            ],
+
+            'License seat' => [
+                fn() => new CheckoutLicenseSeatNotification(
+                    LicenseSeat::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    'Test note',
+                ),
+            ],
+        ];
     }
 }

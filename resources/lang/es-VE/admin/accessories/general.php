@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'No se encontraron términos y condiciones por defecto. Agregue unos en Configuración.',
     'total' => 'Total',
     'remaining' => 'Disponibles',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Actualizar accesorio',
     'use_default_eula' => 'En su lugar, utilice el <a href="#" data-toggle="modal" data-target="#eulaModal">acuerdo de uso predeterminado</a>.',
     'use_default_eula_disabled' => '<del>En su lugar, utilice el acuerdo de uso predeterminado.</del> No está configurado el acuerdo de uso predeterminado. Por favor agregue uno en Configuración.',

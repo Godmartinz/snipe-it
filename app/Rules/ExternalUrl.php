@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Helpers\PublicIpCheck;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -66,30 +67,12 @@ class ExternalUrl implements ValidationRule
         }
 
         foreach ($ips as $ip) {
-            if (! $this->isPublicIp($ip)) {
+            if (! PublicIpCheck::isPublic($ip)) {
                 $fail(trans('validation.external_url'));
 
                 return;
             }
         }
-    }
-
-    private function isPublicIp(string $ip): bool
-    {
-        // Unwrap IPv4-mapped IPv6 so ::ffff:127.0.0.1 doesn't sneak past
-        // the IPv4 private/reserved checks.
-        if (stripos($ip, '::ffff:') === 0) {
-            $ipv4 = substr($ip, 7);
-            if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                $ip = $ipv4;
-            }
-        }
-
-        return (bool) filter_var(
-            $ip,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        );
     }
 
     private function resolveHost(string $host): array

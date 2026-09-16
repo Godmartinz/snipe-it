@@ -23,4 +23,6 @@ return [
         'success' => 'Mantenimiento marcado como completado.',
         'error' => 'Hubo un problema al marcar este mantenimiento como completado. Por favor, inténtalo de nuevo.',
     ],
+    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
+    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
 ];

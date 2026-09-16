@@ -3,7 +3,7 @@
 return [
 
     'account_already_exists' => 'crwdns1102:0crwdne1102:0',
-    'account_not_found' => 'crwdns1392:0crwdne1392:0',
+    'account_not_found' => 'crwdns15509:0crwdne15509:0',
     'account_not_activated' => 'crwdns1104:0crwdne1104:0',
     'account_suspended' => 'crwdns1105:0crwdne1105:0',
 

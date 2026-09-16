@@ -13,6 +13,7 @@ return [
     'pending' => 'Đang chờ',
     'status_type' => 'Loại tình trạng',
     'show_in_nav' => 'Hiển thị trong trình đơn bên cạnh',
+    'status_label' => 'Status Label',
     'title' => 'Nhãn tình trạng',
     'undeployable' => 'Không cho phép cấp phát',
     'update' => 'Cập nhật tình trạng nhãn',

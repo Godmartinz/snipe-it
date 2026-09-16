@@ -13,4 +13,7 @@ return [
     'total' => 'Total',
     'update' => 'Oppdater komponent',
     'checkin_limit' => 'Antall sjekket inn må være lik eller mindre enn :assigned_qty',
+    'exclude_deleted' => 'Exclude Deleted Components',
+    'include_deleted' => 'Include Deleted Components',
+    'only_deleted' => 'Only Deleted Components',
 ];

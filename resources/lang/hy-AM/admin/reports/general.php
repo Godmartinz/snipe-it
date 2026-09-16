@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Ընդունման հարցումը ջնջված է',
     'acceptance_request' => 'Ընդունման հարցում',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Օգտատիրոջ հասցե',
         'user_company' => 'Օգտատիրոջ կազմակերպությւոնը',
         'user_city' => 'Օգտատիրոջ քաղաքը',

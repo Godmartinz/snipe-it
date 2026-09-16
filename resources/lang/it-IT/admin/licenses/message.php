@@ -42,6 +42,11 @@ return [
         'bulk_checkout_warning' => ':license_name ha degli slot attualmente assegnati, e non può essere eliminata. Restituisci tutti gli slot prima di eliminare.',
     ],
 
+    'delete_with_checkin' => [
+        'bulk_success' => ':count licenses were deleted successfully after checking in :seats seats.',
+        'partial_success' => ':count licenses were deleted successfully after checking in :seats seats. See additional information below.',
+    ],
+
     'checkout' => [
         'error' => 'Problema durante l\'assegnazione della Licenza. Riprova.',
         'success' => 'La licenza è stata assegnata con successo',

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Няма EULA по подразбиране. Добавете я в Настройки.',
     'total' => 'Oбщо',
     'remaining' => 'Наличност',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Обновяване на аксесоар',
     'use_default_eula' => 'Използване на <a href="#" data-toggle="modal" data-target="#eulaModal">EULA по подразбиране</a>.',
     'use_default_eula_disabled' => '<del>Използване на EULA по подразбиране</del> Няма EULA по подразбиране. Добавете я в Настройки.',

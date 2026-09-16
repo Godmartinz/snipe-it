@@ -9,6 +9,9 @@ return [
     'acceptance_deleted' => 'Žádost o přijetí byla smazána',
     'acceptance_request' => 'Žádost o přijetí',
     'custom_export' => [
+        'asset_company' => 'Asset Company',
+        'asset_serial' => 'Asset Serial',
+        'assigned_asset_tag' => 'Checked Out Asset Tag',
         'user_address' => 'Uživatelská adresa',
         'user_company' => 'User Company',
         'user_city' => 'Město uživatele',

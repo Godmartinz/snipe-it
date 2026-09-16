@@ -20,6 +20,8 @@ return [
         'confirm' => 'Vai tiešām vēlaties dzēst šo statusa etiķeti?',
         'error' => 'Dzēšot statusa marķējumu, radās problēma. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Statusa marķējums tika veiksmīgi dzēsts.',
+        'bulk_success' => 'Status Label deleted successfully.|:count status labels were deleted successfully.',
+        'partial_success' => 'Status Label deleted successfully. See additional information below. | :count status labels were deleted successfully. See additional information below.',
     ],
 
     'help' => [

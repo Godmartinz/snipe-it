@@ -20,7 +20,6 @@
 @section('content')
     <x-container>
         <x-box>
-
                 <table
                     data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                         data-cookie-id-table="activityReport"
@@ -31,7 +30,7 @@
                         data-sort-name="created_at"
                         id="activityReport"
                         data-url="{{ route('api.activity.index') }}"
-                        class="table table-striped snipe-table"
+                    class="table table-striped snipe-table snipe-table--sticky-right-1"
                         data-export-options='{
                         "fileName": "activity-report-{{ date('Y-m-d') }}",
                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

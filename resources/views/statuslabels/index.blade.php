@@ -11,18 +11,12 @@
     <x-container columns="2">
 
         <x-page-column class="col-md-9">
-            <x-box>
+            <x-box name="statuslabel" sr_only_title>
+
+                <x-slot:table_header>{{ trans('admin/statuslabels/table.title') }}</x-slot:table_header>
 
                 <x-slot:bulkactions>
-                    <x-table.bulk-actions
-                            name='statuslabel'
-                            action_route="{{ route('statuslabels.bulk.delete') }}"
-                            model_name="statuslabel"
-                    >
-                        @can('delete', App\Models\Statuslabel::class)
-                            <option>{{ trans('general.delete') }}</option>
-                        @endcan
-                    </x-table.bulk-actions>
+                    <x-table.bulk-statuslabels />
                 </x-slot:bulkactions>
 
                 <x-table
@@ -36,6 +30,7 @@
                 />
 
             </x-box>
+            <x-shiftclick/>
         </x-page-column>
         <x-page-column class="col-md-3">
 

@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Yleisiä käyttöehtoja ei löytynyt. Voit lisätä ne asetuksista.',
     'total' => 'Yhteensä',
     'remaining' => 'Saatavilla',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Oheistarvikkeen päivittäminen',
     'use_default_eula' => 'Käytä <a href="#" data-toggle="modal" data-target="#eulaModal">yleisiä käyttöehtoja</a>.',
     'use_default_eula_disabled' => '<del>Käytä yleisiä käyttöehtoja.</del> Et ole vielä määritellyt yleisiä käyttöehtoja, voit lisätä ne asetuksista.',

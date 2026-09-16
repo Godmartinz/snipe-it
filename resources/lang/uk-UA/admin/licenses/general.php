@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Перевірено через масову ліцензію з GUI',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Залишилось :remaining_count місць для цієї ліцензії з мінімальною кількістю :min_amt. Ви можете розглянути можливість придбання більше місць.',

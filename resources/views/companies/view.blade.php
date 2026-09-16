@@ -44,7 +44,10 @@
 
                     <!-- start licenses tab pane -->
                     <x-tabs.pane name="licenses">
-                        <x-table.licenses name="licenses" :route="route('api.licenses.index', ['company_id' => $company->id, 'expand_company_hierarchy' => 1])"/>
+                        <x-slot:bulkactions>
+                            <x-table.bulk-licenses />
+                        </x-slot:bulkactions>
+                        <x-table.licenses name="licenses" :export_name="$company->name" :route="route('api.licenses.index', ['company_id' => $company->id, 'expand_company_hierarchy' => 1])"/>
                     </x-tabs.pane>
                     <!-- end licenses tab pane -->
 
@@ -123,7 +126,7 @@
 
 @section('moar_scripts')
     @can('files', $company)
-        @include ('modals.upload-file', ['item_type' => 'companies', 'item_id' => $company->id])
+        <x-modals.upload-file item-type="companies" :item-id="$company->id" />
     @endcan
     <script>
         // Bootstrap-table formatters read these to decorate company tags on

@@ -40,9 +40,9 @@
 
                                 @if ($snipeSettings->login_note)
                                     <div class="col-md-12">
-                                        <div class="alert alert-info">
+                                        <x-alert type="info">
                                             {!!  Helper::parseEscapedMarkedown($snipeSettings->login_note)  !!}
-                                        </div>
+                                        </x-alert>
                                     </div>
                                 @endif
 

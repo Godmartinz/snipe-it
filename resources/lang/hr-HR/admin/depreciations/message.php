@@ -19,6 +19,8 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati ovu klasu amortizacije?',
         'error' => 'Došlo je do problema s brisanjem klase amortizacije. Molim te pokušaj ponovno.',
         'success' => 'Klasa amortizacije uspješno je izbrisana.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

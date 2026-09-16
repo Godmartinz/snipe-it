@@ -5,6 +5,11 @@
 phpstan.neon
 .idea
 /bin/
+# The .screenshotter/ tool. Tracked: README + everything under src/.
+# Ignored: the entire screenshots/ output tree. The layout separates
+# source from output so a bug in the wipe logic can't self-delete the
+# script.
+/.screenshotter/screenshots/
 /bootstrap/compiled.php
 /node_modules
 /vendor
@@ -71,3 +76,19 @@ storage/ldap_client_tls.key
 /storage/framework/testing
 
 /.phpunit.cache
+
+/.mcp.json
+/.agents
+/.amp
+/.claude
+/.codex
+/.cursor
+/.factory
+/.github/skills
+/.grok
+/.junie
+/.kiro
+/.pi
+/.zed
+boost.json
+opencode.json

@@ -15,6 +15,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\Group;
 use App\Models\License;
@@ -115,6 +116,14 @@ class UsersController extends Controller
         $user->display_name = $request->input('display_name');
         if ($request->filled('password')) {
             $user->password = bcrypt($request->input('password'));
+        } else {
+            // SaveUserRequest only skips password validation when the
+            // user is being created deactivated. If we got here with no
+            // password, the user cannot log in anyway, so store the
+            // noPassword placeholder raw. Hash::check at login always
+            // fails against a plain string, so no authentication path
+            // can ever match this value.
+            $user->password = $user->noPassword();
         }
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
@@ -169,7 +178,7 @@ class UsersController extends Controller
             }
 
             if (auth()->user()->isSuperUser() && auth()->user()->can('editableOnDemo')) {
-                $user->groups()->sync($request->input('groups'));
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
             }
 
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -209,7 +218,9 @@ class UsersController extends Controller
     {
 
         $this->authorize('update', $user);
-        session()->put('url.intended', url()->previous());
+        if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
+            session()->put('url.intended', $safeReferer);
+        }
         $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
@@ -295,15 +306,14 @@ class UsersController extends Controller
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
 
-        // Set this here so that we can overwrite it later if the user is an admin or superadmin
-        $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
-
-        // Update the location of any assets checked out to this user
-        Asset::where('assigned_type', User::class)
-            ->where('assigned_to', $user->id)
-            ->update(['location_id' => $request->input('location_id', null)]);
-
-        // check for permissions related fields and only set them if the user has permission to edit them
+        // Permission-gated fields: `activated` lives inside this gate too.
+        // An earlier version of this method assigned `activated` right
+        // before the gate on the theory that the gate would overwrite it.
+        // That let anyone with users.edit toggle an admin's activated flag
+        // by POSTing a full edit payload — the gate would deny the second
+        // assignment but the first had already stuck. Every auth-field
+        // write must live inside this branch so an unauthorized caller
+        // can't reach past the gate on any of them.
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
             $user->username = trim($request->input('username'));
@@ -324,10 +334,11 @@ class UsersController extends Controller
                 ));
             }
 
-            // Only save groups if the user is a superuser
-            if (auth()->user()->isSuperUser()) {
-                $user->groups()->sync($request->input('groups'));
-            }
+            // Group sync lives in the post-save block below so
+            // UserObserver::updating() has already written its
+            // Actionlog row for this edit session, and
+            // syncGroupsWithLogging() can merge the group diff into
+            // that same row instead of producing two log entries.
         }
 
         // Update the location of any assets checked out to this user
@@ -340,7 +351,13 @@ class UsersController extends Controller
         session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
-            $user->syncCompaniesWithLogging(Company::getIdsForCurrentUser($companyIds));
+            $user->syncCompaniesPreservingInvisibleTo(auth()->user(), $companyIds);
+
+            if (auth()->user()->isSuperUser()
+                && auth()->user()->can('canEditAuthFields', $user)
+                && auth()->user()->can('editableOnDemo')) {
+                $user->syncGroupsWithLogging((array) $request->input('groups'));
+            }
 
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -405,12 +422,8 @@ class UsersController extends Controller
         }
 
         if ($user->restore()) {
-            $logaction = new Actionlog;
-            $logaction->item_type = User::class;
-            $logaction->item_id = $user->id;
-            $logaction->created_at = date('Y-m-d H:i:s');
-            $logaction->created_by = auth()->id();
-            $logaction->logaction('restore');
+            // The `restore` action_log entry is written by
+            // UserObserver::restoring - no manual write here.
 
             // Redirect them to the deleted page if there are more, otherwise the section index
             $deleted_users = User::onlyTrashed()->count();
@@ -479,16 +492,13 @@ class UsersController extends Controller
      */
     public function getClone(Request $request, User $user)
     {
-        $this->authorize('create', $user);
-
         // We need to reverse the UI specific logic for our
         // permissions here before we update the user.
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
         $user_to_clone = User::with('userloc', 'companies')->withTrashed()->find($user->id);
-        // Make sure they can view this particular user
-        $this->authorize('view', $user_to_clone);
+        $this->authorize('clone', $user_to_clone);
 
         if ($user_to_clone) {
 
@@ -706,16 +716,36 @@ class UsersController extends Controller
         $this->authorize('view', User::class);
 
         $actor = auth()->user();
+        $canViewAssets = $actor->can('view', Asset::class);
         $canViewLicenses = $actor->can('view', License::class);
         $canViewAccessories = $actor->can('view', Accessory::class);
         $canViewConsumables = $actor->can('view', Consumable::class);
+        $canViewComponents = $actor->can('view', Component::class);
 
-        $user = User::withInventoryRelations($id, $canViewLicenses, $canViewAccessories, $canViewConsumables)->first();
+        $user = User::withInventoryRelations(
+            $id,
+            $canViewAssets,
+            $canViewLicenses,
+            $canViewAccessories,
+            $canViewConsumables,
+            $canViewComponents,
+        )->first();
 
-        $indirectItemsCount = $user?->assets?->flatMap->assignedAssets->count()
-            + $user?->assets?->flatMap->components->count()
-            + ($canViewLicenses ? $user?->assets?->flatMap->licenses->count() : 0)
-            + ($canViewAccessories ? $user?->assets?->flatMap->assignedAccessories->count() : 0);
+        $indirectItemsCount = 0;
+        if ($canViewAssets && $user?->assets) {
+            foreach ($user->assets as $asset) {
+                $indirectItemsCount += $asset->assignedAssets->count();
+                if ($canViewComponents) {
+                    $indirectItemsCount += $asset->components->count();
+                }
+                if ($canViewLicenses) {
+                    $indirectItemsCount += $asset->licenses->count();
+                }
+                if ($canViewAccessories) {
+                    $indirectItemsCount += $asset->assignedAccessories->count();
+                }
+            }
+        }
 
         if ($user) {
             $this->authorize('view', $user);
@@ -818,7 +848,12 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
 
-        if (($user = User::find($id)) && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
+        $user = User::find($id);
+        if ($user) {
+            $this->authorize('view', $user);
+        }
+
+        if ($user && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
             $credentials = ['email' => trim($user->email)];
 
             try {

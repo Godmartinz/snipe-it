@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Ni privzete EULA. Dodajte eno v Nastavitvah.',
     'total' => 'Skupaj',
     'remaining' => 'Razpoložljivo',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Posodobi Dodatke',
     'use_default_eula' => 'Uporabite <a href="#" data-toggle="modal" data-target="#eulaModal">privzeto EULA</a> namesto tega.',
     'use_default_eula_disabled' => '<del>Namesto tega uporabite privzeto EULA.</del> Ni privzetega EULA. Dodajte ga v Nastavitvah.',

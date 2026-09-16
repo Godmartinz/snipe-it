@@ -19,6 +19,8 @@ return [
     'required_acceptance' => 'Kullanıcıya bü ürün ile ilgili kabul bağlantısı içeren bir e-posta gönderilmiştir.',
     'global_signature_required_notice' => 'Kullanıcı imzaları şu anda yönetici ayarları üzerinden genel olarak zorunlu tutulmaktadır; bu nedenle öğe bir kullanıcıya zimmetlenmişse (bir konuma vb. yerine), bu kategori ayarına bakılmaksızın imzalar yine de zorunlu olacaktır.',
     'required_eula' => 'Kullanıcıya Son Kullanıcı Lisans Sözleşmesi\'nin bir kopyası e-posta ile gönderilmiştir',
+    'required_acceptance_component' => 'If the target asset is currently assigned to a user, that user will be emailed with a link to confirm acceptance of this component.',
+    'required_eula_component' => 'If the target asset is currently assigned to a user, that user will be emailed a copy of the EULA.',
     'required_signature' => 'Bu kullanıcının bu öğeyi kabul ettiğini onaylamak için imza atması gerekecek.',
     'no_default_eula' => 'Varsayılan sözleşme bulunamadı. Lütfen Ayarlar\'dan ekleyiniz.',
     'update' => 'Kategori güncelle',

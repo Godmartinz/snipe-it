@@ -20,7 +20,7 @@ return [
         'error' => 'Pri odstraňovaní doávateľa sa vyskytla chby. Skúste prosím neskôr.',
         'success' => 'Dodávateľ bol úspešne odstránený.',
         'not_found' => 'Dodávateľ nenájdený.',
-        'bulk_success' => 'Dodávatelia boli úspešne odstránení.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

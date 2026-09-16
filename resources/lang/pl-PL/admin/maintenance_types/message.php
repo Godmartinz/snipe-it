@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'not_found' => 'Maintenance type not found.',
+    'not_found' => 'Nie znaleziono typu okna serwisowego.',
     'create' => [
-        'error' => 'Maintenance type was not created, please try again.',
+        'error' => 'Typ okna serwisowego nie został utworzony, spróbuj ponownie.',
         'success' => 'Maintenance type created successfully.',
     ],
     'update' => [

@@ -20,7 +20,7 @@ return [
         'error' => 'Radās problēma, izlaižot piegādātāju. Lūdzu mēģiniet vēlreiz.',
         'success' => 'Piegādātājs tika veiksmīgi dzēsts.',
         'not_found' => 'Supplier not found.',
-        'bulk_success' => 'Suppliers were deleted successfully.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

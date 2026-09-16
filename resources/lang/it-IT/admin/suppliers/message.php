@@ -20,7 +20,7 @@ return [
         'error' => 'C\'è stato un problema nell\'eliminazione del fornitore. Riprova.',
         'success' => 'Fornitore eliminato con successo.',
         'not_found' => 'Fornitore non trovato.',
-        'bulk_success' => 'Fornitori eliminati con successo.',
+        'bulk_success' => 'Fornitore eliminato con successo.|:count fornitori eliminati con successo.',
         'partial_success' => '.',
     ],
 

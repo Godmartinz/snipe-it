@@ -120,44 +120,26 @@
                 <x-form.row
                     :label="trans('general.purchase_date')"
                     name="purchase_date"
+                    type="datepicker"
+                    :item="$item"
                     input_div_class="col-md-4"
-                >
-                    <x-slot:input>
-                        <x-input.datepicker
-                            name="purchase_date"
-                            :value="old('purchase_date', $item->purchase_date ? date('Y-m-d', strtotime($item->purchase_date)) : '')"
-                            :placeholder="trans('general.select_date')"
-                        />
-                    </x-slot:input>
-                </x-form.row>
+                />
 
                 <x-form.row
                     :label="trans('admin/licenses/form.expiration')"
                     name="expiration_date"
+                    type="datepicker"
+                    :item="$item"
                     input_div_class="col-md-4"
-                >
-                    <x-slot:input>
-                        <x-input.datepicker
-                            name="expiration_date"
-                            :value="old('expiration_date', $item->expiration_date ? date('Y-m-d', strtotime($item->expiration_date)) : '')"
-                            :placeholder="trans('general.select_date')"
-                        />
-                    </x-slot:input>
-                </x-form.row>
+                />
 
                 <x-form.row
                     :label="trans('admin/licenses/form.termination_date')"
                     name="termination_date"
+                    type="datepicker"
+                    :item="$item"
                     input_div_class="col-md-4"
-                >
-                    <x-slot:input>
-                        <x-input.datepicker
-                            name="termination_date"
-                            :value="old('termination_date', $item->termination_date ? date('Y-m-d', strtotime($item->termination_date)) : '')"
-                            :placeholder="trans('general.select_date')"
-                        />
-                    </x-slot:input>
-                </x-form.row>
+                />
 
                 <x-form.row
                     :label="trans('admin/licenses/form.purchase_order')"
@@ -186,6 +168,12 @@
                 <x-form.checkbox-row
                     name="maintained"
                     :label="trans('admin/licenses/form.maintained')"
+                    :item="$item"
+                />
+
+                <x-form.checkbox-row
+                    name="requestable"
+                    :label="trans('admin/hardware/general.requestable')"
                     :item="$item"
                 />
 

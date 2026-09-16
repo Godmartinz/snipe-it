@@ -354,8 +354,11 @@ class AssetTest extends TestCase
         $asset = Asset::factory()->create();
         $otherAsset = Asset::factory()->create();
 
-        $primaryAccessory = Accessory::factory()->create(['purchase_cost' => 10]);
-        $secondaryAccessory = Accessory::factory()->create(['purchase_cost' => 15]);
+        // See test_asset_components_calculated_total_uses_assigned_quantity
+        // for why per-unit cost must be seeded via withInitialAcquisition
+        // rather than a create-array override.
+        $primaryAccessory = Accessory::factory()->withInitialAcquisition(null, 10.0)->create();
+        $secondaryAccessory = Accessory::factory()->withInitialAcquisition(null, 15.0)->create();
 
         AccessoryCheckout::factory()->create([
             'accessory_id' => $primaryAccessory->id,
@@ -386,8 +389,12 @@ class AssetTest extends TestCase
     {
         $asset = Asset::factory()->create();
 
-        $firstComponent = Component::factory()->create(['purchase_cost' => 10]);
-        $secondComponent = Component::factory()->create(['purchase_cost' => 25]);
+        // Per-unit cost lives on the initial OrderItem the observer
+        // writes; withInitialAcquisition seeds that OrderItem's price so
+        // calculatedPurchaseCost (via lastOrderDefaults) reads the
+        // expected value back for this test.
+        $firstComponent = Component::factory()->withInitialAcquisition(null, 10.0)->create();
+        $secondComponent = Component::factory()->withInitialAcquisition(null, 25.0)->create();
 
         $asset->components()->attach($firstComponent->id, [
             'assigned_qty' => 3,
@@ -403,7 +410,6 @@ class AssetTest extends TestCase
 
         $freshAsset = $asset->fresh();
 
-        $this->assertEquals(35, $freshAsset->components->sum('purchase_cost'));
         $this->assertEquals(80, $freshAsset->components->sum('calculated_purchase_cost'));
         $this->assertSame(80.0, $freshAsset->getComponentCost());
     }
@@ -412,7 +418,12 @@ class AssetTest extends TestCase
     {
         $asset = Asset::factory()->create();
 
-        $componentWithoutCost = Component::factory()->create(['purchase_cost' => null]);
+        // Force the observer-written OrderItem's price to null AND null
+        // out the parent's default_purchase_cost so lastOrderDefaults
+        // returns unit_cost=null; calculatedPurchaseCost coerces to 0.0
+        // when assigned to an asset.
+        $componentWithoutCost = Component::factory()->create(['default_purchase_cost' => null]);
+        $componentWithoutCost->orderItems()->update(['price' => null]);
 
         $asset->components()->attach($componentWithoutCost->id, [
             'assigned_qty' => 4,

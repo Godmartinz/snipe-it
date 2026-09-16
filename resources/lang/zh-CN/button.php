@@ -3,6 +3,7 @@
 return [
     'actions' => '操作',
     'add' => '新增',
+    'back' => '后退',
     'cancel' => '取消',
     'checkin_and_delete' => '归还全部并删除用户',
     'delete' => '刪除',

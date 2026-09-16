@@ -48,6 +48,11 @@ return [
             'log_msg' => 'ライセンスGUIで一括ライセンスチェックアウトを行いました',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => ':min_amt の最小数量とこのライセンスのために残されている唯一の :remaining_count シートがあります. あなたはより多くの席を購入することを検討したいかもしれません.',

@@ -25,7 +25,7 @@ return [
         'confirm' => 'Oletko varma että haluat poistaa tämän valmistajan?',
         'error' => 'Valmistajan poistamisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.',
         'success' => 'Valmistaja poistettiin onnistuneesti.',
-        'bulk_success' => 'Valmistajat poistettiin onnistuneesti.',
+        'bulk_success' => 'Manufacturer deleted successfully.|:count manufacturers were deleted successfully.',
         'partial_success' => 'Valmistaja poistettiin onnistuneesti. Katso lisätietoja alapuolelta. | :count valmistajaa poistettiin onnistuneesti. Katso lisätietoja alapuolelta.',
     ],
 

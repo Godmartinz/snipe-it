@@ -19,6 +19,8 @@ return [
         'confirm' => 'Bent u zeker dat u deze afschrijvingsklasse wil verwijderen?',
         'error' => 'Er was een probleem bij het verwijderen van de afschrijvingsklasse. Probeer opnieuw, aub.',
         'success' => 'De afschrijvingsklasse werd succesvol verwijderd.',
+        'bulk_success' => 'Depreciation class deleted successfully.|:count depreciation classes were deleted successfully.',
+        'partial_success' => 'Depreciation class deleted successfully. See additional information below.|:count depreciation classes were deleted successfully. See additional information below.',
     ],
 
 ];

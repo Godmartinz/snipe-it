@@ -17,6 +17,8 @@ return [
         'confirm' => 'Sind Sie sicher, dass Sie diese Abteilung löschen möchten?',
         'error' => 'Beim Löschen der Abteilung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
         'success' => 'Die Abteilung wurde erfolgreich gelöscht.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

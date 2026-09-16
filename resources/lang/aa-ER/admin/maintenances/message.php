@@ -23,4 +23,6 @@ return [
         'success' => 'crwdns14819:0crwdne14819:0',
         'error' => 'crwdns14821:0crwdne14821:0',
     ],
+    'bulk_delete' => 'crwdns15501:0crwdne15501:0',
+    'bulk_complete' => 'crwdns15503:0crwdne15503:0',
 ];

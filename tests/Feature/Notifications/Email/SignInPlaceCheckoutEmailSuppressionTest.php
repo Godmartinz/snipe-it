@@ -69,7 +69,7 @@ class SignInPlaceCheckoutEmailSuppressionTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 2,
                 'sign_in_place' => 1,
@@ -95,7 +95,7 @@ class SignInPlaceCheckoutEmailSuppressionTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->post(route('licenses.checkout', $seat->license), [
-                'assigned_to' => $targetUser->id,
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'sign_in_place' => 1,
             ]);

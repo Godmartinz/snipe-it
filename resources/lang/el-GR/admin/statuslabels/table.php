@@ -13,6 +13,7 @@ return [
     'pending' => 'Εκκρεμεί',
     'status_type' => 'Τύπος κατάστασης',
     'show_in_nav' => 'Εμφάνιση στο side nav',
+    'status_label' => 'Status Label',
     'title' => 'Ετικέτα Κατάστασης',
     'undeployable' => 'Μη διανέμεται',
     'update' => 'Ενημέρωση κατάστασης ετικέτα',

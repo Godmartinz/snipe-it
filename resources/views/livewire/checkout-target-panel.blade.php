@@ -1,4 +1,4 @@
-<div class="col-md-5" @if ($targetId === null) style="display: none;" @endif>
+<div @if ($targetId === null) style="display: none;" @endif>
     <div class="box box-primary">
         <div class="box-header with-border">
             <h2 class="box-title">

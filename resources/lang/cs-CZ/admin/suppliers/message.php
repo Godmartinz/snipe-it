@@ -20,7 +20,7 @@ return [
         'error' => 'Vyskytl se problém při mazání dodavatele. Zkuste to prosím znovu.',
         'success' => 'Dodavatel byl úspěšně smazán.',
         'not_found' => 'Dodavatel nebyl nalezen.',
-        'bulk_success' => 'Dodavatelé byli úspěšně smazáni.',
+        'bulk_success' => 'Supplier deleted successfully.|:count suppliers were deleted successfully.',
         'partial_success' => '.',
     ],
 

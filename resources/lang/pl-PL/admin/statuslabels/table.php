@@ -13,6 +13,7 @@ return [
     'pending' => 'Oczekujący',
     'status_type' => 'Typ Statusu',
     'show_in_nav' => 'Pokaż w bocznym oknie nawigacji',
+    'status_label' => 'Etykieta statusu',
     'title' => 'Status',
     'undeployable' => 'Niemożliwe do wdrożenia',
     'update' => 'Zaktualizuj Status',

@@ -13,6 +13,19 @@ class PersonalAccessTokens extends Component
 
     protected $listeners = ['openModal' => 'autoFocusModalEvent'];
 
+    /**
+     * Route-level middleware on /account/api requires the self.api gate,
+     * but snapshot replay to POST /livewire/update bypasses that. Re-check
+     * the same gate here so a user without self.api cannot mint a PAT by
+     * replaying a valid snapshot obtained elsewhere.
+     */
+    public function boot(): void
+    {
+        if (! auth()->user()?->can('self.api')) {
+            abort(403);
+        }
+    }
+
     // this is just an annoying thing to make the modal input autofocus
     public function autoFocusModalEvent(): void
     {

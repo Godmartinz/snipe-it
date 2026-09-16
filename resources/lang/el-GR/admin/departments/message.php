@@ -17,6 +17,8 @@ return [
         'confirm' => 'Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το τμήμα;',
         'error' => 'Παρουσιάστηκε πρόβλημα κατά τη διαγραφή του τμήματος. ΠΑΡΑΚΑΛΩ προσπαθησε ξανα.',
         'success' => 'Το τμήμα διαγράφηκε με επιτυχία.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -17,6 +17,8 @@ return [
         'confirm' => 'Jeste li sigurni da želite izbrisati taj odjel?',
         'error' => 'Došlo je do problema s brisanjem odjela. Molim te pokušaj ponovno.',
         'success' => 'Odjel je uspješno izbrisan.',
+        'bulk_success' => 'Department deleted successfully.|:count departments were deleted successfully.',
+        'partial_success' => 'Department deleted successfully. See additional information below. | :count departments were deleted successfully. See additional information below.',
     ],
 
 ];

@@ -125,6 +125,7 @@ if (env('PUBLIC_S3_PROXY', false)) {
 // This is used to determine which files to accept, and also to populate the language strings for the upload-file blade
 $config['allowed_upload_extensions_array'] = [
     'avif',
+    'csv',
     'doc',
     'docx',
     'gif',
@@ -162,6 +163,12 @@ $config['allowed_upload_mimetypes_array'] = [
     'application/json',
     'application/msword',
     'application/pdf',
+    // text/csv is the RFC 4180 mime; some browsers report CSVs as
+    // application/csv or application/vnd.ms-excel instead depending on
+    // OS registration. Accepting all three covers real-world uploads
+    // without users hitting mysterious "wrong type" rejections.
+    'application/csv',
+    'text/csv',
     'application/vnd.ms-excel',
     'application/vnd.oasis.opendocument.presentation',
     'application/vnd.oasis.opendocument.spreadsheet',

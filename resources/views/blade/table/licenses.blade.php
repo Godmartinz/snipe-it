@@ -1,6 +1,7 @@
 @props([
     'route' => route('api.licenses.index'),
     'name' => 'default',
+    'export_name' => null,
     'presenter' => \App\Presenters\LicensePresenter::dataTableLayout(),
     'fixed_right_number' => 2,
     'fixed_number' => 1,
@@ -9,6 +10,8 @@
     'show_column_search' => false,
     'table_header' => trans('general.licenses'),
 ])
+
+@aware(['name'])
 
 <!-- start licenses tab pane -->
 @can('view', \App\Models\License::class)
@@ -27,7 +30,7 @@
         :$show_advanced_search
         buttons="licenseButtons"
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-licenses-{{ date('Y-m-d') }}"
+        export_filename="export-{{ $export_name ? str_slug($export_name).'-' : '' }}licenses-{{ date('Y-m-d') }}"
     />
 
 

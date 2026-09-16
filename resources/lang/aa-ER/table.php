@@ -7,5 +7,9 @@ return [
     'by' => 'crwdns1135:0crwdne1135:0',
     'item' => 'crwdns1204:0crwdne1204:0',
     'no_matching_records' => 'crwdns12200:0crwdne12200:0',
+    'load_error_title' => 'crwdns15135:0crwdne15135:0',
+    'load_error_body' => 'crwdns15137:0crwdne15137:0',
+    'load_error_http_status' => 'crwdns15139:0crwdne15139:0',
+    'load_error_session_expired' => 'crwdns15141:0crwdne15141:0',
 
 ];

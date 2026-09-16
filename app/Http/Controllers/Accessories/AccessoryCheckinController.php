@@ -67,6 +67,7 @@ class AccessoryCheckinController extends Controller
             'App\Models\User' => 'user',
             'App\Models\Location' => 'location',
             'App\Models\Asset' => 'asset',
+            default => null,
         });
 
         $checkin_hours = date('H:i:s');

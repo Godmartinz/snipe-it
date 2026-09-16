@@ -48,6 +48,11 @@ return [
             'log_msg' => 'Lisans GUI\'sinde toplu lisans ödemesi yoluyla teslim alındı',
 
         ],
+
+        'delete_with_checkin' => [
+            'label' => 'Check in seats and delete',
+            'log_msg' => 'Checked in via bulk delete-with-checkin in license index',
+        ],
     ],
 
     'below_threshold' => 'Bu lisans için minimum adet :min_amt olmak üzere yalnızca :remaining_count hak kaldı. Daha fazla lisans hakkı satın almayı düşünebilirsiniz.',

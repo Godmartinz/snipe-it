@@ -40,6 +40,7 @@ return [
 
     'bulkdelete' => [
         'error' => 'ไม่มีการเลือกรายการใด ๆ ดังนั้นจึงไม่มีสิ่งใดถูกลบ',
+        'nothing_deletable' => 'None of the selected models can be deleted because they still have assets associated with them.',
         'success' => 'Model deleted!|:success_count models deleted!',
         'success_partial' => ': success_count โมเดลถูกลบแล้วอย่างไรก็ตาม: ไม่สามารถลบข้อมูล fail_count เนื่องจากยังมีเนื้อหาที่เชื่อมโยงอยู่',
     ],

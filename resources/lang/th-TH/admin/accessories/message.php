@@ -20,6 +20,8 @@ return [
         'confirm' => 'คุณแน่ใจที่จะลบอุปกรณ์เสริมนี้?',
         'error' => 'มีปัญหาขณะลบอุปกรณ์เสริมนี้ กรุณาลองอีกครั้ง.',
         'success' => 'ลบอุปกรณ์เสริมเรียบร้อยแล้ว',
+        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
+        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
     ],
 
     'checkout' => [

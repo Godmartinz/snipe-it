@@ -36,11 +36,12 @@ return [
 
     'assets' => [
         'name' => '资产',
-        'note' => '授予访问应用资产部分的权限。',
+        'note' => 'Grants access to the Assets section of the application. ',
     ],
 
     'assetsview' => [
         'name' => '查看资产',
+        'note' => 'Note that users with this permission will also be able to see (not modify or delete) files uploaded to the asset model as well. This is to make it easier to share common documents like user manuals across assets without having to upload them to every asset, and to avoid having to grant the user permission to modify asset files.',
     ],
 
     'assetscreate' => [

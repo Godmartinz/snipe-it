@@ -13,6 +13,7 @@ return [
     'no_default_eula' => 'Не се пронајдени стандардни Услови за користење. Внесете го во Поставки.',
     'total' => 'Вкупно',
     'remaining' => 'Слободни',
+    'requestable' => 'Users may request this accessory',
     'update' => 'Уредување на додаток',
     'use_default_eula' => 'Наместо ова, користете <a href="#" data-toggle="modal" data-target="#eulaModal">стандардни Услови за користење</a>.',
     'use_default_eula_disabled' => '<del>Наместо тоа користете стандардни Услови за користење.</del> Не се внесени стандардни Услови за користење. Ве молиме внесете ги во Поставки.',
