@@ -9,7 +9,7 @@
 {{-- Page content --}}
 @section('content')
 
-    <form method="POST" autocomplete="off" class="form-horizontal" role="form" id="create-form">
+    <form method="POST" autocomplete="off" class="form-horizontal" role="form" id="create-form" xmlns="http://www.w3.org/1999/html">
         <!-- CSRF Token -->
         {{ csrf_field() }}
 
@@ -359,28 +359,7 @@
                                     </x-slot:input>
                                 </x-form.row>
 
-                               <label for="privacy_policy_link" class="col-md-3 control-label">{{ trans('admin/settings/general.privacy_policy_link') }}</label>
-
-                               <div class="col-md-8">
-
-                                   @if (config('app.lock_passwords'))
-                                       <input class="form-control disabled" disabled="disabled" name="privacy_policy_link" type="text" id="privacy_policy_link" value="{{ old('privacy_policy_link', $setting->privacy_policy_link) }}">
-                                   @else
-                                       <input class="form-control" name="privacy_policy_link" type="text" id="privacy_policy_link" value="{{ old('privacy_policy_link', $setting->privacy_policy_link) }}">
-
-                                   @endif
-
-                                   <span class="help-block">{{ trans('admin/settings/general.privacy_policy_link_help')  }}</span>
-                                   <x-form.error name="privacy_policy_link" />
-
-                                   @if (config('app.lock_passwords')===true)
-                                       <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
-                                   @endif
-
-                               </div>
-                           </div>
-                           
-                               <!-- Depreciation method -->
+                        <!-- Depreciation method -->
                                <div class="form-group {{ $errors->has('depreciation_method') ? 'error' : '' }}">
 
                                    <label for="depreciation_method" class="col-md-3 control-label">{{ trans('admin/depreciations/general.depreciation_method') }}</label>
