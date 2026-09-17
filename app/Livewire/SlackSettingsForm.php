@@ -83,6 +83,9 @@ class SlackSettingsForm extends Component
 
     public function mount(?Company $company = null)
     {
+        if ($company) {
+            $this->company = $company;
+        }
         $this->authorizeWebhookManagement();
 
 
