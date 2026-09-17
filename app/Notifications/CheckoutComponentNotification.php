@@ -36,7 +36,7 @@ class CheckoutComponentNotification extends Notification implements ShouldQueue
         public $target,
         public User $admin,
         public $acceptance,
-        public                 $note,
+        public $note,
         public Company|Setting $webhookSource,
     )
     {
