@@ -655,8 +655,13 @@ class CheckoutableListener
 
     private function webhookSource(Model $checkoutable): Company|Setting
     {
-        if ($checkoutable->company_id) {
-            $company = Company::find($checkoutable->company_id);
+        $companyId = match (true) {
+            $checkoutable instanceof LicenseSeat => $checkoutable->license->company_id,
+            default => $checkoutable->company_id,
+        };
+
+        if ($companyId) {
+            $company = Company::find($companyId);
 
             if ($company?->webhook_endpoint) {
                 return $company;
