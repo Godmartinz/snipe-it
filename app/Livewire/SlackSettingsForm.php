@@ -86,8 +86,6 @@ class SlackSettingsForm extends Component
         if ($company) {
             $this->company = $company;
         }
-        $this->authorizeWebhookManagement();
-
 
         $this->webhook_text = [
             'slack' => [
@@ -351,13 +349,6 @@ class SlackSettingsForm extends Component
     protected function webhookSource(): Company|Setting
     {
         return $this->company ?? Setting::getSettings();
-    }
-
-    protected function authorizeWebhookManagement(): void
-    {
-        if ($this->company) {
-            $this->authorize('update', $this->company);
-        }
     }
 
     protected function loadWebhookSettings(): void
