@@ -3732,7 +3732,6 @@
         }
     }
 
-
     // Renders a single company tag. `isInherited` is decided by the caller —
     // it's true only when (a) we're on the companies show page (viewing context
     // is set), (b) the row didn't get included via direct membership, and (c)

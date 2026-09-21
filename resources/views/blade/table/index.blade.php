@@ -72,7 +72,7 @@
         data-url="{!!  $api_url !!}"
     @endif
     @if ($no_matches)
-        data-format-no-matches="{{ $no_matches }}"
+        data-empty-message="{{ $no_matches }}"
     @endif
     data-export-options='{
         "fileName": "{{ $export_filename }}",
