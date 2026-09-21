@@ -116,4 +116,14 @@
 
     </x-container>
 @stop
-
+<script>
+    document.addEventListener('keydown', e => {
+        console.log({
+            key: e.key,
+            code: e.code,
+            keyCode: e.keyCode,
+            target: e.target,
+            time: performance.now()
+        });
+    }, true);
+</script>
