@@ -80,7 +80,7 @@
                     <x-form.legend help_text="{{trans('general.integration_settings_help')}}">
                         {{ trans('general.integration_settings') }}
                     </x-form.legend>
-                    <livewire:slack-settings-form :company="$item"/>
+                    <livewire:integration-settings-form :company="$item"/>
                 </fieldset>
             @endcan
 
