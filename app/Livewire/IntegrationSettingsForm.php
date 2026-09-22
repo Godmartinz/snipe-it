@@ -296,7 +296,7 @@ class IntegrationSettingsForm extends Component
                         ])->withOptions(['allow_redirects' => false])
                             ->post($this->webhook_endpoint, $payload)/*->throw()*/
                         ;
-                        $status_code = $response->getStatusCode();
+                        $status_code = $response->status();
                     }
 
                     if ($status_code >= 300 && $status_code < 400) {
