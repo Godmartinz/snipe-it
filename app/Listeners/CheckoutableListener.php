@@ -657,7 +657,7 @@ class CheckoutableListener
     {
         $companyId = match (true) {
             $checkoutable instanceof LicenseSeat => $checkoutable->license->company_id,
-            default => $checkoutable->company_id,
+            default => $checkoutable->getAttribute('company_id'),
         };
 
         if ($companyId) {

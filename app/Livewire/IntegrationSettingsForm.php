@@ -176,7 +176,7 @@ class IntegrationSettingsForm extends Component
         $this->teams_webhook_deprecated = filled($this->webhook_endpoint)
             && !Str::contains($this->webhook_endpoint, 'workflows');
 
-        $this->warning = $this->webhook_selected === 'microsoft' && $this->teams_webhook_deprecated
+        $this->warning = $this->teams_webhook_deprecated
             ? trans('admin/settings/message.webhook.ms_teams_deprecation')
             : null;
     }
