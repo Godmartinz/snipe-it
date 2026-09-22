@@ -1469,6 +1469,7 @@
                 observer.observe(document.body, config);
             });
 
+
         </script>
 
         @if ((session()->get('topsearch')=='true') || (request()->is('/')))
