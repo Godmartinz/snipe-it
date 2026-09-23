@@ -83,7 +83,7 @@ class IntegrationSettingsForm extends Component
 
     public function mount(?Company $company = null)
     {
-        if ($company) {
+        if ($company?->exists) {
             $this->company = $company;
         }
 
@@ -348,13 +348,13 @@ class IntegrationSettingsForm extends Component
 
     protected function webhookSource(): Company|Setting
     {
-        return $this->company ?? Setting::getSettings();
+        return $this->company?->exists ? $this->company : Setting::getSettings();
     }
 
     protected function loadWebhookSettings(): void
     {
         $source = $this->webhookSource();
-
+     
         $this->webhook_selected = $source->webhook_selected ?: 'slack';
         $this->webhook_endpoint = $source->webhook_endpoint;
         $this->webhook_channel = $source->webhook_channel;

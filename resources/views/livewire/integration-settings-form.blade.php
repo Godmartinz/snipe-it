@@ -47,12 +47,12 @@
 
 								</label>
                             </div>
-                            <div class="col-md-9 required" wire:ignore>
+                            <div class="col-md-9 required">
                                 <x-input.select
                                     name="webhook_selected"
                                     id="select2"
                                     :options="['slack' => trans('admin/settings/general.slack'), 'general' => trans('admin/settings/general.general_webhook'),'google' => trans('admin/settings/general.google_workspaces'), 'microsoft' => trans('admin/settings/general.ms_teams')]"
-                                    :selected="old('webhook_selected', $webhook_selected)"
+                                    :selected="$webhook_selected"
                                     :disabled="Helper::isDemoMode()"
                                     :for-livewire="true"
                                     data-minimum-results-for-search="-1"
