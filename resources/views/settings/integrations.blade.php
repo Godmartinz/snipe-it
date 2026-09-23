@@ -36,7 +36,7 @@
                                 name="webhook_companies"
                                 fixed_right_number="1"
                                 fixed_number="1"
-                                api_url="{{ route('api.companies.index', ['webhook_filled' => 1]) }}"
+                                api_url="{{ route('api.companies.index', ['has_webhook' => 1]) }}"
                                 :presenter="\App\Presenters\CompanyIntegrationsPresenter::dataTableLayout()"
                                 :show_export="false"
                                 :show_columns="false"

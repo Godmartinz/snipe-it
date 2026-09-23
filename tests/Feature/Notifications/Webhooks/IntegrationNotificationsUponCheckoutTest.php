@@ -11,6 +11,7 @@ use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\Location;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CheckoutAccessoryNotification;
 use App\Notifications\CheckoutAssetNotification;
@@ -26,7 +27,6 @@ use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 use Illuminate\Notifications\Messages\SlackMessage;
 use NotificationChannels\GoogleChat\GoogleChatMessage;
-use App\Models\Setting;
 
 
 #[Group('notifications')]

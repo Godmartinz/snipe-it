@@ -96,7 +96,7 @@ class CompaniesController extends Controller
                 $companies->where('parent_id', '=', (int) $parentId);
             }
         }
-        if ($request->boolean('webhook_filled')) {
+        if ($request->boolean('has_webhook')) {
             $companies->whereNotNull('webhook_endpoint')
                 ->where('webhook_endpoint', '!=', '');
         }

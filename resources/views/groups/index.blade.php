@@ -11,7 +11,6 @@
 
 {{-- Page content --}}
 @section('content')
-    HI
     <x-container>
         <x-box name="groups" sr_only_title>
 

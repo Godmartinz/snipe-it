@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Component;
 use App\Models\LicenseSeat;
 use App\Models\Location;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
@@ -24,7 +25,6 @@ use NotificationChannels\GoogleChat\GoogleChatMessage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
-use App\Models\Setting;
 
 #[Group('notifications')]
 class IntegrationNotificationsUponCheckinTest extends TestCase
