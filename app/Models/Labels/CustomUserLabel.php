@@ -26,6 +26,7 @@ class CustomUserLabel extends Model
     protected $casts = [
         'overrides' => 'array',
         'config_snapshot' => 'array',
+        'is_default' => 'boolean',
     ];
 
     /**

@@ -2636,7 +2636,7 @@
                 }) + '&nbsp;';
             }
 
-            if ((row.available_actions) && (row.available_actions.delete === true)) {
+            if ((row.available_actions) && (row.available_actions.update === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/edit" class="actions btn btn-sm btn-warning hidden-print" data-tooltip="true" title="{{ trans('general.update') }}"><x-icon type="edit" class="fa-fw" /><span class="sr-only">{{ trans('general.update') }}</span></a>&nbsp;';
                 // use the asset tag if no name is provided
 

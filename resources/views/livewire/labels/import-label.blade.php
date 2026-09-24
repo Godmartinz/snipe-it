@@ -40,7 +40,7 @@
                                 class="btn {{ $importMethod === 'text' ? 'btn-primary active' : 'btn-default' }}"
                                 wire:click="setImportMethod('text')"
                         >
-                            {{ trans('general.text') }}
+                            {{ trans('admin/settings/general.text') }}
                         </button>
                     </div>
                 </div>
