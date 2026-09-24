@@ -26,4 +26,5 @@
         data-height="600"
         data-buttons="labelButtons"
         class="table table-striped snipe-table"
+        data-sticky-header="false"
 ></table>
