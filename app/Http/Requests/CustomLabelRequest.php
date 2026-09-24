@@ -24,6 +24,7 @@ class CustomLabelRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::in(['sheet', 'tape'])],
+            'template' => ['required', 'string'],
             'content' => ['required', 'array'],
             'supports' => ['required', 'array'],
             'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED)],
