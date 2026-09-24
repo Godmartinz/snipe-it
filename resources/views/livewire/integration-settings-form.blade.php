@@ -8,7 +8,7 @@
         @endif
         <div class="row">
 
-            <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <div class="col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1">
 
                 <div class="panel box box-default">
 
@@ -141,7 +141,7 @@
                 <div class="box-footer">
                     <div class="text-right col-md-12">
 
-                        <button type="reset" wire:click.prevent="clearSettings" class="col-md-2 text-left btn btn-danger pull-left"{{ Helper::isDemoMode() ? ' disabled' : ''}}>{{ trans('general.clear_and_save') }}</button>
+                        <button type="reset" wire:click.prevent="clearSettings" class="text-left btn btn-danger pull-left"{{ Helper::isDemoMode() ? ' disabled' : ''}}>{{ trans('general.clear_and_save') }}</button>
 
                         <a class="btn btn-link pull-left" href="{{ route('settings.index') }}">{{ trans('button.cancel') }}</a>
 
