@@ -135,7 +135,7 @@
                     <div class="col-md-3 col-xs-12 col-sm-push-9 info-stack">
 
                             <div class="col-md-12 text-center">
-                              <img src="{{ $user->present()->gravatar() }}"  class=" img-thumbnail hidden-print" style="margin-bottom: 20px;" alt="{{ $user->display_name }}" alt="User avatar">
+                              <img src="{{ $user->present()->gravatar() }}" class="img-thumbnail hidden-print" style="margin-bottom: 20px;" referrerpolicy="no-referrer" alt="{{ $user->display_name }}">
                             </div>
 
                               @if (!request()->filled('user_id') || auth()->user()->id == $user->id)

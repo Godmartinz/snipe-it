@@ -89,6 +89,7 @@ class MaintenanceObserver
         $logAction->created_at = date('Y-m-d H:i:s');
         $logAction->action_date = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
+        $logAction->note = $maintenance->notes;
         if ($maintenance->imported) {
             $logAction->setActionSource('importer');
         }
@@ -110,6 +111,7 @@ class MaintenanceObserver
         $logAction->created_at = date('Y-m-d H:i:s');
         $logAction->action_date = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
+        $logAction->note = $maintenance->notes;
         $logAction->logaction('delete');
     }
 }

@@ -43,7 +43,7 @@ final class Company extends SnipeModel
         'fax' => 'min:7|max:35|nullable',
         'phone' => 'min:7|max:35|nullable',
         'email' => 'email|max:150|nullable',
-        'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id',
+        'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id|parent_within_scope',
     ];
 
     protected $casts = [
@@ -349,8 +349,12 @@ final class Company extends SnipeModel
             return true;
         }
 
-        // Again, where would this happen? But check that $companyable is not a string
-        if (! is_string($companyable)) {
+        // Skip the hasColumn early-return for User targets. users.company_id
+        // was renamed to legacy_company_id, so hasColumn would now return false
+        // for every User and short-circuit the per-target check further down
+        // (which is the back-patch for #19187). User targets defer to
+        // CompanyableScope in the auth block below.
+        if (! is_string($companyable) && ! ($companyable instanceof User)) {
             $company_table = $companyable->getModel()->getTable();
             try {
                 // This is primarily for the gate:allows-check in location->isDeletable()
@@ -502,17 +506,16 @@ final class Company extends SnipeModel
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes();
+        return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes([CompanyableScope::class]);
     }
 
     /**
      * Child companies. The one-level-deep validator on parent_id guarantees
      * children of a child cannot be created, so this is the full descendant set.
-     * See parent() above for why the global scope is dropped.
      */
     public function children()
     {
-        return $this->hasMany(self::class, 'parent_id')->withoutGlobalScopes();
+        return $this->hasMany(self::class, 'parent_id')->withoutGlobalScopes([CompanyableScope::class]);
     }
 
     /**

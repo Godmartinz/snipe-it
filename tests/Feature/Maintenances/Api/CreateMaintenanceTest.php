@@ -72,6 +72,35 @@ class CreateMaintenanceTest extends TestCase
 
         $this->assertHasTheseActionLogs($maintenance, ['create']);
     }
+    
+    public function test_create_maintenance_action_log_carries_notes()
+    {
+        $actor = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $type = MaintenanceType::factory()->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.maintenances.store'), [
+                'name' => 'With Notes',
+                'asset_id' => $asset->id,
+                'maintenance_type_id' => $type->id,
+                'start_date' => '2026-01-01',
+                'is_warranty' => 0,
+                'notes' => 'field noise on power-on',
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $maintenance = Maintenance::where('name', 'With Notes')->firstOrFail();
+
+        $log = \App\Models\Actionlog::query()
+            ->where('item_type', Maintenance::class)
+            ->where('item_id', $maintenance->id)
+            ->where('action_type', 'create')
+            ->firstOrFail();
+
+        $this->assertSame('field noise on power-on', $log->note);
+    }
 
     public function test_bulk_create_creates_one_maintenance_per_asset()
     {

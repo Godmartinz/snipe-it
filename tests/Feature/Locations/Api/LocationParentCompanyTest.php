@@ -171,4 +171,132 @@ class LocationParentCompanyTest extends TestCase
 
         $this->assertEquals($parentLocation->id, $location->fresh()->parent_id);
     }
+
+    public function test_scoped_actor_cannot_create_location_with_cross_company_parent_under_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $acme = Company::factory()->create(['name' => 'Acme']);
+        $globex = Company::factory()->create(['name' => 'Globex']);
+
+        $foreignParent = Location::factory()->create(['company_id' => $globex->id]);
+        $scopedActor = User::factory()->createLocations()->forCompany($acme)->create();
+
+        $this->actingAsForApi($scopedActor)
+            ->postJson(route('api.locations.store'), [
+                'name' => 'Forged Child',
+                'company_id' => $acme->id,
+                'parent_id' => $foreignParent->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->assertFalse(Location::where('name', 'Forged Child')->exists());
+    }
+
+    public function test_scoped_actor_cannot_update_location_to_cross_company_parent_under_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $acme = Company::factory()->create(['name' => 'Acme']);
+        $globex = Company::factory()->create(['name' => 'Globex']);
+
+        $foreignParent = Location::factory()->create(['company_id' => $globex->id]);
+        $ownLocation = Location::factory()->create(['company_id' => $acme->id]);
+        $scopedActor = User::factory()->editLocations()->forCompany($acme)->create();
+
+        $this->actingAsForApi($scopedActor)
+            ->patchJson(route('api.locations.update', $ownLocation), [
+                'parent_id' => $foreignParent->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->assertNull($ownLocation->fresh()->parent_id);
+    }
+
+    public function test_scoped_actor_cannot_create_location_with_cross_company_parent_under_scoped_locations_fmcs()
+    {
+        $acme = Company::factory()->create(['name' => 'Acme']);
+        $globex = Company::factory()->create(['name' => 'Globex']);
+
+        $foreignParent = Location::factory()->create(['company_id' => $globex->id]);
+        $scopedActor = User::factory()->createLocations()->forCompany($acme)->create();
+
+        $this->settings->enableScopedLocationsWithFullMultipleCompanySupport();
+
+        $this->actingAsForApi($scopedActor)
+            ->postJson(route('api.locations.store'), [
+                'name' => 'Forged Child Scoped',
+                'company_id' => $acme->id,
+                'parent_id' => $foreignParent->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->assertFalse(Location::where('name', 'Forged Child Scoped')->exists());
+    }
+
+    // -----------------------------------------------------------------------
+    // Model-rule defense in depth
+    //
+    // The controller checks above are the primary reject path for
+    // API/UI/bulk callers. The same invariant is also enforced by the
+    // parent_matches_location_company validation rule on the Location
+    // model, which catches any save() that skips the controller entirely
+    // (importer, seeder, job, future controller). These tests write
+    // directly to the model to prove the rule fires without any HTTP
+    // request in the mix.
+    // -----------------------------------------------------------------------
+
+    public function test_model_save_rejects_cross_company_parent_under_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $acme = Company::factory()->create();
+        $globex = Company::factory()->create();
+        $foreignParent = Location::factory()->create(['company_id' => $globex->id]);
+
+        $location = Location::factory()->make([
+            'name' => 'Direct-Save Attempt',
+            'company_id' => $acme->id,
+            'parent_id' => $foreignParent->id,
+        ]);
+
+        $this->assertFalse($location->save());
+        $this->assertFalse(Location::where('name', 'Direct-Save Attempt')->exists());
+    }
+
+    public function test_model_save_allows_same_company_parent_under_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $acme = Company::factory()->create();
+        $sameCompanyParent = Location::factory()->create(['company_id' => $acme->id]);
+
+        $location = Location::factory()->make([
+            'name' => 'Direct-Save Same Company',
+            'company_id' => $acme->id,
+            'parent_id' => $sameCompanyParent->id,
+        ]);
+
+        $this->assertTrue($location->save());
+    }
+
+    public function test_model_save_allows_cross_company_parent_when_fmcs_disabled()
+    {
+        $this->settings->disableMultipleFullCompanySupport();
+
+        $acme = Company::factory()->create();
+        $globex = Company::factory()->create();
+        $foreignParent = Location::factory()->create(['company_id' => $globex->id]);
+
+        $location = Location::factory()->make([
+            'name' => 'Direct-Save FMCS Off',
+            'company_id' => $acme->id,
+            'parent_id' => $foreignParent->id,
+        ]);
+
+        $this->assertTrue($location->save());
+    }
 }

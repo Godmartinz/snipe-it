@@ -500,9 +500,9 @@ class Consumable extends SnipeModel
      */
     public function scopeOrderRemaining($query, $order)
     {
-        $order_by = 'consumables.qty - consumables_users_count '.$order;
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw($order_by);
+        return $query->orderByRaw('consumables.qty - consumables_users_count '.$order);
     }
 
     /**
@@ -538,8 +538,8 @@ class Consumable extends SnipeModel
      */
     public function scopeOrderPercentRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('CASE WHEN consumables.qty = 0 THEN 0 ELSE ((consumables.qty - consumables_users_count) * 100.0 / consumables.qty) END '.$direction);
+        return $query->orderByRaw('CASE WHEN consumables.qty = 0 THEN 0 ELSE ((consumables.qty - consumables_users_count) * 100.0 / consumables.qty) END '.$order);
     }
 }

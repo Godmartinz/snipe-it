@@ -120,7 +120,14 @@ class BulkLocationsController extends Controller
                     : $location->parent_id;
 
                 if ($effectiveParentId !== null) {
-                    $parent = Location::find($effectiveParentId);
+                    // withoutGlobalScopes: Location::CompanyableScope would
+                    // filter a cross-tenant parent out for a scoped
+                    // non-superuser, so find() would return null and the
+                    // null check below would short-circuit the reject
+                    // branch, letting a cross-company parent link save
+                    // through. See ValidationServiceProvider::fmcs_location
+                    // for the sibling fix.
+                    $parent = Location::withoutGlobalScopes()->find($effectiveParentId);
                     if ($parent && $parent->company_id != $effectiveCompanyId) {
                         if (array_key_exists('parent_id', $rowUpdates)) {
                             unset($rowUpdates['parent_id']);

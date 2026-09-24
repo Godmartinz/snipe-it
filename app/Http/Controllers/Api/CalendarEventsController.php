@@ -54,7 +54,7 @@ class CalendarEventsController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $this->authorizeAnySource($request);
+        $this->authorizeAnySource();
 
         [$rangeStart, $rangeEnd] = $this->resolveRange($request);
         $eventTypes = $this->resolveEventTypes($request);
@@ -84,20 +84,12 @@ class CalendarEventsController extends Controller
 
     /**
      * Base gate: viewer must be able to view AT LEAST ONE registered
-     * HasCalendarEvents source model. Source list comes from
-     * CalendarEvent::sourceModels() so a new adopter of the trait is
-     * picked up automatically. Per-row policy checks inside
+     * HasCalendarEvents source model. Per-row policy checks inside
      * buildEvents() handle the actual event-level scoping.
      */
-    protected function authorizeAnySource(Request $request): void
+    protected function authorizeAnySource(): void
     {
-        $viewer = $request->user();
-        foreach (CalendarEvent::sourceModels() as $sourceClass) {
-            if ($viewer?->can('view', $sourceClass)) {
-                return;
-            }
-        }
-        abort(403);
+        $this->authorize('canViewUsersAndCheckoutables');
     }
 
     /**

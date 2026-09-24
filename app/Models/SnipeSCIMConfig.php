@@ -241,6 +241,32 @@ class SnipeRootComplex extends Complex
 // filter path still handles explicit removals correctly.
 class SnipeMutableCollection extends MutableCollection
 {
+    // Read the membership as ids instead of models. The parent's
+    // Collection::doRead() touches $object->members, hydrating a full User
+    // model plus its Pivot for every member of the group — and
+    // objectToSCIMArray() runs three times over a single PATCH. On a large
+    // group that is enough to exhaust the PHP memory limit before the
+    // request can respond.
+    //
+    // The output has to stay identical to what the parent builds from the
+    // value / $ref / display sub-attributes below, `display => null`
+    // included: `display` maps to users.name, which is neither a column nor
+    // an accessor on User, so it has always read as null.
+    // PatchGroupMembersTest::test_patch_response_still_lists_every_member
+    // pins that.
+    //
+    // pluck() keeps the soft-delete scope the parent's join carries; the
+    // $ref prefix is built once to avoid a route() call per member.
+    protected function doRead(&$object, $attributes = [])
+    {
+        $ref_prefix = route('scim.resources', ['resourceType' => 'Users']).'/';
+
+        return $object->{$this->attribute}()
+            ->pluck('users.id')
+            ->map(fn ($id) => ['value' => $id, '$ref' => $ref_prefix.$id, 'display' => null])
+            ->all();
+    }
+
     public function replace($value, Model &$object, ?Path $path = null)
     {
         $this->add($value, $object);
@@ -289,7 +315,172 @@ class SnipeMutableCollection extends MutableCollection
             request()->attributes->set('scim_in_flight_resource', $object);
         }
 
-        parent::add($value, $object);
+        // Snapshot ONLY the user ids referenced in the SCIM payload,
+        // not the whole membership, so a PATCH against a group with
+        // 50k members doesn't load 50k rows just to log a single-add.
+        // See PatchGroupMembersTest for the shape guard.
+        $requestedUserIds = $this->userIdsFromMemberPayload($value);
+        $previouslyAttachedIds = $this->pivotFilterToAttached($object, $requestedUserIds);
+
+        //   1) Skip its trailing $object->load($this->attribute) call.
+        //      That load fires a `select users.* from users inner join
+        //      users_groups` that hydrates the entire membership into
+        //      User models on every PATCH, enough to exhaust PHP memory
+        //      on a group with tens of thousands of members. The
+        //      response's `members` list is rebuilt by our doRead()
+        //      override (id-only pluck), so the load is redundant here.
+        //   2) Attach only the id delta we already know is new
+        //      (requestedUserIds minus previouslyAttachedIds) instead
+        //      of syncWithoutDetaching(). Laravel's syncWithoutDetaching
+        //      begins by SELECT-ing every pivot row for group_id to
+        //      figure out what already exists, defeating the point of
+        //      the bounded pre-check.
+        $submittedValues = collect($value)->pluck('value')->all();
+        $existingObjects = $object
+            ->{$this->attribute}()
+            ->getRelated()
+            ->findMany($submittedValues)
+            ->map(fn($o) => $o->getKey());
+
+        if (($diff = collect($submittedValues)->diff($existingObjects))->count() > 0) {
+            throw new SCIMException(
+                sprintf('One or more %s are unknown: %s', $this->attribute, implode(',', $diff->all())),
+                500
+            );
+        }
+
+        $toAttach = array_values(array_diff($requestedUserIds, $previouslyAttachedIds));
+        if ($toAttach !== []) {
+            $object->{$this->attribute}()->attach($toAttach);
+        }
+
+        $this->logGroupMembershipChangesForIds(
+            $object,
+            attachedIds: array_values(array_diff($requestedUserIds, $previouslyAttachedIds)),
+            detachedIds: [],
+        );
+    }
+
+    public function remove($value, Model &$object, ?Path $path = null)
+    {
+        // Two shapes: filter-path form ("members[value eq 5]") targets
+        // one user id, list-value form targets an explicit list. Both
+        // reduce to a small requestedUserIds set that we pre-check
+        // against the pivot so we log only real detachments.
+        $comparison = $path?->getValuePathFilter()?->getComparisonExpression();
+        if ($comparison !== null) {
+            $requestedUserIds = [(int) $comparison->compareValue];
+        } else {
+            $requestedUserIds = $this->userIdsFromMemberPayload($value);
+        }
+        $previouslyAttachedIds = $this->pivotFilterToAttached($object, $requestedUserIds);
+
+        // Inline vendor MutableCollection::remove() minus its trailing
+        // $object->load($this->attribute) call. Same reason as add():
+        // the full-membership hydration exhausts memory on large
+        // groups and doRead() rebuilds the response list itself.
+        if ($comparison !== null) {
+            $attributes = $comparison->attributePath->attributeNames ?? [];
+            $operator = $comparison->operator;
+
+            if ($value !== null) {
+                throw new SCIMException('Remove operation with filter requires a null value parameter', 400);
+            }
+            if (count($attributes) !== 1) {
+                throw new SCIMException(sprintf('Filter must specify exactly one attribute, found %d attributes', count($attributes)), 400);
+            }
+            if ($operator !== 'eq') {
+                throw new SCIMException(sprintf('Unsupported filter operator "%s" - only "eq" is supported', $operator), 400);
+            }
+            if ($attributes[0] !== 'value') {
+                throw new SCIMException(sprintf('Cannot filter on "%s" - only filtering on "value" attribute is supported', $attributes[0]), 400);
+            }
+
+            $object->{$this->attribute}()->detach([$comparison->compareValue]);
+        } else {
+            $object->{$this->attribute}()->detach(collect($value)->pluck('value')->all());
+        }
+
+        $this->logGroupMembershipChangesForIds(
+            $object,
+            attachedIds: [],
+            detachedIds: $previouslyAttachedIds,
+        );
+    }
+
+    /**
+     * Flatten the SCIM `members` payload down to a plain list of
+     * integer user ids. Skips entries missing a `value` field so the
+     * validation error in add() stays the one thrown by the guard
+     * above, not a silent misclassification here.
+     *
+     * @return array<int, int>
+     */
+    private function userIdsFromMemberPayload($value): array
+    {
+        $ids = [];
+        foreach ((array) $value as $entry) {
+            if (is_array($entry) && isset($entry['value'])) {
+                $ids[] = (int) $entry['value'];
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * Return the subset of $requestedUserIds that are currently on
+     * the pivot for this group. Cheap: one indexed lookup on
+     * (group_id, user_id in (…)) instead of a full-membership scan.
+     *
+     * Returns [] when the parent relation is not user-shaped
+     * (defensive guard for future MutableCollection usage against
+     * non-Group parents).
+     *
+     * @param  array<int, int>  $requestedUserIds
+     * @return array<int, int>
+     */
+    private function pivotFilterToAttached(Model $object, array $requestedUserIds): array
+    {
+        if (!$object instanceof Group || $requestedUserIds === []) {
+            return [];
+        }
+
+        return $object->users()
+            ->whereIn('users.id', $requestedUserIds)
+            ->pluck('users.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
+     * Write per-user Actionlogs for the attach / detach delta the
+     * caller computed. Delegates to User::logGroupAttached() /
+     * logGroupDetached() so the log_meta shape matches
+     * User::syncGroupsWithLogging(), letting the history UI render
+     * SCIM-driven changes with the same formatter as Web / API edits.
+     *
+     * @param  array<int, int>  $attachedIds
+     * @param  array<int, int>  $detachedIds
+     */
+    private function logGroupMembershipChangesForIds(Model $object, array $attachedIds, array $detachedIds): void
+    {
+        if (!$object instanceof Group) {
+            return;
+        }
+
+        foreach ($attachedIds as $userId) {
+            $user = User::find($userId);
+            if ($user !== null) {
+                $user->logGroupAttached((int) $object->id);
+            }
+        }
+        foreach ($detachedIds as $userId) {
+            $user = User::find($userId);
+            if ($user !== null) {
+                $user->logGroupDetached((int) $object->id);
+            }
+        }
     }
 }
 

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AssetObserver
 {
@@ -274,6 +275,13 @@ class AssetObserver
         $logAction->action_date = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
         $logAction->logaction('delete');
+
+        // Sync-adapter identity rows would otherwise become orphans
+        // that violate the unique(source, external_id) constraint on
+        // the next sync run when the vendor keeps reporting the same
+        // host. If the admin later restores the asset the link is gone,
+        // and the next sync creates a fresh identity for it.
+        DB::table('asset_external_sources')->where('asset_id', $asset->id)->delete();
     }
 
     /**

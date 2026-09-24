@@ -100,7 +100,7 @@ class ComponentsTransformer
             'checkin' => Gate::allows('checkin', $component),
             'update' => Gate::allows('update', $component),
             'adjust_quantity' => Gate::allows('update', $component),
-            'clone' => Gate::allows('create', Component::class),
+            'clone' => Gate::allows('clone', $component),
             'delete' => $component->isDeletable(),
             'request' => (bool) $component->requestable && ! $userHasOpenRequest,
             'cancel' => (bool) $component->requestable && $userHasOpenRequest,

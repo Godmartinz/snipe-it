@@ -105,7 +105,7 @@ class ConsumablesTransformer
             'update' => Gate::allows('update', $consumable),
             'adjust_quantity' => Gate::allows('update', $consumable),
             'delete' => Gate::allows('delete', $consumable),
-            'clone' => (Gate::allows('create', Consumable::class) && ($consumable->deleted_at == '')),
+            'clone' => (Gate::allows('clone', $consumable) && ($consumable->deleted_at == '')),
             'request' => (bool) $consumable->requestable && ! $userHasOpenRequest,
             'cancel' => (bool) $consumable->requestable && $userHasOpenRequest,
         ];

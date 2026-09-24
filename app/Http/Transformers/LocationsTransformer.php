@@ -89,7 +89,7 @@ class LocationsTransformer
                     'edit' => (Gate::allows('update', $location) && ($location->deleted_at == '')),
                     'delete' => $location->isDeletable(),
                 ],
-                'clone' => (Gate::allows('create', Location::class) && ($location->deleted_at == '')),
+                'clone' => (Gate::allows('clone', $location) && ($location->deleted_at == '')),
                 'restore' => (Gate::allows('create', Location::class) && ($location->deleted_at != '')),
             ];
 

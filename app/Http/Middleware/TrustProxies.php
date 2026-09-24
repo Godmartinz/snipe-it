@@ -36,7 +36,6 @@ class TrustProxies extends TrustedProxyMiddleware
                 \Log::error("Error parsing APP_TRUSTED_HEADERS: " . $header . " is not a valid setting, ignoring");
             }
         }
-        \Log::debug("Final header bitmask: $header_bitmask");
 
         $this->headerBitmask = $header_bitmask;
         // note, we do *not* need to also set the Proxies themselves since the middleware does that itself.

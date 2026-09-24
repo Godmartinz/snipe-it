@@ -226,6 +226,12 @@ class Purge extends Command
             Asset::class => [
                 'maintenances' => ['item_id', 'item_type', Asset::class],
                 'checkout_requests' => ['requestable_id', 'requestable_type', Asset::class],
+                // Sync-adapter identity rows tying this asset to a
+                // vendor host. Orphaned once the asset is purged, and
+                // an orphan would cause the next sync to skip creating
+                // a fresh asset for that vendor host because
+                // provisionAsset() finds the dead link first.
+                'asset_external_sources' => 'asset_id',
             ],
             License::class => [
                 'license_seats' => 'license_id',

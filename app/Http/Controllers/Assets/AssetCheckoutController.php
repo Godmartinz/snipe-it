@@ -109,6 +109,26 @@ class AssetCheckoutController extends Controller
 
             $target = $this->determineCheckoutTarget();
 
+            // Company-boundary gate has to fire before any DB write. The
+            // updateAssetLocation() helper mass-updates child assets'
+            // location_id when the target is a location, and the license-seat
+            // loop below persists $seat->assigned_to = $target->id. Both are
+            // real writes with nothing to roll them back if canCheckoutTo
+            // subsequently rejects a cross-company target.
+            if (! $asset->canCheckoutTo($target)) {
+                $targetType = match (class_basename($target)) {
+                    'User' => trans('general.user'),
+                    'Location' => trans('general.location'),
+                    default => trans('general.asset'),
+                };
+
+                return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('general.error_checkout_company_mismatch', [
+                    'item' => trans('general.asset').' "'.$asset->display_name.'"',
+                    'item_company' => $asset->company?->name ?? trans('general.unassigned'),
+                    'target' => $targetType.' "'.($target->name ?? $target->username ?? $target->id).'"',
+                ]));
+            }
+
             $asset = $this->updateAssetLocation($asset, $target);
 
             $checkout_at = date('Y-m-d H:i:s');
@@ -142,20 +162,6 @@ class AssetCheckoutController extends Controller
 
             // Add any custom fields that should be included in the checkout
             $asset->customFieldsForCheckinCheckout('display_checkout');
-
-            if (! $asset->canCheckoutTo($target)) {
-                $targetType = match (class_basename($target)) {
-                    'User' => trans('general.user'),
-                    'Location' => trans('general.location'),
-                    default => trans('general.asset'),
-                };
-
-                return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('general.error_checkout_company_mismatch', [
-                    'item' => trans('general.asset').' "'.$asset->display_name.'"',
-                    'item_company' => $asset->company?->name ?? trans('general.unassigned'),
-                    'target' => $targetType.' "'.($target->name ?? $target->username ?? $target->id).'"',
-                ]));
-            }
 
             session()->put([
                 'redirect_option' => $request->input('redirect_option'),

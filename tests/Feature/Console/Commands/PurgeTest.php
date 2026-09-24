@@ -35,12 +35,23 @@ class PurgeTest extends TestCase
             'action_type' => 'checkout',
         ]);
         $trashedMaintenance = Maintenance::factory()->create(['asset_id' => $trashed->id]);
+        // Sync-adapter identity row that would otherwise become an
+        // orphan and cause a unique-constraint violation on the next
+        // sync when the vendor re-reports the same host.
+        DB::table('asset_external_sources')->insert([
+            'asset_id' => $trashed->id,
+            'source' => 'fleet',
+            'external_id' => 'ext-99',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         $this->artisan('snipeit:purge', ['--force' => 'true'])->assertExitCode(0);
 
         $this->assertDatabaseMissing('assets', ['id' => $trashed->id]);
         $this->assertDatabaseMissing('action_logs', ['id' => $trashedLog->id]);
         $this->assertDatabaseMissing('maintenances', ['id' => $trashedMaintenance->id]);
+        $this->assertDatabaseMissing('asset_external_sources', ['asset_id' => $trashed->id]);
     }
 
     public function test_live_asset_and_its_children_are_not_purged(): void

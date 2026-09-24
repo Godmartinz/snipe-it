@@ -9,6 +9,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ConsumableSeeder extends Seeder
 {
@@ -18,6 +20,27 @@ class ConsumableSeeder extends Seeder
         Actionlog::where('item_type', Consumable::class)->delete();
         Consumable::truncate();
         DB::table('consumables_users')->truncate();
+
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files('consumables') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/consumables') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
 
         if (! Supplier::count()) {
             $this->call(SupplierSeeder::class);

@@ -88,7 +88,7 @@ class LicensesTransformer
         $permissions_array['available_actions'] = [
             'checkout' => Gate::allows('checkout', $license),
             'checkin' => Gate::allows('checkin', $license),
-            'clone' => Gate::allows('create', License::class),
+            'clone' => Gate::allows('clone', $license),
             'update' => Gate::allows('update', $license),
             'delete' => $license->isDeletable(),
             'user_can_checkout' => (bool) (($license->free_seats_count - $unreassignable) > 0),

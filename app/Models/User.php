@@ -679,6 +679,17 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
+     * SCIM library shim. This could maybe be moved into the user model itself,
+     * but since it hooks into arietimmerman's library, this was the easier path
+     * without pulling it into traits. Returns the primary key so a scim-client
+     * fetch of /Me matches the shape of a fetch of /Users/{id}
+     */
+    public function getUserId(): int
+    {
+        return (int) $this->id;
+    }
+
+    /**
      * The association-blocker half of isDeletable(): true only when the
      * user has no assigned assets / accessories / licenses / consumables
      * and isn't managing any users or locations. Split out from
@@ -837,6 +848,148 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
+     * Sync group pivot membership and log the change if the set of groups changed.
+     *
+     * Same as syncCompaniesWithLogging(): if UserObserver::updating()
+     * already wrote an Actionlog for this edit session (via
+     * $this->currentUpdateLogId), the group diff is merged into that
+     * existing row so a single edit produces one log entry, not two.
+     * Otherwise a standalone Actionlog is written.
+     */
+    public function syncGroupsWithLogging(array $groupIds): void
+    {
+        // Same defensive coercion as the company version: reduce any
+        // callable payload shape (API JSON, form input, bulk edit,
+        // future LDAP importer) to a flat, unique list of positive int
+        // ids before it hits ->sync(). Prevents "Array to string
+        // conversion" tripping on nested arrays and drops junk shapes
+        // (null, booleans, unparseable strings) silently.
+        $groupIds = array_values(array_unique(array_filter(
+            array_map('intval', array_filter($groupIds, 'is_scalar'))
+        )));
+
+        $oldSnapshot = $this->currentGroupSnapshot();
+        $this->groups()->sync($groupIds);
+        $newSnapshot = $this->currentGroupSnapshot();
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Log the attachment of a single group to this user. Called from
+     * paths that mutate the pivot without going through
+     * syncGroupsWithLogging() (SCIM SnipeMutableCollection::add(),
+     * LdapSync attaching the LDAP default group, future sync adapters
+     * that propagate group membership).
+     *
+     * The caller has already run ->attach() (or the equivalent). This
+     * method's job is to record the delta if it was a real add. When
+     * the group was already attached before the call, we no-op so
+     * repeat-attach patterns don't produce noise.
+     */
+    public function logGroupAttached(int $groupId): void
+    {
+        $newSnapshot = $this->currentGroupSnapshot();
+        if (! collect($newSnapshot)->contains('id', $groupId)) {
+            // The caller's ->attach() didn't produce a real add (e.g.
+            // duplicate insert silently ignored, race with another
+            // process, group id doesn't exist). Nothing to log.
+            return;
+        }
+
+        $oldSnapshot = array_values(array_filter(
+            $newSnapshot,
+            fn ($entry) => $entry['id'] !== $groupId,
+        ));
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Log the detachment of a single group. Companion to
+     * logGroupAttached(). Called from SCIM's
+     * SnipeMutableCollection::remove() and any other path that runs
+     * ->detach() on a single group without going through
+     * syncGroupsWithLogging().
+     */
+    public function logGroupDetached(int $groupId): void
+    {
+        $newSnapshot = $this->currentGroupSnapshot();
+        if (collect($newSnapshot)->contains('id', $groupId)) {
+            // Detach didn't remove the group (never was attached, or
+            // still present for some other reason). Nothing to log.
+            return;
+        }
+
+        // Look up the detached group's current name so the log records
+        // it verbatim, not the id alone. If the group row is somehow
+        // gone by the time we look (deleted in the same request),
+        // record the id with a placeholder rather than skipping the
+        // log entirely, so the pivot mutation is still visible.
+        $detached = Group::find($groupId);
+        $oldSnapshot = $newSnapshot;
+        $oldSnapshot[] = ['id' => $groupId, 'name' => $detached ? $detached->name : '#'.$groupId];
+        usort($oldSnapshot, fn ($a, $b) => $a['id'] <=> $b['id']);
+
+        $this->recordGroupsChange($oldSnapshot, $newSnapshot);
+    }
+
+    /**
+     * Current pivot state as an ordered list of {id, name} pairs.
+     * The name is snapshotted at log-write time so the history entry
+     * preserves what the group was called when the change happened,
+     * regardless of later renames or deletes.
+     *
+     * @return array<int, array{id: int, name: string}>
+     */
+    private function currentGroupSnapshot(): array
+    {
+        return $this->groups()
+            ->orderBy('permission_groups.id')
+            ->get(['permission_groups.id', 'permission_groups.name'])
+            ->map(fn ($group) => ['id' => (int) $group->id, 'name' => (string) $group->name])
+            ->all();
+    }
+
+    /**
+     * Write (or merge into) an Actionlog for a groups pivot change.
+     * Merges into $this->currentUpdateLogId when the observer already
+     * opened a log row for this edit session so field + group
+     * changes stay in one log entry. Otherwise writes a standalone
+     * 'update' Actionlog row.
+     *
+     * @param  array<int, array{id: int, name: string}>  $oldSnapshot
+     * @param  array<int, array{id: int, name: string}>  $newSnapshot
+     */
+    private function recordGroupsChange(array $oldSnapshot, array $newSnapshot): void
+    {
+        if ($oldSnapshot === $newSnapshot) {
+            return;
+        }
+
+        $groupChange = ['groups' => ['old' => $oldSnapshot, 'new' => $newSnapshot]];
+
+        if ($this->currentUpdateLogId && ($existing = Actionlog::find($this->currentUpdateLogId))) {
+            $meta = json_decode($existing->log_meta ?? '{}', true) ?: [];
+            $existing->log_meta = json_encode(array_merge($meta, $groupChange));
+            $existing->save();
+            $this->currentUpdateLogId = null;
+
+            return;
+        }
+
+        $logAction = new Actionlog;
+        $logAction->item_type = static::class;
+        $logAction->item_id = $this->id;
+        $logAction->target_type = static::class;
+        $logAction->target_id = $this->id;
+        $logAction->created_at = date('Y-m-d H:i:s');
+        $logAction->created_by = auth()->id();
+        $logAction->log_meta = json_encode($groupChange);
+        $logAction->logaction('update');
+    }
+
+    /**
      * FMCS-safe wrapper around syncCompaniesWithLogging() for the user
      * update path. Folds the target's memberships in companies the
      * editor cannot see back into the submitted list before syncing,
@@ -846,16 +999,20 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * Superuser editors skip the merge because they can see every
      * company, so their submission already represents full intent.
      */
-    public function syncCompaniesPreservingInvisibleTo(User $editor, array $submittedCompanyIds): void
+    public function syncCompaniesPreservingInvisibleTo(?User $editor, array $submittedCompanyIds): void
     {
         $submitted = array_map('intval', $submittedCompanyIds);
 
         // FMCS is off, so every user can see every company
         // and there is no invisible-to-editor set to preserve. Superuser
         // editors also skip because their submission already
-        // represents full intent across all tenants.
+        // represents full intent across all tenants. A null editor
+        // means no scope context (CLI-run importer, seeder, artisan
+        // command), which behaves like a superuser edit: sync the
+        // submission verbatim because there is no scope to preserve
+        // against.
         $fmcsOn = (bool) Setting::getSettings()->full_multiple_companies_support;
-        if (! $fmcsOn || $editor->isSuperUser()) {
+        if (! $fmcsOn || $editor === null || $editor->isSuperUser()) {
             $this->syncCompaniesWithLogging($submitted);
 
             return;
@@ -1801,50 +1958,79 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->locale ?? Setting::getSettings()->locale ?? config('app.locale');
     }
 
+    protected bool $userTotalCostComputed = false;
+
     public function getUserTotalCost()
     {
-        $asset_cost = 0;
-        $license_cost = 0;
-        $accessory_cost = 0;
-        $consumable_cost = 0;
-        $maintenance_cost = 0;
-
-        foreach ($this->assets as $asset) {
-            $asset_cost += (float) $asset->purchase_cost;
+        if ($this->userTotalCostComputed) {
+            return $this;
         }
-        $this->asset_cost = $asset_cost;
 
-        foreach ($this->licenses as $license) {
-            $license_cost += (float) $license->purchase_cost;
-        }
-        $this->license_cost = $license_cost;
+        $this->asset_cost = (float) $this->assets()->sum('purchase_cost');
+        $this->license_cost = (float) $this->licenses()->sum('purchase_cost');
+        $this->maintenance_cost = (float) $this->assignedMaintenances()->sum('cost');
 
-        // Accessory / consumable unit cost tracks the info-panel's "last
-        // unit cost" so this tally matches the per-item rows in the tab
-        // tables. lastOrderDefaults() already merges last-Order price
-        // with the parent's `default_purchase_cost` template value when
-        // an item has no order history, so nothing to fall back to here.
-        foreach ($this->accessories as $accessory) {
-            $accessory_cost += (float) ($accessory->lastOrderDefaults()['unit_cost'] ?? 0);
-        }
-        $this->accessory_cost = $accessory_cost;
+        $this->accessory_cost = $this->sumPivotUnitCosts(
+            pivotTable: 'accessories_checkout',
+            pivotFk: 'accessory_id',
+            modelClass: \App\Models\Accessory::class,
+            extraWhere: ['assigned_type' => \App\Models\User::class],
+        );
+        $this->consumable_cost = $this->sumPivotUnitCosts(
+            pivotTable: 'consumables_users',
+            pivotFk: 'consumable_id',
+            modelClass: \App\Models\Consumable::class,
+        );
 
-        foreach ($this->consumables as $consumable) {
-            $consumable_cost += (float) ($consumable->lastOrderDefaults()['unit_cost'] ?? 0);
-        }
-        $this->consumable_cost = $consumable_cost;
+        $this->total_user_cost = $this->asset_cost + $this->accessory_cost + $this->consumable_cost + $this->license_cost + $this->maintenance_cost;
 
-        // Maintenances tied to this user as the polymorphic checked_out_to
-        // target. Summed across open + completed records because the
-        // user "caused" both.
-        foreach ($this->assignedMaintenances as $maintenance) {
-            $maintenance_cost += (float) $maintenance->cost;
-        }
-        $this->maintenance_cost = $maintenance_cost;
-
-        $this->total_user_cost = $asset_cost + $accessory_cost + $consumable_cost + $license_cost + $maintenance_cost;
+        $this->userTotalCostComputed = true;
 
         return $this;
+    }
+
+    /**
+     * Sum (pivot_row_count * last_unit_cost) across every distinct
+     * item this user has any pivot rows for.
+     *
+     * $modelClass must use the HasOrders trait.
+     *
+     * @param  array<string, mixed>  $extraWhere  additional pivot-side filters (e.g. polymorphic assigned_type)
+     */
+    private function sumPivotUnitCosts(
+        string $pivotTable,
+        string $pivotFk,
+        string $modelClass,
+        array $extraWhere = [],
+    ): float {
+        $countsByItem = \Illuminate\Support\Facades\DB::table($pivotTable)
+            ->where('assigned_to', $this->id);
+        foreach ($extraWhere as $column => $value) {
+            $countsByItem->where($column, $value);
+        }
+        $countsByItem = $countsByItem
+            ->groupBy($pivotFk)
+            ->select($pivotFk)
+            ->selectRaw('COUNT(*) as pivot_count')
+            ->pluck('pivot_count', $pivotFk)
+            ->all();
+
+        if ($countsByItem === []) {
+            return 0.0;
+        }
+
+        $items = $modelClass::query()
+            ->whereIn('id', array_keys($countsByItem))
+            ->get(['id', 'default_purchase_cost']);
+
+        $unitCosts = $modelClass::lastUnitCostsFor($items);
+
+        $total = 0.0;
+        foreach ($countsByItem as $itemId => $count) {
+            $total += (float) ($unitCosts[$itemId] ?? 0) * (int) $count;
+        }
+
+        return $total;
     }
 
     public function scopeUserLocation($query, $location, $search)

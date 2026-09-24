@@ -970,7 +970,7 @@ class BulkAssetsController extends Controller
         });
 
         if (! $errors) {
-            return redirect()->intended(route('hardware.index'))->with('success', trans_choice('admin/hardware/message.multi-checkin.success', count($asset_ids)));
+            return Helper::safeIntended(route('hardware.index'))->with('success', trans_choice('admin/hardware/message.multi-checkin.success', count($asset_ids)));
         }
 
         return redirect()->route('hardware.bulkcheckin.show')->withInput()

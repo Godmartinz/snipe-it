@@ -9,6 +9,7 @@
             :actions="[
                 'edit' => ['label' => trans('general.bulk_edit')],
                 'delete' => ['label' => trans('general.bulk_delete')],
+                'merge' => ['label' => trans('general.merge_models')],
             ]"
         />
     @endcanany

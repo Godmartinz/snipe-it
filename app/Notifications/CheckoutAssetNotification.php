@@ -82,12 +82,13 @@ class CheckoutAssetNotification extends Notification implements ShouldQueue
 
     public function toSlack(): SlackMessage
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->webhook_botname) ?: 'Snipe-Bot';
-        $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
+        $botname = ($settings->webhook_botname) ?: 'Snipe-Bot';
+        $channel = ($settings->webhook_channel) ? $settings->webhook_channel : '';
 
         $fields = [
             trans('general.to_user') => '<'.$target->present()->viewUrl().'|'.$target->display_name.'>',
@@ -119,14 +120,15 @@ class CheckoutAssetNotification extends Notification implements ShouldQueue
 
     public function toMicrosoftTeams()
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
 
-        if (! Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows')) {
+        if (!Str::contains($settings->webhook_endpoint, 'workflows')) {
             return MicrosoftTeamsMessage::create()
-                ->to($this->settings->webhook_endpoint)
+                ->to($settings->webhook_endpoint)
                 ->type('success')
                 ->title(trans('mail.Asset_Checkout_Notification', ['tag' => '']))
                 ->addStartGroupToSection('activityText')
@@ -149,12 +151,13 @@ class CheckoutAssetNotification extends Notification implements ShouldQueue
 
     public function toGoogleChat()
     {
+        $settings = Setting::getSettings();
         $target = $this->target;
         $item = $this->item;
         $note = $this->note;
 
         return GoogleChatMessage::create()
-            ->to($this->settings->webhook_endpoint)
+            ->to($settings->webhook_endpoint)
             ->card(
                 Card::create()
                     ->header(

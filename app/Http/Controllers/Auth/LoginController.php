@@ -76,7 +76,7 @@ class LoginController extends Controller
         $this->loginViaRemoteUser($request);
         $this->loginViaSaml($request);
         if (Auth::check()) {
-            return redirect()->intended('/');
+            return Helper::safeIntended('/');
         }
 
         if (! $request->session()->has('loggedout')) {
@@ -300,11 +300,12 @@ class LoginController extends Controller
             return redirect()->back()->withInput()->withErrors($validator);
         }
 
-        // Set the custom lockout attempts from the env and set the custom lockout throttle from the env.
-        // We divide decayMinutes by 60 here to get minutes, since Laravel changed the default from minutes
-        // to seconds, and we don't want to break limits on existing systems
-        $this->maxAttempts = config('auth.passwords.users.throttle.max_attempts');
-        $this->decayMinutes = (config('auth.passwords.users.throttle.lockout_duration') / 60);
+        // Read the local login-form throttle ceiling and lockout window
+        // from config. decayMinutes gets the raw seconds value divided
+        // by 60 so LOGIN_LOCKOUT_DURATION stays in seconds for admins
+        // while Laravel's ThrottlesLogins trait sees minutes.
+        $this->maxAttempts = config('auth.login_throttle.max_attempts');
+        $this->decayMinutes = config('auth.login_throttle.lockout_duration') / 60;
 
         if ($lockedOut = $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
@@ -319,7 +320,7 @@ class LoginController extends Controller
         // demo seed points at Forumsys as a reference config for
         // visitors to click through, we don't want the login form to
         // actually try to bind against it on every demo sign-in.
-        if (Setting::getSettings()->ldap_enabled && !config('app.lock_passwords')) { // avoid hitting the $this->ldap
+        if (Setting::getSettings()->ldap_enabled && ! config('app.lock_passwords')) { // avoid hitting the $this->ldap
             Log::debug('LDAP is enabled.');
             try {
                 Log::debug('Attempting to log user in by LDAP authentication.');
@@ -357,7 +358,7 @@ class LoginController extends Controller
         }
 
         // Redirect to the users page
-        return redirect()->intended()->with('success', trans('auth/message.signin.success'));
+        return Helper::safeIntended()->with('success', trans('auth/message.signin.success'));
     }
 
     /**
@@ -459,7 +460,7 @@ class LoginController extends Controller
             $user->saveQuietly();
             $request->session()->put('2fa_authed', $user->id);
 
-            return redirect()->intended()->with('success', trans('auth/message.signin.success'));
+            return Helper::safeIntended()->with('success', trans('auth/message.signin.success'));
         }
 
         return redirect()->route('two-factor')->with('error', trans('auth/message.two_factor.invalid_code'));

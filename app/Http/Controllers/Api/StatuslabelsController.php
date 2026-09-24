@@ -12,6 +12,7 @@ use App\Http\Transformers\StatuslabelsTransformer;
 use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Rules\CssColor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -101,6 +102,8 @@ class StatuslabelsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, ['type' => ['Status label type is required.']]));
         }
 
+        $request->validate(['color' => ['nullable', new CssColor]]);
+
         $statuslabel = new Statuslabel;
         $statuslabel->fill($request->all());
 
@@ -164,6 +167,9 @@ class StatuslabelsController extends Controller
         if (! $request->filled('type')) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Status label type is required.'));
         }
+
+        // See color-validation comment in store() above.
+        $request->validate(['color' => ['nullable', new CssColor]]);
 
         $statuslabel->fill($request->all());
 

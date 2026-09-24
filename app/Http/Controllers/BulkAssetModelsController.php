@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\AssetModels\MergeAssetModelsAction;
 use App\Helpers\Helper;
 use App\Models\AssetModel;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ class BulkAssetModelsController extends Controller
         // Make sure some IDs have been selected
         if ((is_array($models_raw_array)) && (count($models_raw_array) > 0)) {
             $models = AssetModel::whereIn('id', $models_raw_array)
+                ->with('manufacturer', 'category', 'fieldset')
                 ->withCount('assets as assets_count')
                 ->orderBy('assets_count', 'ASC')
                 ->get();
@@ -44,6 +47,24 @@ class BulkAssetModelsController extends Controller
                 }
 
                 return view('models/bulk-delete', compact('models'))->with('valid_count', $valid_count);
+
+            }
+
+            // Merge: pick a surviving target, reassign every other selected
+            // model's assets onto the target, then delete the sources.
+            // Common driver: a sync adapter that auto-created an
+            // AssetModel keyed on the vendor's part number sitting next
+            // to the same-hardware model keyed on the marketing name.
+            // The merge tool lets admins collapse them without hand-
+            // walking every asset.
+            if ($request->input('bulk_actions') == 'merge') {
+                $this->authorize('delete', AssetModel::class);
+                if ($models->count() < 2) {
+                    return redirect()->route('models.index')
+                        ->with('error', trans('admin/models/message.merge.min_two'));
+                }
+
+                return view('models/confirm-merge', compact('models'));
 
                 // Otherwise display the bulk edit screen
             }
@@ -152,5 +173,50 @@ class BulkAssetModelsController extends Controller
 
         return redirect()->route('models.index')
             ->with('error', trans('admin/models/message.bulkdelete.error'));
+    }
+
+    /**
+     * Merge two or more AssetModels into one target. Every asset on
+     * the sources gets its `model_id` pointed at the target, then the
+     * source models are soft-deleted. Wrapped in a transaction so a
+     * partial failure leaves the models table in its original state.
+     *
+     * Fixes the "phantom AssetModel" cleanup shape when a sync adapter
+     * auto-created models keyed on hardwareModel next to the same-
+     * hardware model keyed on the marketing name.
+     */
+    public function merge(Request $request): RedirectResponse
+    {
+        $this->authorize('delete', AssetModel::class);
+
+        $target_id = (int) $request->input('merge_into_id');
+        $source_ids = array_map('intval', (array) $request->input('ids_to_merge'));
+        $source_ids = array_values(array_diff($source_ids, [$target_id]));
+
+        if ($target_id === 0 || $source_ids === []) {
+            return redirect()->route('models.index')
+                ->with('error', trans('admin/models/message.merge.no_target'));
+        }
+
+        $target = AssetModel::find($target_id);
+        $sources = AssetModel::whereIn('id', $source_ids)->get();
+
+        if ($target === null || $sources->count() !== count($source_ids)) {
+            return redirect()->route('models.index')
+                ->with('error', trans('admin/models/message.merge.not_found'));
+        }
+
+        $moved_assets = MergeAssetModelsAction::run(
+            target: $target,
+            sources: $sources,
+            admin: User::find(auth()->id()),
+        );
+
+        return redirect()->route('models.index')
+            ->with('success', trans('admin/models/message.merge.success', [
+                'source_count' => $sources->count(),
+                'asset_count' => $moved_assets,
+                'target' => $target->name,
+            ]));
     }
 }

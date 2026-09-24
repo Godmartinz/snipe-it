@@ -99,7 +99,7 @@ class UserImporter extends ItemImporter
         $this->setItemFromCsvIfPresent($row, 'zip');
         $this->setItemFromCsvIfPresent($row, 'employee_num');
         $this->setItemFromCsvIfPresent($row, 'notes');
-        $this->setItemFromCsvIfPresent($row, 'avatar');
+        $this->sanitizeAvatarFromCsv($row);
         $this->setItemFromCsvIfPresent($row, 'scim_externalid');
         $this->setItemFromCsvIfPresent($row, 'locale');
         $this->setItemFromCsvIfPresent($row, 'ldap_import');
@@ -139,6 +139,35 @@ class UserImporter extends ItemImporter
         }
 
         $this->createUserIfNotExists($row, $csvId);
+    }
+
+    /**
+     * Store the imported avatar cell defensively. Local filenames are reduced
+     * to their basename, mirroring how AssetImporter and AccessoryImporter
+     * treat their `image` column. Absolute http(s) URLs are preserved so
+     * OAuth-sourced avatars (Google, Microsoft, Gravatar) still render
+     * correctly when a user record is re-imported. Without the basename step,
+     * a value like `../barcodes/target.png` reaches the profile image-delete
+     * sink and Flysystem normalizes the composed key into a cross-directory
+     * delete inside the public uploads tree.
+     */
+    private function sanitizeAvatarFromCsv(array $row): void
+    {
+        if (! $this->csvRowHas($row, 'avatar')) {
+            return;
+        }
+
+        $raw = (string) $this->findCsvMatch($row, 'avatar');
+
+        if ($raw === '') {
+            $this->item['avatar'] = null;
+
+            return;
+        }
+
+        $this->item['avatar'] = preg_match('#^https?://#i', $raw) === 1
+            ? $raw
+            : basename($raw);
     }
 
     /**
@@ -262,9 +291,13 @@ class UserImporter extends ItemImporter
             $user->save();
 
             // Sync company pivot when companies were specified in this row.
+            // GHSA-wwp4-qx8p-62g8: route through the FMCS-safe helper so a
+            // scoped operator running the interactive importer cannot strip
+            // the target's memberships in companies the operator cannot see.
+            // The helper short-circuits to a raw sync when the editor is
+            // null (CLI-run importer), superuser, or FMCS is off.
             if (! empty($companyIds)) {
-                $user->companies()->sync($companyIds);
-                $user->syncLegacyCompanyIdMirror();
+                $user->syncCompaniesPreservingInvisibleTo(Auth::user(), $companyIds);
             }
 
             // Update the location of any assets checked out to this user
@@ -340,11 +373,16 @@ class UserImporter extends ItemImporter
             $this->recordCreated();
 
             // Sync all resolved companies to the pivot. For single-company rows the
-            // User::created event already added company_id; sync() here is idempotent
+            // User::created event already added company_id, and sync here is idempotent
             // for that case and adds any additional companies for multi-company rows.
+            // GHSA-wwp4-qx8p-62g8: same reasoning as the update branch above.
+            // Route through the FMCS-safe helper so a scoped operator running
+            // the interactive importer cannot strip the target's memberships
+            // in companies the operator cannot see. Helper short-circuits to
+            // a raw sync when the editor is null (CLI), superuser, or FMCS
+            // is off.
             if (! empty($companyIds)) {
-                $user->companies()->sync($companyIds);
-                $user->syncLegacyCompanyIdMirror();
+                $user->syncCompaniesPreservingInvisibleTo(Auth::user(), $companyIds);
             }
 
             if (($user->email) && ($user->activated == '1')) {

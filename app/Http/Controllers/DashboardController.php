@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\Company;
@@ -58,7 +59,7 @@ class DashboardController extends Controller
             Session::reflash();
 
             // Redirect to the profile page
-            return redirect()->intended('account/view-assets');
+            return Helper::safeIntended('account/view-assets');
         }
     }
 }

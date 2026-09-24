@@ -18,7 +18,6 @@ use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\Company;
-use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use DomainException;
@@ -415,7 +414,7 @@ class AccessoriesController extends Controller
         $this->authorize('checkout', $accessory);
         $target = $this->determineCheckoutTarget();
 
-        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $target->companies()->where('companies.id', $accessory->company_id)->exists())) {
+        if (! $accessory->canCheckoutTo($target)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 

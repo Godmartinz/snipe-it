@@ -45,4 +45,14 @@ return [
         'success_partial' => ':success_count model(s) were deleted, however :fail_count were unable to be deleted because they still have assets associated with them.',
     ],
 
+    'merge' => [
+        'min_two' => 'Select at least two models to merge.',
+        'no_target' => 'Select which model to keep before merging.',
+        'not_found' => 'One or more of the selected models could not be loaded. Refresh the models list and try again.',
+        'information' => 'You are about to merge :count models. Pick the model you want to keep. Every asset attached to the other models will be reassigned to the model you pick, then the source models will be deleted.',
+        'warning' => 'This cannot be undone. Reassigned assets will inherit the surviving model\'s category, fieldset, and depreciation settings.',
+        'pick_target' => 'Which model do you want to keep?',
+        'success' => 'Merged :source_count model(s) into ":target". :asset_count asset(s) were reassigned.',
+    ],
+
 ];

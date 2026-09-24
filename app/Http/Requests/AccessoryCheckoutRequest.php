@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Traits\InfersCheckoutToType;
 use App\Models\Accessory;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Gate;
 
 class AccessoryCheckoutRequest extends ImageUploadRequest
 {
+    use InfersCheckoutToType;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -18,6 +21,9 @@ class AccessoryCheckoutRequest extends ImageUploadRequest
 
     public function prepareForValidation(): void
     {
+        parent::prepareForValidation();
+
+        $this->inferCheckoutToType();
 
         if ($this->accessory) {
 
@@ -44,9 +50,9 @@ class AccessoryCheckoutRequest extends ImageUploadRequest
 
         return array_merge(
             [
-                'assigned_user' => 'required_without_all:assigned_asset,assigned_location|nullable|exists_undeleted:users,id',
-                'assigned_asset' => 'required_without_all:assigned_user,assigned_location|nullable|exists_undeleted:assets,id',
-                'assigned_location' => 'required_without_all:assigned_user,assigned_asset|nullable|exists_undeleted:locations,id',
+                'assigned_user' => 'required_without_all:assigned_asset,assigned_location|prohibits:assigned_asset,assigned_location|nullable|exists_undeleted:users,id',
+                'assigned_asset' => 'required_without_all:assigned_user,assigned_location|prohibits:assigned_user,assigned_location|nullable|exists_undeleted:assets,id',
+                'assigned_location' => 'required_without_all:assigned_user,assigned_asset|prohibits:assigned_user,assigned_asset|nullable|exists_undeleted:locations,id',
 
                 'number_remaining_after_checkout' => [
                     'min:0',

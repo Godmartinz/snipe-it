@@ -448,9 +448,19 @@ class IndexHistoryTest extends TestCase
         $actor = User::factory()->viewUserHistory()->create();
         $uniqueNote = 'history-polymorphic-n-plus-one-'.uniqid();
 
-        $locations = Location::factory()->count(10)->create();
+        // Deterministic per-row names / usernames sidestep faker's
+        // bounded dictionary. Collisions on Location.name (unique in
+        // parent_id/company_id) or User.username silently no-save
+        // under ValidatingTrait, and downstream `$item->id` reads null.
+        $locations = Location::factory()
+            ->count(10)
+            ->sequence(fn ($seq) => ['name' => 'history-test-loc-'.$seq->index])
+            ->create();
         $assets = Asset::factory()->count(10)->create();
-        $users = User::factory()->count(10)->create();
+        $users = User::factory()
+            ->count(10)
+            ->sequence(fn ($seq) => ['username' => 'history-test-user-'.$seq->index])
+            ->create();
 
         for ($index = 0; $index < 30; $index++) {
             $itemType = $index % 3;

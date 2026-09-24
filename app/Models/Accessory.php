@@ -582,9 +582,9 @@ class Accessory extends SnipeModel
      */
     public function scopeOrderPercentRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('CASE WHEN accessories.qty = 0 THEN 0 ELSE ((accessories.qty - checkouts_count) * 100.0 / accessories.qty) END '.$direction);
+        return $query->orderByRaw('CASE WHEN accessories.qty = 0 THEN 0 ELSE ((accessories.qty - checkouts_count) * 100.0 / accessories.qty) END '.$order);
     }
 
     /**
@@ -597,8 +597,8 @@ class Accessory extends SnipeModel
      */
     public function scopeOrderRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('(accessories.qty - checkouts_count) '.$direction);
+        return $query->orderByRaw('(accessories.qty - checkouts_count) '.$order);
     }
 }

@@ -188,13 +188,20 @@ class UploadedFilesController extends Controller
                 return redirect()->back()->with('error', trans('general.file_upload_status.file_not_found'));
             }
 
-            if (config('filesystems.default') == 's3_private') {
-                return redirect()->away(Storage::disk('s3_private')->temporaryUrl('private_uploads/imports/'.$import->file_path, now()->addMinutes(5)));
+            $storedPath = 'private_uploads/imports/'.$import->file_path;
+            if (! Storage::exists($storedPath)) {
+                return redirect()->back()->with('error', trans('general.file_upload_status.file_not_found'));
             }
 
-            if (Storage::exists('private_uploads/imports/'.$import->file_path)) {
-                return response()->download(config('app.private_uploads').'/imports/'.$import->file_path);
+            $defaultDisk = config('filesystems.default');
+            if (config("filesystems.disks.$defaultDisk.driver") === 's3') {
+                return redirect()->away(Storage::temporaryUrl($storedPath, now()->addMinutes(5), [
+                    'ResponseContentType' => 'application/octet-stream',
+                    'ResponseContentDisposition' => 'attachment; filename="'.basename($import->file_path).'"',
+                ]));
             }
+
+            return response()->download(Storage::path($storedPath));
 
         }
 

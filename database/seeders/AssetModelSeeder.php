@@ -54,12 +54,22 @@ class AssetModelSeeder extends Seeder
         AssetModel::factory()->count(1)->ultrasharp()->create(['created_by' => $admin->id]);
 
         $src = public_path('/img/demo/models/');
-        $dst = 'models'.'/';
-        $del_files = Storage::files($dst);
+        $dst = 'models/';
 
-        foreach ($del_files as $del_file) { // iterate files
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files(rtrim($dst, '/')) as $del_file) {
             try {
-                Storage::disk('public')->delete($dst.$del_file);
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/models') as $del_file) {
+            try {
+                Storage::delete($del_file);
             } catch (\Exception $e) {
                 Log::debug($e);
             }

@@ -3,8 +3,10 @@
 namespace Tests\Feature\Users\Ui\BulkActions;
 
 use App\Models\Actionlog;
+use App\Models\Company;
 use App\Models\Group;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class BulkEditUsersTest extends TestCase
@@ -265,5 +267,111 @@ class BulkEditUsersTest extends TestCase
 
             $this->assertEquals(1, $count, "User {$target->id} should have exactly one update log entry");
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Cross-tenant company detachment (GHSA-wwp4-qx8p-62g8)
+    //
+    // Before the fix, the bulk edit's company-set branch went through a
+    // raw ->companies()->sync(), which treats its argument as the full
+    // new pivot set and deletes anything else. A scoped editor submitting
+    // a company they belong to (a non-empty submission that passes the
+    // clear-mode guards above) would silently strip the target's
+    // memberships in companies the editor never saw. The fix routes the
+    // set-companies branch through User::syncCompaniesPreservingInvisibleTo,
+    // which reads the target's pivot unscoped, splits into visible +
+    // invisible-to-editor, and merges the invisible slice back before the
+    // final sync. These tests pin that behavior across the FMCS modes
+    // called out in the standing FMCS-adversarial-tests rule.
+    // -----------------------------------------------------------------------
+
+    public function test_bulk_edit_preserves_target_memberships_editor_cannot_see_under_strict_fmcs()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->disableFloaterMode();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyB->id]);
+
+        $scopedEditor = User::factory()->editUsers()->forCompany($companyA)->create();
+
+        $this->actingAs($scopedEditor)
+            ->post(route('users/bulkeditsave'), [
+                'ids' => [$target->id],
+                'company_ids' => [$companyA->id],
+            ])
+            ->assertRedirect(route('users.index'));
+
+        $membershipIds = DB::table('company_user')
+            ->where('user_id', $target->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertEqualsCanonicalizing(
+            [$companyA->id, $companyB->id],
+            $membershipIds,
+            'Bulk edit by a company-A-scoped editor must not strip the target from company B, which the editor cannot see.',
+        );
+    }
+
+    public function test_bulk_edit_preserves_target_memberships_editor_cannot_see_under_floater_mode()
+    {
+        $this->settings->enableFloaterMode();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyB->id]);
+
+        $scopedEditor = User::factory()->editUsers()->forCompany($companyA)->create();
+
+        $this->actingAs($scopedEditor)
+            ->post(route('users/bulkeditsave'), [
+                'ids' => [$target->id],
+                'company_ids' => [$companyA->id],
+            ])
+            ->assertRedirect(route('users.index'));
+
+        $membershipIds = DB::table('company_user')
+            ->where('user_id', $target->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertEqualsCanonicalizing([$companyA->id, $companyB->id], $membershipIds);
+    }
+
+    public function test_bulk_edit_superuser_still_gets_full_replacement_semantics()
+    {
+        // Sanity: the fix must not accidentally block the legitimate
+        // "superuser changes a target's full company set" flow. Superusers
+        // bypass the preserve-invisible merge because they can see every
+        // company by definition.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB, $companyC] = Company::factory()->count(3)->create();
+
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyB->id]);
+
+        $superuser = User::factory()->superuser()->create();
+
+        $this->actingAs($superuser)
+            ->post(route('users/bulkeditsave'), [
+                'ids' => [$target->id],
+                'company_ids' => [$companyC->id],
+            ])
+            ->assertRedirect(route('users.index'));
+
+        $membershipIds = DB::table('company_user')
+            ->where('user_id', $target->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertEqualsCanonicalizing([$companyC->id], $membershipIds);
     }
 }

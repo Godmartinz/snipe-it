@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\CalendarEvent;
 use App\Models\Category;
 use App\Models\CheckoutRequest;
 use App\Models\Company;
@@ -46,6 +47,7 @@ use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use Carbon\CarbonInterval;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Console\ClientCommand;
 use Laravel\Passport\Console\InstallCommand;
@@ -89,6 +91,8 @@ class AuthServiceProvider extends ServiceProvider
      * Register any authentication / authorization services.
      *
      * @return void
+     *
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function boot()
     {
@@ -105,6 +109,20 @@ class AuthServiceProvider extends ServiceProvider
         Passport::personalAccessTokensExpireIn(CarbonInterval::years($expirationYears));
 
         Passport::cookie(config('passport.cookie_name'));
+
+        // Federated identity: a provider-agnostic OIDC bearer guard, layered
+        // alongside Passport via the `auth:oidc,api` multi-guard. Inert until
+        // config('oidc.enabled') is true, so this is purely additive.
+        // `$name` is unused: Laravel fixes the driver-closure signature as
+        // ($app, $name, $config), and the guard is named by config/auth.php.
+        Auth::extend('oidc', function ($app, $name, array $config) {
+            return new \App\Auth\OidcGuard(
+                Auth::createUserProvider($config['provider']),
+                $app['request'],
+                $app->make(\App\Services\Oidc\OidcTokenValidator::class),
+                $app->make(\App\Services\Oidc\OidcUserResolver::class),
+            );
+        });
 
         /**
          * BEFORE ANYTHING ELSE
@@ -203,6 +221,24 @@ class AuthServiceProvider extends ServiceProvider
                 || $user->can('checkout', Consumable::class)
                 || $user->can('checkout', Component::class)
                 || $user->can('checkout', License::class);
+        });
+
+        // True when the user can view at least one HasCalendarEvents
+        // adopter. Named for the underlying question ("does this user
+        // have any read access to fleet items or people?") rather
+        // than a specific surface, so it reads sensibly for the
+        // calendar sidenav gate + any future consumer that wants to
+        // check the same shape. Delegates to
+        // CalendarEvent::sourceModels() so a new adopter of the
+        // HasCalendarEvents trait is picked up automatically.
+        Gate::define('canViewUsersAndCheckoutables', function ($user) {
+            foreach (CalendarEvent::sourceModels() as $sourceClass) {
+                if ($user->can('view', $sourceClass)) {
+                    return true;
+                }
+            }
+
+            return false;
         });
 
         Gate::define('assets.view.encrypted_custom_fields', function ($user) {

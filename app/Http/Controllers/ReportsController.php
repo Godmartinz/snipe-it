@@ -759,7 +759,13 @@ class ReportsController extends Controller
 
             $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
             Log::debug('Starting headers: '.$executionTime);
-            fputcsv($handle, $header);
+            // Formula-escape the header before writing. Custom-field
+            // names are attacker-editable via the customfields
+            // permission and carry no character filter, so a header
+            // cell like "=cmd|'/c calc.exe'!A1" would evaluate as a
+            // formula on a reports.view user's workstation.
+            $headerFormatter = new EscapeFormula('`');
+            fputcsv($handle, $headerFormatter->escapeRecord($header));
             $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
             Log::debug('Added headers: '.$executionTime);
 
@@ -1590,8 +1596,6 @@ class ReportsController extends Controller
             ->filter(fn ($unaccepted) => $this->currentUserCanAccessAcceptance($unaccepted))
             ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
 
-        $rows = [];
-
         $header = [
             trans('general.date'),
             trans('general.type'),
@@ -1604,7 +1608,6 @@ class ReportsController extends Controller
         ];
 
         $header = array_map('trim', $header);
-        $rows[] = implode(',', $header);
 
         // Formula-escape data rows using the same helper + setting as the
         // sibling exports in this file. Row values (company / category /
@@ -1616,30 +1619,38 @@ class ReportsController extends Controller
         // by every other export in ReportsController.
         $formatter = new EscapeFormula('`');
 
+        // Build the CSV via fputcsv so cells containing commas, quotes,
+        // or newlines get RFC 4180 quoted rather than concatenated into
+        // the row/record stream. The prior implode(',') + implode("\n")
+        // approach let a mid-cell newline become a real record break,
+        // dropping the second half of the cell onto its own line where
+        // EscapeFormula's leading-character check no longer applied.
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $header);
+
         foreach ($itemsForReport as $item) {
+            $row = [
+                $item->acceptance->created_at,
+                $item->type,
+                $item->plain_text_company,
+                $item->plain_text_category,
+                $item->plain_text_model,
+                $item->plain_text_name,
+                $item->asset_tag,
+                $item->acceptance->assignedto ? $item->acceptance->assignedto->display_name : trans('admin/reports/general.deleted_user'),
+            ];
 
-            if ($item != null) {
-
-                $row = [];
-                $row[] = str_replace(',', '', $item->acceptance->created_at);
-                $row[] = str_replace(',', '', $item->type);
-                $row[] = str_replace(',', '', $item->plain_text_company);
-                $row[] = str_replace(',', '', $item->plain_text_category);
-                $row[] = str_replace(',', '', $item->plain_text_model);
-                $row[] = str_replace(',', '', $item->plain_text_name);
-                $row[] = str_replace(',', '', $item->asset_tag);
-                $row[] = str_replace(',', '', ($item->acceptance->assignedto) ? $item->acceptance->assignedto->display_name : trans('admin/reports/general.deleted_user'));
-
-                if (config('app.escape_formulas') !== false) {
-                    $row = $formatter->escapeRecord($row);
-                }
-
-                $rows[] = implode(',', $row);
+            if (config('app.escape_formulas') !== false) {
+                $row = $formatter->escapeRecord($row);
             }
+
+            fputcsv($handle, $row);
         }
 
-        // spit out a csv
-        $csv = implode("\n", $rows);
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
         $response = response()->make($csv, 200);
         $response->header('Content-Type', 'text/csv');
         $response->header('Content-disposition', 'attachment;filename=report.csv');

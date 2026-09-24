@@ -27,6 +27,7 @@
                                         <th scope="col">{{ trans('general.name') }}</th>
                                         <th scope="col">{{ trans('admin/hardware/form.tag') }}</th>
                                         <th scope="col">{{ trans('admin/hardware/form.serial') }}</th>
+                                        <th scope="col">{{ trans('admin/hardware/form.checkout_date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -44,9 +45,10 @@
                                             </td>
                                             <td>{{ $asset->asset_tag }}</td>
                                             <td>{{ $asset->serial }}</td>
+                                            <td>{{ $asset->last_checkout ? \App\Helpers\Helper::getFormattedDateObject($asset->last_checkout, 'date', false) : '' }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="4">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
+                                        <tr><td colspan="5">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
                                     @endforelse
                                 </tbody>
                                 @break
@@ -59,6 +61,7 @@
                                         @if ($canViewKeys)
                                             <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
                                         @endif
+                                        <th scope="col">{{ trans('admin/hardware/form.checkout_date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,26 +71,32 @@
                                             @if ($canViewKeys)
                                                 <td>{{ $license->serial }}</td>
                                             @endif
+                                            <td>{{ $license->pivot?->created_at ? \App\Helpers\Helper::getFormattedDateObject($license->pivot->created_at, 'date', false) : '' }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="{{ $canViewKeys ? 2 : 1 }}">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
+                                        <tr><td colspan="{{ $canViewKeys ? 3 : 2 }}">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
                                     @endforelse
                                 </tbody>
                                 @break
 
                             @case('accessories')
+                                {{-- Row shape differs by target: User branch returns Accessory-with-pivot (belongsToMany
+                                     accessories()), Asset / Location branches return AccessoryCheckout with ->accessory
+                                     eager loaded (assignedAccessories()). Reconciled inline via null-coalescing. --}}
                                 <thead>
                                     <tr>
                                         <th scope="col">{{ trans('general.name') }}</th>
+                                        <th scope="col">{{ trans('admin/hardware/form.checkout_date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($items as $accessory)
+                                    @forelse ($items as $item)
                                         <tr>
-                                            <td><a href="{{ route('accessories.show', $accessory->id) }}">{{ $accessory->name }}</a></td>
+                                            <td><a href="{{ route('accessories.show', $item->accessory?->id ?? $item->id) }}">{{ $item->accessory?->name ?? $item->name }}</a></td>
+                                            <td>{{ ($item->pivot?->created_at ?? $item->created_at) ? \App\Helpers\Helper::getFormattedDateObject($item->pivot?->created_at ?? $item->created_at, 'date', false) : '' }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td>{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
+                                        <tr><td colspan="2">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
                                     @endforelse
                                 </tbody>
                                 @break
@@ -96,15 +105,17 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">{{ trans('general.name') }}</th>
+                                        <th scope="col">{{ trans('admin/hardware/form.checkout_date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($items as $consumable)
                                         <tr>
                                             <td><a href="{{ route('consumables.show', $consumable->id) }}">{{ $consumable->name }}</a></td>
+                                            <td>{{ $consumable->pivot?->created_at ? \App\Helpers\Helper::getFormattedDateObject($consumable->pivot->created_at, 'date', false) : '' }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td>{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
+                                        <tr><td colspan="2">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
                                     @endforelse
                                 </tbody>
                                 @break
@@ -114,6 +125,7 @@
                                     <tr>
                                         <th scope="col">{{ trans('general.name') }}</th>
                                         <th scope="col">{{ trans('general.qty') }}</th>
+                                        <th scope="col">{{ trans('admin/hardware/form.checkout_date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -121,9 +133,10 @@
                                         <tr>
                                             <td><a href="{{ route('components.show', $component->id) }}">{{ $component->name }}</a></td>
                                             <td>{{ $component->pivot->assigned_qty ?? 1 }}</td>
+                                            <td>{{ $component->pivot?->created_at ? \App\Helpers\Helper::getFormattedDateObject($component->pivot->created_at, 'date', false) : '' }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="2">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
+                                        <tr><td colspan="3">{{ trans('admin/users/message.nothing_currently_assigned') }}</td></tr>
                                     @endforelse
                                 </tbody>
                                 @break

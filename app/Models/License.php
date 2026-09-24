@@ -499,7 +499,6 @@ class License extends Depreciable
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id')->withTrashed();
     }
 
-    
     public function depreciation(): BelongsTo
     {
         return $this->belongsTo(Depreciation::class, 'depreciation_id');
@@ -1063,8 +1062,8 @@ class License extends Depreciable
      */
     public function scopeOrderPercentRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('CASE WHEN licenses.seats = 0 THEN 0 ELSE (free_seats_count * 100.0 / licenses.seats) END '.$direction);
+        return $query->orderByRaw('CASE WHEN licenses.seats = 0 THEN 0 ELSE (free_seats_count * 100.0 / licenses.seats) END '.$order);
     }
 }

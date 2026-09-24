@@ -9,6 +9,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class LicenseSeeder extends Seeder
 {
@@ -16,6 +17,27 @@ class LicenseSeeder extends Seeder
     {
         License::truncate();
         LicenseSeat::truncate();
+
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files('licenses') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/licenses') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
 
         if (! Category::count()) {
             $this->call(CategorySeeder::class);

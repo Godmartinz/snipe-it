@@ -23,6 +23,8 @@ class ImporterTest extends TestCase
      */
     protected function writeFakeImportFile(Import $import, string $csvBody = "a,b,c\n1,2,3\n"): void
     {
+        Storage::put('private_uploads/imports/'.$import->file_path, $csvBody);
+
         $path = config('app.private_uploads').'/imports/'.$import->file_path;
         file_put_contents($path, $csvBody);
         $this->fakeImportPaths[] = $path;

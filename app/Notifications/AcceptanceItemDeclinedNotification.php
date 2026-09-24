@@ -61,7 +61,9 @@ class AcceptanceItemDeclinedNotification extends Notification implements ShouldQ
 
     public function shouldSend($notifiable, $channel)
     {
-        return Setting::getSettings()->alerts_enabled && !empty(Setting::getSettings()->alert_email);
+        $settings = Setting::getSettings();
+
+        return ($settings->alerts_enabled && !empty($settings->admin_cc_email));
     }
 
     /**
@@ -72,8 +74,6 @@ class AcceptanceItemDeclinedNotification extends Notification implements ShouldQ
      */
     public function toMail($notifiable)
     {
-        \Log::error("okay, about to mail the thing....");
-        \Log::error(print_r($this, true));
         $message = (new MailMessage)->markdown('notifications.markdown.asset-acceptance',
             [
                 'item_tag' => $this->item_tag,

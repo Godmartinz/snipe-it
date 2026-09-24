@@ -130,6 +130,29 @@ class UploadFileValidationTest extends TestCase
             ->assertOk();
     }
 
+    // Regression: POST /api/v1/imports with no `files` field returned
+    // a 500 from Symfony's MIME guesser because the controller iterated
+    // a null $files and then called getMimeType() on a phantom File
+    // with an empty path. The guarded shape should return 422 with a
+    // hint about the missing form field instead.
+    #[Test]
+    public function csv_importer_returns_422_when_files_field_is_missing(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.imports.store'), [])
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'error');
+    }
+
+    #[Test]
+    public function csv_importer_returns_422_when_files_field_is_empty_array(): void
+    {
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.imports.store'), ['files' => []])
+            ->assertStatus(422)
+            ->assertJsonPath('status', 'error');
+    }
+
     // Backstop: a genuine non-CSV file (a PNG here) whose extension is
     // also not csv/tsv/txt must still be rejected by the importer.
     #[Test]

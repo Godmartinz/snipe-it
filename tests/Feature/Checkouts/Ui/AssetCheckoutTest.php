@@ -557,4 +557,38 @@ class AssetCheckoutTest extends TestCase
             'location target' => ['location'],
         ];
     }
+
+    public function test_license_seats_are_not_reassigned_when_cross_company_checkout_is_rejected()
+    {
+        // The company-boundary gate has to fire before the license-seat
+        // loop persists $seat->assigned_to = $target->id. Prior to the
+        // ordering fix the seat writes ran first, so a cross-company
+        // checkout attempt would leave the seat reassigned to a user in
+        // a different company even though the checkout itself was
+        // refused.
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$assetCompany, $userCompany] = Company::factory()->count(2)->create();
+
+        $asset = Asset::factory()->for($assetCompany)->create();
+        $seat = LicenseSeat::factory()->assignedToAsset($asset)->create();
+        $originalSeatAssignedTo = $seat->assigned_to;
+
+        $user = User::factory()->forCompany($userCompany)->create();
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => 'user',
+                'assigned_user' => $user->id,
+            ])
+            ->assertRedirect(route('hardware.checkout.store', $asset));
+
+        Event::assertNotDispatched(CheckoutableCheckedOut::class);
+
+        $this->assertSame(
+            $originalSeatAssignedTo,
+            $seat->fresh()->assigned_to,
+            'License seat must not be reassigned when the parent checkout is refused for a cross-company target.',
+        );
+    }
 }

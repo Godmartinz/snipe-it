@@ -577,4 +577,92 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
 
         $this->assertEquals("{$row['firstName']} {$row['lastName']}", $newUser->display_name);
     }
+
+    /**
+     * GHSA-wq64-46j7-h5vr regression coverage: an imported avatar cell
+     * containing a relative traversal string ("../barcodes/target.png")
+     * used to persist verbatim into users.avatar, and the profile
+     * image-delete sink built a storage key by concatenating it onto
+     * "avatars/", giving a cross-directory delete inside the public
+     * uploads tree. The importer now reduces local filenames to their
+     * basename, mirroring how AssetImporter and AccessoryImporter treat
+     * their image cell.
+     */
+    #[Test]
+    public function import_reduces_avatar_path_traversal_to_basename(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new(['avatar' => '../barcodes/target.png']);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertSame('target.png', $newUser->avatar);
+    }
+
+    /**
+     * Bare local filenames pass through untouched (basename of a bare
+     * name returns the same string), so importing a user with a
+     * pre-existing avatar filename does not corrupt the reference.
+     */
+    #[Test]
+    public function import_preserves_bare_avatar_filename(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new(['avatar' => 'user-42-avatar.png']);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertSame('user-42-avatar.png', $newUser->avatar);
+    }
+
+    /**
+     * OAuth-sourced avatars (Google, Microsoft, Gravatar) arrive as
+     * absolute http(s) URLs and must be preserved verbatim. A naive
+     * basename() applied unconditionally would strip the scheme and host,
+     * leaving a value the display path then treats as a local filename
+     * and fails to render.
+     */
+    #[Test]
+    public function import_preserves_avatar_url_verbatim(): void
+    {
+        $avatarUrl = 'https://lh3.googleusercontent.com/a/ACg8ocKexampleAvatarPathSegment';
+        $importFileBuilder = ImportFileBuilder::new(['avatar' => $avatarUrl]);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertSame($avatarUrl, $newUser->avatar);
+    }
+
+    /**
+     * Empty avatar cell on import clears the DB value (present-but-empty
+     * semantics that every other importer field uses).
+     */
+    #[Test]
+    public function import_with_empty_avatar_cell_clears_the_column(): void
+    {
+        $user = User::factory()->create(['avatar' => 'user-42-avatar.png']);
+        $importFileBuilder = ImportFileBuilder::new([
+            'username' => $user->username,
+            'avatar' => '',
+        ]);
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $this->assertNull($user->fresh()->avatar);
+    }
 }

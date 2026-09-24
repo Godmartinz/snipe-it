@@ -4398,6 +4398,20 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "mrjcap",
+      "name": "Jay Cap",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3140504?v=4",
+      "profile": "https://github.com/mrjcap",
+      "contributions": []
+    },
+    {
+      "login": "staabm",
+      "name": "Markus Staab",
+      "avatar_url": "https://avatars.githubusercontent.com/u/120441?v=4",
+      "profile": "https://staabm.github.io/",
+      "contributions": []
     }
   ]
 }

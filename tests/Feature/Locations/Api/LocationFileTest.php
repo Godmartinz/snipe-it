@@ -6,10 +6,22 @@ use App\Models\Company;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class LocationFileTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Swap the private and public disks for in-memory fakes so
+        // uploaded files do not accumulate under storage/private_uploads
+        // and public/uploads across test runs. Was missing here, so
+        // every run of this file left real bytes on disk.
+        Storage::fake('local');
+        Storage::fake('public');
+    }
+
     public function test_location_api_accepts_file_upload()
     {
         // Create a model to work with

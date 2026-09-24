@@ -97,10 +97,10 @@ class ImageUploadRequest extends Request
         $path = trim((string) $path, '/');
         $prefix = $path === '' ? '' : $path.'/';
 
-        if ($path !== '' && ! Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->makeDirectory($path);
-        }
-
+        // No pre-emptive makeDirectory. S3 has no directories to
+        // create (flat namespace), and LocalFilesystemAdapter::write()
+        // calls ensureDirectoryExists() before writing, so the parent
+        // is auto-created on the local disk anyway.
         if ($this->offsetGet($form_fieldname) instanceof UploadedFile) {
             $image = $this->offsetGet($form_fieldname);
         } elseif ($this->hasFile($form_fieldname)) {
@@ -186,20 +186,33 @@ class ImageUploadRequest extends Request
     {
 
         if ($item->{$db_fieldname} != '') {
+            // Absolute http(s) URLs (OAuth-sourced avatars from Google,
+            // Microsoft, Gravatar, etc.) do not point at anything on this
+            // disk and early return.
+            if (preg_match('#^https?://#i', (string) $item->{$db_fieldname}) === 1) {
+                $item->{$db_fieldname} = null;
+
+                return $item;
+            }
+
             try {
                 // Same path normalization as handleImages. Branding callers
                 // pass '' for the disk root, and we don't want to produce a
                 // leading-slash key on S3.
                 $path = trim((string) $path, '/');
-                $key = $path === '' ? $item->{$db_fieldname} : $path.'/'.$item->{$db_fieldname};
+
+                // Defense in depth against a stored value that carries
+                // path traversal (e.g. `../barcodes/target.png`). Every
+                // sanctioned writer of these image columns produces a bare
+                // filename, but a legacy row or a future writer that skips
+                // that step must not reach the delete with a
+                // composable-into-cross-directory key.
+                $filename = basename((string) $item->{$db_fieldname});
+                $key = $path === '' ? $filename : $path.'/'.$filename;
                 $deleted = Storage::disk('public')->delete($key);
 
                 // Only null the model reference if the delete actually
-                // succeeded. Before, the field was cleared unconditionally
-                // even when Storage::delete returned false (silent-fail
-                // mode on the default local disk). The result was a model
-                // row that reported "no image" while the file remained on
-                // disk, orphaned.
+                // succeeded.
                 if ($deleted) {
                     $item->{$db_fieldname} = null;
                 } else {

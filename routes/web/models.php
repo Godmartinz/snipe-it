@@ -86,6 +86,14 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
         ]
     )->name('models.bulkdelete.store');
 
+    Route::post(
+        'merge',
+        [
+            BulkAssetModelsController::class,
+            'merge',
+        ]
+    )->name('models.merge.save');
+
     // Bulk-fulfill queue for a model's pending requests. Each row
     // picks a specific available asset OF this model to hand out.
     // See AssetModelsController::bulkFulfillRequests for design

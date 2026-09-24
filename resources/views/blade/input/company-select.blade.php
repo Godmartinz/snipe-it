@@ -27,6 +27,7 @@
     'onlyTopLevel' => false,
     'excludeId' => null,
     'id' => null,
+    'help_text' => null,
 ])
 
 @php
@@ -73,6 +74,12 @@
             @endcan
         </div>
     @endunless
+
+    @if ($help_text)
+        <div class="col-md-7 col-md-offset-3">
+            <x-form.help :name="$selectId">{!! $help_text !!}</x-form.help>
+        </div>
+    @endif
 
     @if ($snipeSettings->full_multiple_companies_support == '1')
         @cannot('superadmin')

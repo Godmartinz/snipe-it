@@ -6,12 +6,35 @@ use App\Models\Department;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class DepartmentSeeder extends Seeder
 {
     public function run()
     {
         Department::truncate();
+
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files('departments') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/departments') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
 
         if (! Location::count()) {
             $this->call(LocationSeeder::class);

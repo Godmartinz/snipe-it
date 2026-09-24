@@ -6,6 +6,8 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use App\Presenters\StatusLabelPresenter;
+use App\Rules\CssColor;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -47,6 +49,16 @@ class Statuslabel extends SnipeModel
     ];
 
     use Searchable;
+
+    /**
+     * Sanitize of the color column on read.
+     */
+    protected function color(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => CssColor::sanitize($value, ''),
+        );
+    }
 
     /**
      * Per-request memo of the ID lists used by Asset's status-driven scopes

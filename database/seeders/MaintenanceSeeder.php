@@ -25,14 +25,26 @@ class MaintenanceSeeder extends Seeder
         Maintenance::factory()->realistic()->create(['image' => '11.png']);
 
         $src = public_path('/img/demo/maintenances/');
-        $dst = 'maintenances'.'/';
-        $del_files = Storage::files($dst);
+        $dst = 'maintenances/';
 
-        foreach ($del_files as $del_file) { // iterate files
-            $file_to_delete = str_replace($src, '', $del_file);
-            Log::debug('Deleting: '.$file_to_delete);
+        // See AssetSeeder for why this reads and deletes on the same
+        // public disk using Storage::files()'s already-prefixed paths.
+        $disk = Storage::disk('public');
+        foreach ($disk->files(rtrim($dst, '/')) as $del_file) {
+            Log::debug('Deleting: '.$del_file);
             try {
-                Storage::disk('public')->delete($dst.$del_file);
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk. Same reset
+        // rationale as the public dir above.
+        foreach (Storage::files('private_uploads/maintenances') as $del_file) {
+            Log::debug('Deleting: '.$del_file);
+            try {
+                Storage::delete($del_file);
             } catch (\Exception $e) {
                 Log::debug($e);
             }

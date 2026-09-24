@@ -327,87 +327,31 @@
 
                     <x-tabs.pane name="licenses" :count="$user->licenses()->count()">
 
-                        @can('checkin', \App\Models\License::class)
                         <x-slot:table_header>{{ trans('general.licenses') }}</x-slot:table_header>
+
+                        @can('checkin', \App\Models\License::class)
                         <x-slot:bulkactions>
-                            <div class="hidden-print" style="padding-top:10px; min-width:400px;">
-                                <form method="POST" action="{{ route('licenses.bulkcheckin.selected') }}" id="userLicenseBulkCheckinForm" class="form-inline">
-                                    @csrf
-                                    <label for="userLicenseBulkActions"><span class="sr-only">{{ trans('button.bulk_actions') }}</span></label>
-                                    <select name="bulk_actions" id="userLicenseBulkActions" class="form-control select2" style="min-width:350px;">
-                                        <option value="checkin">{{ trans('general.checkin') }}</option>
-                                    </select>
-                                    <button type="submit" id="userLicenseBulkCheckinButton" class="btn btn-theme" disabled>{{ trans('button.go') }}</button>
-                                    <span id="userLicenseBulkCheckinCount" style="display:none; margin-left:8px; line-height:34px;">&mdash; <span class="badge">0</span> {{ trans('general.selected') }}</span>
-                                </form>
-                            </div>
+                            <x-table.bulk-actions
+                                name="userLicenseTable"
+                                :action_route="route('licenses.bulkcheckin.selected')"
+                                model_name="license_seats"
+                                :actions="[
+                                    'checkin' => ['label' => trans('general.checkin')],
+                                ]"
+                            />
                         </x-slot:bulkactions>
                         @endcan
 
                         @can('view', \App\Models\License::class)
-                        <table
-                            data-cookie-id-table="userLicenseTable"
-                            data-id-table="userLicenseTable"
-                            id="userLicenseTable"
-                            data-buttons="licenseButtons"
-                            data-side-pagination="client"
-                            data-show-footer="true"
-                            data-sort-name="name"
-                            class="table table-striped snipe-table table-hover"
-                            data-export-options='{
-                    "fileName": "export-license-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
-                    }'>
-
-                            <thead>
-                                <tr>
-                                    @can('checkin', \App\Models\License::class)
-                                        <th scope="col" class="hidden-print">{{ trans('general.id') }}</th>
-                                    @endcan
-                                    <th scope="col">{{ trans('general.name') }}</th>
-                                    <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
-                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                                    <th scope="col">{{ trans('admin/licenses/form.purchase_order') }}</th>
-                                    <th scope="col">{{ trans('general.order_number') }}</th>
-                                    <th scope="col" class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($user->licenses as $license)
-                                    <tr>
-                                        @can('checkin', \App\Models\License::class)
-                                        <td class="hidden-print">
-                                            <input type="checkbox" class="user-license-seat-checkbox hidden-print" form="userLicenseBulkCheckinForm" name="ids[]" value="{{ $license->pivot->id }}">
-                                        </td>
-                                        @endcan
-                                        <td class="col-md-4">
-                                            {!! $license->present()->nameUrl() !!}
-                                        </td>
-                                        <td class="col-md-4">
-                                            @can('viewKeys', $license)
-                                                <code class="single-line"><span class="js-copy-link" data-clipboard-target=".js-copy-key-{{ $license->id }}" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}"><span class="js-copy-key-{{ $license->id }}">{{ $license->serial }}</span></span></code>
-                                            @else
-                                                ------------
-                                            @endcan
-                                        </td>
-                                        <td class="col-md-2">
-                                            {{ Helper::formatCurrencyOutput($license->purchase_cost) }}
-                                        </td>
-                                        <td>
-                                            {{ $license->purchase_order }}
-                                        </td>
-                                        <td>
-                                            {{ $license->order_number }}
-                                        </td>
-                                        <td class="hidden-print col-md-2">
-                                            @can('update', $license)
-                                                <a href="{{ route('licenses.checkin', $license->pivot->id, ['backto'=>'user']) }}" class="btn bg-purple btn-sm hidden-print">{{ trans('general.checkin') }}</a>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <x-table
+                            name="userLicenseTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="licenseButtons"
+                            api_url="{{ route('api.users.licenselist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::licensesDataTableLayout()"
+                            export_filename="export-license-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
@@ -422,87 +366,30 @@
                         </x-slot:table_header>
 
                         @can('view', \App\Models\Accessory::class)
-                        <table
-                            data-cookie-id-table="userAccessoryTable"
-                            data-id-table="userAccessoryTable"
-                            id="userAccessoryTable"
-                            data-buttons="accessoryButtons"
-                            data-side-pagination="client"
-                            data-sort-name="name"
-                            class="table table-striped snipe-table table-hover"
-                            data-export-options='{
-                    "fileName": "export-accessory-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
-                    }'>
-                            <thead>
-                                <tr>
-                                    <th scope="col">{{ trans('general.id') }}</th>
-                                    <th scope="col">{{ trans('general.name') }}</th>
-                                    <th scope="col">{{ trans('general.date') }}</th>
-                                    <th scope="col" data-fieldname="note">{{ trans('general.notes') }}</th>
-                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th scope="col" class="hidden-print">{{ trans('general.action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($user->accessories as $accessory)
-                                    <tr>
-                                        <td>{{ $accessory->pivot->id }}</td>
-                                        <td>{!! $accessory->present()->nameUrl() !!}</td>
-                                        <td>{{ Helper::getFormattedDateObject($accessory->pivot->created_at, 'datetime',  false) }}</td>
-                                        <td>{{ $accessory->pivot->note }}</td>
-                                        <td>
-                                            {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
-                                        </td>
-                                        <td class="hidden-print">
-                                            @can('checkin', $accessory)
-                                                <a href="{{ route('accessories.checkin.show', array('accessoryID'=> $accessory->pivot->id, 'backto'=>'user')) }}" class="btn bg-purple btn-sm hidden-print">{{ trans('general.checkin') }}</a>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <x-table
+                            name="userAccessoryTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="accessoryButtons"
+                            api_url="{{ route('api.users.accessorieslist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::accessoriesDataTableLayout()"
+                            export_filename="export-accessory-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
 
                     <x-tabs.pane name="consumables" :count="$user->consumables()->count()">
                         @can('view', \App\Models\Consumable::class)
-                        <table
-                            data-cookie-id-table="userConsumableTable"
-                            data-id-table="userConsumableTable"
-                            id="userConsumableTable"
-                            data-buttons="consumableButtons"
-                            data-side-pagination="client"
-                            data-show-footer="true"
-                            data-sort-name="name"
-                            class="table table-striped snipe-table table-hover"
-                            data-export-options='{
-                    "fileName": "export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
-                    }'>
-                            <thead>
-                                <tr>
-                                    <th scope="col" class="col-md-3">{{ trans('general.name') }}</th>
-                                    <th scope="col" class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th scope="col" class="col-md-2">{{ trans('general.date') }}</th>
-                                    <th scope="col" class="col-md-5">{{ trans('general.notes') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($user->consumables as $consumable)
-                                    <tr>
-                                        <td>{!! $consumable->present()->nameUrl() !!}</td>
-                                        <td>
-                                            {!! Helper::formatCurrencyOutput($consumable->lastOrderDefaults()['unit_cost'] ?? null) !!}
-                                        </td>
-                                        <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>
-                                        <td>{{ $consumable->pivot->note }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <x-table
+                            name="userConsumableTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="consumableButtons"
+                            api_url="{{ route('api.users.consumableslist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::consumablesDataTableLayout()"
+                            export_filename="export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
@@ -704,23 +591,6 @@ $(function () {
         document.cookie = "optional_info_open="+optional_info_open+'; path=/';
     });
 
-    $(document).on('change', '.user-license-seat-checkbox', function () {
-        var count = $('.user-license-seat-checkbox:checked').length;
-        $('#userLicenseBulkCheckinButton').prop('disabled', count === 0);
-        $('#userLicenseBulkCheckinCount .badge').text(count);
-        if (count > 0) {
-            $('#userLicenseBulkCheckinCount').show();
-        } else {
-            $('#userLicenseBulkCheckinCount').hide();
-        }
-        var total = $('.user-license-seat-checkbox').length;
-        $('#userLicenseSelectAll').prop('indeterminate', count > 0 && count < total);
-        $('#userLicenseSelectAll').prop('checked', count === total);
-    });
-
-    $(document).on('change', '#userLicenseSelectAll', function () {
-        $('.user-license-seat-checkbox').prop('checked', $(this).is(':checked')).trigger('change');
-    });
 });
 </script>
 

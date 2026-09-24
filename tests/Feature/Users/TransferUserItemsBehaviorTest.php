@@ -147,6 +147,29 @@ class TransferUserItemsBehaviorTest extends TestCase
         $this->assertSame($target->id, $selectedAsset->assigned_to);
         $this->assertSame($source->id, $unselectedAsset->assigned_to);
     }
+    
+    public function test_transfer_preserves_asset_name(): void
+    {
+        $source = User::factory()->create();
+        $target = User::factory()->create();
+        $asset = Asset::factory()->create([
+            'name' => 'Ada\'s laptop',
+            'assigned_to' => $source->id,
+            'assigned_type' => User::class,
+        ]);
+
+        $this->actingAs($this->transferActor())
+            ->post(route('users.transfer.store', $source), [
+                'target_user_id' => $target->id,
+                'asset_ids' => [$asset->id],
+                'note' => 'employee offboarding',
+            ])
+            ->assertRedirect(route('users.show', $target));
+
+        $asset->refresh();
+        $this->assertSame($target->id, $asset->assigned_to);
+        $this->assertSame('Ada\'s laptop', $asset->name, 'Asset name must survive a transfer.');
+    }
 
     private function transferActor(): User
     {

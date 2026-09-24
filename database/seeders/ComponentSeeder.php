@@ -12,6 +12,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ComponentSeeder extends Seeder
 {
@@ -21,6 +23,27 @@ class ComponentSeeder extends Seeder
         Actionlog::where('item_type', Component::class)->delete();
         Component::truncate();
         DB::table('components_assets')->truncate();
+
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files('components') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/components') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
 
         if (! Company::count()) {
             $this->call(CompanySeeder::class);

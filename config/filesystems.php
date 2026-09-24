@@ -66,7 +66,8 @@ $config = [
             'endpoint' => env('PUBLIC_AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('PUBLIC_AWS_PATH_STYLE'),
             'root' => env('PUBLIC_AWS_BUCKET_ROOT'),
-            'visibility' => 'public',
+            // No 'visibility' key: Admins who want public reads should grant them
+            // via a bucket policy and set PUBLIC_AWS_URL to the public endpoint. See #19670.
         ],
 
         's3_private' => [
@@ -83,7 +84,12 @@ $config = [
             'endpoint' => env('PRIVATE_AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('PRIVATE_AWS_PATH_STYLE'),
             'root' => env('PRIVATE_AWS_BUCKET_ROOT'),
-            'visibility' => 'private',
+            // No 'visibility' key: sending an ACL header (even
+            // ACL: private) is rejected on buckets with Object
+            // Ownership = Bucket owner enforced, which has been the
+            // default for buckets created since April 2023. Buckets
+            // configured that way are already private by default via
+            // the bucket policy, so this ACL was redundant. See #19670.
         ],
 
         'rackspace' => [
@@ -102,8 +108,24 @@ $config = [
             'secret' => env('PRIVATE_AWS_SECRET_ACCESS_KEY'),
             'region' => env('PRIVATE_AWS_DEFAULT_REGION'),
             'bucket' => env('PRIVATE_AWS_BUCKET'),
-            'root' => env('BACKUP_FILESYSTEM_ROOT', storage_path('app')),
-            'visibility' => 'private',
+            // Root defaults differ by driver so the same disk config
+            // does the right thing on both. On local, backups live
+            // under storage_path("app")/backups (matches the pre-S3
+            // shape and the spatie backup name). On s3, the root
+            // becomes an S3 key prefix, and defaulting it to a local
+            // filesystem path (storage_path("app") = "/Users/..." or
+            // "/var/www/...") puts every backup behind a leading-slash
+            // prefix that Flysystem's S3 adapter can't list back
+            // (upload preserves the leading /, listContents strips
+            // it, so the write/read round-trip breaks). Empty string
+            // = bucket root, which is what admins actually want.
+            // Override in either direction via BACKUP_FILESYSTEM_ROOT.
+            'root' => env('BACKUP_FILESYSTEM_ROOT', env('BACKUP_FILESYSTEM_DRIVER', 'local') === 's3' ? '' : storage_path('app')),
+            // No 'visibility' key: same reasoning as s3_private above.
+            // On the default local driver this key does nothing anyway.
+            // On the s3 driver it would send ACL: private, which buckets
+            // with Object Ownership = Bucket owner enforced reject with
+            // AccessControlListNotSupported. See #19670.
         ],
 
     ],
@@ -163,7 +185,7 @@ $config['allowed_upload_mimetypes_array'] = [
     'application/json',
     'application/msword',
     'application/pdf',
-    // text/csv is the RFC 4180 mime; some browsers report CSVs as
+    // text/csv is the RFC 4180 mime. Some browsers report CSVs as
     // application/csv or application/vnd.ms-excel instead depending on
     // OS registration. Accepting all three covers real-world uploads
     // without users hitting mysterious "wrong type" rejections.

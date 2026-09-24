@@ -49,7 +49,15 @@ class UploadedFilesTransformer
             'filetype' => StorageHelper::getFiletype($file->uploads_file_path()),
             'mediatype' => StorageHelper::getMediaType($file->uploads_file_path()),
             'url' => $file->uploads_file_url(),
-            'note' => ($file->note) ? e($file->note) : null,
+            // Notes are single-encoded here (e()), but the bootstrap-table
+            // gallery "custom view" concatenates the note into the
+            // data-footer attribute of the lightbox anchor and ekko-lightbox
+            // later rebuilds the modal footer as an HTML string from
+            // $el.data('footer'). Two decodes strip the entity encoding and
+            // leave live markup, so the field must be inert HTML by the time
+            // it leaves this transformer. strip_tags removes any tag markup
+            // placed in the note before it reaches any renderer.
+            'note' => ($file->note) ? e(strip_tags($file->note)) : null,
             'created_by' => ($file->adminuser) ? [
                 'id' => (int) $file->adminuser->id,
                 'name' => e($file->adminuser->display_name),

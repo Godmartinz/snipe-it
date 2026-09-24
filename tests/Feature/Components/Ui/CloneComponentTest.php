@@ -17,10 +17,19 @@ class CloneComponentTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_create_permission_alone_is_not_enough_to_clone_component()
+    {
+        $component = Component::factory()->create();
+
+        $this->actingAs(User::factory()->createComponents()->create())
+            ->get(route('components.clone.create', $component))
+            ->assertForbidden();
+    }
+
     public function test_page_can_be_accessed(): void
     {
         $component = Component::factory()->create();
-        $response = $this->actingAs(User::factory()->createComponents()->create())
+        $response = $this->actingAs(User::factory()->cloneComponents()->create())
             ->get(route('components.clone.create', $component));
         $response->assertStatus(200);
     }
@@ -28,7 +37,7 @@ class CloneComponentTest extends TestCase
     public function test_component_can_be_cloned()
     {
         $component_to_clone = Component::factory()->create(['name' => 'Component to clone']);
-        $this->actingAs(User::factory()->createComponents()->create())
+        $this->actingAs(User::factory()->cloneComponents()->create())
             ->get(route('components.clone.create', $component_to_clone))
             ->assertOk()
             ->assertSee([
@@ -51,7 +60,7 @@ class CloneComponentTest extends TestCase
             'order_number' => 'PO-COMP-CLONE-9',
         ]);
 
-        $response = $this->actingAs(User::factory()->createComponents()->create())
+        $response = $this->actingAs(User::factory()->cloneComponents()->create())
             ->get(route('components.clone.create', $source))
             ->assertOk();
 

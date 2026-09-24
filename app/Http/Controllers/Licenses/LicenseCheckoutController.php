@@ -215,6 +215,16 @@ class LicenseCheckoutController extends Controller
             throw new HttpResponseException(redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.checkout.mismatch')));
         }
 
+        // GHSA-r25g-f428-466r: reject retired-unreassignable seats.
+        if ($licenseSeat->unreassignable_seat) {
+            throw new HttpResponseException(redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.checkout.unavailable')));
+        }
+
+        // GHSA-r25g-f428-466r: reject occupied seats.
+        if ($licenseSeat->assigned_to !== null || $licenseSeat->asset_id !== null) {
+            throw new HttpResponseException(redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.checkout.unavailable')));
+        }
+
         return $licenseSeat;
     }
 

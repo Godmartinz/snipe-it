@@ -12,6 +12,7 @@ use App\Http\Transformers\LicenseSeatsTransformer;
 use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\License;
 use App\Models\LicenseSeat;
@@ -325,6 +326,8 @@ class LicensesController extends Controller
             'assigned_to' => 'required_if:target_type,user|integer|nullable',
             'asset_id' => 'required_if:target_type,asset|integer|nullable',
             'notes' => 'sometimes|string|nullable',
+            // Opt-in flag for instantly reassigning an occupied seat.
+            'reassign' => 'sometimes|boolean',
         ]);
 
         if ($license->isInactive()) {
@@ -352,6 +355,45 @@ class LicensesController extends Controller
                 $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/licenses/message.checkout.unavailable')));
 
                 return;
+            }
+
+            // GHSA-r25g-f428-466r: reject occupied seats on explicit-id
+            // checkout by default.
+            if ($licenseSeat->assigned_to !== null || $licenseSeat->asset_id !== null) {
+                if (!($validated['reassign'] ?? false)) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/licenses/message.checkout.unavailable')));
+
+                    return;
+                }
+
+                if (!$licenseSeat->license->reassignable) {
+                    $errorResponse = response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/licenses/message.checkout.unavailable')));
+
+                    return;
+                }
+
+                // Fire CheckoutableCheckedIn for the
+                // current holder and delete their pending acceptance
+                $displaced = $licenseSeat->assigned_to
+                    ? User::withoutGlobalScopes()->find($licenseSeat->assigned_to)
+                    : ($licenseSeat->asset_id ? Asset::withoutGlobalScopes()->find($licenseSeat->asset_id) : null);
+
+                if ($displaced instanceof User) {
+                    CheckoutAcceptance::pending()
+                        ->where('checkoutable_type', LicenseSeat::class)
+                        ->where('checkoutable_id', $licenseSeat->id)
+                        ->where('assigned_to_id', $displaced->id)
+                        ->get()
+                        ->each(fn($a) => $a->delete());
+                }
+
+                $licenseSeat->assigned_to = null;
+                $licenseSeat->asset_id = null;
+                $licenseSeat->save();
+
+                if ($displaced) {
+                    event(new CheckoutableCheckedIn($licenseSeat, $displaced, auth()->user(), $validated['notes'] ?? null));
+                }
             }
 
             if ($validated['target_type'] === 'user') {

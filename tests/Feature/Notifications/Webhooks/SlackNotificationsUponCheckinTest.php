@@ -15,9 +15,12 @@ use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
 use App\Notifications\CheckinComponentNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
+use App\Notifications\CheckoutAssetNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Support\Facades\Notification;
+use NotificationChannels\GoogleChat\GoogleChatMessage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
@@ -202,5 +205,91 @@ class SlackNotificationsUponCheckinTest extends TestCase
             User::factory()->superuser()->create(),
             ''
         ));
+    }
+
+    #[DataProvider('checkinNotificationCases')]
+    public function test_checkin_slack_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableSlackWebhook();
+
+        $notification = $createNotification();
+
+        $this->assertInstanceOf(
+            SlackMessage::class,
+            $notification->toSlack()
+        );
+    }
+
+    #[DataProvider('checkinNotificationCases')]
+    public function test_checkin_google_chat_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableGoogleChatWebhook();
+
+        $notification = $createNotification();
+
+        $this->assertInstanceOf(
+            GoogleChatMessage::class,
+            $notification->toGoogleChat()
+        );
+    }
+
+    #[DataProvider('checkinNotificationCases')]
+    public function test_checkin_microsoft_teams_workflow_notifications_can_be_built($createNotification)
+    {
+        $this->settings->enableMicrosoftTeamsWebhook();
+
+        $notification = $createNotification();
+
+        $message = $notification->toMicrosoftTeams();
+
+        $this->assertIsArray($message);
+        $this->assertCount(2, $message);
+        $this->assertIsString($message[0]);
+        $this->assertIsArray($message[1]);
+    }
+
+    public static function checkinNotificationCases(): array
+    {
+        return [
+            'Asset' => [
+                fn() => new CheckinAssetNotification(
+                    Asset::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    '',
+                ),
+            ],
+
+            'Accessory' => [
+                fn() => new CheckinAccessoryNotification(
+                    Accessory::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    '',
+                ),
+            ],
+
+            'Component' => [
+                fn() => new CheckinComponentNotification(
+                    Component::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    '',
+                ),
+            ],
+
+            'License seat' => [
+                fn() => new CheckinLicenseSeatNotification(
+                    LicenseSeat::factory()->create(),
+                    User::factory()->create(),
+                    User::factory()->superuser()->create(),
+                    null,
+                    '',
+                ),
+            ],
+        ];
     }
 }

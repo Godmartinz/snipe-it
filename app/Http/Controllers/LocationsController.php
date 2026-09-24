@@ -101,7 +101,12 @@ class LocationsController extends Controller
 
         // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
         if (Setting::getSettings()->full_multiple_companies_support) {
-            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            // withoutGlobalScopes: Location::CompanyableScope would filter a
+            // cross-tenant parent out for a scoped non-superuser, so find()
+            // would return null and the null check below would short-circuit
+            // the reject branch, letting the parent_id save through. See
+            // ValidationServiceProvider::fmcs_location for the sibling fix.
+            $parent = $location->parent_id ? Location::withoutGlobalScopes()->find($location->parent_id) : null;
             if ($parent && $parent->company_id != $location->company_id) {
                 return redirect()->back()->withInput()->with('error', trans('general.error_location_parent_company', [
                     'parent' => $parent->name,
@@ -198,7 +203,12 @@ class LocationsController extends Controller
 
         // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
         if (Setting::getSettings()->full_multiple_companies_support) {
-            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            // withoutGlobalScopes: Location::CompanyableScope would filter a
+            // cross-tenant parent out for a scoped non-superuser, so find()
+            // would return null and the null check below would short-circuit
+            // the reject branch, letting the parent_id save through. See
+            // ValidationServiceProvider::fmcs_location for the sibling fix.
+            $parent = $location->parent_id ? Location::withoutGlobalScopes()->find($location->parent_id) : null;
             if ($parent && $parent->company_id != $location->company_id) {
                 return redirect()->back()->withInput()->with('error', trans('general.error_location_parent_company', [
                     'parent' => $parent->name,
@@ -359,13 +369,13 @@ class LocationsController extends Controller
      */
     public function getClone($locationId = null): View|RedirectResponse
     {
-        $this->authorize('create', Location::class);
-
         // Check if the asset exists
         if (is_null($location_to_clone = Location::find($locationId))) {
             // Redirect to the asset management page
             return redirect()->route('licenses.index')->with('error', trans('admin/locations/message.does_not_exist'));
         }
+
+        $this->authorize('clone', $location_to_clone);
 
         $location = clone $location_to_clone;
 

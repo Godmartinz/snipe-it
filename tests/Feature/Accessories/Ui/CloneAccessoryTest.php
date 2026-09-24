@@ -28,11 +28,23 @@ class CloneAccessoryTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_create_permission_alone_is_not_enough_to_clone_accessory(): void
+    {
+        // Cloning renders the source accessory's data into the create form,
+        // so a user with only accessories.create (no accessories.view)
+        // must be blocked.
+        $accessory = Accessory::factory()->create();
+
+        $this->actingAs(User::factory()->createAccessories()->create())
+            ->get(route('clone/accessories', $accessory))
+            ->assertForbidden();
+    }
+
     public function test_clone_page_renders(): void
     {
         $accessory = Accessory::factory()->create();
 
-        $this->actingAs(User::factory()->createAccessories()->create())
+        $this->actingAs(User::factory()->cloneAccessories()->create())
             ->get(route('clone/accessories', $accessory))
             ->assertOk();
     }
@@ -48,7 +60,7 @@ class CloneAccessoryTest extends TestCase
             'order_number' => 'PO-CLONE-PREFILL-42',
         ]);
 
-        $response = $this->actingAs(User::factory()->createAccessories()->create())
+        $response = $this->actingAs(User::factory()->cloneAccessories()->create())
             ->get(route('clone/accessories', $source))
             ->assertOk();
 
@@ -71,7 +83,7 @@ class CloneAccessoryTest extends TestCase
             'Expected qty=0 accessory to have no observer-written order (baseline for the no-history case).',
         );
 
-        $response = $this->actingAs(User::factory()->createAccessories()->create())
+        $response = $this->actingAs(User::factory()->cloneAccessories()->create())
             ->get(route('clone/accessories', $source))
             ->assertOk();
 

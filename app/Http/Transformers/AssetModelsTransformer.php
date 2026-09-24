@@ -59,7 +59,9 @@ class AssetModelsTransformer
             'assets_count' => (int) $assetmodel->assets_count,
             'assets_assigned_count' => (int) $assetmodel->assets_assigned_count,
             'assets_archived_count' => (int) $assetmodel->assets_archived_count,
-            'remaining' => (int) ($assetmodel->assets_count - (int) $assetmodel->assets_assigned_count) - (int) $assetmodel->assets_archived_count,
+            'remaining' => $assetmodel->remaining !== null
+                ? (int) $assetmodel->remaining
+                : (int) ($assetmodel->assets_count - (int) $assetmodel->assets_assigned_count) - (int) $assetmodel->assets_archived_count,
             'percent_remaining' => round($assetmodel->percentRemaining()),
             'category' => ($assetmodel->category) ? [
                 'id' => (int) $assetmodel->category->id,
@@ -107,7 +109,7 @@ class AssetModelsTransformer
             'view' => Gate::allows('view', $assetmodel),
             'update' => (Gate::allows('update', $assetmodel) && ($assetmodel->deleted_at == '')),
             'delete' => $assetmodel->isDeletable(),
-            'clone' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at == '')),
+            'clone' => (Gate::allows('clone', $assetmodel) && ($assetmodel->deleted_at == '')),
             'restore' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at != '')),
             // Request / cancel: if the requestable flag is off the row
             // never surfaces on /account/requestable anyway (scoped
@@ -118,6 +120,7 @@ class AssetModelsTransformer
             'bulk_selectable' => [
                 'edit' => (Gate::allows('update', $assetmodel) && ($assetmodel->deleted_at == '')),
                 'delete' => (Gate::allows('delete', $assetmodel) && $assetmodel->isDeletable()),
+                'merge' => (Gate::allows('delete', AssetModel::class) && ($assetmodel->deleted_at == '')),
             ],
         ];
 

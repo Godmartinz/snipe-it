@@ -10,7 +10,6 @@ use App\Models\AccessoryCheckout;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class AccessoryCheckinController extends Controller
 {
@@ -19,27 +18,29 @@ class AccessoryCheckinController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
-     * @param  Request  $request
-     * @param  int  $accessoryUserId
-     * @param  string  $backto
+     * @param  int|null  $accessoryCheckoutId
+     * @param  string|null  $backto
      */
-    public function create($accessoryUserId = null, $backto = null): View|RedirectResponse
+    public function create($accessoryCheckoutId = null, $backto = null): View|RedirectResponse
     {
-        if (is_null($accessory_user = DB::table('accessories_checkout')->find($accessoryUserId))) {
+        if (is_null($accessory_checkout = AccessoryCheckout::find($accessoryCheckoutId))) {
             return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.not_found'));
         }
 
-        $accessory = Accessory::find($accessory_user->accessory_id);
+        $accessory = Accessory::find($accessory_checkout->accessory_id);
         $this->authorize('checkin', $accessory);
 
         // based on what the accessory is checked out to the target redirect option will be displayed accordingly.
-        $target_option = match ($accessory_user->assigned_type) {
+        $target_option = match ($accessory_checkout->assigned_type) {
             'App\Models\Asset' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
             'App\Models\Location' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.location')]),
             default => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.user')]),
         };
 
-        return view('accessories/checkin', compact('accessory', 'target_option'))->with('backto', $backto);
+        return view('accessories/checkin', compact('accessory', 'target_option'))
+            ->with('target', $accessory_checkout->assignedTo)
+            ->with('backto', $backto)
+            ->with('checkoutLog', $accessory_checkout);
 
     }
 

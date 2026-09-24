@@ -35,6 +35,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
 use App\Models\Labels\CustomUserLabel;
 
@@ -73,7 +74,10 @@ class SettingsController extends Controller
             ));
         }
 
-        return view('settings/index', compact('settings', 'impersonators', 'missingImpersonationUsernames'));
+        // Grab the adapters list so we can populate the hidden keywords for the settings search box
+        $adapterKeywords = implode(' ', \App\SyncAdapters\SyncAdapter::typeLabels());
+
+        return view('settings/index', compact('settings', 'impersonators', 'missingImpersonationUsernames', 'adapterKeywords'));
     }
 
     /**
@@ -623,6 +627,7 @@ class SettingsController extends Controller
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
         }
+        $wasLabel2Enabled = $setting->label2_enable;
         $setting->label2_enable = $request->input('label2_enable');
         $setting->label2_template = $request->input('label2_template');
         $setting->label2_title = $request->input('label2_title');
@@ -633,7 +638,7 @@ class SettingsController extends Controller
         $setting->label2_2d_target = $request->input('label2_2d_target');
         $setting->label2_fields = $request->input('label2_fields');
         $setting->label2_empty_row_count = $request->input('label2_empty_row_count');
-        if (! $request->boolean('label2_enable')) {
+        if (! $wasLabel2Enabled && ! $request->boolean('label2_enable')) {
             $setting->labels_per_page = $request->input('labels_per_page');
             $setting->labels_width = $request->input('labels_width');
             $setting->labels_height = $request->input('labels_height');
@@ -647,43 +652,46 @@ class SettingsController extends Controller
             $setting->labels_pagewidth = $request->input('labels_pagewidth');
             $setting->labels_pageheight = $request->input('labels_pageheight');
             $setting->labels_display_company_name = $request->input('labels_display_company_name', '0');
+            // Barcodes
+            $setting->qr_code = $request->input('qr_code', '0');
+            // 1D-Barcode
+            $setting->alt_barcode_enabled = $request->input('alt_barcode_enabled', '0');
+            // QR-Code
+            $setting->qr_text = $request->input('qr_text');
+
+            if ($request->filled('labels_display_name')) {
+                $setting->labels_display_name = 1;
+            } else {
+                $setting->labels_display_name = 0;
+            }
+
+            if ($request->filled('labels_display_serial')) {
+                $setting->labels_display_serial = 1;
+            } else {
+                $setting->labels_display_serial = 0;
+            }
+
+            if ($request->filled('labels_display_tag')) {
+                $setting->labels_display_tag = 1;
+            } else {
+                $setting->labels_display_tag = 0;
+            }
+
+            if ($request->filled('labels_display_tag')) {
+                $setting->labels_display_tag = 1;
+            } else {
+                $setting->labels_display_tag = 0;
+            }
+
+            if ($request->filled('labels_display_model')) {
+                $setting->labels_display_model = 1;
+            } else {
+                $setting->labels_display_model = 0;
+            }
         }
 
-        // Barcodes
-        $setting->qr_code = $request->input('qr_code', '0');
-        // 1D-Barcode
-        $setting->alt_barcode_enabled = $request->input('alt_barcode_enabled', '0');
-        // QR-Code
-        $setting->qr_text = $request->input('qr_text');
-
-        if ($request->filled('labels_display_name')) {
-            $setting->labels_display_name = 1;
-        } else {
-            $setting->labels_display_name = 0;
-        }
-
-        if ($request->filled('labels_display_serial')) {
-            $setting->labels_display_serial = 1;
-        } else {
-            $setting->labels_display_serial = 0;
-        }
-
-        if ($request->filled('labels_display_tag')) {
-            $setting->labels_display_tag = 1;
-        } else {
-            $setting->labels_display_tag = 0;
-        }
-
-        if ($request->filled('labels_display_tag')) {
-            $setting->labels_display_tag = 1;
-        } else {
-            $setting->labels_display_tag = 0;
-        }
-
-        if ($request->filled('labels_display_model')) {
-            $setting->labels_display_model = 1;
-        } else {
-            $setting->labels_display_model = 0;
+        if (! $wasLabel2Enabled && $request->boolean('label2_enable')) {
+            $setting->label2_title = $setting->qr_text;
         }
 
         if ($setting->save()) {
@@ -887,6 +895,692 @@ class SettingsController extends Controller
     }
 
     /**
+     * Shared settings page for every host-inventory sync adapter
+     * instance.
+     */
+    public function getAdapters(Request $request): View|RedirectResponse
+    {
+        $adapterTypes = \App\SyncAdapters\SyncAdapter::typeLabels();
+        $adapterCatalog = \App\SyncAdapters\SyncAdapter::typeCatalog();
+
+        // The filter is for UX when per-company adapters exist. Gate on whether the
+        // install has any companies at all. 'Shared' means "no company_id" (built-ins and adapters available to all).
+        $companies = \App\Models\Company::orderBy('name')->pluck('name', 'id')->all();
+        $hasCompanies = count($companies) > 0;
+        $selectedCompany = $hasCompanies ? $request->query('company') : null;
+
+        $instanceQuery = \App\Models\SyncAdapterInstance::query()->orderBy('label');
+        if ($selectedCompany === 'shared') {
+            $instanceQuery->whereNull('company_id');
+        } elseif ($selectedCompany !== null && $selectedCompany !== '') {
+            // Company-scoped view includes the shared built-ins too, since
+            // those are available to every company. Otherwise picking a
+            // specific company would hide Fleet, Kandji, and friends.
+            $instanceQuery->where(function ($q) use ($selectedCompany) {
+                $q->where('company_id', (int) $selectedCompany)
+                    ->orWhereNull('company_id');
+            });
+        }
+
+        // Sort: enabled (green dot) first, then partial (yellow),
+        // then inactive (red). Within each bucket, preserve the
+        // database ORDER BY label.
+        $readinessRank = ['active' => 0, 'partial' => 1, 'inactive' => 2];
+        $adapters = $instanceQuery->get()
+            ->map(fn ($i) => \App\SyncAdapters\SyncAdapter::factory($i))
+            ->filter()
+            ->sortBy(fn ($a) => $readinessRank[$a->readinessStatus()] ?? 99)
+            ->values()
+            ->all();
+
+        // Default selection: an explicit ?adapter=slug wins if present.
+        // Otherwise prefer the first enabled adapter.
+        $requestedSlug = $request->query('adapter');
+        if ($requestedSlug !== null) {
+            $selectedSlug = $requestedSlug;
+        } else {
+            $default = collect($adapters)->first(fn ($a) => $a->isEnabled()) ?? ($adapters[0] ?? null);
+            $selectedSlug = $default?->name();
+        }
+        $selected = collect($adapters)->first(fn ($a) => $a->name() === $selectedSlug);
+
+        // Explicit ?adapter=slug pointing at a non-existent instance
+        // (deleted, typo, stale bookmark). Redirect to the default
+        // view with an error
+        if ($requestedSlug !== null && $selected === null) {
+            return redirect()->route('settings.adapters.index')
+                ->with('error', trans('admin/settings/sync_adapters.not_found', ['slug' => $requestedSlug]));
+        }
+
+        // Per-adapter count of asset_external_sources rows keyed by
+        // source slug. Powers the delete-confirmation message so
+        // admins see how many synced assets they are about to
+        // "orphan" (assets stay, external-source link stays, sync
+        // just stops). One grouped query rather than N per-adapter
+        // COUNTs so the settings page stays cheap for installs with
+        // many configured adapters.
+        $syncedCounts = \App\Models\AssetExternalSource::query()
+            ->selectRaw('source, COUNT(*) as c')
+            ->groupBy('source')
+            ->pluck('c', 'source')
+            ->all();
+
+        return view('settings.adapters', compact(
+            'adapters', 'adapterTypes', 'adapterCatalog', 'selected', 'companies', 'hasCompanies', 'selectedCompany', 'syncedCounts',
+        ));
+    }
+
+    /**
+     * Create a new adapter instance.
+     */
+    public function postCreateAdapterInstance(Request $request): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        $validated = $request->validate([
+            'adapter_type' => 'required|string|in:'.implode(',', \App\SyncAdapters\SyncAdapter::typeNames()),
+            'label' => 'required|string|max:191|unique:sync_adapter_instances,label',
+            'company_id' => 'nullable|integer|exists:companies,id',
+        ]);
+
+        // Start inactive. Active + no URL/token means "Active" ticked
+        // on the settings page while Sync Now stays disabled because
+        // isEnabled() also requires at least minimal config.
+        $instance = new \App\Models\SyncAdapterInstance;
+        $instance->fill([
+            'adapter_type' => $validated['adapter_type'],
+            'label' => $validated['label'],
+            'company_id' => $validated['company_id'] ?? null,
+            'active' => false,
+        ]);
+
+        $instance->created_by = auth()->id();
+        $instance->save();
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with('success', trans('admin/settings/sync_adapters.instance_created'));
+    }
+
+    /**
+     * Clone an existing adapter instance. Creates a new inactive
+     * instance with the same adapter_type as the source and copies
+     * every SyncAdapterConfig row across so the admin lands on a
+     * near-identical setup, ready for a per-clone tweak (typically
+     * a different company_id or a swapped URL / token). The clone
+     * starts inactive so the admin reviews before enabling sync.
+     */
+    public function postCloneAdapterInstance(Request $request, \App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        $validated = $request->validate([
+            'label' => 'required|string|max:191|unique:sync_adapter_instances,label',
+            'company_id' => 'nullable|integer|exists:companies,id',
+        ]);
+
+        $clone = new \App\Models\SyncAdapterInstance;
+        $clone->fill([
+            'adapter_type' => $instance->adapter_type,
+            'label' => $validated['label'],
+            'company_id' => $validated['company_id'] ?? null,
+            'active' => false,
+        ]);
+        $clone->created_by = auth()->id();
+        $clone->save();
+
+        // Copy the whole config blob to the new instance. Encrypted
+        // secrets copy as-is since both rows use the same APP_KEY.
+        // Runtime state (last_synced_at, etc.) lives on its own
+        // instance columns, not in config, so nothing survives from
+        // the source's operational history.
+        $clone->config = $instance->config;
+        $clone->save();
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $clone->slug])
+            ->with('success', trans('admin/settings/sync_adapters.instance_cloned', ['label' => $instance->label]));
+    }
+
+    /**
+     * Save handler for an instance's own config form. Instance-bound
+     * route param resolves the target instance. the shipped adapter
+     * class knows how to persist its own fields.
+     */
+    public function postAdapterConfig(Request $request, \App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        $adapter = $instance->adapter();
+        if ($adapter === null) {
+            abort(404);
+        }
+
+        // Adapter declares its own validation (ExternalUrl on the URL
+        // field blocks loopback / RFC-1918 / metadata targets so the
+        // sync path can't be abused as an SSRF or port-scan primitive).
+        // Label uniqueness is enforced independently so a rename can't
+        // collide with an existing instance's label. `sometimes` because
+        // the field is optional at the wire level: not sending label
+        // leaves the current label in place (below).
+        $request->validate(
+            $adapter->validationRules() + [
+                'label' => [
+                    'sometimes',
+                    'required',
+                    'string',
+                    'max:191',
+                    \Illuminate\Validation\Rule::unique('sync_adapter_instances', 'label')->ignore($instance->id),
+                ],
+                'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+            ]
+        );
+
+        // "active" checkbox lives on the shared partial with a slug-
+        // prefixed name so tab-panes don't collide on ids. Unchecked
+        // comes through as absent from the request, so default to false.
+        $instance->active = $request->boolean($instance->slug.'_active');
+        $instance->label = $request->input('label', $instance->label);
+        // Empty string in the company-select posts as '' rather than
+        // absent, so normalise to null for the shared-across-companies
+        // sentinel value.
+        $companyId = $request->input('company_id');
+        $instance->company_id = $companyId === '' ? null : $companyId;
+        $instance->save();
+
+        $adapter->saveConfig($request);
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with('success', trans('admin/settings/message.update.success'));
+    }
+
+    /**
+     * Manually trigger a sync from the "Sync Now" button.
+     * Realistically, this will likely time out in a real production instance,
+     * so this is used mostly for testing now and will likely be removed later
+     */
+    public function postAdapterSync(\App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        $adapter = $instance->adapter();
+        if ($adapter === null) {
+            abort(404);
+        }
+
+        if (! $adapter->isEnabled()) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.not_configured'));
+        }
+
+        // Drop PHP's execution-time cap. Web-server proxy timeouts still apply tho
+        set_time_limit(0);
+
+        $seen = 0;
+        $errors = 0;
+        $startedAt = microtime(true);
+
+        Log::channel('sync-adapters')->info("{$instance->slug} sync starting (UI)");
+
+        try {
+            foreach ($adapter->pull() as $record) {
+                try {
+                    \App\SyncAdapters\SyncAdapter::syncFromRecord($record);
+                    $seen++;
+                } catch (\Throwable $e) {
+                    $errors++;
+                    Log::channel('sync-adapters')->warning(sprintf(
+                        '%s sync: failed to upsert host %s: %s',
+                        $instance->slug,
+                        $record->sourceId,
+                        $e->getMessage(),
+                    ));
+                }
+            }
+        } catch (\Throwable $e) {
+            // Log the full exception server-side so admins can dig into
+            // response bodies, stack traces, etc. via the dedicated
+            // sync-adapters channel. The flash message only exposes a
+            // short sanitized summary because Guzzle / Laravel HTTP
+            // client stuff the entire response body into the exception
+            // message on 4xx/5xx, and internal error pages regularly
+            // contain sensitive info we don't want to bounce into the
+            // admin's browser.
+            Log::channel('sync-adapters')->warning(sprintf('%s sync aborted: %s', $instance->slug, $e->getMessage()), [
+                'exception' => $e,
+            ]);
+
+            $failMessage = trans('admin/settings/sync_adapters.sync_failed', [
+                'summary' => self::sanitizeSyncErrorSummary($e),
+            ]);
+            $instance->last_synced_at = now();
+            $instance->last_sync_result = $failMessage;
+            $instance->save();
+
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', $failMessage);
+        }
+
+        $result = trans('admin/settings/sync_adapters.sync_complete', [
+            'count' => $seen,
+            'errors' => $errors,
+        ]);
+        $instance->last_synced_at = now();
+        $instance->last_sync_result = $result;
+        $instance->save();
+
+        $elapsed = number_format(microtime(true) - $startedAt, 1);
+        Log::channel('sync-adapters')->info("{$instance->slug} sync complete: {$seen} record(s) processed, {$errors} error(s), elapsed {$elapsed}s");
+
+        //   at least one seen, no errors -> success (green)
+        //   at least one seen, some errors -> warning (orange, admin should check log)
+        //   nothing seen at all, at least one error -> error (red)
+        //   nothing seen AND no errors -> warning: vendor returned no rows,
+        //     which may be legitimate (empty inventory) but is also the
+        //     canary for a misconfigured pull that silently returned empty.
+        //     Warning flags it for the admin to notice without being a
+        //     hard error, so a genuinely empty vendor doesn't scream red.
+        $flashType = match (true) {
+            $seen > 0 && $errors === 0 => 'success',
+            $seen > 0 && $errors > 0 => 'warning',
+            $seen === 0 && $errors > 0 => 'error',
+            default => 'warning',
+        };
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with($flashType, $result);
+    }
+
+    /**
+     * Push Snipe-IT-authoritative fields to the vendor for every asset
+     * already linked to this adapter instance. Only meaningful for
+     * adapters that implement PushableAdapter. Iterates the instance's
+     * asset_external_sources rows so we only touch assets the vendor
+     * actually knows about. A fresh Snipe-IT asset that's never been
+     * synced from this instance gets no push (we'd have no vendor id
+     * to write against). Errors on individual assets are logged and
+     * counted, so a single bad asset doesn't abort the whole run.
+     */
+    public function postAdapterPush(\App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        $adapter = $instance->adapter();
+        if ($adapter === null) {
+            abort(404);
+        }
+
+        if (! $adapter instanceof \App\SyncAdapters\PushableAdapter) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.push_not_supported'));
+        }
+
+        if (! $adapter->isEnabled()) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.not_configured'));
+        }
+
+        // Nothing to push means the admin has no fields directed 'push'
+        // AND no composed-notes template + target configured. Iterating
+        // asset rows in that state would just silent-no-op through
+        // every one and flash a misleading "Pushed N assets" success.
+        // Fail fast with a message that names the actual gap.
+        if (! $adapter->hasPushConfiguration()) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.push_nothing_configured'));
+        }
+
+        set_time_limit(0);
+
+        $pushed = 0;
+        $skipped = 0;
+        $errors = 0;
+
+        try {
+            \App\Models\AssetExternalSource::query()
+                ->where('source', $instance->slug)
+                ->with('asset')
+                ->chunkById(200, function ($rows) use ($adapter, &$pushed, &$skipped, &$errors) {
+                    foreach ($rows as $row) {
+                        $asset = $row->asset;
+                        if ($asset === null) {
+                            continue;
+                        }
+
+                        try {
+                            if ($adapter->push($asset)) {
+                                $pushed++;
+                            } else {
+                                $skipped++;
+                            }
+                        } catch (\Throwable $e) {
+                            $errors++;
+                            // Log the sanitized summary (short) plus,
+                            // for HTTP client exceptions, the raw
+                            // response body truncated to 2KB so vendor
+                            // errors like "missing required field
+                            // 'query'" or "gitops mode requires spec"
+                            // surface in the log even when the vendor's
+                            // JSON shape isn't one the summary
+                            // extractor recognizes.
+                            $context = [];
+                            if ($e instanceof \Illuminate\Http\Client\RequestException) {
+                                $body = (string) $e->response->body();
+                                $context['response_body'] = mb_strlen($body) > 2048
+                                    ? mb_substr($body, 0, 2048).'…'
+                                    : $body;
+                            }
+                            Log::channel('sync-adapters')->warning(sprintf(
+                                '%s push: asset %d failed: %s',
+                                $row->source,
+                                $asset->id,
+                                self::sanitizeSyncErrorSummary($e),
+                            ), $context);
+                        }
+                    }
+                });
+        } catch (\Throwable $e) {
+            Log::channel('sync-adapters')->warning(
+                sprintf('%s push aborted: %s', $instance->slug, $e->getMessage()),
+                ['exception' => $e],
+            );
+
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.push_failed', [
+                    'summary' => self::sanitizeSyncErrorSummary($e),
+                ]));
+        }
+
+        //   at least one push, no failures -> success (green)
+        //   at least one push, some failures -> warning (orange, admin should check log)
+        //   no pushes, at least one failure -> error (red)
+        //   no pushes AND no failures (every row skipped) -> error too, since the
+        //     button did nothing meaningful and the admin should know
+        //   nothing to iterate at all (no matching external_sources) -> warning
+        // Message includes skipped count so admins see the full breakdown.
+        $flashType = match (true) {
+            $pushed > 0 && $errors === 0 => 'success',
+            $pushed > 0 && $errors > 0 => 'warning',
+            $errors > 0 => 'error',
+            $skipped > 0 => 'error',
+            default => 'warning',
+        };
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with($flashType, trans('admin/settings/sync_adapters.push_complete', [
+                'count' => $pushed,
+                'skipped' => $skipped,
+                'errors' => $errors,
+            ]));
+    }
+
+    /**
+     * Short, safe summary of a sync failure for the admin flash. For
+     * HTTP-client exceptions, walk the common vendor error-body shapes
+     * (Fleet / DRF / Graph / Jamf / etc.) and surface the first
+     * human-readable message string we find, prefixed with the HTTP
+     * status. Falls back to just "HTTP {code}" when the response body
+     * doesn't parse or doesn't carry a recognizable message field.
+     * Full detail is still in the sync-adapters log via the caller.
+     */
+    private static function sanitizeSyncErrorSummary(\Throwable $e): string
+    {
+        if ($e instanceof \Illuminate\Http\Client\RequestException) {
+            $status = $e->response->status();
+            $vendorMessage = self::extractVendorErrorMessage($e->response);
+
+            return $vendorMessage !== null
+                ? sprintf('HTTP %d: %s', $status, $vendorMessage)
+                : 'HTTP '.$status;
+        }
+
+        if ($e instanceof \Illuminate\Http\Client\ConnectionException) {
+            return trans('admin/settings/sync_adapters.sync_failed_network');
+        }
+
+        // Vendor adapter errors (wrong base URL, unexpected
+        // content type, etc.) carry their own actionable message. Pass
+        // it through so the admin sees "check your Base URL" instead
+        // of "SyncAdapterVendorException".
+        if ($e instanceof \App\Exceptions\SyncAdapterVendorException) {
+            return $e->getMessage();
+        }
+
+        return class_basename($e);
+    }
+
+    /**
+     * Extract the first human-readable message from a vendor error
+     * response body. Handles the common shapes:
+     * - {"message": "..."}           Fleet, WS1, JumpCloud, Mosyle
+     * - {"detail": "..."}            DRF-based (Zentral, some others)
+     * - {"error": "..."}             plain string
+     * - {"error": {"message": "..."}}  Microsoft Graph
+     * - {"errorMessage": "..."}      NinjaOne
+     * - {"errors": [{"description|reason|message|detail": "..."}]}  Jamf, Fleet nested
+     * - {"errors": ["..."]}          Meraki
+     * Response bodies get truncated so a vendor returning a novel
+     * doesn't blow up the flash bar.
+     */
+    private static function extractVendorErrorMessage(\Illuminate\Http\Client\Response $response): ?string
+    {
+        $body = $response->json();
+        if (! is_array($body)) {
+            return null;
+        }
+
+        $candidate = self::pluckErrorCandidate($body);
+        if (! is_string($candidate) || trim($candidate) === '') {
+            return null;
+        }
+
+        $candidate = trim($candidate);
+
+        return mb_strlen($candidate) > 200
+            ? mb_substr($candidate, 0, 200).'…'
+            : $candidate;
+    }
+
+    /**
+     * Walk the shapes we know about in order (top-level scalar keys,
+     * nested error object, errors array of strings, errors array of
+     * objects). Returns the first string it lands on or null if none
+     * of the paths yield anything.
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private static function pluckErrorCandidate(array $body): ?string
+    {
+        $candidate = $body['message']
+            ?? $body['detail']
+            ?? $body['errorMessage']
+            ?? null;
+        if (is_string($candidate)) {
+            return $candidate;
+        }
+
+        $candidate = self::pluckErrorFromErrorKey($body);
+        if (is_string($candidate)) {
+            return $candidate;
+        }
+
+        return self::pluckErrorFromErrorsArray($body);
+    }
+
+    /**
+     * Extract from a top-level `error` key. Handles both the string
+     * shape ({"error": "..."}) and the Microsoft Graph nested-object
+     * shape ({"error": {"message": "..."}}).
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private static function pluckErrorFromErrorKey(array $body): ?string
+    {
+        if (! isset($body['error'])) {
+            return null;
+        }
+        if (is_string($body['error'])) {
+            return $body['error'];
+        }
+        if (is_array($body['error']) && isset($body['error']['message']) && is_string($body['error']['message'])) {
+            return $body['error']['message'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract from an `errors` array. First entry wins. Handles the
+     * Meraki string-array shape and the Jamf / Fleet object-array
+     * shape whose entries carry description / reason / message /
+     * detail keys.
+     *
+     * @param  array<string, mixed>  $body
+     */
+    private static function pluckErrorFromErrorsArray(array $body): ?string
+    {
+        if (! isset($body['errors']) || ! is_array($body['errors'])) {
+            return null;
+        }
+        $first = $body['errors'][0] ?? null;
+        if (is_string($first)) {
+            return $first;
+        }
+        if (! is_array($first)) {
+            return null;
+        }
+
+        return $first['description']
+            ?? $first['reason']
+            ?? $first['message']
+            ?? $first['detail']
+            ?? null;
+    }
+
+    /**
+     * Refresh the cached list of vendor groups for an adapter
+     * instance. Calls the adapter's fetchGroups() and persists the
+     * result to the instance's config blob so the settings page can render
+     * the mapping table without hitting the vendor on every page load.
+     *
+     * Only meaningful for adapters that opt into supportsGroupScoping().
+     * (Some vendors gate groups by subscripton tier like Fleet.)
+     * Failures land in the sync-adapters log channel and flash a
+     * sanitized error to the admin (same as sync errors).
+     */
+    public function postAdapterRefreshGroups(\App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        $adapter = $instance->adapter();
+        if ($adapter === null) {
+            abort(404);
+        }
+
+        if (! $adapter->supportsGroupScoping()) {
+            abort(404);
+        }
+
+        if (! $adapter->isEnabled()) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.not_configured'));
+        }
+
+        try {
+            $groups = $adapter->fetchGroups();
+        } catch (\Throwable $e) {
+            Log::channel('sync-adapters')->warning(
+                sprintf('%s refresh-groups aborted: %s', $instance->slug, $e->getMessage()),
+                ['exception' => $e],
+            );
+
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.refresh_groups_failed', [
+                    'summary' => self::sanitizeSyncErrorSummary($e),
+                ]));
+        }
+
+        \App\Models\SyncAdapterConfig::put($instance->id, 'cached_groups', json_encode($groups));
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with('success', trans('admin/settings/sync_adapters.refresh_groups_ok', [
+                'count' => count($groups),
+                'label' => $adapter->vendorGroupLabel(),
+            ]));
+    }
+
+    /**
+     * Refresh the cached list of vendor-defined custom fields for an
+     * adapter that opts into supportsVendorCustomFields(). Parallel
+     * to postAdapterRefreshGroups: hits the vendor's custom-fields
+     * listing endpoint, stores the normalized list under
+     * the instance's config.vendor_custom_fields key, and redirects back
+     * to the adapter settings page with a count.
+     */
+    public function postAdapterRefreshCustomFields(\App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        $adapter = $instance->adapter();
+        if ($adapter === null) {
+            abort(404);
+        }
+
+        if (! $adapter->supportsVendorCustomFields()) {
+            abort(404);
+        }
+
+        if (! $adapter->isEnabled()) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.not_configured'));
+        }
+
+        try {
+            $fields = $adapter->fetchVendorCustomFields();
+        } catch (\Throwable $e) {
+            Log::channel('sync-adapters')->warning(
+                sprintf('%s refresh-custom-fields aborted: %s', $instance->slug, $e->getMessage()),
+                ['exception' => $e],
+            );
+
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', trans('admin/settings/sync_adapters.refresh_custom_fields_failed', [
+                    'summary' => self::sanitizeSyncErrorSummary($e),
+                ]));
+        }
+
+        \App\Models\SyncAdapterConfig::put($instance->id, 'vendor_custom_fields', json_encode($fields));
+
+        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+            ->with('success', trans('admin/settings/sync_adapters.refresh_custom_fields_ok', [
+                'count' => count($fields),
+            ]));
+    }
+
+    /**
+     * Delete an adapter instance. Config rows go away with it. Existing
+     * asset_external_sources rows for this instance's slug are left in
+     * place (orphaned) so previously-synced assets keep their history.
+     */
+    public function deleteAdapterInstance(\App\Models\SyncAdapterInstance $instance): RedirectResponse
+    {
+        if (config('app.lock_passwords')) {
+            return redirect()->back()->with('error', trans('general.feature_disabled'));
+        }
+
+        // Config lives on the instance row as a JSON column, so the
+        // instance delete takes it with it. No separate purge needed.
+        $instance->delete();
+
+        return redirect()->route('settings.adapters.index')
+            ->with('success', trans('admin/settings/sync_adapters.instance_deleted'));
+    }
+
+    /**
      * Show the listing of backups.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -896,33 +1590,28 @@ class SettingsController extends Controller
     public function getBackups(): View
     {
         $settings = Setting::getSettings();
-        $path = 'app/backups';
-        $backup_files = Storage::files($path);
+        $backupName = config('backup.backup.name', 'backups');
+        $disk = Storage::disk('backup');
         $files_raw = [];
 
-        if (count($backup_files) > 0) {
-            for ($f = 0; $f < count($backup_files); $f++) {
-
-                // Skip dotfiles like .gitignore and .DS_STORE
-                if ((substr(basename($backup_files[$f]), 0, 1) != '.')) {
-                    // $lastmodified = Carbon::parse(Storage::lastModified($backup_files[$f]))->toDatetimeString();
-                    $file_timestamp = Storage::lastModified($backup_files[$f]);
-
-                    $files_raw[] = [
-                        'filename' => basename($backup_files[$f]),
-                        'filesize' => Setting::fileSizeConvert(Storage::size($backup_files[$f])),
-                        'modified_value' => $file_timestamp,
-                        'modified_display' => date($settings->date_display_format.' '.$settings->time_display_format, $file_timestamp),
-
-                    ];
-                }
+        foreach ($disk->files($backupName) as $file) {
+            // Skip dotfiles like .gitignore and .DS_STORE
+            if (substr(basename($file), 0, 1) === '.') {
+                continue;
             }
+            $file_timestamp = $disk->lastModified($file);
+            $files_raw[] = [
+                'filename' => basename($file),
+                'filesize' => Setting::fileSizeConvert($disk->size($file)),
+                'modified_value' => $file_timestamp,
+                'modified_display' => date($settings->date_display_format . ' ' . $settings->time_display_format, $file_timestamp),
+            ];
         }
 
         // Reverse the array so it lists oldest first
         $files = array_reverse($files_raw);
 
-        return view('settings/backups', compact('path', 'files'));
+        return view('settings/backups', compact('files'));
     }
 
     /**
@@ -964,9 +1653,15 @@ class SettingsController extends Controller
      *
      * @since [v1.8]
      */
-    public function downloadFile($filename = null): RedirectResponse|BinaryFileResponse
+    public function downloadFile($filename = null): RedirectResponse|BinaryFileResponse|StreamedResponse
     {
-        $path = 'app/backups';
+        // Path inside the backup disk mirrors getBackups(): spatie writes
+        // to <disk root>/<backup.backup.name>/*.zip, and BinFile.name
+        // defaults to 'backups'. StorageHelper::downloader('backup')
+        // dispatches to response()->download on the local driver and to
+        // Storage::disk('backup')->download on the s3 driver, so this
+        // works for both destinations without a driver switch here.
+        $backupName = config('backup.backup.name', 'backups');
         $filename = basename((string) $filename);
 
         if ($this->hasInvalidBackupFilename($filename)) {
@@ -974,10 +1669,11 @@ class SettingsController extends Controller
         }
 
         if (! config('app.lock_passwords')) {
-            if (Storage::exists($path.'/'.$filename)) {
+            $path = $backupName . '/' . $filename;
+            if (Storage::disk('backup')->exists($path)) {
                 Log::warning('User '.auth()->user()->username.' is attempting to download backup file: '.$filename);
 
-                return StorageHelper::downloader($path.'/'.$filename);
+                return StorageHelper::downloader($path, 'backup');
             } else {
                 // Redirect to the backup page
                 return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
@@ -1006,13 +1702,15 @@ class SettingsController extends Controller
         if (config('app.allow_backup_delete') == 'true') {
 
             if (! config('app.lock_passwords')) {
-                $path = 'app/backups';
+                // Same disk + path so S3-destination backup is deletable from the UI.
+                $disk = Storage::disk('backup');
+                $path = config('backup.backup.name', 'backups') . '/' . $filename;
 
-                if (Storage::exists($path.'/'.$filename)) {
+                if ($disk->exists($path)) {
 
                     try {
                         Log::warning('User '.auth()->user()->username.' is attempting to delete backup file: '.$filename);
-                        Storage::delete($path.'/'.$filename);
+                        $disk->delete($path);
 
                         return redirect()->route('settings.backups.index')->with('success', trans('admin/settings/message.backup.file_deleted'));
                     } catch (\Exception $e) {
@@ -1087,135 +1785,189 @@ class SettingsController extends Controller
             return redirect()->route('settings.backups.index')->with('error', trans('general.feature_disabled'));
         }
 
-        $path = 'app/backups';
+        // Path inside the backup disk mirrors getBackups / downloadFile /
+        // deleteFile. spatie writes to <disk root>/<backup.backup.name>/
+        // and the name defaults to 'backups'.
+        $backupDisk = Storage::disk('backup');
+        $backupName = config('backup.backup.name', 'backups');
+        $diskPath = $backupName . '/' . $filename;
 
-        if (! Storage::exists($path.'/'.$filename)) {
+        if (!$backupDisk->exists($diskPath)) {
             return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
         }
 
-        $absolutePath = storage_path($path).'/'.$filename;
+        // ZipArchive and snipeit:restore both need a local filesystem path.
+        // On the local driver, resolve directly to the disk's on-disk path
+        // and let the restore CLI read it in place. On any remote driver
+        // (s3), stream the archive down to a temp file so downstream code
+        // that expects a real path still works. The finally block below
+        // unlinks the temp file on every exit path so a bail-out doesn't
+        // leave hundreds of megabytes stranded in storage/app/restore-temp.
+        $localTempPath = null;
+        try {
+            if (config('filesystems.disks.backup.driver') === 'local') {
+                $absolutePath = $backupDisk->path($diskPath);
+            } else {
+                $tempDir = storage_path('app/restore-temp');
+                if (!is_dir($tempDir) && !mkdir($tempDir, 0755, true) && !is_dir($tempDir)) {
+                    Log::error('Restore aborted: could not create temp directory ' . $tempDir);
 
-        // Verify the archive is actually a zip and can be opened, BEFORE we
-        // do anything destructive. Prior behavior wiped the database first
-        // and only then tried to open the archive. An invalid or corrupted
-        // upload therefore destroyed the existing database and left the
-        // install with an empty migrated schema, while the flow still
-        // reported success because snipeit:restore returns exit 0 on
-        // internal errors (see RestoreFromBackup::handle).
-        //
-        // Refuse to proceed if the PHP zip extension is not loaded. The
-        // downstream snipeit:restore command needs ZipArchive too, so
-        // running it without ext-zip would fail after the wipe.
-        if (! class_exists(ZipArchive::class)) {
-            Log::error('Restore aborted: PHP zip extension is not loaded, cannot validate archive before wiping database.');
+                    return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.archive_invalid', ['filename' => $filename]));
+                }
+                $localTempPath = $tempDir . '/' . $filename;
+                // readStream returns null on failure, fopen returns false.
+                $srcStream = $backupDisk->readStream($diskPath);
+                $dstStream = fopen($localTempPath, 'w');
+                if ($srcStream === null || $dstStream === false) {
+                    if (is_resource($srcStream)) {
+                        fclose($srcStream);
+                    }
+                    if (is_resource($dstStream)) {
+                        fclose($dstStream);
+                    }
+                    Log::error('Restore aborted: failed to open streams for temp copy of ' . $diskPath);
 
-            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.zip_extension_missing'));
-        }
+                    return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.archive_invalid', ['filename' => $filename]));
+                }
+                stream_copy_to_stream($srcStream, $dstStream);
+                fclose($srcStream);
+                fclose($dstStream);
+                $absolutePath = $localTempPath;
+            }
 
-        $zip = new ZipArchive;
-        $openResult = $zip->open($absolutePath);
-        if ($openResult !== true) {
-            Log::warning('Restore aborted: archive at '.$absolutePath.' failed zip open with code '.$openResult);
+            // Verify the archive is actually a zip and can be opened, BEFORE we
+            // do anything destructive. Prior behavior wiped the database first
+            // and only then tried to open the archive. An invalid or corrupted
+            // upload therefore destroyed the existing database and left the
+            // install with an empty migrated schema, while the flow still
+            // reported success because snipeit:restore returns exit 0 on
+            // internal errors (see RestoreFromBackup::handle).
+            //
+            // Refuse to proceed if the PHP zip extension is not loaded. The
+            // downstream snipeit:restore command needs ZipArchive too, so
+            // running it without ext-zip would fail after the wipe.
+            if (!class_exists(ZipArchive::class)) {
+                Log::error('Restore aborted: PHP zip extension is not loaded, cannot validate archive before wiping database.');
 
-            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.archive_invalid', ['filename' => $filename]));
-        }
-        $zip->close();
+                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.zip_extension_missing'));
+            }
 
-        // grab the user's info so we can make sure they exist in the system
-        $user = User::find(auth()->id());
+            $zip = new ZipArchive;
+            $openResult = $zip->open($absolutePath);
+            if ($openResult !== true) {
+                Log::warning('Restore aborted: archive at ' . $absolutePath . ' failed zip open with code ' . $openResult);
 
-        // Take a fresh pre-restore backup so we can point the operator at
-        // it if the restore fails after we wipe. This is the mitigation
-        // the pre-existing
-        $requestedBackupFilename = 'pre-restore-'.date('Y-m-d-H-i-s').'.zip';
-        // spatie prepends filename_prefix to the filename provided so this is the actual name on disk:
-        $preRestoreBackupFilename = config('backup.backup.destination.filename_prefix').$requestedBackupFilename;
-        $preBackupPath = storage_path($path).'/'.$preRestoreBackupFilename;
+                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.archive_invalid', ['filename' => $filename]));
+            }
+            $zip->close();
 
-        Log::debug('Running pre-restore backup: '.$preRestoreBackupFilename);
-        $preBackupExit = Artisan::call('snipeit:backup', [
-            '--filename' => $requestedBackupFilename,
-            '--force' => true,
-        ]);
+            // grab the user's info so we can make sure they exist in the system
+            $user = User::find(auth()->id());
 
-        if ($preBackupExit !== 0 || ! (Storage::exists($path.'/'.$preRestoreBackupFilename))) {
-            Log::warning('Pre-restore backup failed (exit '.$preBackupExit.'); aborting restore to protect existing data.');
+            // Take a fresh pre-restore backup so we can point the operator at
+            // it if the restore fails after we wipe. This is the mitigation
+            // the pre-existing
+            $requestedBackupFilename = 'pre-restore-' . date('Y-m-d-H-i-s') . '.zip';
+            // spatie prepends filename_prefix to the filename provided so this is the actual name on disk:
+            $preRestoreBackupFilename = config('backup.backup.destination.filename_prefix') . $requestedBackupFilename;
+            $preRestoreDiskPath = $backupName . '/' . $preRestoreBackupFilename;
+            $preBackupHint = config('filesystems.disks.backup.driver') === 'local'
+                ? $backupDisk->path($preRestoreDiskPath)
+                : 'backup disk (' . $preRestoreDiskPath . ')';
 
-            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.pre_backup_failed'));
-        }
-
-        Log::warning('User '.auth()->user()->username.' is attempting to restore from: '.$absolutePath.' (pre-restore backup at '.$preBackupPath.')');
-
-        $restore_params = [
-            '--force' => true,
-            '--no-progress' => true,
-            'filename' => $absolutePath,
-        ];
-
-        if ($request->input('clean')) {
-            Log::debug("Attempting 'clean' - first, guessing prefix...");
-            Artisan::call('snipeit:restore', [
-                '--sanitize-guess-prefix' => true,
-                'filename' => $absolutePath,
+            Log::debug('Running pre-restore backup: ' . $preRestoreBackupFilename);
+            $preBackupExit = Artisan::call('snipeit:backup', [
+                '--filename' => $requestedBackupFilename,
+                '--force' => true,
             ]);
-            $guess_prefix_output = Artisan::output();
-            Log::debug("Sanitize output is: $guess_prefix_output");
-            [$prefix, $_output] = explode("\n", $guess_prefix_output);
-            Log::debug("prefix is: '$prefix'");
-            $restore_params['--sanitize-with-prefix'] = $prefix;
+
+            if ($preBackupExit !== 0 || !$backupDisk->exists($preRestoreDiskPath)) {
+                Log::warning('Pre-restore backup failed (exit ' . $preBackupExit . '); aborting restore to protect existing data.');
+
+                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.pre_backup_failed'));
+            }
+
+            Log::warning('User ' . auth()->user()->username . ' is attempting to restore from: ' . $absolutePath . ' (pre-restore backup at ' . $preBackupHint . ')');
+
+            $restore_params = [
+                '--force' => true,
+                '--no-progress' => true,
+                'filename' => $absolutePath,
+            ];
+
+            if ($request->input('clean')) {
+                Log::debug("Attempting 'clean' - first, guessing prefix...");
+                Artisan::call('snipeit:restore', [
+                    '--sanitize-guess-prefix' => true,
+                    'filename' => $absolutePath,
+                ]);
+                $guess_prefix_output = Artisan::output();
+                Log::debug("Sanitize output is: $guess_prefix_output");
+                [$prefix, $_output] = explode("\n", $guess_prefix_output);
+                Log::debug("prefix is: '$prefix'");
+                $restore_params['--sanitize-with-prefix'] = $prefix;
+            }
+
+            Artisan::call('db:wipe', ['--force' => true]);
+
+            // run the restore command
+            $restoreExit = Artisan::call('snipeit:restore', $restore_params);
+            $restoreOutput = Artisan::output();
+            Log::debug('snipeit:restore output: ' . $restoreOutput);
+
+            // snipeit:restore returns 0 even on some internal errors, so we also
+            // scan its output for its own "Could not access file" / "DB_CONNECTION
+            // must be MySQL" style error strings.
+            $restoreLooksFailed = $restoreExit !== 0 || str_contains(strtolower($restoreOutput), 'could not access file') || str_contains(strtolower($restoreOutput), 'db_connection must be mysql');
+
+            if ($restoreLooksFailed) {
+                Log::error('Restore failed after db:wipe. Pre-restore backup available at ' . $preBackupHint);
+
+                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
+                    'backup' => $preRestoreBackupFilename,
+                ]));
+            }
+
+            /* Run migrations */
+            Log::debug('Migrating database...');
+            $migrateExit = Artisan::call('migrate', ['--force' => true]);
+            $migrate_output = Artisan::output();
+            Log::debug($migrate_output);
+
+            if ($migrateExit !== 0) {
+                Log::error('Migrate failed after restore. Pre-restore backup available at ' . $preBackupHint);
+
+                return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
+                    'backup' => $preRestoreBackupFilename,
+                ]));
+            }
+
+            $find_user = DB::table('users')->where('username', $user->username)->exists();
+
+            if (!$find_user) {
+                Log::warning('Attempting to restore user: ' . $user->username);
+                $new_user = $user->replicate();
+                $new_user->push();
+            } else {
+                Log::debug('User: ' . $user->username . ' already exists.');
+            }
+
+            Log::debug('Logging all users out..');
+            Artisan::call('snipeit:global-logout', ['--force' => true]);
+
+            DB::table('users')->update(['remember_token' => null]);
+            Auth::logout();
+
+            return redirect()->route('login')->with('success', trans('admin/settings/message.restore.success'));
+        } finally {
+            // Temp copy only exists when we downloaded from a remote
+            // driver. On the local driver $localTempPath stays null and
+            // we skip the unlink entirely, so we don't accidentally
+            // reach into the backup disk's own storage.
+            if ($localTempPath !== null && file_exists($localTempPath)) {
+                @unlink($localTempPath);
+            }
         }
-
-        Artisan::call('db:wipe', ['--force' => true]);
-
-        // run the restore command
-        $restoreExit = Artisan::call('snipeit:restore', $restore_params);
-        $restoreOutput = Artisan::output();
-        Log::debug('snipeit:restore output: '.$restoreOutput);
-
-        // snipeit:restore returns 0 even on some internal errors, so we also
-        // scan its output for its own "Could not access file" / "DB_CONNECTION
-        // must be MySQL" style error strings.
-        $restoreLooksFailed = $restoreExit !== 0 || str_contains(strtolower($restoreOutput), 'could not access file') || str_contains(strtolower($restoreOutput), 'db_connection must be mysql');
-
-        if ($restoreLooksFailed) {
-            Log::error('Restore failed after db:wipe. Pre-restore backup available at '.$preBackupPath);
-
-            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
-                'backup' => $preRestoreBackupFilename,
-            ]));
-        }
-
-        /* Run migrations */
-        Log::debug('Migrating database...');
-        $migrateExit = Artisan::call('migrate', ['--force' => true]);
-        $migrate_output = Artisan::output();
-        Log::debug($migrate_output);
-
-        if ($migrateExit !== 0) {
-            Log::error('Migrate failed after restore. Pre-restore backup available at '.$preBackupPath);
-
-            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.restore.failed_with_backup', [
-                'backup' => $preRestoreBackupFilename,
-            ]));
-        }
-
-        $find_user = DB::table('users')->where('username', $user->username)->exists();
-
-        if (! $find_user) {
-            Log::warning('Attempting to restore user: '.$user->username);
-            $new_user = $user->replicate();
-            $new_user->push();
-        } else {
-            Log::debug('User: '.$user->username.' already exists.');
-        }
-
-        Log::debug('Logging all users out..');
-        Artisan::call('snipeit:global-logout', ['--force' => true]);
-
-        DB::table('users')->update(['remember_token' => null]);
-        Auth::logout();
-
-        return redirect()->route('login')->with('success', trans('admin/settings/message.restore.success'));
     }
 
     /**

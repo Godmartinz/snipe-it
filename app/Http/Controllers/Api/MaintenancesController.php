@@ -307,22 +307,40 @@ class MaintenancesController extends Controller
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('admin/maintenances/general.maintenance'), 'id' => $id, 'action' => trans('general.edit')])));
             }
 
-            // If the request changes asset_id, verify the new asset is accessible
-            if ($request->filled('asset_id') && (int) $request->input('asset_id') !== $maintenance->asset_id) {
-                $newAsset = Asset::find($request->input('asset_id'));
+            // Re-parenting intent can arrive as the legacy `asset_id` alias
+            // or as the polymorphic pair (`item_id` + `item_type`). Both are
+            // fillable on the model, so gating only on `asset_id` (as the
+            // original CVE-2026-55516 fix did) still let `item_id` through
+            // to bypass the FMCS check. Normalize both shapes into a single
+            // "requested asset id" and reject any non-Asset item_type since
+            // only asset-scoped maintenances are supported.
+            $requestedAssetId = null;
+            if ($request->filled('asset_id')) {
+                $requestedAssetId = (int) $request->input('asset_id');
+            } elseif ($request->filled('item_id')) {
+                if ($request->filled('item_type') && $request->input('item_type') !== Asset::class) {
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('admin/maintenances/general.maintenance'), 'id' => $id, 'action' => trans('general.edit')])), 403);
+                }
+                $requestedAssetId = (int) $request->input('item_id');
+            }
+
+            $newAsset = null;
+            if ($requestedAssetId !== null && $requestedAssetId !== $maintenance->asset_id) {
+                $newAsset = Asset::find($requestedAssetId);
 
                 if (! $newAsset) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.item_not_found', ['item_type' => trans('general.asset'), 'id' => $request->input('asset_id')])));
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.item_not_found', ['item_type' => trans('general.asset'), 'id' => $requestedAssetId])));
                 }
 
                 if (! Company::isCurrentUserHasAccess($newAsset)) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('general.asset'), 'id' => $request->input('asset_id'), 'action' => trans('general.edit')])), 403);
+                    return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.action_permission_denied', ['item_type' => trans('general.asset'), 'id' => $requestedAssetId, 'action' => trans('general.edit')])), 403);
                 }
+            }
 
-                $maintenance->fill($request->except('asset_id'));
+            $maintenance->fill($request->except(['asset_id', 'item_id', 'item_type']));
+
+            if ($newAsset !== null) {
                 $maintenance->asset_id = $newAsset->id;
-            } else {
-                $maintenance->fill($request->except('asset_id'));
             }
 
             if ($maintenance->save()) {

@@ -247,6 +247,10 @@
         <x-modals.upload-file item-type="locations" :item-id="$location->id" />
     @endcan
 
+    @can('checkout', \App\Models\Accessory::class)
+        <x-modals.adjust-quantity />
+    @endcan
+
     @include ('partials.bootstrap-table')
 @endsection
 

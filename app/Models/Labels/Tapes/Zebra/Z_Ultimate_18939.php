@@ -43,7 +43,7 @@ class Z_Ultimate_18939 extends Z_Ultimate
 
     public function getSupport1DBarcode()
     {
-        return false;
+        return true;
     }
 
     public function getSupport2DBarcode()
@@ -160,22 +160,8 @@ class Z_Ultimate_18939 extends Z_Ultimate
 
             $currentX += $barcodeWidth;
             $usableWidth -= $barcodeWidth;
-        } else {
-            static::writeText(
-                $pdf,
-                $record->get('tag'),
-                $pa->x1,
-                $pa->y2 - static::TAG_SIZE,
-                'freemono',
-                'B',
-                static::TAG_SIZE,
-                'R',
-                $usableWidth,
-                static::TAG_SIZE,
-                true,
-                0
-            );
         }
+
         $textWidth = $usableWidth;
 
         if ($record->has('logo')) {
@@ -257,6 +243,17 @@ class Z_Ultimate_18939 extends Z_Ultimate
                 true,
                 false,
                 0
+            );
+        }
+        if ($record->has('barcode1d')) {
+            static::write1DBarcode(
+                $pdf,
+                $record->get('barcode1d')->content,
+                $record->get('barcode1d')->type,
+                $currentX,
+                $barcodeSize + static::BARCODE_MARGIN,
+                $usableWidth - static::TAG_SIZE,
+                static::TAG_SIZE
             );
         }
     }

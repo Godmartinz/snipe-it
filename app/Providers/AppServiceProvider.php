@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Exceptions\SyncAdapterVendorException;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -25,6 +26,7 @@ use App\Observers\SettingObserver;
 use App\Observers\UserObserver;
 use App\View\Composers\ImpersonationBannerComposer;
 use App\View\Composers\SidebarComposer;
+use Illuminate\Http\Client\Response as HttpClientResponse;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Log;
@@ -91,6 +93,27 @@ class AppServiceProvider extends ServiceProvider
         Maintenance::observe(MaintenanceObserver::class);
         Setting::observe(SettingObserver::class);
         User::observe(UserObserver::class);
+
+        // Defense against sync-adapter base URLs pointing at the vendor's
+        // web console instead of their API. A wrong URL commonly returns
+        // 200 OK with an SPA shell (text/html), which slips past
+        // ->throw() and decodes to an empty array in adapter clients,
+        // producing a silent "Sync complete. 0 hosts, 0 errors" flash
+        // instead of a visible failure. Adapter clients chain this
+        // after ->throw() before ->json() so a wrong-URL response
+        // surfaces as a real error the admin can act on.
+        HttpClientResponse::macro('throwIfNotJson', function () {
+            /** @var HttpClientResponse $this */
+            $contentType = $this->header('Content-Type');
+            if (! str_contains(strtolower($contentType), 'json')) {
+                $received = $contentType !== '' ? '"'.$contentType.'"' : 'a response with no Content-Type header';
+                throw new SyncAdapterVendorException(
+                    "Expected a JSON response, got {$received}. Verify the adapter Base URL points at the vendor API, not their web console or dashboard."
+                );
+            }
+
+            return $this;
+        });
     }
 
     /**

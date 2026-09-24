@@ -23,6 +23,19 @@
                 <x-form.static :label="trans('admin/hardware/form.name')">{{ $accessory->name }}</x-form.static>
             @endif
 
+            @if ($accessory->category)
+                <x-form.static :label="trans('general.category')">
+                    <x-icon type="category" class="fa-fw" style="{{ $accessory->category->tag_color ? 'color: '.e($accessory->category->tag_color).';' : '' }}" />
+                    {{ $accessory->category->name }}
+                </x-form.static>
+            @endif
+
+            <x-checkin.checked-out-from
+                :target="$target ?? null"
+                :checkout-date="$checkoutLog?->created_at"
+                :checkout-by="$checkoutLog?->adminuser"
+            />
+
             <x-form.row
                 :label="trans('admin/hardware/form.notes')"
                 :item="$accessory"

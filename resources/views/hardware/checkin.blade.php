@@ -37,35 +37,27 @@
                     @endif
 
                     @if ($asset->model->category)
-                        {{-- Category (read-only) --}}
-                        <x-form.row :label="trans('general.category')" name="category_display" input_div_class="col-md-6">
-                            <x-slot:input>
-                                <p class="form-control-static">{!! $asset->model->category->present()->formattedNameLink !!}</p>
-                            </x-slot:input>
-                        </x-form.row>
+                        <x-form.static :label="trans('general.category')">
+                            <x-icon type="category" class="fa-fw" style="{{ $asset->model->category->tag_color ? 'color: '.e($asset->model->category->tag_color).';' : '' }}" />
+                            {{ $asset->model->category->name }}
+                        </x-form.static>
                     @endif
 
-                    {{-- Model (read-only with fallback UI when the model
-                         reference is broken — asset points at a deleted or
-                         invalid model). --}}
-                    <x-form.row :label="trans('admin/hardware/form.model')" name="model_display" input_div_class="col-md-8">
-                        <x-slot:input>
-                            <p class="form-control-static">
-                                @if ($asset->model)
-                                    {!! $asset->model->present()->formattedNameLink !!}
-                                @else
-                                    <span class="text-danger text-bold">
-                                        <x-icon type="warning" />
-                                        {{ trans('admin/hardware/general.model_invalid') }}
-                                    </span>
-                                    {{ trans('admin/hardware/general.model_invalid_fix') }}
-                                    <a href="{{ route('hardware.edit', $asset->id) }}">
-                                        <strong>{{ trans('admin/hardware/general.edit') }}</strong>
-                                    </a>
-                                @endif
-                            </p>
-                        </x-slot:input>
-                    </x-form.row>
+                    <x-form.static :label="trans('admin/hardware/form.model')">
+                        @if ($asset->model)
+                            <x-icon type="model" class="fa-fw" />
+                            {{ $asset->model->name }}
+                        @else
+                            <span class="text-danger text-bold">
+                                <x-icon type="warning" />
+                                {{ trans('admin/hardware/general.model_invalid') }}
+                            </span>
+                            {{ trans('admin/hardware/general.model_invalid_fix') }}
+                            <a href="{{ route('hardware.edit', $asset->id) }}">
+                                <strong>{{ trans('admin/hardware/general.edit') }}</strong>
+                            </a>
+                        @endif
+                    </x-form.static>
 
                         @if ($asset->defaultLoc)
                             {{-- Default Location (read-only) --}}
@@ -75,6 +67,12 @@
                                 </x-slot:input>
                             </x-form.row>
                         @endif
+
+                    <x-checkin.checked-out-from
+                        :target="$asset->assignedTo"
+                        :checkout-date="$checkoutLog?->created_at"
+                        :checkout-by="$checkoutLog?->adminuser"
+                    />
 
                     {{-- Asset name --}}
                     <x-form.row

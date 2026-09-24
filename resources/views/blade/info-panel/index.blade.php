@@ -78,7 +78,7 @@
 
         @if ($infoPanelObj->notes)
             <x-info-element icon_type="notes" title="{{ trans('general.notes') }}">
-                <x-copy-to-clipboard class="pull-right" copy_what="notes">{!! nl2br(Helper::parseEscapedMarkedownInline($infoPanelObj->notes)) !!}</x-copy-to-clipboard>
+                <x-copy-to-clipboard class="pull-right" copy_what="notes">{!! (new \Parsedown)->setSafeMode(true)->setBreaksEnabled(true)->line($infoPanelObj->notes) !!}</x-copy-to-clipboard>
             </x-info-element>
         @endif
 

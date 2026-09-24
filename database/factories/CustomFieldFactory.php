@@ -84,6 +84,111 @@ class CustomFieldFactory extends Factory
         });
     }
 
+    public function ipAddress()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'IP Address',
+                'help_text' => 'The last-known IP address for this device.',
+            ];
+        });
+    }
+
+    public function operatingSystem()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Operating System',
+                'help_text' => 'The operating system this device is running.',
+            ];
+        });
+    }
+
+    public function osVersion()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'OS Version',
+                'help_text' => 'The OS version this device is running.',
+            ];
+        });
+    }
+
+    public function lastCheckIn()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Last Check-in',
+                'help_text' => 'The last time this device was seen by an inventory sync adapter.',
+                'element' => 'datetime_picker',
+                'format' => 'DATETIME',
+            ];
+        });
+    }
+
+    public function storageCapacity()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Storage Capacity',
+                'help_text' => 'On-device storage capacity for this device (e.g. 256GB, 1TB).',
+            ];
+        });
+    }
+
+    public function bluetoothMac()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Bluetooth MAC',
+                'format' => 'regex:/^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/',
+            ];
+        });
+    }
+
+    public function ethernetMac()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Ethernet MAC',
+                'format' => 'regex:/^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/',
+            ];
+        });
+    }
+
+    public function meid()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'MEID',
+                'help_text' => 'Mobile Equipment Identifier for CDMA cellular devices.',
+                'format' => 'regex:/^[0-9A-Fa-f]{14}$/',
+            ];
+        });
+    }
+
+    public function eid()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'EID',
+                'help_text' => 'Embedded SIM Identifier (eSIM) for cellular devices.',
+                'format' => 'regex:/^[0-9]{32}$/',
+            ];
+        });
+    }
+
+    public function activationLock()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Activation Lock Enabled',
+                'help_text' => 'Whether Apple Activation Lock is enabled on this device. Must be cleared before the device can be redeployed to a new user.',
+                'element' => 'checkbox',
+            ];
+        });
+    }
+
     public function testEncrypted()
     {
         return $this->state(function () {

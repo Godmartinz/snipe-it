@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Location;
 use App\Models\Setting;
@@ -323,6 +324,42 @@ class ValidationServiceProvider extends ServiceProvider
             return ! DB::table($table)->where('parent_id', $modelId)->exists();
         });
 
+        // Companion to `parent_must_be_top_level` / `must_have_no_children`:
+        // enforce that the caller is authorized to re-parent the row under the
+        // chosen new parent. Without this check, a scoped non-superuser
+        // holding companies.edit could PATCH their own company's parent_id to
+        // a foreign top-level company id — the structural rules above accept
+        // it because they only look at the parent's shape (top-level, no
+        // children), not the caller's scope. Company::getCurrentUserCompanyIds
+        // then walks parent+children so re-parenting A under B silently
+        // expands every B member's scope to include A. Bypasses CompanyableScope
+        // on the lookup for the same reason `fmcs_location` does: the scope
+        // hides foreign rows and would fall through to "not found" here.
+        Validator::extend('parent_within_scope', function ($attribute, $value, $parameters, $validator) {
+            if ($value === null || $value === '' || (int) $value === 0) {
+                return true;
+            }
+
+            // CLI / system context (seeders, artisan) has no auth user to scope
+            // against. Skip the check so trusted callers still work.
+            if (! auth()->user()) {
+                return true;
+            }
+
+            // Deliberately not going through Company::isCurrentUserHasAccess.
+            // That helper short-circuits `return true` for any Companyable
+            // whose table has no `company_id` column, which includes the
+            // companies table itself (the tenant boundary). Directly filtering
+            // the requested id against the actor's expanded company set
+            // matches what CompanyableScope enforces on reads and applies the
+            // superuser / non-FMCS bypasses via getIdsForCurrentUser.
+            return ! empty(Company::getIdsForCurrentUser([(int) $value]));
+        });
+
+        Validator::replacer('parent_within_scope', function ($message) {
+            return str_replace(':attribute', trans('general.company'), $message);
+        });
+
         // Yo dawg. I heard you like validators.
         // This validates the custom validator regex in custom fields.
         // We're just checking that the regex won't throw an exception, not
@@ -505,12 +542,84 @@ class ValidationServiceProvider extends ServiceProvider
             );
         });
 
-        // Enforces "Company must be picked" when FMCS is on AND
-        // null_company_is_floater is disabled (strict mode). Without this
-        // rule a companied non-superuser can save a form with an unset
-        // company dropdown, land a row with company_id=NULL, and then
-        // have that row instantly filtered out of their own view by the
-        // strict-mode scope. See #19192. Passes when:
+        // Enforce that a Location's parent_id references a location in the
+        // same company under FMCS. Controllers already run an equivalent
+        // check (Api/LocationsController::store + update,
+        // LocationsController::store + update, BulkLocationsController::update),
+        // but the model-level rule also catches importer, seeder, and any
+        // future programmatic save that skips the controller-level guard.
+        // withoutGlobalScopes() bypasses CompanyableScope on the parent
+        // lookup so a scoped actor sees the real record and can be
+        // compared against it, matching the pattern fmcs_location already
+        // uses above. See GHSA-jmrm-535m-cx3c.
+        Validator::extend('parent_matches_location_company', function ($attribute, $value, $parameters, $validator) {
+            if ($value === null || $value === '' || (int) $value === 0) {
+                return true;
+            }
+
+            if (! Setting::getSettings()->full_multiple_companies_support) {
+                return true;
+            }
+
+            $parent = Location::withoutGlobalScopes()->find((int) $value);
+            if (! $parent) {
+                return true;
+            }
+
+            $childCompanyIdRaw = $validator->getData()['company_id'] ?? null;
+            $childCompanyId = ($childCompanyIdRaw === null || $childCompanyIdRaw === '')
+                ? null
+                : (int) $childCompanyIdRaw;
+
+            // When the location being validated has no company_id of its
+            // own, it inherits its effective company_id from the parent
+            // location chain via Location::effectiveFmcsCompanyId. Nested
+            // locations where only the top-level ancestor carries a
+            // company_id are an intended Snipe-IT hierarchy pattern
+            // (e.g. "Acme Corp HQ" -> "Building 3" -> "Server Room" with
+            // the company_id set only on "Acme Corp HQ"), so this rule
+            // must not reject a null company_id on the location being
+            // validated. The CVE this rule closes (GHSA-jmrm-535m-cx3c)
+            // required the location being validated to have an explicit
+            // company_id pointing at a parent location in a different
+            // company_id, which is still caught below.
+            if ($childCompanyId === null) {
+                return true;
+            }
+
+            $parentCompanyId = $parent->company_id === null ? null : (int) $parent->company_id;
+
+            return $parentCompanyId === $childCompanyId;
+        });
+
+        Validator::replacer('parent_matches_location_company', function ($message, $attribute, $rule, $parameters, $validator) {
+            $data = $validator->getData();
+            $parentId = $data[$attribute] ?? null;
+            $parent = $parentId ? Location::withoutGlobalScopes()->find((int) $parentId) : null;
+
+            $childCompanyIdRaw = $data['company_id'] ?? null;
+            $childCompanyId = ($childCompanyIdRaw === null || $childCompanyIdRaw === '')
+                ? null
+                : (int) $childCompanyIdRaw;
+            $childCompany = $childCompanyId ? Company::withoutGlobalScopes()->find($childCompanyId) : null;
+
+            return trans('general.error_location_parent_company', [
+                'parent' => $parent?->name ?? '?',
+                'parent_company' => $parent?->company?->name ?? trans('general.unassigned'),
+                'location_company' => $childCompany?->name ?? trans('general.unassigned'),
+            ]);
+        });
+
+        // Requires a company be picked when a companied non-superuser
+        // submits a form under strict FMCS (FMCS on and
+        // null_company_is_floater off). Null companies stay legal for
+        // null-company users (they operate in the null "pseudo-company"
+        // namespace), superusers, and system contexts (CLI, seeders,
+        // importers). Without this rule a companied user could save a
+        // form with an unset company dropdown, land a row with
+        // company_id=NULL, and then have that row instantly filtered out
+        // of their own view by the strict-mode scope. See #19192. Passes
+        // when:
         //  - FMCS is off (nothing to enforce)
         //  - null_company_is_floater is on (nulls are legal floaters)
         //  - value is present (form was filled in)
@@ -575,7 +684,16 @@ class ValidationServiceProvider extends ServiceProvider
                     return true;
                 }
 
-                $location = Location::find($value);
+                // Bypass CompanyableScope on the lookup. With scope_locations_fmcs=1
+                // Location has the scope applied, so Location::find() on a
+                // location whose company_id sits outside the current user's
+                // scope returns null. That would drop through to the trailing
+                // `return true` and let a cross-tenant location_id write pass
+                // validation, which is the opposite of what this rule exists
+                // to enforce. withoutGlobalScopes() ensures the rule sees the
+                // real record every time and can compare it against the
+                // request's company scope.
+                $location = Location::withoutGlobalScopes()->find($value);
 
                 if ($location) {
                     $effectiveCompanyId = $location->effectiveFmcsCompanyId();

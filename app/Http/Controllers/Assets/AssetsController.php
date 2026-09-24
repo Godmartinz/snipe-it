@@ -374,6 +374,9 @@ class AssetsController extends Controller
         $this->authorize('view', $asset);
         $settings = Setting::getSettings();
 
+        // Eager-load the sync-adapter side row
+        $asset->loadMissing('externalSource');
+
         $audit_log = Actionlog::where('action_type', '=', 'audit')
             ->where('item_id', '=', $asset->id)
             ->where('item_type', '=', Asset::class)
@@ -397,7 +400,7 @@ class AssetsController extends Controller
         $total_maintenance_cost = $asset->maintenances?->sum('cost');
         $total_asset_cost = ($asset->assignedAssets()?->AssetsForShow()) ? $asset->assignedAssets()?->AssetsForShow()?->sum('purchase_cost') : 0;
         $total_license_cost = ($asset->licenses) ? $asset->licenses->sum('purchase_cost') : 0;
-        // accessories.purchase_cost no longer exists; getAccessoryCost()
+        // accessories.purchase_cost no longer exists. getAccessoryCost()
         // walks lastOrderDefaults() per attached accessory so the total
         // reflects each item's last acquisition (with the parent's
         // default_purchase_cost as fallback).
@@ -793,7 +796,7 @@ class AssetsController extends Controller
      */
     public function getClone(Asset $asset)
     {
-        $this->authorize('create', Asset::class);
+        $this->authorize('clone', $asset);
         $cloned = clone $asset;
         $cloned_model = $asset;
         $cloned->id = null;

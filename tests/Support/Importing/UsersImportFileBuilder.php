@@ -29,6 +29,7 @@ class UsersImportFileBuilder extends FileBuilder
     protected function getDictionary(): array
     {
         return [
+            'avatar' => 'avatar',
             'companyName' => 'Company',
             'email' => 'email',
             'employeeNumber' => 'Employee Number',
@@ -50,6 +51,7 @@ class UsersImportFileBuilder extends FileBuilder
         $faker = fake();
 
         return [
+            'avatar' => '',
             'companyName' => $faker->company,
             'email' => $faker->safeEmail(),
             'employeeNumber' => $faker->uuid,

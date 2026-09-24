@@ -38,7 +38,11 @@ class LicenseCheckinController extends Controller
         $license = License::find($licenseSeat->license_id);
         $this->authorize('checkin', $license);
 
-        return view('licenses/checkin', compact('licenseSeat'))->with('backto', $backTo);
+        $checkoutLog = $licenseSeat->checkouts()->first();
+
+        return view('licenses/checkin', compact('licenseSeat'))
+            ->with('backto', $backTo)
+            ->with('checkoutLog', $checkoutLog);
     }
 
     /**

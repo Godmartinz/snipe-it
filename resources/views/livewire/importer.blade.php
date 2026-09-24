@@ -93,20 +93,18 @@
                                     </div>
                                 @else
 
-                                @if (count($selectedIds) > 0)
                                     <div class="row" style="padding-bottom: 10px;">
                                         <div class="col-md-12">
                                             <button type="button"
                                                     class="btn btn-danger"
                                                     data-toggle="modal"
                                                     data-target="#bulkDeleteImportsModal"
-                                                @disabled(config('app.lock_passwords'))>
+                                                @disabled(config('app.lock_passwords') || count($selectedIds) === 0)>
                                                 <i class="fas fa-trash" aria-hidden="true"></i>
                                                 {{ trans('admin/hardware/message.import.bulk_delete.button', ['count' => count($selectedIds)]) }}
                                             </button>
                                         </div>
                                     </div>
-                                @endif
 
                                 <table data-id-table="upload-table"
                                         data-side-pagination="client"
@@ -143,7 +141,7 @@
 
                                     @foreach($this->files as $currentFile)
 
-                                        <tr style="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? 'font-weight: bold' : '' }}">
+                                        <tr wire:key="import-row-{{ $currentFile->id }}" style="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? 'font-weight: bold' : '' }}">
                                                 <td>
                                                     <label class="sr-only" for="import-row-{{ $currentFile->id }}">
                                                         {{ trans('admin/hardware/message.import.bulk_delete.select_row', ['file' => $currentFile->file_path]) }}
@@ -206,8 +204,9 @@
 
                                                     @if (((auth()->user()->id == $currentFile->adminuser?->id) || (auth()->user()->isSuperUser())) && ! config('app.lock_passwords'))
                                                         <a href="#" wire:click.prevent="$set('activeFileId',null)" data-tooltip="true" data-title="{{ trans('general.delete') }}">
-                                                            <button class="btn btn-sm btn-danger" wire:click="destroy({{ $currentFile->id }})">
-                                                                <i class="fas fa-trash icon-white" aria-hidden="true"></i>
+                                                            <button class="btn btn-sm btn-danger" wire:click="destroy({{ $currentFile->id }})" wire:loading.attr="disabled" wire:target="destroy({{ $currentFile->id }})">
+                                                                <i class="fas fa-trash icon-white" aria-hidden="true" wire:loading.remove wire:target="destroy({{ $currentFile->id }})"></i>
+                                                                <i class="fas fa-spinner fa-spin icon-white" aria-hidden="true" wire:loading wire:target="destroy({{ $currentFile->id }})"></i>
                                                                 <span class="sr-only">{{ trans('general.delete') }}</span>
                                                             </button>
                                                         </a>

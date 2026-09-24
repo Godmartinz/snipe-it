@@ -15,9 +15,13 @@ class UserObserver
     public function updating(User $user)
     {
 
-        // ONLY allow these fields to be stored
-        // NOTE: company_id is intentionally excluded — company membership changes are logged
-        // via User::syncCompaniesWithLogging() against the pivot table instead.
+        // ONLY allow these fields to be stored.
+        // NOTE: company_id and permission-group pivot changes are intentionally
+        // excluded here. Company membership is logged via
+        // User::syncCompaniesWithLogging(). Permission-group membership is
+        // logged via User::syncGroupsWithLogging(). Both helpers merge their
+        // diff into this row via $user->currentUpdateLogId when the group
+        // sync runs in the same edit session as a field change.
         $allowed_fields = [
             'email',
             'activated',

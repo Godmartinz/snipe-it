@@ -196,4 +196,65 @@ class LicenseCheckoutTest extends TestCase
 
         $response->assertSessionHas('sign_in_place', true);
     }
+
+    // -----------------------------------------------------------------------
+    // GHSA-r25g-f428-466r regression coverage.
+    //
+    // Web license checkout must reject explicit-seat-id requests that target
+    // a retired unreassignable seat (which would push a non-reassignable
+    // license past its intended activation count) or an already-occupied seat
+    // (which would silently displace the current holder with no audit trail).
+    // The web path has no reassign opt-in flag: any reassignment goes through
+    // the API's `reassign: true` request or through the UserItemTransferController
+    // seat-transfer flow, which produce a proper checkin-then-checkout event
+    // pair.
+    // -----------------------------------------------------------------------
+
+    public function test_web_checkout_by_explicit_seat_id_rejects_retired_unreassignable_seat()
+    {
+        $license = License::factory()->create(['seats' => 2, 'reassignable' => 0]);
+        $seats = $license->licenseseats()->orderBy('id')->get();
+        $retiredSeat = $seats[0];
+        // unreassignable_seat is not fillable, so ->update() would silently
+        // skip it. Direct property assignment + save persists it.
+        $retiredSeat->unreassignable_seat = true;
+        $retiredSeat->assigned_to = null;
+        $retiredSeat->save();
+
+        $target = User::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('licenses.checkout.save', ['licenseId' => $license->id, 'seatId' => $retiredSeat->id]), [
+                'assigned_user' => $target->id,
+                'redirect_option' => 'index',
+            ])
+            ->assertSessionHas('error');
+
+        $this->assertNull($retiredSeat->fresh()->assigned_to);
+        $this->assertTrue((bool) $retiredSeat->fresh()->unreassignable_seat);
+    }
+
+    public function test_web_checkout_by_explicit_seat_id_rejects_seat_already_assigned_to_user()
+    {
+        $license = License::factory()->create(['seats' => 2]);
+        $seats = $license->licenseseats()->orderBy('id')->get();
+
+        $originalHolder = User::factory()->create();
+        $seats[0]->update(['assigned_to' => $originalHolder->id]);
+
+        $newTarget = User::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('licenses.checkout.save', ['licenseId' => $license->id, 'seatId' => $seats[0]->id]), [
+                'assigned_user' => $newTarget->id,
+                'redirect_option' => 'index',
+            ])
+            ->assertSessionHas('error');
+
+        $this->assertEquals(
+            $originalHolder->id,
+            $seats[0]->fresh()->assigned_to,
+            'Web checkout must never silently displace the current holder.',
+        );
+    }
 }

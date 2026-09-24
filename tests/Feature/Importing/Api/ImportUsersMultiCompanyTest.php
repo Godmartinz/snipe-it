@@ -134,4 +134,95 @@ class ImportUsersMultiCompanyTest extends ImportDataTestCase
             'username' => $row['username'],
         ]);
     }
+
+    /**
+     * GHSA-wwp4-qx8p-62g8 regression coverage for the CSV importer.
+     *
+     * Before the fix, the importer's update branch used a raw
+     * $user->companies()->sync($companyIds), which strips any target
+     * pivot rows for companies not in the submitted set. A scoped
+     * importer running the interactive Livewire path could re-import a
+     * co-tenant target with only their own company in the row and
+     * silently detach the target from co-companies the importer never
+     * saw. The fix routes the update branch through
+     * User::syncCompaniesPreservingInvisibleTo, which reads the target's
+     * pivot unscoped, splits into visible + invisible-to-editor, and
+     * merges the invisible slice back before syncing.
+     */
+    public function test_importer_update_preserves_target_memberships_editor_cannot_see()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->disableFloaterMode();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $target = User::factory()->create();
+        $target->companies()->sync([$companyA->id, $companyB->id]);
+
+        $scopedImporter = User::factory()->canImport()->forCompany($companyA)->create();
+
+        // Drop the auto-generated location column: under strict FMCS, a
+        // companied non-superuser can't create a new null-company Location
+        // via the importer (fmcs_company rule on Location.company_id
+        // rejects it), and the test isn't about that constraint.
+        $importFileBuilder = ImportFileBuilder::new([
+            'username' => $target->username,
+            'companyName' => $companyA->name,
+        ])->forget('location');
+        // created_by must be the acting user or the process endpoint refuses
+        // the request (ImportController security control that prevents an
+        // import-permission holder from processing someone else's file).
+        $import = Import::factory()->users()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+            'created_by' => $scopedImporter->id,
+        ]);
+
+        $this->actingAsForApi($scopedImporter)
+            ->importFileResponse(['import' => $import->id, 'import-update' => true])
+            ->assertOk();
+
+        $membershipIds = \DB::table('company_user')
+            ->where('user_id', $target->id)
+            ->pluck('company_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertEqualsCanonicalizing(
+            [$companyA->id, $companyB->id],
+            $membershipIds,
+            'CSV re-import by a company-A-scoped operator must not strip the target from company B, which the operator cannot see.',
+        );
+    }
+
+    public function test_importer_create_by_scoped_importer_still_works_for_own_company()
+    {
+        // Sanity: the fix must not break the legitimate create branch. A
+        // scoped importer creating a new user with their own company on
+        // the row should succeed. The invisible-to-editor merge is a
+        // no-op on a create because a brand-new user has no prior pivot
+        // rows to preserve.
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->disableFloaterMode();
+
+        $companyA = Company::factory()->create();
+        $scopedImporter = User::factory()->canImport()->forCompany($companyA)->create();
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $companyA->name,
+        ])->forget('location');
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+            'created_by' => $scopedImporter->id,
+        ]);
+
+        $this->actingAsForApi($scopedImporter)
+            ->importFileResponse(['import' => $import->id])
+            ->assertOk();
+
+        $newUser = User::where('username', $row['username'])->firstOrFail();
+        $membershipIds = $newUser->companies->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertEqualsCanonicalizing([$companyA->id], $membershipIds);
+    }
 }

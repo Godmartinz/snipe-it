@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Acceptable;
 use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasOrders;
@@ -32,6 +33,7 @@ class Component extends SnipeModel
 
     protected $presenter = ComponentPresenter::class;
 
+    use Acceptable;
     use AdjustsQuantity;
     use CompanyableTrait;
     use HasOrders;
@@ -560,9 +562,9 @@ class Component extends SnipeModel
      */
     public function scopeOrderPercentRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('CASE WHEN components.qty = 0 THEN 0 ELSE ((components.qty - COALESCE(sum_unconstrained_assets, 0)) * 100.0 / components.qty) END '.$direction);
+        return $query->orderByRaw('CASE WHEN components.qty = 0 THEN 0 ELSE ((components.qty - COALESCE(sum_unconstrained_assets, 0)) * 100.0 / components.qty) END '.$order);
     }
 
     /**
@@ -575,8 +577,8 @@ class Component extends SnipeModel
      */
     public function scopeOrderRemaining($query, $order)
     {
-        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
 
-        return $query->orderByRaw('(components.qty - COALESCE(sum_unconstrained_assets, 0)) '.$direction);
+        return $query->orderByRaw('(components.qty - COALESCE(sum_unconstrained_assets, 0)) '.$order);
     }
 }

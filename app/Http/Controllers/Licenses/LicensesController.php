@@ -316,7 +316,7 @@ class LicensesController extends Controller
             return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.does_not_exist'));
         }
 
-        $this->authorize('create', License::class);
+        $this->authorize('clone', $license_to_clone);
 
         $maintained_list = [
             '' => 'Maintained',

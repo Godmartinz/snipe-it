@@ -72,11 +72,22 @@ class AssetSeeder extends Seeder
         Asset::factory()->count(20)->ultrafine()->state(new Sequence($this->getState()))->create();
         Asset::factory()->count(20)->ultrasharp()->state(new Sequence($this->getState()))->create();
 
-        $del_files = Storage::files('assets');
-        foreach ($del_files as $del_file) { // iterate files
-            Log::debug('Deleting: '.$del_files);
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files('assets') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
             try {
-                Storage::disk('public')->delete('assets'.'/'.$del_files);
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/assets') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
             } catch (\Exception $e) {
                 Log::debug($e);
             }

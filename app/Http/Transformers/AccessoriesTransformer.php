@@ -108,7 +108,7 @@ class AccessoriesTransformer
             'update' => Gate::allows('update', $accessory),
             'adjust_quantity' => Gate::allows('update', $accessory),
             'delete' => $accessory->checkouts_count === 0 && Gate::allows('delete', $accessory),
-            'clone' => Gate::allows('create', Accessory::class),
+            'clone' => Gate::allows('clone', $accessory),
             // Request / cancel: if the requestable flag is off the row
             // never surfaces on /account/requestable anyway (scoped out
             // by Requestable()), but honor it here too for

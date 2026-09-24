@@ -1795,12 +1795,31 @@ class Helper
 
         $url = str_replace(["\r", "\n"], '', $url);
 
-        $parts = parse_url($url);
+        // Normalize backslashes to forward slashes before parsing, so that a malicious input like
+        // https:\\evil.com\@example.com\@evil.com\@example.com
+        // doesn't get parsed as a same-origin URL.
+        $normalized = str_replace('\\', '/', $url);
+
+        $parts = parse_url($normalized);
         if ($parts === false) {
             return null;
         }
 
         if (isset($parts['scheme']) && ! in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return null;
+        }
+
+        // Same-origin redirects never legitimately carry credentials.
+        // Reject any input where parse_url extracted a userinfo component,
+        // closing further parser-differential variants that hide the real
+        // authority behind an `@`.
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            return null;
+        }
+
+        // Reject scheme-only URLs with no authority (e.g. "https:evil.com",
+        // "https:/evil.com", "http:@evil.com").
+        if (isset($parts['scheme']) && !isset($parts['host'])) {
             return null;
         }
 
@@ -1812,6 +1831,30 @@ class Helper
         }
 
         return $url;
+    }
+
+    /**
+     * Emission-side replacement for Laravel's redirect()->intended().
+     *
+     * Laravel's redirect()->intended() pulls session('url.intended') and
+     * hands it straight to redirect()->to() with no host validation. The
+     * write-side sanitize we perform in SamlController::acs and similar
+     * places is defense-in-depth, but any writer that skips it (or any
+     * parser-differential bypass of Helper::sameOriginUrl at write time)
+     * leaves an open-redirect surface. This helper reads url.intended,
+     * runs it through sameOriginUrl at emission, and falls back to the
+     * caller-supplied default whenever the stored value is missing or
+     * fails the guard. Every controller that previously called
+     * redirect()->intended(...) directly should call this instead.
+     */
+    public static function safeIntended(?string $default = null): RedirectResponse
+    {
+        $default ??= '/';
+
+        $intended = session()->pull('url.intended');
+        $target = self::sameOriginUrl($intended) ?? $default;
+
+        return redirect()->to($target);
     }
 
     public static function getRedirectOption($request, $id, $table, $item_id = null): RedirectResponse

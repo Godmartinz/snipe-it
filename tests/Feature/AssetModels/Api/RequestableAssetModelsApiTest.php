@@ -149,4 +149,31 @@ class RequestableAssetModelsApiTest extends TestCase
         $this->assertTrue($rowWith['available_actions']['view']);
         $this->assertFalse($rowWithout['available_actions']['view']);
     }
+    
+    public function test_remaining_reflects_deployable_asset_count(): void
+    {
+        $model = AssetModel::factory()->create(['requestable' => 1]);
+        $rtd = \App\Models\Statuslabel::factory()->rtd()->create();
+
+        // Three deployable + unassigned assets of this model, one already
+        // assigned. `remaining` should count only the three unassigned.
+        \App\Models\Asset::factory()->count(3)->create([
+            'model_id' => $model->id,
+            'status_id' => $rtd->id,
+            'assigned_to' => null,
+        ]);
+        \App\Models\Asset::factory()->create([
+            'model_id' => $model->id,
+            'status_id' => $rtd->id,
+            'assigned_to' => User::factory()->create()->id,
+            'assigned_type' => User::class,
+        ]);
+
+        $row = $this->actingAsForApi(User::factory()->create())
+            ->getJson(route('api.assetmodels.requestable'))
+            ->assertOk()
+            ->json('rows.0');
+
+        $this->assertSame(3, $row['remaining']);
+    }
 }

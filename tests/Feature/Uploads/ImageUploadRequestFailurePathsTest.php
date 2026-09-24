@@ -110,6 +110,62 @@ class ImageUploadRequestFailurePathsTest extends TestCase
         );
     }
 
+    /**
+     * GHSA-wq64-46j7-h5vr defense-in-depth: a stored avatar containing
+     * path traversal ("../foo/target.png") must not compose into a
+     * cross-directory storage key at the delete sink. The write-side
+     * fix (UserImporter basename) closes the specific vector. This test
+     * covers the sink regardless of which writer populated the field.
+     */
+    public function test_delete_existing_image_strips_traversal_from_stored_value(): void
+    {
+        Storage::fake('public');
+        $publicDisk = Storage::disk('public');
+        $publicDisk->put('barcodes/target.png', 'attacker target');
+        $publicDisk->put('avatars/legitimate.png', 'the caller owns this');
+
+        $user = User::factory()->create(['avatar' => '../barcodes/target.png']);
+
+        $request = app(\App\Http\Requests\ImageUploadRequest::class);
+        $request->deleteExistingImage($user, 'avatars', 'avatar');
+
+        $this->assertTrue(
+            $publicDisk->exists('barcodes/target.png'),
+            'The cross-directory file must remain. basename() should have reduced the composed key to avatars/target.png, which does not exist.',
+        );
+    }
+
+    /**
+     * OAuth-sourced avatars (Google, Microsoft, Gravatar) arrive as
+     * absolute http(s) URLs. The delete sink must not try to compose
+     * them into a storage key. `avatars/https://...` never points at
+     * anything on this disk, and any embedded ".." would slip past
+     * basename. Skip the storage delete entirely and null the DB
+     * reference so the user's "remove avatar" action still takes effect.
+     */
+    public function test_delete_existing_image_skips_storage_delete_for_url_avatar_but_nulls_db(): void
+    {
+        Storage::fake('public');
+        $publicDisk = Storage::disk('public');
+        $publicDisk->put('avatars/other-user.png', 'not the attackers');
+
+        $user = User::factory()->create([
+            'avatar' => 'https://lh3.googleusercontent.com/a/ACg8ocKexample',
+        ]);
+
+        $request = app(\App\Http\Requests\ImageUploadRequest::class);
+        $result = $request->deleteExistingImage($user, 'avatars', 'avatar');
+
+        $this->assertNull(
+            $result->avatar,
+            'The user requested avatar removal, so the DB reference must clear even though the URL points off-disk.',
+        );
+        $this->assertTrue(
+            $publicDisk->exists('avatars/other-user.png'),
+            'No file on this disk should be touched when the stored value is an http(s) URL.',
+        );
+    }
+
     public function test_successful_write_still_replaces_existing_image(): void
     {
         // Sanity: the fix must not regress the happy path. Successful writes
@@ -142,5 +198,54 @@ class ImageUploadRequestFailurePathsTest extends TestCase
             $publicDisk->exists('manufacturers/'.$manufacturer->image),
             'On a successful new write, the new file lands at the expected path.',
         );
+    }
+
+    /**
+     * Regression coverage for #19670: handleImages must not call
+     * makeDirectory() on the public disk.
+     */
+    public function test_handle_images_does_not_call_make_directory_on_image_less_save(): void
+    {
+        Storage::fake('public');
+        $publicDisk = Storage::disk('public');
+
+        $manufacturer = Manufacturer::factory()->create(['image' => null]);
+
+        $proxy = Mockery::mock($publicDisk);
+        $proxy->shouldReceive('makeDirectory')->never();
+        $proxy->shouldReceive('exists')->andReturnUsing(fn (...$a) => $publicDisk->exists(...$a));
+        $proxy->shouldReceive('put')->andReturnUsing(fn (...$a) => $publicDisk->put(...$a));
+        $proxy->shouldReceive('delete')->andReturnUsing(fn (...$a) => $publicDisk->delete(...$a));
+        Storage::shouldReceive('disk')->with('public')->andReturn($proxy);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->put(route('manufacturers.update', $manufacturer), [
+                'name' => $manufacturer->name.' updated',
+            ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_handle_images_does_not_call_make_directory_when_image_is_uploaded(): void
+    {
+        Storage::fake('public');
+        $publicDisk = Storage::disk('public');
+
+        $manufacturer = Manufacturer::factory()->create(['image' => null]);
+
+        $proxy = Mockery::mock($publicDisk);
+        $proxy->shouldReceive('makeDirectory')->never();
+        $proxy->shouldReceive('exists')->andReturnUsing(fn (...$a) => $publicDisk->exists(...$a));
+        $proxy->shouldReceive('put')->andReturnUsing(fn (...$a) => $publicDisk->put(...$a));
+        $proxy->shouldReceive('delete')->andReturnUsing(fn (...$a) => $publicDisk->delete(...$a));
+        Storage::shouldReceive('disk')->with('public')->andReturn($proxy);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->put(route('manufacturers.update', $manufacturer), [
+                'name' => $manufacturer->name,
+                'image' => UploadedFile::fake()->image('new.png'),
+            ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
     }
 }

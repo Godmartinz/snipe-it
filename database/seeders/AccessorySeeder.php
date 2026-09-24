@@ -110,14 +110,24 @@ class AccessorySeeder extends Seeder
         }
 
         $src = public_path('/img/demo/accessories/');
-        $dst = 'accessories'.'/';
-        $del_files = Storage::files($dst);
+        $dst = 'accessories/';
 
-        foreach ($del_files as $del_file) { // iterate files
-            $file_to_delete = str_replace($src, '', $del_file);
-            Log::debug('Deleting: '.$file_to_delete);
+        // Wipe every item file in the public uploads dir.
+        $disk = Storage::disk('public');
+        foreach ($disk->files(rtrim($dst, '/')) as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
             try {
-                Storage::disk('public')->delete($dst.$del_file);
+                $disk->delete($del_file);
+            } catch (\Exception $e) {
+                Log::debug($e);
+            }
+        }
+
+        // Attached files on the private (default) disk.
+        foreach (Storage::files('private_uploads/accessories') as $del_file) {
+            Log::debug('Deleting: ' . $del_file);
+            try {
+                Storage::delete($del_file);
             } catch (\Exception $e) {
                 Log::debug($e);
             }

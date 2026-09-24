@@ -368,6 +368,23 @@ class CustomFieldEditor extends Component
             return;
         }
 
+        // ValidatingTrait::save() returns false on validation failure
+        // without throwing, stashing the actual messages on
+        // $field->getErrors(). Surface those directly against their
+        // attributes so the admin sees "The name has already been
+        // taken" (or whatever) instead of a generic "please try
+        // again" with no additional context.
+        $errors = $field->getErrors();
+        if ($errors->isNotEmpty()) {
+            foreach ($errors->messages() as $attribute => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($attribute, $message);
+                }
+            }
+
+            return;
+        }
+
         $this->addError(
             'name',
             $this->isEdit

@@ -56,11 +56,23 @@ trait CompanyableTrait
         }
 
         if (! $this->company_id) {
-            $targetHasNoCompany = $target instanceof User
-                ? $target->companies()->count() === 0
-                : is_null($target->company_id);
+            // For a User target, delegate to canReceiveFromCompany(null),
+            // which reads company_user directly via DB::table and avoids
+            // the FMCS global scope on the companies-table subquery. A
+            // naive $target->companies()->count() re-applies the actor's
+            // CompanyableScope to the companies table, and for an
+            // empty-pivot actor Company::scopeCompanyablesDirectly reduces
+            // that subquery to whereNull('companies.id'), which never
+            // matches (companies.id is a NOT NULL primary key). Every
+            // target then looks like it has no company, flipping the
+            // strict-mode deny to allow. See User::canReceiveFromCompany
+            // for the comment and GHSA-6hxf-hqrc-wfrp for the
+            // specific bypass this closes.
+            if ($target instanceof User) {
+                return $target->canReceiveFromCompany(null);
+            }
 
-            if ($targetHasNoCompany) {
+            if (is_null($target->company_id)) {
                 return true;
             }
 

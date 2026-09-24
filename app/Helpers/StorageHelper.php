@@ -43,14 +43,14 @@ class StorageHelper
                 return response()->download(Storage::disk($disk)->path($filename), null, $safeHeaders);
 
             case 's3':
-                Storage::disk($disk)->temporaryUrl(
+                return redirect()->to(Storage::disk($disk)->temporaryUrl(
                     $filename,
                     now()->addMinutes(5),
                     [
                         'ResponseContentType' => 'application/octet-stream',
-                        'ResponseContentDisposition' => 'attachment; filename=download-file',
+                        'ResponseContentDisposition' => 'attachment; filename="'.basename($filename).'"',
                     ]
-                );
+                ));
 
             default:
                 return Storage::disk($disk)->download($filename, null, $safeHeaders);
@@ -209,7 +209,7 @@ class StorageHelper
      */
     public static function readablePath(string $filename, string $disk = 'public'): ?string
     {
-        if (!Storage::disk($disk)->exists($filename)) {
+        if (! Storage::disk($disk)->exists($filename)) {
             return null;
         }
 
@@ -229,8 +229,8 @@ class StorageHelper
             return null;
         }
         if ($extension !== '') {
-            $tmpWithExt = $tmp . '.' . $extension;
-            if (!@rename($tmp, $tmpWithExt)) {
+            $tmpWithExt = $tmp.'.'.$extension;
+            if (! @rename($tmp, $tmpWithExt)) {
                 @unlink($tmp);
 
                 return null;
@@ -258,7 +258,7 @@ class StorageHelper
         // Auto-clean at request end so the caller doesn't own the
         // lifecycle. Register once per file so many calls in the same
         // request each get their own cleanup.
-        register_shutdown_function(fn() => @unlink($tmp));
+        register_shutdown_function(fn () => @unlink($tmp));
 
         return $tmp;
     }

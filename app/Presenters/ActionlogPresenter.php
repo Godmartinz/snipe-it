@@ -75,6 +75,10 @@ class ActionlogPresenter extends Presenter
             return 'fa-solid fa-plus';
         }
 
+        if ($this->action_type == 'merged') {
+            return 'fa-solid fa-code-merge';
+        }
+
         if (($this->action_type == 'delete') || ($this->action_type == 'upload deleted')) {
             return 'fa-solid fa-trash';
         }

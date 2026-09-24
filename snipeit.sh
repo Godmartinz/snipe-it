@@ -267,6 +267,7 @@ install_snipeit () {
   done
 
   chown -R "$APP_USER":"$apache_group" "$APP_PATH"
+  chmod 640 "$APP_PATH/.env"
 
   echo "* Running composer."
   # We specify the path to composer because CentOS lacks /usr/local/bin in $PATH when using sudo
