@@ -21,7 +21,6 @@ Homestead.json
 Homestead.yaml
 output
 phpDocumentor.phar
-/public/build/
 public/uploads/*.gif
 public/uploads/barcodes/*.png
 public/uploads/*.jpg

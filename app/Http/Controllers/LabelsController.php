@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Asset;
+use App\Http\Requests\CustomLabelRequest;
 use App\Models\CustomField;
+use App\Models\Labels\CustomLabelFonts;
 use App\Models\Labels\CustomLabels\PreviewSheetLabel;
 use App\Models\Labels\CustomLabels\PreviewTapeLabel;
 use App\Models\Labels\CustomUserLabel;
 use App\Models\Labels\DefaultLabel;
 use App\Models\Labels\Label;
+use App\Models\Labels\LabelPreviewAsset;
+use App\Models\Labels\RectangleSheet;
 use App\Models\Setting;
+use App\Rules\LabelGeometryRules;
+use App\Services\CustomLabelImportValidator;
 use App\View\Label as LabelView;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use App\Services\CustomLabelImportValidator;
 use Illuminate\Validation\Rule;
-use App\Models\Labels\RectangleSheet;
-use App\Models\Labels\LabelPreviewAsset;
-use App\Models\Labels\LabelGeometryRules;
-use App\Models\Labels\CustomLabelFonts;
+use Illuminate\Validation\ValidationException;
 
 class LabelsController extends Controller
 {
@@ -150,38 +150,14 @@ class LabelsController extends Controller
         ]);
     }
 
-    public function update(Request $request, CustomUserLabel $label)
+    public function update(CustomLabelRequest $request, CustomUserLabel $label)
     {
-        $type = $request->input('type', $label->type ?? 'sheet');
+        $validated = $request->validated();
+
+        $type = $validated['type'];
         $isTape = $type === 'tape';
 
-        $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', Rule::in(['sheet', 'tape'])],
-            'content' => ['required', 'array'],
-            'supports' => ['required', 'array'],
-            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-        ];
-        if ($isTape) {
-            $rules += [
-                'dimensions' => ['required', 'array'],
-                'dimensions.width' => ['required', 'numeric', 'gt:0'],
-                'dimensions.height' => ['required', 'numeric', 'gt:0'],
-                'dimensions.label_gap' => ['nullable', 'numeric', 'min:0'],
-            ];
-        } else {
-            $rules += [
-                'page' => ['required', 'array'],
-                'grid' => ['required', 'array'],
-                'label' => ['required', 'array'],
-            ];
-            $rules += LabelGeometryRules::sheet();
-        }
 
-        $validated = $request->validate($rules);
 
         $supports = collect($validated['supports'])
             ->map(function ($value, $key) {
@@ -272,40 +248,12 @@ class LabelsController extends Controller
             ->with('success', trans('admin/labels/general.updated_successfully', ['item' => $label->name]));
     }
 
-    public function store(Request $request)
+    public function store(CustomLabelRequest $request)
     {
-        $type = $request->input('type', 'sheet');
+        $validated = $request->validated();
 
-        $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'template' => ['nullable', 'string'],
-            'type' => ['required', Rule::in(['sheet', 'tape'])],
-            'content' => ['required', 'array'],
-            'supports' => ['required', 'array'],
-            'content.tag_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.title_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.field_label_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-            'content.field_value_font' => ['nullable', 'string', Rule::in(CustomLabelFonts::ALLOWED),],
-        ];
+        $type = $validated['type'];
 
-        if ($type === 'sheet') {
-            $rules += [
-                'page' => ['required', 'array'],
-                'grid' => ['required', 'array'],
-                'label' => ['required', 'array'],
-            ];
-            $rules += LabelGeometryRules::sheet();
-        }
-        if ($type === 'tape') {
-            $rules += [
-                'dimensions' => ['required', 'array'],
-                'dimensions.width' => ['required', 'numeric', 'gt:0'],
-                'dimensions.height' => ['required', 'numeric', 'gt:0'],
-                'dimensions.label_gap' => ['nullable', 'numeric', 'min:0'],
-            ];
-        }
-
-        $validated = $request->validate($rules);
 
         $supports = collect($validated['supports'])
             ->map(function ($value, $key) {

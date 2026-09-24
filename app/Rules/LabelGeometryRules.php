@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Labels;
+namespace App\Rules;
 
 final class LabelGeometryRules
 {

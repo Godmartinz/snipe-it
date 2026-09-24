@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Labels\LabelGeometryRules;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rule;
 use App\Models\Labels\CustomLabelFonts;
+use App\Rules\LabelGeometryRules;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+
 class CustomLabelImportValidator
 {
     public function validate(?string $rawJson): array
