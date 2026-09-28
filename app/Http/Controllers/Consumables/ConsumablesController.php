@@ -61,7 +61,8 @@ class ConsumablesController extends Controller
         $this->authorize('create', Consumable::class);
 
         return view('consumables.edit')->with('category_type', 'consumable')
-            ->with('item', new Consumable);
+            ->with('item', new Consumable)
+            ->with('measurement_units', Consumable::measurementUnits());
     }
 
     /**
@@ -92,6 +93,7 @@ class ConsumablesController extends Controller
         $consumable->model_number = $request->input('model_number');
         $consumable->item_no = $request->input('item_no');
         $consumable->qty = $request->input('qty');
+        $consumable->unit = $request->input('unit');
         $consumable->created_by = auth()->id();
         $consumable->notes = $request->input('notes');
         // Unchecked checkboxes are omitted from the POST body; coerce

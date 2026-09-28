@@ -361,6 +361,30 @@ class Consumable extends SnipeModel
         return $this->consumables_users_count ?? $this->users()->count();
     }
 
+    public static function measurementUnits(): array
+    {
+        return [
+            '' => trans('general.count'),
+            trans('admin/consumables/general.volume') => [
+                'uL' => 'µL',
+                'mL' => 'mL',
+                'L' => 'L',
+            ],
+            trans('admin/consumables/general.mass') => [
+                'ug' => 'µg',
+                'mg' => 'mg',
+                'g' => 'g',
+                'kg' => 'kg',
+            ],
+            trans('admin/consumables/general.amount_of_substance') => [
+                'nmol' => 'nmol',
+                'umol' => 'µmol',
+                'mmol' => 'mmol',
+                'mol' => 'mol',
+            ],
+        ];
+    }
+
     /**
      * AdjustsQuantity trait hook: units currently distributed to users.
      * The adjust-quantity modal uses this to reject decrements that

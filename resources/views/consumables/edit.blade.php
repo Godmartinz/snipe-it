@@ -118,7 +118,7 @@
                         </x-slot:input>
                     </x-form.row>
 
-                    <x-input.quantity :item="$item"/>
+                        <x-input.quantity :item="$item" :measurement-units="$measurement_units"/>
                 @endif
 
                 <x-input.supplier-select

@@ -7,6 +7,7 @@
     'min' => 0,
     'max' => null,
     'value' => null,
+    'measurementUnits' => null,
     'help_text' => null,
     'help_icon' => null,
 ])
@@ -21,7 +22,7 @@
         {{ $label ?? trans('general.quantity') }}
     </label>
     <div class="col-md-9">
-        <div class="col-md-3" style="padding-left: 0">
+        <div class="col-md-3">
             <input
                 class="form-control"
                 type="number"
@@ -36,6 +37,16 @@
                 @required($item && Helper::checkIfRequired($item, $name))
             />
         </div>
+        @if($measurementUnits)
+            <div class="col-md-2">
+                <x-input.select
+                        name="unit"
+                        :options="$measurementUnits"
+                        :selected="old('unit', $item?->unit)"
+                        style="width: 100%"
+                />
+            </div>
+        @endif
         <div class="col-md-12" style="padding-left: 0">
             <x-form.error :name="$name" />
             @if ($help_text)

@@ -17,11 +17,29 @@
         <option value=""></option>
     @endif
     {{-- map the simple key => value pairs when nothing is passed in via the slot --}}
-    @if($slot->isEmpty())
-        @foreach($options as $key => $value)
-            <option value="{{ $key }}" @selected(is_array($selected) ? in_array($key, $selected) : $selected == $key)>{{ $value }}</option>
-        @endforeach
-    @else
-        {{ $slot }}
-    @endif
+        @if($slot->isEmpty())
+            @foreach($options as $key => $value)
+                @if(is_array($value))
+                    <optgroup label="{{ $key }}">
+                        @foreach($value as $optionKey => $optionValue)
+                            <option
+                                    value="{{ $optionKey }}"
+                                    @selected(is_array($selected) ? in_array($optionKey, $selected) : $selected == $optionKey)
+                            >
+                                {{ $optionValue }}
+                            </option>
+                        @endforeach
+                    </optgroup>
+                @else
+                    <option
+                            value="{{ $key }}"
+                            @selected(is_array($selected) ? in_array($key, $selected) : $selected == $key)
+                    >
+                        {{ $value }}
+                    </option>
+                @endif
+            @endforeach
+        @else
+            {{ $slot }}
+        @endif
 </select>

@@ -12,4 +12,7 @@ return [
     'exclude_deleted' => 'Exclude Deleted Consumables',
     'include_deleted' => 'Include Deleted Consumables',
     'only_deleted' => 'Only Deleted Consumables',
+    'volume' => 'Volume',
+    'mass' => 'Mass',
+    'amount_of_substance' => 'Amount of Substance',
 ];
