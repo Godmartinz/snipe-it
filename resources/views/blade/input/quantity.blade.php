@@ -7,7 +7,7 @@
     'min' => 0,
     'max' => null,
     'value' => null,
-    'measurementUnits' => null,
+    'measurementUnits' => [],
     'help_text' => null,
     'help_icon' => null,
 ])
@@ -38,7 +38,11 @@
             />
         </div>
         @if($measurementUnits)
-            <div class="col-md-2">
+            <div id="measurement-unit-container"
+                 class="col-md-2"
+                 @if (! $item->category?->use_measurement_units)
+                     style="display: none;"
+                    @endif>
                 <x-input.select
                         name="unit"
                         :options="$measurementUnits"

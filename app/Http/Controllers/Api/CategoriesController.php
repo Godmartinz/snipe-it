@@ -267,6 +267,7 @@ class CategoriesController extends Controller
             'id',
             'name',
             'image',
+            'use_measurement_units'
         ]);
 
         if ($request->filled('search')) {

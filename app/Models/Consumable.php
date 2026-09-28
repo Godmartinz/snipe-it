@@ -364,18 +364,23 @@ class Consumable extends SnipeModel
     public static function measurementUnits(): array
     {
         return [
-            '' => trans('general.count'),
             trans('admin/consumables/general.volume') => [
                 'uL' => 'µL',
                 'mL' => 'mL',
                 'L' => 'L',
+                'fl_oz' => 'fl oz',
+                'gal' => 'gal',
             ],
+
             trans('admin/consumables/general.mass') => [
                 'ug' => 'µg',
                 'mg' => 'mg',
                 'g' => 'g',
                 'kg' => 'kg',
+                'oz' => 'oz',
+                'lb' => 'lb',
             ],
+
             trans('admin/consumables/general.amount_of_substance') => [
                 'nmol' => 'nmol',
                 'umol' => 'µmol',

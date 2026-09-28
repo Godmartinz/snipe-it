@@ -36,6 +36,7 @@
                 >
                     <x-slot:input>
                         <x-input.select
+                                id="category_type"
                             name="category_type"
                             :options="$category_types"
                             :selected="old('category_type', $item->category_type)"
@@ -45,6 +46,23 @@
                         />
                     </x-slot:input>
                 </x-form.row>
+                    <div
+                            id="quantity-type-row"
+                            @if (old('category_type', $item->category_type) !== 'consumable')
+                                style="display: none;"
+                            @endif
+                    >
+                        <x-form.radio-row
+                                name="use_measurement_units"
+                                :item="$item"
+                                :label="trans('admin/consumables/general.quantity_type')"
+                                :options="[ 0 => trans('admin/consumables/general.counted'),
+                                        1 => trans('admin/consumables/general.measured'),
+                                      ]"
+                                :selected="$item->use_measurement_units ?? 0"
+                                :help_text="trans('admin/consumables/general.quantity_type_help')"
+                        />
+                    </div>
 
                 <livewire:category-edit-form
                     :alert-on-response="(bool) old('alert_on_response', $item->alert_on_response)"
@@ -104,4 +122,21 @@
         </div>
     @endif
 
+@stop
+@section('moar_scripts')
+    <script>
+        $(function () {
+            function toggleQuantityType() {
+                const categoryType = $('#category_type').val();
+                const isConsumable = categoryType === 'consumable';
+
+                $('#quantity-type-row').toggle(isConsumable);
+                $('#quantity-type-row input').prop('disabled', !isConsumable);
+            }
+
+            $(document).on('change', '#category_type', toggleQuantityType);
+
+            toggleQuantityType();
+        });
+    </script>
 @stop

@@ -37,6 +37,10 @@ class SelectlistTransformer
             if (! empty($select_item->use_disabled)) {
                 $row['disabled'] = true;
             }
+            // Include measurement unit metadata when provided by the selectlist query.
+            if (isset($select_item->use_measurement_units)) {
+                $row['use_measurement_units'] = (bool)$select_item->use_measurement_units;
+            }
 
             $items_array[] = $row;
         }

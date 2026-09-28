@@ -42,7 +42,7 @@
                     categoryType="consumable"
                 />
 
-                <x-input.minimum-quantity :item="$item"/>
+                    <x-input.minimum-quantity :item="$item" :measurement-units="$measurement_units"/>
 
                 <x-input.manufacturer-select
                     :label="trans('general.manufacturer')"
@@ -160,4 +160,23 @@
 
     </x-container>
 
+@stop
+@section('moar_scripts')
+    <script>
+        $(document).on('select2:select', '#category_id_select', function (e) {
+            console.log('selected:', e.params.data);
+            console.log(
+                e.params.data.use_measurement_units,
+                typeof e.params.data.use_measurement_units
+            );
+            const useMeasurementUnits = Boolean(
+                e.params.data.use_measurement_units
+            );
+
+            console.log('useMeasurementUnits:', useMeasurementUnits);
+
+
+            $('#measurement-unit-container').toggle(useMeasurementUnits);
+        });
+    </script>
 @stop

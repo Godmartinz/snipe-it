@@ -37,6 +37,7 @@ class Category extends SnipeModel
 
     protected $casts = [
         'alert_on_response' => 'boolean',
+        'use_measurement_units' => 'boolean',
         'created_by' => 'integer',
     ];
 
@@ -48,6 +49,7 @@ class Category extends SnipeModel
         'name' => 'required|min:1|max:255|two_column_unique_undeleted:category_type',
         'require_acceptance' => 'boolean',
         'use_default_eula' => 'boolean',
+        'use_measurement_units' => 'boolean',
         'category_type' => 'required|in:asset,accessory,consumable,component,license',
     ];
 
@@ -78,6 +80,7 @@ class Category extends SnipeModel
         'use_default_eula',
         'tag_color',
         'notes',
+        'use_measurement_units',
     ];
 
     use Searchable;
