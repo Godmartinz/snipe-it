@@ -259,6 +259,7 @@ class UsersTransformer
         $unitCost = $unitCostsById[$consumable->id] ?? null;
         /** @var \Illuminate\Database\Eloquent\Relations\Pivot $pivot */
         $pivot = $consumable->pivot;
+        $isMeasured = (bool)$consumable->category?->use_measurement_units;
 
         return [
             'id' => (int) $pivot->id,
@@ -269,6 +270,8 @@ class UsersTransformer
             'name' => e($consumable->name),
             'image' => $consumable->getImageUrl() ?: null,
             'qty' => 1,
+            'unit' => $isMeasured ? $consumable->unit : null,
+            'use_measurement_units' => $isMeasured,
             'purchase_cost' => Helper::formatCurrencyOutput($unitCost),
             'created_at' => Helper::getFormattedDateObject($pivot->created_at, 'datetime'),
             'note' => $pivot->note ? e($pivot->note) : null,

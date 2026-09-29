@@ -12,7 +12,7 @@
 >
     <label for="min_amt" class="col-md-3 control-label">{{ trans('general.min_amt') }}</label>
     <div class="col-md-9">
-        <div class="col-md-3" style="padding-left: 0">
+        <div class="col-md-3 input-group" style="padding-left: 0">
             <input
                 class="form-control"
                 type="number"
@@ -24,6 +24,11 @@
                 maxlength="5"
                 @required($item && Helper::checkIfRequired($item, 'min_amt'))
             />
+            @if ($item->category?->use_measurement_units && $item->unit)
+                <span class="input-group-addon">
+                    {{ $item->unit }}
+                </span>
+            @endif
         </div>
         <div class="col-md-7" style="margin-left: -15px">
             <x-form.tooltip>{{ trans('general.min_amt_help') }}</x-form.tooltip>

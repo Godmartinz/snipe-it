@@ -387,7 +387,7 @@
                             show_footer="true"
                             buttons="consumableButtons"
                             api_url="{{ route('api.users.consumableslist', ['user' => $user->id]) }}"
-                            :presenter="\App\Presenters\UserPresenter::consumablesDataTableLayout()"
+                            :presenter="\App\Presenters\UserPresenter::consumablesDataTableLayout('consumableQtyFormatter')"
                             export_filename="export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
                         />
                         @endcan

@@ -629,7 +629,7 @@ class UserPresenter extends Presenter
             ?? $this->model->company?->color;
     }
 
-    public static function consumablesDataTableLayout(): string
+    public static function consumablesDataTableLayout($quantity_formatter = null): string
     {
         $layout = [
             [
@@ -650,8 +650,9 @@ class UserPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.qty'),
                 'visible' => true,
-                'footerFormatter' => 'sumFormatter',
+                'footerFormatter' => 'consumableQtySumFormatter',
                 'class' => 'text-right',
+                ...($quantity_formatter ? ['formatter' => $quantity_formatter] : []),
             ],
             [
                 'field' => 'purchase_cost',
