@@ -866,10 +866,11 @@ class Helper
         // when a correlated subquery is in the SELECT list (withCount
         // generates one). Since id is unique, adding the other columns
         // is a cardinality no-op and works on every engine + sql_mode.
-        $consumables = Consumable::select('id', 'name', 'qty', 'min_amt')
+        $consumables = Consumable::select('id', 'name', 'qty', 'min_amt', 'unit', 'category_id')
+            ->with('category:id,use_measurement_units')
             ->withCount('consumableAssignments as consumables_users_count')
             ->whereNotNull('min_amt')
-            ->groupBy('consumables.id', 'consumables.name', 'consumables.qty', 'consumables.min_amt')
+            ->groupBy('consumables.id', 'consumables.name', 'consumables.qty', 'consumables.min_amt', 'consumables.unit')
             ->havingRaw('(qty - consumables_users_count) < (min_amt + ?)', [$alert_threshold])
             ->get();
 
@@ -923,6 +924,7 @@ class Helper
             $items_array[$all_count]['percent'] = $percent;
             $items_array[$all_count]['remaining'] = $avail;
             $items_array[$all_count]['min_amt'] = $consumable->min_amt;
+            $items_array[$all_count]['unit'] = $consumable->category?->use_measurement_units ? $consumable->unit : null;
             $all_count++;
         }
 
