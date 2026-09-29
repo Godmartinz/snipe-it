@@ -28,9 +28,13 @@
                 <x-form.static :label="trans('general.category')">{!! $consumable->category->present()->formattedNameLink !!}</x-form.static>
             @endif
 
-            <x-form.static :label="trans('admin/components/general.total')">{{ $consumable->qty }}</x-form.static>
+                <x-form.static :label="trans('admin/components/general.total')">{{ $consumable->qty }}@if ($consumable->category?->use_measurement_units && $consumable->unit)
+                        {{ $consumable->unit }}
+                    @endif</x-form.static>
 
-            <x-form.static :label="trans('admin/components/general.remaining')">{{ $consumable->numRemaining() }}</x-form.static>
+                <x-form.static :label="trans('admin/components/general.remaining')">{{ $consumable->numRemaining() }}@if ($consumable->category?->use_measurement_units && $consumable->unit)
+                        {{ $consumable->unit }}
+                    @endif</x-form.static>
 
             <x-input.user-select
                 :label="trans('general.select_user')"
@@ -46,10 +50,15 @@
             <div class="form-group {{ $errors->has('qty') ? 'has-error' : '' }}">
                 <label for="checkout_qty" class="col-md-3 control-label">{{ trans('general.qty') }}</label>
                 <div class="col-md-7 col-sm-12">
-                    <div class="col-md-2" style="padding-left: 0">
+                    <div class="input-group" style="width: 150px;">
+                        {{--                    <div class="col-md-2" style="width: auto;display: inline-table;">--}}
                         <input class="form-control" type="number" name="checkout_qty" id="checkout_qty" value="{{ old('checkout_qty', 1) }}" min="1" max="{{ $consumable->numRemaining() }}" aria-label="{{ trans('general.qty') }}" />
+                        @if ($consumable->category?->use_measurement_units && $consumable->unit)
+                            <span class="input-group-addon">{{ $consumable->unit }}</span>
+                        @endif
                     </div>
                 </div>
+
                 <div class="col-md-8 col-md-offset-3"><x-form.error name="qty" /></div>
             </div>
 
