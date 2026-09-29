@@ -9,7 +9,7 @@ class HistoryPresenter extends Presenter
      *
      * @return string
      */
-    public static function dataTableLayout($hide_fields = [], $extra_columns = [])
+    public static function dataTableLayout($hide_fields = [], $extra_columns = [], $quantity_formatter = null)
     {
         $layout = [];
 
@@ -168,7 +168,9 @@ class HistoryPresenter extends Presenter
                     'sortable' => true,
                     'visible' => true,
                     'title' => trans('general.quantity'),
+                    ...($quantity_formatter ? ['formatter' => $quantity_formatter] : []),
                 ]);
+
         }
 
         if (! in_array('order_number', $hide_fields)) {

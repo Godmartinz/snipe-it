@@ -9,6 +9,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
+use App\Models\Consumable;
 use App\Models\CustomField;
 use App\Models\License;
 use App\Models\Location;
@@ -159,6 +160,21 @@ class ActionlogsTransformer
 
             }
             $clean_meta = $this->changedInfo($clean_meta);
+            
+            if (
+                $actionlog->item instanceof Consumable
+                && $actionlog->item->category?->use_measurement_units
+                && $actionlog->item->unit
+                && isset($clean_meta['min_amt'])
+            ) {
+                if ($clean_meta['min_amt']['old'] !== '') {
+                    $clean_meta['min_amt']['old'] .= $actionlog->item->unit;
+                }
+
+                if ($clean_meta['min_amt']['new'] !== '') {
+                    $clean_meta['min_amt']['new'] .= $actionlog->item->unit;
+                }
+            }
 
             // A license serial is the product key. When the current
             // user does not hold licenses.keys / create / edit, the
@@ -241,6 +257,8 @@ class ActionlogsTransformer
                 'type' => e($actionlog->targetType()),
             ] : null,
             'quantity' => $this->getQuantity($actionlog),
+            'unit' => $actionlog->item instanceof Consumable && $actionlog->item->category?->use_measurement_units ? $actionlog->item->unit : null,
+            'use_measurement_units' => $actionlog->item instanceof Consumable && $actionlog->item->category?->use_measurement_units,
             // action_logs.order_number was replaced by action_logs.order_item_id
             // pointing at the specific OrderItem line. The parent Order
             // is one hop away. Null for log rows with no OrderItem

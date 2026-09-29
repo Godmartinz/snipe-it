@@ -4071,6 +4071,9 @@
     }
 
     function consumableQtyFormatter(value, row) {
+        if (value === null || value === undefined || value === '') {
+            return value;
+        }
         return row.use_measurement_units && row.unit
             ? value + row.unit
             : value;

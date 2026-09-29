@@ -58,7 +58,7 @@
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$consumable" :route="route('api.consumables.history', $consumable)" :hide_fields="['serial']"/>
+                        <x-table.history :model="$consumable" :route="route('api.consumables.history', $consumable)" :hide_fields="['serial']" quantity_formatter="consumableQtyFormatter"/>
                     </x-tabs.pane>
                     <!-- end history tab pane -->
 

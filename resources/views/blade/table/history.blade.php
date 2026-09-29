@@ -5,6 +5,7 @@
     'model' => null,
     'hide_fields' => [],
     'extra_columns' => [],
+    'quantity_formatter' => null,
 ])
 
 <!-- start history tab pane -->
@@ -14,7 +15,7 @@
     </x-slot:table_header>
 
     <x-table
-        :presenter="\App\Presenters\HistoryPresenter::dataTableLayout($hide_fields, $extra_columns)"
+            :presenter="\App\Presenters\HistoryPresenter::dataTableLayout($hide_fields, $extra_columns, $quantity_formatter)"
         show_advanced_search="false"
         api_url="{{ $route }}"
         fixed_number="false"
