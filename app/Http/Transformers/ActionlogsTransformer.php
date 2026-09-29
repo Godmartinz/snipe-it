@@ -160,19 +160,24 @@ class ActionlogsTransformer
 
             }
             $clean_meta = $this->changedInfo($clean_meta);
-            
+
             if (
                 $actionlog->item instanceof Consumable
                 && $actionlog->item->category?->use_measurement_units
                 && $actionlog->item->unit
-                && isset($clean_meta['min_amt'])
             ) {
-                if ($clean_meta['min_amt']['old'] !== '') {
-                    $clean_meta['min_amt']['old'] .= $actionlog->item->unit;
-                }
+                foreach (['qty', 'min_amt'] as $field) {
+                    if (! isset($clean_meta[$field])) {
+                        continue;
+                    }
 
-                if ($clean_meta['min_amt']['new'] !== '') {
-                    $clean_meta['min_amt']['new'] .= $actionlog->item->unit;
+                    if ($clean_meta[$field]['old'] !== '') {
+                        $clean_meta[$field]['old'] .= $actionlog->item->unit;
+                    }
+
+                    if ($clean_meta[$field]['new'] !== '') {
+                        $clean_meta[$field]['new'] .= $actionlog->item->unit;
+                    }
                 }
             }
 

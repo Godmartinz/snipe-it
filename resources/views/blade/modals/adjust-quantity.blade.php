@@ -31,7 +31,23 @@
         :label="trans('general.adjust_quantity_amount')"
         :help_text="trans('general.adjust_quantity_amount_help')"
         required
-    />
+    >
+        <x-slot:input>
+            <div class="input-group">
+                <input
+                        type="number"
+                        class="form-control"
+                        id="adjustQuantityAmount"
+                        name="amount"
+                        required
+                >
+                <span
+                        class="input-group-addon adjust-quantity-unit"
+                        style="display: none;"
+                ></span>
+            </div>
+        </x-slot:input>
+    </x-form.row>
 
     {{-- Acquisition-only fields (order_number, supplier, unit cost,
          currency). Shown for positive qty changes and hidden by snipeit.js

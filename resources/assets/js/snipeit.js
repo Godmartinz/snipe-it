@@ -168,10 +168,12 @@ $(function () {
         // attribute so the browser stepper refuses to go below and the
         // constraint-validation message surfaces before submit.
         var available = parseInt($btn.data('available'), 10);
+        var unit = $btn.data('unit') || '';
 
         $('#adjustQuantityForm').attr('action', $btn.data('adjust-url'));
         $modal.find('.adjust-quantity-item-name').text($btn.data('item-name') || '');
-        $modal.find('.adjust-quantity-available').text(!isNaN(available) ? available : '');
+        $modal.find('.adjust-quantity-available').text(!isNaN(available) ? available + unit : '');
+        $modal.find('.adjust-quantity-unit').text(unit).toggle(!!unit);
 
         if (!isNaN(available)) {
             $amount.attr('min', -available);

@@ -86,6 +86,7 @@
                                 data-adjust-url="{{ route('consumables.adjust-quantity', $consumable) }}"
                                 data-item-name="{{ e($consumable->name) }}"
                                 data-available="{{ (int) $consumable->numRemaining() }}"
+                                    data-unit="{{ $consumable->category?->use_measurement_units ? $consumable->unit : '' }}"
                                 @if ($lastOrder && $lastOrder['unit_cost'] !== null) data-last-unit-cost="{{ $lastOrder['unit_cost'] }}" @endif
                                 @if ($lastOrder && $lastOrder['currency'] !== null) data-last-currency="{{ e($lastOrder['currency']) }}" @endif
                             >

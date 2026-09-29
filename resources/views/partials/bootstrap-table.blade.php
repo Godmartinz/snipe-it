@@ -2607,6 +2607,7 @@
                     id: row.id,
                     name: row.name || '',
                     available: row.remaining,
+                    unit: row.use_measurement_units && row.unit ? row.unit : '',
                 }) + '&nbsp;';
             }
 
@@ -3432,7 +3433,8 @@
         return '<button type="button" class="actions btn btn-sm btn-primary hidden-print adjust-quantity" data-tooltip="true" title="{{ trans('general.adjust_quantity') }}"'
             + ' data-adjust-url="{{ config('app.url') }}/' + opts.dest + '/' + opts.id + '/adjust-quantity"'
             + ' data-item-name="' + (opts.name || '') + '"'
-            + ' data-available="' + (opts.available != null ? opts.available : '') + '">'
+            + ' data-available="' + (opts.available != null ? opts.available : '') + '"'
+            + ' data-unit="' + (opts.unit || '') + '">'
             + '<x-icon type="plus-minus" class="fa-fw" /><span class="sr-only">{{ trans('general.adjust_quantity') }}</span></button>';
     };
 
@@ -3586,7 +3588,7 @@
 
             var minAmt = value.use_measurement_units && value.unit ? value.min_amt + value.unit : value.min_amt;
 
-            if (value.remaining < minAmt) {
+            if (value.remaining < value.min_amt) {
                 return  '<span class="text-danger text-bold" data-tooltip="true" title="{{ trans('admin/licenses/general.below_threshold_short') }}"><x-icon type="warning" class="text-yellow" /> ' + minAmt + '</span>';
             }
             return minAmt
