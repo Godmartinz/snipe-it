@@ -18,6 +18,10 @@ return new class extends Migration {
             $table->boolean('use_measurement_units')->default(false)->after('category_type');
         });
 
+        Schema::table('consumables_users', function (Blueprint $table) {
+            $table->unsignedInteger('qty')->default(1)->after('consumable_id');
+        });
+
     }
 
 
@@ -29,6 +33,9 @@ return new class extends Migration {
 
         Schema::table('categories', function (Blueprint $table) {
             $table->dropColumn('use_measurement_units');
+        });
+        Schema::table('consumables_users', function (Blueprint $table) {
+            $table->dropColumn('qty');
         });
     }
 };

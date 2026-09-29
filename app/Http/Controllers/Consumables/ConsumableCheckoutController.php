@@ -142,12 +142,18 @@ class ConsumableCheckoutController extends Controller
                 return;
             }
 
-            for ($i = 0; $i < $quantity; $i++) {
+            $isMeasured = $consumable->category?->use_measurement_units;
+
+            $checkoutCount = $isMeasured ? 1 : $quantity;
+            $checkoutQty = $isMeasured ? $quantity : 1;
+
+            for ($i = 0; $i < $checkoutCount; $i++) {
                 $consumable->users()->attach($consumable->id, [
                     'consumable_id' => $consumable->id,
                     'created_by' => $admin_user->id,
                     'assigned_to' => e($request->input('assigned_user')),
                     'note' => $request->input('note'),
+                    'qty' => $checkoutQty,
                 ]);
             }
         });

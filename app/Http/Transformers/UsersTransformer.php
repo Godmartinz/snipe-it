@@ -269,10 +269,10 @@ class UsersTransformer
             ],
             'name' => e($consumable->name),
             'image' => $consumable->getImageUrl() ?: null,
-            'qty' => 1,
+            'qty' => $consumable->pivot->qty,
             'unit' => $isMeasured ? $consumable->unit : null,
             'use_measurement_units' => $isMeasured,
-            'purchase_cost' => Helper::formatCurrencyOutput($unitCost),
+            'purchase_cost' => Helper::formatCurrencyOutput($unitCost * $consumable->pivot->qty),
             'created_at' => Helper::getFormattedDateObject($pivot->created_at, 'datetime'),
             'note' => $pivot->note ? e($pivot->note) : null,
         ];
