@@ -197,8 +197,13 @@ class CustomConsumableReportController extends Controller
                 ],
             ],
             'quantity' => [
-                'headers' => [trans('general.quantity')],
-                'values' => fn ($consumable, $i) => [$consumable->qty],
+                'headers' => [
+                    trans('general.quantity'),
+                    trans('admin/consumables/general.unit'),
+                ],
+                'values' => fn($consumable, $i) => [$consumable->qty, $consumable->category?->use_measurement_units ? $consumable->unit : '',
+                ],
+
             ],
             'min_amount' => [
                 'headers' => [trans('general.min_amt')],

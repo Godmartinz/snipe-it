@@ -3584,10 +3584,12 @@
 
         if ((row) && (row!=undefined)) {
 
-            if (value.remaining < value.min_amt) {
-                return  '<span class="text-danger text-bold" data-tooltip="true" title="{{ trans('admin/licenses/general.below_threshold_short') }}"><x-icon type="warning" class="text-yellow" /> ' + value.min_amt + '</span>';
+            var minAmt = value.use_measurement_units && value.unit ? value.min_amt + value.unit : value.min_amt;
+
+            if (value.remaining < minAmt) {
+                return  '<span class="text-danger text-bold" data-tooltip="true" title="{{ trans('admin/licenses/general.below_threshold_short') }}"><x-icon type="warning" class="text-yellow" /> ' + minAmt + '</span>';
             }
-            return value.min_amt
+            return minAmt
         }
         return '--';
     }
@@ -4068,6 +4070,24 @@
         return parseFloat(decimalfixed);
     }
 
+    function consumableQtyFormatter(value, row) {
+        return row.use_measurement_units && row.unit
+            ? value + row.unit
+            : value;
+    }
+
+    function consumableQtySumFormatter(data) {
+        var currentField = this.field;
+        var total = 0;
+
+        $.each(data, function () {
+            if (!this.use_measurement_units) {
+                total += Number(this[currentField]) || 0;
+            }
+        });
+
+        return total;
+    }
 
     function qtySumFormatter(data) {
         var currentField = this.field;

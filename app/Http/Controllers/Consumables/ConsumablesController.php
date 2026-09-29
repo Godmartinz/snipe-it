@@ -152,7 +152,8 @@ class ConsumablesController extends Controller
 
         return view('consumables/edit')
             ->with('item', $consumable)
-            ->with('category_type', 'consumable');
+            ->with('category_type', 'consumable')
+            ->with('measurement_units', Consumable::measurementUnits());
 
     }
 

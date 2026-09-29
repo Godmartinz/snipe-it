@@ -19,4 +19,5 @@ return [
     'counted' => 'Counted',
     'measured' => 'Measured',
     'quantity_type_help' => 'Counted consumables are tracked as individual items. Measured consumables are tracked using a unit of measurement.',
+    'unit' => 'Unit',
 ];

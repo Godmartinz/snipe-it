@@ -59,7 +59,7 @@ class ConsumablesTransformer
             ] : null,
             'min_amt' => (int) $consumable->min_amt,
             'model_number' => ($consumable->model_number != '') ? e($consumable->model_number) : null,
-            'remaining' => $consumable->numRemaining(),
+            'remaining' => $consumable->numRemaining() . ($consumable->category->use_measurement_unit ? $consumable->unit : null),
             'percent_remaining' => round($consumable->percentRemaining()),
             // See AccessoriesTransformer for why order_number is no longer
             // in the parent-level output.
@@ -73,6 +73,8 @@ class ConsumablesTransformer
             'total_cost' => Helper::formatCurrencyOutput($consumable->totalCostSum()),
             'purchase_date' => ($lastDefaults['purchase_date'] ?? null) ? Helper::getFormattedDateObject($lastDefaults['purchase_date'], 'date') : null,
             'qty' => (int) $consumable->qty,
+            'use_measurement_units' => (bool)$consumable->category?->use_measurement_units,
+            'unit' => $consumable->unit,
             'notes' => ($consumable->notes) ? Helper::parseEscapedMarkedownInline($consumable->notes) : null,
             'requestable' => (bool) $consumable->requestable,
             'created_by' => ($consumable->adminuser) ? [

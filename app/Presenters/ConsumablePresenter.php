@@ -124,7 +124,8 @@ class ConsumablePresenter extends Presenter
                 'title' => trans('admin/components/general.total'),
                 'visible' => true,
                 'class' => 'text-right text-padding-number-cell',
-                'footerFormatter' => 'qtySumFormatter',
+                'formatter' => 'consumableQtyFormatter',
+                'footerFormatter' => 'consumableQtySumFormatter',
             ], [
                 'field' => 'remaining',
                 'scope' => 'col',
@@ -133,7 +134,8 @@ class ConsumablePresenter extends Presenter
                 'title' => trans('admin/components/general.remaining'),
                 'visible' => true,
                 'class' => 'text-right text-padding-number-cell',
-                'footerFormatter' => 'qtySumFormatter',
+                'formatter' => 'consumableQtyFormatter',
+                'footerFormatter' => 'consumableQtySumFormatter',
             ], [
                 'field' => 'percent_remaining',
                 'scope' => 'col',
