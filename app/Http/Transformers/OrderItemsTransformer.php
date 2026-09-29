@@ -4,6 +4,7 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Models\Consumable;
 use App\Models\OrderItem;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -38,6 +39,8 @@ class OrderItemsTransformer
             ] : null,
             'purchase_date' => Helper::getFormattedDateObject($order?->purchase_date, 'date'),
             'qty' => $qty,
+            'unit' => $line->item instanceof Consumable && $line->item->category?->use_measurement_units ? $line->item->unit : null,
+            'use_measurement_units' => $line->item instanceof Consumable && $line->item->category?->use_measurement_units,
             'unit_cost' => $price !== null ? Helper::formatCurrencyOutput($price) : null,
             'currency' => $order?->currency ? e($order->currency) : null,
             'total_cost' => $price !== null ? Helper::formatCurrencyOutput($qty * $price) : null,

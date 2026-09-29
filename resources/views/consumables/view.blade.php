@@ -52,7 +52,7 @@
 
                     <!-- start orders tab pane -->
                     <x-tabs.pane name="orders">
-                        <x-table.orders :route="route('api.order-items.index', ['item_type' => \App\Models\Consumable::class, 'item_id' => $consumable->id])"/>
+                        <x-table.orders :route="route('api.order-items.index', ['item_type' => \App\Models\Consumable::class, 'item_id' => $consumable->id])" quantity_formatter="consumableQtyFormatter"/>
                     </x-tabs.pane>
                     <!-- end orders tab pane -->
 

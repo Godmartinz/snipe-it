@@ -9,12 +9,12 @@ namespace App\Presenters;
  */
 class OrderItemsPresenter
 {
-    public static function dataTableLayout(): string
+    public static function dataTableLayout($quantity_formatter = null): string
     {
         return json_encode(array_merge(
             self::metadataColumns(),
             self::acquisitionColumns(),
-            self::amountColumns(),
+            self::amountColumns($quantity_formatter),
             self::notesColumns(),
         ));
     }
@@ -93,7 +93,7 @@ class OrderItemsPresenter
      * qty / unit_cost / currency / total_cost: the "how much" columns.
      * All three numeric fields use sumFormatter for the footer roll-up.
      */
-    private static function amountColumns(): array
+    private static function amountColumns($quantity_formatter): array
     {
         return [
             [
@@ -106,6 +106,7 @@ class OrderItemsPresenter
                 'visible' => true,
                 'footerFormatter' => 'sumFormatter',
                 'class' => 'text-right text-padding-number-cell',
+                ...($quantity_formatter ? ['formatter' => $quantity_formatter] : []),
             ],
             [
                 'field' => 'unit_cost',

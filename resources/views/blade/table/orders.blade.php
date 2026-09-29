@@ -1,6 +1,7 @@
 @props([
     'route',
     'table_header' => trans('general.orders'),
+    'quantity_formatter' => null,
 ])
 
 <x-slot:table_header>
@@ -8,7 +9,7 @@
 </x-slot:table_header>
 
 <x-table
-    :presenter="\App\Presenters\OrderItemsPresenter::dataTableLayout()"
+        :presenter="\App\Presenters\OrderItemsPresenter::dataTableLayout($quantity_formatter)"
     show_advanced_search="false"
     api_url="{{ $route }}"
     fixed_number="false"
