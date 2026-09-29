@@ -69,7 +69,10 @@
 
         <x-page-column class="col-md-3">
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$consumable" img_path="{{ app('consumables_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'consumables', 'id' => $consumable->id])">
+                <x-info-panel :infoPanelObj="$consumable"
+                              img_path="{{ app('consumables_upload_url') }}"
+                              :qr_code_url="route('qr_code/common', ['object_type' => 'consumables', 'id' => $consumable->id])"
+                              :measurement-unit="$consumable->category?->use_measurement_units ? $consumable->unit : null">
 
                     <x-slot:buttons>
                         <x-button.edit :item="$consumable" :route="route('consumables.edit', $consumable->id)"/>

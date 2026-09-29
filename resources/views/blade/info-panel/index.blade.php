@@ -2,6 +2,7 @@
     'infoPanelObj' => null,
     'img_path' => null,
     'qr_code_url' => null,
+    'measurementUnit' => null,
     'snipeSettings' => \App\Models\Setting::getSettings()
 ])
 
@@ -158,20 +159,20 @@
         @if ($infoPanelObj->min_amt)
             <x-info-element>
                 <x-icon type="min-qty" class="fa-fw" title="{{ trans('general.min_amt') }}" />
-                {{ trans('general.min_amt') }} {{ $infoPanelObj->min_amt }}
+                {{ trans('general.min_amt') }} {{ $infoPanelObj->min_amt }}{{ $measurementUnit ? ' '.$measurementUnit : '' }}
             </x-info-element>
         @endif
 
         @if (method_exists($infoPanelObj, 'numCheckedOut'))
             <x-info-element icon_type="checkedout" title="{{ trans('general.checked_out') }}">
-                {{ (int) $infoPanelObj->numCheckedOut() }}
+                {{ (int) $infoPanelObj->numCheckedOut() }}{{ $measurementUnit ? ' '.$measurementUnit : '' }}
                 {{ trans('general.checked_out') }}
             </x-info-element>
         @endif
 
         @if (method_exists($infoPanelObj, 'numRemaining'))
             <x-info-element icon_type="available" class="{{ ($infoPanelObj->numRemaining()) <= $infoPanelObj->min_amt ? 'text-danger' : 'text-success' }}" title="{{ trans('general.remaining') }}">
-                 {{ $infoPanelObj->numRemaining() }}
+                {{ $infoPanelObj->numRemaining() }}{{ $measurementUnit ? ' '.$measurementUnit : '' }}
                 {{ trans('general.remaining') }}
             </x-info-element>
         @endif
