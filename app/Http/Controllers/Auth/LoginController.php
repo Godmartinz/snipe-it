@@ -11,6 +11,9 @@ use App\Models\User;
 use App\Services\Saml;
 use Com\Tecnick\Barcode\Barcode;
 use Google2FA;
+use PragmaRX\Google2FA\Exceptions\SecretKeyTooShortException;
+use PragmaRX\Google2FA\Exceptions\InvalidCharactersException;
+use PragmaRX\Google2FA\Exceptions\IncompatibleWithGoogleAuthenticatorException;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -454,7 +457,14 @@ class LoginController extends Controller
         $user = auth()->user();
         $secret = $request->input('two_factor_secret');
 
-        if (Google2FA::verifyKey($user->two_factor_secret, $secret)) {
+        try {
+            $verified = Google2FA::verifyKey($user->two_factor_secret, $secret);
+        } catch (SecretKeyTooShortException|
+        InvalidCharactersException|
+        IncompatibleWithGoogleAuthenticatorException $e) {
+            $verified = false;
+        }
+        if ($verified) {
             $user->two_factor_enrolled = 1;
             $user->last_login = \Carbon::now();
             $user->saveQuietly();
