@@ -83,6 +83,11 @@ class CheckoutAcceptancePresenter extends Presenter
             'scope' => 'col',
             'searchable' => true,
             'sortable' => true,
+            // item/target/checked_out_by are nested objects, so bs-table's
+            // default sorter can't compare them meaningfully. sortName
+            // points it at the string name field inside the object so
+            // header clicks sort alphabetically by display name.
+            'sortName' => 'item.name',
             'title' => trans('general.name'),
             'visible' => true,
             'formatter' => 'polymorphicItemFormatter',
@@ -102,7 +107,8 @@ class CheckoutAcceptancePresenter extends Presenter
             'field' => 'target',
             'scope' => 'col',
             'searchable' => true,
-            'sortable' => false,
+            'sortable' => true,
+            'sortName' => 'target.name',
             'title' => trans('admin/hardware/table.checkoutto'),
             'visible' => true,
             'formatter' => 'polymorphicItemFormatter',
@@ -112,7 +118,8 @@ class CheckoutAcceptancePresenter extends Presenter
             'field' => 'checked_out_by',
             'scope' => 'col',
             'searchable' => true,
-            'sortable' => false,
+            'sortable' => true,
+            'sortName' => 'checked_out_by.name',
             'switchable' => true,
             'visible' => true,
             'title' => trans('general.created_by'),

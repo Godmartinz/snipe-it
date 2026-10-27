@@ -303,28 +303,31 @@ class AssetTest extends TestCase
 
     public function test_get_image_url_method()
     {
-        $urlBase = config('filesystems.disks.public.url');
+        // Build expected URLs through the same disk the model uses so
+        // the assertion stays valid whether or not the public disk is
+        // faked (base setUp fakes it under --parallel).
+        $publicDisk = \Illuminate\Support\Facades\Storage::disk('public');
 
         $category = Category::factory()->create(['image' => 'category-image.jpg']);
         $model = AssetModel::factory()->for($category)->create(['image' => 'asset-model-image.jpg']);
         $asset = Asset::factory()->for($model, 'model')->create(['image' => 'asset-image.jpg']);
 
         $this->assertEquals(
-            "{$urlBase}/assets/asset-image.jpg",
+            $publicDisk->url('assets/asset-image.jpg'),
             $asset->getImageUrl()
         );
 
         $asset->update(['image' => null]);
 
         $this->assertEquals(
-            "{$urlBase}/models/asset-model-image.jpg",
+            $publicDisk->url('models/asset-model-image.jpg'),
             $asset->refresh()->getImageUrl()
         );
 
         $model->update(['image' => null]);
 
         $this->assertEquals(
-            "{$urlBase}/categories/category-image.jpg",
+            $publicDisk->url('categories/category-image.jpg'),
             $asset->refresh()->getImageUrl()
         );
 

@@ -549,11 +549,14 @@ class LicensesController extends Controller
      */
     public function requestable(Request $request): array
     {
+        $this->authorize('viewRequestable', License::class);
+
         $query = License::with('category', 'company', 'manufacturer', 'requests')
             ->Requestable();
 
         if ($request->filled('search')) {
-            $query->TextSearch($request->input('search'));
+            $search = $request->input('search');
+            $query->where('licenses.name', 'LIKE', '%'.$search.'%');
         }
 
         $total = $query->count();

@@ -11,6 +11,7 @@ use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\CompanyPresenter;
 use App\Presenters\Presentable;
+use App\Rules\ExternalUrl;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,14 +43,45 @@ final class Company extends SnipeModel
 
     protected $table = 'companies';
 
-    // Declare the rules for the model validation
+    /**
+     * Fields that configure a per-company outbound webhook. These are the
+     * same fields the Livewire IntegrationSettingsForm gates on
+     * isSuperUser(), so the REST API must enforce the same control. Any
+     * controller / importer / job that mass-assigns from user input needs
+     * to reject the write when the user lacks superuser, rather than
+     * silently dropping the fields.
+     */
+    public const GATED_WEBHOOK_FIELDS = [
+        'webhook_selected',
+        'webhook_endpoint',
+        'webhook_channel',
+        'webhook_botname',
+    ];
+
+    // Declare the rules for the model validation. The ExternalUrl rule
+    // for webhook_endpoint is layered on in getRules() below because PHP
+    // rejects `new` in a property-default array initializer.
     protected $rules = [
         'name' => 'required|max:255|unique_undeleted_in_scope:parent_id',
         'fax' => 'min:7|max:35|nullable',
         'phone' => 'min:7|max:35|nullable',
         'email' => 'email|max:150|nullable',
         'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id|parent_within_scope',
+        'webhook_selected' => 'nullable|string|in:slack,general,google,microsoft',
+        'webhook_channel' => 'nullable|string',
+        'webhook_botname' => 'nullable|string|max:255',
     ];
+
+    /**
+     * PHP 8.2 doesn't allow `new` in a property default, so the ExternalUrl rule is added on here.
+     */
+    public function getRules()
+    {
+        $rules = $this->rules;
+        $rules['webhook_endpoint'] = ['nullable', 'url', new ExternalUrl('app.webhook_allow_internal_targets')];
+
+        return $rules;
+    }
 
     protected $casts = [
         'parent_id' => 'integer',
@@ -139,6 +171,54 @@ final class Company extends SnipeModel
     private static array $companyIdsCache = [];
 
     /**
+     * Per-process memoization for Schema::hasColumn(). Keyed by "table::column".
+     * Called on every row from isCurrentUserHasAccess() and every scoped query
+     * from scopeCompanyablesDirectly(). Laravel 12 does not cache hasColumn, so
+     * without this each call issues a separate information_schema.columns query.
+     * Schema cannot change inside a request, so a plain static map is enough.
+     * Reset in tests via flushCompanyColumnCache(). Reported in #19918.
+     *
+     * @var array<string, bool>
+     */
+    private static array $hasCompanyColumnCache = [];
+
+    /**
+     * Per-request memoization for User-target visibility in isCurrentUserHasAccess().
+     * Keyed by "actor_id::target_id" because CompanyableScope resolves against the
+     * currently authenticated user. Transformers call Gate::allows() per row for
+     * every User reference (created_by, assigned_to, manager, etc.), and without
+     * this each call issues the FMCS pivot-subquery exists() check again against
+     * the same target id. Reset in tests via flushUserVisibilityCache(). #19918.
+     *
+     * @var array<string, bool>
+     */
+    private static array $userIsVisibleCache = [];
+
+    /**
+     * Return hasColumn($table, $column) from the per-process memo. Only
+     * consulted inside the FMCS hot path, which only ever asks about the
+     * company_id column, but the signature stays generic so the two call
+     * sites can share one entry.
+     */
+    private static function tableHasCompanyColumn(string $table, string $column = 'company_id'): bool
+    {
+        return self::$hasCompanyColumnCache[$table.'::'.$column]
+            ??= Schema::hasColumn($table, $column);
+    }
+
+    /**
+     * Return whether $target is visible to the current actor, from the
+     * per-request memo. Falls back to the FMCS pivot-subquery exists()
+     * check on first lookup. Only called from the User branch of
+     * isCurrentUserHasAccess() with an authenticated non-superuser actor.
+     */
+    private static function userIsVisibleToActor(int $actorId, int $targetId): bool
+    {
+        return self::$userIsVisibleCache[$actorId.'::'.$targetId]
+            ??= User::where('users.id', $targetId)->exists();
+    }
+
+    /**
      * Return the current user's company IDs by querying the pivot table directly.
      *
      * We deliberately bypass the Eloquent companies() relationship here because
@@ -187,6 +267,25 @@ final class Company extends SnipeModel
     public static function flushCompanyIdsCache(): void
     {
         self::$companyIdsCache = [];
+    }
+
+    /**
+     * Reset the per-process hasColumn memo. Called from TestCase::setUp(). The
+     * schema is stable at runtime, but migrations can add or drop columns in
+     * tests, so wipe between cases.
+     */
+    public static function flushCompanyColumnCache(): void
+    {
+        self::$hasCompanyColumnCache = [];
+    }
+
+    /**
+     * Reset the per-request user-visibility memo. Called from TestCase::setUp()
+     * for the same test-isolation reason as flushCompanyIdsCache().
+     */
+    public static function flushUserVisibilityCache(): void
+    {
+        self::$userIsVisibleCache = [];
     }
 
     /**
@@ -369,7 +468,7 @@ final class Company extends SnipeModel
                 // This is primarily for the gate:allows-check in location->isDeletable()
                 // Locations don't have a company_id so without this it isn't possible to delete locations with FullMultipleCompanySupport enabled
                 // because this function is called by SnipePermissionsPolicy->before()
-                if (! Schema::hasColumn($company_table, 'company_id')) {
+                if (! self::tableHasCompanyColumn($company_table)) {
                     return true;
                 }
 
@@ -392,7 +491,7 @@ final class Company extends SnipeModel
             // per-target path, which left actors able to see users they
             // couldn't then edit. One check, one query, same logic as the list.
             if ($companyable instanceof User) {
-                return User::where('users.id', $companyable->id)->exists();
+                return self::userIsVisibleToActor((int) auth()->id(), (int) $companyable->id);
             }
 
             $userCompanyIds = self::getCurrentUserCompanyIds();
@@ -442,9 +541,9 @@ final class Company extends SnipeModel
             return $requestedIds;
         }
 
-        $current_user = auth()->user();
-
-        if ($current_user->isSuperUser()) {
+        // CLI contexts (snipeit:import, scheduled tasks) run without an
+        // auth user.
+        if (! Auth::hasUser() || auth()->user()->isSuperUser()) {
             return $requestedIds;
         }
 
@@ -694,7 +793,7 @@ final class Company extends SnipeModel
         }
 
         // If the column exists in the table, use it to scope the query
-        if ($query && $query->getModel() && Schema::hasColumn($query->getModel()->getTable(), $column)) {
+        if ($query && $query->getModel() && self::tableHasCompanyColumn($query->getModel()->getTable(), $column)) {
             $table = ($table_name) ? $table_name.'.' : $query->getModel()->getTable().'.';
 
             if (empty($companyIds)) {

@@ -132,6 +132,39 @@ class AssetModelsTransformer
         return $array;
     }
 
+    public function transformRequestedModels(Collection $assetmodels, $total)
+    {
+        $array = [];
+        foreach ($assetmodels as $assetmodel) {
+            $array[] = self::transformRequestedModel($assetmodel);
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
+    }
+
+    public function transformRequestedModel(AssetModel $assetmodel)
+    {
+        $userHasOpenRequest = auth()->check() && $assetmodel->relationLoaded('requests') && $assetmodel->requests->contains(
+            fn (\App\Models\CheckoutRequest $request) => $request->user_id === auth()->id() && $request->canceled_at === null
+        );
+
+        return [
+            'id' => (int) $assetmodel->id,
+            'name' => e($assetmodel->name),
+            'image' => ($assetmodel->image != '') ? Storage::disk('public')->url(FileStorage::Models->publicPath().e($assetmodel->image)) : null,
+            'model_number' => ($assetmodel->model_number) ? e($assetmodel->model_number) : null,
+            'remaining' => $assetmodel->remaining !== null
+                ? (int) $assetmodel->remaining
+                : (int) ($assetmodel->assets_count - (int) $assetmodel->assets_assigned_count) - (int) $assetmodel->assets_archived_count,
+            'assigned_to_self' => $userHasOpenRequest,
+            'available_actions' => [
+                'view' => Gate::allows('view', $assetmodel),
+                'request' => ! $userHasOpenRequest,
+                'cancel' => $userHasOpenRequest,
+            ],
+        ];
+    }
+
     public function transformAssetModelFiles($assetmodel, $total)
     {
 

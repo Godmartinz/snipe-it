@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FileStorage;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Builders\SupplierQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
@@ -21,7 +22,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperSupplier
  */
-class Supplier extends SnipeModel
+class Supplier extends SnipeModel implements Importable
 {
     use HasFactory;
     use HasUploads;

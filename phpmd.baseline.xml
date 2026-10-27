@@ -17,7 +17,6 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Http/Controllers/Assets/AssetsController.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Http/Controllers/Auth/SamlController.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Http/Controllers/Components/ComponentCheckinController.php"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="app/Http/Controllers/CustomFieldsetsController.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Http/Controllers/DepreciationsController.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Http/Controllers/Licenses/LicenseCheckinController.php"/>
   <violation rule="PHPMD\Rule\UnusedLocalVariable" file="app/Http/Controllers/Reports/CustomComponentReportController.php"/>
@@ -83,8 +82,12 @@
   <violation rule="PHPMD\Rule\UnusedLocalVariable" file="app/Observers/MaintenanceObserver.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Observers/SettingObserver.php"/>
   <violation rule="PHPMD\Rule\UnusedLocalVariable" file="app/Observers/UserObserver.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/AccessoryPolicy.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/AssetModelPolicy.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/AssetPolicy.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/CheckoutablePermissionsPolicy.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/ComponentPolicy.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/ConsumablePolicy.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/LicensePolicy.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/MaintenancePolicy.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="app/Policies/SnipePermissionsPolicy.php"/>

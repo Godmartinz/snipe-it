@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Actionlog;
 use App\SyncAdapters\SyncErrorFormatter;
+use App\Traits\LocksLongRunningOperation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SyncAdapterController extends Controller
 {
+    use LocksLongRunningOperation;
+
     public function getAdapters(Request $request): View|RedirectResponse
     {
         $adapterTypes = \App\SyncAdapters\SyncAdapter::typeLabels();
@@ -248,130 +251,143 @@ class SyncAdapterController extends Controller
                 ->with('error', $message);
         }
 
-        // Drop PHP's execution-time cap. Web-server proxy timeouts still apply tho
-        set_time_limit(0);
-
-        $seen = 0;
-        $skipped = 0;
-        $errors = 0;
-        $startedAt = microtime(true);
-
-        Log::channel('sync-adapters')->info("{$instance->slug} sync starting (UI)");
-
-        $dryRun = $adapter->isPullDryRun();
-        if ($dryRun) {
-            Log::channel('sync-adapters')->info($instance->slug.' sync [dry-run]: no assets will be created or updated');
+        // Per-instance mutex: a pull or push already in progress for THIS
+        // adapter blocks a second trigger. Different adapters stay
+        // independent (Fleet pulling doesn't block a Jamf pull, etc).
+        if (!$this->acquireOperationLock($instance->lockKey())) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', $this->operationAlreadyRunningMessage('admin/settings/sync_adapters.sync_adapter_run'));
         }
 
-        // captureSyncRunLog's token return goes unused on the caller
-        // side - the panel reads sync_run_log_last_token directly from
-        // session rather than from a flashed value, so we don't need
-        // the token here. The capture itself is still what we're after:
-        // it isolates this run's log lines, caches them under the
-        // persistent session key, and purges any prior run's cache.
-        // --limit from the panel caps how many records this run
-        // processes before stopping. Null = no limit. Non-positive
-        // (<=0) treated as no-limit to prevent silent zero-record runs.
-        $limitInput = $request->input('limit');
-        $limit = ($limitInput !== null && $limitInput !== '' && (int) $limitInput > 0) ? (int) $limitInput : null;
-        if ($limit !== null) {
-            Log::channel('sync-adapters')->info($instance->slug.' sync: limit set to '.$limit.', will stop after that many records');
-        }
+        try {
 
-        $abortedRedirect = null;
-        $this->captureSyncRunLog($instance->slug, 'pull', function () use ($adapter, $instance, $dryRun, $limit, &$seen, &$skipped, &$errors, &$abortedRedirect) {
-            try {
-                Actionlog::withActionSource('sync:'.$instance->slug, function () use ($adapter, $instance, $dryRun, $limit, &$seen, &$skipped, &$errors) {
-                    foreach ($adapter->pull() as $record) {
-                        if ($limit !== null && ($seen + $skipped + $errors) >= $limit) {
-                            Log::channel('sync-adapters')->info($instance->slug.' sync: limit '.$limit.' reached, stopping early');
-                            break;
-                        }
-                        try {
-                            if ($dryRun) {
-                                // Mirror of the push dry-run shape: log the
-                                // normalized record and tally it as "seen"
-                                // without handing it to syncFromRecord.
-                                Log::channel('sync-adapters')->info(sprintf(
-                                    '%s sync [dry-run]: would upsert record source=%s id=%s hostname=%s serial=%s',
-                                    $instance->slug,
-                                    $record->sourceKey,
-                                    $record->sourceId,
-                                    $record->hostname ?? '(none)',
-                                    $record->hardwareSerial ?? '(none)',
-                                ));
-                                $seen++;
+            // Drop PHP's execution-time cap. Web-server proxy timeouts still apply tho
+            set_time_limit(0);
 
-                                continue;
-                            }
+            $seen = 0;
+            $skipped = 0;
+            $errors = 0;
+            $startedAt = microtime(true);
 
-                            $result = \App\SyncAdapters\SyncAdapter::syncFromRecord($record);
-                            if ($result === null) {
-                                $skipped++;
-                            } else {
-                                $seen++;
-                            }
-                        } catch (\Throwable $e) {
-                            $errors++;
-                            Log::channel('sync-adapters')->warning($instance->slug.' sync: failed to upsert host '.$record->sourceId.': '.$e->getMessage());
-                        }
-                    }
-                });
-            } catch (\Throwable $e) {
-                Log::channel('sync-adapters')->warning(
-                    $instance->slug.' sync aborted: '.SyncErrorFormatter::summary($e),
-                    SyncErrorFormatter::logContext($e),
-                );
+            Log::channel('sync-adapters')->info("{$instance->slug} sync starting (UI)");
 
-                $failMessage = trans('admin/settings/sync_adapters.sync_failed', [
-                    'summary' => SyncErrorFormatter::summary($e),
-                ]);
-                $instance->last_synced_at = now();
-                $instance->last_sync_result = $failMessage;
-                $instance->save();
-
-                $abortedRedirect = redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
-                    ->with('error', $failMessage);
+            $dryRun = $adapter->isPullDryRun();
+            if ($dryRun) {
+                Log::channel('sync-adapters')->info($instance->slug . ' sync [dry-run]: no assets will be created or updated');
             }
-        });
 
-        if ($abortedRedirect !== null) {
-            return $abortedRedirect;
+            // captureSyncRunLog's token return goes unused on the caller
+            // side - the panel reads sync_run_log_last_token directly from
+            // session rather than from a flashed value, so we don't need
+            // the token here. The capture itself is still what we're after:
+            // it isolates this run's log lines, caches them under the
+            // persistent session key, and purges any prior run's cache.
+            // --limit from the panel caps how many records this run
+            // processes before stopping. Null = no limit. Non-positive
+            // (<=0) treated as no-limit to prevent silent zero-record runs.
+            $limitInput = $request->input('limit');
+            $limit = ($limitInput !== null && $limitInput !== '' && (int) $limitInput > 0) ? (int) $limitInput : null;
+            if ($limit !== null) {
+                Log::channel('sync-adapters')->info($instance->slug . ' sync: limit set to ' . $limit . ', will stop after that many records');
+            }
+
+            $abortedRedirect = null;
+            $this->captureSyncRunLog($instance->slug, 'pull', function () use ($adapter, $instance, $dryRun, $limit, &$seen, &$skipped, &$errors, &$abortedRedirect) {
+                try {
+                    Actionlog::withActionSource('sync:' . $instance->slug, function () use ($adapter, $instance, $dryRun, $limit, &$seen, &$skipped, &$errors) {
+                        foreach ($adapter->pull() as $record) {
+                            if ($limit !== null && ($seen + $skipped + $errors) >= $limit) {
+                                Log::channel('sync-adapters')->info($instance->slug . ' sync: limit ' . $limit . ' reached, stopping early');
+                                break;
+                            }
+                            try {
+                                if ($dryRun) {
+                                    // Mirror of the push dry-run shape: log the
+                                    // normalized record and tally it as "seen"
+                                    // without handing it to syncFromRecord.
+                                    Log::channel('sync-adapters')->info(sprintf(
+                                        '%s sync [dry-run]: would upsert record source=%s id=%s hostname=%s serial=%s',
+                                        $instance->slug,
+                                        $record->sourceKey,
+                                        $record->sourceId,
+                                        $record->hostname ?? '(none)',
+                                        $record->hardwareSerial ?? '(none)',
+                                    ));
+                                    $seen++;
+
+                                    continue;
+                                }
+
+                                $result = \App\SyncAdapters\SyncAdapter::syncFromRecord($record);
+                                if ($result === null) {
+                                    $skipped++;
+                                } else {
+                                    $seen++;
+                                }
+                            } catch (\Throwable $e) {
+                                $errors++;
+                                Log::channel('sync-adapters')->warning($instance->slug . ' sync: failed to upsert host ' . $record->sourceId . ': ' . $e->getMessage());
+                            }
+                        }
+                    });
+                } catch (\Throwable $e) {
+                    Log::channel('sync-adapters')->warning(
+                        $instance->slug . ' sync aborted: ' . SyncErrorFormatter::summary($e),
+                        SyncErrorFormatter::logContext($e),
+                    );
+
+                    $failMessage = trans('admin/settings/sync_adapters.sync_failed', [
+                        'summary' => SyncErrorFormatter::summary($e),
+                    ]);
+                    $instance->last_synced_at = now();
+                    $instance->last_sync_result = $failMessage;
+                    $instance->save();
+
+                    $abortedRedirect = redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                        ->with('error', $failMessage);
+                }
+            });
+
+            if ($abortedRedirect !== null) {
+                return $abortedRedirect;
+            }
+
+            $result = trans('admin/settings/sync_adapters.sync_complete', [
+                'count' => $seen,
+                'skipped' => $skipped,
+                'errors' => $errors,
+            ]);
+            $instance->last_synced_at = now();
+            $instance->last_sync_result = $result;
+            $instance->save();
+
+            $elapsed = number_format(microtime(true) - $startedAt, 1);
+            Log::channel('sync-adapters')->info("{$instance->slug} sync complete: {$seen} record(s) processed, {$skipped} skipped, {$errors} error(s), elapsed {$elapsed}s");
+
+            //   at least one seen, no errors -> success (green)
+            //   at least one seen, some errors -> warning (orange, admin should check log)
+            //   nothing seen at all, at least one error -> error (red)
+            //   nothing seen AND no errors -> warning: vendor returned no rows,
+            //     which may be legitimate (empty inventory) but is also the
+            //     canary for a misconfigured pull that silently returned empty.
+            //     Warning flags it for the admin to notice without being a
+            //     hard error, so a genuinely empty vendor doesn't scream red.
+            $flashType = match (true) {
+                $seen > 0 && $errors === 0 => 'success',
+                $seen > 0 && $errors > 0 => 'warning',
+                $seen === 0 && $errors > 0 => 'error',
+                default => 'warning',
+            };
+
+            // The download-run-log link reads sync_run_log_last_token from
+            // the persistent session instead of a flash key, so a reload
+            // inside the 10-min TTL keeps the link visible. captureSyncRunLog
+            // put() the token in session already.
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with($flashType, $result);
+        } finally {
+            $this->releaseOperationLock($instance->lockKey());
         }
-
-        $result = trans('admin/settings/sync_adapters.sync_complete', [
-            'count' => $seen,
-            'skipped' => $skipped,
-            'errors' => $errors,
-        ]);
-        $instance->last_synced_at = now();
-        $instance->last_sync_result = $result;
-        $instance->save();
-
-        $elapsed = number_format(microtime(true) - $startedAt, 1);
-        Log::channel('sync-adapters')->info("{$instance->slug} sync complete: {$seen} record(s) processed, {$skipped} skipped, {$errors} error(s), elapsed {$elapsed}s");
-
-        //   at least one seen, no errors -> success (green)
-        //   at least one seen, some errors -> warning (orange, admin should check log)
-        //   nothing seen at all, at least one error -> error (red)
-        //   nothing seen AND no errors -> warning: vendor returned no rows,
-        //     which may be legitimate (empty inventory) but is also the
-        //     canary for a misconfigured pull that silently returned empty.
-        //     Warning flags it for the admin to notice without being a
-        //     hard error, so a genuinely empty vendor doesn't scream red.
-        $flashType = match (true) {
-            $seen > 0 && $errors === 0 => 'success',
-            $seen > 0 && $errors > 0 => 'warning',
-            $seen === 0 && $errors > 0 => 'error',
-            default => 'warning',
-        };
-
-        // The download-run-log link reads sync_run_log_last_token from
-        // the persistent session instead of a flash key, so a reload
-        // inside the 10-min TTL keeps the link visible. captureSyncRunLog
-        // put() the token in session already.
-        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
-            ->with($flashType, $result);
     }
 
     /**
@@ -439,110 +455,123 @@ class SyncAdapterController extends Controller
                 ->with('error', $message);
         }
 
-        set_time_limit(0);
-
-        $pushed = 0;
-        $skipped = 0;
-        $errors = 0;
-
-        // --limit cap, same semantics as the pull side.
-        $limitInput = $request->input('limit');
-        $limit = ($limitInput !== null && $limitInput !== '' && (int) $limitInput > 0) ? (int) $limitInput : null;
-        if ($limit !== null) {
-            Log::channel('sync-adapters')->info($instance->slug.' push: limit set to '.$limit.', will stop after that many assets');
+        // Shared with the pull side via $instance->lockKey() so Pull Now
+        // and Push Now on the same adapter are mutually exclusive.
+        // Different adapters stay independent.
+        if (!$this->acquireOperationLock($instance->lockKey())) {
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with('error', $this->operationAlreadyRunningMessage('admin/settings/sync_adapters.sync_adapter_run'));
         }
 
-        $abortedRedirect = null;
-        $this->captureSyncRunLog($instance->slug, 'push', function () use ($adapter, $instance, $limit, &$pushed, &$skipped, &$errors, &$abortedRedirect) {
-            try {
-                \App\Models\AssetExternalSource::query()
-                    ->where('source', $instance->slug)
-                    ->with('asset')
-                    ->chunkById(200, function ($rows) use ($adapter, $instance, $limit, &$pushed, &$skipped, &$errors) {
-                        foreach ($rows as $row) {
-                            if ($limit !== null && ($pushed + $skipped + $errors) >= $limit) {
-                                // Returning false from chunkById's
-                                // callback stops Eloquent paging after
-                                // this chunk.
-                                Log::channel('sync-adapters')->info($instance->slug.' push: limit '.$limit.' reached, stopping early');
+        try {
 
-                                return false;
-                            }
+            set_time_limit(0);
 
-                            $asset = $row->asset;
-                            if ($asset === null) {
-                                continue;
-                            }
+            $pushed = 0;
+            $skipped = 0;
+            $errors = 0;
 
-                            try {
-                                if ($adapter->push($asset)) {
-                                    $pushed++;
-                                } else {
-                                    $skipped++;
-                                }
-                            } catch (\Throwable $e) {
-                                $errors++;
-                                // Log the sanitized summary (short) plus,
-                                // for HTTP client exceptions, the raw
-                                // response body truncated to 2KB so vendor
-                                // errors like "missing required field
-                                // 'query'" or "gitops mode requires spec"
-                                // surface in the log even when the vendor's
-                                // JSON shape isn't one the summary
-                                // extractor recognizes.
-                                Log::channel('sync-adapters')->warning(sprintf(
-                                    '%s push: asset %d failed: %s',
-                                    $row->source,
-                                    $asset->id,
-                                    SyncErrorFormatter::summary($e),
-                                ), SyncErrorFormatter::logContext($e));
-                            }
-                        }
-                    });
-            } catch (\Throwable $e) {
-                Log::channel('sync-adapters')->warning(
-                    sprintf('%s push aborted: %s', $instance->slug, SyncErrorFormatter::summary($e)),
-                    SyncErrorFormatter::logContext($e),
-                );
-
-                $abortedRedirect = redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
-                    ->with('error', trans('admin/settings/sync_adapters.push_failed', [
-                        'summary' => SyncErrorFormatter::summary($e),
-                    ]));
+            // --limit cap, same semantics as the pull side.
+            $limitInput = $request->input('limit');
+            $limit = ($limitInput !== null && $limitInput !== '' && (int) $limitInput > 0) ? (int) $limitInput : null;
+            if ($limit !== null) {
+                Log::channel('sync-adapters')->info($instance->slug . ' push: limit set to ' . $limit . ', will stop after that many assets');
             }
-        });
 
-        if ($abortedRedirect !== null) {
-            return $abortedRedirect;
+            $abortedRedirect = null;
+            $this->captureSyncRunLog($instance->slug, 'push', function () use ($adapter, $instance, $limit, &$pushed, &$skipped, &$errors, &$abortedRedirect) {
+                try {
+                    \App\Models\AssetExternalSource::query()
+                        ->where('source', $instance->slug)
+                        ->with('asset')
+                        ->chunkById(200, function ($rows) use ($adapter, $instance, $limit, &$pushed, &$skipped, &$errors) {
+                            foreach ($rows as $row) {
+                                if ($limit !== null && ($pushed + $skipped + $errors) >= $limit) {
+                                    // Returning false from chunkById's
+                                    // callback stops Eloquent paging after
+                                    // this chunk.
+                                    Log::channel('sync-adapters')->info($instance->slug . ' push: limit ' . $limit . ' reached, stopping early');
+
+                                    return false;
+                                }
+
+                                $asset = $row->asset;
+                                if ($asset === null) {
+                                    continue;
+                                }
+
+                                try {
+                                    if ($adapter->push($asset)) {
+                                        $pushed++;
+                                    } else {
+                                        $skipped++;
+                                    }
+                                } catch (\Throwable $e) {
+                                    $errors++;
+                                    // Log the sanitized summary (short) plus,
+                                    // for HTTP client exceptions, the raw
+                                    // response body truncated to 2KB so vendor
+                                    // errors like "missing required field
+                                    // 'query'" or "gitops mode requires spec"
+                                    // surface in the log even when the vendor's
+                                    // JSON shape isn't one the summary
+                                    // extractor recognizes.
+                                    Log::channel('sync-adapters')->warning(sprintf(
+                                        '%s push: asset %d failed: %s',
+                                        $row->source,
+                                        $asset->id,
+                                        SyncErrorFormatter::summary($e),
+                                    ), SyncErrorFormatter::logContext($e));
+                                }
+                            }
+                        });
+                } catch (\Throwable $e) {
+                    Log::channel('sync-adapters')->warning(
+                        sprintf('%s push aborted: %s', $instance->slug, SyncErrorFormatter::summary($e)),
+                        SyncErrorFormatter::logContext($e),
+                    );
+
+                    $abortedRedirect = redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                        ->with('error', trans('admin/settings/sync_adapters.push_failed', [
+                            'summary' => SyncErrorFormatter::summary($e),
+                        ]));
+                }
+            });
+
+            if ($abortedRedirect !== null) {
+                return $abortedRedirect;
+            }
+
+            //   at least one push, no failures -> success (green)
+            //   at least one push, some failures -> warning (orange, admin should check log)
+            //   no pushes, at least one failure -> error (red)
+            //   no pushes AND no failures (every row skipped) -> error too, since the
+            //     button did nothing meaningful and the admin should know
+            //   nothing to iterate at all (no matching external_sources) -> warning
+            // Message includes skipped count so admins see the full breakdown.
+            $flashType = match (true) {
+                $pushed > 0 && $errors === 0 => 'success',
+                $pushed > 0 && $errors > 0 => 'warning',
+                $errors > 0 => 'error',
+                $skipped > 0 => 'error',
+                default => 'warning',
+            };
+
+            // Same session-persistent download link affordance as the pull
+            // path - captureSyncRunLog() has already put() the token under
+            // sync_run_log_last_token, so the panel renders the link until
+            // either (a) the next sync/push run purges this cache entry,
+            // or (b) the download endpoint consumes it, or (c) the 10-min
+            // TTL fires.
+            return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
+                ->with($flashType, trans('admin/settings/sync_adapters.push_complete', [
+                    'count' => $pushed,
+                    'skipped' => $skipped,
+                    'errors' => $errors,
+                ]));
+        } finally {
+            $this->releaseOperationLock($instance->lockKey());
         }
-
-        //   at least one push, no failures -> success (green)
-        //   at least one push, some failures -> warning (orange, admin should check log)
-        //   no pushes, at least one failure -> error (red)
-        //   no pushes AND no failures (every row skipped) -> error too, since the
-        //     button did nothing meaningful and the admin should know
-        //   nothing to iterate at all (no matching external_sources) -> warning
-        // Message includes skipped count so admins see the full breakdown.
-        $flashType = match (true) {
-            $pushed > 0 && $errors === 0 => 'success',
-            $pushed > 0 && $errors > 0 => 'warning',
-            $errors > 0 => 'error',
-            $skipped > 0 => 'error',
-            default => 'warning',
-        };
-
-        // Same session-persistent download link affordance as the pull
-        // path - captureSyncRunLog() has already put() the token under
-        // sync_run_log_last_token, so the panel renders the link until
-        // either (a) the next sync/push run purges this cache entry,
-        // or (b) the download endpoint consumes it, or (c) the 10-min
-        // TTL fires.
-        return redirect()->route('settings.adapters.index', ['adapter' => $instance->slug])
-            ->with($flashType, trans('admin/settings/sync_adapters.push_complete', [
-                'count' => $pushed,
-                'skipped' => $skipped,
-                'errors' => $errors,
-            ]));
     }
 
     /**

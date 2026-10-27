@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\Helper;
 use App\Models\Builders\LicenseQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
@@ -26,7 +27,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperLicense
  */
-class License extends Depreciable
+class License extends Depreciable implements Importable
 {
     use HasFactory;
 

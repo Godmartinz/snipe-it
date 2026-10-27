@@ -179,7 +179,7 @@ class ConsumableIndexTest extends TestCase
             ->checkedOutToUser($userInCompanyB)
             ->create(['qty' => 3, 'requestable' => true]);
 
-        $this->actingAsForApi(User::factory()->forCompany($companyA)->create())
+        $this->actingAsForApi(User::factory()->viewRequestableAssets()->forCompany($companyA)->create())
             ->getJson(route('api.consumables.requestable'))
             ->assertOk()
             ->assertJsonPath('rows.0.id', $consumableForCompanyA->id)

@@ -177,12 +177,12 @@ class AcceptanceController extends Controller
                 // width/height is rejected without imagecreatefromstring
                 // decoding the raster or the flatten path allocating a second
                 // same-size buffer. IMAGETYPE_PNG is enforced because the
-                // signature-pad JavaScript creates only PNG files.
+                // signature-pad JavaScript creates only PNG files. 
                 $imgInfo = @getimagesizefromstring($decoded_image);
                 if ($imgInfo === false
                     || $imgInfo[2] !== IMAGETYPE_PNG
-                    || $imgInfo[0] > 2000
-                    || $imgInfo[1] > 2000
+                    || $imgInfo[0] > 6000
+                    || $imgInfo[1] > 6000
                 ) {
                     return redirect()->back()->with('error', trans('general.shitty_browser'));
                 }
@@ -512,8 +512,6 @@ class AcceptanceController extends Controller
         $flattened = imagecreatetruecolor($width, $height);
 
         if ($flattened === false) {
-            imagedestroy($source);
-
             return null;
         }
 
@@ -524,9 +522,6 @@ class AcceptanceController extends Controller
         ob_start();
         $encoded = @imagepng($flattened);
         $output = ob_get_clean();
-
-        imagedestroy($source);
-        imagedestroy($flattened);
 
         // Fail-closed if either imagepng() reported failure or the
         // output buffer did not produce a string. Previously fell back

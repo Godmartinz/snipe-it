@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FileStorage;
 use App\Models\Builders\ConsumableQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
@@ -28,7 +29,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperConsumable
  */
-class Consumable extends SnipeModel
+class Consumable extends SnipeModel implements Importable
 {
     use HasFactory;
 
@@ -392,6 +393,12 @@ class Consumable extends SnipeModel
     /**
      * Same as users() but without FMCS scoping applied so counts
      * reflect every unit checked out regardless of the viewer's company.
+     *
+     * For withCount in the list controllers prefer consumableAssignments:
+     * this relation INNER JOINs users for a count that never reads any
+     * user field, which is dead weight on fleets with large
+     * consumables_users pivots. Kept intact for any caller that needs
+     * the actual User objects (e.g. iterating recipients).
      */
     public function unconstrainedUsers(): BelongsToMany
     {
@@ -461,7 +468,10 @@ class Consumable extends SnipeModel
      */
     public function numCheckedOut()
     {
-        return $this->consumables_users_count ?? $this->unconstrainedUsers()->count();
+        // Fallback walks the consumableAssignments hasMany so this
+        // path matches the shape the list controllers use via withCount
+        // (single-table COUNT on consumables_users, no users JOIN).
+        return $this->consumables_users_count ?? $this->consumableAssignments()->count();
     }
 
     /**

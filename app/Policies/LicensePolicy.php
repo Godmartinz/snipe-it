@@ -44,4 +44,16 @@ class LicensePolicy extends CheckoutablePermissionsPolicy
     {
         return $user->hasAccess($this->columnName().'.files');
     }
+
+    /**
+     * Gates the /api/v1/account/requestable/licenses endpoint. Reuses
+     * the `assets.view.requestable` permission alongside AssetPolicy /
+     * AccessoryPolicy / ConsumablePolicy / ComponentPolicy so the five
+     * requestable endpoints have one consistent gate. This is a bit of a hack,
+     * but it works and avoids creating a new permission just for this one endpoint.
+     */
+    public function viewRequestable(User $user, $item = null)
+    {
+        return $user->hasAccess('assets.view.requestable');
+    }
 }

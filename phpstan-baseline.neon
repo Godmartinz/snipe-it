@@ -433,12 +433,6 @@ parameters:
 			path: app/Console/Commands/SyncAssetLocations.php
 
 		-
-			message: '#^Empty array passed to foreach\.$#'
-			identifier: foreach.emptyArray
-			count: 1
-			path: app/Console/Commands/SyncAssetLocations.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -2637,19 +2631,19 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\AssetModel\:\:\$assets_archived_count\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 3
 			path: app/Http/Transformers/AssetModelsTransformer.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AssetModel\:\:\$assets_assigned_count\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 3
 			path: app/Http/Transformers/AssetModelsTransformer.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AssetModel\:\:\$remaining\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: app/Http/Transformers/AssetModelsTransformer.php
 
 		-
@@ -7709,12 +7703,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: database/migrations/2015_07_29_230054_add_thread_id_to_asset_logs_table.php
-
-		-
-			message: '#^Result of static method Illuminate\\Support\\Facades\\Schema\:\:table\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
-			count: 1
-			path: database/migrations/2015_09_22_003413_migrate_mac_address.php
 
 		-
 			message: '#^Property App\\Models\\IdeHelperSetting\:\:\$ldap_enabled \(string\|null\) does not accept int\.$#'

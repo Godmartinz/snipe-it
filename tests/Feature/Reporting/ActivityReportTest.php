@@ -8,11 +8,18 @@ use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class ActivityReportTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake();
+    }
+
     public function test_requires_permission_to_view_activity()
     {
         $this->actingAsForApi(User::factory()->create())

@@ -14,6 +14,7 @@ return [
     'push_nothing_configured' => 'Push aborted: no fields on the mapping table are directed "Push to vendor" and no composed-notes template is configured. Set at least one before hitting Push Now.',
     'not_configured' => 'This adapter has not been configured yet.',
     'sync_complete' => 'Sync complete. Synced :count host(s), :skipped skipped, :errors error(s).',
+    'sync_adapter_run' => 'This sync adapter run',
     'sync_failed' => 'Sync failed: :summary. See storage/logs/sync-adapters.log for full details.',
     'sync_failed_network' => 'network error',
     'last_synced_label' => 'Last Successful Sync',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FileStorage;
 use App\Models\Builders\ManufacturerQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\Searchable;
 use App\Presenters\ManufacturerPresenter;
 use App\Presenters\Presentable;
@@ -17,7 +18,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperManufacturer
  */
-class Manufacturer extends SnipeModel
+class Manufacturer extends SnipeModel implements Importable
 {
     use HasFactory;
 

@@ -74,16 +74,18 @@ class IntuneClient
     {
         $graphOrigin = $this->origin($this->graphBaseUrl);
         $url = rtrim($this->graphBaseUrl, '/').'/v1.0/deviceManagement/managedDevices';
-        $query = [];
 
         do {
-            $response = $this->request()->get($url, $query)->throw()->json();
+            // Pass no second argument. Laravel forwards it as Guzzle's
+            // `query` option, which replaces the URL's query string even
+            // when empty, stripping the $skiptoken off `@odata.nextLink`.
+            // Tenants with more than one page would loop on page 1 forever.
+            // See #19916.
+            $response = $this->request()->get($url)->throw()->json();
 
             foreach (($response['value'] ?? []) as $device) {
                 yield $device;
             }
-
-            $query = [];
 
             $url = $this->rebasedCursor($response['@odata.nextLink'] ?? null, $graphOrigin);
         } while ($url !== null);

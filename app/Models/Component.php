@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CheckoutRequestState;
 use App\Enums\FileStorage;
 use App\Models\Builders\ComponentQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
@@ -34,7 +35,7 @@ use Watson\Validating\ValidatingTrait;
  *
  * @mixin IdeHelperComponent
  */
-class Component extends SnipeModel
+class Component extends SnipeModel implements Importable
 {
     use HasFactory;
 

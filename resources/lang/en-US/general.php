@@ -543,6 +543,8 @@ return [
     'ldap_user_sync' => 'LDAP User Sync',
     'synchronize' => 'Synchronize',
     'sync_results' => 'Synchronization Results',
+    'backup_or_restore' => 'Backup or Restore',
+    'operation_already_running' => ':operation is already in progress. Please wait for it to complete before starting another.',
     'license_serial' => 'Serial/Product Key',
     'invalid_category' => 'Invalid or missing category',
     'invalid_item_category_single' => 'Invalid or missing :type category. Please update the category of this :type to include a valid category before checking out.',

@@ -92,6 +92,48 @@ class IntuneAdapterTest extends TestCase
         $this->assertNotNull($record->lastSeen);
     }
 
+    public function test_nextlink_pagination_follows_skiptoken_cursor_through_every_page()
+    {
+        // Regression for #19916. Before the fix, managedDevices() passed
+        // an empty-array $query to Http::get(), which Laravel forwards as
+        // Guzzle's `query` option. Guzzle replaces the URL's query string
+        // even when the option is an empty array, so the $skiptoken on
+        // the @odata.nextLink cursor got stripped and Graph served page 1
+        // forever. Tenants under ~1,000 devices never saw it because they
+        // only ever had one page.
+        $adapter = $this->configuredAdapter();
+
+        $callsPerPage = ['page1' => 0, 'page2' => 0];
+
+        Http::fake([
+            '*/oauth2/v2.0/token' => Http::response(['access_token' => 'stub-bearer', 'expires_in' => 3600]),
+            '*/v1.0/deviceManagement/managedDevices*' => function ($request) use (&$callsPerPage) {
+                if (str_contains($request->url(), '$skiptoken=cursor-abc')) {
+                    $callsPerPage['page2']++;
+
+                    return Http::response([
+                        'value' => [$this->intuneDevice(id: 'guid-page2', name: 'host-page2')],
+                    ]);
+                }
+
+                $callsPerPage['page1']++;
+
+                return Http::response([
+                    'value' => [$this->intuneDevice(id: 'guid-page1', name: 'host-page1')],
+                    '@odata.nextLink' => 'https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?$skiptoken=cursor-abc',
+                ]);
+            },
+        ]);
+
+        $records = iterator_to_array($adapter->pull(), preserve_keys: false);
+
+        $ids = array_map(fn ($record) => $record->sourceId, $records);
+        $this->assertEqualsCanonicalizing(['guid-page1', 'guid-page2'], $ids,
+            'Pagination must follow @odata.nextLink and yield both pages, not loop on page 1.');
+        $this->assertSame(1, $callsPerPage['page1'], 'Page 1 should be fetched exactly once.');
+        $this->assertSame(1, $callsPerPage['page2'], 'Page 2 (via $skiptoken) should be fetched exactly once.');
+    }
+
     public function test_nextlink_cursor_cannot_redirect_bearer_to_arbitrary_host()
     {
         // Graph normally serves `@odata.nextLink` from the same host as
@@ -357,6 +399,44 @@ class IntuneAdapterTest extends TestCase
 
         $this->assertDatabaseMissing('asset_external_sources', ['source' => 'intune', 'external_id' => 'guid-no-serial']);
         $this->assertSame(0, Asset::query()->count(), 'No asset should be created when the model requires a serial and the vendor record has none.');
+    }
+
+    public function test_vendor_record_with_serial_creates_when_model_requires_serial()
+    {
+        // Regression for #19901. Asset::save() injects a `required` rule
+        // on the serial field when the resolved model has
+        // require_serial = 1. The old shell-asset write ran save() before
+        // the mapping loop populated the serial, so Watson rejected
+        // records that DID carry a serial from the vendor. The reporter
+        // saw this on a tenant where 6 of 260 Intune devices had serials
+        // and ended up skipped with "The serial field is required."
+        AssetModel::factory()->create([
+            'name' => 'Generic Model',
+            'require_serial' => 1,
+        ]);
+
+        $adapter = $this->configuredAdapter();
+
+        Http::fake([
+            '*/oauth2/v2.0/token' => Http::response(['access_token' => 'stub-bearer', 'expires_in' => 3600]),
+            '*/v1.0/deviceManagement/managedDevices*' => Http::response([
+                'value' => [
+                    [
+                        'id' => 'guid-has-serial',
+                        'deviceName' => 'intune-host-with-serial',
+                        'serialNumber' => 'VENDOR-SERIAL-ABC123',
+                        'model' => 'Generic Model',
+                    ],
+                ],
+            ]),
+        ]);
+
+        foreach ($adapter->pull() as $record) {
+            SyncAdapter::syncFromRecord($record);
+        }
+
+        $this->assertDatabaseHas('asset_external_sources', ['source' => 'intune', 'external_id' => 'guid-has-serial']);
+        $this->assertDatabaseHas('assets', ['serial' => 'VENDOR-SERIAL-ABC123']);
     }
 
     public function test_vendor_record_without_serial_still_creates_when_model_does_not_require_serial()

@@ -819,12 +819,18 @@ class AccessoriesController extends Controller
      */
     public function requestable(Request $request): array
     {
+        $this->authorize('viewRequestable', Accessory::class);
+
         $query = Accessory::with('category', 'location', 'company', 'manufacturer', 'requests')
             ->withCount('checkouts as checkouts_count')
             ->Requestable();
 
         if ($request->filled('search')) {
-            $query->TextSearch($request->input('search'));
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('accessories.name', 'LIKE', '%'.$search.'%')
+                    ->orWhere('accessories.model_number', 'LIKE', '%'.$search.'%');
+            });
         }
 
         $total = $query->count();

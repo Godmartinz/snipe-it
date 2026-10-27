@@ -6,7 +6,7 @@ use App\Exceptions\MissingLogTarget;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CompanyableScope;
-use App\Models\ICompanyableChild;
+use App\Models\Contracts\CompanyableChild;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Location;
@@ -253,7 +253,7 @@ trait Loggable
         }
 
         // Companyable children (like Maintenance) inherit company visibility from parents.
-        if ($this instanceof ICompanyableChild) {
+        if ($this instanceof CompanyableChild) {
             foreach ((array) $this->getCompanyableParents() as $parentRelation) {
                 $parent = $this->{$parentRelation} ?? null;
 

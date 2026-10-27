@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\Helper;
 use App\Models\Builders\MaintenanceQueryBuilder;
+use App\Models\Contracts\CompanyableChild;
 use App\Models\Traits\CompanyableChildTrait;
 use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
@@ -34,7 +35,7 @@ use Watson\Validating\ValidatingTrait;
  *
  * @mixin IdeHelperMaintenance
  */
-class Maintenance extends SnipeModel implements ICompanyableChild
+class Maintenance extends SnipeModel implements CompanyableChild
 {
     use CompanyableChildTrait;
     use HasCalendarEvents;

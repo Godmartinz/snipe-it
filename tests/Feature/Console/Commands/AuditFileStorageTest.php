@@ -246,7 +246,8 @@ class AuditFileStorageTest extends TestCase
     private function tempCsvPath(): string
     {
         if ($this->csvPath === null) {
-            $this->csvPath = tempnam(sys_get_temp_dir(), 'audit-file-storage-').'.csv';
+            $stub = $this->trackTempFile(tempnam(sys_get_temp_dir(), 'audit-file-storage-'));
+            $this->csvPath = $this->trackTempFile($stub.'.csv');
         }
 
         return $this->csvPath;
@@ -260,11 +261,11 @@ class AuditFileStorageTest extends TestCase
         $this->assertFileExists($this->csvPath);
 
         $handle = fopen($this->csvPath, 'r');
-        $header = fgetcsv($handle);
+        $header = fgetcsv($handle, escape: '\\');
         $this->assertSame(['direction', 'table', 'id', 'type', 'file'], $header);
 
         $rows = [];
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, escape: '\\')) !== false) {
             $rows[] = array_combine($header, $row);
         }
         fclose($handle);

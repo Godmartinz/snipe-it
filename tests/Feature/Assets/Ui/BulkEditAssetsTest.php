@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
@@ -186,6 +187,79 @@ class BulkEditAssetsTest extends TestCase
             $this->assertNull($asset->expected_checkin);
             $this->assertNull($asset->next_audit_date);
             $this->assertNull($asset->notes);
+        });
+    }
+
+    public function test_bulk_edit_writes_default_and_current_location_independently()
+    {
+        $originalDefault = Location::factory()->create();
+        $originalCurrent = Location::factory()->create();
+        $newDefault = Location::factory()->create();
+        $newCurrent = Location::factory()->create();
+
+        $assets = Asset::factory()->count(3)->create([
+            'rtd_location_id' => $originalDefault->id,
+            'location_id' => $originalCurrent->id,
+        ]);
+
+        $this->actingAs(User::factory()->editAssets()->create())->post(route('hardware/bulksave'), [
+            'ids' => $assets->pluck('id')->toArray(),
+            'rtd_location_id' => $newDefault->id,
+            'location_id' => $newCurrent->id,
+        ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
+
+        Asset::findMany($assets->pluck('id'))->each(function (Asset $asset) use ($newDefault, $newCurrent) {
+            $this->assertEquals($newDefault->id, $asset->rtd_location_id);
+            $this->assertEquals($newCurrent->id, $asset->location_id);
+        });
+    }
+
+    public function test_bulk_edit_clears_default_and_current_location_when_null_checkboxes_set()
+    {
+        // Regression test for #11779. Pre-fix the bulk edit form had
+        // no way to null out rtd_location_id or location_id, only the
+        // single-asset edit path cleared them.
+        $default = Location::factory()->create();
+        $current = Location::factory()->create();
+        $otherDefault = Location::factory()->create();
+
+        $assets = Asset::factory()->count(3)->create([
+            'rtd_location_id' => $default->id,
+            'location_id' => $current->id,
+        ]);
+
+        $this->actingAs(User::factory()->editAssets()->create())->post(route('hardware/bulksave'), [
+            'ids' => $assets->pluck('id')->toArray(),
+            'null_rtd_location_id' => '1',
+            'null_location_id' => '1',
+        ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
+
+        Asset::findMany($assets->pluck('id'))->each(function (Asset $asset) {
+            $this->assertNull($asset->rtd_location_id);
+            $this->assertNull($asset->location_id);
+        });
+
+        // Mixed path: set default, clear current, independently.
+        $moreAssets = Asset::factory()->count(2)->create([
+            'rtd_location_id' => $default->id,
+            'location_id' => $current->id,
+        ]);
+
+        $this->actingAs(User::factory()->editAssets()->create())->post(route('hardware/bulksave'), [
+            'ids' => $moreAssets->pluck('id')->toArray(),
+            'rtd_location_id' => $otherDefault->id,
+            'null_location_id' => '1',
+        ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors();
+
+        Asset::findMany($moreAssets->pluck('id'))->each(function (Asset $asset) use ($otherDefault) {
+            $this->assertEquals($otherDefault->id, $asset->rtd_location_id);
+            $this->assertNull($asset->location_id);
         });
     }
 

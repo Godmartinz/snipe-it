@@ -762,8 +762,12 @@ class AssetsController extends Controller
      */
     public function store(StoreAssetRequest $request): JsonResponse
     {
+        // Eager-load the fieldset chain down to the per-model pivot defaults
+        $model = AssetModel::with('fieldset.fields.defaultValues')
+            ->find((int) $request->input('model_id'));
+
         $asset = new Asset;
-        $asset->model()->associate(AssetModel::find((int) $request->input('model_id')));
+        $asset->model()->associate($model);
 
         $asset->fill($request->validated());
         $asset->created_by = auth()->id();
@@ -779,11 +783,7 @@ class AssetsController extends Controller
         $asset = $request->handleImages($asset);
 
         // Update custom fields in the database.
-        $model = AssetModel::find($request->input('model_id'));
-
-        // Check that it's an object and not a collection
-        // (Sometimes people send arrays here and they shouldn't
-        if (($model && $model->fieldset)) {
+        if ($model && $model->fieldset) {
             foreach ($model->fieldset->fields as $field) {
 
                 // Set the field value based on what was sent in the request
@@ -793,7 +793,7 @@ class AssetsController extends Controller
                 if ($field_val == null) {
                     Log::debug('Field value for '.$field->db_column.' is null');
                     $field_val = $field->defaultValue($request->input('model_id'));
-                    Log::debug('Use the default fieldset value of '.$field->defaultValue($request->input('model_id')));
+                    Log::debug('Use the default fieldset value of '.$field_val);
                 }
 
                 // if the field is set to encrypted, make sure we encrypt the value
@@ -804,7 +804,7 @@ class AssetsController extends Controller
 
                         // If input value is null, use custom field's default value
                         if (($field_val == null) && ($request->has('model_id') != '')) {
-                            $field_val = Crypt::encrypt($field->defaultValue($request->input('model_id')));
+                            $field_val = Crypt::encrypt($field_val);
                         } else {
                             $field_val = Crypt::encrypt($request->input($field->db_column));
                         }
@@ -1486,15 +1486,35 @@ class AssetsController extends Controller
             }
 
             $target = $locked->assignedTo;
-            if (is_null($target)) {
+            $alreadyCheckedIn = is_null($target);
+
+            // The Quickscan Checkin form carries status, location, name,
+            // notes, and clear_name alongside the scan input. When the
+            // operator scans an asset that was never checked out, they
+            // still expect those form fields to apply (issue #19899:
+            // scan a box of returned assets, set them all to Retired in
+            // one pass). Only short-circuit on "already checked in" when
+            // the form carried nothing to update, otherwise fall through
+            // to the field-apply branch so the status / location /
+            // name / notes still land.
+            $hasFieldUpdates = $request->filled('status_id')
+                || $request->filled('location_id')
+                || $request->has('name')
+                || $request->input('clear_name') == '1';
+
+            if ($alreadyCheckedIn && ! $hasFieldUpdates) {
                 return ['status' => 'already_checked_in', 'asset' => $locked];
             }
 
-            $locked->expected_checkin = null;
-            // $locked->last_checkout = null;
-            $locked->last_checkin = now();
-            $locked->assignedTo()->disassociate($locked);
-            $locked->accepted = null;
+            // Checkout-clearing housekeeping only when there is actually
+            // a checkout to clear. The status / location / name / notes
+            // writes below run in both branches.
+            if (! $alreadyCheckedIn) {
+                $locked->expected_checkin = null;
+                $locked->last_checkin = now();
+                $locked->assignedTo()->disassociate($locked);
+                $locked->accepted = null;
+            }
 
             if ($request->input('clear_name') == '1') {
                 $locked->name = null;
@@ -1504,7 +1524,14 @@ class AssetsController extends Controller
 
             $this->migrateLegacyLocations($locked);
 
-            $locked->location_id = $locked->rtd_location_id;
+            // Reset to the default location only on a real checkin.
+            // Overwriting the location on an already-checked-in asset
+            // with its rtd_location_id would be surprising when the
+            // operator only asked for a status change. If they supplied
+            // a location_id on the form, that still applies below.
+            if (! $alreadyCheckedIn) {
+                $locked->location_id = $locked->rtd_location_id;
+            }
 
             if ($request->filled('location_id')) {
                 $locked->location_id = $request->input('location_id');
@@ -1525,36 +1552,46 @@ class AssetsController extends Controller
                 $originalValues['action_date'] = $checkin_at;
             }
 
-            $locked->licenseseats->each(function (LicenseSeat $seat) {
-                $seat->update(['assigned_to' => null]);
-            });
-
-            // Get all pending Acceptances for this asset and delete them
-            CheckoutAcceptance::pending()
-                ->whereHasMorph(
-                    'checkoutable',
-                    [Asset::class],
-                    function (Builder $query) use ($locked) {
-                        $query->where('id', $locked->id);
-                    }
-                )
-                ->get()
-                ->map(function ($acceptance) {
-                    $acceptance->delete();
+            // License-seat release and pending-Acceptance cleanup only
+            // on a real checkin. An already-checked-in asset has no
+            // seat to free and nothing is pending acceptance for it.
+            if (! $alreadyCheckedIn) {
+                $locked->licenseseats->each(function (LicenseSeat $seat) {
+                    $seat->update(['assigned_to' => null]);
                 });
+
+                CheckoutAcceptance::pending()
+                    ->whereHasMorph(
+                        'checkoutable',
+                        [Asset::class],
+                        function (Builder $query) use ($locked) {
+                            $query->where('id', $locked->id);
+                        }
+                    )
+                    ->get()
+                    ->map(function ($acceptance) {
+                        $acceptance->delete();
+                    });
+            }
 
             if (! $locked->save()) {
                 return ['status' => 'save_failed', 'asset' => $locked];
             }
 
-            // Update the location of any child assets
-            Asset::where('assigned_type', Asset::class)
-                ->where('assigned_to', $locked->id)
-                ->update(['location_id' => $locked->location_id]);
+            if (! $alreadyCheckedIn) {
+                // Child-asset location propagation only fires on a real
+                // checkin so a status-only update on an already-checked-in
+                // parent does not drag children to its rtd_location.
+                Asset::where('assigned_type', Asset::class)
+                    ->where('assigned_to', $locked->id)
+                    ->update(['location_id' => $locked->location_id]);
 
-            event(new CheckoutableCheckedIn($locked, $target, auth()->user(), $request->input('note'), $checkin_at, $originalValues));
+                event(new CheckoutableCheckedIn($locked, $target, auth()->user(), $request->input('note'), $checkin_at, $originalValues));
 
-            return ['status' => 'success', 'asset' => $locked];
+                return ['status' => 'success', 'asset' => $locked];
+            }
+
+            return ['status' => 'updated_without_checkin', 'asset' => $locked];
         });
 
         $asset = $outcome['asset'];
@@ -1565,6 +1602,14 @@ class AssetsController extends Controller
                 'model' => e($asset->model->name),
                 'model_number' => e($asset->model->model_number),
             ], trans('admin/hardware/message.checkin.already_checked_in')));
+        }
+
+        if ($outcome['status'] === 'updated_without_checkin') {
+            return response()->json(Helper::formatStandardApiResponse('success', [
+                'asset_tag' => e($asset->asset_tag),
+                'model' => e($asset->model->name),
+                'model_number' => e($asset->model->model_number),
+            ], trans('admin/hardware/message.checkin.updated_without_checkin')));
         }
 
         if ($outcome['status'] === 'success') {

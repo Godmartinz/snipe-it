@@ -305,6 +305,9 @@ class BulkAssetsController extends Controller
             || ($request->filled('supplier_id'))
             || ($request->filled('warranty_months'))
             || ($request->filled('rtd_location_id'))
+            || ($request->filled('location_id'))
+            || ($request->filled('null_rtd_location_id'))
+            || ($request->filled('null_location_id'))
             || ($request->filled('requestable'))
             || ($request->filled('company_id'))
             || ($request->filled('status_id'))
@@ -457,32 +460,18 @@ class BulkAssetsController extends Controller
                     }
 
                 }
-
-                /**
-                 * We're changing the location ID - figure out which location we should apply
-                 * this change to:
-                 *
-                 * 0 - RTD location only
-                 * 1 - location ID and RTD location ID
-                 * 2 - location ID only
-                 *
-                 * Note: this is kinda dumb and we should just use human-readable values IMHO. - snipe
-                 */
+                
                 if ($request->filled('rtd_location_id')) {
-
-                    if (($request->filled('update_real_loc')) && (($request->input('update_real_loc')) == '0')) {
-                        $this->update_array['rtd_location_id'] = $request->input('rtd_location_id');
-                    }
-
-                    if (($request->filled('update_real_loc')) && (($request->input('update_real_loc')) == '1')) {
-                        $this->update_array['location_id'] = $request->input('rtd_location_id');
-                        $this->update_array['rtd_location_id'] = $request->input('rtd_location_id');
-                    }
-
-                    if (($request->filled('update_real_loc')) && (($request->input('update_real_loc')) == '2')) {
-                        $this->update_array['location_id'] = $request->input('rtd_location_id');
-                    }
-
+                    $this->update_array['rtd_location_id'] = $request->input('rtd_location_id');
+                }
+                if ($request->input('null_rtd_location_id') == '1') {
+                    $this->update_array['rtd_location_id'] = null;
+                }
+                if ($request->filled('location_id')) {
+                    $this->update_array['location_id'] = $request->input('location_id');
+                }
+                if ($request->input('null_location_id') == '1') {
+                    $this->update_array['location_id'] = null;
                 }
 
                 /**

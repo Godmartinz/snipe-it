@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FileStorage;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Builders\UserQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasImageUpload;
@@ -40,7 +41,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperUser
  */
-class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
+class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference, Importable
 {
     use CompanyableTrait;
     use HasCalendarEvents;
@@ -157,7 +158,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'password' => 'required|min:8',
         'locale' => 'max:10|nullable',
         'website' => 'url|nullable|max:191',
-        'manager_id' => 'nullable|exists:users,id|cant_manage_self',
+        'manager_id' => 'nullable|exists:users,id|cant_manage_self|non_circular:users,id',
         'location_id' => 'exists:locations,id|nullable',
         'start_date' => 'nullable|date_format:Y-m-d',
         'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
@@ -1949,13 +1950,21 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             return false;
         }
 
-        // Eager load manager relationship to potentially reduce queries in the loop
+        // User::$rules prevents new cycles via non_circular on manager_id,
+        // but legacy rows or two-pass CSV imports can still exist in the DB.
+        // The depth cap of 50 matches the default in the non_circular validator.
+        $visited = [$userToCheck->id => true];
         $manager = $userToCheck->load('manager')->manager;
-        while ($manager) {
+        $hops = 0;
+
+        while ($manager && $hops++ < 50) {
             if ($manager->id === $this->id) {
                 return true;
             }
-            // Move up the hierarchy (load relationship if not already loaded)
+            if (isset($visited[$manager->id])) {
+                return false;
+            }
+            $visited[$manager->id] = true;
             $manager = $manager->load('manager')->manager;
         }
 

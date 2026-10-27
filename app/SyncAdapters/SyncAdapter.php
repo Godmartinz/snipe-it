@@ -490,6 +490,16 @@ abstract class SyncAdapter
         return $this->instance->label;
     }
 
+    /**
+     * Public accessor for the backing instance. Blade views that need to
+     * reason about per-instance state (lock keys, mapping tables, etc)
+     * use through this vs relying on the protected constructor property.
+     */
+    public function instance(): SyncAdapterInstance
+    {
+        return $this->instance;
+    }
+
     public function companyId(): ?int
     {
         return $this->instance->company_id;
@@ -897,14 +907,11 @@ abstract class SyncAdapter
         );
 
         // Opt-out: skip asset creation on pull when the vendor record
-        // has no existing Snipe-IT counterpart. Default on so existing
-        // installs keep the "vendor row with no match creates a fresh
-        // asset" behavior. Off = update rows already linked via
-        // asset_external_sources, log and skip anything with no match.
+        // has no existing Snipe-IT counterpart.
         SyncAdapterConfig::put(
             $this->instance->id,
             'create_snipeit_assets_on_pull',
-            $request->boolean($slug.'_create_snipeit_assets_on_pull', true) ? '1' : '0',
+            $request->boolean($slug . '_create_snipeit_assets_on_pull') ? '1' : '0',
         );
 
         // Per-device enrichment opt-in. Only persisted for adapters

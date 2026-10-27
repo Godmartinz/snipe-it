@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Builders\LicenseSeatQueryBuilder;
+use App\Models\Contracts\CompanyableChild;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\CompanyableChildTrait;
 use App\Models\Traits\Loggable;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @mixin IdeHelperLicenseSeat
  */
-class LicenseSeat extends SnipeModel implements ICompanyableChild
+class LicenseSeat extends SnipeModel implements CompanyableChild
 {
     use Acceptable;
     use CompanyableChildTrait;

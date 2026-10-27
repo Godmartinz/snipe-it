@@ -613,6 +613,10 @@ trait SyncsHostFromRecord
         $asset->status_id = self::resolveStatusId($instance);
         $asset->asset_tag = self::resolveAssetTag($record, $instance);
         $asset->company_id = self::resolveCompanyId($record, $instance);
+        // Set serial before save because Asset::save() adds a `required`
+        // rule to the serial field when the resolved model has
+        // require_serial = 1. 
+        $asset->serial = $record->hardwareSerial;
         // Asset uses ValidatingTrait, so save() returns false on
         // validation failure without throwing. Without this guard the
         // caller then wrote asset_external_sources with asset_id=null

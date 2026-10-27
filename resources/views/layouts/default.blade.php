@@ -56,6 +56,9 @@
             settings: {
                 "per_page": {{ $snipeSettings->per_page }},
                 "first_day_of_week": {{ (int) $snipeSettings->week_start }}
+            },
+            i18n: {
+                "processing": @json(trans('general.processing'))
             }
         };
     </script>
@@ -184,7 +187,7 @@
                                                     </label>
                                                     <input type="text" class="form-control" id="tagSearch" name="assetTag" placeholder="{{ trans('general.lookup_by_tag') }}">
                                                     <span class="input-group-btn">
-                                                        <button type="submit" id="topSearchButton" class="btn btn-sm btn-theme" style="padding: 7px 10px 7px 10px; "><x-icon type="search" class="fa-fw" /><div class="sr-only">{{ trans('general.search') }}</div></button>
+                                                        <button type="submit" id="topSearchButton" class="btn btn-sm btn-theme" style="padding: 7px 10px 7px 10px; " data-processing-icon-only="1"><x-icon type="search" class="fa-fw" /><div class="sr-only">{{ trans('general.search') }}</div></button>
                                                     </span>
                                                 </div>
 
@@ -1401,28 +1404,8 @@
                 event.preventDefault();
                 $(this).ekkoLightbox();
             });
-            // Anti-double-click on checkout forms. The old implementation did
-            //   event.preventDefault(); $btn.prop('disabled', true); this.submit();
-            // which submitted the form NATIVELY (without re-firing the submit
-            // event), bypassing jQuery Validate entirely — hence any JS
-            // validation error was visible for a single frame before the form
-            // shipped straight to the server.
-            //
-            // New shape: let the normal submit lifecycle run, and only disable
-            // the button when the submit has not been cancelled by a prior
-            // handler (jQuery Validate calls event.preventDefault() when the
-            // form is invalid, so we skip the disable in that case and the
-            // operator can fix + retry). jQuery Validate is bound at .validate()
-            // time (line ~2390 above) which runs before this ready() callback,
-            // so its handler is registered — and fires — first.
-            $(document).ready(function () {
-                $('#checkout_form').on('submit', function (event) {
-                    if (event.isDefaultPrevented()) {
-                        return;
-                    }
-                    $('#submit_button').prop('disabled', true);
-                });
-            });
+            // Anti-double-click on checkout forms is handled by the
+            // global double-submit guard in snipeit.js
 
             // Select encrypted custom fields to hide them in the asset list
             $(document).ready(function() {

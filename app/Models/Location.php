@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FileStorage;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Builders\LocationQueryBuilder;
+use App\Models\Contracts\Importable;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
@@ -22,7 +23,7 @@ use Watson\Validating\ValidatingTrait;
 /**
  * @mixin IdeHelperLocation
  */
-class Location extends SnipeModel
+class Location extends SnipeModel implements Importable
 {
     use CompanyableTrait;
     use HasFactory;

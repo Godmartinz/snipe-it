@@ -9,11 +9,23 @@ use App\Models\Ldap;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
+use App\Traits\LocksLongRunningOperation;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class LdapSync extends Command
 {
+    use LocksLongRunningOperation;
+
+    /**
+     * Shared mutex key for LDAP sync. Both the scheduled CLI run and the
+     * UI "Sync Now" (which Artisan::call's this command) acquire the
+     * same key, so cron + an admin click can't collide on the same
+     * directory read. Public so the UI controller can read the lock
+     * state via isOperationLocked() without duplicating the string.
+     */
+    public const LDAP_SYNC_LOCK = 'ldap-sync:running';
+
     /**
      * The name and signature of the console command.
      *
@@ -52,11 +64,32 @@ class LdapSync extends Command
             exit();
         }
 
-        // Tag every action_log written during this run (direct writes
-        // and the observer-driven writes User saves trigger) as `ldap`
-        // so the activity report distinguishes LDAP-created entries
-        // from gui / api / sync-adapter origins.
-        return Actionlog::withActionSource('ldap', fn () => $this->runSync());
+        // Shared backup+restore pattern: refuse to start a second sync
+        // when one is already in flight. Covers both the UI sync-now
+        // path (via LDAPImportController's Artisan::call) and a
+        // scheduled cron that fires while a UI run is still open.
+        // Output shape matches the existing JSON-summary branches
+        // below so the UI's result parser doesn't need a special case.
+        if (! $this->acquireOperationLock(self::LDAP_SYNC_LOCK)) {
+            $message = $this->operationAlreadyRunningMessage('general.ldap_sync');
+            if ($this->option('json_summary')) {
+                $this->info(json_encode(['error' => true, 'error_message' => $message, 'summary' => []]));
+            } else {
+                $this->error($message);
+            }
+
+            return 1;
+        }
+
+        try {
+            // Tag every action_log written during this run (direct writes
+            // and the observer-driven writes User saves trigger) as `ldap`
+            // so the activity report distinguishes LDAP-created entries
+            // from gui / api / sync-adapter origins.
+            return Actionlog::withActionSource('ldap', fn () => $this->runSync());
+        } finally {
+            $this->releaseOperationLock(self::LDAP_SYNC_LOCK);
+        }
     }
 
     private function runSync()
@@ -221,7 +254,7 @@ class LdapSync extends Command
                         }
                     }
                 }
-                
+
                 $results = array_merge($location_users, $results);
                 $results['count'] = count(array_filter(array_keys($results), 'is_int'));
             }
