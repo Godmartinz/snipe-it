@@ -53,6 +53,7 @@ class AssetModelsTransformer
             'model_number' => ($assetmodel->model_number ? e($assetmodel->model_number) : null),
             'min_amt' => ($assetmodel->min_amt) ? (int) $assetmodel->min_amt : null,
             'default_purchase_cost' => ($assetmodel->default_purchase_cost) ? $assetmodel->default_purchase_cost : null,
+            'default_currency' => ($assetmodel->default_currency) ? $assetmodel->default_currency : null,
 
             'depreciation' => ($assetmodel->depreciation) ? [
                 'id' => (int) $assetmodel->depreciation->id,

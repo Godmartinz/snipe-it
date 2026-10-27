@@ -72,7 +72,21 @@
                             name="default_purchase_cost"
                             :label="trans('general.default_purchase_cost')"
                             :item="$item"
+                            :currency-type="$item->default_currency"
                     />
+                    <x-form.row
+                            name="default_currency"
+                            :label="trans('admin/settings/general.default_currency')"
+                            input_div_class="col-md-4"
+                    >
+                        <x-slot:input>
+                            <x-input.currency-select
+                                    name="default_currency"
+                                    id="default_currency"
+                                    :selected="old('default_currency', $item->default_currency)"
+                            />
+                        </x-slot:input>
+                    </x-form.row>
                 <x-form.checkbox-row
                     name="require_serial"
                     :label="trans('admin/hardware/general.require_serial')"

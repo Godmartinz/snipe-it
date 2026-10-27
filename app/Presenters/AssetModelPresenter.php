@@ -100,6 +100,16 @@ class AssetModelPresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ],
             [
+                'field' => 'default_currency',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/settings/general.default_currency'),
+                'visible' => false,
+                'class' => 'text-right text-padding-number-cell',
+            ],
+            [
                 'field' => 'assets_count',
                 'scope' => 'col',
                 'searchable' => true,

@@ -75,6 +75,7 @@ class AssetModelsController extends Controller
             'models.model_number',
             'models.min_amt',
             'models.default_purchase_cost',
+            'models.default_currency',
             'models.eol',
             'models.created_by',
             'models.requestable',
@@ -367,6 +368,7 @@ class AssetModelsController extends Controller
             'models.manufacturer_id',
             'models.category_id',
             'models.default_purchase_cost',
+            'models.default_currency',
         ])->with('manufacturer', 'category');
 
         $settings = Setting::getSettings();
@@ -399,11 +401,13 @@ class AssetModelsController extends Controller
 
         $results = (new SelectlistTransformer)->transformSelectlist($assetmodels);
 
-        $costs = $assetmodels->getCollection()
-            ->pluck('default_purchase_cost', 'id');
+        $models = $assetmodels->getCollection()->keyBy('id');
 
         foreach ($results['results'] as &$result) {
-            $result['default_purchase_cost'] = $costs[$result['id']] ?? null;
+            $model = $models->get($result['id']);
+
+            $result['default_purchase_cost'] = $model?->default_purchase_cost;
+            $result['default_currency'] = $model?->default_currency;
         }
 
         unset($result);

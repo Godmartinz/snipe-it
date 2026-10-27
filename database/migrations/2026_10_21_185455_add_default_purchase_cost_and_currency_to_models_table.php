@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('models', function (Blueprint $table) {
             //decimal consistent with purchase_cost on asset model
             $table->decimal('default_purchase_cost', 20, 2)->nullable()->after('min_amt');
+            $table->string('default_currency', 10)->nullable()->after('default_purchase_cost');
         });
     }
 
@@ -24,6 +25,7 @@ return new class extends Migration
     {
         Schema::table('models', function (Blueprint $table) {
             $table->dropColumn('default_purchase_cost');
+            $table->dropColumn('default_currency');
         });
     }
 };
