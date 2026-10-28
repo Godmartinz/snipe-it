@@ -11,6 +11,8 @@ return [
     'eula_text_help' => 'This field allows you to customize your EULAs for specific types of assets. If you only have one EULA for all of your assets, you can check the box below to use the primary default.',
     'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
     'no_default_eula' => 'No primary default EULA found. Add one in Settings.',
+    'not_fit_for_reassignment' => 'Not fit for reassignment',
+    'not_fit_for_reassignment_help' => 'This accessory will not be returned to available stock.',
     'total' => 'Total',
     'remaining' => 'Avail',
     'requestable' => 'Users may request this accessory',

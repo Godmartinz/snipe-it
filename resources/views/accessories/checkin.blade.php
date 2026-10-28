@@ -35,7 +35,12 @@
                 :checkout-date="$checkoutLog?->created_at"
                 :checkout-by="$checkoutLog?->adminuser"
             />
-
+                <x-form.checkbox-row
+                        name="require_serial"
+                        :label="trans('admin/accessories/general.not_fit_for_reassignment')"
+                        :item="$accessory"
+                        :info_tooltip_text="trans('admin/accessories/general.not_fit_for_reassignment_help')"
+                />
             <x-form.row
                 :label="trans('admin/hardware/form.notes')"
                 :item="$accessory"
