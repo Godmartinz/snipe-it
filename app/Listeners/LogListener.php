@@ -6,6 +6,7 @@ use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
 use App\Events\CheckoutAccepted;
 use App\Events\CheckoutDeclined;
+use App\Events\CheckoutableReturnedUndeployable;
 use App\Events\UserMerged;
 use App\Models\Actionlog;
 use App\Models\LicenseSeat;
@@ -89,6 +90,26 @@ class LogListener
         $logaction->save();
     }
 
+    public function onCheckoutableReturnedUndeployable(CheckoutableReturnedUndeployable $event): void
+    {
+        $logAction = new Actionlog;
+
+        $logAction->item()->associate($event->checkoutable);
+
+        if ($event->checkedOutTo) {
+            $logAction->target()->associate($event->checkedOutTo);
+        }
+
+        $logAction->action_type = 'unfit for reassignment';
+        $logAction->action_date = $event->action_date;
+        $logAction->created_by = $event->returnedBy->id;
+        $logAction->note = $event->note;
+        $logAction->quantity = $event->checkout->qty ?? 1;
+        $logAction->company_id = $event->checkoutable->company_id;
+
+        $logAction->save();
+    }
+
     public function onUserMerged(UserMerged $event)
     {
 
@@ -136,6 +157,7 @@ class LogListener
             'CheckoutableCheckedOut',
             'CheckoutAccepted',
             'CheckoutDeclined',
+            'CheckoutableReturnedUndeployable',
             'UserMerged',
             'NoteAdded',
         ];

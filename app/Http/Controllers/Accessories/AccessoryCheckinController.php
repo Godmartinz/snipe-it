@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accessories;
 
 use App\Events\CheckoutableCheckedIn;
+use App\Events\CheckoutableReturnedUndeployable;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Accessory;
@@ -13,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
-
+use Illuminate\Support\Facades\Log;
 class AccessoryCheckinController extends Controller
 {
     /**
@@ -78,6 +79,36 @@ class AccessoryCheckinController extends Controller
         $checkin_at = date('Y-m-d H:i:s');
         if ($request->filled('checkin_at')) {
             $checkin_at = $request->input('checkin_at').' '.$checkin_hours;
+        }
+        Log::debug('WEB accessory checkin', [
+            'checkout_id' => $accessoryCheckoutId,
+            'not_fit_for_reassignment' => $request->boolean('undeployable'),
+        ]);
+        // Accessory is returned but unfit for reassignment
+        if ($request->boolean('undeployable')) {
+            $accessory_checkout->returned_at = $checkin_at;
+            $accessory_checkout->undeployable = true;
+            $accessory_checkout->assigned_to = null;
+            $accessory_checkout->assigned_type = null;
+
+            $accessory_checkout->save();
+
+            if ($accessory_checkout->save()) {
+                event(new CheckoutableReturnedUndeployable(
+                    checkoutable: $accessory,
+                    checkout: $accessory_checkout,
+                    checkedOutTo: $accessory_checkout->assignedTo,
+                    returnedBy: auth()->user(),
+                    note: $request->input('note'),
+                ));
+
+                session()->put([
+                    'redirect_option' => $request->input('redirect_option'),
+                ]);
+
+                return Helper::getRedirectOption($request, $accessory->id, 'Accessories')
+                    ->with('success', trans('admin/accessories/message.checkin.success'));
+            }
         }
 
         // Was the accessory updated?

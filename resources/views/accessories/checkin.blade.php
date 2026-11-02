@@ -36,7 +36,7 @@
                 :checkout-by="$checkoutLog?->adminuser"
             />
                 <x-form.checkbox-row
-                        name="require_serial"
+                        name="undeployable"
                         :label="trans('admin/accessories/general.not_fit_for_reassignment')"
                         :item="$accessory"
                         :info_tooltip_text="trans('admin/accessories/general.not_fit_for_reassignment_help')"

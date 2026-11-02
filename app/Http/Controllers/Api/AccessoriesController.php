@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableReturnedUndeployable;
 use App\Helpers\Helper;
 use App\Http\Controllers\Accessories\BulkAccessoriesController;
 use App\Http\Controllers\Controller;
@@ -28,6 +29,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class AccessoriesController extends Controller
 {
@@ -756,20 +758,59 @@ class AccessoriesController extends Controller
         $accessory = Accessory::find($accessory_checkout->accessory_id);
         $this->authorize('checkin', $accessory);
 
-        if ($accessory_checkout->delete()) {
-            event(new CheckoutableCheckedIn($accessory, $accessory_checkout->assignedTo, auth()->user(), $request->input('note')));
+        // Accessory is returned but unfit for reassignment
+        $request->validate([
+            'not_fit_for_reassignment' => 'sometimes|boolean',
+            'checkin_at' => 'nullable|date|before_or_equal:today',
+            'note' => 'nullable|string',
+        ]);
 
-            $payload = [
-                'accessory_id' => $accessory->id,
-                'note' => $request->input('note'),
-                'created_by' => auth()->id(),
-                'pivot' => $accessory_checkout->id,
-            ];
+        $note = $request->input('note');
+        $assignedTo = $accessory_checkout->assignedTo;
+        $undeployable = $request->boolean('not_fit_for_reassignment');
 
-            return response()->json(Helper::formatStandardApiResponse('success', $payload, trans('admin/accessories/message.checkin.success')));
+        if ($undeployable) {
+            $accessory_checkout->returned_at = $request->input('checkin_at', now());
+            $accessory_checkout->undeployable = true;
+
+            $success = $accessory_checkout->save();
+        } else {
+            $success = $accessory_checkout->delete();
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/accessories/message.checkin.error')));
+        if (!$success) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/accessories/message.checkin.error')), 422);
+        }
+        Log::debug('API accessory checkin', [
+            'checkout_id' => $accessoryUserId,
+            'not_fit_for_reassignment' => $request->boolean('undeployable'),
+        ]);
+        if ($undeployable) {
+            event(new CheckoutableReturnedUndeployable(
+                checkoutable: $accessory,
+                checkout: $accessory_checkout,
+                checkedOutTo: $assignedTo,
+                returnedBy: auth()->user(),
+                note: $note,
+            ));
+        } else {
+            event(new CheckoutableCheckedIn(
+                $accessory,
+                $assignedTo,
+                auth()->user(),
+                $note
+            ));
+        }
+
+        $payload = [
+            'accessory_id' => $accessory->id,
+            'note' => $note,
+            'created_by' => auth()->id(),
+            'pivot' => $accessory_checkout->id,
+            'undeployable' => $undeployable,
+        ];
+
+        return response()->json(Helper::formatStandardApiResponse('success', $payload, trans('admin/accessories/message.checkin.success')));
 
     }
 

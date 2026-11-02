@@ -317,6 +317,8 @@ return [
     'no' => 'No',
     'notes' => 'Notes',
     'note_added' => 'Note Added',
+    'unfit_for_reassignment' => 'unfit for reassignment',
+    'unfit_for_reassignment_help' => 'This accessory will not be returned to available stock.',
     'options' => 'Options',
     'preview' => 'Preview',
     'add_note' => 'Add Journal Note',
