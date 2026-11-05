@@ -104,7 +104,7 @@ class LogListener
         $logAction->action_date = $event->action_date;
         $logAction->created_by = $event->returnedBy->id;
         $logAction->note = $event->note;
-        $logAction->quantity = $event->checkout->qty ?? 1;
+        $logAction->quantity = $event->qty ?? 1;
         $logAction->company_id = $event->checkoutable->company_id;
 
         $logAction->save();

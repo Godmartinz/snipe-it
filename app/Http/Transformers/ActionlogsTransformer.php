@@ -491,6 +491,7 @@ class ActionlogsTransformer
             ActionType::AddSeats->value,
             ActionType::DeleteSeats->value,
             ActionType::QuantityAdjust->value,
+            ActionType::UnfitForReassignment->value,
             ActionType::Create->value,
         ])) {
             return null;

@@ -91,14 +91,13 @@ class AccessoryCheckinController extends Controller
             $accessory_checkout->assigned_to = null;
             $accessory_checkout->assigned_type = null;
 
-            $accessory_checkout->save();
-
             if ($accessory_checkout->save()) {
                 event(new CheckoutableReturnedUndeployable(
                     checkoutable: $accessory,
                     checkout: $accessory_checkout,
                     checkedOutTo: $accessory_checkout->assignedTo,
                     returnedBy: auth()->user(),
+                    qty: 1,
                     note: $request->input('note'),
                 ));
 

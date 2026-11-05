@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Components;
 
 use App\Events\CheckoutableCheckedIn;
+use App\Events\CheckoutableReturnedUndeployable;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
@@ -94,8 +95,58 @@ class ComponentCheckinController extends Controller
             }
 
             // Validation passed, so let's figure out what we have to do here.
-            $qty_remaining_in_checkout = ($component_assets->assigned_qty - (int) $request->input('checkin_qty'));
+            $checkin_qty = $request->input('checkin_qty');
+            $qty_remaining_in_checkout = $component_assets->assigned_qty - $checkin_qty;
+            $asset = Asset::find($component_assets->asset_id);
 
+            // Component is returned but unfit for reassignment
+            if ($request->boolean('undeployable')) {
+
+                // Preserve the returned quantity as a separate record
+                DB::transaction(function () use (
+                    $component_assets,
+                    $component,
+                    $asset,
+                    $checkin_qty,
+                    $qty_remaining_in_checkout,
+                    $request
+                ) {
+                    $assignment = ComponentAssignment::findOrFail($component_assets->id);
+
+                    if ($qty_remaining_in_checkout > 0) {
+                        // Keep the remaining quantity assigned to the asset
+                        $returned_assignment = $assignment->replicate();
+                        $returned_assignment->assigned_qty = $checkin_qty;
+
+                        $assignment->assigned_qty = $qty_remaining_in_checkout;
+                        $assignment->save();
+                    } else {
+                        //Entire qty assigned is being returned
+                        $returned_assignment = $assignment;
+                    }
+
+                    $returned_assignment->asset_id = null;
+                    $returned_assignment->undeployable = true;
+                    $returned_assignment->returned_at = now();
+                    $returned_assignment->save();
+
+                    event(new CheckoutableReturnedUndeployable(
+                        checkoutable: $component,
+                        checkout: $returned_assignment,
+                        checkedOutTo: $asset,
+                        returnedBy: auth()->user(),
+                        qty: $checkin_qty,
+                        note: $request->input('note'),
+                    ));
+                });
+
+                session()->put([
+                    'redirect_option' => $request->input('redirect_option'),
+                ]);
+
+                return Helper::getRedirectOption($request, $component->id, 'Components')
+                    ->with('success', trans('admin/components/message.checkin.success'));
+            }
             // We have to modify the record to reflect the new qty that's
             // actually checked out.
             $component_assets->assigned_qty = $qty_remaining_in_checkout;
