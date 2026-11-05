@@ -32,6 +32,7 @@
                 :checkout-by="$checkoutBy"
             />
 
+
             <x-input.quantity
                 name="checkin_qty"
                 :value="$component_assets->assigned_qty"
@@ -40,7 +41,12 @@
                 :label="trans('general.qty')"
                 :help_text="trans('admin/components/general.checkin_limit', ['assigned_qty' => $component_assets->assigned_qty])"
             />
-
+            <x-form.checkbox-row
+                    name="undeployable"
+                    :label="trans('general.unfit_for_reassignment')"
+                    :item="$snipe_component"
+                    :info_tooltip_text="trans('general.unfit_for_reassignment_help')"
+            />
             <x-form.row
                 :label="trans('admin/hardware/form.notes')"
                 :item="$snipe_component"

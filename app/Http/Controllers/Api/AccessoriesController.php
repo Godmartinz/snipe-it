@@ -294,7 +294,7 @@ class AccessoriesController extends Controller
         $limit = request('limit', 50);
 
         // Total count of all checkouts for this asset
-        $accessory_checkouts = $accessory->checkouts();
+        $accessory_checkouts = $accessory->checkouts()->whereNull('returned_at');
 
         // Check for search text in the request
         if ($request->filled('search')) {

@@ -37,9 +37,9 @@
             />
                 <x-form.checkbox-row
                         name="undeployable"
-                        :label="trans('admin/accessories/general.not_fit_for_reassignment')"
+                        :label="trans('general.unfit_for_reassignment')"
                         :item="$accessory"
-                        :info_tooltip_text="trans('admin/accessories/general.not_fit_for_reassignment_help')"
+                        :info_tooltip_text="trans('general.unfit_for_reassignment_help')"
                 />
             <x-form.row
                 :label="trans('admin/hardware/form.notes')"
