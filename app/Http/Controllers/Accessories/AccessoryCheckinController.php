@@ -80,10 +80,7 @@ class AccessoryCheckinController extends Controller
         if ($request->filled('checkin_at')) {
             $checkin_at = $request->input('checkin_at').' '.$checkin_hours;
         }
-        Log::debug('WEB accessory checkin', [
-            'checkout_id' => $accessoryCheckoutId,
-            'not_fit_for_reassignment' => $request->boolean('undeployable'),
-        ]);
+
         // Accessory is returned but unfit for reassignment
         if ($request->boolean('undeployable')) {
             $accessory_checkout->returned_at = $checkin_at;
